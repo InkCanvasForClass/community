@@ -18,6 +18,8 @@ Elegant by Default. Based on `dubi906w/icc-0610fix` .
 
 ## 公告
 ICC CE创立的初衷是因为作者使用ICC的过程中一些小BUG，于是作者想尝试在icc-0610fix版本的基础上修改。
+说白了，我比较懒README懒得改了，就直接用之前ICC的了
+高中生，更新不定期/doge
 
 ### 项目特点
 由初学者结合AI技术实现代码(说白了就是不会)
