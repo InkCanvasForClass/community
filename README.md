@@ -9,7 +9,7 @@ Elegant by Default. Based on `dubi906w/icc-0610fix` .
 **致力于更稳定、持续更新的ICC**
 
 [![UPSTREAM](https://img.shields.io/badge/UpStream-ChangSakura%2FInk--Canvas-red.svg "LICENSE")](https://github.com/Awesome-Iwb/icc-0610fix)
-[![LICENSE](https://img.shields.io/badge/License-GPL--3.0-red.svg "LICENSE")]
+![LICENSE](https://img.shields.io/badge/License-GPL--3.0-red.svg "LICENSE")
 
 ![Screenshot-1](./Images/icc1.png)
 ![Screenshot-2](./Images/icc2.png)
