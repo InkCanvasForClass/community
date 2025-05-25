@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "jnP4vEIYaWU=",
+  "dgSpecHash": "ruL3SDApgoE=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\Ink Canvas\\InkCanvasForClass.csproj",
+  "projectFilePath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\InkCanvasForClass.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Administrator\\.nuget\\packages\\avalonedit\\6.3.0.90\\avalonedit.6.3.0.90.nupkg.sha512",
     "C:\\Users\\Administrator\\.nuget\\packages\\hardcodet.notifyicon.wpf\\1.1.0\\hardcodet.notifyicon.wpf.1.1.0.nupkg.sha512",

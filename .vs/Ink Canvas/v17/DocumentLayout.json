@@ -1,43 +1,33 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\",
+  "WorkspaceRootPath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\icc.png||{177559E0-D141-11D0-92DF-00A0C9138C45}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\AutomaticUpdateVersionControl.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\.gitignore||{3B902123-F8A7-4915-9F01-361F908088D0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\administrator\\desktop\\icc ce\\icc ce main\\icc-ce\\ink canvas\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|solutionrelative:ink canvas\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
-      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\privacy.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\privacy.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:privacy.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Manual.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Manual.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Manual.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\LICENSE||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\LICENSE||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:LICENSE||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas.sln.DotSettings.user||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Ink Canvas.sln.DotSettings.user||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Ink Canvas.sln.DotSettings.user||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\administrator\\desktop\\icc ce\\icc ce main\\icc-ce\\ink canvas\\mainwindow_cs\\mw_ppt.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\administrator\\desktop\\icc ce\\icc ce 1.2.3\\ink canvas\\mainwindow_cs\\mw_ppt.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|solutionrelative:ink canvas\\mainwindow_cs\\mw_ppt.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\administrator\\desktop\\icc ce\\icc ce 1.2.3\\ink canvas\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|solutionrelative:ink canvas\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
@@ -50,104 +40,62 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "icc.png - PNG [1328x1328, 32 \u4F4D, PNG]",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\icc.png",
-              "RelativeDocumentMoniker": "..\\..\\icc-0610.2.3\\icc.png",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\icc.png - PNG [1328x1328, 32 \u4F4D, PNG]",
-              "RelativeToolTip": "..\\..\\icc-0610.2.3\\icc.png - PNG [1328x1328, 32 \u4F4D, PNG]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001533|",
-              "WhenOpened": "2025-05-25T01:51:56.591Z",
-              "EditorCaption": " - PNG [1328x1328, 32 \u4F4D, PNG]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "AutomaticUpdateVersionControl.txt",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\AutomaticUpdateVersionControl.txt",
-              "RelativeDocumentMoniker": "..\\..\\icc-0610.2.3\\AutomaticUpdateVersionControl.txt",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\AutomaticUpdateVersionControl.txt",
-              "RelativeToolTip": "..\\..\\icc-0610.2.3\\AutomaticUpdateVersionControl.txt",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2025-05-25T01:51:56.498Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": ".gitignore",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\.gitignore",
-              "RelativeDocumentMoniker": "..\\..\\icc-0610.2.3\\.gitignore",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\.gitignore",
-              "RelativeToolTip": "..\\..\\icc-0610.2.3\\.gitignore",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "00000000-0000-0000-0000-000000000000.000000|iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAF8SURBVDhPjVNLTgJBEG1lwpoFB3GNK9fieA48hD8iwT/ihwgSDAIHgAGXXsEV18CNzL/LquqZdsYM6kteXqcy3fWqpmpNRBgOhyABBEgpAFVKPIMUcYzUyOU\u002BXM/b2qtU3vkSfRjjZTCAMAw1A2LwzdFoBPP5HNqdzuL27n4juibWI\u002BUshBA1DIkhEx9iEorFotgslQqGYbxxAGFEqt1MxmPWJLbLZdZ\u002Bv89q5PMFPiTR6z2zdaxR0fXA0XTBcVywkb4fwHXjRteecIDNQ7UmExVYAdPcxYaqclN46na5WenMKjtlVnTYwcXlVYaDqImW9beD5N/TeGy32QHXm6hZ03ZgiSQHp2fnWQ4oBmJqWSqwAqZpZjt4aLXAD4J0VqyZsmoubfB8H2r1eoaD6NXZ9HcHO\u002BSA3f4AjifXl8rItOETM8ckB9WTWpYD9RdeZ1PWVWAHWXPQaDb59f/w8LiqHeh1pvGkCaP6qB8yXusoxmuNZ7XmII4O9vGuEF86osuDYRkpYQAAAABJRU5ErkJggg==",
-              "WhenOpened": "2025-05-25T01:51:56.388Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Ink Canvas\\MainWindow.xaml",
               "RelativeDocumentMoniker": "Ink Canvas\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Ink Canvas\\MainWindow.xaml",
               "RelativeToolTip": "Ink Canvas\\MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-05-24T13:22:56.715Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-24T13:22:56.715Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 7,
               "Title": "Microsoft.Common.CurrentVersion.targets",
               "DocumentMoniker": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "ToolTip": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
-              "RelativeToolTip": "..\\..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
+              "RelativeToolTip": "..\\..\\..\\..\\..\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\Microsoft.Common.CurrentVersion.targets",
               "ViewState": "AgIAAGsJAAAAAAAAAAAQwIEJAAAEAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003801|",
-              "WhenOpened": "2025-05-24T13:06:01.053Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "MW_PPT.cs",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
-              "RelativeDocumentMoniker": "Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
-              "RelativeToolTip": "Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
-              "ViewState": "AgIAAFgAAAAAAAAAAAAUwHQAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-24T13:04:47.205Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-24T13:06:01.053Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
-              "Title": "README.md",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\README.md",
-              "RelativeDocumentMoniker": "README.md",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\README.md",
-              "RelativeToolTip": "README.md",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2025-05-24T13:04:01.407Z",
-              "EditorCaption": ""
+              "Title": "MW_PPT.cs",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
+              "RelativeDocumentMoniker": "Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
+              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
+              "RelativeToolTip": "Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
+              "ViewState": "AgIAAFgAAAAAAAAAAAAUwHQAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-05-24T13:04:47.205Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 6,
+              "Title": "README.md",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\README.md",
+              "RelativeDocumentMoniker": "..\\icc-0610.2.3\\README.md",
+              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\README.md",
+              "RelativeToolTip": "..\\icc-0610.2.3\\README.md",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
+              "WhenOpened": "2025-05-24T13:04:01.407Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
               "Title": "privacy.txt",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\privacy.txt",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\privacy.txt",
               "RelativeDocumentMoniker": "privacy.txt",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\privacy.txt",
+              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\privacy.txt",
               "RelativeToolTip": "privacy.txt",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
@@ -156,11 +104,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 1,
               "Title": "Manual.md",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Manual.md",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Manual.md",
               "RelativeDocumentMoniker": "Manual.md",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Manual.md",
+              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Manual.md",
               "RelativeToolTip": "Manual.md",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
@@ -169,11 +117,11 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 2,
               "Title": "LICENSE",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\LICENSE",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\LICENSE",
               "RelativeDocumentMoniker": "LICENSE",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\LICENSE",
+              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\LICENSE",
               "RelativeToolTip": "LICENSE",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
@@ -182,16 +130,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 3,
               "Title": "Ink Canvas.sln.DotSettings.user",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas.sln.DotSettings.user",
+              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Ink Canvas.sln.DotSettings.user",
               "RelativeDocumentMoniker": "Ink Canvas.sln.DotSettings.user",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas.sln.DotSettings.user",
+              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.3\\Ink Canvas.sln.DotSettings.user",
               "RelativeToolTip": "Ink Canvas.sln.DotSettings.user",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003464|",
               "WhenOpened": "2025-05-24T13:04:00.792Z",
               "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
             }
           ]
         }

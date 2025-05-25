@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\Ink Canvas\\InkCanvasForClass.csproj": {}
+    "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\InkCanvasForClass.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\Ink Canvas\\InkCanvasForClass.csproj": {
+    "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\InkCanvasForClass.csproj": {
       "version": "5.0.4",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\Ink Canvas\\InkCanvasForClass.csproj",
+        "projectUniqueName": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\InkCanvasForClass.csproj",
         "projectName": "InkCanvasForClass",
-        "projectPath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\Ink Canvas\\InkCanvasForClass.csproj",
+        "projectPath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\InkCanvasForClass.csproj",
         "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\Ink Canvas\\obj\\",
+        "outputPath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
