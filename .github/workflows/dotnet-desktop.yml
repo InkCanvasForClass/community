@@ -1,0 +1,35 @@
+name: .NET Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4.2.2
+
+    - name: Setup MSbuild
+      uses: microsoft/setup-msbuild@v2
+   
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2.0.1
+      
+    - name: Restore NuGet Packages
+      run: nuget restore "Ink Canvas.sln"
+
+    - name: Build the Solution
+      run: |
+        msbuild -t:restore /p:GitFlow="Github Action"
+        msbuild /p:platform="Any CPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj"
+
+    - name: Upload to artifact
+      uses: actions/upload-artifact@v4.5.0
+      with:
+        name: InkCanvasForClass
+        path: "Ink Canvas/bin/Any CPU/Release/net472/"

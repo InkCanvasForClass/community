@@ -1,0 +1,1222 @@
+{
+  "version": 3,
+  "targets": {
+    ".NETFramework,Version=v4.7.2": {
+      "AvalonEdit/6.3.0.90": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Windows.Forms"
+        ],
+        "compile": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Hardcodet.NotifyIcon.Wpf/1.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "iNKORE.UI.WPF.Modern/0.9.27": {
+        "type": "package",
+        "dependencies": {
+          "System.ValueTuple": "4.5.0"
+        },
+        "frameworkAssemblies": [
+          "netstandard"
+        ],
+        "compile": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        },
+        "runtime": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        }
+      },
+      "MdXaml/1.27.0": {
+        "type": "package",
+        "dependencies": {
+          "AvalonEdit": "6.3.0.90",
+          "MdXaml.Plugins": "1.27.0"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net462/MdXaml.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.dll": {}
+        }
+      },
+      "MdXaml.Plugins/1.27.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        }
+      },
+      "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
+        "type": "package",
+        "compile": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        },
+        "runtime": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        }
+      },
+      "MicrosoftOfficeCore/15.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net35/Office.dll": {}
+        },
+        "runtime": {
+          "lib/net35/Office.dll": {}
+        }
+      },
+      "Newtonsoft.Json/13.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NHotkey/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "NHotkey.Wpf/3.0.0": {
+        "type": "package",
+        "dependencies": {
+          "NHotkey": "3.0.0"
+        },
+        "compile": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "OSVersionExt/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/OSVersionExt.dll": {}
+        },
+        "runtime": {
+          "lib/net462/OSVersionExt.dll": {}
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win": {
+      "AvalonEdit/6.3.0.90": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Windows.Forms"
+        ],
+        "compile": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Hardcodet.NotifyIcon.Wpf/1.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "iNKORE.UI.WPF.Modern/0.9.27": {
+        "type": "package",
+        "dependencies": {
+          "System.ValueTuple": "4.5.0"
+        },
+        "frameworkAssemblies": [
+          "netstandard"
+        ],
+        "compile": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        },
+        "runtime": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        }
+      },
+      "MdXaml/1.27.0": {
+        "type": "package",
+        "dependencies": {
+          "AvalonEdit": "6.3.0.90",
+          "MdXaml.Plugins": "1.27.0"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net462/MdXaml.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.dll": {}
+        }
+      },
+      "MdXaml.Plugins/1.27.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        }
+      },
+      "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
+        "type": "package",
+        "compile": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        },
+        "runtime": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        }
+      },
+      "MicrosoftOfficeCore/15.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net35/Office.dll": {}
+        },
+        "runtime": {
+          "lib/net35/Office.dll": {}
+        }
+      },
+      "Newtonsoft.Json/13.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NHotkey/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "NHotkey.Wpf/3.0.0": {
+        "type": "package",
+        "dependencies": {
+          "NHotkey": "3.0.0"
+        },
+        "compile": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "OSVersionExt/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/OSVersionExt.dll": {}
+        },
+        "runtime": {
+          "lib/net462/OSVersionExt.dll": {}
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-arm64": {
+      "AvalonEdit/6.3.0.90": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Windows.Forms"
+        ],
+        "compile": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Hardcodet.NotifyIcon.Wpf/1.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "iNKORE.UI.WPF.Modern/0.9.27": {
+        "type": "package",
+        "dependencies": {
+          "System.ValueTuple": "4.5.0"
+        },
+        "frameworkAssemblies": [
+          "netstandard"
+        ],
+        "compile": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        },
+        "runtime": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        }
+      },
+      "MdXaml/1.27.0": {
+        "type": "package",
+        "dependencies": {
+          "AvalonEdit": "6.3.0.90",
+          "MdXaml.Plugins": "1.27.0"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net462/MdXaml.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.dll": {}
+        }
+      },
+      "MdXaml.Plugins/1.27.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        }
+      },
+      "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
+        "type": "package",
+        "compile": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        },
+        "runtime": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        }
+      },
+      "MicrosoftOfficeCore/15.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net35/Office.dll": {}
+        },
+        "runtime": {
+          "lib/net35/Office.dll": {}
+        }
+      },
+      "Newtonsoft.Json/13.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NHotkey/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "NHotkey.Wpf/3.0.0": {
+        "type": "package",
+        "dependencies": {
+          "NHotkey": "3.0.0"
+        },
+        "compile": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "OSVersionExt/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/OSVersionExt.dll": {}
+        },
+        "runtime": {
+          "lib/net462/OSVersionExt.dll": {}
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-x64": {
+      "AvalonEdit/6.3.0.90": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Windows.Forms"
+        ],
+        "compile": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Hardcodet.NotifyIcon.Wpf/1.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "iNKORE.UI.WPF.Modern/0.9.27": {
+        "type": "package",
+        "dependencies": {
+          "System.ValueTuple": "4.5.0"
+        },
+        "frameworkAssemblies": [
+          "netstandard"
+        ],
+        "compile": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        },
+        "runtime": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        }
+      },
+      "MdXaml/1.27.0": {
+        "type": "package",
+        "dependencies": {
+          "AvalonEdit": "6.3.0.90",
+          "MdXaml.Plugins": "1.27.0"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net462/MdXaml.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.dll": {}
+        }
+      },
+      "MdXaml.Plugins/1.27.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        }
+      },
+      "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
+        "type": "package",
+        "compile": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        },
+        "runtime": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        }
+      },
+      "MicrosoftOfficeCore/15.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net35/Office.dll": {}
+        },
+        "runtime": {
+          "lib/net35/Office.dll": {}
+        }
+      },
+      "Newtonsoft.Json/13.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NHotkey/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "NHotkey.Wpf/3.0.0": {
+        "type": "package",
+        "dependencies": {
+          "NHotkey": "3.0.0"
+        },
+        "compile": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "OSVersionExt/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/OSVersionExt.dll": {}
+        },
+        "runtime": {
+          "lib/net462/OSVersionExt.dll": {}
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      }
+    },
+    ".NETFramework,Version=v4.7.2/win-x86": {
+      "AvalonEdit/6.3.0.90": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "System.Windows.Forms"
+        ],
+        "compile": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net462/ICSharpCode.AvalonEdit.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Hardcodet.NotifyIcon.Wpf/1.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net472/Hardcodet.NotifyIcon.Wpf.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "iNKORE.UI.WPF.Modern/0.9.27": {
+        "type": "package",
+        "dependencies": {
+          "System.ValueTuple": "4.5.0"
+        },
+        "frameworkAssemblies": [
+          "netstandard"
+        ],
+        "compile": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        },
+        "runtime": {
+          "lib/net452/System.ValueTuple.dll": {},
+          "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.Modern.dll": {
+            "related": ".Controls.pdb;.Controls.xml;.pdb;.xml"
+          },
+          "lib/net452/iNKORE.UI.WPF.dll": {
+            "related": ".Modern.Controls.pdb;.Modern.Controls.xml;.Modern.pdb;.Modern.xml"
+          }
+        }
+      },
+      "MdXaml/1.27.0": {
+        "type": "package",
+        "dependencies": {
+          "AvalonEdit": "6.3.0.90",
+          "MdXaml.Plugins": "1.27.0"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net462/MdXaml.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.dll": {}
+        }
+      },
+      "MdXaml.Plugins/1.27.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        },
+        "runtime": {
+          "lib/net462/MdXaml.Plugins.dll": {}
+        }
+      },
+      "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
+        "type": "package",
+        "compile": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        },
+        "runtime": {
+          "lib/net20/Microsoft.Office.Interop.PowerPoint.dll": {}
+        }
+      },
+      "MicrosoftOfficeCore/15.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net35/Office.dll": {}
+        },
+        "runtime": {
+          "lib/net35/Office.dll": {}
+        }
+      },
+      "Newtonsoft.Json/13.0.3": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "NHotkey/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "NHotkey.Wpf/3.0.0": {
+        "type": "package",
+        "dependencies": {
+          "NHotkey": "3.0.0"
+        },
+        "compile": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/net462/NHotkey.Wpf.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
+      "OSVersionExt/3.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net462/OSVersionExt.dll": {}
+        },
+        "runtime": {
+          "lib/net462/OSVersionExt.dll": {}
+        }
+      },
+      "System.ValueTuple/4.5.0": {
+        "type": "package",
+        "frameworkAssemblies": [
+          "mscorlib"
+        ],
+        "compile": {
+          "ref/net47/System.ValueTuple.dll": {}
+        },
+        "runtime": {
+          "lib/net47/System.ValueTuple.dll": {
+            "related": ".xml"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "AvalonEdit/6.3.0.90": {
+      "sha512": "WVTb5MxwGqKdeasd3nG5udlV4t6OpvkFanziwI133K0/QJ5FvZmfzRQgpAjGTJhQfIA8GP7AzKQ3sTY9JOFk8Q==",
+      "type": "package",
+      "path": "avalonedit/6.3.0.90",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "PackageReadme.md",
+        "avalonedit.6.3.0.90.nupkg.sha512",
+        "avalonedit.nuspec",
+        "images/AvalonEditNuGetPackageIcon.png",
+        "lib/net462/ICSharpCode.AvalonEdit.dll",
+        "lib/net462/ICSharpCode.AvalonEdit.xml",
+        "lib/net6.0-windows7.0/ICSharpCode.AvalonEdit.dll",
+        "lib/net6.0-windows7.0/ICSharpCode.AvalonEdit.xml",
+        "lib/net7.0-windows7.0/ICSharpCode.AvalonEdit.dll",
+        "lib/net7.0-windows7.0/ICSharpCode.AvalonEdit.xml"
+      ]
+    },
+    "Hardcodet.NotifyIcon.Wpf/1.1.0": {
+      "sha512": "FFEkdRSidMrbMfQVwhCzq6KtSyR1qQojqtiUrkCyjnOOuMf7W3TNQkzFnBBxYxFe7uLk5mz7M38wFh1qdWyfvg==",
+      "type": "package",
+      "path": "hardcodet.notifyicon.wpf/1.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE",
+        "hardcodet.notifyicon.wpf.1.1.0.nupkg.sha512",
+        "hardcodet.notifyicon.wpf.nuspec",
+        "icon.png",
+        "lib/net45/Hardcodet.NotifyIcon.Wpf.dll",
+        "lib/net45/Hardcodet.NotifyIcon.Wpf.xml",
+        "lib/net462/Hardcodet.NotifyIcon.Wpf.dll",
+        "lib/net462/Hardcodet.NotifyIcon.Wpf.xml",
+        "lib/net472/Hardcodet.NotifyIcon.Wpf.dll",
+        "lib/net472/Hardcodet.NotifyIcon.Wpf.xml",
+        "lib/net5.0-windows7.0/Hardcodet.NotifyIcon.Wpf.dll",
+        "lib/net5.0-windows7.0/Hardcodet.NotifyIcon.Wpf.xml",
+        "lib/netcoreapp3.1/Hardcodet.NotifyIcon.Wpf.dll",
+        "lib/netcoreapp3.1/Hardcodet.NotifyIcon.Wpf.xml"
+      ]
+    },
+    "iNKORE.UI.WPF.Modern/0.9.27": {
+      "sha512": "Mt7KEDjYMdq7hOdPQ0accBN/X6Eb1bkgvyqs+qTGpfx9GKTVhtShbBslWplrqtKvvLsC9/6uU+bTa6rKBcO+kA==",
+      "type": "package",
+      "path": "inkore.ui.wpf.modern/0.9.27",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Inkore_Badge_256.png",
+        "README.md",
+        "inkore.ui.wpf.modern.0.9.27.nupkg.sha512",
+        "inkore.ui.wpf.modern.nuspec",
+        "lib/net452/System.ValueTuple.dll",
+        "lib/net452/iNKORE.UI.WPF.Modern.Controls.dll",
+        "lib/net452/iNKORE.UI.WPF.Modern.Controls.pdb",
+        "lib/net452/iNKORE.UI.WPF.Modern.Controls.xml",
+        "lib/net452/iNKORE.UI.WPF.Modern.dll",
+        "lib/net452/iNKORE.UI.WPF.Modern.pdb",
+        "lib/net452/iNKORE.UI.WPF.Modern.xml",
+        "lib/net452/iNKORE.UI.WPF.dll",
+        "lib/net6.0-windows10.0.18362.0/iNKORE.UI.WPF.Modern.Controls.deps.json",
+        "lib/net6.0-windows10.0.18362.0/iNKORE.UI.WPF.Modern.Controls.dll",
+        "lib/net6.0-windows10.0.18362.0/iNKORE.UI.WPF.Modern.Controls.pdb",
+        "lib/net6.0-windows10.0.18362.0/iNKORE.UI.WPF.Modern.Controls.xml",
+        "lib/net6.0-windows10.0.18362.0/iNKORE.UI.WPF.Modern.dll",
+        "lib/net6.0-windows10.0.18362.0/iNKORE.UI.WPF.Modern.pdb",
+        "lib/net6.0-windows10.0.18362.0/iNKORE.UI.WPF.Modern.xml"
+      ]
+    },
+    "MdXaml/1.27.0": {
+      "sha512": "VWhqhCeKVkJe8vkPmXuGZlRX01WDrTugOLeUvJn18jH/8DrGGVBvtgIlJoELHD2f1DiEWqF3lxxjV55vnzE7Tg==",
+      "type": "package",
+      "path": "mdxaml/1.27.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "MdXaml.md",
+        "lib/net45/MdXaml.dll",
+        "lib/net462/MdXaml.dll",
+        "lib/net6.0-windows7.0/MdXaml.dll",
+        "lib/netcoreapp3.0/MdXaml.dll",
+        "mdxaml.1.27.0.nupkg.sha512",
+        "mdxaml.nuspec"
+      ]
+    },
+    "MdXaml.Plugins/1.27.0": {
+      "sha512": "We7LtBdoukRg9mqTfa1f5n8z/GQPMKBRj3URk9DiMuqzIHkW1lTgK5njVPSScxsRt4YzW22423tSnLWNm2MJKg==",
+      "type": "package",
+      "path": "mdxaml.plugins/1.27.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net45/MdXaml.Plugins.dll",
+        "lib/net462/MdXaml.Plugins.dll",
+        "lib/net6.0-windows7.0/MdXaml.Plugins.dll",
+        "lib/netcoreapp3.0/MdXaml.Plugins.dll",
+        "mdxaml.plugins.1.27.0.nupkg.sha512",
+        "mdxaml.plugins.nuspec"
+      ]
+    },
+    "Microsoft.Office.Interop.PowerPoint/15.0.4420.1018": {
+      "sha512": "3XkJAqbYq93MqqSOPusNE+6Tve5yBkbE92n9W8f+k8Z9AzXeoTMqMYqhZMrzVOp4saHhMMbOD78JkCjvk+qIzw==",
+      "type": "package",
+      "path": "microsoft.office.interop.powerpoint/15.0.4420.1018",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net20/Microsoft.Office.Interop.PowerPoint.dll",
+        "lib/netstandard2.0/Microsoft.Office.Interop.PowerPoint.dll",
+        "microsoft.office.interop.powerpoint.15.0.4420.1018.nupkg.sha512",
+        "microsoft.office.interop.powerpoint.nuspec"
+      ]
+    },
+    "MicrosoftOfficeCore/15.0.0": {
+      "sha512": "/KgYw8uvv0Ut8FPvyEa1XJ/TrLSRgvTv3JgC2IT0/8NwoICzbEJWfmfwsE6Dwi8WH0jVkTEO7zRvGvaKqUOhqQ==",
+      "type": "package",
+      "path": "microsoftofficecore/15.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net35/Office.dll",
+        "microsoftofficecore.15.0.0.nupkg.sha512",
+        "microsoftofficecore.nuspec"
+      ]
+    },
+    "Newtonsoft.Json/13.0.3": {
+      "sha512": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ==",
+      "type": "package",
+      "path": "newtonsoft.json/13.0.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.md",
+        "README.md",
+        "lib/net20/Newtonsoft.Json.dll",
+        "lib/net20/Newtonsoft.Json.xml",
+        "lib/net35/Newtonsoft.Json.dll",
+        "lib/net35/Newtonsoft.Json.xml",
+        "lib/net40/Newtonsoft.Json.dll",
+        "lib/net40/Newtonsoft.Json.xml",
+        "lib/net45/Newtonsoft.Json.dll",
+        "lib/net45/Newtonsoft.Json.xml",
+        "lib/net6.0/Newtonsoft.Json.dll",
+        "lib/net6.0/Newtonsoft.Json.xml",
+        "lib/netstandard1.0/Newtonsoft.Json.dll",
+        "lib/netstandard1.0/Newtonsoft.Json.xml",
+        "lib/netstandard1.3/Newtonsoft.Json.dll",
+        "lib/netstandard1.3/Newtonsoft.Json.xml",
+        "lib/netstandard2.0/Newtonsoft.Json.dll",
+        "lib/netstandard2.0/Newtonsoft.Json.xml",
+        "newtonsoft.json.13.0.3.nupkg.sha512",
+        "newtonsoft.json.nuspec",
+        "packageIcon.png"
+      ]
+    },
+    "NHotkey/3.0.0": {
+      "sha512": "IEghs0QqWsQYH0uUmvIl0Ye6RaebWRh38eB6ToOkDnQucTYRGFOgtig0gSxlwCszTilYFz3n1ZuY762x+kDR3A==",
+      "type": "package",
+      "path": "nhotkey/3.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net462/NHotkey.dll",
+        "lib/net462/NHotkey.pdb",
+        "lib/net6.0-windows7.0/NHotkey.dll",
+        "lib/net6.0-windows7.0/NHotkey.pdb",
+        "nhotkey.3.0.0.nupkg.sha512",
+        "nhotkey.nuspec"
+      ]
+    },
+    "NHotkey.Wpf/3.0.0": {
+      "sha512": "BIUKlhTG5KtFf9OQzWvkmVmktt5/FFj6AOEgag8Uf0R2YdZt5ajUzs3sVskcJcT2TztWlEHKQr1jFj3KQ0D9Nw==",
+      "type": "package",
+      "path": "nhotkey.wpf/3.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net462/NHotkey.Wpf.dll",
+        "lib/net462/NHotkey.Wpf.pdb",
+        "lib/net6.0-windows7.0/NHotkey.Wpf.dll",
+        "lib/net6.0-windows7.0/NHotkey.Wpf.pdb",
+        "nhotkey.wpf.3.0.0.nupkg.sha512",
+        "nhotkey.wpf.nuspec"
+      ]
+    },
+    "OSVersionExt/3.0.0": {
+      "sha512": "G+3FGoEFhjSMx24UInvqRVb7dQ7K0coC8E+EiZWhnQGnDe8IJa14AZ0IDqz5YkwUFHOAcVUnoMWDqLH2RPR0wA==",
+      "type": "package",
+      "path": "osversionext/3.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net462/OSVersionExt.dll",
+        "osversionext.3.0.0.nupkg.sha512",
+        "osversionext.nuspec"
+      ]
+    },
+    "System.ValueTuple/4.5.0": {
+      "sha512": "okurQJO6NRE/apDIP23ajJ0hpiNmJ+f0BwOlB/cSqTLQlw5upkf+5+96+iG2Jw40G1fCVCyPz/FhIABUjMR+RQ==",
+      "type": "package",
+      "path": "system.valuetuple/4.5.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net461/System.ValueTuple.dll",
+        "lib/net461/System.ValueTuple.xml",
+        "lib/net47/System.ValueTuple.dll",
+        "lib/net47/System.ValueTuple.xml",
+        "lib/netcoreapp2.0/_._",
+        "lib/netstandard1.0/System.ValueTuple.dll",
+        "lib/netstandard1.0/System.ValueTuple.xml",
+        "lib/netstandard2.0/_._",
+        "lib/portable-net40+sl4+win8+wp8/System.ValueTuple.dll",
+        "lib/portable-net40+sl4+win8+wp8/System.ValueTuple.xml",
+        "lib/uap10.0.16299/_._",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "lib/xamarintvos10/_._",
+        "lib/xamarinwatchos10/_._",
+        "ref/MonoAndroid10/_._",
+        "ref/MonoTouch10/_._",
+        "ref/net461/System.ValueTuple.dll",
+        "ref/net47/System.ValueTuple.dll",
+        "ref/netcoreapp2.0/_._",
+        "ref/netstandard2.0/_._",
+        "ref/portable-net40+sl4+win8+wp8/System.ValueTuple.dll",
+        "ref/uap10.0.16299/_._",
+        "ref/xamarinios10/_._",
+        "ref/xamarinmac20/_._",
+        "ref/xamarintvos10/_._",
+        "ref/xamarinwatchos10/_._",
+        "system.valuetuple.4.5.0.nupkg.sha512",
+        "system.valuetuple.nuspec",
+        "useSharedDesignerContext.txt",
+        "version.txt"
+      ]
+    }
+  },
+  "projectFileDependencyGroups": {
+    ".NETFramework,Version=v4.7.2": [
+      "Hardcodet.NotifyIcon.Wpf >= 1.1.0",
+      "MdXaml >= 1.27.0",
+      "Microsoft.Office.Interop.PowerPoint >= 15.0.4420.1018",
+      "MicrosoftOfficeCore >= 15.0.0",
+      "NHotkey.Wpf >= 3.0.0",
+      "Newtonsoft.Json >= 13.0.3",
+      "OSVersionExt >= 3.0.0",
+      "iNKORE.UI.WPF.Modern >= 0.9.27"
+    ]
+  },
+  "packageFolders": {
+    "C:\\Users\\Administrator\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+  },
+  "project": {
+    "version": "5.0.4",
+    "restore": {
+      "projectUniqueName": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\Ink Canvas\\InkCanvasForClass.csproj",
+      "projectName": "InkCanvasForClass",
+      "projectPath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\Ink Canvas\\InkCanvasForClass.csproj",
+      "packagesPath": "C:\\Users\\Administrator\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\Ink Canvas\\obj\\",
+      "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
+      "configFilePaths": [
+        "C:\\Users\\Administrator\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+      ],
+      "originalTargetFrameworks": [
+        "net472"
+      ],
+      "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
+      },
+      "frameworks": {
+        "net472": {
+          "targetAlias": "net472",
+          "projectReferences": {}
+        }
+      },
+      "warningProperties": {
+        "warnAsError": [
+          "NU1605"
+        ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
+      },
+      "SdkAnalysisLevel": "9.0.300"
+    },
+    "frameworks": {
+      "net472": {
+        "targetAlias": "net472",
+        "dependencies": {
+          "Hardcodet.NotifyIcon.Wpf": {
+            "target": "Package",
+            "version": "[1.1.0, )"
+          },
+          "MdXaml": {
+            "target": "Package",
+            "version": "[1.27.0, )"
+          },
+          "Microsoft.Office.Interop.PowerPoint": {
+            "target": "Package",
+            "version": "[15.0.4420.1018, )"
+          },
+          "MicrosoftOfficeCore": {
+            "target": "Package",
+            "version": "[15.0.0, )"
+          },
+          "NHotkey.Wpf": {
+            "target": "Package",
+            "version": "[3.0.0, )"
+          },
+          "Newtonsoft.Json": {
+            "target": "Package",
+            "version": "[13.0.3, )"
+          },
+          "OSVersionExt": {
+            "target": "Package",
+            "version": "[3.0.0, )"
+          },
+          "iNKORE.UI.WPF.Modern": {
+            "target": "Package",
+            "version": "[0.9.27, )"
+          }
+        },
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300\\RuntimeIdentifierGraph.json"
+      }
+    },
+    "runtimes": {
+      "win": {
+        "#import": []
+      },
+      "win-arm64": {
+        "#import": []
+      },
+      "win-x64": {
+        "#import": []
+      },
+      "win-x86": {
+        "#import": []
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+﻿InkCanvasForClass
+
+
+winexe
+C#
+.cs
+C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\x64\x86 Debug\net472\
+Ink_Canvas
+none
+false
+TRACE;X86_DEBUG;NETFRAMEWORK;NET472;;NET30_OR_GREATER;NET35_OR_GREATER;NET40_OR_GREATER;NET45_OR_GREATER;NET451_OR_GREATER;NET452_OR_GREATER;NET46_OR_GREATER;NET461_OR_GREATER;NET462_OR_GREATER;NET47_OR_GREATER;NET471_OR_GREATER;NET472_OR_GREATER
+C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\App.xaml
+13173459795
+
+55-769182680
+46864286016
+MainWindow.xaml;Resources\DrawShapeImageDictionary.xaml;Resources\IconImageDictionary.xaml;Resources\SeewoImageDictionary.xaml;Resources\Styles\Dark.xaml;Resources\Styles\Light.xaml;Windows\CountdownTimerWindow.xaml;Windows\CycleProcessBar.xaml;Windows\HasNewUpdateWindow.xaml;Windows\NamesInputWindow.xaml;Windows\OperatingGuideWindow.xaml;Windows\RandWindow.xaml;Windows\YesOrNoNotificationWindow.xaml;
+
+True
+

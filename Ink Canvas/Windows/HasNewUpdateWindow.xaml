@@ -1,0 +1,59 @@
+﻿<Window x:Class="Ink_Canvas.HasNewUpdateWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ink_Canvas"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
+        mc:Ignorable="d"
+        ui:WindowHelper.UseModernWindowStyle = "True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:TitleBar.Height="36"
+        Title="InkCanvasForClass有新版本可用" Height="475" Width="800" ResizeMode="NoResize">
+    <Grid Background="#fafafa">
+        <ui:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0">
+            <ui:SimpleStackPanel Orientation="Horizontal" Background="#2563eb" Margin="0,0,0,0">
+                <ui:SimpleStackPanel Orientation="Vertical" Width="685" Margin="24,18,0,12" Spacing="2">
+                    <TextBlock Text="InkCanvasForClass 新版本来了！" FontSize="24" FontWeight="Bold" Foreground="White" TextAlignment="Left"/>
+                    <TextBlock Text="希望您能喜欢我们的新版本 :-)" FontSize="20" TextAlignment="Left" Foreground="White"/>
+                </ui:SimpleStackPanel>
+                <Image Source="/Resources/Icons-fluent/party.png" Width="72" Height="72"/>
+            </ui:SimpleStackPanel>
+
+            <Border BorderBrush="#3f3f46" Background="White" BorderThickness="1" CornerRadius="4" Margin="24,12,24,0">
+                <ui:ScrollViewerEx Margin="0" VerticalScrollBarVisibility="Auto" Height="256" PanningMode="VerticalOnly">
+                    <mdxam:MarkdownScrollViewer xml:space="preserve" Foreground="Black" MarkdownStyleName="GithubLike">
+                        # InkCanvasForClass v5.0.2更新
+                        
+                        你好，旅行者们，本次InkCanvasForClass更新带来了如下新功能供您探索：
+                        
+                        1. 全新设计的UI界面，包括浮动工具栏和白板页面均经过重新设计，更加现代化的UI让您在使用的过程中更加舒适。
+                        2. 带来了实时修改橡皮大小和橡皮形状的菜单。您可以选择使用圆形橡皮，方形橡皮，和类似希沃白板的真实黑板擦（矩形）橡皮。
+                        3. 白板页面支持显示当前时间和日期
+                        4. 自动收纳新增对希沃轻白板、智绘教、鸿合屏幕书写等软件的支持，自动查杀新增对鸿合屏幕书写、希沃轻白板等软件的支持。
+                        5. 为设置界面重写了全新的UI。
+                        6. 重写了随机抽选模块，现在支持更丰富的抽选机制和自定义选项。
+                        7. 修复了部分小Bug，提升了整体的用户体验。
+                        8. 带来了基于FitToCurve的笔迹平滑，基于贝塞尔曲线平滑，让墨迹线条更加优美好看。
+                    </mdxam:MarkdownScrollViewer>
+                </ui:ScrollViewerEx>
+            </Border>
+            <ui:SimpleStackPanel Orientation="Horizontal"  HorizontalAlignment="Center" Spacing="12" Margin="0,8,0,0">
+                <TextBlock Text="本次更新： 4.9.1 -> 5.9.1" FontWeight="Bold" FontSize="14" TextAlignment="Center"/>
+                <TextBlock Text="2024年8月4日发布更新" FontSize="14" TextAlignment="Center"/>
+            </ui:SimpleStackPanel>
+            <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12">
+                <Button Content="立刻更新" Foreground="White" HorizontalAlignment="Center" Margin="0,10,0,0">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#15803d"/>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#15803d"/>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#166534"/>
+                    </Button.Resources>
+                </Button>
+                <Button Content="下次更新" Foreground="Black" HorizontalAlignment="Center" Margin="0,10,0,0"/>
+                <Button Content="跳过该版本" HorizontalAlignment="Center" Foreground="#71717a" Margin="0,10,0,0"/>
+            </ui:SimpleStackPanel>
+        </ui:SimpleStackPanel>
+    </Grid>
+</Window>

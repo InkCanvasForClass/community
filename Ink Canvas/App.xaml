@@ -1,0 +1,244 @@
+﻿<Application x:Class="Ink_Canvas.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Ink_Canvas"
+             xmlns:tb="http://www.hardcodet.net/taskbar"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <Style TargetType="ui:ScrollViewerEx">
+                <EventSetter Event="PreviewMouseWheel" Handler="ScrollViewer_PreviewMouseWheel"/>
+            </Style>
+            <ContextMenu Opened="SysTrayMenu_Opened" x:Shared="false" x:Key="SysTrayMenu" Padding="6" ui:ThemeManager.RequestedTheme="Light">
+                <MenuItem IsCheckable="True" IsChecked="False" Checked="HideICCMainWindowTrayIconMenuItem_Checked" Unchecked="HideICCMainWindowTrayIconMenuItem_UnChecked" Name="HideICCMainWindowTrayIconMenuItem">
+                    <MenuItem.Header>
+                        <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
+                            <TextBlock Name="HideICCMainWindowTrayIconMenuItemHeaderText" FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="隐藏ICC主窗口" />
+                        </ui:SimpleStackPanel>
+                    </MenuItem.Header>
+                    <MenuItem.Icon>
+                        <Image Width="28" Height="28" Margin="-2">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                            <GeometryDrawing Brush="#27272a" Geometry="F0 M24,24z M0,0z M5,6C4.73478,6 4.48043,6.10536 4.29289,6.29289 4.10536,6.48043 4,6.73478 4,7L4,17C4,17.2652 4.10536,17.5196 4.29289,17.7071 4.48043,17.8946 4.73478,18 5,18L19,18C19.2652,18 19.5196,17.8946 19.7071,17.7071 19.8946,17.5196 20,17.2652 20,17L20,7C20,6.73478 19.8946,6.48043 19.7071,6.29289 19.5196,6.10536 19.2652,6 19,6L5,6z M2.87868,4.87868C3.44129,4.31607,4.20435,4,5,4L19,4C19.7957,4 20.5587,4.31607 21.1213,4.87868 21.6839,5.44129 22,6.20435 22,7L22,17C22,17.7957 21.6839,18.5587 21.1213,19.1213 20.5587,19.6839 19.7957,20 19,20L5,20C4.20435,20 3.44129,19.6839 2.87868,19.1213 2.31607,18.5587 2,17.7956 2,17L2,7C2,6.20435,2.31607,5.44129,2.87868,4.87868z M5,8C5,7.44772,5.44772,7,6,7L6.01,7C6.56228,7 7.01,7.44772 7.01,8 7.01,8.55228 6.56228,9 6.01,9L6,9C5.44772,9,5,8.55228,5,8z M9,7C8.44772,7 8,7.44772 8,8 8,8.55228 8.44772,9 9,9L9.01,9C9.56228,9 10.01,8.55228 10.01,8 10.01,7.44772 9.56228,7 9.01,7L9,7z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator Margin="0,3" />
+                <MenuItem>
+                    <MenuItem.Header>
+                        <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="禁用所有快捷键" />
+                        </ui:SimpleStackPanel>
+                    </MenuItem.Header>
+                    <MenuItem.Icon>
+                        <Image Width="28" Height="28" Margin="-2">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                            <GeometryDrawing Brush="#27272a" Geometry="F0 M24,24z M0,0z M3.29289,7.29289C3.48043,7.10536,3.73478,7,4,7L20,7C20.2652,7 20.5196,7.10536 20.7071,7.29289 20.8946,7.48043 21,7.73478 21,8L21,16C21,16.2652 20.8946,16.5196 20.7071,16.7071 20.5196,16.8946 20.2652,17 20,17L4,17C3.73478,17 3.48043,16.8946 3.29289,16.7071 3.10536,16.5196 3,16.2652 3,16L3,8C3,7.73478,3.10536,7.48043,3.29289,7.29289z M4,5C3.20435,5 2.44129,5.31607 1.87868,5.87868 1.31607,6.44129 1,7.20435 1,8L1,16C1,16.7956 1.31607,17.5587 1.87868,18.1213 2.44129,18.6839 3.20435,19 4,19L20,19C20.7957,19 21.5587,18.6839 22.1213,18.1213 22.6839,17.5587 23,16.7957 23,16L23,8C23,7.20435 22.6839,6.44129 22.1213,5.87868 21.5587,5.31607 20.7957,5 20,5L4,5z M7,10C7,9.44772 6.55228,9 6,9 5.44772,9 5,9.44772 5,10L5,10.01C5,10.5623 5.44772,11.01 6,11.01 6.55228,11.01 7,10.5623 7,10.01L7,10z M10,9C10.5523,9,11,9.44772,11,10L11,10.01C11,10.5623 10.5523,11.01 10,11.01 9.44771,11.01 9,10.5623 9,10.01L9,10C9,9.44772,9.44771,9,10,9z M15,10C15,9.44772 14.5523,9 14,9 13.4477,9 13,9.44772 13,10L13,10.01C13,10.5623 13.4477,11.01 14,11.01 14.5523,11.01 15,10.5623 15,10.01L15,10z M18,9C18.5523,9,19,9.44772,19,10L19,10.01C19,10.5623 18.5523,11.01 18,11.01 17.4477,11.01 17,10.5623 17,10.01L17,10C17,9.44772,17.4477,9,18,9z M7,14C7,13.4477 6.55228,13 6,13 5.44772,13 5,13.4477 5,14L5,14.01C5,14.5623 5.44772,15.01 6,15.01 6.55228,15.01 7,14.5623 7,14.01L7,14z M18,13C18.5523,13,19,13.4477,19,14L19,14.01C19,14.5623 18.5523,15.01 18,15.01 17.4477,15.01 17,14.5623 17,14.01L17,14C17,13.4477,17.4477,13,18,13z M10.0025,13C9.45022,12.9986 9.00138,13.4452 9,13.9975 8.99862,14.5498 9.44522,14.9986 9.9975,15L13.9975,15.01C14.5498,15.0114 14.9986,14.5648 15,14.0125 15.0014,13.4602 14.5548,13.0114 14.0025,13.01L10.0025,13z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="ForceFullScreenTrayIconMenuItem" Click="ForceFullScreenTrayIconMenuItem_Clicked">
+                    <MenuItem.Header>
+                        <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="强制全屏化" />
+                            <ui:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
+                                <Border Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />
+                                </Border>
+                                <TextBlock FontSize="10" Foreground="#3f3f46" Text="+" />
+                                <Border Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="F" />
+                                </Border>
+                            </ui:SimpleStackPanel>
+                        </ui:SimpleStackPanel>
+                    </MenuItem.Header>
+                    <MenuItem.Icon>
+                        <Image Width="28" Height="28" Margin="-2">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                            <GeometryDrawing Brush="#27272a" Geometry="F0 M24,24z M0,0z M3.61722,3.07588C3.4962,3.12606 3.38717,3.19933 3.29562,3.29018 3.39086,3.19565 3.50039,3.12422 3.61722,3.07588z" />
+                                            <GeometryDrawing Brush="#27272a" Geometry="F1 M24,24z M0,0z M8,3L4,3C3.86441,3 3.73512,3.02699 3.61722,3.07588 3.4962,3.12606 3.38717,3.19933 3.29562,3.29018 3.20228,3.38281 3.1271,3.49373 3.07592,3.61711 3.027,3.73504 3,3.86437 3,4L3,8C3,8.55228 3.44772,9 4,9 4.55228,9 5,8.55228 5,8L5,6.41421 9.29289,10.7071C9.68342,11.0976 10.3166,11.0976 10.7071,10.7071 11.0976,10.3166 11.0976,9.68342 10.7071,9.29289L6.41421,5 8,5C8.55228,5 9,4.55228 9,4 9,3.44772 8.55228,3 8,3z" />
+                                            <GeometryDrawing Brush="#27272a" Geometry="F1 M24,24z M0,0z M16,3C15.4477,3 15,3.44772 15,4 15,4.55228 15.4477,5 16,5L17.5858,5 13.2929,9.29289C12.9024,9.68342 12.9024,10.3166 13.2929,10.7071 13.6834,11.0976 14.3166,11.0976 14.7071,10.7071L19,6.41421 19,8C19,8.55228 19.4477,9 20,9 20.5523,9 21,8.55228 21,8L21,4C21,3.44772,20.5523,3,20,3L16,3z" />
+                                            <GeometryDrawing Brush="#27272a" Geometry="F1 M24,24z M0,0z M21,16C21,15.4477 20.5523,15 20,15 19.4477,15 19,15.4477 19,16L19,17.5858 14.7071,13.2929C14.3166,12.9024 13.6834,12.9024 13.2929,13.2929 12.9024,13.6834 12.9024,14.3166 13.2929,14.7071L17.5858,19 16,19C15.4477,19 15,19.4477 15,20 15,20.5523 15.4477,21 16,21L20,21C20.5523,21,21,20.5523,21,20L21,16z" />
+                                            <GeometryDrawing Brush="#27272a" Geometry="F1 M24,24z M0,0z M5,16C5,15.4477 4.55228,15 4,15 3.44772,15 3,15.4477 3,16L3,20C3,20.5523,3.44772,21,4,21L8,21C8.55228,21 9,20.5523 9,20 9,19.4477 8.55228,19 8,19L6.41421,19 10.7071,14.7071C11.0976,14.3166 11.0976,13.6834 10.7071,13.2929 10.3166,12.9024 9.68342,12.9024 9.29289,13.2929L5,17.5858 5,16z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="FoldFloatingBarTrayIconMenuItem" Click="FoldFloatingBarTrayIconMenuItem_Clicked">
+                    <MenuItem.Header>
+                        <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
+                            <TextBlock Name="FoldFloatingBarTrayIconMenuItemHeaderText" FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="切换为收纳模式" />
+                            <ui:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
+                                <Border Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />
+                                </Border>
+                                <TextBlock FontSize="10" Foreground="#3f3f46" Text="+" />
+                                <Border Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="S" />
+                                </Border>
+                            </ui:SimpleStackPanel>
+                        </ui:SimpleStackPanel>
+                    </MenuItem.Header>
+                    <MenuItem.Icon>
+                        <Grid>
+                            <Image Width="28" Height="28" Margin="-2" x:Name="FoldFloatingBarTrayIconMenuItemIconEyeOff" Visibility="Hidden">
+                                <Image.Source>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                <GeometryDrawing Brush="#27272a" Geometry="F0 M24,24z M0,0z M17.3074,15.8932L3.70711,2.29289C3.31658,1.90237 2.68342,1.90237 2.29289,2.29289 1.90237,2.68342 1.90237,3.31658 2.29289,3.70711L5.77595,7.19016C4.41908,8.25997 3.21193,9.70316 2.14251,11.4855 1.9525,11.8022 1.9525,12.1978 2.14251,12.5145 4.66152,16.7129 7.94268,18.9988 11.9967,19 13.5692,19.0099 15.1164,18.638 16.5073,17.9215L20.2929,21.7071C20.6834,22.0976 21.3166,22.0976 21.7071,21.7071 22.0976,21.3166 22.0976,20.6834 21.7071,20.2929L17.4597,16.0455C17.4139,15.9885,17.3627,15.9376,17.3074,15.8932z M12,15.0011C11.2044,15.0012 10.4412,14.6853 9.87852,14.1227 9.3158,13.5602 8.99959,12.7972 8.99945,12.0015 8.99937,11.5492 9.10142,11.1075 9.29284,10.7071L7.20216,8.61637C6.1303,9.41883 5.11853,10.537 4.17707,12.0001 6.39041,15.4411 9.00116,17 12,17L12.0066,17C13.0383,17.0068,14.0564,16.8067,15.0021,16.4163L13.2934,14.7077C12.8933,14.8989,12.452,15.001,12,15.0011z" />
+                                                <GeometryDrawing Brush="#27272a" Geometry="F1 M24,24z M0,0z M11.9974,7.00003C11.4537,6.99862 10.9113,7.05227 10.3784,7.16015 9.83711,7.26973 9.30946,6.91975 9.19988,6.37844 9.0903,5.83714 9.44028,5.30949 9.98159,5.19991 10.6464,5.06534 11.323,4.99837 12.0013,5.00003 16.0563,5.00051 19.3381,7.2865 21.8575,11.4855 22.0475,11.8022 22.0475,12.1978 21.8575,12.5145 21.1604,13.6763 20.405,14.6934 19.5887,15.5569 19.2094,15.9583 18.5765,15.9761 18.1751,15.5968 17.7737,15.2174 17.7559,14.5845 18.1353,14.1831 18.7203,13.5641 19.2838,12.8377 19.8229,11.9999 17.6096,8.55894 14.9988,7.00003 12,7.00003L11.9974,7.00003z" />
+                                            </DrawingGroup>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </Image.Source>
+                            </Image>
+                            <Image Width="28" Height="28" Margin="-2" x:Name="FoldFloatingBarTrayIconMenuItemIconEyeOn" Visibility="Hidden">
+                                <Image.Source>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                <GeometryDrawing Brush="#27272a" Geometry="F1 M24,24z M0,0z M9.87868,9.87868C10.4413,9.31607 11.2043,9 12,9 12.7957,9 13.5587,9.31607 14.1213,9.87868 14.6839,10.4413 15,11.2043 15,12 15,12.7957 14.6839,13.5587 14.1213,14.1213 13.5587,14.6839 12.7957,15 12,15 11.2043,15 10.4413,14.6839 9.87868,14.1213 9.31607,13.5587 9,12.7957 9,12 9,11.2043 9.31607,10.4413 9.87868,9.87868z" />
+                                                <GeometryDrawing Brush="#27272a" Geometry="F0 M24,24z M0,0z M12,5C7.94444,5 4.66219,7.28603 2.14251,11.4855 1.9525,11.8022 1.9525,12.1978 2.14251,12.5145 4.66219,16.714 7.94444,19 12,19 16.0556,19 19.3378,16.714 21.8575,12.5145 22.0475,12.1978 22.0475,11.8022 21.8575,11.4855 19.3378,7.28603 16.0556,5 12,5z M12,17C9.00114,17 6.39038,15.4411 4.17703,12 6.39038,8.55893 9.00114,7 12,7 14.9989,7 17.6096,8.55893 19.823,12 17.6096,15.4411 14.9989,17 12,17z" />
+                                            </DrawingGroup>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </Image.Source>
+                            </Image>
+                        </Grid>
+                        
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="ResetFloatingBarPositionTrayIconMenuItem" Click="ResetFloatingBarPositionTrayIconMenuItem_Clicked">
+                    <MenuItem.Header>
+                        <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="重置工具栏位置" />
+                            <ui:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
+                                <Border  Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />
+                                </Border>
+                                <TextBlock FontSize="10" Foreground="#3f3f46" Text="+" />
+                                <Border Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="T" />
+                                </Border>
+                            </ui:SimpleStackPanel>
+                        </ui:SimpleStackPanel>
+                    </MenuItem.Header>
+                    <MenuItem.Icon>
+                        <Image Width="28" Height="28" Margin="-2">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                            <GeometryDrawing Brush="#27272a" Geometry="F0 M24,24z M0,0z M12,7C10.9391,7 9.92172,7.42143 9.17157,8.17157 8.42143,8.92172 8,9.93913 8,11 8,12.0609 8.42143,13.0783 9.17157,13.8284 9.92172,14.5786 10.9391,15 12,15 13.0609,15 14.0783,14.5786 14.8284,13.8284 15.5786,13.0783 16,12.0609 16,11 16,9.93913 15.5786,8.92172 14.8284,8.17157 14.0783,7.42143 13.0609,7 12,7z M10.5858,9.58579C10.9609,9.21071 11.4696,9 12,9 12.5304,9 13.0391,9.21071 13.4142,9.58579 13.7893,9.96086 14,10.4696 14,11 14,11.5304 13.7893,12.0391 13.4142,12.4142 13.0391,12.7893 12.5304,13 12,13 11.4696,13 10.9609,12.7893 10.5858,12.4142 10.2107,12.0391 10,11.5304 10,11 10,10.4696 10.2107,9.96086 10.5858,9.58579z" />
+                                            <GeometryDrawing Brush="#27272a" Geometry="F0 M24,24z M0,0z M12,2.00024C10.22,2.00024 8.47995,2.52807 6.99992,3.51699 5.51989,4.5059 4.36633,5.91148 3.68513,7.55599 3.00393,9.20049 2.82567,11.0101 3.1729,12.7559 3.52013,14.5017 4.37725,16.1053 5.63588,17.364L9.87998,21.6071C10.4425,22.1691 11.2054,22.485 12.0005,22.485 12.7956,22.485 13.5582,22.1694 14.1208,21.6074L18.3641,17.3641C19.6227,16.1054 20.4799,14.5017 20.8271,12.7559 21.1743,11.0101 20.9961,9.20049 20.3149,7.55599 19.6337,5.91148 18.4801,4.5059 17.0001,3.51699 15.5201,2.52807 13.78,2.00024 12,2.00024z M8.11105,5.17993C9.26219,4.41078 10.6156,4.00024 12,4.00024 13.3845,4.00024 14.7378,4.41078 15.889,5.17993 17.0401,5.94909 17.9373,7.04232 18.4671,8.32138 18.997,9.60044 19.1356,11.0079 18.8655,12.3657 18.5955,13.7236 17.9288,14.9709 16.9499,15.9498L12.7073,20.1925C12.5197,20.3798 12.2655,20.485 12.0005,20.485 11.7355,20.485 11.4813,20.3798 11.2938,20.1925L7.05013,15.9499C6.07125,14.9709 5.40454,13.7236 5.13448,12.3657 4.86441,11.0079 5.00306,9.60044 5.53288,8.32138 6.06271,7.04232 6.95991,5.94909 8.11105,5.17993z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <Separator Margin="0,3" />
+                <MenuItem Name="RestartAppTrayIconMenuItem" Click="RestartAppTrayIconMenuItem_Clicked">
+                    <MenuItem.Header>
+                        <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
+                            <TextBlock FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="#2563eb" Text="重启软件" />
+                            <ui:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
+                                <Border  Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />
+                                </Border>
+                                <TextBlock FontSize="10" Foreground="#3f3f46" Text="+" />
+                                <Border Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="R" />
+                                </Border>
+                            </ui:SimpleStackPanel>
+                        </ui:SimpleStackPanel>
+                    </MenuItem.Header>
+                    <MenuItem.Icon>
+                        <Image Width="24" Height="24">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                            <GeometryDrawing Brush="#2563eb"
+                                                             Geometry="F1 M24,24z M0,0z M6.34315,6.34315C7.84299,4.8433 9.87707,4.0005 11.9981,4 14.2527,4.00897 16.4167,4.88785 18.039,6.45324L18.5858,7 16,7C15.4477,7 15,7.44772 15,8 15,8.55228 15.4477,9 16,9L21,9C21.1356,9 21.2649,8.97301 21.3828,8.92412 21.5007,8.87532 21.6112,8.80298 21.7071,8.70711 21.8902,8.52405 21.9874,8.28768 21.9989,8.04797 21.9996,8.03199 22,8.016 22,8L22,3C22,2.44772 21.5523,2 21,2 20.4477,2 20,2.44772 20,3L20,5.58579 19.4471,5.03289 19.435,5.02103C17.4405,3.09289,14.7779,2.01044,12.0038,2L12,2C9.34784,2 6.8043,3.05357 4.92893,4.92893 3.05357,6.8043 2,9.34784 2,12 2,12.5523 2.44772,13 3,13 3.55228,13 4,12.5523 4,12 4,9.87827 4.84285,7.84344 6.34315,6.34315z" />
+                                            <GeometryDrawing Brush="#2563eb"
+                                                             Geometry="F1 M24,24z M0,0z M22,12C22,14.6522 20.9464,17.1957 19.0711,19.0711 17.1957,20.9464 14.6522,22 12,22L11.9962,22C9.22213,21.9896,6.55946,20.9071,4.56496,18.979L4.55289,18.9671 4,18.4142 4,21C4,21.5523 3.55228,22 3,22 2.44772,22 2,21.5523 2,21L2,16.0002C2,15.8646 2.02699,15.7351 2.07588,15.6172 2.12432,15.5001 2.19595,15.3904 2.29078,15.295 2.29219,15.2936 2.2936,15.2922 2.29502,15.2908 2.48924,15.0977 2.74301,15.0008 2.997,15 2.998,15 2.999,15 3,15L8,15C8.55228,15 9,15.4477 9,16 9,16.5523 8.55228,17 8,17L5.41421,17 5.96095,17.5467C7.5833,19.1122 9.74736,19.9911 12.002,20 14.123,19.9995 16.157,19.1567 17.6569,17.6569 19.1571,16.1566 20,14.1217 20,12 20,11.4477 20.4477,11 21,11 21.5523,11 22,11.4477 22,12z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Name="CloseAppTrayIconMenuItem" Click="CloseAppTrayIconMenuItem_Clicked">
+                    <MenuItem.Header>
+                        <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
+                            <TextBlock FontSize="14" FontWeight="Bold" VerticalAlignment="Center" Foreground="#dc2626" Text="退出软件" />
+                            <ui:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="4" Margin="16,0,0,0">
+                                <Border  Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="CTRL" />
+                                </Border>
+                                <TextBlock FontSize="10" Foreground="#3f3f46" Text="+" />
+                                <Border Padding="4,2,4,1" Background="#e4e4e7" BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="2.5">
+                                    <TextBlock FontSize="8" Foreground="#3f3f46" FontWeight="Bold" Text="Q" />
+                                </Border>
+                            </ui:SimpleStackPanel>
+                        </ui:SimpleStackPanel>
+                    </MenuItem.Header>
+                    <MenuItem.Icon>
+                        <Image Width="24" Height="24">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                            <GeometryDrawing Brush="#dc2626"
+                                                             Geometry="F1 M24,24z M0,0z M13,2C13,1.44772 12.5523,1 12,1 11.4477,1 11,1.44772 11,2L11,12C11,12.5523 11.4477,13 12,13 12.5523,13 13,12.5523 13,12L13,2z" />
+                                            <GeometryDrawing Brush="#dc2626"
+                                                             Geometry="F1 M24,24z M0,0z M19.1073,5.89303C18.7168,5.50243 18.0837,5.50232 17.6931,5.89277 17.3025,6.28322 17.3024,6.91639 17.6928,7.30698 18.8098,8.42441 19.571,9.84758 19.8802,11.397 20.1894,12.9464 20.0329,14.5528 19.4305,16.0134 18.828,17.474 17.8065,18.7235 16.4948,19.6043 15.1831,20.4851 13.64,20.9578 12.06,20.9628 10.48,20.9677 8.93392,20.5047 7.61674,19.6321 6.29956,18.7595 5.27025,17.5164 4.65863,16.0596 4.04701,14.6028 3.88046,12.9975 4.17999,11.4462 4.47952,9.89485 5.23171,8.46694 6.3417,7.34254 6.7297,6.9495 6.72562,6.31635 6.33258,5.92835 5.93955,5.54036 5.3064,5.54444 4.9184,5.93747 3.5309,7.34298 2.59067,9.12786 2.21626,11.067 1.84185,13.0062 2.05003,15.0128 2.81456,16.8338 3.57909,18.6549 4.86572,20.2087 6.5122,21.2994 8.15867,22.3902 10.0913,22.9689 12.0662,22.9627 14.0412,22.9566 15.9701,22.3657 17.6098,21.2647 19.2494,20.1637 20.5262,18.6018 21.2793,16.776 22.0324,14.9502 22.2281,12.9424 21.8415,11.0056 21.455,9.06878 20.5036,7.28981 19.1073,5.89303z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </ContextMenu>
+            <tb:TaskbarIcon x:Key="TaskbarTrayIcon"
+                            Visibility="Collapsed"
+                            ToolTipText="InkCanvasForClass"
+                            ContextMenu="{StaticResource SysTrayMenu}"
+                            IconSource="/Resources/icc.ico"/>
+                <ResourceDictionary.MergedDictionaries>
+                <ui:ThemeResources RequestedTheme="Light"/>
+                <ui:XamlControlsResources />
+                <ResourceDictionary Source="Resources/SeewoImageDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/DrawShapeImageDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/IconImageDictionary.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/Light.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
