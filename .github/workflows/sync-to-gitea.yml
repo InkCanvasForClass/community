@@ -20,7 +20,7 @@ jobs:
           git config --global user.email "action@github.com"
           
           # 使用 token 认证的正确格式
-          git remote add gitea https://${{ secrets.GITEA_TOKEN }}git@gitea.com:CJKmkp/ICC-CE.git
+          git remote add gitea https://git@gitea.com:${{ secrets.GITEA_TOKEN }}CJKmkp/ICC-CE.git
           
           # 推送代码到 Gitea
           git push -u gitea --all
