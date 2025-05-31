@@ -32,4 +32,4 @@ jobs:
       uses: actions/upload-artifact@v4.5.0
       with:
         name: InkCanvasForClass
-        path: "Ink Canvas/bin/Release/net472/"
+        path: "Ink Canvas/bin/Any CPU/Release/net472/"
