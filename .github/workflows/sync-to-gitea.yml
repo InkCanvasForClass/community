@@ -47,7 +47,7 @@ jobs:
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
         run: |
           # 构建完整URL并转义可能的特殊字符
-          GITEA_URL="https://${GITEA_TOKEN}@${GITEA_DOMAIN}/${GITEA_OWNER}/${GITEA_REPO}.git"
+          GITEA_URL="https://${GITEA_TOKEN}git@${GITEA_DOMAIN}/${GITEA_OWNER}/${GITEA_REPO}.git"
           
           echo "构建的Gitea URL: $GITEA_URL"  # GitHub会自动掩码token部分
           
