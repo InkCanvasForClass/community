@@ -13,14 +13,14 @@ jobs:
         
       - name: Push to Gitea
         env:
-          GITEA_REPO: ${{ secrets.GITEA_REPO_URL }}
-          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          GITEA_REPO: https://gitea.com/CJKmkp/ICC-CE.git
+          GITEA_TOKEN: 2cd2e3be72be915d738043b44ec53024ac87271c
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           
           # 使用 token 认证的正确格式
-          git remote add gitea https://${{ secrets.2cd2e3be72be915d738043b44ec53024ac87271c }}@https://gitea.com/CJKmkp/ICC-CE.git
+          git remote add gitea https://${{ secrets.GITEA_TOKEN }}@your-gitea-domain.com/your-username/your-repo.git
           
           # 推送代码到 Gitea
           git push -u gitea --all
