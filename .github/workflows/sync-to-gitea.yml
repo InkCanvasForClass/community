@@ -19,9 +19,6 @@ jobs:
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
           
-          # 使用 token 认证的正确格式
-          git remote add gitea https://${{ secrets.GITEA_TOKEN }}@your-gitea-domain.com/your-username/your-repo.git
-          
           # 推送代码到 Gitea
           git push -u gitea --all
           git push -u gitea --tags
