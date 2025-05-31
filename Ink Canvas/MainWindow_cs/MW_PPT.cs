@@ -81,39 +81,41 @@ namespace Ink_Canvas {
         public static bool IsShowingRestoreHiddenSlidesWindow = false;
         private static bool IsShowingAutoplaySlidesWindow = false;
         private static bool hasLoggedPresentationWarning = false;
+        private bool isPowerPointInitialized = false;
+        
 
 
-        private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e) {
-            if (IsShowingRestoreHiddenSlidesWindow || IsShowingAutoplaySlidesWindow) return;
+        private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            // 如果正在显示特定窗口，则跳过检查
+            if (IsShowingRestoreHiddenSlidesWindow || IsShowingAutoplaySlidesWindow) 
+                return;
+
             try
             {
-                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
-            }
-            catch (COMException)
-            {
-                // 创建新实例或记录错误
-            }
-
-            try {
-                var processes = Process.GetProcessesByName("wpp");
-                if (processes.Length > 0 && !isWPSSupportOn) return;
-
-                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
-                new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowBegin").AddEventHandler(pptApplication, new EApplication_SlideShowBeginEventHandler(this.PptApplication_SlideShowBegin));
-                new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowEnd").AddEventHandler(pptApplication, new EApplication_SlideShowEndEventHandler(this.PptApplication_SlideShowEnd));
-                new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").AddEventHandler(pptApplication, new EApplication_SlideShowNextSlideEventHandler(this.PptApplication_SlideShowNextSlide));
-
-                pptApplication =
-                    (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
-                if (pptApplication == null || pptApplication.Presentations.Count == 0)
+                // 检查是否已有初始化的 PowerPoint 实例
+                if (!isPowerPointInitialized)
                 {
-                    if (!hasLoggedPresentationWarning)
+                    // 检查 WPS 进程（如果不支持则返回）
+                    var processes = Process.GetProcessesByName("wpp");
+                    if (processes.Length > 0 && !isWPSSupportOn) 
+                        return;
+
+                    // 尝试获取已运行的 PowerPoint 实例
+                    try
                     {
-                        LogHelper.WriteLogToFile("No active presentation found", LogHelper.LogType.Warning);
-                        hasLoggedPresentationWarning = true;
+                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
                     }
-                    return;
+                    catch (COMException)
+                    {
+                        // 如果没有找到运行中的实例，则创建新实例
+                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
+                            Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                    }
+            
+                    isPowerPointInitialized = true;
                 }
+                
 
                 if (pptApplication != null) {
                     timerCheckPPT.Stop();
