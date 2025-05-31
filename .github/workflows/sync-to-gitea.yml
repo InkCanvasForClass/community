@@ -2,18 +2,15 @@ name: Sync to Gitea
 
 on:
   push:
-    branches: [ main ]  # 监听的分支
-  workflow_dispatch:  # 允许手动触发
+    branches: [ main ]
 
 jobs:
   sync:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # 获取所有历史记录
-
+      - name: Checkout
+        uses: actions/checkout@v3
+        
       - name: Push to Gitea
         env:
           GITEA_REPO: ${{ secrets.GITEA_REPO_URL }}
@@ -21,6 +18,10 @@ jobs:
         run: |
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git remote add gitea $GITEA_REPO
+          
+          # 使用 token 认证的正确格式
+          git remote add gitea https://${{ secrets.2cd2e3be72be915d738043b44ec53024ac87271c }}@https://gitea.com/CJKmkp/ICC-CE.git
+          
+          # 推送代码到 Gitea
           git push -u gitea --all
           git push -u gitea --tags
