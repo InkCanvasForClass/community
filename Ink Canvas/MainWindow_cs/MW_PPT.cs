@@ -80,7 +80,6 @@ namespace Ink_Canvas {
 
         public static bool IsShowingRestoreHiddenSlidesWindow = false;
         private static bool IsShowingAutoplaySlidesWindow = false;
-        private static bool hasLoggedPresentationWarning = false;
         private bool isPowerPointInitialized = false;
         
 
@@ -112,12 +111,18 @@ namespace Ink_Canvas {
                         pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
                             Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
                     }
-            
                     isPowerPointInitialized = true;
+                    return;
                 }
+                
+                
                 
 
                 if (pptApplication != null) {
+                    // 检查是否有活动演示文稿
+                    if (pptApplication.Presentations.Count == 0 || pptApplication.ActivePresentation == null) 
+                        return; // 退出方法，避免后续代码执行
+                    isPowerPointInitialized = false;
                     timerCheckPPT.Stop();
                     //获得演示文稿对象
                     presentation = pptApplication.ActivePresentation;
@@ -152,6 +157,7 @@ namespace Ink_Canvas {
                 Application.Current.Dispatcher.Invoke(() => {
                     PptApplication_PresentationOpen(null);
                 });
+                
 
                 //如果检测到已经开始放映，则立即进入画板模式
                 if (pptApplication.SlideShowWindows.Count >= 1) {
