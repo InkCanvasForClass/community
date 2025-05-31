@@ -1,0 +1,26 @@
+name: Sync to Gitea
+
+on:
+  push:
+    branches: [ main ]  # 监听的分支
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  sync:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 获取所有历史记录
+
+      - name: Push to Gitea
+        env:
+          GITEA_REPO: ${{ secrets.GITEA_REPO_URL }}
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+        run: |
+          git config --global user.name "GitHub Action"
+          git config --global user.email "action@github.com"
+          git remote add gitea $GITEA_REPO
+          git push -u gitea --all
+          git push -u gitea --tags
