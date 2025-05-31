@@ -29,7 +29,7 @@ namespace Ink_Canvas {
         #region “手勢”按鈕
 
         /// <summary>
-        /// 用於浮動工具欄的“手勢”按鈕和白板工具欄的“手勢”按鈕的點擊事件
+        /// 用於浮動工具欄的"手勢"按鈕和白板工具欄的"手勢"按鈕的點擊事件
         /// </summary>
         private void TwoFingerGestureBorder_MouseUp(object sender, RoutedEventArgs e) {
             if (TwoFingerGestureBorder.Visibility == Visibility.Visible) {
@@ -63,7 +63,7 @@ namespace Ink_Canvas {
         }
 
         /// <summary>
-        /// 用於更新浮動工具欄的“手勢”按鈕和白板工具欄的“手勢”按鈕的樣式（開啟和關閉狀態）
+        /// 用於更新浮動工具欄的"手勢"按鈕和白板工具欄的"手勢"按鈕的樣式（開啟和關閉狀態）
         /// </summary>
         private void CheckEnableTwoFingerGestureBtnColorPrompt() {
             if (ToggleSwitchEnableMultiTouchMode.IsOn) {
@@ -111,7 +111,7 @@ namespace Ink_Canvas {
         }
 
         /// <summary>
-        /// 控制是否顯示浮動工具欄的“手勢”按鈕
+        /// 控制是否顯示浮動工具欄的"手勢"按鈕
         /// </summary>
         private void CheckEnableTwoFingerGestureBtnVisibility(bool isVisible) {
             if (StackPanelCanvasControls.Visibility != Visibility.Visible
@@ -128,7 +128,7 @@ namespace Ink_Canvas {
             }
         }
 
-        #endregion “手勢”按鈕
+        #endregion "手勢"按鈕
 
         #region 浮動工具欄的拖動實現
 
@@ -217,22 +217,22 @@ namespace Ink_Canvas {
         ///     </para>
         ///     <list type="number">
         ///         <item>
-        ///             隱藏浮動工具欄和白板模式下的“更多功能”面板
+        ///             隱藏浮動工具欄和白板模式下的"更多功能"面板
         ///         </item>
         ///         <item>
         ///             隱藏白板模式下和浮動工具欄的畫筆調色盤
         ///         </item>
         ///         <item>
-        ///             隱藏白板模式下的“清屏”按鈕（已作廢）
+        ///             隱藏白板模式下的"清屏"按鈕（已作廢）
         ///         </item>
         ///         <item>
         ///             負責給Settings設置面板做隱藏動畫
         ///         </item>
         ///         <item>
-        ///             隱藏白板模式下和浮動工具欄的“手勢”面板
+        ///             隱藏白板模式下和浮動工具欄的"手勢"面板
         ///         </item>
         ///         <item>
-        ///             當<c>ToggleSwitchDrawShapeBorderAutoHide</c>開啟時，會自動隱藏白板模式下和浮動工具欄的“形狀”面板
+        ///             當<c>ToggleSwitchDrawShapeBorderAutoHide</c>開啟時，會自動隱藏白板模式下和浮動工具欄的"形狀"面板
         ///         </item>
         ///         <item>
         ///             按需高亮指定的浮動工具欄和白板工具欄中的按鈕，通過param：<paramref name="mode"/> 來指定
@@ -254,16 +254,16 @@ namespace Ink_Canvas {
         ///             當<c><paramref name="mode"/>!="clear"</c>時，會先取消高亮所有工具欄按鈕，然後根據下面的情況進行高亮處理
         ///         </item>
         ///         <item>
-        ///             當<c><paramref name="mode"/>=="color" || <paramref name="mode"/>=="pen"</c>時，會高亮浮動工具欄和白板工具欄中的“批註”，“筆”按鈕
+        ///             當<c><paramref name="mode"/>=="color" || <paramref name="mode"/>=="pen"</c>時，會高亮浮動工具欄和白板工具欄中的"批註"，"筆"按鈕
         ///         </item>
         ///         <item>
-        ///             當<c><paramref name="mode"/>=="eraser"</c>時，會高亮白板工具欄中的“橡皮”和浮動工具欄中的“面積擦”按鈕
+        ///             當<c><paramref name="mode"/>=="eraser"</c>時，會高亮白板工具欄中的"橡皮"和浮動工具欄中的"面積擦"按鈕
         ///         </item>
         ///         <item>
-        ///             當<c><paramref name="mode"/>=="eraserByStrokes"</c>時，會高亮白板工具欄中的“橡皮”和浮動工具欄中的“墨跡擦”按鈕
+        ///             當<c><paramref name="mode"/>=="eraserByStrokes"</c>時，會高亮白板工具欄中的"橡皮"和浮動工具欄中的"墨跡擦"按鈕
         ///         </item>
         ///         <item>
-        ///             當<c><paramref name="mode"/>=="select"</c>時，會高亮浮動工具欄和白板工具欄中的“選擇”，“套索選”按鈕
+        ///             當<c><paramref name="mode"/>=="select"</c>時，會高亮浮動工具欄和白板工具欄中的"選擇"，"套索選"按鈕
         ///         </item>
         ///     </list>
         /// </param>
@@ -664,7 +664,7 @@ namespace Ink_Canvas {
         #region 主要的工具按鈕事件
 
         /// <summary>
-        ///     浮動工具欄的“套索選”按鈕事件，重定向到舊UI的<c>BtnSelect_Click</c>方法
+        ///     浮動工具欄的"套索選"按鈕事件，重定向到舊UI的<c>BtnSelect_Click</c>方法
         /// </summary>
         /// <param name="sender">sender</param>
         /// <param name="e">MouseButtonEventArgs</param>
@@ -1891,5 +1891,8 @@ namespace Ink_Canvas {
         }
 
         #endregion
+
+
+        
     }
 }

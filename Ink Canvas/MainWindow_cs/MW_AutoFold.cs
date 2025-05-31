@@ -54,7 +54,7 @@ namespace Ink_Canvas {
 
             // FloatingBarIcons_MouseUp_New(sender);
             if (sender == null)
-                foldFloatingBarByUser = false;
+                foldFloatingBarByUser = true;
             else
                 foldFloatingBarByUser = true;
             unfoldFloatingBarByUser = false;

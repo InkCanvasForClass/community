@@ -199,6 +199,11 @@ namespace Ink_Canvas {
             }
 
             SystemEvents.DisplaySettingsChanged += SystemEventsOnDisplaySettingsChanged;
+            // 自动收纳到侧边栏
+            if (Settings.Startup.IsFoldAtStartup)
+            {
+                FoldFloatingBar_MouseUp(null, null);
+            }
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
