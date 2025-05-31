@@ -2,25 +2,66 @@ name: Sync to Gitea
 
 on:
   push:
-    branches: [ main ]  # 监听的分支
-  workflow_dispatch:  # 允许手动触发
+    branches: [ main ]
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # 获取所有历史记录
-
+      - name: Checkout
+        uses: actions/checkout@v3
+        
+      - name: Debug Environment
+        run: |
+          echo "GITEA_DOMAIN: ${{ secrets.GITEA_DOMAIN }}"
+          echo "GITEA_OWNER: ${{ secrets.GITEA_OWNER }}"
+          echo "GITEA_REPO: ${{ secrets.GITEA_REPO }}"
+          echo "GITEA_TOKEN 已设置: ${{ secrets.GITEA_TOKEN != '' }}"
+          
+          # 检查必要的环境变量是否设置
+          if [ -z "${{ secrets.GITEA_DOMAIN }}" ]; then
+            echo "错误: GITEA_DOMAIN 未设置"
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.GITEA_OWNER }}" ]; then
+            echo "错误: GITEA_OWNER 未设置"
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.GITEA_REPO }}" ]; then
+            echo "错误: GITEA_REPO 未设置"
+            exit 1
+          fi
+          
+          if [ -z "${{ secrets.GITEA_TOKEN }}" ]; then
+            echo "错误: GITEA_TOKEN 未设置"
+            exit 1
+          fi
+          
       - name: Push to Gitea
         env:
-          GITEA_REPO: ${{ secrets.GITEA_REPO_URL }}
+          GITEA_DOMAIN: ${{ secrets.GITEA_DOMAIN }}
+          GITEA_OWNER: ${{ secrets.GITEA_OWNER }}
+          GITEA_REPO: ${{ secrets.GITEA_REPO }}
           GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
         run: |
+          # 构建完整URL并转义可能的特殊字符
+          GITEA_URL="https://${GITEA_TOKEN}@${GITEA_DOMAIN}/${GITEA_OWNER}/${GITEA_REPO}.git"
+          
+          echo "构建的Gitea URL: $GITEA_URL"  # GitHub会自动掩码token部分
+          
+          # 验证URL格式
+          if ! echo "$GITEA_URL" | grep -qE '^https://[^/]+/[^/]+/[^/]+.git$'; then
+            echo "错误: 构建的URL格式不正确: $GITEA_URL"
+            exit 1
+          fi
+          
           git config --global user.name "GitHub Action"
           git config --global user.email "action@github.com"
-          git remote add gitea $GITEA_REPO
+          
+          # 添加远程仓库并推送
+          git remote add gitea "$GITEA_URL"
+          git remote -v  # 显示配置的远程仓库
           git push -u gitea --all
           git push -u gitea --tags
