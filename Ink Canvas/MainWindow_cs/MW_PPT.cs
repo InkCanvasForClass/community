@@ -115,6 +115,43 @@ namespace Ink_Canvas {
                     return;
                 }
                 
+                // 检查 PowerPoint 进程是否还在
+                var pptProcesses = Process.GetProcessesByName("POWERPNT");
+                if (pptProcesses.Length == 0)
+                {
+                    // 进程已关闭，清理对象
+                    if (pptApplication != null)
+                    {
+                        try { Marshal.ReleaseComObject(pptApplication); } catch { }
+                        pptApplication = null;
+                    }
+                    if (presentation != null)
+                    {
+                        try { Marshal.ReleaseComObject(presentation); } catch { }
+                        presentation = null;
+                    }
+                    if (slides != null)
+                    {
+                        try { Marshal.ReleaseComObject(slides); } catch { }
+                        slides = null;
+                    }
+                    slide = null;
+                    isPowerPointInitialized = false;
+                    // 这里可以选择自动重启 PowerPoint 或等待用户操作
+                    // 例如自动重启
+                    try
+                    {
+                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
+                            Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                        isPowerPointInitialized = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile("PowerPoint 守护重启失败: " + ex.ToString(), LogHelper.LogType.Error);
+                    }
+                    return;
+                }
+                
                 
                 
 
