@@ -47,8 +47,11 @@ namespace Ink_Canvas {
 
             ViewBoxStackPanelMain.Visibility = Visibility.Collapsed;
             ViewBoxStackPanelShapes.Visibility = Visibility.Collapsed;
-            ViewboxFloatingBar.Margin = new Thickness((SystemParameters.WorkArea.Width - 284) / 2,
-                SystemParameters.WorkArea.Height - 60, -2000, -200);
+            var workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+            ViewboxFloatingBar.Margin = new Thickness(
+                (workingArea.Width - 284) / 2,
+                workingArea.Bottom - 60 - workingArea.Top,
+                -2000, -200);
             ViewboxFloatingBarMarginAnimation(100, true);
 
             try {
@@ -271,7 +274,7 @@ namespace Ink_Canvas {
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
 
-        private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e) {
+                private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e) {
             if (Settings.Advanced.IsEnableForceFullScreen) {
                 if (isLoaded) ShowNotification(
                     $"检测到窗口大小变化，已自动恢复到全屏：{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height}（缩放比例为{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width / SystemParameters.PrimaryScreenWidth}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height / SystemParameters.PrimaryScreenHeight}）");
@@ -281,6 +284,7 @@ namespace Ink_Canvas {
                     System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
             }
         }
+
 
         private void Window_Closed(object sender, EventArgs e) {
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
