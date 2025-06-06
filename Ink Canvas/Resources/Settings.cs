@@ -378,6 +378,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isSecondConfirmWhenShutdownApp")]
         public bool IsSecondConfirmWhenShutdownApp { get; set; } = false;
+
+        [JsonProperty("isEnableAvoidFullScreenHelper")]
+        public bool IsEnableAvoidFullScreenHelper { get; set; } = false;
     }
 
     public class InkToShape

@@ -1207,6 +1207,40 @@
                                     <TextBlock TextWrapping="Wrap" Foreground="#a1a1aa"
                                                Text="# 感谢lindexi大佬提供的FullScreenHelper，可以减少任务栏弹出的问题，且支持多显示器自动全屏（虽然对icc来说没什么用就是了），如果遇到一些玄学问题，可以关闭该功能，重启icc后生效。" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                                                            
+                                        <TextBlock Foreground="#fafafa" Text="启用AvoidFullScreenHelper"
+                                                   VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,6,0" />
+                                        <Border Height="20" CornerRadius="3" Background="#7f1d1d" Margin="0,0,12,0"
+                                                Padding="4,0">
+                                            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="3"
+                                                                 VerticalAlignment="Center">
+                                                <Image Width="15" Height="15" VerticalAlignment="Center">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                    <GeometryDrawing Brush="#fca5a5"
+                                                                        Geometry="F1 M24,24z M0,0z M20.1758,20.0951L15.1058,9.97512C15.0358,9.83512,14.9958,9.68512,14.9958,9.52512L14.9958,2.99512 15.4958,2.99512C16.0458,2.99512 16.4958,2.54512 16.4958,1.99512 16.4958,1.44512 16.0458,0.995117 15.4958,0.995117L8.49582,0.995117C7.94582,0.995117 7.49582,1.44512 7.49582,1.99512 7.49582,2.54512 7.94582,2.99512 8.49582,2.99512L8.99582,2.99512 8.99582,9.52512C8.99582,9.67512,8.95582,9.83512,8.89582,9.97512L3.82582,20.0951C3.67582,20.4051 3.59582,20.7451 3.61582,21.0851 3.62582,21.4251 3.73582,21.7651 3.91582,22.0551 4.09582,22.3451 4.34582,22.5851 4.64582,22.7551 4.94582,22.9151 5.27582,23.0051 5.60582,23.0051L18.3758,23.0051C18.7558,23.0051 19.0558,22.9251 19.3558,22.7551 19.6558,22.5851 19.9058,22.3451 20.0858,22.0551 20.2658,21.7651 20.3658,21.4351 20.3858,21.0851 20.3958,20.7451 20.3258,20.4051 20.1758,20.1051L20.1758,20.0951z M10.6858,10.8651C10.8958,10.4451,11.0058,9.98512,11.0058,9.52512L11.0058,2.99512 13.0058,2.99512 13.0058,9.52512C13.0058,9.98512,13.1158,10.4551,13.3258,10.8651L15.3858,14.9951 8.62582,14.9951 10.6958,10.8651 10.6858,10.8651z" />
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                                <TextBlock Foreground="#fca5a5" Text="实验性选项" FontSize="12"
+                                                           VerticalAlignment="Center">
+                                                </TextBlock>
+                                            </ui:SimpleStackPanel>
+                                        </Border>
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchIsEnableAvoidFullScreenHelper"
+                                                         Toggled="ToggleSwitchIsEnableAvoidFullScreenHelper_OnToggled"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock TextWrapping="Wrap" Foreground="#a1a1aa"
+                                               Text="# 避免画布全屏，重启icc后生效。" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    
                                         <TextBlock Foreground="#fafafa" Text="启用EdgeGestureUtil"
                                                    VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,6,0" />
