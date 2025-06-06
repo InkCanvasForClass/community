@@ -1,132 +1,3 @@
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe.config
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\ICSharpCode.AvalonEdit.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\Hardcodet.NotifyIcon.Wpf.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.Controls.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\MdXaml.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\MdXaml.Plugins.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\Microsoft.Office.Interop.PowerPoint.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\Office.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\Newtonsoft.Json.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\NHotkey.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\NHotkey.Wpf.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\OSVersionExt.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\System.ValueTuple.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\IACore.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\IALoader.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\bin\Debug\net472\IAWinFX.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.AssemblyReference.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Interop.IWshRuntimeLibrary.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.ResolveComReference.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Resources\DrawShapeImageDictionary.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Resources\IconImageDictionary.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Resources\SeewoImageDictionary.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Resources\Styles\Dark.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Resources\Styles\Light.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\MainWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\RandWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\App.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\GeneratedInternalTypeHelper.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.lref
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\App.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\MainWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\RandWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanvasForClass.g.resources
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\Ink_Canvas.Properties.Resources.resources
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.GenerateResource.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanvasForClass.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.CoreCompileInputs.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanva.0F57E7D5.Up2Date
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.2\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.AssemblyReference.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Interop.IWshRuntimeLibrary.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.ResolveComReference.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Resources\DrawShapeImageDictionary.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Resources\IconImageDictionary.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Resources\SeewoImageDictionary.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Resources\Styles\Dark.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Resources\Styles\Light.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\MainWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\RandWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\App.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\GeneratedInternalTypeHelper.g.cs
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.lref
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe.config
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\ICSharpCode.AvalonEdit.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\Hardcodet.NotifyIcon.Wpf.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.Controls.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\MdXaml.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\MdXaml.Plugins.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\Microsoft.Office.Interop.PowerPoint.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\Office.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\Newtonsoft.Json.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\NHotkey.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\NHotkey.Wpf.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\OSVersionExt.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\System.ValueTuple.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\IACore.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\IALoader.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\bin\Debug\net472\IAWinFX.dll
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\App.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\MainWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\RandWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.g.resources
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\Ink_Canvas.Properties.Resources.resources
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.GenerateResource.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.CoreCompileInputs.cache
-C:\Users\Administrator\Desktop\ICC CE\icc-0610.2.3\Ink Canvas\obj\Debug\net472\InkCanva.0F57E7D5.Up2Date
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe.config
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\ICSharpCode.AvalonEdit.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\Hardcodet.NotifyIcon.Wpf.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.Controls.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\MdXaml.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\MdXaml.Plugins.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\Microsoft.Office.Interop.PowerPoint.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\Office.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\Newtonsoft.Json.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\NHotkey.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\NHotkey.Wpf.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\OSVersionExt.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\System.ValueTuple.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\IACore.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\IALoader.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\IAWinFX.dll
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.AssemblyReference.cache
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\Interop.IWshRuntimeLibrary.dll
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.ResolveComReference.cache
@@ -147,6 +18,25 @@ C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\A
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\GeneratedInternalTypeHelper.g.cs
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.cache
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.lref
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe.config
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\ICSharpCode.AvalonEdit.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\Hardcodet.NotifyIcon.Wpf.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.Controls.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\MdXaml.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\MdXaml.Plugins.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\Microsoft.Office.Interop.PowerPoint.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\Office.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\Newtonsoft.Json.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\NHotkey.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\NHotkey.Wpf.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\OSVersionExt.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\System.ValueTuple.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\IACore.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\IALoader.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\bin\Debug\net472\IAWinFX.dll
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\App.baml
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\MainWindow.baml
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.baml
@@ -163,60 +53,172 @@ C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\I
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.CoreCompileInputs.cache
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\InkCanva.0F57E7D5.Up2Date
 C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe.config
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\ICSharpCode.AvalonEdit.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\Hardcodet.NotifyIcon.Wpf.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.Controls.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\MdXaml.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\MdXaml.Plugins.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\Microsoft.Office.Interop.PowerPoint.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\Office.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\Newtonsoft.Json.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\NHotkey.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\NHotkey.Wpf.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\OSVersionExt.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\System.ValueTuple.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\IACore.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\IALoader.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\bin\Debug\net472\IAWinFX.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.AssemblyReference.cache
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Interop.IWshRuntimeLibrary.dll
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.ResolveComReference.cache
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Resources\DrawShapeImageDictionary.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Resources\IconImageDictionary.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Resources\SeewoImageDictionary.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Resources\Styles\Dark.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Resources\Styles\Light.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\MainWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\RandWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\App.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\GeneratedInternalTypeHelper.g.cs
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.cache
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.lref
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\App.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\MainWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\RandWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.baml
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.g.resources
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\Ink_Canvas.Properties.Resources.resources
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.GenerateResource.cache
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.GeneratedMSBuildEditorConfig.editorconfig
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.CoreCompileInputs.cache
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.sourcelink.json
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanva.0F57E7D5.Up2Date
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe
-C:\Users\Administrator\Desktop\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe.config
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.3\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe.config
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe.config
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\ICSharpCode.AvalonEdit.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\Hardcodet.NotifyIcon.Wpf.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.Controls.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\MdXaml.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\MdXaml.Plugins.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\Microsoft.Office.Interop.PowerPoint.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\Office.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\Newtonsoft.Json.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\NHotkey.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\NHotkey.Wpf.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\OSVersionExt.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\System.ValueTuple.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\IACore.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\IALoader.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\bin\Debug\net472\IAWinFX.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.AssemblyReference.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Interop.IWshRuntimeLibrary.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.ResolveComReference.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Resources\DrawShapeImageDictionary.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Resources\IconImageDictionary.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Resources\SeewoImageDictionary.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Resources\Styles\Dark.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Resources\Styles\Light.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\MainWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\RandWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\App.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\GeneratedInternalTypeHelper.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.lref
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\App.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\MainWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\RandWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass.g.resources
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\Ink_Canvas.Properties.Resources.resources
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.GenerateResource.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanva.0F57E7D5.Up2Date
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.4\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe.config
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.AssemblyReference.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe.config
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Interop.IWshRuntimeLibrary.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.ResolveComReference.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Resources\DrawShapeImageDictionary.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Resources\IconImageDictionary.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Resources\SeewoImageDictionary.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Resources\Styles\Dark.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Resources\Styles\Light.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\MainWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\RandWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\App.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\GeneratedInternalTypeHelper.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.lref
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe.config
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\ICSharpCode.AvalonEdit.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\Hardcodet.NotifyIcon.Wpf.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.Controls.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\MdXaml.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\MdXaml.Plugins.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\Microsoft.Office.Interop.PowerPoint.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\Office.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\Newtonsoft.Json.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\NHotkey.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\NHotkey.Wpf.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\OSVersionExt.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\System.ValueTuple.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\IACore.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\IALoader.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\bin\Debug\net472\IAWinFX.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\App.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\MainWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\RandWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass.g.resources
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\Ink_Canvas.Properties.Resources.resources
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.GenerateResource.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.2.5\Ink Canvas\obj\Debug\net472\InkCanva.0F57E7D5.Up2Date
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe.config
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\ICSharpCode.AvalonEdit.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\Hardcodet.NotifyIcon.Wpf.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.Controls.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.Modern.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\iNKORE.UI.WPF.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\MdXaml.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\MdXaml.Plugins.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\Microsoft.Office.Interop.PowerPoint.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\Office.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\Newtonsoft.Json.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\NHotkey.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\NHotkey.Wpf.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\OSVersionExt.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\System.ValueTuple.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\IACore.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\IALoader.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\bin\Debug\net472\IAWinFX.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.AssemblyReference.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe.config
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Interop.IWshRuntimeLibrary.dll
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.ResolveComReference.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Resources\DrawShapeImageDictionary.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Resources\IconImageDictionary.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Resources\SeewoImageDictionary.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Resources\Styles\Dark.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Resources\Styles\Light.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\MainWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\RandWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\App.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\GeneratedInternalTypeHelper.g.cs
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass_MarkupCompile.lref
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\App.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\MainWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\RandWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.baml
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass.g.resources
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\Ink_Canvas.Properties.Resources.resources
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.GenerateResource.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanva.0F57E7D5.Up2Date
+C:\Users\Administrator\Desktop\ICC CE\ICC CE 1.3.1\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe

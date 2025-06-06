@@ -527,6 +527,12 @@ namespace Ink_Canvas {
                     FullScreenHelper.MarkFullscreenWindowTaskbarList(new WindowInteropHelper(this).Handle, true);
                 }
 
+                ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn = Settings.Advanced.IsEnableAvoidFullScreenHelper;
+                if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                {
+                    AvoidFullScreenHelper.StartAvoidFullScreen(this);
+                }
+
                 ToggleSwitchIsEnableEdgeGestureUtil.IsOn = Settings.Advanced.IsEnableEdgeGestureUtil;
                 if (Settings.Advanced.IsEnableEdgeGestureUtil) {
                     if (OSVersion.GetOperatingSystem() >= OperatingSystem.Windows10)
@@ -613,6 +619,7 @@ namespace Ink_Canvas {
                     SettingsShowCanvasAtNewSlideShowStackPanel.Opacity = 0.5;
                     SettingsShowCanvasAtNewSlideShowStackPanel.IsHitTestVisible = false;
                 }
+                
 
                 ToggleSwitchAutoFoldInPPTSlideShow.IsOn = Settings.Automation.IsAutoFoldInPPTSlideShow;
 
