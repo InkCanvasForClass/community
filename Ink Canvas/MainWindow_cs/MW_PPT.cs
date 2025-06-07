@@ -29,33 +29,28 @@ namespace Ink_Canvas {
 
         private void BtnCheckPPT_Click(object sender, RoutedEventArgs e) {
             try {
-                pptApplication =
-                    (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("kwpp.Application");
-                
-                if (pptApplication != null) {
-                    //获得演示文稿对象
-                    presentation = pptApplication.ActivePresentation;
-                    pptApplication.SlideShowBegin += PptApplication_SlideShowBegin;
-                    pptApplication.SlideShowNextSlide += PptApplication_SlideShowNextSlide;
-                    pptApplication.SlideShowEnd += PptApplication_SlideShowEnd;
-                    // 获得幻灯片对象集合
-                    slides = presentation.Slides;
-                    // 获得幻灯片的数量
-                    slidescount = slides.Count;
-                    memoryStreams = new MemoryStream[slidescount + 2];
-                    // 获得当前选中的幻灯片
-                    try {
-                        // 在普通视图下这种方式可以获得当前选中的幻灯片对象
-                        // 然而在阅读模式下，这种方式会出现异常
-                        slide = slides[pptApplication.ActiveWindow.Selection.SlideRange.SlideNumber];
-                    }
-                    catch {
-                        // 在阅读模式下出现异常时，通过下面的方式来获得当前选中的幻灯片对象
-                        slide = pptApplication.SlideShowWindows[1].View.Slide;
-                    }
-                }
-
+                pptApplication = GetPPTApplication();
                 if (pptApplication == null) throw new Exception();
+                //获得演示文稿对象
+                presentation = pptApplication.ActivePresentation;
+                pptApplication.SlideShowBegin += PptApplication_SlideShowBegin;
+                pptApplication.SlideShowNextSlide += PptApplication_SlideShowNextSlide;
+                pptApplication.SlideShowEnd += PptApplication_SlideShowEnd;
+                // 获得幻灯片对象集合
+                slides = presentation.Slides;
+                // 获得幻灯片的数量
+                slidescount = slides.Count;
+                memoryStreams = new MemoryStream[slidescount + 2];
+                // 获得当前选中的幻灯片
+                try {
+                    // 在普通视图下这种方式可以获得当前选中的幻灯片对象
+                    // 然而在阅读模式下，这种方式会出现异常
+                    slide = slides[pptApplication.ActiveWindow.Selection.SlideRange.SlideNumber];
+                }
+                catch {
+                    // 在阅读模式下出现异常时，通过下面的方式来获得当前选中的幻灯片对象
+                    slide = pptApplication.SlideShowWindows[1].View.Slide;
+                }
                 StackPanelPPTControls.Visibility = Visibility.Visible;
             }
             catch (Exception ex) {
@@ -92,32 +87,35 @@ namespace Ink_Canvas {
 
             try
             {
-                // 检查是否已有初始化的 PowerPoint 实例
+                // 检查是否已有初始化的 PowerPoint/WPS 实例
                 if (!isPowerPointInitialized)
                 {
-                    // 检查 WPS 进程（如果不支持则返回）
-                    var processes = Process.GetProcessesByName("wpp");
-                    if (processes.Length > 0 && !isWPSSupportOn) 
-                        return;
+                    // 检查进程（WPS或PowerPoint）
+                    bool wpsExist = Process.GetProcessesByName("wpp").Length > 0;
+                    bool pptExist = Process.GetProcessesByName("POWERPNT").Length > 0;
+                    if (!isWPSSupportOn && wpsExist) return;
+                    if (!pptExist && !wpsExist) return;
 
-                    // 尝试获取已运行的 PowerPoint 实例
-                    try
+                    // 获取已运行的实例
+                    pptApplication = GetPPTApplication();
+                    if (pptApplication == null)
                     {
-                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                        // 没有找到运行中的实例，尝试创建新实例（仅PowerPoint）
+                        try
+                        {
+                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
+                                Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                        }
+                        catch { }
                     }
-                    catch (COMException)
-                    {
-                        // 如果没有找到运行中的实例，则创建新实例
-                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
-                            Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
-                    }
-                    isPowerPointInitialized = true;
+                    isPowerPointInitialized = pptApplication != null;
                     return;
                 }
-                
-                // 检查 PowerPoint 进程是否还在
-                var pptProcesses = Process.GetProcessesByName("POWERPNT");
-                if (pptProcesses.Length == 0)
+
+                // 检查进程是否还在
+                bool wpsStillExist = Process.GetProcessesByName("wpp").Length > 0;
+                bool pptStillExist = Process.GetProcessesByName("POWERPNT").Length > 0;
+                if ((!isWPSSupportOn && !pptStillExist) || (isWPSSupportOn && !pptStillExist && !wpsStillExist))
                 {
                     // 进程已关闭，清理对象
                     if (pptApplication != null)
@@ -138,7 +136,7 @@ namespace Ink_Canvas {
                     slide = null;
                     isPowerPointInitialized = false;
                     // 这里可以选择自动重启 PowerPoint 或等待用户操作
-                    // 例如自动重启
+                    // 例如自动重启（仅PowerPoint）
                     try
                     {
                         pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
@@ -147,13 +145,10 @@ namespace Ink_Canvas {
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile("PowerPoint 守护重启失败: " + ex.ToString(), LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile("PowerPoint/WPS 守护重启失败: " + ex.ToString(), LogHelper.LogType.Error);
                     }
                     return;
                 }
-                
-                
-                
 
                 if (pptApplication != null) {
                     // 检查是否有活动演示文稿
@@ -189,12 +184,10 @@ namespace Ink_Canvas {
                 }
 
                 if (pptApplication == null) return;
-                
                 // 此处是已经开启了
                 Application.Current.Dispatcher.Invoke(() => {
                     PptApplication_PresentationOpen(null);
                 });
-                
 
                 //如果检测到已经开始放映，则立即进入画板模式
                 if (pptApplication.SlideShowWindows.Count >= 1) {
@@ -1135,6 +1128,23 @@ namespace Ink_Canvas {
             catch (Exception ex) {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
             }
+        }
+
+        // 新增：统一获取PPT应用对象的方法
+        private Microsoft.Office.Interop.PowerPoint.Application GetPPTApplication()
+        {
+            if (isWPSSupportOn)
+            {
+                // 优先尝试WPS
+                try { return (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("kwpp.Application"); } catch { }
+                // 再尝试PowerPoint
+                try { return (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application"); } catch { }
+            }
+            else
+            {
+                try { return (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application"); } catch { }
+            }
+            return null;
         }
     }
 }
