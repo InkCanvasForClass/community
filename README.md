@@ -73,16 +73,16 @@ ICC可以支持WPS，但目前无法同时支持MSOffice和WPS。若要启用WPS
         <tr>
             <td align="center" valign="top" width="14.28%"><a href="https://github.com/ChangSakura"><img
                         src="https://avatars.githubusercontent.com/u/90511645?v=4" width="100px;"
-                        alt="HelloWRC" /><br /><sub><b>ChangSakura</b></sub></a></td>
+                        alt="ChangSakura" /><br /><sub><b>ChangSakura</b></sub></a></td>
             <td align="center" valign="top" width="14.28%"><a href="https://github.com/WXRIW"><img
                         src="https://avatars.githubusercontent.com/u/62491584?v=4" width="100px;"
-                        alt="Doctor-yoi" /><br /><sub><b>WXRIW</b></sub></a></td>
+                        alt="XY Wang" /><br /><sub><b>WXRIW</b></sub></a></td>
             <td align="center" valign="top" width="14.28%"><a href="https://github.com/Alan-CRL"><img
                         src="https://avatars.githubusercontent.com/u/92425617?v=4" width="100px;"
-                        alt="姜胤" /><br /><sub><b>Alan-CRL</b></sub></a></td>
+                        alt="Alan-CRL" /><br /><sub><b>Alan-CRL</b></sub></a></td>
             <td align="center" valign="top" width="14.28%"><a href="https://github.com/dubi906w"><img
                         src="https://avatars.githubusercontent.com/u/185512682?v=4" width="100px;"
-                        alt="逗比" /><br /><sub><b>Alan-CRL</b></sub></a></td>            
+                        alt="逗比" /><br /><sub><b>Dubi906w</b></sub></a></td>            
         </tr>
     </tbody>
 </table>
