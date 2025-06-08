@@ -54,8 +54,20 @@ namespace Ink_Canvas {
                         }
                     }
                     catch (Exception fallbackEx) {
-                        ShowNotification($"墨迹保存失败: {fallbackEx.Message}");
-                        return;
+                        // 如果默认路径失败，切换到 C 盘根目录
+                        var cRootPath = @"C:\墨迹备份\" + Path.GetFileName(docPath);
+                        try {
+                            Directory.CreateDirectory(Path.GetDirectoryName(cRootPath));
+                            using (FileStream fs = new FileStream(cRootPath, FileMode.Create)) {
+                                inkCanvas.Strokes.Save(fs);
+                                savePathWithName = cRootPath; // 使用 C 盘路径替代
+                                ShowNotification("墨迹保存至 C 盘: " + cRootPath); // 提示用户变更路径
+                            }
+                        }
+                        catch (Exception cRootEx) {
+                            ShowNotification($"墨迹保存失败: {cRootEx.Message}");
+                            return;
+                        }
                     }
                 }
                 catch (Exception ex) {

@@ -390,4 +390,3 @@ E:\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.cspro
 E:\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.sourcelink.json
 E:\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanva.0F57E7D5.Up2Date
 E:\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe
-E:\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\InkCanvasForClass.exe.config
