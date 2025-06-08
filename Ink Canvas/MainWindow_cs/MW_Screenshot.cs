@@ -104,10 +104,19 @@ namespace Ink_Canvas {
                 (ex is IOException || 
                  ex is UnauthorizedAccessException) // 明确捕获与目录创建相关的异常
             {
-                // 如果创建失败则使用文档目录
+                // 如果创建失败则尝试使用文档目录
                 basePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 fullPath = Path.Combine(basePath, "Auto Saved - Screenshots", dateFolder);
-                Directory.CreateDirectory(fullPath);
+
+                try {
+                    Directory.CreateDirectory(fullPath);
+                }
+                catch (Exception) {
+                    // 如果文档目录也不可用，则使用软件根目录
+                    basePath = AppDomain.CurrentDomain.BaseDirectory;
+                    fullPath = Path.Combine(basePath, "Auto Saved - Screenshots", dateFolder);
+                    Directory.CreateDirectory(fullPath);
+                }
             }
             
             return Path.Combine(fullPath, $"{fileName}.png");
