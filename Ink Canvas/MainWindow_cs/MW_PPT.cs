@@ -96,20 +96,67 @@ namespace Ink_Canvas {
                 if (!isPowerPointInitialized)
                 {
                     // 检查 WPS 进程（如果不支持则返回）
-                    var processes = Process.GetProcessesByName("wpp");
-                    if (processes.Length > 0 && !isWPSSupportOn) 
+                    var wpsProcesses = Process.GetProcessesByName("wpp");
+                    if (wpsProcesses.Length > 0 && !isWPSSupportOn)
                         return;
 
-                    // 尝试获取已运行的 PowerPoint 实例
                     try
                     {
-                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                        if (isWPSSupportOn && wpsProcesses.Length > 0)
+                        {
+                            // 优先获取WPS实例
+                            try
+                            {
+                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
+                            }
+                            catch (COMException)
+                            {
+                                // WPS未启动或未注册
+                                pptApplication = null;
+                            }
+                        }
+                        if (pptApplication == null)
+                        {
+                            // 获取PowerPoint实例
+                            try
+                            {
+                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                            }
+                            catch (COMException)
+                            {
+                                pptApplication = null;
+                            }
+                        }
                     }
-                    catch (COMException)
+                    catch (Exception)
                     {
-                        // 如果没有找到运行中的实例，则创建新实例
-                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
-                            Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                        pptApplication = null;
+                    }
+
+                    // 如果没有找到运行中的实例，则创建新实例
+                    if (pptApplication == null)
+                    {
+                        try
+                        {
+                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
+                                Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                        }
+                        catch
+                        {
+                            // 如果WPS支持开启，尝试创建WPS实例
+                            if (isWPSSupportOn)
+                            {
+                                try
+                                {
+                                    pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
+                                        Type.GetTypeFromProgID("wpp.Application"));
+                                }
+                                catch
+                                {
+                                    pptApplication = null;
+                                }
+                            }
+                        }
                     }
                     isPowerPointInitialized = true;
                     return;
@@ -117,7 +164,9 @@ namespace Ink_Canvas {
                 
                 // 检查 PowerPoint 进程是否还在
                 var pptProcesses = Process.GetProcessesByName("POWERPNT");
-                if (pptProcesses.Length == 0)
+                var wpsProcessesCheck = Process.GetProcessesByName("wpp");
+                bool isWpsMode = isWPSSupportOn && wpsProcessesCheck.Length > 0;
+                if ((isWpsMode && wpsProcessesCheck.Length == 0) || (!isWpsMode && pptProcesses.Length == 0))
                 {
                     // 进程已关闭，清理对象
                     if (pptApplication != null)
@@ -137,17 +186,27 @@ namespace Ink_Canvas {
                     }
                     slide = null;
                     isPowerPointInitialized = false;
-                    // 这里可以选择自动重启 PowerPoint 或等待用户操作
-                    // 例如自动重启
+                    // 这里可以选择自动重启 PowerPoint 或 WPS 或等待用户操作
                     try
                     {
-                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
-                            Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                        if (isWpsMode)
+                        {
+                            // 自动重启WPS
+                            Process.Start("wpp.exe");
+                            Thread.Sleep(2000); // 等待WPS启动
+                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
+                                Type.GetTypeFromProgID("wpp.Application"));
+                        }
+                        else
+                        {
+                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
+                                Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                        }
                         isPowerPointInitialized = true;
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile("PowerPoint 守护重启失败: " + ex.ToString(), LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile("PowerPoint/WPS 守护重启失败: " + ex.ToString(), LogHelper.LogType.Error);
                     }
                     return;
                 }
@@ -178,7 +237,12 @@ namespace Ink_Canvas {
                     }
                     catch {
                         // 在阅读模式下出现异常时，通过下面的方式来获得当前选中的幻灯片对象
-                        slide = pptApplication.SlideShowWindows[1].View.Slide;
+                        try {
+                            slide = pptApplication.SlideShowWindows[1].View.Slide;
+                        }
+                        catch (Exception ex) {
+                            LogHelper.WriteLogToFile("Failed to get current slide: " + ex.ToString(), LogHelper.LogType.Error);
+                        }
                     }
 
                     pptApplication.PresentationOpen += PptApplication_PresentationOpen;
@@ -186,6 +250,22 @@ namespace Ink_Canvas {
                     pptApplication.SlideShowBegin += PptApplication_SlideShowBegin;
                     pptApplication.SlideShowNextSlide += PptApplication_SlideShowNextSlide;
                     pptApplication.SlideShowEnd += PptApplication_SlideShowEnd;
+
+                    // 检查是否在放映模式
+                    Application.Current.Dispatcher.Invoke(() => {
+                        try {
+                            if (pptApplication.SlideShowWindows.Count >= 1) {
+                                BtnPPTSlideShow.Visibility = Visibility.Collapsed;
+                                BtnPPTSlideShowEnd.Visibility = Visibility.Visible;
+                                UpdatePPTBtnDisplaySettingsStatus();
+                            } else {
+                                BtnPPTSlideShow.Visibility = Visibility.Visible;
+                                BtnPPTSlideShowEnd.Visibility = Visibility.Collapsed;
+                            }
+                        } catch (Exception ex) {
+                            LogHelper.WriteLogToFile("Failed to update button visibility: " + ex.ToString(), LogHelper.LogType.Error);
+                        }
+                    });
                 }
 
                 if (pptApplication == null) return;
@@ -475,7 +555,12 @@ namespace Ink_Canvas {
 
         private void UpdatePPTBtnDisplaySettingsStatus() {
             try {
-                if (!Settings.PowerPointSettings.ShowPPTButton || BtnPPTSlideShowEnd.Visibility != Visibility.Visible)
+                // 检查是否应该显示PPT按钮
+                bool shouldShowButtons = Settings.PowerPointSettings.ShowPPTButton && 
+                    (BtnPPTSlideShowEnd.Visibility == Visibility.Visible || 
+                    (pptApplication != null && pptApplication.SlideShowWindows.Count > 0));
+
+                if (!shouldShowButtons)
                 {
                     LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
