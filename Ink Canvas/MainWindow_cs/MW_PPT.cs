@@ -1,4 +1,4 @@
-﻿﻿using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
@@ -29,28 +29,11 @@ namespace Ink_Canvas {
 
         private void BtnCheckPPT_Click(object sender, RoutedEventArgs e) {
             try {
-                // 优先尝试获取 WPS 实例
-                if (Settings.PowerPointSettings.IsSupportWPS) {
-                    try {
-                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
-                    }
-                    catch (COMException) {
-                        pptApplication = null;
-                    }
-                }
-
-                // 如果 WPS 实例未获取到，尝试获取 PowerPoint 实例
-                if (pptApplication == null) {
-                    try {
-                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
-                    }
-                    catch (COMException) {
-                        pptApplication = null;
-                    }
-                }
-
+                pptApplication =
+                    (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("kwpp.Application");
+                
                 if (pptApplication != null) {
-                    // 获得演示文稿对象
+                    //获得演示文稿对象
                     presentation = pptApplication.ActivePresentation;
                     pptApplication.SlideShowBegin += PptApplication_SlideShowBegin;
                     pptApplication.SlideShowNextSlide += PptApplication_SlideShowNextSlide;
@@ -98,95 +81,138 @@ namespace Ink_Canvas {
         public static bool IsShowingRestoreHiddenSlidesWindow = false;
         private static bool IsShowingAutoplaySlidesWindow = false;
         private bool isPowerPointInitialized = false;
+        
 
-        private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e) {
+
+        private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e)
+        {
             // 如果正在显示特定窗口，则跳过检查
             if (IsShowingRestoreHiddenSlidesWindow || IsShowingAutoplaySlidesWindow) 
                 return;
 
-            try {
+            try
+            {
                 // 检查是否已有初始化的 PowerPoint 实例
-                if (!isPowerPointInitialized) {
-                    // 优先尝试获取 WPS 实例
-                    if (isWPSSupportOn) {
-                        try {
-                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
+                if (!isPowerPointInitialized)
+                {
+                    // 检查 WPS 进程（如果不支持则返回）
+                    var wpsProcesses = Process.GetProcessesByName("wpp");
+                    if (wpsProcesses.Length > 0 && !isWPSSupportOn)
+                        return;
+
+                    try
+                    {
+                        if (isWPSSupportOn && wpsProcesses.Length > 0)
+                        {
+                            // 优先获取WPS实例
+                            try
+                            {
+                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
+                            }
+                            catch (COMException)
+                            {
+                                // WPS未启动或未注册
+                                pptApplication = null;
+                            }
                         }
-                        catch (COMException) {
-                            pptApplication = null;
+                        if (pptApplication == null)
+                        {
+                            // 获取PowerPoint实例
+                            try
+                            {
+                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                            }
+                            catch (COMException)
+                            {
+                                pptApplication = null;
+                            }
                         }
                     }
-
-                    // 如果 WPS 实例未获取到，尝试获取 PowerPoint 实例
-                    if (pptApplication == null) {
-                        try {
-                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
-                        }
-                        catch (COMException) {
-                            pptApplication = null;
-                        }
+                    catch (Exception)
+                    {
+                        pptApplication = null;
                     }
 
                     // 如果没有找到运行中的实例，则创建新实例
-                    if (pptApplication == null) {
-                        try {
-                            if (isWPSSupportOn) {
-                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
-                                    Type.GetTypeFromProgID("wpp.Application"));
-                            }
-                            else {
-                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
-                                    Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
-                            }
+                    if (pptApplication == null)
+                    {
+                        try
+                        {
+                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
+                                Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
                         }
-                        catch (Exception) {
-                            pptApplication = null;
+                        catch
+                        {
+                            // 如果WPS支持开启，尝试创建WPS实例
+                            if (isWPSSupportOn)
+                            {
+                                try
+                                {
+                                    pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
+                                        Type.GetTypeFromProgID("wpp.Application"));
+                                }
+                                catch
+                                {
+                                    pptApplication = null;
+                                }
+                            }
                         }
                     }
                     isPowerPointInitialized = true;
                     return;
                 }
-
+                
                 // 检查 PowerPoint 进程是否还在
                 var pptProcesses = Process.GetProcessesByName("POWERPNT");
                 var wpsProcessesCheck = Process.GetProcessesByName("wpp");
                 bool isWpsMode = isWPSSupportOn && wpsProcessesCheck.Length > 0;
-                if ((isWpsMode && wpsProcessesCheck.Length == 0) || (!isWpsMode && pptProcesses.Length == 0)) {
+                if ((isWpsMode && wpsProcessesCheck.Length == 0) || (!isWpsMode && pptProcesses.Length == 0))
+                {
                     // 进程已关闭，清理对象
-                    if (pptApplication != null) {
+                    if (pptApplication != null)
+                    {
                         try { Marshal.ReleaseComObject(pptApplication); } catch { }
                         pptApplication = null;
                     }
-                    if (presentation != null) {
+                    if (presentation != null)
+                    {
                         try { Marshal.ReleaseComObject(presentation); } catch { }
                         presentation = null;
                     }
-                    if (slides != null) {
+                    if (slides != null)
+                    {
                         try { Marshal.ReleaseComObject(slides); } catch { }
                         slides = null;
                     }
                     slide = null;
                     isPowerPointInitialized = false;
                     // 这里可以选择自动重启 PowerPoint 或 WPS 或等待用户操作
-                    try {
-                        if (isWpsMode) {
-                            // 自动重启 WPS
+                    try
+                    {
+                        if (isWpsMode)
+                        {
+                            // 自动重启WPS
                             Process.Start("wpp.exe");
-                            Thread.Sleep(2000); // 等待 WPS 启动
+                            Thread.Sleep(2000); // 等待WPS启动
                             pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
                                 Type.GetTypeFromProgID("wpp.Application"));
                         }
-                        else {
+                        else
+                        {
                             pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
                                 Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
                         }
                         isPowerPointInitialized = true;
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         LogHelper.WriteLogToFile("PowerPoint/WPS 守护重启失败: " + ex.ToString(), LogHelper.LogType.Error);
                     }
                     return;
                 }
+                
+                
+                
 
                 if (pptApplication != null) {
                     // 检查是否有活动演示文稿
@@ -194,7 +220,7 @@ namespace Ink_Canvas {
                         return; // 退出方法，避免后续代码执行
                     isPowerPointInitialized = false;
                     timerCheckPPT.Stop();
-                    // 获得演示文稿对象
+                    //获得演示文稿对象
                     presentation = pptApplication.ActivePresentation;
 
                     // 获得幻灯片对象集合
@@ -232,26 +258,25 @@ namespace Ink_Canvas {
                                 BtnPPTSlideShow.Visibility = Visibility.Collapsed;
                                 BtnPPTSlideShowEnd.Visibility = Visibility.Visible;
                                 UpdatePPTBtnDisplaySettingsStatus();
-                            }
-                            else {
+                            } else {
                                 BtnPPTSlideShow.Visibility = Visibility.Visible;
                                 BtnPPTSlideShowEnd.Visibility = Visibility.Collapsed;
                             }
-                        }
-                        catch (Exception ex) {
+                        } catch (Exception ex) {
                             LogHelper.WriteLogToFile("Failed to update button visibility: " + ex.ToString(), LogHelper.LogType.Error);
                         }
                     });
                 }
 
                 if (pptApplication == null) return;
-
+                
                 // 此处是已经开启了
                 Application.Current.Dispatcher.Invoke(() => {
                     PptApplication_PresentationOpen(null);
                 });
+                
 
-                // 如果检测到已经开始放映，则立即进入画板模式
+                //如果检测到已经开始放映，则立即进入画板模式
                 if (pptApplication.SlideShowWindows.Count >= 1) {
                     Application.Current.Dispatcher.Invoke(() => {
                         PptApplication_SlideShowBegin(pptApplication.SlideShowWindows[1]);
@@ -1023,47 +1048,36 @@ namespace Ink_Canvas {
             }
         }
 
-        private void BtnPPTSlideShowEnd_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                // 检查 PowerPoint 进程是否还在运行
-                var pptProcesses = Process.GetProcessesByName("POWERPNT");
-                var wpsProcessesCheck = Process.GetProcessesByName("wpp");
-                bool isWpsMode = Settings.PowerPointSettings.IsSupportWPS && wpsProcessesCheck.Length > 0;
-                if ((isWpsMode && wpsProcessesCheck.Length == 0) || (!isWpsMode && pptProcesses.Length == 0))
-                {
-                    LogHelper.WriteLogToFile("PowerPoint/WPS 进程已关闭，无法结束幻灯片放映", LogHelper.LogType.Error);
-                    return;
-                }
-
-                if (pptApplication != null && pptApplication.SlideShowWindows.Count >= 1)
-                {
-                    var slideShowWindow = pptApplication.SlideShowWindows[1];
-                    var slideShowView = slideShowWindow.View;
-
-                    // 检查 SlideShowView 对象是否有效
-                    if (slideShowView != null)
-                    {
-                        try
-                        {
-                            // 尝试结束幻灯片放映
-                            slideShowView.Exit();
-                        }
-                        catch (COMException ex)
-                        {
-                            LogHelper.WriteLogToFile($"结束幻灯片放映时发生 COM 异常: {ex.ToString()}", LogHelper.LogType.Error);
-                        }
+        private async void BtnPPTSlideShowEnd_Click(object sender, RoutedEventArgs e) {
+            try {
+                Application.Current.Dispatcher.Invoke(() => {
+                    try {
+                        var ms = new MemoryStream();
+                        inkCanvas.Strokes.Save(ms);
+                        ms.Position = 0;
+                        memoryStreams[pptApplication.SlideShowWindows[1].View.CurrentShowPosition] = ms;
+                        timeMachine.ClearStrokeHistory();
                     }
-                    else
-                    {
-                        LogHelper.WriteLogToFile("SlideShowView 对象无效，无法结束幻灯片放映", LogHelper.LogType.Error);
+                    catch (Exception ex) {
+                        LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
                     }
-                }
+                });
+                
+                new Thread(new ThreadStart(() => {
+                    try {
+                        pptApplication.SlideShowWindows[1].View.Exit();
+                    }
+                    catch (Exception ex) {
+                        LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+                    }
+                })).Start();
+
+                HideSubPanels("cursor");
+                await Task.Delay(150);
+                ViewboxFloatingBarMarginAnimation(100, true);
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"结束幻灯片放映时发生异常: {ex.ToString()}", LogHelper.LogType.Error);
+            catch (Exception ex) {
+                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
             }
         }
 

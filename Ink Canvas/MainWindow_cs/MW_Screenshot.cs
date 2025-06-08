@@ -100,7 +100,11 @@ namespace Ink_Canvas {
                     Directory.CreateDirectory(fullPath);
                 }
             }
-            catch (Exception) {
+            catch (Exception ex) when 
+                (ex is IOException || 
+                 ex is UnauthorizedAccessException ||
+                 ex is DirectoryNotFoundException) // 明确捕获与目录创建相关的异常
+            {
                 // 如果创建失败则使用文档目录
                 basePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 fullPath = Path.Combine(basePath, "Auto Saved - Screenshots", dateFolder);
