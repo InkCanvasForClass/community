@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using Microsoft.Win32;
 using System;
 using System.IO;
@@ -20,7 +20,7 @@ namespace Ink_Canvas {
             SaveInkCanvasStrokes(true, true);
         }
 
-        private void SaveInkCanvasStrokes(bool newNotice = true, bool saveByUser = false) {
+        private void SaveInkCanvasStrokes(Boolean newNotice, Boolean saveByUser) {
             try {
                 var savePath = Settings.Automation.AutoSavedStrokesLocation
                                + (saveByUser ? @"\User Saved - " : @"\Auto Saved - ")
@@ -33,8 +33,36 @@ namespace Ink_Canvas {
                 else
                     //savePathWithName = savePath + @"\" + DateTime.Now.ToString("u").Replace(':', '-') + ".icstk";
                     savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + ".icstk";
-                var fs = new FileStream(savePathWithName, FileMode.Create);
-                inkCanvas.Strokes.Save(fs);
+
+                try {
+                    using (FileStream fs = new FileStream(savePathWithName, FileMode.Create)) { // 修复未定义的filePath引用
+                        inkCanvas.Strokes.Save(fs);
+                    }
+                }
+                catch (Exception ex) when (ex is UnauthorizedAccessException || ex is DirectoryNotFoundException) {
+                    var docPath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
+                        "Auto Saved - Annotation Strokes",
+                        DateTime.Now.ToString("yyyyMMdd"),
+                        Path.GetFileNameWithoutExtension(savePathWithName) + "_retry.icstk"); // 使用正确的原始文件名
+
+                    try {
+                        Directory.CreateDirectory(Path.GetDirectoryName(docPath));
+                        using (FileStream fs = new FileStream(docPath, FileMode.Create)) {
+                            inkCanvas.Strokes.Save(fs);
+                            savePathWithName = docPath; // 更新通知使用的路径变量
+                        }
+                    }
+                    catch (Exception fallbackEx) {
+                        ShowNotification($"墨迹保存失败: {fallbackEx.Message}");
+                        return;
+                    }
+                }
+                catch (Exception ex) {
+                    ShowNotification($"墨迹保存失败: {ex.Message}");
+                    return;
+                }
+
                 if (newNotice) ShowNotification("墨迹成功保存至 " + savePathWithName);
             }
             catch (Exception ex) {
