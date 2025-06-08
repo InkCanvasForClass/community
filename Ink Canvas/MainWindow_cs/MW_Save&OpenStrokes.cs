@@ -54,23 +54,18 @@ namespace Ink_Canvas {
                         }
                     }
                     catch (Exception fallbackEx) {
-                        // 如果文档路径保存失败，尝试用户目录
-                        string userDocPath = Path.Combine(
-                            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
-                            "Documents",
-                            "墨迹备份",
-                            Path.GetFileName(docPath)
-                        );
-
+                        // 如果文档路径保存失败，尝试保存到软件根目录
+                        string rootPath = AppDomain.CurrentDomain.BaseDirectory;
+                        string rootFilePath = Path.Combine(rootPath, Path.GetFileName(docPath));
                         try {
-                            Directory.CreateDirectory(Path.GetDirectoryName(userDocPath));
-                            using (FileStream fs = new FileStream(userDocPath, FileMode.Create)) {
+                            Directory.CreateDirectory(Path.GetDirectoryName(rootFilePath));
+                            using (FileStream fs = new FileStream(rootFilePath, FileMode.Create)) {
                                 inkCanvas.Strokes.Save(fs);
-                                savePathWithName = userDocPath;
+                                savePathWithName = rootFilePath; // 更新通知使用的路径变量
                             }
                         }
-                        catch (Exception userFallbackEx) {
-                            ShowNotification($"墨迹保存失败: {userFallbackEx.Message}");
+                        catch (Exception rootEx) {
+                            ShowNotification($"墨迹保存失败: {fallbackEx.Message} | 根目录保存失败: {rootEx.Message}");
                             return;
                         }
                     }
