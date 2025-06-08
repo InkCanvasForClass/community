@@ -22,9 +22,17 @@ namespace Ink_Canvas {
 
         private void SaveInkCanvasStrokes(Boolean newNotice, Boolean saveByUser) {
             try {
-                var savePath = Settings.Automation.AutoSavedStrokesLocation
-                               + (saveByUser ? @"\User Saved - " : @"\Auto Saved - ")
-                               + (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes");
+                // 修改保存路径为软件根目录下的Saves文件夹
+                string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                if (string.IsNullOrEmpty(appDirectory))
+                {
+                    appDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                }
+                
+                string savePath = Path.Combine(appDirectory, "Saves", 
+                    (saveByUser ? @"User Saved - " : @"Auto Saved - ") + 
+                    (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes"));
+                
                 if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
                 string savePathWithName;
                 if (currentMode != 0) // 黑板模式下
@@ -48,11 +56,10 @@ namespace Ink_Canvas {
 
                     try {
                         // 修改保存路径为软件所在目录下的 Saves 文件夹
-                        string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
                         string saveDirectory = Path.Combine(appDirectory, "Saves");
                         Directory.CreateDirectory(saveDirectory); // 自动创建 Saves 目录
 
-                        string fileName = Path.GetFileName(docPath); // 保留原始文件名
+                        string fileName = Path.GetFileNameWithoutExtension(savePathWithName) + "_retry.icstk"; // 使用正确的原始文件名
                         string newPath = Path.Combine(saveDirectory, fileName); // 新路径组合
 
                         using (FileStream fs = new FileStream(newPath, FileMode.Create)) {
