@@ -122,8 +122,8 @@ namespace Ink_Canvas {
                 }
 
                 if (Settings.Automation.IsAutoKillIDT) {
-                    var processes = Process.GetProcessesByName("智绘教");
-                    if (processes.Length > 0) arg += " /IM \"智绘教.exe\"";
+                    var processes = Process.GetProcessesByName("Inkeys");
+                    if (processes.Length > 0) arg += " /IM \"Inkeys.exe\"";
                 }
 
                 if (Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation) {
@@ -162,9 +162,9 @@ namespace Ink_Canvas {
                         });
                     }
 
-                    if (arg.Contains("智绘教")) {
+                    if (arg.Contains("Inkeys")) {
                         Dispatcher.Invoke(() => {
-                            ShowNotification("“智绘教”已自动关闭");
+                            ShowNotification("“智绘教Inkeys”已自动关闭");
                         });
                     }
 
@@ -178,7 +178,7 @@ namespace Ink_Canvas {
                     if (arg.Contains("DesktopAnnotation"))
                     {
                         Dispatcher.Invoke(() => {
-                            ShowNotification("“DesktopAnnotation”已自动关闭");
+                            ShowNotification("“希沃桌面2.0 桌面批注”已自动关闭");
                         });
                     }
                 }
