@@ -47,27 +47,22 @@ namespace Ink_Canvas {
                         Path.GetFileNameWithoutExtension(savePathWithName) + "_retry.icstk"); // 使用正确的原始文件名
 
                     try {
-                        Directory.CreateDirectory(Path.GetDirectoryName(docPath));
-                        using (FileStream fs = new FileStream(docPath, FileMode.Create)) {
+                        // 修改保存路径为软件所在目录下的 Saves 文件夹
+                        string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                        string saveDirectory = Path.Combine(appDirectory, "Saves");
+                        Directory.CreateDirectory(saveDirectory); // 自动创建 Saves 目录
+
+                        string fileName = Path.GetFileName(docPath); // 保留原始文件名
+                        string newPath = Path.Combine(saveDirectory, fileName); // 新路径组合
+
+                        using (FileStream fs = new FileStream(newPath, FileMode.Create)) {
                             inkCanvas.Strokes.Save(fs);
-                            savePathWithName = docPath; // 更新通知使用的路径变量
+                            savePathWithName = newPath; // 更新通知使用的路径变量
                         }
                     }
                     catch (Exception fallbackEx) {
-                        // 如果文档路径保存失败，尝试保存到软件根目录
-                        string rootPath = AppDomain.CurrentDomain.BaseDirectory;
-                        string rootFilePath = Path.Combine(rootPath, Path.GetFileName(docPath));
-                        try {
-                            Directory.CreateDirectory(Path.GetDirectoryName(rootFilePath));
-                            using (FileStream fs = new FileStream(rootFilePath, FileMode.Create)) {
-                                inkCanvas.Strokes.Save(fs);
-                                savePathWithName = rootFilePath; // 更新通知使用的路径变量
-                            }
-                        }
-                        catch (Exception rootEx) {
-                            ShowNotification($"墨迹保存失败: {fallbackEx.Message} | 根目录保存失败: {rootEx.Message}");
-                            return;
-                        }
+                        ShowNotification($"墨迹保存失败: {fallbackEx.Message}");
+                        return;
                     }
                 }
                 catch (Exception ex) {
