@@ -36,35 +36,28 @@ namespace Ink_Canvas {
                 if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
                 string savePathWithName;
                 if (currentMode != 0) // 黑板模式下
-                    savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + " Page-" +
-                                       CurrentWhiteboardIndex + " StrokesCount-" + inkCanvas.Strokes.Count + ".icstk";
+                    savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + " Page-" + 
+                               CurrentWhiteboardIndex + " StrokesCount-" + inkCanvas.Strokes.Count + ".icstk";
                 else
-                    //savePathWithName = savePath + @"\" + DateTime.Now.ToString("u").Replace(':', '-') + ".icstk";
                     savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + ".icstk";
 
                 try {
-                    using (FileStream fs = new FileStream(savePathWithName, FileMode.Create)) { // 修复未定义的filePath引用
+                    using (FileStream fs = new FileStream(savePathWithName, FileMode.Create)) { 
                         inkCanvas.Strokes.Save(fs);
                     }
                 }
                 catch (Exception ex) when (ex is UnauthorizedAccessException || ex is DirectoryNotFoundException) {
-                    var docPath = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-                        "Auto Saved - Annotation Strokes",
-                        DateTime.Now.ToString("yyyyMMdd"),
-                        Path.GetFileNameWithoutExtension(savePathWithName) + "_retry.icstk"); // 使用正确的原始文件名
+                    // 修改异常处理中的备用路径为软件根目录下的Saves文件夹
+                    string fallbackPath = Path.Combine(appDirectory, "Saves");
+                    Directory.CreateDirectory(fallbackPath);
+                    
+                    string fileName = Path.GetFileNameWithoutExtension(savePathWithName) + "_retry.icstk";
+                    string newPath = Path.Combine(fallbackPath, fileName);
 
                     try {
-                        // 修改保存路径为软件所在目录下的 Saves 文件夹
-                        string saveDirectory = Path.Combine(appDirectory, "Saves");
-                        Directory.CreateDirectory(saveDirectory); // 自动创建 Saves 目录
-
-                        string fileName = Path.GetFileNameWithoutExtension(savePathWithName) + "_retry.icstk"; // 使用正确的原始文件名
-                        string newPath = Path.Combine(saveDirectory, fileName); // 新路径组合
-
                         using (FileStream fs = new FileStream(newPath, FileMode.Create)) {
                             inkCanvas.Strokes.Save(fs);
-                            savePathWithName = newPath; // 更新通知使用的路径变量
+                            savePathWithName = newPath;
                         }
                     }
                     catch (Exception fallbackEx) {
@@ -91,7 +84,6 @@ namespace Ink_Canvas {
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
 
             var openFileDialog = new OpenFileDialog();
-            openFileDialog.InitialDirectory = Settings.Automation.AutoSavedStrokesLocation;
             openFileDialog.Title = "打开墨迹文件";
             openFileDialog.Filter = "Ink Canvas Strokes File (*.icstk)|*.icstk";
             if (openFileDialog.ShowDialog() != true) return;

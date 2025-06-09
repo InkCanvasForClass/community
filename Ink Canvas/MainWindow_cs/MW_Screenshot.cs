@@ -84,16 +84,9 @@ namespace Ink_Canvas {
 
         // 获取日期文件夹路径
         private string GetDateFolderPath(string fileName) {
-            if (string.IsNullOrWhiteSpace(fileName)) {
-                fileName = DateTime.Now.ToString("HH-mm-ss");
-            }
-            
-            var basePath = Settings.Automation.AutoSavedStrokesLocation;
+            var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Saves");
             var dateFolder = DateTime.Now.ToString("yyyyMMdd");
-            var fullPath = Path.Combine(
-                basePath, 
-                "Auto Saved - Screenshots", 
-                dateFolder);
+            var fullPath = Path.Combine(basePath, "Auto Saved - Screenshots", dateFolder);
 
             try {
                 if (!Directory.Exists(fullPath)) {
@@ -115,7 +108,7 @@ namespace Ink_Canvas {
         }
 
         private string GetDefaultFolderPath() {
-            var basePath = Settings.Automation.AutoSavedStrokesLocation;
+            var basePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Saves");
             var screenshotsFolder = Path.Combine(basePath, "Auto Saved - Screenshots");
 
             try {
