@@ -29,9 +29,16 @@ namespace Ink_Canvas {
 
         private void BtnCheckPPT_Click(object sender, RoutedEventArgs e) {
             try {
-                pptApplication =
-                    (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("kwpp.Application");
-                
+                pptApplication = null;
+                // 优先检测WPS（wpp.Application），获取不到再尝试PowerPoint
+                try {
+                    pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
+                } catch { }
+                if (pptApplication == null) {
+                    try {
+                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                    } catch { }
+                }
                 if (pptApplication != null) {
                     //获得演示文稿对象
                     presentation = pptApplication.ActivePresentation;
@@ -45,16 +52,14 @@ namespace Ink_Canvas {
                     memoryStreams = new MemoryStream[slidescount + 2];
                     // 获得当前选中的幻灯片
                     try {
-                        // 在普通视图下这种方式可以获得当前选中的幻灯片对象
-                        // 然而在阅读模式下，这种方式会出现异常
                         slide = slides[pptApplication.ActiveWindow.Selection.SlideRange.SlideNumber];
                     }
                     catch {
-                        // 在阅读模式下出现异常时，通过下面的方式来获得当前选中的幻灯片对象
-                        slide = pptApplication.SlideShowWindows[1].View.Slide;
+                        try {
+                            slide = pptApplication.SlideShowWindows[1].View.Slide;
+                        } catch { }
                     }
                 }
-
                 if (pptApplication == null) throw new Exception();
                 StackPanelPPTControls.Visibility = Visibility.Visible;
             }
@@ -387,25 +392,7 @@ namespace Ink_Canvas {
                 pptApplication.SlideShowEnd -= PptApplication_SlideShowEnd;
                 
                 // 释放COM对象
-                if (slide != null) {
-                    Marshal.ReleaseComObject(slide);
-                    slide = null;
-                }
-                
-                if (slides != null) {
-                    Marshal.ReleaseComObject(slides);
-                    slides = null;
-                }
-                
-                if (presentation != null) {
-                    Marshal.ReleaseComObject(presentation);
-                    presentation = null;
-                }
-                
-                if (pptApplication != null) {
-                    Marshal.ReleaseComObject(pptApplication);
-                    pptApplication = null;
-                }
+                ReleasePptResources();
                 
                 timerCheckPPT.Start();
                 
@@ -1225,6 +1212,19 @@ namespace Ink_Canvas {
             catch (Exception ex) {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
             }
+        }
+
+        // 统一释放PPT相关COM对象，防止内存泄漏
+        private void ReleasePptResources()
+        {
+            try { if (slide != null) Marshal.ReleaseComObject(slide); } catch { }
+            slide = null;
+            try { if (slides != null) Marshal.ReleaseComObject(slides); } catch { }
+            slides = null;
+            try { if (presentation != null) Marshal.ReleaseComObject(presentation); } catch { }
+            presentation = null;
+            try { if (pptApplication != null) Marshal.ReleaseComObject(pptApplication); } catch { }
+            pptApplication = null;
         }
     }
 }
