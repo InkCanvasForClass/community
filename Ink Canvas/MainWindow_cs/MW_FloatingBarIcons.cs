@@ -1074,16 +1074,15 @@ namespace Ink_Canvas {
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-
-                // 修正：直接使用 WorkingArea 计算工作区高度
-                double workingAreaHeight = screen.WorkingArea.Height / dpiScaleY;
-
+                var toolbarHeight = SystemParameters.PrimaryScreenHeight - SystemParameters.FullPrimaryScreenHeight -
+                                    SystemParameters.WindowCaptionHeight;
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
                 if (PosXCaculatedWithTaskbarHeight == false)
-                    pos.Y = workingAreaHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                    pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
                 else if (PosXCaculatedWithTaskbarHeight == true)
-                    pos.Y = workingAreaHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                    pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                            toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
 
                 if (MarginFromEdge != -60) {
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
@@ -1138,13 +1137,12 @@ namespace Ink_Canvas {
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-
-                // 修正：直接使用 WorkingArea 计算工作区高度
-                double workingAreaHeight = screen.WorkingArea.Height / dpiScaleY;
-
+                var toolbarHeight = SystemParameters.PrimaryScreenHeight - SystemParameters.FullPrimaryScreenHeight -
+                                    SystemParameters.WindowCaptionHeight;
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
-                pos.Y = workingAreaHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                        toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
 
                 if (pointDesktop.X != -1 || pointDesktop.Y != -1) pointDesktop = pos;
 
@@ -1182,13 +1180,11 @@ namespace Ink_Canvas {
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-
-                // 修正：直接使用 WorkingArea 计算工作区高度
-                double workingAreaHeight = screen.WorkingArea.Height / dpiScaleY;
-
+                var toolbarHeight = SystemParameters.PrimaryScreenHeight - SystemParameters.FullPrimaryScreenHeight -
+                                    SystemParameters.WindowCaptionHeight;
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
-                pos.Y = workingAreaHeight - 55 * ViewboxFloatingBarScaleTransform.ScaleY;
+                pos.Y = screenHeight - 55 * ViewboxFloatingBarScaleTransform.ScaleY;
 
                 if (pointPPT.X != -1 || pointPPT.Y != -1)
                 {
