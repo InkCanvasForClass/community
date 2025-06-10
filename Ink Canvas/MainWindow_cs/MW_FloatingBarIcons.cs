@@ -729,7 +729,7 @@ namespace Ink_Canvas {
         private void SymbolIconRand_MouseUp(object sender, MouseButtonEventArgs e) {
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-            if (lastBorderMouseDownObject != sender) return;
+            //if (lastBorderMouseDownObject != sender) return;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
@@ -797,7 +797,7 @@ namespace Ink_Canvas {
         private void SymbolIconRandOne_MouseUp(object sender, MouseButtonEventArgs e) {
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-            if (lastBorderMouseDownObject != sender) return;
+            //if (lastBorderMouseDownObject != sender) return;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
@@ -806,7 +806,7 @@ namespace Ink_Canvas {
         }
 
         private void GridInkReplayButton_MouseUp(object sender, MouseButtonEventArgs e) {
-            if (lastBorderMouseDownObject != sender) return;
+            //if (lastBorderMouseDownObject != sender) return;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);

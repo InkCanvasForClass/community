@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas {
     /// <summary>
@@ -204,6 +205,22 @@ namespace Ink_Canvas {
 
         private void BtnClose_MouseUp(object sender, MouseButtonEventArgs e) {
             Close();
+        }
+
+        private void BorderBtnIslandCaller_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "classisland://plugins/IslandCaller/Run",
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("无法调用外部点名：" + ex.Message);
+            }
         }
     }
 }

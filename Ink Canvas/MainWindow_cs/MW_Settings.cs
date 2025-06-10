@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
@@ -1218,7 +1218,10 @@ namespace Ink_Canvas {
         }
 
         private void SetAutoSavedStrokesLocationToDiskDButton_Click(object sender, RoutedEventArgs e) {
-            AutoSavedStrokesLocation.Text = @"D:\Ink Canvas";
+            // 修改默认路径为软件根目录下的 Saves 文件夹
+            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string savesPath = System.IO.Path.Combine(appDirectory, "Saves");
+            AutoSavedStrokesLocation.Text = savesPath;
         }
 
         private void SetAutoSavedStrokesLocationToDocumentFolderButton_Click(object sender, RoutedEventArgs e) {
