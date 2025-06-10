@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -14,24 +16,19 @@ namespace Ink_Canvas.Helpers
 
         public static void NewLog(Exception ex)
         {
-
+            if (ex == null) return;
+            var stackTrace = ex.StackTrace ?? "<no stack trace>";
+            var msg = $"[Exception] Type: {ex.GetType().FullName}\nMessage: {ex.Message}\nStackTrace: {stackTrace}";
+            if (ex.InnerException != null)
+            {
+                msg += $"\nInnerException: {ex.InnerException.GetType().FullName} - {ex.InnerException.Message}\n{ex.InnerException.StackTrace}";
+            }
+            WriteLogToFile(msg, LogType.Error);
         }
 
         public static void WriteLogToFile(string str, LogType logType = LogType.Info)
         {
-            string strLogType = "Info";
-            switch (logType)
-            {
-                case LogType.Event:
-                    strLogType = "Event";
-                    break;
-                case LogType.Trace:
-                    strLogType = "Trace";
-                    break;
-                case LogType.Error:
-                    strLogType = "Error";
-                    break;
-            }
+            string strLogType = logType.ToString();
             try
             {
                 var file = App.RootPath + LogFile;
@@ -39,16 +36,30 @@ namespace Ink_Canvas.Helpers
                 {
                     Directory.CreateDirectory(App.RootPath);
                 }
-                StreamWriter sw = new StreamWriter(file, true);
-                sw.WriteLine(string.Format("{0} [{1}] {2}", DateTime.Now.ToString("O"), strLogType, str));
-                sw.Close();
+                var threadId = Thread.CurrentThread.ManagedThreadId;
+                var callingMethod = new StackTrace(2, true).GetFrame(0);
+                string callerInfo = "<unknown>";
+                if (callingMethod != null)
+                {
+                    var method = callingMethod.GetMethod();
+                    if (method != null)
+                    {
+                        var className = method.DeclaringType != null ? method.DeclaringType.FullName : "<no class>";
+                        callerInfo = $"{className}.{method.Name}";
+                    }
+                }
+                string logLine = string.Format("{0} [T{1}] [{2}] [{3}] {4}", DateTime.Now.ToString("O"), threadId, strLogType, callerInfo, str);
+                using (StreamWriter sw = new StreamWriter(file, true))
+                {
+                    sw.WriteLine(logLine);
+                }
             }
             catch { }
         }
 
         internal static void WriteLogToFile(string v, object warning)
         {
-            throw new NotImplementedException();
+            WriteLogToFile($"[Warning] {v}", LogType.Warning);
         }
 
         public enum LogType

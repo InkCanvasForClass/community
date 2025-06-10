@@ -485,7 +485,7 @@ namespace Ink_Canvas {
                 RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                //进入黑板
+                //進入黑板
 
                 /*
                 if (Not_Enter_Blackboard_fir_Mouse_Click) {// BUG-Fixed_tmp：程序启动后直接进入白板会导致后续撤销功能、退出白板无法恢复墨迹
@@ -501,7 +501,6 @@ namespace Ink_Canvas {
                     Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
                 })).Start();
 
-                HideSubPanels();
                 if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
                 {
                     if (currentMode == 1)
@@ -514,6 +513,11 @@ namespace Ink_Canvas {
                     }
 
                     BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                    HideSubPanels();
+                }
+                else
+                {
+                    HideSubPanels();
                 }
 
                 if (Settings.Gesture.AutoSwitchTwoFingerGesture) // 自动关闭多指书写、开启双指移动
@@ -573,6 +577,15 @@ namespace Ink_Canvas {
                     if (dopsc[1] == '2' && isDisplayingOrHidingBlackboard == false) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
                     if (dopsc[2] == '2' && isDisplayingOrHidingBlackboard == false) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
                     if (dopsc[3] == '2' && isDisplayingOrHidingBlackboard == false) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
+                }
+                // 修复PPT放映时点击白板按钮后翻页按钮不显示的问题
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                {
+                    // 强制显示PPT翻页按钮
+                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Visible;
+                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Visible;
+                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Visible;
+                    RightSidePanelForPPTNavigation.Visibility = Visibility.Visible;
                 }
 
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
