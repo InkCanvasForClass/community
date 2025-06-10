@@ -207,8 +207,20 @@ namespace Ink_Canvas {
             Close();
         }
 
+        private bool isIslandCallerFirstClick = true;
+
         private void BorderBtnIslandCaller_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (isIslandCallerFirstClick)
+            {
+                MessageBox.Show(
+                    "首次使用ClassIsland点名功能，请确保已安装ClassIsland和Island caller插件。\n" +
+                    "如未安装，请前往官网下载并安装后再使用。",
+                    "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                isIslandCallerFirstClick = false;
+                return;
+            }
+
             try
             {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo

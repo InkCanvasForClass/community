@@ -106,7 +106,7 @@
                             <Viewbox Margin="0,10">
                                 <ui:SymbolIcon Symbol="Globe" Foreground="White"/>
                             </Viewbox>
-                            <TextBlock Text="调用外部点名" Foreground="White" FontSize="22" Margin="-1,-1,4,0" VerticalAlignment="Center"/>
+                            <TextBlock Text="ClassIsland点名" Foreground="White" FontSize="18" Margin="-1,-1,4,0" VerticalAlignment="Center"/>
                         </ui:SimpleStackPanel>
                     </Border>
                 </ui:SimpleStackPanel>
