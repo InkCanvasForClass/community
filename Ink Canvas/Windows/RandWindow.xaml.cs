@@ -207,14 +207,15 @@ namespace Ink_Canvas {
             Close();
         }
 
-        private bool isIslandCallerFirstClick = true;
+        // 将 isIslandCallerFirstClick 设为静态字段，实现全局记录
+        private static bool isIslandCallerFirstClick = true;
 
         private void BorderBtnIslandCaller_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (isIslandCallerFirstClick)
             {
                 MessageBox.Show(
-                    "使用ClassIsland点名功能，请确保已安装ClassIsland和Island caller插件。\n" +
+                    "首次使用ClassIsland点名功能，请确保已安装ClassIsland和Island caller插件。\n" +
                     "如未安装，请前往官网下载并安装后再使用。如果安装请再次点击此按钮。",
                     "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 isIslandCallerFirstClick = false;
