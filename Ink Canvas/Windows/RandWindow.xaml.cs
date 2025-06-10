@@ -214,8 +214,8 @@ namespace Ink_Canvas {
             if (isIslandCallerFirstClick)
             {
                 MessageBox.Show(
-                    "首次使用ClassIsland点名功能，请确保已安装ClassIsland和Island caller插件。\n" +
-                    "如未安装，请前往官网下载并安装后再使用。",
+                    "使用ClassIsland点名功能，请确保已安装ClassIsland和Island caller插件。\n" +
+                    "如未安装，请前往官网下载并安装后再使用。如果安装请再次点击此按钮。",
                     "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 isIslandCallerFirstClick = false;
                 return;
