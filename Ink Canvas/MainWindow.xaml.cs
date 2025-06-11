@@ -17,6 +17,7 @@ using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
+using System.Windows.Input;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -150,9 +151,10 @@ namespace Ink_Canvas {
             // 修复“显示画笔光标”选项不可用的问题
             if (Settings.Canvas.IsShowCursor) {
                 inkCanvas1.UseCustomCursor = true;
-                // 修复触屏时光标不显示：只要有输入设备悬停或有任何输入设备捕获就显示
+                // 修复触屏和数位笔时光标不显示：只要有输入设备悬停、捕获，或有任何Stylus设备连接就显示
                 if ((inkCanvas1.EditingMode == InkCanvasEditingMode.Ink || drawingShapeMode != 0)
-                    && (inkCanvas1.IsStylusDirectlyOver || inkCanvas1.IsMouseDirectlyOver || inkCanvas1.IsStylusCaptured || inkCanvas1.IsMouseCaptured))
+                    && (inkCanvas1.IsStylusDirectlyOver || inkCanvas1.IsMouseDirectlyOver || inkCanvas1.IsStylusCaptured || inkCanvas1.IsMouseCaptured
+                        || Stylus.CurrentStylusDevice != null))
                     inkCanvas1.ForceCursor = true;
                 else
                     inkCanvas1.ForceCursor = false;
