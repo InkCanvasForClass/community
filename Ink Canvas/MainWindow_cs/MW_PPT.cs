@@ -759,7 +759,7 @@ namespace Ink_Canvas {
 
                 await Task.Delay(150);
 
-                Application.Current.Dispatcher.InvokeAsync(() => {
+                await Application.Current.Dispatcher.InvokeAsync(() => {
                     ViewboxFloatingBarMarginAnimation(100, true);
                 });
             }
