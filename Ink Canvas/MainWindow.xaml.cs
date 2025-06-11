@@ -150,7 +150,9 @@ namespace Ink_Canvas {
             // 修复“显示画笔光标”选项不可用的问题
             if (Settings.Canvas.IsShowCursor) {
                 inkCanvas1.UseCustomCursor = true;
-                if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink || drawingShapeMode != 0)
+                // 修复触屏时光标不显示：只要有输入设备悬停就显示
+                if ((inkCanvas1.EditingMode == InkCanvasEditingMode.Ink || drawingShapeMode != 0)
+                    && (inkCanvas1.IsStylusDirectlyOver || inkCanvas1.IsMouseDirectlyOver))
                     inkCanvas1.ForceCursor = true;
                 else
                     inkCanvas1.ForceCursor = false;
