@@ -107,6 +107,7 @@ namespace Ink_Canvas {
             if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) SaveScreenShot(true);
             if (CurrentWhiteboardIndex >= WhiteboardTotalCount) {
+                // 在最后一页时，点击“新页面”按钮直接新增一页
                 BtnWhiteBoardAdd_Click(sender, e);
                 return;
             }
@@ -166,64 +167,35 @@ namespace Ink_Canvas {
             TextBlockWhiteBoardIndexInfo.Text =
                 $"{CurrentWhiteboardIndex}/{WhiteboardTotalCount}";
 
-            if (CurrentWhiteboardIndex == WhiteboardTotalCount) {
-                var newImageSource = new BitmapImage();
-                newImageSource.BeginInit();
-                newImageSource.UriSource = new Uri("/Resources/Icons-Fluent/ic_fluent_add_circle_24_regular.png",
-                    UriKind.RelativeOrAbsolute);
-                newImageSource.EndInit();
-                //BoardLeftPannelNextPage.Source = newImageSource;
-                //BoardRightPannelNextPage.Source = newImageSource;
-                //BoardRightPannelNextPageTextBlock.Text = "加页";
-                //BoardLeftPannelNextPageTextBlock.Text = "加页";
-            } else {
-                var newImageSource = new BitmapImage();
-                newImageSource.BeginInit();
-                newImageSource.UriSource =
-                    new Uri("/Resources/Icons-Fluent/ic_fluent_arrow_circle_right_24_regular.png",
-                        UriKind.RelativeOrAbsolute);
-                newImageSource.EndInit();
-                //BoardLeftPannelNextPage.Source = newImageSource;
-                //BoardRightPannelNextPage.Source = newImageSource;
-                //BoardRightPannelNextPageTextBlock.Text = "下一页";
-                //BoardLeftPannelNextPageTextBlock.Text = "下一页";
-            }
+            bool isLastPage = CurrentWhiteboardIndex == WhiteboardTotalCount;
+            bool isMaxPage = WhiteboardTotalCount >= 99;
+
+            // 设置按钮文本
+            BtnLeftWhiteBoardSwitchNextLabel.Text = isLastPage ? "新页面" : "下一页";
+            BtnRightWhiteBoardSwitchNextLabel.Text = isLastPage ? "新页面" : "下一页";
+
+            // 始终允许点击“下一页/新页面”按钮（除非已达最大页数）
+            BtnWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
+
+            // 保持按钮常亮（高亮）
+            BtnLeftWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
+            BtnLeftWhiteBoardSwitchNextLabel.Opacity = 1;
+            BtnRightWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
+            BtnRightWhiteBoardSwitchNextLabel.Opacity = 1;
 
             BtnWhiteBoardSwitchPrevious.IsEnabled = true;
-            BtnWhiteBoardSwitchNext.IsEnabled = true;
 
             if (CurrentWhiteboardIndex == 1) {
                 BtnWhiteBoardSwitchPrevious.IsEnabled = false;
                 BtnLeftWhiteBoardSwitchPreviousGeometry.Brush = new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
                 BtnLeftWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
-                BtnLeftWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
-                BtnLeftWhiteBoardSwitchNextLabel.Opacity = 1;
-
                 BtnRightWhiteBoardSwitchPreviousGeometry.Brush = new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
                 BtnRightWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
-                BtnRightWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
-                BtnRightWhiteBoardSwitchNextLabel.Opacity = 1;
             } else {
                 BtnLeftWhiteBoardSwitchPreviousGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
                 BtnLeftWhiteBoardSwitchPreviousLabel.Opacity = 1;
-
                 BtnRightWhiteBoardSwitchPreviousGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
                 BtnRightWhiteBoardSwitchPreviousLabel.Opacity = 1;
-
-                if (CurrentWhiteboardIndex == WhiteboardTotalCount) {
-                    BtnLeftWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
-                    BtnLeftWhiteBoardSwitchNextLabel.Opacity = 0.5;
-
-                    BtnRightWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
-                    BtnRightWhiteBoardSwitchNextLabel.Opacity = 0.5;
-                    BtnWhiteBoardSwitchNext.IsEnabled = false;
-                } else {
-                    BtnLeftWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
-                    BtnLeftWhiteBoardSwitchNextLabel.Opacity = 1;
-
-                    BtnRightWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
-                    BtnRightWhiteBoardSwitchNextLabel.Opacity = 1;
-                }
             }
 
             BtnWhiteBoardDelete.IsEnabled = WhiteboardTotalCount != 1;
