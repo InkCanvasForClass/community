@@ -147,12 +147,15 @@ namespace Ink_Canvas {
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e) {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
+            // 修复“显示画笔光标”选项不可用的问题
             if (Settings.Canvas.IsShowCursor) {
+                inkCanvas1.UseCustomCursor = true;
                 if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink || drawingShapeMode != 0)
                     inkCanvas1.ForceCursor = true;
                 else
                     inkCanvas1.ForceCursor = false;
             } else {
+                inkCanvas1.UseCustomCursor = false;
                 inkCanvas1.ForceCursor = false;
             }
 
