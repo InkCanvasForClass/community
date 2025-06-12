@@ -214,6 +214,12 @@ namespace Ink_Canvas {
             {
                 FoldFloatingBar_MouseUp(null, null);
             }
+
+            // 恢复崩溃后操作设置
+            if (App.CrashAction == App.CrashActionType.SilentRestart)
+                RadioCrashSilentRestart.IsChecked = true;
+            else
+                RadioCrashNoAction.IsChecked = true;
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
@@ -319,6 +325,21 @@ namespace Ink_Canvas {
             } else {
                 AutoUpdateHelper.DeleteUpdatesFolder();
             }
+        }
+
+        // 新增：崩溃后操作设置按钮事件
+        private void RadioCrashAction_Checked(object sender, RoutedEventArgs e)
+        {
+            if (RadioCrashSilentRestart != null && RadioCrashSilentRestart.IsChecked == true)
+            {
+                App.CrashAction = App.CrashActionType.SilentRestart;
+            }
+            else if (RadioCrashNoAction != null && RadioCrashNoAction.IsChecked == true)
+            {
+                App.CrashAction = App.CrashActionType.NoAction;
+            }
+            // 可选：保存到配置文件
+            // SaveSettingsToFile();
         }
 
         #endregion Definations and Loading

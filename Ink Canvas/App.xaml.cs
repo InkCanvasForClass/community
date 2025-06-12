@@ -27,11 +27,28 @@ namespace Ink_Canvas
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
         }
 
+        // 增加字段保存崩溃后操作设置
+        public static CrashActionType CrashAction = CrashActionType.SilentRestart;
+
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
             Ink_Canvas.MainWindow.ShowNewMessage("抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。", true);
             LogHelper.NewLog(e.Exception.ToString());
             e.Handled = true;
+
+            // 新增：根据设置自动处理崩溃
+            if (CrashAction == CrashActionType.SilentRestart)
+            {
+                try
+                {
+                    // 静默重启：启动新进程并退出当前进程
+                    string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    System.Diagnostics.Process.Start(exePath);
+                }
+                catch { }
+                Environment.Exit(1);
+            }
+            // CrashActionType.NoAction 时不做处理
         }
 
         private TaskbarIcon _taskbar;
@@ -74,6 +91,13 @@ namespace Ink_Canvas
                     catch {  }
             }
             catch {  }
+        }
+
+        // 新增：用于设置崩溃后操作类型
+        public enum CrashActionType
+        {
+            SilentRestart,
+            NoAction
         }
     }
 }

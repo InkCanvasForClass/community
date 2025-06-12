@@ -361,6 +361,25 @@
                                     </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                             </GroupBox>
+                            <!-- 新增：崩溃后操作设置 -->
+                            <GroupBox>
+                                <GroupBox.Header>
+                                    <TextBlock Margin="0,12,0,0" Text="崩溃后操作" FontWeight="Bold" Foreground="#fafafa"
+                                               FontSize="26" />
+                                </GroupBox.Header>
+                                <ui:SimpleStackPanel Spacing="6">
+                                    <TextBlock Text="请选择软件发生未处理异常时的自动操作：" Foreground="#a1a1aa" />
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,4,0,0">
+                                        <RadioButton x:Name="RadioCrashSilentRestart" GroupName="CrashAction"
+                                                     Content="静默重启软件" FontSize="14" Margin="0,0,24,0"
+                                                     Checked="RadioCrashAction_Checked"/>
+                                        <RadioButton x:Name="RadioCrashNoAction" GroupName="CrashAction"
+                                                     Content="无操作" FontSize="14"
+                                                     Checked="RadioCrashAction_Checked"/>
+                                    </StackPanel>
+                                    <TextBlock Text="# 静默重启：崩溃后自动重启软件，无提示。无操作：崩溃后仅记录日志，不自动重启。" Foreground="#a1a1aa" />
+                                </ui:SimpleStackPanel>
+                            </GroupBox>
                             <GroupBox>
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="手势" FontWeight="Bold" Foreground="#fafafa"
