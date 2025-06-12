@@ -364,7 +364,7 @@ namespace Ink_Canvas {
         // 触摸输入，通常隐藏光标
         private void inkCanvas_TouchDown(object sender, TouchEventArgs e)
         {
-            System.Windows.Forms.Cursor.Hide();
+            System.Windows.Forms.Cursor.Show();
         }
 
         // 触摸结束，恢复光标
