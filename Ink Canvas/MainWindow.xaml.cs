@@ -344,7 +344,6 @@ namespace Ink_Canvas {
             {
                 App.CrashAction = App.CrashActionType.NoAction;
             }
-            可选：保存到配置文件
             SaveSettingsToFile();
         }
 
