@@ -361,15 +361,17 @@ namespace Ink_Canvas {
                 inkCanvas.Cursor = new Cursor(sri.Stream);
         }
 
-        // 触摸输入，通常隐藏光标
+        // 触摸输入，不隐藏光标
         private void inkCanvas_TouchDown(object sender, TouchEventArgs e)
         {
+            inkCanvas.ForceCursor = false;
             System.Windows.Forms.Cursor.Show();
         }
 
         // 触摸结束，恢复光标
         private void inkCanvas_TouchUp(object sender, TouchEventArgs e)
         {
+            inkCanvas.ForceCursor = false;
             System.Windows.Forms.Cursor.Show();
         }
 

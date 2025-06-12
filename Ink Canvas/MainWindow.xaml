@@ -226,7 +226,7 @@
                                 <ui:SimpleStackPanel VerticalAlignment="Center">
                                     <TextBlock Foreground="#fafafa" HorizontalAlignment="Center"
                                                VerticalAlignment="Center" FontSize="15" Margin="0,0,0,10"
-                                               Text="开发中..." />
+                                               Text="开发中...请不要点击，可能会导致ICC异常崩溃" />
                                     <ui:SimpleStackPanel Spacing="5">
                                         <ui:SimpleStackPanel Spacing="5" Orientation="Horizontal"
                                                              HorizontalAlignment="Center">
