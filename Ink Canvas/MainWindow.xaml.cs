@@ -99,6 +99,12 @@ namespace Ink_Canvas {
 
             CheckColorTheme(true);
             CheckPenTypeUIState();
+
+            // 注册输入事件
+            inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
+            inkCanvas.StylusDown += inkCanvas_StylusDown;
+            inkCanvas.TouchDown += inkCanvas_TouchDown;
+            inkCanvas.TouchUp += inkCanvas_TouchUp;
         }
 
         #endregion
@@ -214,6 +220,12 @@ namespace Ink_Canvas {
             {
                 FoldFloatingBar_MouseUp(null, null);
             }
+
+            // 恢复崩溃后操作设置
+            if (App.CrashAction == App.CrashActionType.SilentRestart)
+                RadioCrashSilentRestart.IsChecked = true;
+            else
+                RadioCrashNoAction.IsChecked = true;
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
@@ -319,6 +331,46 @@ namespace Ink_Canvas {
             } else {
                 AutoUpdateHelper.DeleteUpdatesFolder();
             }
+        }
+
+        // 新增：崩溃后操作设置按钮事件
+        private void RadioCrashAction_Checked(object sender, RoutedEventArgs e)
+        {
+            if (RadioCrashSilentRestart != null && RadioCrashSilentRestart.IsChecked == true)
+            {
+                App.CrashAction = App.CrashActionType.SilentRestart;
+            }
+            else if (RadioCrashNoAction != null && RadioCrashNoAction.IsChecked == true)
+            {
+                App.CrashAction = App.CrashActionType.NoAction;
+            }
+            SaveSettingsToFile();
+        }
+
+        // 鼠标输入
+        private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            inkCanvas.Cursor = Cursors.Arrow;
+        }
+
+        // 手写笔输入
+        private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
+        {
+            var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
+            if (sri != null)
+                inkCanvas.Cursor = new Cursor(sri.Stream);
+        }
+
+        // 触摸输入，通常隐藏光标
+        private void inkCanvas_TouchDown(object sender, TouchEventArgs e)
+        {
+            System.Windows.Forms.Cursor.Show();
+        }
+
+        // 触摸结束，恢复光标
+        private void inkCanvas_TouchUp(object sender, TouchEventArgs e)
+        {
+            System.Windows.Forms.Cursor.Show();
         }
 
         #endregion Definations and Loading

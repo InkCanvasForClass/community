@@ -1577,8 +1577,10 @@ namespace Ink_Canvas {
         public static bool CloseIsFromButton = false;
 
         public void BtnExit_Click(object sender, RoutedEventArgs e) {
-            CloseIsFromButton = true;
-            Close();
+            App.IsAppExitByUser = true;
+            Application.Current.Shutdown();
+            // CloseIsFromButton = true;
+            // Close();
         }
 
         public void BtnRestart_Click(object sender, RoutedEventArgs e) {

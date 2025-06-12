@@ -54,7 +54,11 @@ namespace Ink_Canvas
 
         private void CloseAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e) {
             var mainWin = (MainWindow)Application.Current.MainWindow;
-            if (mainWin.IsLoaded) mainWin.BtnExit_Click(null,null);
+            if (mainWin.IsLoaded) {
+                App.IsAppExitByUser = true;
+                Application.Current.Shutdown();
+                // mainWin.BtnExit_Click(null,null);
+            }
         }
 
         private void RestartAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e) {

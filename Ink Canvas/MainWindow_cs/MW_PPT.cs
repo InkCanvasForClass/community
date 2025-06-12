@@ -31,7 +31,24 @@ namespace Ink_Canvas {
             try {
                 if (pptApplication != null) {
                     //获得演示文稿对象
-                    presentation = pptApplication.ActivePresentation;
+                    try {
+                        presentation = pptApplication.ActivePresentation;
+                    }
+                    catch (COMException) {
+                        // ActivePresentation 可能因只读等原因抛异常，遍历 Presentations
+                        presentation = null;
+                        foreach (Presentation pres in pptApplication.Presentations) {
+                            try {
+                                if (pres.ReadOnly == MsoTriState.msoFalse) {
+                                    presentation = pres;
+                                    break;
+                                }
+                            } catch { }
+                        }
+                        // 如果没有可编辑的，选择第一个只读的
+                        if (presentation == null && pptApplication.Presentations.Count > 0)
+                            presentation = pptApplication.Presentations[1];
+                    }
                     pptApplication.SlideShowBegin += PptApplication_SlideShowBegin;
                     pptApplication.SlideShowNextSlide += PptApplication_SlideShowNextSlide;
                     pptApplication.SlideShowEnd += PptApplication_SlideShowEnd;
@@ -90,45 +107,37 @@ namespace Ink_Canvas {
                 // 检查是否已有初始化的 PowerPoint 实例
                 if (!isPowerPointInitialized)
                 {
-                    // 检查 WPS 进程（如果不支持则返回）
+                    // 优先检测WPS进程
                     var wpsProcesses = Process.GetProcessesByName("wpp");
-                    if (wpsProcesses.Length > 0 && !isWPSSupportOn)
-                        return;
+                    var pptProcesses = Process.GetProcessesByName("POWERPNT");
 
-                    try
+                    // 优先获取WPS实例
+                    if (isWPSSupportOn && wpsProcesses.Length > 0)
                     {
-                        if (isWPSSupportOn && wpsProcesses.Length > 0)
+                        try
                         {
-                            // 优先获取WPS实例
-                            try
-                            {
-                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
-                            }
-                            catch (COMException)
-                            {
-                                // WPS未启动或未注册
-                                pptApplication = null;
-                            }
+                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
                         }
-                        if (pptApplication == null)
+                        catch (COMException)
                         {
-                            // 获取PowerPoint实例
-                            try
-                            {
-                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
-                            }
-                            catch (COMException)
-                            {
-                                pptApplication = null;
-                            }
+                            pptApplication = null;
                         }
                     }
-                    catch (Exception)
+
+                    // 如果未获取到WPS实例，尝试获取PowerPoint实例
+                    if (pptApplication == null && pptProcesses.Length > 0)
                     {
-                        pptApplication = null;
+                        try
+                        {
+                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                        }
+                        catch (COMException)
+                        {
+                            pptApplication = null;
+                        }
                     }
 
-                    // 如果没有找到运行中的实例，则自动创建PowerPoint进程（仅在未启用WPS支持时）
+                    // 如果都没有找到，且未启用WPS支持，则自动创建PowerPoint进程
                     if (pptApplication == null && !isWPSSupportOn)
                     {
                         try
@@ -144,12 +153,14 @@ namespace Ink_Canvas {
                     isPowerPointInitialized = true;
                     return;
                 }
-                
-                // 检查 PowerPoint 进程是否还在
-                var pptProcesses = Process.GetProcessesByName("POWERPNT");
+
+                // 检查进程是否还在
+                var pptProcessesCheck = Process.GetProcessesByName("POWERPNT");
                 var wpsProcessesCheck = Process.GetProcessesByName("wpp");
                 bool isWpsMode = isWPSSupportOn && wpsProcessesCheck.Length > 0;
-                if ((isWpsMode && wpsProcessesCheck.Length == 0) || (!isWpsMode && pptProcesses.Length == 0))
+                bool isPptMode = !isWPSSupportOn && pptProcessesCheck.Length > 0;
+
+                if ((isWpsMode && wpsProcessesCheck.Length == 0) || (!isWpsMode && pptProcessesCheck.Length == 0))
                 {
                     // 进程已关闭，清理对象
                     if (pptApplication != null)
@@ -364,8 +375,6 @@ namespace Ink_Canvas {
                 pptApplication.SlideShowNextSlide -= PptApplication_SlideShowNextSlide;
                 pptApplication.SlideShowEnd -= PptApplication_SlideShowEnd;
                 
-                // 释放COM对象
-                ReleasePptResources();
                 
                 timerCheckPPT.Start();
                 
@@ -815,389 +824,306 @@ namespace Ink_Canvas {
 
         private bool _isPptClickingBtnTurned = false;
 
-        private void BtnPPTSlidesUp_Click(object sender, RoutedEventArgs e) {
+       private void BtnPPTSlidesUp_Click(object sender, RoutedEventArgs e) {
+            if (currentMode == 1) {
+                GridBackgroundCover.Visibility = Visibility.Collapsed;
+                AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
+                AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
+                AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
+                currentMode = 0;
+            }
+
+            _isPptClickingBtnTurned = true;
+
+            if (inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber &&
+                Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint)
+                SaveScreenShot(true,
+                    pptApplication.SlideShowWindows[1].Presentation.Name + "/" +
+                    pptApplication.SlideShowWindows[1].View.CurrentShowPosition);
+
             try {
-                if (currentMode == 1) {
-                    GridBackgroundCover.Visibility = Visibility.Collapsed;
-                    AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
-                    AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
-                    AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
-                    currentMode = 0;
-                }
-
-                _isPptClickingBtnTurned = true;
-
-                if (inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber &&
-                    Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint)
-                    SaveScreenShot(true,
-                        pptApplication.SlideShowWindows[1].Presentation.Name + "/" +
-                        pptApplication.SlideShowWindows[1].View.CurrentShowPosition);
-
                 new Thread(new ThreadStart(() => {
                     try {
                         pptApplication.SlideShowWindows[1].Activate();
+                    }
+                    catch {
+                        // ignored
+                    }
+
+                    try {
                         pptApplication.SlideShowWindows[1].View.Previous();
                     }
-                    catch (Exception ex) {
-                        LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-                        Application.Current.Dispatcher.Invoke(() => {
-                            StackPanelPPTControls.Visibility = Visibility.Collapsed;
-                            LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                            RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                            LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                            RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                        });
-                    }
+                    catch {
+                        // ignored
+                    } // Without this catch{}, app will crash when click the pre-page button in the fir page in some special env.
                 })).Start();
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            catch {
+                StackPanelPPTControls.Visibility = Visibility.Collapsed;
+                LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
             }
         }
 
         private void BtnPPTSlidesDown_Click(object sender, RoutedEventArgs e) {
-            try {
-                if (currentMode == 1) {
-                    GridBackgroundCover.Visibility = Visibility.Collapsed;
-                    AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
-                    AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
-                    AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
-                    currentMode = 0;
-                }
+            if (currentMode == 1) {
+                GridBackgroundCover.Visibility = Visibility.Collapsed;
+                AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
+                AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
+                AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
+                currentMode = 0;
+            }
 
-                _isPptClickingBtnTurned = true;
-                if (inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber &&
-                    Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint)
-                    SaveScreenShot(true,
-                        pptApplication.SlideShowWindows[1].Presentation.Name + "/" +
-                        pptApplication.SlideShowWindows[1].View.CurrentShowPosition);
-                
+            _isPptClickingBtnTurned = true;
+            if (inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber &&
+                Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint)
+                SaveScreenShot(true,
+                    pptApplication.SlideShowWindows[1].Presentation.Name + "/" +
+                    pptApplication.SlideShowWindows[1].View.CurrentShowPosition);
+            try {
                 new Thread(new ThreadStart(() => {
                     try {
                         pptApplication.SlideShowWindows[1].Activate();
+                    }
+                    catch {
+                        // ignored
+                    }
+
+                    try {
                         pptApplication.SlideShowWindows[1].View.Next();
                     }
-                    catch (Exception ex) {
-                        LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-                        Application.Current.Dispatcher.Invoke(() => {
-                            StackPanelPPTControls.Visibility = Visibility.Collapsed;
-                            LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                            RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                            LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                            RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                        });
+                    catch {
+                        // ignored
                     }
                 })).Start();
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            catch {
+                StackPanelPPTControls.Visibility = Visibility.Collapsed;
+                LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
             }
         }
 
-        private void PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
+        private async void PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            try
+            lastBorderMouseDownObject = sender;
+            if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
+            if (sender == PPTLSPageButton)
             {
-                lastBorderMouseDownObject = sender;
-                if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
-
-                if (sender == PPTLSPageButton)
-                {
-                    PPTLSPageButtonFeedbackBorder.Opacity = 0.15;
-                }
-                else if (sender == PPTRSPageButton)
-                {
-                    PPTRSPageButtonFeedbackBorder.Opacity = 0.15;
-                }
-                else if (sender == PPTLBPageButton)
-                {
-                    PPTLBPageButtonFeedbackBorder.Opacity = 0.15;
-                }
-                else if (sender == PPTRBPageButton)
-                {
-                    PPTRBPageButtonFeedbackBorder.Opacity = 0.15;
-                }
+                PPTLSPageButtonFeedbackBorder.Opacity = 0.15;
             }
-            catch (Exception ex)
+            else if (sender == PPTRSPageButton)
             {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+                PPTRSPageButtonFeedbackBorder.Opacity = 0.15;
+            }
+            else if (sender == PPTLBPageButton)
+            {
+                PPTLBPageButtonFeedbackBorder.Opacity = 0.15;
+            }
+            else if (sender == PPTRBPageButton)
+            {
+                PPTRBPageButtonFeedbackBorder.Opacity = 0.15;
             }
         }
 
-        private void PPTNavigationBtn_MouseLeave(object sender, MouseEventArgs e)
+        private async void PPTNavigationBtn_MouseLeave(object sender, MouseEventArgs e)
         {
-            try
+            lastBorderMouseDownObject = null;
+            if (sender == PPTLSPageButton)
             {
-                lastBorderMouseDownObject = null;
-                if (sender == PPTLSPageButton)
-                {
-                    PPTLSPageButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTRSPageButton)
-                {
-                    PPTRSPageButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTLBPageButton)
-                {
-                    PPTLBPageButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTRBPageButton)
-                {
-                    PPTRBPageButtonFeedbackBorder.Opacity = 0;
-                }
+                PPTLSPageButtonFeedbackBorder.Opacity = 0;
             }
-            catch (Exception ex)
+            else if (sender == PPTRSPageButton)
             {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+                PPTRSPageButtonFeedbackBorder.Opacity = 0;
+            }
+            else if (sender == PPTLBPageButton)
+            {
+                PPTLBPageButtonFeedbackBorder.Opacity = 0;
+            }
+            else if (sender == PPTRBPageButton)
+            {
+                PPTRBPageButtonFeedbackBorder.Opacity = 0;
             }
         }
 
         private async void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e) {
-            try {
-                if (lastBorderMouseDownObject != sender) return;
+            if (lastBorderMouseDownObject != sender) return;
 
-                if (sender == PPTLSPageButton)
-                {
-                    PPTLSPageButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTRSPageButton)
-                {
-                    PPTRSPageButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTLBPageButton)
-                {
-                    PPTLBPageButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTRBPageButton)
-                {
-                    PPTRBPageButtonFeedbackBorder.Opacity = 0;
-                }
-
-                if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
-
-                GridTransparencyFakeBackground.Opacity = 1;
-                GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
-                CursorIcon_Click(null, null);
-                
-                try {
-                    pptApplication.SlideShowWindows[1].SlideNavigation.Visible = true;
-                }
-                catch (Exception ex) {
-                    LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-                }
-
-                // 控制居中
-                if (!isFloatingBarFolded) {
-                    await Task.Delay(100);
-                    ViewboxFloatingBarMarginAnimation(60);
-                }
+            if (sender == PPTLSPageButton)
+            {
+                PPTLSPageButtonFeedbackBorder.Opacity = 0;
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            else if (sender == PPTRSPageButton)
+            {
+                PPTRSPageButtonFeedbackBorder.Opacity = 0;
+            }
+            else if (sender == PPTLBPageButton)
+            {
+                PPTLBPageButtonFeedbackBorder.Opacity = 0;
+            }
+            else if (sender == PPTRBPageButton)
+            {
+                PPTRBPageButtonFeedbackBorder.Opacity = 0;
+            }
+
+            if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
+
+            GridTransparencyFakeBackground.Opacity = 1;
+            GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
+            CursorIcon_Click(null, null);
+            try {
+                pptApplication.SlideShowWindows[1].SlideNavigation.Visible = true;
+            }
+            catch { }
+
+            // 控制居中
+            if (!isFloatingBarFolded) {
+                await Task.Delay(100);
+                ViewboxFloatingBarMarginAnimation(60);
             }
         }
 
         private void BtnPPTSlideShow_Click(object sender, RoutedEventArgs e) {
-            try {
-                new Thread(new ThreadStart(() => {
-                    try {
-                        presentation.SlideShowSettings.Run();
-                    }
-                    catch (Exception ex) {
-                        LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-                    }
-                })).Start();
-            }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-            }
+            new Thread(new ThreadStart(() => {
+                try {
+                    presentation.SlideShowSettings.Run();
+                }
+                catch { }
+            })).Start();
         }
 
         private async void BtnPPTSlideShowEnd_Click(object sender, RoutedEventArgs e) {
-            try {
-                Application.Current.Dispatcher.Invoke(() => {
-                    try {
-                        var ms = new MemoryStream();
-                        inkCanvas.Strokes.Save(ms);
-                        ms.Position = 0;
-                        memoryStreams[pptApplication.SlideShowWindows[1].View.CurrentShowPosition] = ms;
-                        timeMachine.ClearStrokeHistory();
-                    }
-                    catch (Exception ex) {
-                        LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-                    }
-                });
-                
-                new Thread(new ThreadStart(() => {
-                    try {
-                        pptApplication.SlideShowWindows[1].View.Exit();
-                    }
-                    catch (Exception ex) {
-                        LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-                    }
-                })).Start();
+            Application.Current.Dispatcher.Invoke(() => {
+                try {
+                    var ms = new MemoryStream();
+                    inkCanvas.Strokes.Save(ms);
+                    ms.Position = 0;
+                    memoryStreams[pptApplication.SlideShowWindows[1].View.CurrentShowPosition] = ms;
+                    timeMachine.ClearStrokeHistory();
+                }
+                catch {
+                    // ignored
+                }
+            });
+            new Thread(new ThreadStart(() => {
+                try {
+                    pptApplication.SlideShowWindows[1].View.Exit();
+                }
+                catch {
+                    // ignored
+                }
+            })).Start();
 
-                HideSubPanels("cursor");
-                await Task.Delay(150);
-                ViewboxFloatingBarMarginAnimation(100, true);
-            }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-            }
+            HideSubPanels("cursor");
+            await Task.Delay(150);
+            ViewboxFloatingBarMarginAnimation(100, true);
         }
 
         private void GridPPTControlPrevious_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            try {
-                lastBorderMouseDownObject = sender;
-                if (sender == PPTLSPreviousButtonBorder) {
-                    PPTLSPreviousButtonFeedbackBorder.Opacity = 0.15;
-                } else if (sender == PPTRSPreviousButtonBorder) {
-                    PPTRSPreviousButtonFeedbackBorder.Opacity = 0.15;
-                } else if (sender == PPTLBPreviousButtonBorder)
-                {
-                    PPTLBPreviousButtonFeedbackBorder.Opacity = 0.15;
-                }
-                else if (sender == PPTRBPreviousButtonBorder)
-                {
-                    PPTRBPreviousButtonFeedbackBorder.Opacity = 0.15;
-                }
+            lastBorderMouseDownObject = sender;
+            if (sender == PPTLSPreviousButtonBorder) {
+                PPTLSPreviousButtonFeedbackBorder.Opacity = 0.15;
+            } else if (sender == PPTRSPreviousButtonBorder) {
+                PPTRSPreviousButtonFeedbackBorder.Opacity = 0.15;
+            } else if (sender == PPTLBPreviousButtonBorder)
+            {
+                PPTLBPreviousButtonFeedbackBorder.Opacity = 0.15;
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            else if (sender == PPTRBPreviousButtonBorder)
+            {
+                PPTRBPreviousButtonFeedbackBorder.Opacity = 0.15;
             }
         }
-        
         private void GridPPTControlPrevious_MouseLeave(object sender, MouseEventArgs e)
         {
-            try {
-                lastBorderMouseDownObject = null;
-                if (sender == PPTLSPreviousButtonBorder) {
-                    PPTLSPreviousButtonFeedbackBorder.Opacity = 0;
-                } else if (sender == PPTRSPreviousButtonBorder) {
-                    PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
-                } else if (sender == PPTLBPreviousButtonBorder)
-                {
-                    PPTLBPreviousButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTRBPreviousButtonBorder)
-                {
-                    PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
-                }
+            lastBorderMouseDownObject = null;
+            if (sender == PPTLSPreviousButtonBorder) {
+                PPTLSPreviousButtonFeedbackBorder.Opacity = 0;
+            } else if (sender == PPTRSPreviousButtonBorder) {
+                PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
+            } else if (sender == PPTLBPreviousButtonBorder)
+            {
+                PPTLBPreviousButtonFeedbackBorder.Opacity = 0;
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            else if (sender == PPTRBPreviousButtonBorder)
+            {
+                PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
             }
         }
-        
         private void GridPPTControlPrevious_MouseUp(object sender, MouseButtonEventArgs e) {
-            try {
-                if (lastBorderMouseDownObject != sender) return;
-                if (sender == PPTLSPreviousButtonBorder) {
-                    PPTLSPreviousButtonFeedbackBorder.Opacity = 0;
-                } else if (sender == PPTRSPreviousButtonBorder) {
-                    PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
-                } else if (sender == PPTLBPreviousButtonBorder)
-                {
-                    PPTLBPreviousButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTRBPreviousButtonBorder)
-                {
-                    PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
-                }
-                BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+            if (lastBorderMouseDownObject != sender) return;
+            if (sender == PPTLSPreviousButtonBorder) {
+                PPTLSPreviousButtonFeedbackBorder.Opacity = 0;
+            } else if (sender == PPTRSPreviousButtonBorder) {
+                PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
+            } else if (sender == PPTLBPreviousButtonBorder)
+            {
+                PPTLBPreviousButtonFeedbackBorder.Opacity = 0;
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            else if (sender == PPTRBPreviousButtonBorder)
+            {
+                PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
             }
+            BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
         }
 
 
         private void GridPPTControlNext_MouseDown(object sender, MouseButtonEventArgs e) {
-            try {
-                lastBorderMouseDownObject = sender;
-                if (sender == PPTLSNextButtonBorder) {
-                    PPTLSNextButtonFeedbackBorder.Opacity = 0.15;
-                } else if (sender == PPTRSNextButtonBorder) {
-                    PPTRSNextButtonFeedbackBorder.Opacity = 0.15;
-                } else if (sender == PPTLBNextButtonBorder)
-                {
-                    PPTLBNextButtonFeedbackBorder.Opacity = 0.15;
-                }
-                else if (sender == PPTRBNextButtonBorder)
-                {
-                    PPTRBNextButtonFeedbackBorder.Opacity = 0.15;
-                }
+            lastBorderMouseDownObject = sender;
+            if (sender == PPTLSNextButtonBorder) {
+                PPTLSNextButtonFeedbackBorder.Opacity = 0.15;
+            } else if (sender == PPTRSNextButtonBorder) {
+                PPTRSNextButtonFeedbackBorder.Opacity = 0.15;
+            } else if (sender == PPTLBNextButtonBorder)
+            {
+                PPTLBNextButtonFeedbackBorder.Opacity = 0.15;
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            else if (sender == PPTRBNextButtonBorder)
+            {
+                PPTRBNextButtonFeedbackBorder.Opacity = 0.15;
             }
         }
-        
         private void GridPPTControlNext_MouseLeave(object sender, MouseEventArgs e)
         {
-            try {
-                lastBorderMouseDownObject = null;
-                if (sender == PPTLSNextButtonBorder) {
-                    PPTLSNextButtonFeedbackBorder.Opacity = 0;
-                } else if (sender == PPTRSNextButtonBorder) {
-                    PPTRSNextButtonFeedbackBorder.Opacity = 0;
-                } else if (sender == PPTLBNextButtonBorder)
-                {
-                    PPTLBNextButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTRBNextButtonBorder)
-                {
-                    PPTRBNextButtonFeedbackBorder.Opacity = 0;
-                }
+            lastBorderMouseDownObject = null;
+            if (sender == PPTLSNextButtonBorder) {
+                PPTLSNextButtonFeedbackBorder.Opacity = 0;
+            } else if (sender == PPTRSNextButtonBorder) {
+                PPTRSNextButtonFeedbackBorder.Opacity = 0;
+            } else if (sender == PPTLBNextButtonBorder)
+            {
+                PPTLBNextButtonFeedbackBorder.Opacity = 0;
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            else if (sender == PPTRBNextButtonBorder)
+            {
+                PPTRBNextButtonFeedbackBorder.Opacity = 0;
             }
         }
-        
         private void GridPPTControlNext_MouseUp(object sender, MouseButtonEventArgs e) {
-            try {
-                if (lastBorderMouseDownObject != sender) return;
-                if (sender == PPTLSNextButtonBorder) {
-                    PPTLSNextButtonFeedbackBorder.Opacity = 0;
-                } else if (sender == PPTRSNextButtonBorder) {
-                    PPTRSNextButtonFeedbackBorder.Opacity = 0;
-                } else if (sender == PPTLBNextButtonBorder)
-                {
-                    PPTLBNextButtonFeedbackBorder.Opacity = 0;
-                }
-                else if (sender == PPTRBNextButtonBorder)
-                {
-                    PPTRBNextButtonFeedbackBorder.Opacity = 0;
-                }
-                BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+            if (lastBorderMouseDownObject != sender) return;
+            if (sender == PPTLSNextButtonBorder) {
+                PPTLSNextButtonFeedbackBorder.Opacity = 0;
+            } else if (sender == PPTRSNextButtonBorder) {
+                PPTRSNextButtonFeedbackBorder.Opacity = 0;
+            } else if (sender == PPTLBNextButtonBorder)
+            {
+                PPTLBNextButtonFeedbackBorder.Opacity = 0;
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            else if (sender == PPTRBNextButtonBorder)
+            {
+                PPTRBNextButtonFeedbackBorder.Opacity = 0;
             }
+            BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
         }
 
         private void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e) {
-            try {
-                BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
-            }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-            }
-        }
-
-        // 统一释放PPT相关COM对象，防止内存泄漏
-        private void ReleasePptResources()
-        {
-            try { if (slide != null) Marshal.ReleaseComObject(slide); } catch { }
-            slide = null;
-            try { if (slides != null) Marshal.ReleaseComObject(slides); } catch { }
-            slides = null;
-            try { if (presentation != null) Marshal.ReleaseComObject(presentation); } catch { }
-            presentation = null;
-            try { if (pptApplication != null) Marshal.ReleaseComObject(pptApplication); } catch { }
-            pptApplication = null;
+            BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }
     }
 }
