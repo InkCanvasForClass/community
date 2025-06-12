@@ -31,7 +31,24 @@ namespace Ink_Canvas {
             try {
                 if (pptApplication != null) {
                     //获得演示文稿对象
-                    presentation = pptApplication.ActivePresentation;
+                    try {
+                        presentation = pptApplication.ActivePresentation;
+                    }
+                    catch (COMException) {
+                        // ActivePresentation 可能因只读等原因抛异常，遍历 Presentations
+                        presentation = null;
+                        foreach (Presentation pres in pptApplication.Presentations) {
+                            try {
+                                if (pres.ReadOnly == MsoTriState.msoFalse) {
+                                    presentation = pres;
+                                    break;
+                                }
+                            } catch { }
+                        }
+                        // 如果没有可编辑的，选择第一个只读的
+                        if (presentation == null && pptApplication.Presentations.Count > 0)
+                            presentation = pptApplication.Presentations[1];
+                    }
                     pptApplication.SlideShowBegin += PptApplication_SlideShowBegin;
                     pptApplication.SlideShowNextSlide += PptApplication_SlideShowNextSlide;
                     pptApplication.SlideShowEnd += PptApplication_SlideShowEnd;
@@ -90,45 +107,37 @@ namespace Ink_Canvas {
                 // 检查是否已有初始化的 PowerPoint 实例
                 if (!isPowerPointInitialized)
                 {
-                    // 检查 WPS 进程（如果不支持则返回）
+                    // 优先检测WPS进程
                     var wpsProcesses = Process.GetProcessesByName("wpp");
-                    if (wpsProcesses.Length > 0 && !isWPSSupportOn)
-                        return;
+                    var pptProcesses = Process.GetProcessesByName("POWERPNT");
 
-                    try
+                    // 优先获取WPS实例
+                    if (isWPSSupportOn && wpsProcesses.Length > 0)
                     {
-                        if (isWPSSupportOn && wpsProcesses.Length > 0)
+                        try
                         {
-                            // 优先获取WPS实例
-                            try
-                            {
-                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
-                            }
-                            catch (COMException)
-                            {
-                                // WPS未启动或未注册
-                                pptApplication = null;
-                            }
+                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
                         }
-                        if (pptApplication == null)
+                        catch (COMException)
                         {
-                            // 获取PowerPoint实例
-                            try
-                            {
-                                pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
-                            }
-                            catch (COMException)
-                            {
-                                pptApplication = null;
-                            }
+                            pptApplication = null;
                         }
                     }
-                    catch (Exception)
+
+                    // 如果未获取到WPS实例，尝试获取PowerPoint实例
+                    if (pptApplication == null && pptProcesses.Length > 0)
                     {
-                        pptApplication = null;
+                        try
+                        {
+                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                        }
+                        catch (COMException)
+                        {
+                            pptApplication = null;
+                        }
                     }
 
-                    // 如果没有找到运行中的实例，则自动创建PowerPoint进程（仅在未启用WPS支持时）
+                    // 如果都没有找到，且未启用WPS支持，则自动创建PowerPoint进程
                     if (pptApplication == null && !isWPSSupportOn)
                     {
                         try
@@ -144,12 +153,14 @@ namespace Ink_Canvas {
                     isPowerPointInitialized = true;
                     return;
                 }
-                
-                // 检查 PowerPoint 进程是否还在
-                var pptProcesses = Process.GetProcessesByName("POWERPNT");
+
+                // 检查进程是否还在
+                var pptProcessesCheck = Process.GetProcessesByName("POWERPNT");
                 var wpsProcessesCheck = Process.GetProcessesByName("wpp");
                 bool isWpsMode = isWPSSupportOn && wpsProcessesCheck.Length > 0;
-                if ((isWpsMode && wpsProcessesCheck.Length == 0) || (!isWpsMode && pptProcesses.Length == 0))
+                bool isPptMode = !isWPSSupportOn && pptProcessesCheck.Length > 0;
+
+                if ((isWpsMode && wpsProcessesCheck.Length == 0) || (!isWpsMode && pptProcessesCheck.Length == 0))
                 {
                     // 进程已关闭，清理对象
                     if (pptApplication != null)
