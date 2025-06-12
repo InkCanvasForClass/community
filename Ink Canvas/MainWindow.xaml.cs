@@ -99,6 +99,12 @@ namespace Ink_Canvas {
 
             CheckColorTheme(true);
             CheckPenTypeUIState();
+
+            // 注册输入事件
+            inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
+            inkCanvas.StylusDown += inkCanvas_StylusDown;
+            inkCanvas.TouchDown += inkCanvas_TouchDown;
+            inkCanvas.TouchUp += inkCanvas_TouchUp;
         }
 
         #endregion
@@ -338,8 +344,34 @@ namespace Ink_Canvas {
             {
                 App.CrashAction = App.CrashActionType.NoAction;
             }
-            // 可选：保存到配置文件
-            // SaveSettingsToFile();
+            可选：保存到配置文件
+            SaveSettingsToFile();
+        }
+
+        // 鼠标输入
+        private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            inkCanvas.Cursor = Cursors.Arrow;
+        }
+
+        // 手写笔输入
+        private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
+        {
+            var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
+            if (sri != null)
+                inkCanvas.Cursor = new Cursor(sri.Stream);
+        }
+
+        // 触摸输入，通常隐藏光标
+        private void inkCanvas_TouchDown(object sender, TouchEventArgs e)
+        {
+            System.Windows.Forms.Cursor.Hide();
+        }
+
+        // 触摸结束，恢复光标
+        private void inkCanvas_TouchUp(object sender, TouchEventArgs e)
+        {
+            System.Windows.Forms.Cursor.Show();
         }
 
         #endregion Definations and Loading
