@@ -29,16 +29,6 @@ namespace Ink_Canvas {
 
         private void BtnCheckPPT_Click(object sender, RoutedEventArgs e) {
             try {
-                pptApplication = null;
-                // 优先检测WPS（wpp.Application），获取不到再尝试PowerPoint
-                try {
-                    pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
-                } catch { }
-                if (pptApplication == null) {
-                    try {
-                        pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
-                    } catch { }
-                }
                 if (pptApplication != null) {
                     //获得演示文稿对象
                     presentation = pptApplication.ActivePresentation;
@@ -138,8 +128,8 @@ namespace Ink_Canvas {
                         pptApplication = null;
                     }
 
-                    // 如果没有找到运行中的实例，则创建新实例
-                    if (pptApplication == null)
+                    // 如果没有找到运行中的实例，则自动创建PowerPoint进程（仅在未启用WPS支持时）
+                    if (pptApplication == null && !isWPSSupportOn)
                     {
                         try
                         {
@@ -148,19 +138,7 @@ namespace Ink_Canvas {
                         }
                         catch
                         {
-                            // 如果WPS支持开启，尝试创建WPS实例
-                            if (isWPSSupportOn)
-                            {
-                                try
-                                {
-                                    pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
-                                        Type.GetTypeFromProgID("wpp.Application"));
-                                }
-                                catch
-                                {
-                                    pptApplication = null;
-                                }
-                            }
+                            pptApplication = null;
                         }
                     }
                     isPowerPointInitialized = true;
@@ -191,28 +169,23 @@ namespace Ink_Canvas {
                     }
                     slide = null;
                     isPowerPointInitialized = false;
-                    // 这里可以选择自动重启 PowerPoint 或 WPS 或等待用户操作
-                    try
+
+                    // PowerPoint进程守护：自动重启PowerPoint进程（仅在未启用WPS支持时）
+                    if (!isWPSSupportOn)
                     {
-                        if (isWpsMode)
-                        {
-                            // 自动重启WPS
-                            Process.Start("wpp.exe");
-                            Thread.Sleep(2000); // 等待WPS启动
-                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
-                                Type.GetTypeFromProgID("wpp.Application"));
-                        }
-                        else
+                        try
                         {
                             pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
                                 Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                            isPowerPointInitialized = true;
                         }
-                        isPowerPointInitialized = true;
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile("PowerPoint 守护重启失败: " + ex.ToString(), LogHelper.LogType.Error);
+                        }
+                        return;
                     }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile("PowerPoint/WPS 守护重启失败: " + ex.ToString(), LogHelper.LogType.Error);
-                    }
+                    // 启用WPS支持时不守护PowerPoint进程
                     return;
                 }
                 
@@ -786,7 +759,7 @@ namespace Ink_Canvas {
 
                 await Task.Delay(150);
 
-                Application.Current.Dispatcher.InvokeAsync(() => {
+                await Application.Current.Dispatcher.InvokeAsync(() => {
                     ViewboxFloatingBarMarginAnimation(100, true);
                 });
             }

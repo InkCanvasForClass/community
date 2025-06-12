@@ -21,6 +21,11 @@ ICC CE创立的初衷是因为作者使用ICC的过程中一些小BUG，于是�
 说白了，我比较懒README懒得改了，就直接用之前ICC的了
 高中生，更新不定期/doge
 
+## 相关信息
+ICC CE交流群：QQ群1054377349
+
+智教联盟 InkCanvasForClass Community Edition 板块:https://forum.smart-teach.cn/t/icc-ce
+
 ### 项目特点
 由初学者结合AI技术实现代码(说白了就是不会)
 
