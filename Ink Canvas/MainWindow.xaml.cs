@@ -364,15 +364,25 @@ namespace Ink_Canvas {
         // 触摸输入，不隐藏光标
         private void inkCanvas_TouchDown(object sender, TouchEventArgs e)
         {
-            inkCanvas.ForceCursor = false;
-            System.Windows.Forms.Cursor.Show();
+            // 修改：根据用户设置决定是否强制显示自定义光标
+            if (Settings.Canvas.IsShowCursor) {
+                inkCanvas.ForceCursor = true;
+            } else {
+                inkCanvas.ForceCursor = false;
+                System.Windows.Forms.Cursor.Show();
+            }
         }
 
         // 触摸结束，恢复光标
         private void inkCanvas_TouchUp(object sender, TouchEventArgs e)
         {
-            inkCanvas.ForceCursor = false;
-            System.Windows.Forms.Cursor.Show();
+            // 修改：根据当前模式和设置恢复光标状态
+            if (Settings.Canvas.IsShowCursor && inkCanvas.EditingMode == InkCanvasEditingMode.Ink) {
+                inkCanvas.ForceCursor = true;
+            } else {
+                inkCanvas.ForceCursor = false;
+                System.Windows.Forms.Cursor.Show();
+            }
         }
 
         #endregion Definations and Loading
