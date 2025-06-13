@@ -1,4 +1,4 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
+using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
@@ -49,12 +49,11 @@ namespace Ink_Canvas
             LogHelper.NewLog(e.Exception.ToString());
             e.Handled = true;
 
-            // 新增：根据设置自动处理崩溃
-            if (CrashAction == CrashActionType.SilentRestart)
+            // 修改：仅当非用户主动退出时才触发自动重启
+            if (CrashAction == CrashActionType.SilentRestart && !IsAppExitByUser)
             {
                 try
                 {
-                    // 静默重启：启动新进程并退出当前进程
                     string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
                     System.Diagnostics.Process.Start(exePath);
                 }

@@ -1585,7 +1585,7 @@ namespace Ink_Canvas {
 
         public void BtnRestart_Click(object sender, RoutedEventArgs e) {
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
-
+            App.IsAppExitByUser = true;
             CloseIsFromButton = true;
             Application.Current.Shutdown();
         }

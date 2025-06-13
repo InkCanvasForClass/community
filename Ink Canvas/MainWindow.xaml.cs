@@ -292,8 +292,8 @@ namespace Ink_Canvas {
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern bool MoveWindow(IntPtr hWnd, int X, int Y, int nWidth, int nHeight, bool bRepaint);
-
-                private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e) {
+        
+        private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e) {
             if (Settings.Advanced.IsEnableForceFullScreen) {
                 if (isLoaded) ShowNotification(
                     $"检测到窗口大小变化，已自动恢复到全屏：{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height}（缩放比例为{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width / SystemParameters.PrimaryScreenWidth}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height / SystemParameters.PrimaryScreenHeight}）");

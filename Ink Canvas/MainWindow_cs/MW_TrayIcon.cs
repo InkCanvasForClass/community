@@ -63,7 +63,11 @@ namespace Ink_Canvas
 
         private void RestartAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e) {
             var mainWin = (MainWindow)Application.Current.MainWindow;
-            if (mainWin.IsLoaded) mainWin.BtnRestart_Click(null,null);
+            if (mainWin.IsLoaded) {
+                App.IsAppExitByUser = true;
+                Application.Current.Shutdown();
+                // mainWin.BtnExit_Click(null,null);
+            }
         }
 
         private void ForceFullScreenTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e) {
