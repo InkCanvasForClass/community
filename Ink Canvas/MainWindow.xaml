@@ -2390,7 +2390,7 @@
         <Grid Name="GridTransparencyFakeBackground" Opacity="0" />
         <Label Name="Label" Visibility="Collapsed" Foreground="Gray" Content="0" />
         <Grid Name="InkCanvasGridForInkReplay">
-            <InkCanvas x:Name="inkCanvas" ForceCursor="False"
+            <InkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
                        TouchUp="Main_Grid_TouchUp" TouchDown="Main_Grid_TouchDown"
                        TouchMove="inkCanvas_TouchMove"
                        ManipulationDelta="Main_Grid_ManipulationDelta"

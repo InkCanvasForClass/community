@@ -154,16 +154,11 @@ namespace Ink_Canvas {
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e) {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
-            // 修复“显示画笔光标”选项不可用的问题
+            // 修复"显示画笔光标"选项不可用的问题
             if (Settings.Canvas.IsShowCursor) {
                 inkCanvas1.UseCustomCursor = true;
-                // 修复触屏和数位笔时光标不显示：只要有输入设备悬停、捕获，或有任何Stylus设备连接就显示
-                if ((inkCanvas1.EditingMode == InkCanvasEditingMode.Ink || drawingShapeMode != 0)
-                    && (inkCanvas1.IsStylusDirectlyOver || inkCanvas1.IsMouseDirectlyOver || inkCanvas1.IsStylusCaptured || inkCanvas1.IsMouseCaptured
-                        || Stylus.CurrentStylusDevice != null))
-                    inkCanvas1.ForceCursor = true;
-                else
-                    inkCanvas1.ForceCursor = false;
+                // 修复触屏和数位笔时光标不显示：强制显示光标，不再依赖鼠标或触控状态
+                inkCanvas1.ForceCursor = true;
             } else {
                 inkCanvas1.UseCustomCursor = false;
                 inkCanvas1.ForceCursor = false;
@@ -368,6 +363,8 @@ namespace Ink_Canvas {
             if (Settings.Canvas.IsShowCursor)
             {
                 inkCanvas.ForceCursor = true;
+                // 确保鼠标光标对触摸可见
+                System.Windows.Forms.Cursor.Show();
                 // 新增：当处于套索选择模式时保持光标可见
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
                     inkCanvas.Cursor = Cursors.Cross;
@@ -383,8 +380,10 @@ namespace Ink_Canvas {
         private void inkCanvas_TouchUp(object sender, TouchEventArgs e)
         {
             // 修改：根据当前模式和设置恢复光标状态
-            if (Settings.Canvas.IsShowCursor && inkCanvas.EditingMode == InkCanvasEditingMode.Ink) {
+            if (Settings.Canvas.IsShowCursor) {
                 inkCanvas.ForceCursor = true;
+                // 确保鼠标光标对触摸可见
+                System.Windows.Forms.Cursor.Show();
             } else {
                 inkCanvas.ForceCursor = false;
                 System.Windows.Forms.Cursor.Show();
