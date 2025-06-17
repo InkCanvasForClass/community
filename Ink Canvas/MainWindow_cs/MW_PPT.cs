@@ -162,14 +162,16 @@ namespace Ink_Canvas {
         /// <summary>
         /// 检查WPS进程是否正在运行
         /// </summary>
-        private bool IsWPSRunning()
+        /// <param name="writeLog">是否记录日志，默认为true</param>
+        private bool IsWPSRunning(bool writeLog = true)
         {
             foreach (var processName in GetPossibleWPSProcessNames())
             {
                 var processes = Process.GetProcessesByName(processName);
                 if (processes.Length > 0)
                 {
-                    LogHelper.WriteLogToFile($"检测到WPS进程: {processName}", LogHelper.LogType.Info);
+                    if (writeLog)
+                        LogHelper.WriteLogToFile($"检测到WPS进程: {processName}", LogHelper.LogType.Info);
                     return true;
                 }
             }
@@ -188,7 +190,7 @@ namespace Ink_Canvas {
                 if (!isPowerPointInitialized)
                 {
                     // 检测WPS和PowerPoint进程
-                    bool wpsRunning = IsWPSRunning();
+                    bool wpsRunning = IsWPSRunning(true);
                     var pptProcesses = Process.GetProcessesByName("POWERPNT");
                     
                     // 根据设置和进程状态决定模式
@@ -269,7 +271,7 @@ namespace Ink_Canvas {
                 }
 
                 // 检查进程是否还在
-                bool currentWpsRunning = IsWPSRunning();
+                bool currentWpsRunning = IsWPSRunning(false); // 定期检查不输出日志
                 var currentPptProcesses = Process.GetProcessesByName("POWERPNT");
                 
                 // 检测应用程序是否关闭
@@ -375,7 +377,7 @@ namespace Ink_Canvas {
                 }
             }
             catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"TimerCheckPPT_Elapsed 异常: {ex.Message}", LogHelper.LogType.Error);
                 Application.Current.Dispatcher.Invoke(() => { 
                     BtnPPTSlideShow.Visibility = Visibility.Collapsed; 
                     timerCheckPPT.Start();

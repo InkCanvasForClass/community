@@ -378,6 +378,23 @@
                                                          Toggled="ToggleSwitchShowCursor_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用压感触屏模式" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnablePressureTouchMode"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchEnablePressureTouchMode_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后，触屏设备也将支持压感效果，适用于部分支持压感但无法被系统识别的触屏设备。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="屏蔽压感" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchDisablePressure"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchDisablePressure_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后，将忽略所有设备的压感信息，使所有笔画具有统一的粗细。与压感触屏模式互斥。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="橡皮大小" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <ComboBox Name="ComboBoxEraserSize" FontFamily="Microsoft YaHei UI"
@@ -553,7 +570,46 @@
                                             </CheckBox>
                                         </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
-
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
+                                          Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="直线自动拉直" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoStraightenLine"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAutoStraightenLine_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" 
+                                                         Visibility="{Binding ElementName=ToggleSwitchAutoStraightenLine, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="长度阈值" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider Name="AutoStraightenLineThresholdSlider" Width="150" Minimum="30" Maximum="300" 
+                                                Value="30" TickFrequency="30" IsSnapToTickEnabled="True"
+                                                ValueChanged="AutoStraightenLineThresholdSlider_ValueChanged" />
+                                        <TextBlock Foreground="#fafafa" Text="{Binding ElementName=AutoStraightenLineThresholdSlider, Path=Value, StringFormat={}{0:0}}" 
+                                                   VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
+                                          Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="直线端点吸附" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchLineEndpointSnapping"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchLineEndpointSnapping_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" 
+                                                         Visibility="{Binding ElementName=ToggleSwitchLineEndpointSnapping, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="吸附距离" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider Name="LineEndpointSnappingThresholdSlider" Width="150" Minimum="5" Maximum="50" 
+                                                Value="15" TickFrequency="5" IsSnapToTickEnabled="True"
+                                                ValueChanged="LineEndpointSnappingThresholdSlider_ValueChanged" />
+                                        <TextBlock Foreground="#fafafa" Text="{Binding ElementName=LineEndpointSnappingThresholdSlider, Path=Value, StringFormat={}{0:0}}" 
+                                                   VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后，当绘制的直线端点靠近其他直线端点时，将自动吸附连接。" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <GroupBox Name="GroupBoxAppearanceNewUI">

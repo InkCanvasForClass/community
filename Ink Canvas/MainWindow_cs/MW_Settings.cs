@@ -694,6 +694,62 @@ namespace Ink_Canvas {
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnablePressureTouchMode_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+
+            Settings.Canvas.EnablePressureTouchMode = ToggleSwitchEnablePressureTouchMode.IsOn;
+            
+            // 如果启用了压感触屏模式，则自动关闭屏蔽压感
+            if (Settings.Canvas.EnablePressureTouchMode && Settings.Canvas.DisablePressure) {
+                Settings.Canvas.DisablePressure = false;
+                ToggleSwitchDisablePressure.IsOn = false;
+            }
+            
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchDisablePressure_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+
+            Settings.Canvas.DisablePressure = ToggleSwitchDisablePressure.IsOn;
+            
+            // 如果启用了屏蔽压感，则自动关闭压感触屏模式
+            if (Settings.Canvas.DisablePressure && Settings.Canvas.EnablePressureTouchMode) {
+                Settings.Canvas.EnablePressureTouchMode = false;
+                ToggleSwitchEnablePressureTouchMode.IsOn = false;
+            }
+            
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAutoStraightenLine_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            Settings.Canvas.AutoStraightenLine = ToggleSwitchAutoStraightenLine.IsOn;
+            SaveSettingsToFile();
+        }
+        
+        private void AutoStraightenLineThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            
+            Settings.Canvas.AutoStraightenLineThreshold = (int)e.NewValue;
+            SaveSettingsToFile();
+        }
+        
+        private void ToggleSwitchLineEndpointSnapping_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            Settings.Canvas.LineEndpointSnapping = ToggleSwitchLineEndpointSnapping.IsOn;
+            SaveSettingsToFile();
+        }
+        
+        private void LineEndpointSnappingThresholdSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            
+            Settings.Canvas.LineEndpointSnappingThreshold = (int)e.NewValue;
+            SaveSettingsToFile();
+        }
+
         #endregion
 
         #region Canvas
@@ -1412,7 +1468,7 @@ namespace Ink_Canvas {
             Settings.Automation.IsAutoKillVComYouJiao = false;
             Settings.Automation.IsAutoKillInkCanvas = false;
             Settings.Automation.IsAutoKillICA = false;
-            Settings.Automation.IsAutoKillIDT = true;
+            Settings.Automation.IsAutoKillIDT = false;
             Settings.Automation.IsAutoKillSeewoLauncher2DesktopAnnotation = false;
             Settings.Automation.IsSaveScreenshotsInDateFolders = false;
             Settings.Automation.IsAutoSaveStrokesAtScreenshot = true;
@@ -1447,6 +1503,12 @@ namespace Ink_Canvas {
             Settings.Canvas.HideStrokeWhenSelecting = false;
             Settings.Canvas.ClearCanvasAndClearTimeMachine = false;
             Settings.Canvas.FitToCurve = true;
+            Settings.Canvas.EnablePressureTouchMode = false;
+            Settings.Canvas.DisablePressure = false;
+            Settings.Canvas.AutoStraightenLine = true;
+            Settings.Canvas.AutoStraightenLineThreshold = 30;
+            Settings.Canvas.LineEndpointSnapping = true;
+            Settings.Canvas.LineEndpointSnappingThreshold = 15;
             Settings.Canvas.UsingWhiteboard = false;
             Settings.Canvas.HyperbolaAsymptoteOption = 0;
 

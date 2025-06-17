@@ -434,6 +434,12 @@ namespace Ink_Canvas {
                     inkCanvas.ForceCursor = false;
                 }
 
+                // 初始化压感触屏模式开关状态
+                ToggleSwitchEnablePressureTouchMode.IsOn = Settings.Canvas.EnablePressureTouchMode;
+                
+                // 初始化屏蔽压感开关状态
+                ToggleSwitchDisablePressure.IsOn = Settings.Canvas.DisablePressure;
+
                 ComboBoxPenStyle.SelectedIndex = Settings.Canvas.InkStyle;
                 BoardComboBoxPenStyle.SelectedIndex = Settings.Canvas.InkStyle;
 
@@ -500,6 +506,14 @@ namespace Ink_Canvas {
                     ToggleSwitchFitToCurve.IsOn = false;
                     drawingAttributes.FitToCurve = false;
                 }
+                
+                // 初始化直线自动拉直相关设置
+                ToggleSwitchAutoStraightenLine.IsOn = Settings.Canvas.AutoStraightenLine;
+                AutoStraightenLineThresholdSlider.Value = Settings.Canvas.AutoStraightenLineThreshold;
+                
+                // 初始化直线端点吸附相关设置
+                ToggleSwitchLineEndpointSnapping.IsOn = Settings.Canvas.LineEndpointSnapping;
+                LineEndpointSnappingThresholdSlider.Value = Settings.Canvas.LineEndpointSnappingThreshold;
             } else {
                 Settings.Canvas = new Canvas();
             }
