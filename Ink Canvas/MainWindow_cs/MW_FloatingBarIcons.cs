@@ -1078,8 +1078,8 @@ namespace Ink_Canvas {
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-                var toolbarHeight = SystemParameters.PrimaryScreenHeight - SystemParameters.FullPrimaryScreenHeight -
-                                    SystemParameters.WindowCaptionHeight;
+                // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
+                var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
                 if (PosXCaculatedWithTaskbarHeight == false)
@@ -1141,8 +1141,8 @@ namespace Ink_Canvas {
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-                var toolbarHeight = SystemParameters.PrimaryScreenHeight - SystemParameters.FullPrimaryScreenHeight -
-                                    SystemParameters.WindowCaptionHeight;
+                // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
+                var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
                 pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
@@ -1184,8 +1184,8 @@ namespace Ink_Canvas {
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-                var toolbarHeight = SystemParameters.PrimaryScreenHeight - SystemParameters.FullPrimaryScreenHeight -
-                                    SystemParameters.WindowCaptionHeight;
+                // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
+                var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
                 pos.Y = screenHeight - 55 * ViewboxFloatingBarScaleTransform.ScaleY;
