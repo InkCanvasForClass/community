@@ -15,6 +15,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Microsoft.Win32;
 using Application = System.Windows.Application;
 using File = System.IO.File;
 using MessageBox = System.Windows.MessageBox;
@@ -86,6 +87,61 @@ namespace Ink_Canvas {
 
             Settings.PowerPointSettings.IsSupportWPS = ToggleSwitchSupportWPS.IsOn;
             SaveSettingsToFile();
+            
+            // 重置PowerPoint/WPS实例状态
+            ResetPresentationObjects();
+            isPowerPointInitialized = false;
+        }
+        
+        /// <summary>
+        /// 重置所有演示相关的COM对象
+        /// </summary>
+        private void ResetPresentationObjects()
+        {
+            try 
+            {
+                // 清理对象引用
+                if (pptApplication != null)
+                {
+                    try 
+                    {
+                        // 尝试解除事件绑定
+                        pptApplication.PresentationOpen -= PptApplication_PresentationOpen;
+                        pptApplication.PresentationClose -= PptApplication_PresentationClose;
+                        pptApplication.SlideShowBegin -= PptApplication_SlideShowBegin;
+                        pptApplication.SlideShowNextSlide -= PptApplication_SlideShowNextSlide;
+                        pptApplication.SlideShowEnd -= PptApplication_SlideShowEnd;
+                    }
+                    catch { }
+                    
+                    try { Marshal.ReleaseComObject(pptApplication); } catch { }
+                    pptApplication = null;
+                }
+                
+                if (presentation != null)
+                {
+                    try { Marshal.ReleaseComObject(presentation); } catch { }
+                    presentation = null;
+                }
+                
+                if (slides != null)
+                {
+                    try { Marshal.ReleaseComObject(slides); } catch { }
+                    slides = null;
+                }
+                
+                slide = null;
+                
+                // 强制GC回收
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                
+                LogHelper.WriteLogToFile("成功重置所有演示对象", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"重置演示对象时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private static bool isWPSSupportOn => Settings.PowerPointSettings.IsSupportWPS;
@@ -93,8 +149,32 @@ namespace Ink_Canvas {
         public static bool IsShowingRestoreHiddenSlidesWindow = false;
         private static bool IsShowingAutoplaySlidesWindow = false;
         private bool isPowerPointInitialized = false;
+        private bool isWPSMode = false;
         
-
+        /// <summary>
+        /// 获取所有可能的WPS进程名
+        /// </summary>
+        private string[] GetPossibleWPSProcessNames()
+        {
+            return new[] { "wpp", "wppmain", "wps", "et" };
+        }
+        
+        /// <summary>
+        /// 检查WPS进程是否正在运行
+        /// </summary>
+        private bool IsWPSRunning()
+        {
+            foreach (var processName in GetPossibleWPSProcessNames())
+            {
+                var processes = Process.GetProcessesByName(processName);
+                if (processes.Length > 0)
+                {
+                    LogHelper.WriteLogToFile($"检测到WPS进程: {processName}", LogHelper.LogType.Info);
+                    return true;
+                }
+            }
+            return false;
+        }
 
         private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -107,19 +187,44 @@ namespace Ink_Canvas {
                 // 检查是否已有初始化的 PowerPoint 实例
                 if (!isPowerPointInitialized)
                 {
-                    // 优先检测WPS进程
-                    var wpsProcesses = Process.GetProcessesByName("wpp");
+                    // 检测WPS和PowerPoint进程
+                    bool wpsRunning = IsWPSRunning();
                     var pptProcesses = Process.GetProcessesByName("POWERPNT");
+                    
+                    // 根据设置和进程状态决定模式
+                    isWPSMode = isWPSSupportOn && wpsRunning;
+                    
+                    LogHelper.WriteLogToFile($"初始化模式: {(isWPSMode ? "WPS" : "PowerPoint")}", LogHelper.LogType.Info);
 
                     // 优先获取WPS实例
-                    if (isWPSSupportOn && wpsProcesses.Length > 0)
+                    if (isWPSMode)
                     {
                         try
                         {
-                            pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("wpp.Application");
+                            // 尝试多种可能的ProgID
+                            string[] possibleProgIds = { "wpp.Application", "WPS.Application" };
+                            
+                            foreach (var progId in possibleProgIds)
+                            {
+                                try
+                                {
+                                    LogHelper.WriteLogToFile($"尝试获取COM对象: {progId}", LogHelper.LogType.Info);
+                                    pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject(progId);
+                                    if (pptApplication != null)
+                                    {
+                                        LogHelper.WriteLogToFile($"成功连接到WPS: {progId}", LogHelper.LogType.Info);
+                                        break;
+                                    }
+                                }
+                                catch 
+                                {
+                                    continue;
+                                }
+                            }
                         }
-                        catch (COMException)
+                        catch (COMException ex)
                         {
+                            LogHelper.WriteLogToFile($"获取WPS实例失败: {ex.Message}", LogHelper.LogType.Error);
                             pptApplication = null;
                         }
                     }
@@ -129,74 +234,71 @@ namespace Ink_Canvas {
                     {
                         try
                         {
+                            LogHelper.WriteLogToFile("尝试获取PowerPoint实例", LogHelper.LogType.Info);
                             pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                            if (pptApplication != null)
+                                LogHelper.WriteLogToFile("成功连接到PowerPoint", LogHelper.LogType.Info);
                         }
-                        catch (COMException)
+                        catch (COMException ex)
                         {
+                            LogHelper.WriteLogToFile($"获取PowerPoint实例失败: {ex.Message}", LogHelper.LogType.Error);
                             pptApplication = null;
                         }
                     }
 
                     // 如果都没有找到，且未启用WPS支持，则自动创建PowerPoint进程
-                    if (pptApplication == null && !isWPSSupportOn)
+                    if (pptApplication == null && !isWPSMode && pptProcesses.Length == 0)
                     {
                         try
                         {
+                            LogHelper.WriteLogToFile("尝试创建新的PowerPoint实例", LogHelper.LogType.Info);
                             pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
                                 Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                            if (pptApplication != null)
+                                LogHelper.WriteLogToFile("成功创建PowerPoint实例", LogHelper.LogType.Info);
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            LogHelper.WriteLogToFile($"创建PowerPoint实例失败: {ex.Message}", LogHelper.LogType.Error);
                             pptApplication = null;
                         }
                     }
+                    
                     isPowerPointInitialized = true;
                     return;
                 }
 
                 // 检查进程是否还在
-                var pptProcessesCheck = Process.GetProcessesByName("POWERPNT");
-                var wpsProcessesCheck = Process.GetProcessesByName("wpp");
-                bool isWpsMode = isWPSSupportOn && wpsProcessesCheck.Length > 0;
-                bool isPptMode = !isWPSSupportOn && pptProcessesCheck.Length > 0;
+                bool currentWpsRunning = IsWPSRunning();
+                var currentPptProcesses = Process.GetProcessesByName("POWERPNT");
+                
+                // 检测应用程序是否关闭
+                bool applicationClosed = isWPSMode ? !currentWpsRunning : currentPptProcesses.Length == 0;
 
-                if ((isWpsMode && wpsProcessesCheck.Length == 0) || (!isWpsMode && pptProcessesCheck.Length == 0))
+                if (applicationClosed)
                 {
-                    // 进程已关闭，清理对象
-                    if (pptApplication != null)
-                    {
-                        try { Marshal.ReleaseComObject(pptApplication); } catch { }
-                        pptApplication = null;
-                    }
-                    if (presentation != null)
-                    {
-                        try { Marshal.ReleaseComObject(presentation); } catch { }
-                        presentation = null;
-                    }
-                    if (slides != null)
-                    {
-                        try { Marshal.ReleaseComObject(slides); } catch { }
-                        slides = null;
-                    }
-                    slide = null;
+                    LogHelper.WriteLogToFile($"{(isWPSMode ? "WPS" : "PowerPoint")}进程已关闭，清理对象", LogHelper.LogType.Info);
+                    
+                    // 进程已关闭，调用重置方法清理对象
+                    ResetPresentationObjects();
                     isPowerPointInitialized = false;
 
                     // PowerPoint进程守护：自动重启PowerPoint进程（仅在未启用WPS支持时）
-                    if (!isWPSSupportOn)
+                    if (!isWPSSupportOn && !isWPSMode)
                     {
                         try
                         {
+                            LogHelper.WriteLogToFile("尝试重启PowerPoint进程", LogHelper.LogType.Info);
                             pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(
                                 Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
                             isPowerPointInitialized = true;
+                            LogHelper.WriteLogToFile("PowerPoint进程重启成功", LogHelper.LogType.Info);
                         }
                         catch (Exception ex)
                         {
-                            LogHelper.WriteLogToFile("PowerPoint 守护重启失败: " + ex.ToString(), LogHelper.LogType.Error);
+                            LogHelper.WriteLogToFile($"PowerPoint守护重启失败: {ex.Message}", LogHelper.LogType.Error);
                         }
-                        return;
                     }
-                    // 启用WPS支持时不守护PowerPoint进程
                     return;
                 }
                 

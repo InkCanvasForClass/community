@@ -183,6 +183,11 @@ namespace Ink_Canvas {
         private bool forcePointEraser = true;
 
         private void Main_Grid_TouchDown(object sender, TouchEventArgs e) {
+            // 确保触摸时显示自定义光标
+            if (Settings.Canvas.IsShowCursor) {
+                inkCanvas.ForceCursor = true;
+                System.Windows.Forms.Cursor.Show();
+            }
 
             inkCanvas.CaptureTouch(e.TouchDevice);
             ViewboxFloatingBar.IsHitTestVisible = false;

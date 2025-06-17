@@ -56,7 +56,7 @@ namespace Ink_Canvas {
         #endregion Floating Bar Control
 
         private int drawingShapeMode = 0;
-        private bool isLongPressSelected = false; // 用于存是否是“选中”状态，便于后期抬笔后不做切换到笔的处理
+        private bool isLongPressSelected = false; // 用于存是否是"选中"状态，便于后期抬笔后不做切换到笔的处理
 
         #region Buttons
 
@@ -429,6 +429,8 @@ namespace Ink_Canvas {
 
         private void inkCanvas_TouchMove(object sender, TouchEventArgs e) {
             if (isSingleFingerDragMode) return;
+
+            // 处理形状绘制模式
             if (drawingShapeMode != 0) {
                 if (isLastTouchEraser) return;
                 //EraserContainer.Background = null;
@@ -443,15 +445,75 @@ namespace Ink_Canvas {
                     catch {
                         Trace.WriteLine("lastTempStrokeCollection failed.");
                     }
-
                     return;
                 }
-
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.None)
-                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
             }
 
-            MouseTouchMove(e.GetTouchPoint(inkCanvas).Position);
+            // 触摸移动时保持自定义光标显示
+            if (Settings.Canvas.IsShowCursor) {
+                inkCanvas.ForceCursor = true;
+                System.Windows.Forms.Cursor.Show();
+            }
+
+            if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
+            if (drawingShapeMode == 9 && isFirstTouchCuboid == false) MouseTouchMove(iniP);
+            inkCanvas.Opacity = 1;
+            double boundsWidth = GetTouchBoundWidth(e), eraserMultiplier = 1.0;
+            if (!Settings.Advanced.EraserBindTouchMultiplier && Settings.Advanced.IsSpecialScreen)
+                eraserMultiplier = 1 / Settings.Advanced.TouchMultiplier;
+            if (boundsWidth > BoundsWidth) {
+                isLastTouchEraser = true;
+                if (drawingShapeMode == 0 && forceEraser) return;
+                if (boundsWidth > BoundsWidth * 2.5) {
+                    double k = 1;
+                    switch (Settings.Canvas.EraserSize) {
+                        case 0:
+                            k = 0.5;
+                            break;
+                        case 1:
+                            k = 0.8;
+                            break;
+                        case 3:
+                            k = 1.25;
+                            break;
+                        case 4:
+                            k = 1.8;
+                            break;
+                    }
+
+                    inkCanvas.EraserShape = new EllipseStylusShape(boundsWidth * k * eraserMultiplier,
+                        boundsWidth * k * eraserMultiplier);
+                    inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+                }
+                else {
+                    if (StackPanelPPTControls.Visibility == Visibility.Visible && inkCanvas.Strokes.Count == 0 &&
+                        Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl) {
+                        isLastTouchEraser = false;
+                        inkCanvas.EditingMode = InkCanvasEditingMode.GestureOnly;
+                        inkCanvas.Opacity = 0.1;
+                    }
+                    else {
+                        inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
+                        inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
+                    }
+                }
+            }
+            else {
+                isLastTouchEraser = false;
+                // 修复面积擦时不显示橡皮形状：无论 forcePointEraser 状态，均显示 50x50 橡皮
+                inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
+                if (forceEraser) return;
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+            }
+
+            if (inkCanvas.EditingMode != InkCanvasEditingMode.None)
+                return;
+
+            if (e.TouchDevice == null) {
+                System.Windows.Forms.Cursor.Show();
+            } else {
+                System.Windows.Forms.Cursor.Hide();
+            }
         }
 
         private int drawMultiStepShapeCurrentStep = 0; //多笔完成的图形 当前所处在的笔画

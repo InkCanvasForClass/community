@@ -1,4 +1,4 @@
-﻿using iNKORE.UI.WPF.Modern.Controls;
+using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -17,6 +17,13 @@ namespace Ink_Canvas {
         private object lastBorderMouseDownObject;
 
         private void Border_MouseDown(object sender, MouseButtonEventArgs e) {
+            // 如果发送者是 RandomDrawPanel 或 SingleDrawPanel，且它们被隐藏，则不处理事件
+            if (sender is SimpleStackPanel panel) {
+                if ((panel == RandomDrawPanel || panel == SingleDrawPanel) && 
+                    panel.Visibility != Visibility.Visible) {
+                    return;
+                }
+            }
             lastBorderMouseDownObject = sender;
         }
 
@@ -379,6 +386,11 @@ namespace Ink_Canvas {
                     inkCanvas.Select(strokes);
                     isProgramChangeStrokeSelection = false;
                     inkCanvas.Strokes.Add(StrokesSelectionClone);
+                }
+                else {
+                    // 新增：启动套索选择模式
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+                    inkCanvas.Select(new StrokeCollection());
                 }
             }
         }

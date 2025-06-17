@@ -740,9 +740,11 @@ namespace Ink_Canvas {
         }
 
         private void SymbolIconRand_MouseUp(object sender, MouseButtonEventArgs e) {
+            // 如果控件被隐藏，不处理事件
+            if (RandomDrawPanel.Visibility != Visibility.Visible) return;
+
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-            //if (lastBorderMouseDownObject != sender) return;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
@@ -808,14 +810,16 @@ namespace Ink_Canvas {
         }
 
         private void SymbolIconRandOne_MouseUp(object sender, MouseButtonEventArgs e) {
+            // 如果控件被隐藏，不处理事件
+            if (SingleDrawPanel.Visibility != Visibility.Visible) return;
+
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
-            //if (lastBorderMouseDownObject != sender) return;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
 
-            new RandWindow(Settings,true).ShowDialog();
+            new RandWindow(Settings, true).ShowDialog();
         }
 
         private void GridInkReplayButton_MouseUp(object sender, MouseButtonEventArgs e) {
@@ -1074,15 +1078,38 @@ namespace Ink_Canvas {
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-                var toolbarHeight = SystemParameters.PrimaryScreenHeight - SystemParameters.FullPrimaryScreenHeight -
-                                    SystemParameters.WindowCaptionHeight;
+                // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
+                var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
                 if (PosXCaculatedWithTaskbarHeight == false)
-                    pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                {
+                    // 如果任务栏高度为0(隐藏状态),则使用固定边距
+                    if (toolbarHeight == 0)
+                    {
+                        pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定边距: {MarginFromEdge}", LogHelper.LogType.Info);
+                    }
+                    else
+                    {
+                        pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                    }
+                }
                 else if (PosXCaculatedWithTaskbarHeight == true)
-                    pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
-                            toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                {
+                    // 如果任务栏高度为0(隐藏状态),则使用固定高度
+                    if (toolbarHeight == 0)
+                    {
+                        pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY - 
+                               3 * ViewboxFloatingBarScaleTransform.ScaleY;
+                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}", LogHelper.LogType.Info);
+                    }
+                    else
+                    {
+                        pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                               toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                    }
+                }
 
                 if (MarginFromEdge != -60) {
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
@@ -1137,12 +1164,22 @@ namespace Ink_Canvas {
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-                var toolbarHeight = SystemParameters.PrimaryScreenHeight - SystemParameters.FullPrimaryScreenHeight -
-                                    SystemParameters.WindowCaptionHeight;
+                // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
+                var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
-                pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
-                        toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                // 如果任务栏高度为0(隐藏状态),则使用固定边距
+                if (toolbarHeight == 0)
+                {
+                    pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY - 
+                           3 * ViewboxFloatingBarScaleTransform.ScaleY;
+                    LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}", LogHelper.LogType.Info);
+                }
+                else
+                {
+                    pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                           toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                }
 
                 if (pointDesktop.X != -1 || pointDesktop.Y != -1) pointDesktop = pos;
 
@@ -1180,8 +1217,8 @@ namespace Ink_Canvas {
                 var windowHandle = new WindowInteropHelper(this).Handle;
                 var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
-                var toolbarHeight = SystemParameters.PrimaryScreenHeight - SystemParameters.FullPrimaryScreenHeight -
-                                    SystemParameters.WindowCaptionHeight;
+                // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
+                var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
                 pos.Y = screenHeight - 55 * ViewboxFloatingBarScaleTransform.ScaleY;
@@ -1585,7 +1622,7 @@ namespace Ink_Canvas {
 
         public void BtnRestart_Click(object sender, RoutedEventArgs e) {
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
-
+            App.IsAppExitByUser = true;
             CloseIsFromButton = true;
             Application.Current.Shutdown();
         }
