@@ -52,6 +52,14 @@ namespace Ink_Canvas
         public bool EnablePressureTouchMode { get; set; } = false; // 是否启用压感触屏模式
         [JsonProperty("disablePressure")]
         public bool DisablePressure { get; set; } = false; // 是否屏蔽压感
+        [JsonProperty("autoStraightenLine")]
+        public bool AutoStraightenLine { get; set; } = true; // 是否启用直线自动拉直
+        [JsonProperty("autoStraightenLineThreshold")]
+        public int AutoStraightenLineThreshold { get; set; } = 30; // 直线自动拉直的长度阈值（像素）
+        [JsonProperty("lineEndpointSnapping")]
+        public bool LineEndpointSnapping { get; set; } = true; // 是否启用直线端点吸附
+        [JsonProperty("lineEndpointSnappingThreshold")]
+        public int LineEndpointSnappingThreshold { get; set; } = 15; // 直线端点吸附的距离阈值（像素）
 
         [JsonProperty("usingWhiteboard")]
         public bool UsingWhiteboard { get; set; }

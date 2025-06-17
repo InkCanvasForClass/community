@@ -506,6 +506,14 @@ namespace Ink_Canvas {
                     ToggleSwitchFitToCurve.IsOn = false;
                     drawingAttributes.FitToCurve = false;
                 }
+                
+                // 初始化直线自动拉直相关设置
+                ToggleSwitchAutoStraightenLine.IsOn = Settings.Canvas.AutoStraightenLine;
+                AutoStraightenLineThresholdSlider.Value = Settings.Canvas.AutoStraightenLineThreshold;
+                
+                // 初始化直线端点吸附相关设置
+                ToggleSwitchLineEndpointSnapping.IsOn = Settings.Canvas.LineEndpointSnapping;
+                LineEndpointSnappingThresholdSlider.Value = Settings.Canvas.LineEndpointSnappingThreshold;
             } else {
                 Settings.Canvas = new Canvas();
             }

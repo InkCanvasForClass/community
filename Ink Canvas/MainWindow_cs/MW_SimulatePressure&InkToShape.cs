@@ -19,6 +19,108 @@ namespace Ink_Canvas {
 
             try {
                 inkCanvas.Opacity = 1;
+                
+                // 直线自动拉直功能
+                if (Settings.Canvas.AutoStraightenLine && e.Stroke.StylusPoints.Count > 1 && drawingShapeMode == 0 && penType == 0) {
+                    // 获取起点和终点
+                    StylusPoint startPoint = e.Stroke.StylusPoints[0];
+                    StylusPoint endPoint = e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1];
+                    
+                    // 计算直线长度
+                    double length = Math.Sqrt(Math.Pow(endPoint.X - startPoint.X, 2) + Math.Pow(endPoint.Y - startPoint.Y, 2));
+                    
+                    // 判断是否需要拉直
+                    if (length >= Settings.Canvas.AutoStraightenLineThreshold) {
+                        // 判断是否符合直线特征（计算点到直线的最大距离）
+                        double maxDistance = 0;
+                        for (int i = 1; i < e.Stroke.StylusPoints.Count - 1; i++) {
+                            StylusPoint point = e.Stroke.StylusPoints[i];
+                            double distance = DistanceFromPointToLine(point, startPoint, endPoint);
+                            maxDistance = Math.Max(maxDistance, distance);
+                        }
+                        
+                        // 如果最大距离小于线长的15%，认为是直线
+                        if (maxDistance < length * 0.15) {
+                            // 创建新的直线点集合
+                            StylusPointCollection newPoints = new StylusPointCollection();
+                            
+                            // 直线端点吸附功能
+                            if (Settings.Canvas.LineEndpointSnapping) {
+                                bool startPointSnapped = false;
+                                bool endPointSnapped = false;
+                                
+                                // 获取画布上的所有笔画
+                                StrokeCollection allStrokes = inkCanvas.Strokes;
+                                
+                                // 排除当前笔画
+                                StrokeCollection otherStrokes = new StrokeCollection();
+                                foreach (Stroke stroke in allStrokes) {
+                                    if (stroke != e.Stroke) {
+                                        otherStrokes.Add(stroke);
+                                    }
+                                }
+                                
+                                // 查找最近的端点
+                                double minStartDistance = Settings.Canvas.LineEndpointSnappingThreshold;
+                                double minEndDistance = Settings.Canvas.LineEndpointSnappingThreshold;
+                                StylusPoint nearestToStart = startPoint;
+                                StylusPoint nearestToEnd = endPoint;
+                                
+                                foreach (Stroke stroke in otherStrokes) {
+                                    // 只考虑直线（只有两个点的笔画）
+                                    if (stroke.StylusPoints.Count == 2) {
+                                        StylusPoint strokeStart = stroke.StylusPoints[0];
+                                        StylusPoint strokeEnd = stroke.StylusPoints[1];
+                                        
+                                        // 计算当前笔画起点到其他笔画端点的距离
+                                        double distanceToStrokeStart = Distance(startPoint, strokeStart);
+                                        double distanceToStrokeEnd = Distance(startPoint, strokeEnd);
+                                        
+                                        // 如果距离小于阈值且小于当前最小距离，更新最近点
+                                        if (distanceToStrokeStart < minStartDistance) {
+                                            minStartDistance = distanceToStrokeStart;
+                                            nearestToStart = strokeStart;
+                                            startPointSnapped = true;
+                                        }
+                                        if (distanceToStrokeEnd < minStartDistance) {
+                                            minStartDistance = distanceToStrokeEnd;
+                                            nearestToStart = strokeEnd;
+                                            startPointSnapped = true;
+                                        }
+                                        
+                                        // 计算当前笔画终点到其他笔画端点的距离
+                                        double distanceEndToStrokeStart = Distance(endPoint, strokeStart);
+                                        double distanceEndToStrokeEnd = Distance(endPoint, strokeEnd);
+                                        
+                                        // 如果距离小于阈值且小于当前最小距离，更新最近点
+                                        if (distanceEndToStrokeStart < minEndDistance) {
+                                            minEndDistance = distanceEndToStrokeStart;
+                                            nearestToEnd = strokeStart;
+                                            endPointSnapped = true;
+                                        }
+                                        if (distanceEndToStrokeEnd < minEndDistance) {
+                                            minEndDistance = distanceEndToStrokeEnd;
+                                            nearestToEnd = strokeEnd;
+                                            endPointSnapped = true;
+                                        }
+                                    }
+                                }
+                                
+                                // 应用吸附结果
+                                newPoints.Add(startPointSnapped ? nearestToStart : startPoint);
+                                newPoints.Add(endPointSnapped ? nearestToEnd : endPoint);
+                            } else {
+                                // 不启用吸附，直接使用原始端点
+                                newPoints.Add(startPoint);
+                                newPoints.Add(endPoint);
+                            }
+                            
+                            // 替换原有笔迹
+                            e.Stroke.StylusPoints = newPoints;
+                        }
+                    }
+                }
+                
                 if (Settings.InkToShape.IsInkToShapeEnabled && drawingShapeMode == 0 && !isInMultiTouchMode && penType == 0) {
                     void InkToShapeProcess() {
                         try {
@@ -553,6 +655,32 @@ namespace Ink_Canvas {
 
         public StylusPoint GetCenterPoint(StylusPoint point1, StylusPoint point2) {
             return new StylusPoint((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2);
+        }
+
+        /// <summary>
+        /// 计算点到直线的距离
+        /// </summary>
+        /// <param name="point">点</param>
+        /// <param name="lineStart">直线起点</param>
+        /// <param name="lineEnd">直线终点</param>
+        /// <returns>距离</returns>
+        private double DistanceFromPointToLine(StylusPoint point, StylusPoint lineStart, StylusPoint lineEnd) {
+            double lineLength = Math.Sqrt(Math.Pow(lineEnd.X - lineStart.X, 2) + Math.Pow(lineEnd.Y - lineStart.Y, 2));
+            if (lineLength == 0) return 0;
+            
+            double area = Math.Abs(
+                (lineEnd.X - lineStart.X) * (lineStart.Y - point.Y) - 
+                (lineStart.X - point.X) * (lineEnd.Y - lineStart.Y)
+            );
+            
+            return area / lineLength;
+        }
+
+        /// <summary>
+        /// 计算两点之间的距离
+        /// </summary>
+        private double Distance(StylusPoint p1, StylusPoint p2) {
+            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
         }
     }
 }
