@@ -434,6 +434,12 @@ namespace Ink_Canvas {
                     inkCanvas.ForceCursor = false;
                 }
 
+                // 初始化压感触屏模式开关状态
+                ToggleSwitchEnablePressureTouchMode.IsOn = Settings.Canvas.EnablePressureTouchMode;
+                
+                // 初始化屏蔽压感开关状态
+                ToggleSwitchDisablePressure.IsOn = Settings.Canvas.DisablePressure;
+
                 ComboBoxPenStyle.SelectedIndex = Settings.Canvas.InkStyle;
                 BoardComboBoxPenStyle.SelectedIndex = Settings.Canvas.InkStyle;
 

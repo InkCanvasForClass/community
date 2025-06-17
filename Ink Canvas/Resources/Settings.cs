@@ -48,6 +48,10 @@ namespace Ink_Canvas
         public bool FitToCurve { get; set; } = true;
         [JsonProperty("clearCanvasAndClearTimeMachine")]
         public bool ClearCanvasAndClearTimeMachine { get; set; } = false;
+        [JsonProperty("enablePressureTouchMode")]
+        public bool EnablePressureTouchMode { get; set; } = false; // 是否启用压感触屏模式
+        [JsonProperty("disablePressure")]
+        public bool DisablePressure { get; set; } = false; // 是否屏蔽压感
 
         [JsonProperty("usingWhiteboard")]
         public bool UsingWhiteboard { get; set; }
@@ -308,7 +312,7 @@ namespace Ink_Canvas
         public bool IsAutoKillICA { get; set; } = false;
 
         [JsonProperty("isAutoKillIDT")]
-        public bool IsAutoKillIDT { get; set; } = true;
+        public bool IsAutoKillIDT { get; set; } = false;
 
         [JsonProperty("isSaveScreenshotsInDateFolders")]
         public bool IsSaveScreenshotsInDateFolders { get; set; } = false;

@@ -19,7 +19,7 @@ namespace Ink_Canvas {
 
             try {
                 inkCanvas.Opacity = 1;
-                if (Settings.InkToShape.IsInkToShapeEnabled && !Environment.Is64BitProcess) {
+                if (Settings.InkToShape.IsInkToShapeEnabled && drawingShapeMode == 0 && !isInMultiTouchMode && penType == 0) {
                     void InkToShapeProcess() {
                         try {
                             newStrokes.Add(e.Stroke);
@@ -320,13 +320,27 @@ namespace Ink_Canvas {
                     InkToShapeProcess();
                 }
 
-                foreach (var stylusPoint in e.Stroke.StylusPoints)
-                    //LogHelper.WriteLogToFile(stylusPoint.PressureFactor.ToString(), LogHelper.LogType.Info);
-                    // 检查是否是压感笔书写
-                    //if (stylusPoint.PressureFactor != 0.5 && stylusPoint.PressureFactor != 0)
-                    if ((stylusPoint.PressureFactor > 0.501 || stylusPoint.PressureFactor < 0.5) &&
-                        stylusPoint.PressureFactor != 0)
-                        return;
+                // 如果启用了屏蔽压感功能，强制所有点的压感值为0.5
+                if (Settings.Canvas.DisablePressure) {
+                    var stylusPoints = new StylusPointCollection();
+                    foreach (var point in e.Stroke.StylusPoints) {
+                        var newPoint = new StylusPoint(point.X, point.Y, 0.5f);
+                        stylusPoints.Add(newPoint);
+                    }
+                    e.Stroke.StylusPoints = stylusPoints;
+                    return; // 跳过后续的压感处理
+                }
+                
+                // 检查是否是压感笔书写，如果启用了压感触屏模式则跳过此检查
+                if (!Settings.Canvas.EnablePressureTouchMode) {
+                    foreach (var stylusPoint in e.Stroke.StylusPoints)
+                        //LogHelper.WriteLogToFile(stylusPoint.PressureFactor.ToString(), LogHelper.LogType.Info);
+                        // 检查是否是压感笔书写
+                        //if (stylusPoint.PressureFactor != 0.5 && stylusPoint.PressureFactor != 0)
+                        if ((stylusPoint.PressureFactor > 0.501 || stylusPoint.PressureFactor < 0.5) &&
+                            stylusPoint.PressureFactor != 0)
+                            return;
+                }
 
                 try {
                     if (e.Stroke.StylusPoints.Count > 3) {
