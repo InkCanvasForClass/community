@@ -1690,6 +1690,21 @@ namespace Ink_Canvas {
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchShowRandomAndSingleDraw_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+
+            // 获取开关状态并保存到设置中
+            bool isToggled = ToggleSwitchShowRandomAndSingleDraw.IsOn;
+            Settings.RandSettings.ShowRandomAndSingleDraw = isToggled;
+
+            // 更新UI显示
+            RandomDrawPanel.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
+            SingleDrawPanel.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
+
+            // 保存设置到文件
+            SaveSettingsToFile();
+        }
+
         #endregion
 
         public static void SaveSettingsToFile() {

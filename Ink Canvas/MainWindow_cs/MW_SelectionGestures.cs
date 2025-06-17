@@ -17,6 +17,13 @@ namespace Ink_Canvas {
         private object lastBorderMouseDownObject;
 
         private void Border_MouseDown(object sender, MouseButtonEventArgs e) {
+            // 如果发送者是 RandomDrawPanel 或 SingleDrawPanel，且它们被隐藏，则不处理事件
+            if (sender is SimpleStackPanel panel) {
+                if ((panel == RandomDrawPanel || panel == SingleDrawPanel) && 
+                    panel.Visibility != Visibility.Visible) {
+                    return;
+                }
+            }
             lastBorderMouseDownObject = sender;
         }
 
