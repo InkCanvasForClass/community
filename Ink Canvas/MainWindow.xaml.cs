@@ -159,6 +159,19 @@ namespace Ink_Canvas {
                 inkCanvas1.UseCustomCursor = true;
                 // 修复触屏和数位笔时光标不显示：强制显示光标，不再依赖鼠标或触控状态
                 inkCanvas1.ForceCursor = true;
+
+                // 根据编辑模式设置不同的光标
+                if (inkCanvas1.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                    var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Eraser.cur", UriKind.Relative));
+                    if (sri != null)
+                        inkCanvas1.Cursor = new Cursor(sri.Stream);
+                } else if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) {
+                    var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
+                    if (sri != null)
+                        inkCanvas1.Cursor = new Cursor(sri.Stream);
+                } else if (inkCanvas1.EditingMode == InkCanvasEditingMode.Select) {
+                    inkCanvas1.Cursor = Cursors.Cross;
+                }
             } else {
                 inkCanvas1.UseCustomCursor = false;
                 inkCanvas1.ForceCursor = false;
