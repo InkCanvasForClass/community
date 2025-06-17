@@ -1,4 +1,4 @@
-﻿using iNKORE.UI.WPF.Modern.Controls;
+using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -379,6 +379,11 @@ namespace Ink_Canvas {
                     inkCanvas.Select(strokes);
                     isProgramChangeStrokeSelection = false;
                     inkCanvas.Strokes.Add(StrokesSelectionClone);
+                }
+                else {
+                    // 新增：启动套索选择模式
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+                    inkCanvas.Select(new StrokeCollection());
                 }
             }
         }

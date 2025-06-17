@@ -4,10 +4,13 @@ using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.Win32;
+using System.Security;  // 添加SecurityException所需命名空间
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Threading;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using MessageBox = System.Windows.MessageBox;
 using Window = System.Windows.Window;
@@ -86,6 +89,110 @@ namespace Ink_Canvas
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
 
             StartArgs = e.Args;
+
+            // 新增：Office注册表检测
+            try
+            {
+                LogHelper.WriteLogToFile("开始Office注册表检测");
+                
+                // 检查Office安装
+                if (!IsOfficeInstalled())
+                {
+                    LogHelper.WriteLogToFile("未检测到Office安装", LogHelper.LogType.Warning);
+                    return;
+                }
+                
+                var pptApplication = new Microsoft.Office.Interop.PowerPoint.Application();
+                string officeVersion = pptApplication.Version;
+                LogHelper.WriteLogToFile($"检测到Office版本: {officeVersion}");
+                
+                string regPath = $"Software\\Microsoft\\Office\\{officeVersion}\\Common\\Security";
+                LogHelper.WriteLogToFile($"注册表路径: {regPath}");
+
+                using (Microsoft.Win32.RegistryKey baseKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(regPath))
+                {
+                    if (baseKey == null)
+                    {
+                        LogHelper.WriteLogToFile($"注册表路径不存在: {regPath}", LogHelper.LogType.Warning);
+                        return;
+                    }
+
+                    Settings settingsInstance = new Settings();
+                    string backupPath = Path.Combine(settingsInstance.Automation.AutoSavedStrokesLocation, "RegistryBackups");
+                    LogHelper.WriteLogToFile($"备份路径: {backupPath}");
+                    
+                    if (!Directory.Exists(backupPath)) 
+                    {
+                        Directory.CreateDirectory(backupPath);
+                        LogHelper.WriteLogToFile($"创建备份目录: {backupPath}");
+                    }
+                    
+                    string backupFile = Path.Combine(backupPath, $"SecurityBackup_{DateTime.Now:yyyyMMddHHmmss}.reg");
+                    LogHelper.WriteLogToFile($"创建备份文件: {backupFile}");
+                    
+                    // 使用UTF8编码写入注册表文件
+                    using (StreamWriter sw = new StreamWriter(backupFile, false, System.Text.Encoding.UTF8))
+                    {
+                        sw.WriteLine("Windows Registry Editor Version 5.00\n");
+                        sw.WriteLine();
+                        sw.WriteLine($"[{Microsoft.Win32.Registry.CurrentUser.Name}\\{regPath}]");
+                        
+                        foreach (string valueName in baseKey.GetValueNames())
+                        {
+                            object value = baseKey.GetValue(valueName);
+                            sw.WriteLine($"\"{valueName}\"=dword:{((int)value):x8}");
+                            LogHelper.WriteLogToFile($"备份注册表值: {valueName} = {value}");
+                        }
+                    }
+
+                    using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regPath, true))
+                    {
+                        // 仅在值不存在或不等于1时更新
+                        object currentValue = key.GetValue("DisableProtectedView");
+                        if (currentValue == null || (int)currentValue != 1)
+                        {
+                            key.SetValue("DisableProtectedView", 1, Microsoft.Win32.RegistryValueKind.DWord);
+                            LogHelper.WriteLogToFile("注册表值已设置: DisableProtectedView = 1");
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("注册表值已存在且无需更改: DisableProtectedView = 1");
+                        }
+                    }
+                }
+            }
+            catch (System.Runtime.InteropServices.COMException comEx) when (comEx.ErrorCode == -2147221040)
+            {
+                // 处理特定的COM错误（如Office未安装）
+                LogHelper.WriteLogToFile($"Office COM错误: 未安装PowerPoint (HRESULT: 0x{comEx.ErrorCode:x8})", LogHelper.LogType.Error);
+            }
+            catch (System.Runtime.InteropServices.COMException comEx)
+            {
+                LogHelper.WriteLogToFile($"Office COM错误: {comEx.Message} (HRESULT: 0x{comEx.ErrorCode:x8})", LogHelper.LogType.Error);
+            }
+            catch (SecurityException secEx)
+            {
+                LogHelper.WriteLogToFile($"安全异常: {secEx.Message}", LogHelper.LogType.Error);
+                ShowPermissionError();
+            }
+            catch (UnauthorizedAccessException authEx)
+            {
+                LogHelper.WriteLogToFile($"访问被拒绝: {authEx.Message}", LogHelper.LogType.Error);
+                ShowPermissionError();
+            }
+            catch (DirectoryNotFoundException dirEx)
+            {
+                LogHelper.WriteLogToFile($"目录未找到: {dirEx.Message}", LogHelper.LogType.Error);
+            }
+            catch (IOException ioEx)
+            {
+                LogHelper.WriteLogToFile($"IO错误: {ioEx.Message}", LogHelper.LogType.Error);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"未知错误: {ex.GetType().FullName} - {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile(ex.StackTrace, LogHelper.LogType.Info);
+            }
         }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
@@ -206,6 +313,35 @@ namespace Ink_Canvas
                 }
             }
             catch { }
+        }
+
+        /// <summary>
+        /// 检查Office是否安装
+        /// </summary>
+        private bool IsOfficeInstalled()
+        {
+            try
+            {
+                // 检查注册表判断Office是否存在
+                using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office"))
+                {
+                    return key?.GetValueNames().Any(name => name.Contains(".0")) ?? false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        
+        /// <summary>
+        /// 显示权限不足的错误提示
+        /// </summary>
+        private void ShowPermissionError()
+        {
+            const string message = "需要管理员权限才能完成此操作\n请以管理员身份重新启动应用程序";
+            LogHelper.WriteLogToFile(message, LogHelper.LogType.Error);
+            System.Windows.MessageBox.Show(message, "权限错误", MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 }

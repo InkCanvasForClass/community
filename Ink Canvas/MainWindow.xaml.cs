@@ -365,9 +365,15 @@ namespace Ink_Canvas {
         private void inkCanvas_TouchDown(object sender, TouchEventArgs e)
         {
             // 修改：根据用户设置决定是否强制显示自定义光标
-            if (Settings.Canvas.IsShowCursor) {
+            if (Settings.Canvas.IsShowCursor)
+            {
                 inkCanvas.ForceCursor = true;
-            } else {
+                // 新增：当处于套索选择模式时保持光标可见
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+                    inkCanvas.Cursor = Cursors.Cross;
+            }
+            else
+            {
                 inkCanvas.ForceCursor = false;
                 System.Windows.Forms.Cursor.Show();
             }

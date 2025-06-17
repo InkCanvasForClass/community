@@ -69,46 +69,6 @@ namespace Ink_Canvas {
                     }
                 }
                 if (pptApplication == null) throw new Exception();
-
-                // Office安装检测及注册表操作
-                try {
-                    // 获取Office版本
-                    string officeVersion = pptApplication.Version;
-                    string regPath = $"Software\\Microsoft\\Office\\{officeVersion}\\Common\\Security";
-
-                    // 验证注册表路径有效性
-                    using (RegistryKey baseKey = Registry.CurrentUser.OpenSubKey(regPath)) {
-                        if (baseKey == null) {
-                            LogHelper.WriteLogToFile("注册表路径不存在: " + regPath, LogHelper.LogType.Warning);
-                            return;
-                        }
-
-                        // 备份注册表项
-                        string backupPath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "RegistryBackups");
-                        if (!Directory.Exists(backupPath)) Directory.CreateDirectory(backupPath);
-                        string backupFile = Path.Combine(backupPath, $"SecurityBackup_{DateTime.Now:yyyyMMddHHmmss}.reg");
-                        using (StreamWriter sw = new StreamWriter(backupFile)) {
-                            sw.WriteLine($"Windows Registry Editor Version 5.00\n\n[{Registry.CurrentUser.Name}\\{regPath}]");
-                            foreach (string valueName in baseKey.GetValueNames()) {
-                                object value = baseKey.GetValue(valueName);
-                                sw.WriteLine($"\"{valueName}\"=dword:{((int)value):x8}");
-                            }
-                        }
-
-                        // 处理DisableProtectedView值
-                        using (RegistryKey key = Registry.CurrentUser.CreateSubKey(regPath, true)) {
-                            if (key.GetValue("DisableProtectedView") == null) {
-                                key.CreateSubKey(regPath, RegistryKeyPermissionCheck.ReadWriteSubTree);
-                                key.SetValue("DisableProtectedView", 1, RegistryValueKind.DWord);
-                            } else {
-                                key.SetValue("DisableProtectedView", 1, RegistryValueKind.DWord);
-                            }
-                        }
-                    }
-                } catch (Exception regEx) {
-                    LogHelper.WriteLogToFile("注册表操作失败: " + regEx.ToString(), LogHelper.LogType.Error);
-                }
-
                 StackPanelPPTControls.Visibility = Visibility.Visible;
             }
             catch (Exception ex) {
