@@ -1083,10 +1083,33 @@ namespace Ink_Canvas {
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
                 if (PosXCaculatedWithTaskbarHeight == false)
-                    pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                {
+                    // 如果任务栏高度为0(隐藏状态),则使用固定边距
+                    if (toolbarHeight == 0)
+                    {
+                        pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定边距: {MarginFromEdge}", LogHelper.LogType.Info);
+                    }
+                    else
+                    {
+                        pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
+                    }
+                }
                 else if (PosXCaculatedWithTaskbarHeight == true)
-                    pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
-                            toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                {
+                    // 如果任务栏高度为0(隐藏状态),则使用固定高度
+                    if (toolbarHeight == 0)
+                    {
+                        pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY - 
+                               3 * ViewboxFloatingBarScaleTransform.ScaleY;
+                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}", LogHelper.LogType.Info);
+                    }
+                    else
+                    {
+                        pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                               toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                    }
+                }
 
                 if (MarginFromEdge != -60) {
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
@@ -1145,8 +1168,18 @@ namespace Ink_Canvas {
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
                 pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
 
-                pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
-                        toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                // 如果任务栏高度为0(隐藏状态),则使用固定边距
+                if (toolbarHeight == 0)
+                {
+                    pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY - 
+                           3 * ViewboxFloatingBarScaleTransform.ScaleY;
+                    LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}", LogHelper.LogType.Info);
+                }
+                else
+                {
+                    pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
+                           toolbarHeight - ViewboxFloatingBarScaleTransform.ScaleY * 3;
+                }
 
                 if (pointDesktop.X != -1 || pointDesktop.Y != -1) pointDesktop = pos;
 

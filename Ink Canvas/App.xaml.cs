@@ -14,6 +14,7 @@ using System.Windows.Threading;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using MessageBox = System.Windows.MessageBox;
 using Window = System.Windows.Window;
+using System.Collections.Generic;
 
 namespace Ink_Canvas
 {
@@ -101,74 +102,80 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile("未检测到Office安装", LogHelper.LogType.Warning);
                     return;
                 }
-                
-                var pptApplication = new Microsoft.Office.Interop.PowerPoint.Application();
-                string officeVersion = pptApplication.Version;
-                LogHelper.WriteLogToFile($"检测到Office版本: {officeVersion}");
-                
-                string regPath = $"Software\\Microsoft\\Office\\{officeVersion}\\Common\\Security";
-                LogHelper.WriteLogToFile($"注册表路径: {regPath}");
 
-                using (Microsoft.Win32.RegistryKey baseKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(regPath))
+                // 尝试获取所有可能的Office版本路径
+                var officeVersions = GetOfficeVersions();
+                if (officeVersions.Count == 0)
                 {
-                    if (baseKey == null)
-                    {
-                        LogHelper.WriteLogToFile($"注册表路径不存在: {regPath}", LogHelper.LogType.Warning);
-                        return;
-                    }
+                    LogHelper.WriteLogToFile("未找到任何Office版本", LogHelper.LogType.Warning);
+                    return;
+                }
 
-                    Settings settingsInstance = new Settings();
-                    string backupPath = Path.Combine(settingsInstance.Automation.AutoSavedStrokesLocation, "RegistryBackups");
-                    LogHelper.WriteLogToFile($"备份路径: {backupPath}");
-                    
-                    if (!Directory.Exists(backupPath)) 
-                    {
-                        Directory.CreateDirectory(backupPath);
-                        LogHelper.WriteLogToFile($"创建备份目录: {backupPath}");
-                    }
-                    
-                    string backupFile = Path.Combine(backupPath, $"SecurityBackup_{DateTime.Now:yyyyMMddHHmmss}.reg");
-                    LogHelper.WriteLogToFile($"创建备份文件: {backupFile}");
-                    
-                    // 使用UTF8编码写入注册表文件
-                    using (StreamWriter sw = new StreamWriter(backupFile, false, System.Text.Encoding.UTF8))
-                    {
-                        sw.WriteLine("Windows Registry Editor Version 5.00\n");
-                        sw.WriteLine();
-                        sw.WriteLine($"[{Microsoft.Win32.Registry.CurrentUser.Name}\\{regPath}]");
-                        
-                        foreach (string valueName in baseKey.GetValueNames())
-                        {
-                            object value = baseKey.GetValue(valueName);
-                            sw.WriteLine($"\"{valueName}\"=dword:{((int)value):x8}");
-                            LogHelper.WriteLogToFile($"备份注册表值: {valueName} = {value}");
-                        }
-                    }
+                foreach (var version in officeVersions)
+                {
+                    string regPath = $"Software\\Microsoft\\Office\\{version}\\Common\\Security";
+                    LogHelper.WriteLogToFile($"正在处理Office版本 {version}, 注册表路径: {regPath}");
 
-                    using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regPath, true))
+                    try
                     {
-                        // 仅在值不存在或不等于1时更新
-                        object currentValue = key.GetValue("DisableProtectedView");
-                        if (currentValue == null || (int)currentValue != 1)
+                        using (Microsoft.Win32.RegistryKey baseKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(regPath))
                         {
-                            key.SetValue("DisableProtectedView", 1, Microsoft.Win32.RegistryValueKind.DWord);
-                            LogHelper.WriteLogToFile("注册表值已设置: DisableProtectedView = 1");
+                            if (baseKey == null)
+                            {
+                                LogHelper.WriteLogToFile($"注册表路径不存在: {regPath}", LogHelper.LogType.Warning);
+                                continue;
+                            }
+
+                            Settings settingsInstance = new Settings();
+                            string backupPath = Path.Combine(settingsInstance.Automation.AutoSavedStrokesLocation, "RegistryBackups");
+                            LogHelper.WriteLogToFile($"备份路径: {backupPath}");
+                            
+                            if (!Directory.Exists(backupPath)) 
+                            {
+                                Directory.CreateDirectory(backupPath);
+                                LogHelper.WriteLogToFile($"创建备份目录: {backupPath}");
+                            }
+                            
+                            string backupFile = Path.Combine(backupPath, $"SecurityBackup_{version}_{DateTime.Now:yyyyMMddHHmmss}.reg");
+                            LogHelper.WriteLogToFile($"创建备份文件: {backupFile}");
+                            
+                            // 使用UTF8编码写入注册表文件
+                            using (StreamWriter sw = new StreamWriter(backupFile, false, System.Text.Encoding.UTF8))
+                            {
+                                sw.WriteLine("Windows Registry Editor Version 5.00\n");
+                                sw.WriteLine();
+                                sw.WriteLine($"[{Microsoft.Win32.Registry.CurrentUser.Name}\\{regPath}]");
+                                
+                                foreach (string valueName in baseKey.GetValueNames())
+                                {
+                                    object value = baseKey.GetValue(valueName);
+                                    sw.WriteLine($"\"{valueName}\"=dword:{((int)value):x8}");
+                                    LogHelper.WriteLogToFile($"备份注册表值: {valueName} = {value}");
+                                }
+                            }
+
+                            using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regPath, true))
+                            {
+                                // 仅在值不存在或不等于1时更新
+                                object currentValue = key.GetValue("DisableProtectedView");
+                                if (currentValue == null || (int)currentValue != 1)
+                                {
+                                    key.SetValue("DisableProtectedView", 1, Microsoft.Win32.RegistryValueKind.DWord);
+                                    LogHelper.WriteLogToFile($"Office {version} 注册表值已设置: DisableProtectedView = 1");
+                                }
+                                else
+                                {
+                                    LogHelper.WriteLogToFile($"Office {version} 注册表值已存在且无需更改: DisableProtectedView = 1");
+                                }
+                            }
                         }
-                        else
-                        {
-                            LogHelper.WriteLogToFile("注册表值已存在且无需更改: DisableProtectedView = 1");
-                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"处理Office版本 {version} 时出错: {ex.Message}", LogHelper.LogType.Error);
+                        continue;
                     }
                 }
-            }
-            catch (System.Runtime.InteropServices.COMException comEx) when (comEx.ErrorCode == -2147221040)
-            {
-                // 处理特定的COM错误（如Office未安装）
-                LogHelper.WriteLogToFile($"Office COM错误: 未安装PowerPoint (HRESULT: 0x{comEx.ErrorCode:x8})", LogHelper.LogType.Error);
-            }
-            catch (System.Runtime.InteropServices.COMException comEx)
-            {
-                LogHelper.WriteLogToFile($"Office COM错误: {comEx.Message} (HRESULT: 0x{comEx.ErrorCode:x8})", LogHelper.LogType.Error);
             }
             catch (SecurityException secEx)
             {
@@ -179,14 +186,6 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"访问被拒绝: {authEx.Message}", LogHelper.LogType.Error);
                 ShowPermissionError();
-            }
-            catch (DirectoryNotFoundException dirEx)
-            {
-                LogHelper.WriteLogToFile($"目录未找到: {dirEx.Message}", LogHelper.LogType.Error);
-            }
-            catch (IOException ioEx)
-            {
-                LogHelper.WriteLogToFile($"IO错误: {ioEx.Message}", LogHelper.LogType.Error);
             }
             catch (Exception ex)
             {
@@ -342,6 +341,85 @@ namespace Ink_Canvas
             const string message = "需要管理员权限才能完成此操作\n请以管理员身份重新启动应用程序";
             LogHelper.WriteLogToFile(message, LogHelper.LogType.Error);
             System.Windows.MessageBox.Show(message, "权限错误", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
+
+        /// <summary>
+        /// 获取所有已安装的Office版本
+        /// </summary>
+        private List<string> GetOfficeVersions()
+        {
+            var versions = new List<string>();
+            try
+            {
+                // 检查HKLM
+                using (var key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office"))
+                {
+                    if (key != null)
+                    {
+                        foreach (var subKeyName in key.GetSubKeyNames())
+                        {
+                            if (subKeyName.Contains(".0"))
+                            {
+                                versions.Add(subKeyName);
+                                LogHelper.WriteLogToFile($"在HKLM中找到Office版本: {subKeyName}");
+                            }
+                        }
+                    }
+                }
+
+                // 检查HKCU
+                using (var key = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Office"))
+                {
+                    if (key != null)
+                    {
+                        foreach (var subKeyName in key.GetSubKeyNames())
+                        {
+                            if (subKeyName.Contains(".0") && !versions.Contains(subKeyName))
+                            {
+                                versions.Add(subKeyName);
+                                LogHelper.WriteLogToFile($"在HKCU中找到Office版本: {subKeyName}");
+                            }
+                        }
+                    }
+                }
+
+                // 检查64位注册表
+                using (var key = Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Microsoft\\Office"))
+                {
+                    if (key != null)
+                    {
+                        foreach (var subKeyName in key.GetSubKeyNames())
+                        {
+                            if (subKeyName.Contains(".0") && !versions.Contains(subKeyName))
+                            {
+                                versions.Add(subKeyName);
+                                LogHelper.WriteLogToFile($"在64位注册表中找到Office版本: {subKeyName}");
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取Office版本时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 按版本号排序
+            versions.Sort((a, b) =>
+            {
+                try
+                {
+                    double va = double.Parse(a.Replace(".0", ""));
+                    double vb = double.Parse(b.Replace(".0", ""));
+                    return vb.CompareTo(va); // 降序排列，最新版本在前
+                }
+                catch
+                {
+                    return 0;
+                }
+            });
+
+            return versions;
         }
     }
 }

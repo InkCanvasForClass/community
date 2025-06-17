@@ -29,8 +29,26 @@ namespace Ink_Canvas.Helpers
         [DllImport("user32.dll")]
         private static extern int SystemParametersInfo(uint uiAction, uint uiParam, IntPtr pvParam, uint fWinIni);
 
+        [DllImport("user32.dll")]
+        private static extern bool GetMonitorInfo(IntPtr hMonitor, ref MONITORINFO lpmi);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint dwFlags);
+
         private const uint ABM_GETTASKBARPOS = 0x00000005;
+        private const uint ABM_GETSTATE = 0x00000004;
         private const int SPI_GETWORKAREA = 0x0030;
+        private const uint MONITOR_DEFAULTTOPRIMARY = 1;
+        private const int ABS_AUTOHIDE = 0x0000001;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MONITORINFO
+        {
+            public int cbSize;
+            public RECT rcMonitor;
+            public RECT rcWork;
+            public uint dwFlags;
+        }
 
         [StructLayout(LayoutKind.Sequential)]
         private struct APPBARDATA
@@ -68,6 +86,17 @@ namespace Ink_Canvas.Helpers
                 var abd = new APPBARDATA();
                 abd.cbSize = Marshal.SizeOf(abd);
 
+                // 获取任务栏状态
+                IntPtr state = SHAppBarMessage(ABM_GETSTATE, ref abd);
+                bool isAutoHide = (state.ToInt32() & ABS_AUTOHIDE) == ABS_AUTOHIDE;
+
+                // 如果任务栏是自动隐藏的,返回0
+                if (isAutoHide)
+                {
+                    LogHelper.WriteLogToFile("任务栏处于自动隐藏状态", LogHelper.LogType.Info);
+                    return 0;
+                }
+
                 // 获取任务栏信息
                 IntPtr result = SHAppBarMessage(ABM_GETTASKBARPOS, ref abd);
                 if (result != IntPtr.Zero)
@@ -102,6 +131,7 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 Debug.WriteLine($"获取任务栏高度出错: {ex.Message}");
+                LogHelper.WriteLogToFile($"获取任务栏高度出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
             // 如果获取失败，回退到通用方法
