@@ -940,7 +940,17 @@
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=AutoStraightenLineThresholdSlider, Path=Value, StringFormat={}{0:0}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" 
+                                                         Visibility="{Binding ElementName=ToggleSwitchAutoStraightenLine, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="灵敏度" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider Name="LineStraightenSensitivitySlider" Width="150" Minimum="0.05" Maximum="0.75" 
+                                                Value="0.10" TickFrequency="0.05" IsSnapToTickEnabled="True"
+                                                ValueChanged="LineStraightenSensitivitySlider_ValueChanged" />
+                                        <TextBlock Foreground="#fafafa" Text="{Binding ElementName=LineStraightenSensitivitySlider, Path=Value, StringFormat={}{0:F2}}" 
+                                                   VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围0.05-0.75，越小要求越严格，弯曲的线条越不容易被拉直；值越大越容易识别为直线。" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">

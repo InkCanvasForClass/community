@@ -14,7 +14,7 @@ namespace Ink_Canvas {
         private StrokeCollection newStrokes = new StrokeCollection();
         private List<Circle> circles = new List<Circle>();
         private const double SNAP_THRESHOLD = 15.0; // Distance threshold for endpoint snapping
-        private const double LINE_STRAIGHTEN_THRESHOLD = 0.15; // Threshold for line straightening
+        private const double LINE_STRAIGHTEN_THRESHOLD = 0.10; // 降低阈值，让直线检测更严格
 
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e) {
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = false;
@@ -566,7 +566,7 @@ namespace Ink_Canvas {
 
         // New method: Checks if a stroke is potentially a straight line
         private bool IsPotentialStraightLine(Stroke stroke) {
-            // Minimum length for line detection
+            // 确保有足够的点来进行线条分析
             if (stroke.StylusPoints.Count < 5) 
                 return false;
                 
@@ -574,8 +574,40 @@ namespace Ink_Canvas {
             Point end = stroke.StylusPoints.Last().ToPoint();
             double lineLength = GetDistance(start, end);
             
-            // Line should be longer than 30 pixels
-            return lineLength > 30;
+            // 线条必须足够长才考虑拉直，至少30像素
+            if (lineLength < 30)
+                return false;
+                
+            // 获取用户设置的灵敏度值
+            double sensitivity = Settings.InkToShape.LineStraightenSensitivity;
+            // 快速检查使用略宽松的阈值
+            double quickThreshold = Math.Min(sensitivity * 1.5, 0.20);
+                
+            // 快速检查：计算几个关键点与直线的距离
+            if (stroke.StylusPoints.Count >= 10) {
+                // 取中点和1/4、3/4位置的点，快速检查偏差
+                int quarterIdx = stroke.StylusPoints.Count / 4;
+                int midIdx = stroke.StylusPoints.Count / 2;
+                int threeQuarterIdx = quarterIdx * 3;
+                
+                Point quarterPoint = stroke.StylusPoints[quarterIdx].ToPoint();
+                Point midPoint = stroke.StylusPoints[midIdx].ToPoint();
+                Point threeQuarterPoint = stroke.StylusPoints[threeQuarterIdx].ToPoint();
+                
+                double quarterDeviation = DistanceFromLineToPoint(start, end, quarterPoint);
+                double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
+                double threeQuarterDeviation = DistanceFromLineToPoint(start, end, threeQuarterPoint);
+                
+                // 如果任一点偏离太大，直接排除
+                double quickRelativeThreshold = lineLength * quickThreshold;
+                if (quarterDeviation > quickRelativeThreshold || 
+                    midDeviation > quickRelativeThreshold || 
+                    threeQuarterDeviation > quickRelativeThreshold) {
+                    return false;
+                }
+            }
+            
+            return true;
         }
         
         // New method: Determines if a stroke should be straightened into a line
@@ -588,15 +620,62 @@ namespace Ink_Canvas {
             double maxDeviation = 0;
             double lineLength = GetDistance(start, end);
             
+            // 如果线条太短，不进行拉直处理
+            if (lineLength < 50) {
+                return false;
+            }
+            
+            // 获取用户设置的灵敏度值
+            double sensitivity = Settings.InkToShape.LineStraightenSensitivity;
+            
+            // 计算点与直线的偏差
+            double totalDeviation = 0;
+            int pointCount = 0;
+            
             // Calculate deviation for each point
             foreach (StylusPoint sp in stroke.StylusPoints) {
                 Point p = sp.ToPoint();
                 double deviation = DistanceFromLineToPoint(start, end, p);
                 maxDeviation = Math.Max(maxDeviation, deviation);
+                totalDeviation += deviation;
+                pointCount++;
             }
             
-            // If maximum deviation is less than threshold relative to line length
-            return (maxDeviation / lineLength) < LINE_STRAIGHTEN_THRESHOLD;
+            // 计算平均偏差
+            double avgDeviation = totalDeviation / pointCount;
+            
+            // 检查点分布的一致性 - 如果有些点偏离很大而其他点很接近直线，表明线条有明显弯曲
+            double deviationVariance = 0;
+            foreach (StylusPoint sp in stroke.StylusPoints) {
+                Point p = sp.ToPoint();
+                double deviation = DistanceFromLineToPoint(start, end, p);
+                deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+            }
+            deviationVariance /= pointCount;
+            
+            // 如果最大偏差超过线长的阈值比例，或者偏差方差较大（表示不均匀弯曲），则不拉直
+            if ((maxDeviation / lineLength) > sensitivity) {
+                return false;
+            }
+            
+            // 如果偏差方差大，说明线条弯曲不均匀
+            if (deviationVariance > (sensitivity * lineLength * 0.05)) {
+                return false;
+            }
+            
+            // 检查中点偏离情况 - 针对弧形线条特别有效
+            if (stroke.StylusPoints.Count > 10) {
+                int midIndex = stroke.StylusPoints.Count / 2;
+                Point midPoint = stroke.StylusPoints[midIndex].ToPoint();
+                double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
+                
+                // 如果中点偏离过大，不拉直
+                if (midDeviation > (lineLength * sensitivity * 0.8)) {
+                    return false;
+                }
+            }
+            
+            return true;
         }
         
         // New method: Creates a straight line stroke between two points

@@ -409,6 +409,8 @@ namespace Ink_Canvas
         public bool IsInkToShapeRectangle { get; set; } = true;
         [JsonProperty("isInkToShapeRounded")]
         public bool IsInkToShapeRounded { get; set; } = true;
+        [JsonProperty("lineStraightenSensitivity")]
+        public double LineStraightenSensitivity { get; set; } = 0.10; // 直线检测灵敏度，值越小越严格（0.05-0.75）
     }
 
     public class RandSettings {

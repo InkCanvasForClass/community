@@ -578,6 +578,9 @@ namespace Ink_Canvas {
                 ToggleCheckboxEnableInkToShapeRectangle.IsChecked = Settings.InkToShape.IsInkToShapeRectangle;
 
                 ToggleCheckboxEnableInkToShapeRounded.IsChecked = Settings.InkToShape.IsInkToShapeRounded;
+                
+                // 初始化直线拉直灵敏度
+                LineStraightenSensitivitySlider.Value = Settings.InkToShape.LineStraightenSensitivity;
             } else {
                 Settings.InkToShape = new InkToShape();
             }

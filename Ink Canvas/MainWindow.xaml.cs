@@ -391,6 +391,13 @@ namespace Ink_Canvas {
         {
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(inkCanvas);
+            
+            // 确保光标可见
+            if (Settings.Canvas.IsShowCursor) {
+                inkCanvas.ForceCursor = true;
+                inkCanvas.UseCustomCursor = true;
+                System.Windows.Forms.Cursor.Show();
+            }
         }
 
         #endregion Definations and Loading
