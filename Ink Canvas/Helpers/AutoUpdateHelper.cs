@@ -22,7 +22,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | Local version: {localVersion}");
                 
                 string remoteAddress = proxy;
-                remoteAddress += "https://github.com/awesome-iwb/icc-ce/blob/main/AutomaticUpdateVersionControl.txt";
+                remoteAddress += "https://raw.githubusercontent.com/awesome-iwb/icc-ce/refs/heads/main/AutomaticUpdateVersionControl.txt";
                 string remoteVersion = await GetRemoteVersion(remoteAddress);
 
                 if (remoteVersion != null)
