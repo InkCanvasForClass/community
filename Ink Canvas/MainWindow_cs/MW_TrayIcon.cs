@@ -65,8 +65,22 @@ namespace Ink_Canvas
             var mainWin = (MainWindow)Application.Current.MainWindow;
             if (mainWin.IsLoaded) {
                 App.IsAppExitByUser = true;
+                
+                try {
+                    // 启动新实例
+                    string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                    ProcessStartInfo startInfo = new ProcessStartInfo();
+                    startInfo.FileName = exePath;
+                    startInfo.UseShellExecute = true;
+                    
+                    // 启动进程但不等待
+                    Process.Start(startInfo);
+                } catch (Exception ex) {
+                    LogHelper.NewLog($"重启程序时出错: {ex.Message}");
+                }
+                
+                // 退出当前实例
                 Application.Current.Shutdown();
-                // mainWin.BtnExit_Click(null,null);
             }
         }
 

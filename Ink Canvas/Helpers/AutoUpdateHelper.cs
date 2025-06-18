@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Controls;
 using System.IO.Compression;
+using System.Text;
 
 namespace Ink_Canvas.Helpers
 {
@@ -122,7 +123,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static string updatesFolderPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Ink Canvas Annotation", "AutoUpdate");
+        private static string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
         private static string statusFilePath = null;
 
         public static async Task<bool> DownloadSetupFileAndSaveStatus(string version, string proxy = "")
@@ -137,49 +138,172 @@ namespace Ink_Canvas.Helpers
                     return true;
                 }
 
+                // Ensure update directory exists
+                if (!Directory.Exists(updatesFolderPath))
+                {
+                    Directory.CreateDirectory(updatesFolderPath);
+                    LogHelper.WriteLogToFile($"AutoUpdate | Created updates directory: {updatesFolderPath}");
+                }
+
+                // Use the correct URL format for GitHub releases
                 string downloadUrl = $"{proxy}https://github.com/awesome-iwb/icc-ce/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                LogHelper.WriteLogToFile($"AutoUpdate | Download URL: {downloadUrl}");
 
                 SaveDownloadStatus(false);
                 string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
-                await DownloadFile(downloadUrl, zipFilePath);
-                SaveDownloadStatus(true);
-
-                LogHelper.WriteLogToFile("AutoUpdate | Setup file successfully downloaded.");
-                return true;
+                LogHelper.WriteLogToFile($"AutoUpdate | Target file path: {zipFilePath}");
+                
+                bool downloadSuccess = await DownloadFile(downloadUrl, zipFilePath);
+                
+                if (downloadSuccess)
+                {
+                    SaveDownloadStatus(true);
+                    LogHelper.WriteLogToFile("AutoUpdate | Setup file successfully downloaded.");
+                    return true;
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Failed to download the update file.", LogHelper.LogType.Error);
+                    return false;
+                }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | Error downloading update: {ex.Message}", LogHelper.LogType.Error);
+                if (ex.InnerException != null)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Inner exception: {ex.InnerException.Message}", LogHelper.LogType.Error);
+                }
 
                 SaveDownloadStatus(false);
                 return false;
             }
         }
 
-        private static async Task DownloadFile(string fileUrl, string destinationPath)
+        private static async Task<bool> DownloadFile(string fileUrl, string destinationPath)
         {
             using (HttpClient client = new HttpClient())
             {
                 try
                 {
-                    HttpResponseMessage response = await client.GetAsync(fileUrl);
-                    response.EnsureSuccessStatusCode();
-
-                    using (FileStream fileStream = File.Create(destinationPath))
+                    // Configure client
+                    client.Timeout = TimeSpan.FromMinutes(5); // Longer timeout for downloading larger files
+                    client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    
+                    LogHelper.WriteLogToFile($"AutoUpdate | Downloading from: {fileUrl}");
+                    
+                    // 创建临时文件路径
+                    string tempFilePath = destinationPath + ".tmp";
+                    
+                    // 确保目标目录存在
+                    string directory = Path.GetDirectoryName(destinationPath);
+                    if (!Directory.Exists(directory))
                     {
-                        await response.Content.CopyToAsync(fileStream);
-                        fileStream.Close();
+                        Directory.CreateDirectory(directory);
+                        LogHelper.WriteLogToFile($"AutoUpdate | Created directory: {directory}");
                     }
+                    
+                    // 删除可能存在的临时文件
+                    if (File.Exists(tempFilePath))
+                    {
+                        File.Delete(tempFilePath);
+                        LogHelper.WriteLogToFile($"AutoUpdate | Deleted existing temp file");
+                    }
+                    
+                    // 使用流式下载而不是一次性加载到内存
+                    LogHelper.WriteLogToFile($"AutoUpdate | Starting download...");
+                    
+                    // 获取响应但不读取内容
+                    HttpResponseMessage response = await client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+                    response.EnsureSuccessStatusCode();
+                    
+                    // 获取文件大小（如果服务器提供）
+                    long? totalBytes = response.Content.Headers.ContentLength;
+                    LogHelper.WriteLogToFile($"AutoUpdate | Expected file size: {(totalBytes.HasValue ? totalBytes.Value.ToString() : "unknown")} bytes");
+                    
+                    // 使用流式方式下载文件
+                    using (var contentStream = await response.Content.ReadAsStreamAsync())
+                    using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                    {
+                        byte[] buffer = new byte[8192];
+                        int bytesRead;
+                        long totalBytesRead = 0;
+                        int progressPercent = 0;
+                        
+                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                        {
+                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                            
+                            totalBytesRead += bytesRead;
+                            
+                            // 报告进度（每10%）
+                            if (totalBytes.HasValue)
+                            {
+                                int newProgressPercent = (int)((totalBytesRead * 100) / totalBytes.Value);
+                                if (newProgressPercent >= progressPercent + 10)
+                                {
+                                    progressPercent = newProgressPercent;
+                                    LogHelper.WriteLogToFile($"AutoUpdate | Download progress: {progressPercent}%");
+                                }
+                            }
+                        }
+                        
+                        // 确保所有数据都写入到文件
+                        await fileStream.FlushAsync();
+                    }
+                    
+                    // 检查临时文件大小
+                    if (new FileInfo(tempFilePath).Length == 0)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Downloaded file is empty", LogHelper.LogType.Error);
+                        if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
+                        return false;
+                    }
+                    
+                    // 如果目标文件已存在，先删除
+                    if (File.Exists(destinationPath))
+                    {
+                        File.Delete(destinationPath);
+                        LogHelper.WriteLogToFile($"AutoUpdate | Deleted existing destination file");
+                    }
+                    
+                    // 将临时文件移动到最终位置
+                    File.Move(tempFilePath, destinationPath);
+                    LogHelper.WriteLogToFile($"AutoUpdate | File saved to: {destinationPath}");
+                    
+                    return true;
                 }
                 catch (HttpRequestException ex)
                 {
-                    Console.WriteLine($"AutoUpdate | HTTP request error: {ex.Message}");
-                    throw;
+                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP request error: {ex.Message}", LogHelper.LogType.Error);
+                    if (ex.InnerException != null)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Inner exception: {ex.InnerException.Message}", LogHelper.LogType.Error);
+                    }
+                    return false;
+                }
+                catch (TaskCanceledException ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Download timed out: {ex.Message}", LogHelper.LogType.Error);
+                    return false;
+                }
+                catch (IOException ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | IO error while downloading: {ex.Message}", LogHelper.LogType.Error);
+                    if (ex.InnerException != null)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Inner exception: {ex.InnerException.Message}", LogHelper.LogType.Error);
+                    }
+                    return false;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"AutoUpdate | Error: {ex.Message}");
-                    throw;
+                    LogHelper.WriteLogToFile($"AutoUpdate | Error downloading file: {ex.Message}", LogHelper.LogType.Error);
+                    if (ex.InnerException != null)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Inner exception: {ex.InnerException.Message}", LogHelper.LogType.Error);
+                    }
+                    return false;
                 }
             }
         }
@@ -209,6 +333,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
+                LogHelper.WriteLogToFile($"AutoUpdate | Checking for ZIP file: {zipFilePath}");
 
                 if (!File.Exists(zipFilePath))
                 {
@@ -216,84 +341,265 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
+                // Verify ZIP file size and validity
+                FileInfo fileInfo = new FileInfo(zipFilePath);
+                if (fileInfo.Length == 0)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | ZIP file is empty, cannot continue", LogHelper.LogType.Error);
+                    return;
+                }
+                LogHelper.WriteLogToFile($"AutoUpdate | ZIP file size: {fileInfo.Length} bytes");
+
+                // 获取当前应用程序路径和进程ID
+                string currentAppDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                int currentProcessId = Process.GetCurrentProcess().Id;
+                string appPath = Assembly.GetExecutingAssembly().Location;
+                
+                LogHelper.WriteLogToFile($"AutoUpdate | Current application directory: {currentAppDir}");
+                LogHelper.WriteLogToFile($"AutoUpdate | Current process ID: {currentProcessId}");
+
+                // 创建批处理文件来执行更新操作
+                string batchFilePath = Path.Combine(Path.GetTempPath(), "UpdateICC_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
+                LogHelper.WriteLogToFile($"AutoUpdate | Creating update batch file: {batchFilePath}");
+                
+                // 构建批处理文件内容
+                StringBuilder batchContent = new StringBuilder();
+                batchContent.AppendLine("@echo off");
+                
+                // 使窗口隐藏（使用VBS脚本运行隐藏窗口）
+                batchContent.AppendLine("echo Set objShell = CreateObject(\"WScript.Shell\") > \"%temp%\\hideme.vbs\"");
+                batchContent.AppendLine("echo objShell.Run \"cmd /c \"\"\" ^& WScript.Arguments(0) ^& \"\"\"\", 0, True >> \"%temp%\\hideme.vbs\"");
+                batchContent.AppendLine($"echo Wscript.Sleep 100 >> \"%temp%\\hideme.vbs\"");
+                
+                // 创建真正的更新批处理文件
+                string updateBatPath = Path.Combine(Path.GetTempPath(), "ICCUpdate_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
+                batchContent.AppendLine($"echo @echo off > \"{updateBatPath}\"");
+                
+                // 写入等待进程退出的代码到更新批处理文件
+                batchContent.AppendLine($"echo set PROC_ID={currentProcessId} >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo :CHECK_PROCESS >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo tasklist /fi \"PID eq %PROC_ID%\" ^| find \"%PROC_ID%\" ^> nul >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo if %%ERRORLEVEL%% == 0 ( >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo     timeout /t 1 /nobreak ^> nul >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo     goto CHECK_PROCESS >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
+                
+                // 应用程序已关闭，开始更新操作
+                batchContent.AppendLine($"echo echo Application closed, starting update process... >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo timeout /t 2 /nobreak ^> nul >> \"{updateBatPath}\"");
+                
                 // 创建临时解压目录
                 string extractPath = Path.Combine(updatesFolderPath, $"Extract_{version}");
-                if (Directory.Exists(extractPath))
-                {
-                    Directory.Delete(extractPath, true);
-                }
-                Directory.CreateDirectory(extractPath);
-
-                // 解压ZIP文件
-                LogHelper.WriteLogToFile($"AutoUpdate | Extracting ZIP file to: {extractPath}");
-                ZipFile.ExtractToDirectory(zipFilePath, extractPath);
-
-                // 获取当前应用程序路径
-                string currentAppDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                LogHelper.WriteLogToFile($"AutoUpdate | Current application directory: {currentAppDir}");
-
-                // 复制解压的文件到应用程序目录
-                LogHelper.WriteLogToFile($"AutoUpdate | Copying files to application directory");
-                CopyDirectory(extractPath, currentAppDir);
-
+                batchContent.AppendLine($"echo echo Extracting update files... >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo if exist \"{extractPath}\" rd /s /q \"{extractPath}\" >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo mkdir \"{extractPath}\" >> \"{updateBatPath}\"");
+                
+                // PowerShell解压ZIP文件（因为批处理不直接支持ZIP解压）
+                batchContent.AppendLine($"echo powershell -command \"Expand-Archive -Path '{zipFilePath.Replace("'", "''")}' -DestinationPath '{extractPath.Replace("'", "''")}' -Force\" >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo     goto ERROR_EXIT >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
+                
+                // 复制文件到应用程序目录
+                batchContent.AppendLine($"echo echo Copying updated files to application directory... >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo xcopy /s /y /e \"{extractPath}\\*\" \"{currentAppDir}\\\" >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo     goto ERROR_EXIT >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
+                
                 // 清理临时文件
-                if (Directory.Exists(extractPath))
-                {
-                    Directory.Delete(extractPath, true);
-                }
+                batchContent.AppendLine($"echo echo Cleaning up temporary files... >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo if exist \"{extractPath}\" rd /s /q \"{extractPath}\" >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo if exist \"{zipFilePath}\" del /f /q \"{zipFilePath}\" >> \"{updateBatPath}\"");
+                
+                // 启动更新后的应用程序
+                batchContent.AppendLine($"echo echo Update completed successfully! >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo :: 检查应用程序是否已经在运行 >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo tasklist /FI \"IMAGENAME eq Ink Canvas.exe\" | find /i \"Ink Canvas.exe\" > nul >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo     echo 启动应用程序... >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo     start \"\" \"{appPath}\" >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo ) else ( >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo     echo 应用程序已经在运行，不再重复启动 >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo exit /b 0 >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo goto EXIT >> \"{updateBatPath}\"");
+                
+                // 错误退出处理
+                batchContent.AppendLine($"echo :ERROR_EXIT >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo start \"\" cmd /c \"echo Update failed! ^& pause\" >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo exit /b 1 >> \"{updateBatPath}\"");
+                
+                // 删除批处理文件自身
+                batchContent.AppendLine($"echo :EXIT >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo del \"{updateBatPath}\" >> \"{updateBatPath}\"");
+                batchContent.AppendLine($"echo exit >> \"{updateBatPath}\"");
 
-                // 重启应用程序
-                LogHelper.WriteLogToFile($"AutoUpdate | Update completed, restarting application");
-                RestartApplication();
+                // 使用VBS脚本执行更新批处理文件（隐藏窗口）
+                batchContent.AppendLine($"wscript \"%temp%\\hideme.vbs\" \"{updateBatPath}\"");
+                batchContent.AppendLine("del \"%temp%\\hideme.vbs\"");
+                batchContent.AppendLine("exit");
+                
+                // 写入批处理文件
+                File.WriteAllText(batchFilePath, batchContent.ToString());
+                LogHelper.WriteLogToFile($"AutoUpdate | Created update batch file");
+                
+                // 启动批处理文件（隐藏窗口）
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = batchFilePath,
+                    CreateNoWindow = true,
+                    UseShellExecute = true,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                });
+                
+                LogHelper.WriteLogToFile($"AutoUpdate | Started update batch process with hidden window");
+                
+                // 应用程序将由用户手动关闭或由MainWindow中的代码关闭
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"AutoUpdate | Error installing update: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"AutoUpdate | Error preparing update installation: {ex.Message}", LogHelper.LogType.Error);
+                if (ex.InnerException != null)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Inner exception: {ex.InnerException.Message}", LogHelper.LogType.Error);
+                }
             }
         }
 
-        private static void CopyDirectory(string sourceDir, string destinationDir)
+        private static bool CopyDirectory(string sourceDir, string destinationDir)
         {
-            // 创建目标目录（如果不存在）
-            Directory.CreateDirectory(destinationDir);
-
-            // 复制所有文件
-            foreach (string filePath in Directory.GetFiles(sourceDir))
+            bool allCopiesSuccessful = true;
+            
+            try
             {
-                string fileName = Path.GetFileName(filePath);
-                string destPath = Path.Combine(destinationDir, fileName);
-                try
+                // 创建目标目录（如果不存在）
+                Directory.CreateDirectory(destinationDir);
+                LogHelper.WriteLogToFile($"AutoUpdate | Created/verified destination directory: {destinationDir}");
+
+                // 复制所有文件
+                foreach (string filePath in Directory.GetFiles(sourceDir))
                 {
-                    // 如果目标文件存在，先删除
-                    if (File.Exists(destPath))
+                    string fileName = Path.GetFileName(filePath);
+                    string destPath = Path.Combine(destinationDir, fileName);
+                    try
                     {
-                        File.Delete(destPath);
+                        LogHelper.WriteLogToFile($"AutoUpdate | Copying file: {fileName}");
+                        
+                        // 如果目标文件存在，先删除
+                        if (File.Exists(destPath))
+                        {
+                            File.Delete(destPath);
+                        }
+                        
+                        File.Copy(filePath, destPath);
                     }
-                    File.Copy(filePath, destPath);
+                    catch (Exception ex)
+                    {
+                        allCopiesSuccessful = false;
+                        LogHelper.WriteLogToFile($"AutoUpdate | Error copying file {fileName}: {ex.Message}", LogHelper.LogType.Error);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | Error copying file {fileName}: {ex.Message}", LogHelper.LogType.Error);
-                }
-            }
 
-            // 递归复制所有子目录
-            foreach (string subDirPath in Directory.GetDirectories(sourceDir))
+                // 递归复制所有子目录
+                foreach (string subDirPath in Directory.GetDirectories(sourceDir))
+                {
+                    string subDirName = Path.GetFileName(subDirPath);
+                    string destSubDir = Path.Combine(destinationDir, subDirName);
+                    
+                    bool subDirCopyResult = CopyDirectory(subDirPath, destSubDir);
+                    if (!subDirCopyResult)
+                    {
+                        allCopiesSuccessful = false;
+                    }
+                }
+                
+                return allCopiesSuccessful;
+            }
+            catch (Exception ex)
             {
-                string subDirName = Path.GetFileName(subDirPath);
-                string destSubDir = Path.Combine(destinationDir, subDirName);
-                CopyDirectory(subDirPath, destSubDir);
+                LogHelper.WriteLogToFile($"AutoUpdate | Error copying directory {sourceDir}: {ex.Message}", LogHelper.LogType.Error);
+                return false;
             }
         }
 
         private static void RestartApplication()
         {
-            string appPath = Assembly.GetExecutingAssembly().Location;
-            Process.Start(appPath);
-            Application.Current.Dispatcher.Invoke(() =>
+            try
             {
-                Application.Current.Shutdown();
-            });
+                string appPath = Assembly.GetExecutingAssembly().Location;
+                LogHelper.WriteLogToFile($"AutoUpdate | Restarting application: {appPath}");
+                
+                // Create a batch file to wait briefly and then start the application
+                // This allows the current process to fully exit before starting the new instance
+                string batchFilePath = Path.Combine(Path.GetTempPath(), "RestartICC_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
+                
+                string batchContent = 
+                    "@echo off\r\n" +
+                    "timeout /t 2 /nobreak >nul\r\n" +
+                    ":: 检查应用程序是否已经在运行\r\n" +
+                    "tasklist /FI \"IMAGENAME eq Ink Canvas.exe\" | find /i \"Ink Canvas.exe\" > nul\r\n" +
+                    "if %ERRORLEVEL% neq 0 (\r\n" +
+                    "    echo 启动应用程序...\r\n" +
+                    $"    start \"\" \"{appPath}\"\r\n" +
+                    ") else (\r\n" +
+                    "    echo 应用程序已经在运行，不再重复启动\r\n" +
+                    ")\r\n" +
+                    "timeout /t 1 /nobreak >nul\r\n" +
+                    "del \"%~f0\"\r\n" +
+                    "exit\r\n"; // 确保批处理进程结束
+                
+                File.WriteAllText(batchFilePath, batchContent);
+                
+                // Start the batch file
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = "cmd.exe",
+                    Arguments = $"/c start \"\" \"{batchFilePath}\"",
+                    CreateNoWindow = true,
+                    UseShellExecute = false
+                });
+                
+                LogHelper.WriteLogToFile($"AutoUpdate | Created restart script at {batchFilePath}");
+                
+                // Shutdown the application
+                LogHelper.WriteLogToFile($"AutoUpdate | Shutting down application for restart");
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Application.Current.Shutdown();
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Error restarting application: {ex.Message}", LogHelper.LogType.Error);
+                
+                // Fallback direct restart approach
+                try
+                {
+                    string appPath = Assembly.GetExecutingAssembly().Location;
+                    LogHelper.WriteLogToFile($"AutoUpdate | Attempting direct restart: {appPath}");
+                    
+                    // 检查是否已有实例运行
+                    Process[] processes = Process.GetProcessesByName("Ink Canvas");
+                    if (processes.Length <= 1) // 只有当前进程
+                    {
+                        Process.Start(appPath);
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Application already running, not starting a new instance");
+                    }
+                    
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Application.Current.Shutdown();
+                    });
+                }
+                catch (Exception fallbackEx)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Fallback restart also failed: {fallbackEx.Message}", LogHelper.LogType.Error);
+                }
+            }
         }
 
         private static void ExecuteCommandLine(string command)
@@ -303,7 +609,7 @@ namespace Ink_Canvas.Helpers
                 ProcessStartInfo processStartInfo = new ProcessStartInfo
                 {
                     FileName = "cmd.exe",
-                    Arguments = $"/c {command}",
+                    Arguments = $"/c {command} & exit", // 添加exit确保cmd进程退出
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
@@ -313,12 +619,20 @@ namespace Ink_Canvas.Helpers
                 using (Process process = new Process { StartInfo = processStartInfo })
                 {
                     process.Start();
+                    // 设置一个超时时间
+                    bool exited = process.WaitForExit(500); // 等待500毫秒
+                    if (!exited)
+                    {
+                        // 不等待进程完成，让它在后台运行
+                        LogHelper.WriteLogToFile($"AutoUpdate | Command is running in background");
+                    }
                     Application.Current.Shutdown();
-                    /*process.WaitForExit();
-                    int exitCode = process.ExitCode;*/
                 }
             }
-            catch { }
+            catch (Exception ex) 
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Error executing command: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         public static void DeleteUpdatesFolder()
@@ -327,12 +641,53 @@ namespace Ink_Canvas.Helpers
             {
                 if (Directory.Exists(updatesFolderPath))
                 {
-                    Directory.Delete(updatesFolderPath, true);
+                    // Try to delete all files first in case of locking issues
+                    foreach (string file in Directory.GetFiles(updatesFolderPath, "*", SearchOption.AllDirectories))
+                    {
+                        try
+                        {
+                            File.Delete(file);
+                            LogHelper.WriteLogToFile($"AutoUpdate | Deleted file: {file}");
+                        }
+                        catch (Exception fileEx)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | Could not delete file {file}: {fileEx.Message}", LogHelper.LogType.Warning);
+                        }
+                    }
+                    
+                    // Then try to delete subdirectories
+                    foreach (string dir in Directory.GetDirectories(updatesFolderPath))
+                    {
+                        try
+                        {
+                            Directory.Delete(dir, true);
+                            LogHelper.WriteLogToFile($"AutoUpdate | Deleted directory: {dir}");
+                        }
+                        catch (Exception dirEx)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | Could not delete directory {dir}: {dirEx.Message}", LogHelper.LogType.Warning);
+                        }
+                    }
+                    
+                    // Finally try to delete the main directory
+                    try
+                    {
+                        Directory.Delete(updatesFolderPath, true);
+                        LogHelper.WriteLogToFile($"AutoUpdate | Deleted updates folder: {updatesFolderPath}");
+                    }
+                    catch (Exception mainDirEx)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Could not completely delete updates folder: {mainDirEx.Message}", LogHelper.LogType.Warning);
+                    }
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Updates folder does not exist: {updatesFolderPath}");
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"AutoUpdate clearing| Error deleting updates folder: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"AutoUpdate | Error deleting updates folder: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }
@@ -374,3 +729,4 @@ namespace Ink_Canvas.Helpers
         }
     }
 }
+
