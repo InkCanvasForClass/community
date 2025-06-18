@@ -682,14 +682,32 @@ namespace Ink_Canvas {
         private StylusPointCollection CreateStraightLine(Point start, Point end) {
             StylusPointCollection points = new StylusPointCollection();
             
-            // Create a more natural pressure profile for the line
-            if (Settings.InkToShape.IsInkToShapeNoFakePressureRectangle == true || penType == 1) {
-                points.Add(new StylusPoint(start.X, start.Y));
-                points.Add(new StylusPoint(end.X, end.Y));
+            // 根据是否启用压感触屏模式决定如何设置压感
+            // 如果未启用压感触屏模式，则使用均匀粗细
+            if (!Settings.Canvas.EnablePressureTouchMode || Settings.Canvas.DisablePressure || 
+                Settings.InkToShape.IsInkToShapeNoFakePressureRectangle == true || penType == 1) {
+                // 使用均匀粗细（所有点压感值都是0.5f）
+                points.Add(new StylusPoint(start.X, start.Y, 0.5f));
+                
+                // 可以添加一些额外的中间点使线条更平滑（均匀粗细）
+                double distance = GetDistance(start, end);
+                if (distance > 100) {
+                    // 对于较长的线条，添加几个中间点
+                    for (int i = 1; i < 3; i++) {
+                        double ratio = i / 3.0;
+                        Point midPoint = new Point(
+                            start.X + (end.X - start.X) * ratio,
+                            start.Y + (end.Y - start.Y) * ratio);
+                        points.Add(new StylusPoint(midPoint.X, midPoint.Y, 0.5f));
+                    }
+                }
+                
+                points.Add(new StylusPoint(end.X, end.Y, 0.5f));
             } else {
+                // 启用了压感触屏模式，使用变化的粗细（原有行为）
                 points.Add(new StylusPoint(start.X, start.Y, 0.4f));
                 
-                // Add a middle point with higher pressure
+                // 添加中点，压感值较高，使线条中间较粗
                 Point midPoint = new Point((start.X + end.X) / 2, (start.Y + end.Y) / 2);
                 points.Add(new StylusPoint(midPoint.X, midPoint.Y, 0.8f));
                 
