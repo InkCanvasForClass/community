@@ -13,6 +13,8 @@ namespace Ink_Canvas {
     public partial class MainWindow : Window {
         private StrokeCollection newStrokes = new StrokeCollection();
         private List<Circle> circles = new List<Circle>();
+        private const double SNAP_THRESHOLD = 15.0; // Distance threshold for endpoint snapping
+        private const double LINE_STRAIGHTEN_THRESHOLD = 0.15; // Threshold for line straightening
 
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e) {
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = false;
@@ -20,108 +22,50 @@ namespace Ink_Canvas {
             try {
                 inkCanvas.Opacity = 1;
                 
-                // 直线自动拉直功能
-                if (Settings.Canvas.AutoStraightenLine && e.Stroke.StylusPoints.Count > 1 && drawingShapeMode == 0 && penType == 0) {
-                    // 获取起点和终点
-                    StylusPoint startPoint = e.Stroke.StylusPoints[0];
-                    StylusPoint endPoint = e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1];
-                    
-                    // 计算直线长度
-                    double length = Math.Sqrt(Math.Pow(endPoint.X - startPoint.X, 2) + Math.Pow(endPoint.Y - startPoint.Y, 2));
-                    
-                    // 判断是否需要拉直
-                    if (length >= Settings.Canvas.AutoStraightenLineThreshold) {
-                        // 判断是否符合直线特征（计算点到直线的最大距离）
-                        double maxDistance = 0;
-                        for (int i = 1; i < e.Stroke.StylusPoints.Count - 1; i++) {
-                            StylusPoint point = e.Stroke.StylusPoints[i];
-                            double distance = DistanceFromPointToLine(point, startPoint, endPoint);
-                            maxDistance = Math.Max(maxDistance, distance);
-                        }
+                // Apply line straightening and endpoint snapping if ink-to-shape is enabled
+                if (Settings.InkToShape.IsInkToShapeEnabled) {
+                    // Check if this stroke could be a straight line
+                    if (IsPotentialStraightLine(e.Stroke)) {
+                        // Get start and end points of the stroke
+                        Point startPoint = e.Stroke.StylusPoints[0].ToPoint();
+                        Point endPoint = e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint();
                         
-                        // 如果最大距离小于线长的15%，认为是直线
-                        if (maxDistance < length * 0.15) {
-                            // 创建新的直线点集合
-                            StylusPointCollection newPoints = new StylusPointCollection();
-                            
-                            // 直线端点吸附功能
-                            if (Settings.Canvas.LineEndpointSnapping) {
-                                bool startPointSnapped = false;
-                                bool endPointSnapped = false;
-                                
-                                // 获取画布上的所有笔画
-                                StrokeCollection allStrokes = inkCanvas.Strokes;
-                                
-                                // 排除当前笔画
-                                StrokeCollection otherStrokes = new StrokeCollection();
-                                foreach (Stroke stroke in allStrokes) {
-                                    if (stroke != e.Stroke) {
-                                        otherStrokes.Add(stroke);
-                                    }
-                                }
-                                
-                                // 查找最近的端点
-                                double minStartDistance = Settings.Canvas.LineEndpointSnappingThreshold;
-                                double minEndDistance = Settings.Canvas.LineEndpointSnappingThreshold;
-                                StylusPoint nearestToStart = startPoint;
-                                StylusPoint nearestToEnd = endPoint;
-                                
-                                foreach (Stroke stroke in otherStrokes) {
-                                    // 只考虑直线（只有两个点的笔画）
-                                    if (stroke.StylusPoints.Count == 2) {
-                                        StylusPoint strokeStart = stroke.StylusPoints[0];
-                                        StylusPoint strokeEnd = stroke.StylusPoints[1];
-                                        
-                                        // 计算当前笔画起点到其他笔画端点的距离
-                                        double distanceToStrokeStart = Distance(startPoint, strokeStart);
-                                        double distanceToStrokeEnd = Distance(startPoint, strokeEnd);
-                                        
-                                        // 如果距离小于阈值且小于当前最小距离，更新最近点
-                                        if (distanceToStrokeStart < minStartDistance) {
-                                            minStartDistance = distanceToStrokeStart;
-                                            nearestToStart = strokeStart;
-                                            startPointSnapped = true;
-                                        }
-                                        if (distanceToStrokeEnd < minStartDistance) {
-                                            minStartDistance = distanceToStrokeEnd;
-                                            nearestToStart = strokeEnd;
-                                            startPointSnapped = true;
-                                        }
-                                        
-                                        // 计算当前笔画终点到其他笔画端点的距离
-                                        double distanceEndToStrokeStart = Distance(endPoint, strokeStart);
-                                        double distanceEndToStrokeEnd = Distance(endPoint, strokeEnd);
-                                        
-                                        // 如果距离小于阈值且小于当前最小距离，更新最近点
-                                        if (distanceEndToStrokeStart < minEndDistance) {
-                                            minEndDistance = distanceEndToStrokeStart;
-                                            nearestToEnd = strokeStart;
-                                            endPointSnapped = true;
-                                        }
-                                        if (distanceEndToStrokeEnd < minEndDistance) {
-                                            minEndDistance = distanceEndToStrokeEnd;
-                                            nearestToEnd = strokeEnd;
-                                            endPointSnapped = true;
-                                        }
-                                    }
-                                }
-                                
-                                // 应用吸附结果
-                                newPoints.Add(startPointSnapped ? nearestToStart : startPoint);
-                                newPoints.Add(endPointSnapped ? nearestToEnd : endPoint);
-                            } else {
-                                // 不启用吸附，直接使用原始端点
-                                newPoints.Add(startPoint);
-                                newPoints.Add(endPoint);
+                        // Try to snap endpoints to existing strokes
+                        bool snapped = false;
+                        if (Settings.InkToShape.IsInkToShapeRectangle || Settings.InkToShape.IsInkToShapeTriangle) {
+                            Point[] snappedPoints = GetSnappedEndpoints(startPoint, endPoint);
+                            if (snappedPoints != null) {
+                                startPoint = snappedPoints[0];
+                                endPoint = snappedPoints[1];
+                                snapped = true;
                             }
+                        }
+
+                        // Create straight line stroke
+                        if (snapped || ShouldStraightenLine(e.Stroke)) {
+                            StylusPointCollection straightLinePoints = CreateStraightLine(startPoint, endPoint);
+                            Stroke straightStroke = new Stroke(straightLinePoints) {
+                                DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
+                            };
                             
-                            // 替换原有笔迹
-                            e.Stroke.StylusPoints = newPoints;
+                            // Replace the original stroke with the straightened one
+                            SetNewBackupOfStroke();
+                            _currentCommitType = CommitReason.ShapeRecognition;
+                            inkCanvas.Strokes.Remove(e.Stroke);
+                            inkCanvas.Strokes.Add(straightStroke);
+                            _currentCommitType = CommitReason.UserInput;
+                            
+                            // We can't modify e.Stroke directly, but we need to update newStrokes
+                            // to ensure proper shape recognition for the straightened line
+                            if (newStrokes.Contains(e.Stroke)) {
+                                newStrokes.Remove(e.Stroke);
+                                newStrokes.Add(straightStroke);
+                            }
                         }
                     }
                 }
-                
-                if (Settings.InkToShape.IsInkToShapeEnabled && drawingShapeMode == 0 && !isInMultiTouchMode && penType == 0) {
+
+                if (Settings.InkToShape.IsInkToShapeEnabled && !Environment.Is64BitProcess) {
                     void InkToShapeProcess() {
                         try {
                             newStrokes.Add(e.Stroke);
@@ -422,27 +366,13 @@ namespace Ink_Canvas {
                     InkToShapeProcess();
                 }
 
-                // 如果启用了屏蔽压感功能，强制所有点的压感值为0.5
-                if (Settings.Canvas.DisablePressure) {
-                    var stylusPoints = new StylusPointCollection();
-                    foreach (var point in e.Stroke.StylusPoints) {
-                        var newPoint = new StylusPoint(point.X, point.Y, 0.5f);
-                        stylusPoints.Add(newPoint);
-                    }
-                    e.Stroke.StylusPoints = stylusPoints;
-                    return; // 跳过后续的压感处理
-                }
-                
-                // 检查是否是压感笔书写，如果启用了压感触屏模式则跳过此检查
-                if (!Settings.Canvas.EnablePressureTouchMode) {
-                    foreach (var stylusPoint in e.Stroke.StylusPoints)
-                        //LogHelper.WriteLogToFile(stylusPoint.PressureFactor.ToString(), LogHelper.LogType.Info);
-                        // 检查是否是压感笔书写
-                        //if (stylusPoint.PressureFactor != 0.5 && stylusPoint.PressureFactor != 0)
-                        if ((stylusPoint.PressureFactor > 0.501 || stylusPoint.PressureFactor < 0.5) &&
-                            stylusPoint.PressureFactor != 0)
-                            return;
-                }
+                foreach (var stylusPoint in e.Stroke.StylusPoints)
+                    //LogHelper.WriteLogToFile(stylusPoint.PressureFactor.ToString(), LogHelper.LogType.Info);
+                    // 检查是否是压感笔书写
+                    //if (stylusPoint.PressureFactor != 0.5 && stylusPoint.PressureFactor != 0)
+                    if ((stylusPoint.PressureFactor > 0.501 || stylusPoint.PressureFactor < 0.5) &&
+                        stylusPoint.PressureFactor != 0)
+                        return;
 
                 try {
                     if (e.Stroke.StylusPoints.Count > 3) {
@@ -536,6 +466,124 @@ namespace Ink_Canvas {
             catch { }
 
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = true;
+        }
+
+        // New method: Checks if a stroke is potentially a straight line
+        private bool IsPotentialStraightLine(Stroke stroke) {
+            // Minimum length for line detection
+            if (stroke.StylusPoints.Count < 5) 
+                return false;
+                
+            Point start = stroke.StylusPoints.First().ToPoint();
+            Point end = stroke.StylusPoints.Last().ToPoint();
+            double lineLength = GetDistance(start, end);
+            
+            // Line should be longer than 30 pixels
+            return lineLength > 30;
+        }
+        
+        // New method: Determines if a stroke should be straightened into a line
+        private bool ShouldStraightenLine(Stroke stroke) {
+            // Basic implementation: check if points roughly follow a straight line
+            Point start = stroke.StylusPoints.First().ToPoint();
+            Point end = stroke.StylusPoints.Last().ToPoint();
+            
+            // Calculate max deviation from the straight line between start and end
+            double maxDeviation = 0;
+            double lineLength = GetDistance(start, end);
+            
+            // Calculate deviation for each point
+            foreach (StylusPoint sp in stroke.StylusPoints) {
+                Point p = sp.ToPoint();
+                double deviation = DistanceFromLineToPoint(start, end, p);
+                maxDeviation = Math.Max(maxDeviation, deviation);
+            }
+            
+            // If maximum deviation is less than threshold relative to line length
+            return (maxDeviation / lineLength) < LINE_STRAIGHTEN_THRESHOLD;
+        }
+        
+        // New method: Creates a straight line stroke between two points
+        private StylusPointCollection CreateStraightLine(Point start, Point end) {
+            StylusPointCollection points = new StylusPointCollection();
+            
+            // Create a more natural pressure profile for the line
+            if (Settings.InkToShape.IsInkToShapeNoFakePressureRectangle == true || penType == 1) {
+                points.Add(new StylusPoint(start.X, start.Y));
+                points.Add(new StylusPoint(end.X, end.Y));
+            } else {
+                points.Add(new StylusPoint(start.X, start.Y, 0.4f));
+                
+                // Add a middle point with higher pressure
+                Point midPoint = new Point((start.X + end.X) / 2, (start.Y + end.Y) / 2);
+                points.Add(new StylusPoint(midPoint.X, midPoint.Y, 0.8f));
+                
+                points.Add(new StylusPoint(end.X, end.Y, 0.4f));
+            }
+            
+            return points;
+        }
+        
+        // New method: Gets distance from point to a line defined by two points
+        private double DistanceFromLineToPoint(Point lineStart, Point lineEnd, Point point) {
+            // Calculate distance from point to line defined by lineStart and lineEnd
+            double lineLength = GetDistance(lineStart, lineEnd);
+            if (lineLength == 0) return GetDistance(point, lineStart);
+            
+            // Calculate the cross product to get the perpendicular distance
+            double distance = Math.Abs((lineEnd.Y - lineStart.Y) * point.X - 
+                                      (lineEnd.X - lineStart.X) * point.Y + 
+                                      lineEnd.X * lineStart.Y - lineEnd.Y * lineStart.X) / lineLength;
+            return distance;
+        }
+        
+        // New method: Attempts to snap endpoints to existing stroke endpoints
+        private Point[] GetSnappedEndpoints(Point start, Point end) {
+            bool startSnapped = false;
+            bool endSnapped = false;
+            Point snappedStart = start;
+            Point snappedEnd = end;
+            
+            // Check all strokes in canvas for potential snap points
+            foreach (Stroke stroke in inkCanvas.Strokes) {
+                if (stroke.StylusPoints.Count == 0) continue;
+                
+                // Get stroke endpoints
+                Point strokeStart = stroke.StylusPoints.First().ToPoint();
+                Point strokeEnd = stroke.StylusPoints.Last().ToPoint();
+                
+                // Check if start point should snap to an endpoint
+                if (!startSnapped) {
+                    if (GetDistance(start, strokeStart) < SNAP_THRESHOLD) {
+                        snappedStart = strokeStart;
+                        startSnapped = true;
+                    } else if (GetDistance(start, strokeEnd) < SNAP_THRESHOLD) {
+                        snappedStart = strokeEnd;
+                        startSnapped = true;
+                    }
+                }
+                
+                // Check if end point should snap to an endpoint
+                if (!endSnapped) {
+                    if (GetDistance(end, strokeStart) < SNAP_THRESHOLD) {
+                        snappedEnd = strokeStart;
+                        endSnapped = true;
+                    } else if (GetDistance(end, strokeEnd) < SNAP_THRESHOLD) {
+                        snappedEnd = strokeEnd;
+                        endSnapped = true;
+                    }
+                }
+                
+                // If both endpoints are snapped, we're done
+                if (startSnapped && endSnapped) break;
+            }
+            
+            // Return snapped points if any snapping occurred
+            if (startSnapped || endSnapped) {
+                return new Point[] { snappedStart, snappedEnd };
+            }
+            
+            return null;
         }
 
         private void SetNewBackupOfStroke() {
@@ -655,32 +703,6 @@ namespace Ink_Canvas {
 
         public StylusPoint GetCenterPoint(StylusPoint point1, StylusPoint point2) {
             return new StylusPoint((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2);
-        }
-
-        /// <summary>
-        /// 计算点到直线的距离
-        /// </summary>
-        /// <param name="point">点</param>
-        /// <param name="lineStart">直线起点</param>
-        /// <param name="lineEnd">直线终点</param>
-        /// <returns>距离</returns>
-        private double DistanceFromPointToLine(StylusPoint point, StylusPoint lineStart, StylusPoint lineEnd) {
-            double lineLength = Math.Sqrt(Math.Pow(lineEnd.X - lineStart.X, 2) + Math.Pow(lineEnd.Y - lineStart.Y, 2));
-            if (lineLength == 0) return 0;
-            
-            double area = Math.Abs(
-                (lineEnd.X - lineStart.X) * (lineStart.Y - point.Y) - 
-                (lineStart.X - point.X) * (lineEnd.Y - lineStart.Y)
-            );
-            
-            return area / lineLength;
-        }
-
-        /// <summary>
-        /// 计算两点之间的距离
-        /// </summary>
-        private double Distance(StylusPoint p1, StylusPoint p2) {
-            return Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2));
         }
     }
 }
