@@ -18,6 +18,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using System.Windows.Input;
+using System.Windows.Data;
+using System.Windows.Documents;
+using System.Windows.Media.Animation;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -154,28 +157,9 @@ namespace Ink_Canvas {
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e) {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
-            // 修复"显示画笔光标"选项不可用的问题
-            if (Settings.Canvas.IsShowCursor) {
-                inkCanvas1.UseCustomCursor = true;
-                // 修复触屏和数位笔时光标不显示：强制显示光标，不再依赖鼠标或触控状态
-                inkCanvas1.ForceCursor = true;
-
-                // 根据编辑模式设置不同的光标
-                if (inkCanvas1.EditingMode == InkCanvasEditingMode.EraseByPoint) {
-                    var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Eraser.cur", UriKind.Relative));
-                    if (sri != null)
-                        inkCanvas1.Cursor = new Cursor(sri.Stream);
-                } else if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) {
-                    var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
-                    if (sri != null)
-                        inkCanvas1.Cursor = new Cursor(sri.Stream);
-                } else if (inkCanvas1.EditingMode == InkCanvasEditingMode.Select) {
-                    inkCanvas1.Cursor = Cursors.Cross;
-                }
-            } else {
-                inkCanvas1.UseCustomCursor = false;
-                inkCanvas1.ForceCursor = false;
-            }
+            
+            // 使用辅助方法设置光标
+            SetCursorBasedOnEditingMode(inkCanvas1);
 
             if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) forcePointEraser = !forcePointEraser;
         }
@@ -355,54 +339,280 @@ namespace Ink_Canvas {
             SaveSettingsToFile();
         }
 
+        // 添加一个辅助方法，根据当前编辑模式设置光标
+        private void SetCursorBasedOnEditingMode(InkCanvas canvas)
+        {
+            if (Settings.Canvas.IsShowCursor) {
+                canvas.UseCustomCursor = true;
+                canvas.ForceCursor = true;
+                
+                // 根据编辑模式设置不同的光标
+                if (canvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                    canvas.Cursor = Cursors.Cross;
+                } else if (canvas.EditingMode == InkCanvasEditingMode.Ink) {
+                    var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
+                    if (sri != null)
+                        canvas.Cursor = new Cursor(sri.Stream);
+                } else if (canvas.EditingMode == InkCanvasEditingMode.Select) {
+                    canvas.Cursor = Cursors.Cross;
+                }
+                
+                System.Windows.Forms.Cursor.Show();
+            } else {
+                canvas.UseCustomCursor = false;
+                canvas.ForceCursor = false;
+                System.Windows.Forms.Cursor.Show();
+            }
+        }
+
         // 鼠标输入
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            inkCanvas.Cursor = Cursors.Arrow;
+            // 使用辅助方法设置光标
+            SetCursorBasedOnEditingMode(inkCanvas);
         }
 
         // 手写笔输入
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
-            var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
-            if (sri != null)
-                inkCanvas.Cursor = new Cursor(sri.Stream);
+            // 使用辅助方法设置光标
+            SetCursorBasedOnEditingMode(inkCanvas);
         }
 
         // 触摸输入，不隐藏光标
         private void inkCanvas_TouchDown(object sender, TouchEventArgs e)
         {
-            // 修改：根据用户设置决定是否强制显示自定义光标
-            if (Settings.Canvas.IsShowCursor)
-            {
-                inkCanvas.ForceCursor = true;
-                // 确保鼠标光标对触摸可见
-                System.Windows.Forms.Cursor.Show();
-                // 新增：当处于套索选择模式时保持光标可见
-                if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
-                    inkCanvas.Cursor = Cursors.Cross;
-            }
-            else
-            {
-                inkCanvas.ForceCursor = false;
-                System.Windows.Forms.Cursor.Show();
-            }
+            // 使用辅助方法设置光标
+            SetCursorBasedOnEditingMode(inkCanvas);
         }
 
         // 触摸结束，恢复光标
         private void inkCanvas_TouchUp(object sender, TouchEventArgs e)
         {
-            // 修改：根据当前模式和设置恢复光标状态
-            if (Settings.Canvas.IsShowCursor) {
-                inkCanvas.ForceCursor = true;
-                // 确保鼠标光标对触摸可见
-                System.Windows.Forms.Cursor.Show();
-            } else {
-                inkCanvas.ForceCursor = false;
-                System.Windows.Forms.Cursor.Show();
-            }
+            // 使用辅助方法设置光标
+            SetCursorBasedOnEditingMode(inkCanvas);
         }
 
         #endregion Definations and Loading
+
+        #region Navigation Sidebar Methods
+
+        // 侧边栏导航按钮事件处理
+        private void NavStartup_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到启动设置页面
+            ShowSettingsSection("startup");
+        }
+
+        private void NavCanvas_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到画布设置页面
+            ShowSettingsSection("canvas");
+        }
+
+        private void NavGesture_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到手势设置页面
+            ShowSettingsSection("gesture");
+        }
+
+        private void NavInkRecognition_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到墨迹识别设置页面
+            ShowSettingsSection("inkrecognition");
+        }
+
+        private void NavCrashAction_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到崩溃处理设置页面
+            ShowSettingsSection("crashaction");
+        }
+
+        private void NavPPT_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到PPT设置页面
+            ShowSettingsSection("ppt");
+        }
+
+        private void NavAdvanced_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到高级设置页面
+            ShowSettingsSection("advanced");
+        }
+
+        private void NavAutomation_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到自动化设置页面
+            ShowSettingsSection("automation");
+        }
+
+        private void NavRandomWindow_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到随机窗口设置页面
+            ShowSettingsSection("randomwindow");
+        }
+
+        private void NavAbout_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到关于页面
+            ShowSettingsSection("about");
+        }
+
+        // 新增：个性化设置
+        private void NavTheme_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到个性化设置页面
+            ShowSettingsSection("theme");
+        }
+
+        // 新增：快捷键设置
+        private void NavShortcuts_Click(object sender, RoutedEventArgs e)
+        {
+            // 切换到快捷键设置页面
+            ShowSettingsSection("shortcuts");
+            // 如果设置部分尚未快捷键
+            MessageBox.Show("设置功能正在开发中", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void BtnCloseSettings_Click(object sender, RoutedEventArgs e)
+        {
+            // 关闭设置面板
+            BorderSettings.Visibility = Visibility.Collapsed;
+            BorderSettingsMask.IsHitTestVisible = false;
+        }
+
+        // 新增：折叠侧边栏
+        private void CollapseNavSidebar_Click(object sender, RoutedEventArgs e)
+        {
+            // 折叠/展开侧边栏
+            var columnDefinitions = ((Grid)BorderSettings.Child).ColumnDefinitions;
+            if (columnDefinitions[0].Width.Value == 50)
+            {
+                // 折叠侧边栏
+                columnDefinitions[0].Width = new GridLength(0);
+            }
+            else
+            {
+                // 展开侧边栏
+                columnDefinitions[0].Width = new GridLength(50);
+            }
+        }
+        
+        // 新增：显示侧边栏
+        private void ShowNavSidebar_Click(object sender, RoutedEventArgs e)
+        {
+            // 确保侧边栏展开
+            var columnDefinitions = ((Grid)BorderSettings.Child).ColumnDefinitions;
+            columnDefinitions[0].Width = new GridLength(50);
+        }
+
+        // 辅助方法：显示指定的设置部分
+        private void ShowSettingsSection(string sectionTag)
+        {
+            // 显示设置面板
+            BorderSettings.Visibility = Visibility.Visible;
+            BorderSettingsMask.IsHitTestVisible = true;
+            
+            // 获取SettingsPanelScrollViewer中的所有GroupBox
+            var stackPanel = SettingsPanelScrollViewer.Content as StackPanel;
+            if (stackPanel == null) return;
+            
+            // 首先隐藏所有GroupBox
+            foreach (var child in stackPanel.Children)
+            {
+                if (child is GroupBox groupBox)
+                {
+                    groupBox.Visibility = Visibility.Collapsed;
+                }
+            }
+            
+            // 根据传入的sectionTag显示相应的设置部分
+            switch (sectionTag.ToLower())
+            {
+                case "startup":
+                    // 显示启动设置
+                    ShowGroupBoxByHeader(stackPanel, "启动");
+                    break;
+                case "canvas":
+                    // 显示画板和墨迹设置
+                    ShowGroupBoxByHeader(stackPanel, "画板和墨迹");
+                    break;
+                case "gesture":
+                    // 显示手势设置
+                    ShowGroupBoxByHeader(stackPanel, "手势");
+                    break;
+                case "inkrecognition":
+                    // 显示墨迹纠正设置
+                    ShowGroupBoxByHeader(stackPanel, "墨迹纠正");
+                    if (GroupBoxInkRecognition != null)
+                        GroupBoxInkRecognition.Visibility = Visibility.Visible;
+                    break;
+                case "crashaction":
+                    // 显示崩溃后操作设置
+                    ShowGroupBoxByHeader(stackPanel, "崩溃后操作");
+                    break;
+                case "ppt":
+                    // 显示PPT联动设置
+                    ShowGroupBoxByHeader(stackPanel, "PPT联动");
+                    break;
+                case "advanced":
+                    // 显示高级设置
+                    // 这里可能需要根据实际情况调整
+                    break;
+                case "automation":
+                    // 显示自动化设置
+                    // 这里可能需要根据实际情况调整
+                    break;
+                case "randomwindow":
+                    // 显示随机窗口设置
+                    if (GroupBoxRandWindow != null)
+                        GroupBoxRandWindow.Visibility = Visibility.Visible;
+                    break;
+                case "theme":
+                    // 显示主题设置
+                    if (GroupBoxAppearanceNewUI != null)
+                        GroupBoxAppearanceNewUI.Visibility = Visibility.Visible;
+                    break;
+                case "shortcuts":
+                    // 显示快捷键设置
+                    // 快捷键设置部分可能尚未实现
+                    break;
+                case "about":
+                    // 显示关于页面
+                    ShowGroupBoxByHeader(stackPanel, "关于");
+                    break;
+                default:
+                    // 默认显示第一个GroupBox
+                    if (stackPanel.Children.Count > 0 && stackPanel.Children[0] is GroupBox firstGroupBox)
+                    {
+                        firstGroupBox.Visibility = Visibility.Visible;
+                    }
+                    break;
+            }
+            
+            // 滚动到顶部
+            SettingsPanelScrollViewer.ScrollToTop();
+        }
+        
+        // 根据Header文本查找并显示GroupBox
+        private void ShowGroupBoxByHeader(StackPanel parent, string headerText)
+        {
+            foreach (var child in parent.Children)
+            {
+                if (child is GroupBox groupBox)
+                {
+                    // 查找GroupBox的Header
+                    if (groupBox.Header is TextBlock headerTextBlock && 
+                        headerTextBlock.Text != null && 
+                        headerTextBlock.Text.Contains(headerText))
+                    {
+                        groupBox.Visibility = Visibility.Visible;
+                        return;
+                    }
+                }
+            }
+        }
+
+        #endregion Navigation Sidebar Methods
     }
 }
