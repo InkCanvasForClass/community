@@ -11,7 +11,6 @@
         Title="Ink Canvas 抽奖" Height="500" Width="900">
     <Border Background="#F0F3F9" CornerRadius="10" BorderThickness="1" BorderBrush="#0066BF" Margin="0" ClipToBounds="True">
         <Canvas>
-            <Image Source="/Resources/hatsune-miku1.png" Width="300" Canvas.Bottom="-140" Canvas.Left="-48" Canvas.Top="304"></Image>
             <Grid Canvas.Left="0" Canvas.Right="0" Canvas.Top="0" Canvas.Bottom="0" Width="900" Height="309" HorizontalAlignment="Center" VerticalAlignment="Top">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="1.8*"/>
