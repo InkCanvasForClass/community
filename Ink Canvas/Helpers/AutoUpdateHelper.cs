@@ -23,8 +23,19 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | Local version: {localVersion}");
                 
                 string remoteAddress = proxy;
-                remoteAddress += "https://raw.githubusercontent.com/awesome-iwb/icc-ce/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                string primaryUrl = "https://raw.githubusercontent.com/awesome-iwb/icc-ce/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                string fallbackUrl = "https://raw.bgithub.xyz/awesome-iwb/icc-ce/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                
+                // 先尝试主地址
+                remoteAddress += primaryUrl;
                 string remoteVersion = await GetRemoteVersion(remoteAddress);
+
+                // 如果主地址失败，尝试备用地址
+                if (remoteVersion == null)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Primary URL failed, trying fallback URL");
+                    remoteVersion = await GetRemoteVersion(proxy + fallbackUrl);
+                }
 
                 if (remoteVersion != null)
                 {
@@ -44,7 +55,7 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("AutoUpdate | Failed to retrieve remote version.", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile("AutoUpdate | Failed to retrieve remote version from both URLs.", LogHelper.LogType.Error);
                     return null;
                 }
             }
@@ -62,10 +73,23 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     // Set a reasonable timeout
-                    client.Timeout = TimeSpan.FromSeconds(15);
+                    client.Timeout = TimeSpan.FromSeconds(10); // 减少超时时间以便更快切换到备用地址
                     
                     LogHelper.WriteLogToFile($"AutoUpdate | Sending HTTP request to: {fileUrl}");
-                    HttpResponseMessage response = await client.GetAsync(fileUrl);
+                    
+                    // 使用带超时的Task.WhenAny来确保请求不会无限期等待
+                    var downloadTask = client.GetAsync(fileUrl);
+                    var timeoutTask = Task.Delay(client.Timeout);
+                    
+                    var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
+                    if (completedTask == timeoutTask)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Request timed out after {client.Timeout.TotalSeconds} seconds", LogHelper.LogType.Error);
+                        return null;
+                    }
+                    
+                    // 请求完成，检查结果
+                    HttpResponseMessage response = await downloadTask;
                     
                     LogHelper.WriteLogToFile($"AutoUpdate | HTTP response status: {response.StatusCode}");
                     response.EnsureSuccessStatusCode();
@@ -145,15 +169,26 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"AutoUpdate | Created updates directory: {updatesFolderPath}");
                 }
 
-                // Use the correct URL format for GitHub releases
-                string downloadUrl = $"{proxy}https://github.com/awesome-iwb/icc-ce/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
-                LogHelper.WriteLogToFile($"AutoUpdate | Download URL: {downloadUrl}");
+                // 主下载地址
+                string primaryUrl = $"{proxy}https://github.com/awesome-iwb/icc-ce/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                // 备用下载地址
+                string fallbackUrl = $"{proxy}https://bgithub.xyz/awesome-iwb/icc-ce/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                
+                LogHelper.WriteLogToFile($"AutoUpdate | Primary download URL: {primaryUrl}");
 
                 SaveDownloadStatus(false);
                 string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
                 LogHelper.WriteLogToFile($"AutoUpdate | Target file path: {zipFilePath}");
                 
-                bool downloadSuccess = await DownloadFile(downloadUrl, zipFilePath);
+                // 先尝试主地址下载
+                bool downloadSuccess = await DownloadFile(primaryUrl, zipFilePath);
+                
+                // 如果主地址下载失败，尝试备用地址
+                if (!downloadSuccess)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Primary download failed, trying fallback URL: {fallbackUrl}");
+                    downloadSuccess = await DownloadFile(fallbackUrl, zipFilePath);
+                }
                 
                 if (downloadSuccess)
                 {
@@ -163,7 +198,7 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("AutoUpdate | Failed to download the update file.", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile("AutoUpdate | Failed to download the update file from both URLs.", LogHelper.LogType.Error);
                     return false;
                 }
             }
@@ -200,101 +235,108 @@ namespace Ink_Canvas.Helpers
                     if (!Directory.Exists(directory))
                     {
                         Directory.CreateDirectory(directory);
-                        LogHelper.WriteLogToFile($"AutoUpdate | Created directory: {directory}");
                     }
                     
-                    // 删除可能存在的临时文件
-                    if (File.Exists(tempFilePath))
+                    // 使用带超时的Task.WhenAny来确保请求不会无限期等待
+                    var downloadTask = client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+                    var initialTimeoutTask = Task.Delay(TimeSpan.FromSeconds(30)); // 30秒内必须有响应
+                    
+                    var completedTask = await Task.WhenAny(downloadTask, initialTimeoutTask);
+                    if (completedTask == initialTimeoutTask)
                     {
-                        File.Delete(tempFilePath);
-                        LogHelper.WriteLogToFile($"AutoUpdate | Deleted existing temp file");
-                    }
-                    
-                    // 使用流式下载而不是一次性加载到内存
-                    LogHelper.WriteLogToFile($"AutoUpdate | Starting download...");
-                    
-                    // 获取响应但不读取内容
-                    HttpResponseMessage response = await client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
-                    response.EnsureSuccessStatusCode();
-                    
-                    // 获取文件大小（如果服务器提供）
-                    long? totalBytes = response.Content.Headers.ContentLength;
-                    LogHelper.WriteLogToFile($"AutoUpdate | Expected file size: {(totalBytes.HasValue ? totalBytes.Value.ToString() : "unknown")} bytes");
-                    
-                    // 使用流式方式下载文件
-                    using (var contentStream = await response.Content.ReadAsStreamAsync())
-                    using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
-                    {
-                        byte[] buffer = new byte[8192];
-                        int bytesRead;
-                        long totalBytesRead = 0;
-                        int progressPercent = 0;
-                        
-                        while ((bytesRead = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                        {
-                            await fileStream.WriteAsync(buffer, 0, bytesRead);
-                            
-                            totalBytesRead += bytesRead;
-                            
-                            // 报告进度（每10%）
-                            if (totalBytes.HasValue)
-                            {
-                                int newProgressPercent = (int)((totalBytesRead * 100) / totalBytes.Value);
-                                if (newProgressPercent >= progressPercent + 10)
-                                {
-                                    progressPercent = newProgressPercent;
-                                    LogHelper.WriteLogToFile($"AutoUpdate | Download progress: {progressPercent}%");
-                                }
-                            }
-                        }
-                        
-                        // 确保所有数据都写入到文件
-                        await fileStream.FlushAsync();
-                    }
-                    
-                    // 检查临时文件大小
-                    if (new FileInfo(tempFilePath).Length == 0)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | Downloaded file is empty", LogHelper.LogType.Error);
-                        if (File.Exists(tempFilePath)) File.Delete(tempFilePath);
+                        LogHelper.WriteLogToFile($"AutoUpdate | Initial connection timed out after 30 seconds", LogHelper.LogType.Error);
                         return false;
                     }
                     
-                    // 如果目标文件已存在，先删除
-                    if (File.Exists(destinationPath))
+                    // 请求完成，检查结果
+                    HttpResponseMessage response = await downloadTask;
+                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP response status: {response.StatusCode}");
+                    response.EnsureSuccessStatusCode();
+                    
+                    // 获取文件总大小
+                    long? totalBytes = response.Content.Headers.ContentLength;
+                    LogHelper.WriteLogToFile($"AutoUpdate | File size: {(totalBytes.HasValue ? (totalBytes.Value / 1024.0 / 1024.0).ToString("F2") + " MB" : "Unknown")}");
+                    
+                    // 创建临时文件流
+                    using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                     {
-                        File.Delete(destinationPath);
-                        LogHelper.WriteLogToFile($"AutoUpdate | Deleted existing destination file");
+                        // 获取下载流
+                        using (var downloadStream = await response.Content.ReadAsStreamAsync())
+                        {
+                            byte[] buffer = new byte[8192]; // 8KB buffer
+                            long totalBytesRead = 0;
+                            int bytesRead;
+                            DateTime lastProgressUpdate = DateTime.Now;
+                            
+                            // 设置下载超时 - 如果60秒内没有数据传输，则认为下载超时
+                            var downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                            var readTask = Task.Run(async () => {
+                                while ((bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                {
+                                    await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                    totalBytesRead += bytesRead;
+                                    
+                                    // 每5秒更新一次进度
+                                    if ((DateTime.Now - lastProgressUpdate).TotalSeconds >= 5)
+                                    {
+                                        if (totalBytes.HasValue)
+                                        {
+                                            double percentage = (double)totalBytesRead / totalBytes.Value * 100;
+                                            LogHelper.WriteLogToFile($"AutoUpdate | Download progress: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
+                                        }
+                                        else
+                                        {
+                                            LogHelper.WriteLogToFile($"AutoUpdate | Downloaded: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                        }
+                                        lastProgressUpdate = DateTime.Now;
+                                        
+                                        // 重置下载超时
+                                        downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                                    }
+                                }
+                                return true;
+                            });
+                            
+                            // 等待下载完成或超时
+                            if (await Task.WhenAny(readTask, downloadTimeoutTask) == downloadTimeoutTask)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | Download timed out after 60 seconds of inactivity", LogHelper.LogType.Error);
+                                return false;
+                            }
+                            
+                            // 确保下载任务完成
+                            bool downloadCompleted = await readTask;
+                            
+                            if (downloadCompleted)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | Download completed: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                            }
+                        }
                     }
                     
-                    // 将临时文件移动到最终位置
-                    File.Move(tempFilePath, destinationPath);
-                    LogHelper.WriteLogToFile($"AutoUpdate | File saved to: {destinationPath}");
+                    // 如果临时文件存在，则将其移动到目标位置
+                    if (File.Exists(tempFilePath))
+                    {
+                        // 如果目标文件已存在，先删除
+                        if (File.Exists(destinationPath))
+                        {
+                            File.Delete(destinationPath);
+                        }
+                        
+                        File.Move(tempFilePath, destinationPath);
+                        LogHelper.WriteLogToFile($"AutoUpdate | File saved to: {destinationPath}");
+                        return true;
+                    }
                     
-                    return true;
+                    return false;
                 }
                 catch (HttpRequestException ex)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | HTTP request error: {ex.Message}", LogHelper.LogType.Error);
-                    if (ex.InnerException != null)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | Inner exception: {ex.InnerException.Message}", LogHelper.LogType.Error);
-                    }
-                    return false;
                 }
                 catch (TaskCanceledException ex)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | Download timed out: {ex.Message}", LogHelper.LogType.Error);
-                    return false;
-                }
-                catch (IOException ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | IO error while downloading: {ex.Message}", LogHelper.LogType.Error);
-                    if (ex.InnerException != null)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | Inner exception: {ex.InnerException.Message}", LogHelper.LogType.Error);
-                    }
-                    return false;
                 }
                 catch (Exception ex)
                 {
@@ -303,8 +345,20 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | Inner exception: {ex.InnerException.Message}", LogHelper.LogType.Error);
                     }
-                    return false;
                 }
+                
+                // 清理临时文件
+                try
+                {
+                    string tempFilePath = destinationPath + ".tmp";
+                    if (File.Exists(tempFilePath))
+                    {
+                        File.Delete(tempFilePath);
+                    }
+                }
+                catch { }
+                
+                return false;
             }
         }
 
