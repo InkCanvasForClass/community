@@ -19,30 +19,37 @@ namespace Ink_Canvas.Helpers
             try
             {
                 string localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                LogHelper.WriteLogToFile($"AutoUpdate | Local version: {localVersion}");
+                
                 string remoteAddress = proxy;
                 remoteAddress += "https://github.com/awesome-iwb/icc-ce/blob/main/AutomaticUpdateVersionControl.txt";
                 string remoteVersion = await GetRemoteVersion(remoteAddress);
 
                 if (remoteVersion != null)
                 {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Remote version: {remoteVersion}");
                     Version local = new Version(localVersion);
                     Version remote = new Version(remoteVersion);
                     if (remote > local)
                     {
-                        LogHelper.WriteLogToFile("AutoUpdate | New version Availble: " + remoteVersion);
+                        LogHelper.WriteLogToFile($"AutoUpdate | New version available: {remoteVersion}");
                         return remoteVersion;
                     }
-                    else return null;
+                    else 
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Current version is up to date");
+                        return null;
+                    }
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("Failed to retrieve remote version.", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile("AutoUpdate | Failed to retrieve remote version.", LogHelper.LogType.Error);
                     return null;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"AutoUpdate | Error: {ex.Message}");
+                LogHelper.WriteLogToFile($"AutoUpdate | Error in CheckForUpdates: {ex.Message}", LogHelper.LogType.Error);
                 return null;
             }
         }
@@ -53,14 +60,58 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
+                    // Set a reasonable timeout
+                    client.Timeout = TimeSpan.FromSeconds(15);
+                    
+                    LogHelper.WriteLogToFile($"AutoUpdate | Sending HTTP request to: {fileUrl}");
                     HttpResponseMessage response = await client.GetAsync(fileUrl);
+                    
+                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP response status: {response.StatusCode}");
                     response.EnsureSuccessStatusCode();
 
-                    return await response.Content.ReadAsStringAsync();
+                    string content = await response.Content.ReadAsStringAsync();
+                    // Trim any whitespace, newlines, etc.
+                    content = content.Trim();
+                    
+                    // If the content contains HTML (likely the GitHub view page instead of raw content),
+                    // try to extract the version number
+                    if (content.Contains("<html") || content.Contains("<!DOCTYPE"))
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Received HTML content instead of raw version number - trying to extract version");
+                        // Try to extract version from GitHub page - look for text content in the file
+                        int startPos = content.IndexOf("<table");
+                        if (startPos > 0)
+                        {
+                            int endPos = content.IndexOf("</table>", startPos);
+                            if (endPos > startPos)
+                            {
+                                string tableContent = content.Substring(startPos, endPos - startPos);
+                                // Look for the version number pattern (like 1.2.3 or 1.2.3.4)
+                                var match = System.Text.RegularExpressions.Regex.Match(tableContent, @"(\d+\.\d+\.\d+(\.\d+)?)");
+                                if (match.Success)
+                                {
+                                    content = match.Groups[1].Value;
+                                    LogHelper.WriteLogToFile($"AutoUpdate | Extracted version from HTML: {content}");
+                                }
+                                else
+                                {
+                                    LogHelper.WriteLogToFile($"AutoUpdate | Could not extract version from HTML content");
+                                    return null;
+                                }
+                            }
+                        }
+                    }
+                    
+                    LogHelper.WriteLogToFile($"AutoUpdate | Response content: {content}");
+                    return content;
                 }
                 catch (HttpRequestException ex)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | HTTP request error: {ex.Message}", LogHelper.LogType.Error);
+                }
+                catch (TaskCanceledException ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Request timed out: {ex.Message}", LogHelper.LogType.Error);
                 }
                 catch (Exception ex)
                 {

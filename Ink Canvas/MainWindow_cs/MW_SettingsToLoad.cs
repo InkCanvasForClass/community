@@ -70,8 +70,17 @@ namespace Ink_Canvas {
                     BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
                 }
 
-                if (Settings.Startup.IsAutoUpdate) {
-                    ToggleSwitchIsAutoUpdate.IsOn = true;
+                // Always show update setting in UI based on stored preference
+                ToggleSwitchIsAutoUpdate.IsOn = Settings.Startup.IsAutoUpdate;
+                
+                // Always check for updates at startup, regardless of the setting
+                if (isStartup) {
+                    LogHelper.WriteLogToFile("AutoUpdate | Running auto-update check at startup");
+                    AutoUpdate();
+                }
+                // Call auto-update when setting is changed (not at startup)
+                else if (Settings.Startup.IsAutoUpdate) {
+                    LogHelper.WriteLogToFile("AutoUpdate | Running auto-update check after settings change");
                     AutoUpdate();
                 }
 
