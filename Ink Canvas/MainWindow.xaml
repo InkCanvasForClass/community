@@ -2432,7 +2432,7 @@
                                     <ui:SimpleStackPanel Orientation="Horizontal">
                                         <TextBlock FontSize="18" FontWeight="Bold" Text="Version：" />
                                         <TextBlock x:Name="AppVersionTextBlock" FontSize="18" FontWeight="Bold"
-                                                   Text="1.X.X.X" />
+                                                   Text="1.X.X" />
                                     </ui:SimpleStackPanel>
                                     <TextBlock
                                         Text="# 使用和分发本软件前，请您应当且务必知晓相关开源协议，且您应当知晓本软件基于 https://github.com/WXRIW/Ink-Canvas 修改而成。"

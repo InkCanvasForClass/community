@@ -399,7 +399,7 @@ namespace Ink_Canvas {
                                 App.IsAppExitByUser = true;
                                 
                                 // 准备批处理脚本
-                                AutoUpdateHelper.InstallNewVersionApp(AvailableLatestVersion, false);
+                            AutoUpdateHelper.InstallNewVersionApp(AvailableLatestVersion, false);
                                 
                                 // 关闭软件，让安装程序接管
                                 Application.Current.Shutdown();
