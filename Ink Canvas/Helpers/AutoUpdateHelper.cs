@@ -8,6 +8,7 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Controls;
+using System.IO.Compression;
 
 namespace Ink_Canvas.Helpers
 {
@@ -19,7 +20,7 @@ namespace Ink_Canvas.Helpers
             {
                 string localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 string remoteAddress = proxy;
-                remoteAddress += "https://github.com/CJKmkp/ICC-CE/blob/main/AutomaticUpdateVersionControl.txt";
+                remoteAddress += "https://github.com/awesome-iwb/icc-ce/blob/main/AutomaticUpdateVersionControl.txt";
                 string remoteVersion = await GetRemoteVersion(remoteAddress);
 
                 if (remoteVersion != null)
@@ -85,10 +86,11 @@ namespace Ink_Canvas.Helpers
                     return true;
                 }
 
-                string downloadUrl = $"{proxy}https://github.com/ChangSakura/Ink-Canvas/releases/download/v{version}/Ink.Canvas.Annotation.V{version}.Setup.exe";
+                string downloadUrl = $"{proxy}https://github.com/awesome-iwb/icc-ce/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
 
                 SaveDownloadStatus(false);
-                await DownloadFile(downloadUrl, $"{updatesFolderPath}\\Ink.Canvas.Annotation.V{version}.Setup.exe");
+                string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
+                await DownloadFile(downloadUrl, zipFilePath);
                 SaveDownloadStatus(true);
 
                 LogHelper.WriteLogToFile("AutoUpdate | Setup file successfully downloaded.");
@@ -96,7 +98,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"AutoUpdate | Error downloading and installing update: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"AutoUpdate | Error downloading update: {ex.Message}", LogHelper.LogType.Error);
 
                 SaveDownloadStatus(false);
                 return false;
@@ -155,21 +157,43 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                string setupFilePath = Path.Combine(updatesFolderPath, $"Ink.Canvas.Annotation.V{version}.Setup.exe");
+                string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
 
-                if (!File.Exists(setupFilePath))
+                if (!File.Exists(zipFilePath))
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | Setup file not found: {setupFilePath}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"AutoUpdate | ZIP file not found: {zipFilePath}", LogHelper.LogType.Error);
                     return;
                 }
 
-                string InstallCommand = $"\"{setupFilePath}\" /SILENT";
-                if (isInSilence) InstallCommand += " /VERYSILENT";
-                ExecuteCommandLine(InstallCommand);
-                Application.Current.Dispatcher.Invoke(() =>
+                // 创建临时解压目录
+                string extractPath = Path.Combine(updatesFolderPath, $"Extract_{version}");
+                if (Directory.Exists(extractPath))
                 {
-                    Application.Current.Shutdown();
-                });
+                    Directory.Delete(extractPath, true);
+                }
+                Directory.CreateDirectory(extractPath);
+
+                // 解压ZIP文件
+                LogHelper.WriteLogToFile($"AutoUpdate | Extracting ZIP file to: {extractPath}");
+                ZipFile.ExtractToDirectory(zipFilePath, extractPath);
+
+                // 获取当前应用程序路径
+                string currentAppDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+                LogHelper.WriteLogToFile($"AutoUpdate | Current application directory: {currentAppDir}");
+
+                // 复制解压的文件到应用程序目录
+                LogHelper.WriteLogToFile($"AutoUpdate | Copying files to application directory");
+                CopyDirectory(extractPath, currentAppDir);
+
+                // 清理临时文件
+                if (Directory.Exists(extractPath))
+                {
+                    Directory.Delete(extractPath, true);
+                }
+
+                // 重启应用程序
+                LogHelper.WriteLogToFile($"AutoUpdate | Update completed, restarting application");
+                RestartApplication();
             }
             catch (Exception ex)
             {
@@ -177,6 +201,49 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        private static void CopyDirectory(string sourceDir, string destinationDir)
+        {
+            // 创建目标目录（如果不存在）
+            Directory.CreateDirectory(destinationDir);
+
+            // 复制所有文件
+            foreach (string filePath in Directory.GetFiles(sourceDir))
+            {
+                string fileName = Path.GetFileName(filePath);
+                string destPath = Path.Combine(destinationDir, fileName);
+                try
+                {
+                    // 如果目标文件存在，先删除
+                    if (File.Exists(destPath))
+                    {
+                        File.Delete(destPath);
+                    }
+                    File.Copy(filePath, destPath);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Error copying file {fileName}: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
+
+            // 递归复制所有子目录
+            foreach (string subDirPath in Directory.GetDirectories(sourceDir))
+            {
+                string subDirName = Path.GetFileName(subDirPath);
+                string destSubDir = Path.Combine(destinationDir, subDirName);
+                CopyDirectory(subDirPath, destSubDir);
+            }
+        }
+
+        private static void RestartApplication()
+        {
+            string appPath = Assembly.GetExecutingAssembly().Location;
+            Process.Start(appPath);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Application.Current.Shutdown();
+            });
+        }
 
         private static void ExecuteCommandLine(string command)
         {

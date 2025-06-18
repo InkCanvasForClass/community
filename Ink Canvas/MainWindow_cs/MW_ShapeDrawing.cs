@@ -452,6 +452,7 @@ namespace Ink_Canvas {
             // 触摸移动时保持自定义光标显示
             if (Settings.Canvas.IsShowCursor) {
                 inkCanvas.ForceCursor = true;
+                inkCanvas.UseCustomCursor = true; // 确保使用自定义光标
                 System.Windows.Forms.Cursor.Show();
             }
 
@@ -484,6 +485,12 @@ namespace Ink_Canvas {
                     inkCanvas.EraserShape = new EllipseStylusShape(boundsWidth * k * eraserMultiplier,
                         boundsWidth * k * eraserMultiplier);
                     inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+                    
+                    // 立即应用光标设置
+                    if (Settings.Canvas.IsShowCursor) {
+                        inkCanvas.Cursor = Cursors.Cross;
+                        System.Windows.Forms.Cursor.Show();
+                    }
                 }
                 else {
                     if (StackPanelPPTControls.Visibility == Visibility.Visible && inkCanvas.Strokes.Count == 0 &&
@@ -1669,9 +1676,24 @@ namespace Ink_Canvas {
 
         private void MainWindow_OnMouseMove(object sender, MouseEventArgs e) {
             if (e.StylusDevice == null) {
+                // 鼠标移动时保持光标可见
                 System.Windows.Forms.Cursor.Show();
+                
+                // 如果用户设置了显示光标，则确保光标显示正确
+                if (Settings.Canvas.IsShowCursor && inkCanvas != null) {
+                    inkCanvas.ForceCursor = true;
+                    inkCanvas.UseCustomCursor = true;
+                }
             } else {
-                System.Windows.Forms.Cursor.Hide();
+                // 只有当用户未设置显示光标时才隐藏
+                if (!Settings.Canvas.IsShowCursor) {
+                    System.Windows.Forms.Cursor.Hide();
+                } else if (inkCanvas != null) {
+                    // 如果用户设置了显示光标，则确保光标显示正确
+                    inkCanvas.ForceCursor = true;
+                    inkCanvas.UseCustomCursor = true;
+                    System.Windows.Forms.Cursor.Show();
+                }
             }
         }
     }

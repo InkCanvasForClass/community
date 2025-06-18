@@ -749,6 +749,13 @@ namespace Ink_Canvas {
             Settings.Canvas.LineEndpointSnappingThreshold = (int)e.NewValue;
             SaveSettingsToFile();
         }
+        
+        private void LineStraightenSensitivitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            
+            Settings.InkToShape.LineStraightenSensitivity = e.NewValue;
+            SaveSettingsToFile();
+        }
 
         #endregion
 
