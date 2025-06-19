@@ -323,6 +323,11 @@ namespace Ink_Canvas {
         }
 
         private void GridInkCanvasSelectionCover_ManipulationDelta(object sender, ManipulationDeltaEventArgs e) {
+            // 手掌擦时禁止移动/缩放
+            if (isLastTouchEraser || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                return;
+            // 三指及以上禁止缩放
+            bool disableScale = dec.Count >= 3;
             try {
                 if (dec.Count >= 1) {
                     var md = e.DeltaManipulation;
@@ -341,7 +346,8 @@ namespace Ink_Canvas {
 
                     // Update matrix to reflect translation/rotation
                     m.Translate(trans.X, trans.Y); // 移动
-                    m.ScaleAt(scale.X, scale.Y, center.X, center.Y); // 缩放
+                    if (!disableScale)
+                        m.ScaleAt(scale.X, scale.Y, center.X, center.Y); // 缩放
 
                     var strokes = inkCanvas.GetSelectedStrokes();
                     if (StrokesSelectionClone.Count != 0)

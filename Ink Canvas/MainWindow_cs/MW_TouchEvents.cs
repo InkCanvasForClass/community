@@ -391,6 +391,11 @@ namespace Ink_Canvas {
         //}
 
         private void Main_Grid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e) {
+            // 手掌擦时禁止移动/缩放
+            if (isLastTouchEraser || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                return;
+            // 三指及以上禁止缩放
+            bool disableScale = dec.Count >= 3;
             if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
             if ((dec.Count >= 2 && (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
                                     StackPanelPPTControls.Visibility != Visibility.Visible ||
@@ -415,7 +420,7 @@ namespace Ink_Canvas {
 
                     if (Settings.Gesture.IsEnableTwoFingerRotation)
                         m.RotateAt(rotate, center.X, center.Y); // 旋转
-                    if (Settings.Gesture.IsEnableTwoFingerZoom)
+                    if (Settings.Gesture.IsEnableTwoFingerZoom && !disableScale)
                         m.ScaleAt(scale.X, scale.Y, center.X, center.Y); // 缩放
                 }
 
