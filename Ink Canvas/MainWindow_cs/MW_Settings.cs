@@ -792,46 +792,17 @@ namespace Ink_Canvas {
                 ComboBoxEraserSizeFloatingBar.SelectedIndex = s.SelectedIndex;
                 ComboBoxEraserSize.SelectedIndex = s.SelectedIndex;
             }
-            if (Settings.Canvas.EraserShapeType == 0) {
-                double k = 1;
-                switch (s.SelectedIndex) {
-                    case 0:
-                        k = 0.5;
-                        break;
-                    case 1:
-                        k = 0.8;
-                        break;
-                    case 3:
-                        k = 1.25;
-                        break;
-                    case 4:
-                        k = 1.8;
-                        break;
-                }
-
-                inkCanvas.EraserShape = new EllipseStylusShape(k * 90, k * 90);
-            } else if (Settings.Canvas.EraserShapeType == 1) {
-                double k = 1;
-                switch (s.SelectedIndex) {
-                    case 0:
-                        k = 0.7;
-                        break;
-                    case 1:
-                        k = 0.9;
-                        break;
-                    case 3:
-                        k = 1.2;
-                        break;
-                    case 4:
-                        k = 1.6;
-                        break;
-                }
-
-                inkCanvas.EraserShape = new RectangleStylusShape(k * 90 * 0.6, k * 90);
+            
+            // 使用统一的方法应用橡皮擦形状
+            ApplyCurrentEraserShape();
+            
+            // 确保当前处于橡皮擦模式时能立即看到效果
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                // 先切换一下模式，再切回来，确保橡皮擦形状得到刷新
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
             }
-
-            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            
             SaveSettingsToFile();
         }
 
@@ -840,23 +811,11 @@ namespace Ink_Canvas {
             Settings.Canvas.EraserShapeType = 0;
             SaveSettingsToFile();
             CheckEraserTypeTab();
-            double k = 1;
-            switch (ComboBoxEraserSizeFloatingBar.SelectedIndex) {
-                case 0:
-                    k = 0.5;
-                    break;
-                case 1:
-                    k = 0.8;
-                    break;
-                case 3:
-                    k = 1.25;
-                    break;
-                case 4:
-                    k = 1.8;
-                    break;
-            }
-
-            inkCanvas.EraserShape = new EllipseStylusShape(k * 90, k * 90);
+            
+            // 使用统一的方法应用橡皮擦形状
+            ApplyCurrentEraserShape();
+            
+            // 确保当前处于橡皮擦模式时能立即看到效果
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
         }
@@ -866,23 +825,11 @@ namespace Ink_Canvas {
             Settings.Canvas.EraserShapeType = 1;
             SaveSettingsToFile();
             CheckEraserTypeTab();
-            double k = 1;
-            switch (ComboBoxEraserSizeFloatingBar.SelectedIndex) {
-                case 0:
-                    k = 0.7;
-                    break;
-                case 1:
-                    k = 0.9;
-                    break;
-                case 3:
-                    k = 1.2;
-                    break;
-                case 4:
-                    k = 1.6;
-                    break;
-            }
-
-            inkCanvas.EraserShape = new RectangleStylusShape(k * 90 * 0.6, k * 90);
+            
+            // 使用统一的方法应用橡皮擦形状
+            ApplyCurrentEraserShape();
+            
+            // 确保当前处于橡皮擦模式时能立即看到效果
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
         }
@@ -1347,29 +1294,52 @@ namespace Ink_Canvas {
                 BoardToggleSwitchEnableMultiTouchMode.IsOn = ToggleSwitchEnableMultiTouchMode.IsOn;
             else
                 ToggleSwitchEnableMultiTouchMode.IsOn = BoardToggleSwitchEnableMultiTouchMode.IsOn;
+                
             if (ToggleSwitchEnableMultiTouchMode.IsOn) {
                 if (!isInMultiTouchMode) {
+                    // 保存当前编辑模式和绘图工具状态
+                    InkCanvasEditingMode currentEditingMode = inkCanvas.EditingMode;
+                    int currentDrawingShapeMode = drawingShapeMode;
+                    bool currentForceEraser = forceEraser;
+                    
                     inkCanvas.StylusDown += MainWindow_StylusDown;
                     inkCanvas.StylusMove += MainWindow_StylusMove;
                     inkCanvas.StylusUp += MainWindow_StylusUp;
                     inkCanvas.TouchDown += MainWindow_TouchDown;
                     inkCanvas.TouchDown -= Main_Grid_TouchDown;
+                    
+                    // 先设为None再设回原来的模式，避免可能的事件冲突
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                     inkCanvas.Children.Clear();
                     isInMultiTouchMode = true;
+                    
+                    // 恢复到之前的编辑状态
+                    inkCanvas.EditingMode = currentEditingMode;
+                    drawingShapeMode = currentDrawingShapeMode;
+                    forceEraser = currentForceEraser;
                 }
             } else {
                 if (isInMultiTouchMode) {
+                    // 保存当前编辑模式和绘图工具状态
+                    InkCanvasEditingMode currentEditingMode = inkCanvas.EditingMode;
+                    int currentDrawingShapeMode = drawingShapeMode;
+                    bool currentForceEraser = forceEraser;
+                    
                     inkCanvas.StylusDown -= MainWindow_StylusDown;
                     inkCanvas.StylusMove -= MainWindow_StylusMove;
                     inkCanvas.StylusUp -= MainWindow_StylusUp;
                     inkCanvas.TouchDown -= MainWindow_TouchDown;
                     inkCanvas.TouchDown += Main_Grid_TouchDown;
+                    
+                    // 先设为None再设回原来的模式，避免可能的事件冲突
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                     inkCanvas.Children.Clear();
                     isInMultiTouchMode = false;
+                    
+                    // 恢复到之前的编辑状态
+                    inkCanvas.EditingMode = currentEditingMode;
+                    drawingShapeMode = currentDrawingShapeMode;
+                    forceEraser = currentForceEraser;
                 }
             }
 

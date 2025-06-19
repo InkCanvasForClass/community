@@ -91,6 +91,24 @@ namespace Ink_Canvas {
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
+            // 确保手写笔模式下显示光标
+            if (Settings.Canvas.IsShowCursor) {
+                inkCanvas.ForceCursor = true;
+                inkCanvas.UseCustomCursor = true;
+                
+                // 根据当前编辑模式设置不同的光标
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                    inkCanvas.Cursor = Cursors.Cross;
+                } else if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink) {
+                    var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
+                    if (sri != null)
+                        inkCanvas.Cursor = new Cursor(sri.Stream);
+                }
+                
+                // 强制显示光标
+                System.Windows.Forms.Cursor.Show();
+            }
+
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
                 || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
                 || inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
@@ -136,6 +154,13 @@ namespace Ink_Canvas {
                     if (e.StylusDevice.StylusButtons[1].StylusButtonState == StylusButtonState.Down) return;
                 }
                 catch { }
+
+                // 确保手写笔移动时光标保持可见
+                if (Settings.Canvas.IsShowCursor) {
+                    inkCanvas.ForceCursor = true;
+                    inkCanvas.UseCustomCursor = true;
+                    System.Windows.Forms.Cursor.Show();
+                }
 
                 var strokeVisual = GetStrokeVisual(e.StylusDevice.Id);
                 var stylusPointCollection = e.GetStylusPoints(this);
@@ -224,8 +249,17 @@ namespace Ink_Canvas {
                             break;
                     }
 
-                    inkCanvas.EraserShape = new EllipseStylusShape(boundsWidth * k * eraserMultiplier,
-                        boundsWidth * k * eraserMultiplier);
+                    // 根据EraserShapeType设置合适的橡皮擦形状
+                    if (Settings.Canvas.EraserShapeType == 0) {
+                        // 圆形擦
+                        inkCanvas.EraserShape = new EllipseStylusShape(boundsWidth * k * eraserMultiplier,
+                            boundsWidth * k * eraserMultiplier);
+                    } else if (Settings.Canvas.EraserShapeType == 1) {
+                        // 矩形黑板擦
+                        inkCanvas.EraserShape = new RectangleStylusShape(boundsWidth * k * eraserMultiplier * 0.6,
+                            boundsWidth * k * eraserMultiplier);
+                    }
+                    
                     inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
                 }
                 else {
@@ -245,7 +279,8 @@ namespace Ink_Canvas {
                 isLastTouchEraser = false;
                 // 修复面积擦时不显示橡皮形状：无论 forcePointEraser 状态，均显示 50x50 橡皮
                 inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
-                if (forceEraser) return;
+                // 修复触屏状态下几何绘制功能不可用的问题：在几何绘制模式下不应该因为forceEraser而直接返回
+                if (forceEraser && drawingShapeMode == 0) return;
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             }
         }
@@ -304,6 +339,16 @@ namespace Ink_Canvas {
                     inkCanvas.EditingMode = lastInkCanvasEditingMode;
             dec.Remove(e.TouchDevice.Id);
             inkCanvas.Opacity = 1;
+            
+            // 如果是手掌触发的面积擦抬起，需要确保橡皮擦形状被正确重置
+            if (isLastTouchEraser && dec.Count == 0) {
+                isLastTouchEraser = false;
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && forcePointEraser) {
+                    // 重新应用当前设置的橡皮擦形状
+                    ApplyCurrentEraserShape();
+                }
+            }
+            
             if (dec.Count == 0)
                 if (lastTouchDownStrokeCollection.Count() != inkCanvas.Strokes.Count() &&
                     !(drawingShapeMode == 9 && !isFirstTouchCuboid)) {

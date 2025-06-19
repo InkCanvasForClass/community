@@ -113,7 +113,16 @@ namespace Ink_Canvas {
 
         private Task<bool> CheckIsDrawingShapesInMultiTouchMode() {
             if (isInMultiTouchMode) {
-                ToggleSwitchEnableMultiTouchMode.IsOn = false;
+                // 不关闭多指书写模式，而是保存状态，暂时禁用多指书写相关的事件处理
+                // 不再调用 ToggleSwitchEnableMultiTouchMode.IsOn = false;
+                
+                // 暂时禁用多指书写事件处理，以避免冲突
+                inkCanvas.StylusDown -= MainWindow_StylusDown;
+                inkCanvas.StylusMove -= MainWindow_StylusMove;
+                inkCanvas.StylusUp -= MainWindow_StylusUp;
+                inkCanvas.TouchDown -= MainWindow_TouchDown;
+                
+                // 记录已暂时禁用多指书写模式，但实际上多指书写开关仍然为打开状态
                 lastIsInMultiTouchMode = true;
             }
 
@@ -128,6 +137,14 @@ namespace Ink_Canvas {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 inkCanvas.IsManipulationEnabled = true;
                 CancelSingleFingerDragMode();
+            }
+            else {
+                // 即使不是长按，也设置必要的绘图状态
+                forceEraser = true;
+                drawingShapeMode = 1;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                isLongPressSelected = true; // 设置为选中状态，避免抬笔后切换回笔模式
             }
 
             lastMouseDownSender = null;
@@ -188,6 +205,14 @@ namespace Ink_Canvas {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 inkCanvas.IsManipulationEnabled = true;
                 CancelSingleFingerDragMode();
+            }
+            else {
+                // 即使不是长按，也设置必要的绘图状态
+                forceEraser = true;
+                drawingShapeMode = 2;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                inkCanvas.IsManipulationEnabled = true;
+                isLongPressSelected = true; // 设置为选中状态，避免抬笔后切换回笔模式
             }
 
             lastMouseDownSender = null;
@@ -276,6 +301,7 @@ namespace Ink_Canvas {
             drawingShapeMode = 3;
             inkCanvas.EditingMode = InkCanvasEditingMode.None;
             inkCanvas.IsManipulationEnabled = true;
+            isLongPressSelected = true; // 设置为选中状态，避免抬笔后切换回笔模式
             CancelSingleFingerDragMode();
             DrawShapePromptToPen();
         }
@@ -435,7 +461,12 @@ namespace Ink_Canvas {
                 if (isLastTouchEraser) return;
                 //EraserContainer.Background = null;
                 //ImageEraser.Visibility = Visibility.Visible;
-                if (isWaitUntilNextTouchDown) return;
+                
+                // 修复触屏状态下几何绘制功能不可用的问题
+                // 在几何绘制模式下，即使isWaitUntilNextTouchDown为true，也应该处理触摸移动事件
+                // 只有当多点触控时才需要等待下一次触摸
+                if (isWaitUntilNextTouchDown && dec.Count > 1) return;
+                
                 if (dec.Count > 1) {
                     isWaitUntilNextTouchDown = true;
                     try {
@@ -447,6 +478,11 @@ namespace Ink_Canvas {
                     }
                     return;
                 }
+                
+                // 在几何绘制模式下，确保处理单点触控的移动事件
+                Point touchPoint = e.GetTouchPoint(inkCanvas).Position;
+                MouseTouchMove(touchPoint);
+                return; // 处理完几何绘制后直接返回，不执行后面的代码
             }
 
             // 触摸移动时保持自定义光标显示
@@ -1346,8 +1382,34 @@ namespace Ink_Canvas {
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 
+            // 在几何绘制模式下，确保正确处理触摸抬起事件
+            if (drawingShapeMode != 0) {
+                // 如果是几何绘制模式，确保将临时绘制的图形添加到永久图形中
+                if (lastTempStroke != null) {
+                    // 将临时笔画添加到历史记录中
+                    var strokes = new StrokeCollection();
+                    strokes.Add(lastTempStroke);
+                    timeMachine.CommitStrokeUserInputHistory(strokes);
+                    // 清除临时笔画引用，以便下次绘制
+                    lastTempStroke = null;
+                }
+                
+                if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0) {
+                    // 将临时笔画集合添加到历史记录中
+                    timeMachine.CommitStrokeUserInputHistory(lastTempStrokeCollection);
+                    // 清除临时笔画集合引用，以便下次绘制
+                    lastTempStrokeCollection = new StrokeCollection();
+                }
+                
+                // 如果不是长按选中的状态，则需要在抬起手指后重置isWaitUntilNextTouchDown
+                if (!isLongPressSelected && dec.Count == 0) {
+                    isWaitUntilNextTouchDown = false;
+                }
+            }
+
             inkCanvas_MouseUp(sender, null);
-            if (dec.Count == 0) isWaitUntilNextTouchDown = false;
+            // 修改此处逻辑，在长按选择图形模式下保持isWaitUntilNextTouchDown
+            if (dec.Count == 0 && !isLongPressSelected) isWaitUntilNextTouchDown = false;
         }
 
         private Stroke lastTempStroke = null;
@@ -1537,17 +1599,37 @@ namespace Ink_Canvas {
                 }
 
                 if (lastIsInMultiTouchMode) {
-                    ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                    // 不再重新启用开关，而是恢复多指书写相关的事件处理
+                    // ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                    
+                    // 恢复多指书写事件处理
+                    inkCanvas.StylusDown += MainWindow_StylusDown;
+                    inkCanvas.StylusMove += MainWindow_StylusMove;
+                    inkCanvas.StylusUp += MainWindow_StylusUp;
+                    inkCanvas.TouchDown += MainWindow_TouchDown;
+                    
                     lastIsInMultiTouchMode = false;
                 }
             }
 
+            // 修改此处逻辑，确保在正确的情况下才切换回笔模式
             if (drawingShapeMode != 9 && drawingShapeMode != 0 && drawingShapeMode != 24 && drawingShapeMode != 25) {
-                if (isLongPressSelected) { }
+                if (isLongPressSelected) { 
+                    // 如果是长按选中的情况，保持图形模式，不做任何切换
+                    isWaitUntilNextTouchDown = true; // 保持当前绘图模式直到下一次触摸
+                }
                 else {
                     BtnPen_Click(null, null); //画完一次还原到笔模式
                     if (lastIsInMultiTouchMode) {
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        // 不再重新启用开关，而是恢复多指书写相关的事件处理
+                        // ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        
+                        // 恢复多指书写事件处理
+                        inkCanvas.StylusDown += MainWindow_StylusDown;
+                        inkCanvas.StylusMove += MainWindow_StylusMove;
+                        inkCanvas.StylusUp += MainWindow_StylusUp;
+                        inkCanvas.TouchDown += MainWindow_TouchDown;
+                        
                         lastIsInMultiTouchMode = false;
                     }
                 }
@@ -1573,7 +1655,15 @@ namespace Ink_Canvas {
                 else {
                     BtnPen_Click(null, null); //画完还原到笔模式
                     if (lastIsInMultiTouchMode) {
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        // 不再重新启用开关，而是恢复多指书写相关的事件处理
+                        // ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        
+                        // 恢复多指书写事件处理
+                        inkCanvas.StylusDown += MainWindow_StylusDown;
+                        inkCanvas.StylusMove += MainWindow_StylusMove;
+                        inkCanvas.StylusUp += MainWindow_StylusUp;
+                        inkCanvas.TouchDown += MainWindow_TouchDown;
+                        
                         lastIsInMultiTouchMode = false;
                     }
 
@@ -1619,7 +1709,15 @@ namespace Ink_Canvas {
 
                     BtnPen_Click(null, null); //画完还原到笔模式
                     if (lastIsInMultiTouchMode) {
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        // 不再重新启用开关，而是恢复多指书写相关的事件处理
+                        // ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        
+                        // 恢复多指书写事件处理
+                        inkCanvas.StylusDown += MainWindow_StylusDown;
+                        inkCanvas.StylusMove += MainWindow_StylusMove;
+                        inkCanvas.StylusUp += MainWindow_StylusUp;
+                        inkCanvas.TouchDown += MainWindow_TouchDown;
+                        
                         lastIsInMultiTouchMode = false;
                     }
                 }

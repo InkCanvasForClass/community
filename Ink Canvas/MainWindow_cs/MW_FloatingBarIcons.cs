@@ -282,6 +282,7 @@ namespace Ink_Canvas {
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
 
             if (BorderSettings.Visibility == Visibility.Visible) {
+                // 设置蒙版为不可点击，并移除背景
                 BorderSettingsMask.IsHitTestVisible = false;
                 BorderSettingsMask.Background = null;
                 var sb = new Storyboard();
@@ -402,6 +403,11 @@ namespace Ink_Canvas {
                         FloatingbarSelectionBG.Visibility = Visibility.Visible;
                         System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 28 * 5);
                             break;
+                    }
+                    case "shape": {
+                        // 对图形模式进行特殊处理，不修改按钮UI状态
+                        // 只隐藏相关面板，但保持图形绘制模式
+                        break;
                     }
                 }
 
@@ -1422,44 +1428,9 @@ namespace Ink_Canvas {
 
             forceEraser = true;
             forcePointEraser = true;
-            if (Settings.Canvas.EraserShapeType == 0) {
-                double k = 1;
-                switch (Settings.Canvas.EraserSize) {
-                    case 0:
-                        k = 0.5;
-                        break;
-                    case 1:
-                        k = 0.8;
-                        break;
-                    case 3:
-                        k = 1.25;
-                        break;
-                    case 4:
-                        k = 1.8;
-                        break;
-                }
-
-                inkCanvas.EraserShape = new EllipseStylusShape(k * 90, k * 90);
-            }
-            else if (Settings.Canvas.EraserShapeType == 1) {
-                double k = 1;
-                switch (Settings.Canvas.EraserSize) {
-                    case 0:
-                        k = 0.7;
-                        break;
-                    case 1:
-                        k = 0.9;
-                        break;
-                    case 3:
-                        k = 1.2;
-                        break;
-                    case 4:
-                        k = 1.6;
-                        break;
-                }
-
-                inkCanvas.EraserShape = new RectangleStylusShape(k * 90 * 0.6, k * 90);
-            }
+            
+            // 即使手掌触发过面积擦，也强制应用当前的EraserShapeType设置
+            ApplyCurrentEraserShape();
 
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                 if (EraserSizePanel.Visibility == Visibility.Collapsed) {
@@ -1497,6 +1468,33 @@ namespace Ink_Canvas {
 
             inkCanvas_EditingModeChanged(inkCanvas, null);
             CancelSingleFingerDragMode();
+        }
+        
+        // 新增方法，根据当前设置应用橡皮擦形状
+        public void ApplyCurrentEraserShape() {
+            double k = 1;
+            switch (Settings.Canvas.EraserSize) {
+                case 0:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 0.5 : 0.7;
+                    break;
+                case 1:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 0.8 : 0.9;
+                    break;
+                case 3:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 1.25 : 1.2;
+                    break;
+                case 4:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 1.8 : 1.6;
+                    break;
+            }
+
+            if (Settings.Canvas.EraserShapeType == 0) {
+                // 圆形擦
+                inkCanvas.EraserShape = new EllipseStylusShape(k * 90, k * 90);
+            } else if (Settings.Canvas.EraserShapeType == 1) {
+                // 矩形黑板擦
+                inkCanvas.EraserShape = new RectangleStylusShape(k * 90 * 0.6, k * 90);
+            }
         }
 
         private void EraserIconByStrokes_Click(object sender, RoutedEventArgs e) {
@@ -1549,7 +1547,8 @@ namespace Ink_Canvas {
 
         private void DrawShapePromptToPen() {
             if (isLongPressSelected == true) {
-                HideSubPanels("pen");
+                // 如果是长按选中的状态，只隐藏面板，不切换到笔模式
+                HideSubPanels("shape");
             }
             else {
                 if (StackPanelCanvasControls.Visibility == Visibility.Visible)
@@ -1629,7 +1628,23 @@ namespace Ink_Canvas {
 
         private void SettingsOverlayClick(object sender, MouseButtonEventArgs e) {
             if (isOpeningOrHidingSettingsPane == true) return;
-            BtnSettings_Click(null, null);
+            
+            // 获取点击的位置
+            Point clickPoint = e.GetPosition(BorderSettingsMask);
+            
+            // 获取BorderSettings的位置和大小
+            Point settingsPosition = BorderSettings.TranslatePoint(new Point(0, 0), BorderSettingsMask);
+            Rect settingsRect = new Rect(
+                settingsPosition.X,
+                settingsPosition.Y,
+                BorderSettings.ActualWidth,
+                BorderSettings.ActualHeight
+            );
+            
+            // 如果点击位置不在设置界面内部，才关闭设置界面
+            if (!settingsRect.Contains(clickPoint)) {
+                BtnSettings_Click(null, null);
+            }
         }
 
         private bool isOpeningOrHidingSettingsPane = false;
@@ -1639,6 +1654,7 @@ namespace Ink_Canvas {
                 HideSubPanels();
             }
             else {
+                // 设置蒙版为可点击，并添加半透明背景
                 BorderSettingsMask.IsHitTestVisible = true;
                 BorderSettingsMask.Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
                 SettingsPanelScrollViewer.ScrollToTop();

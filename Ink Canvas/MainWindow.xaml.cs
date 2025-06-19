@@ -480,7 +480,22 @@ namespace Ink_Canvas {
                     canvas.Cursor = Cursors.Cross;
                 }
                 
+                // 确保光标可见，无论是鼠标、触控还是手写笔
                 System.Windows.Forms.Cursor.Show();
+                
+                // 强制应用光标设置
+                canvas.ForceCursor = true;
+                
+                // 确保手写笔模式下也能显示光标
+                if (Tablet.TabletDevices.Count > 0) {
+                    foreach (TabletDevice device in Tablet.TabletDevices) {
+                        if (device.Type == TabletDeviceType.Stylus) {
+                            // 手写笔设备存在，强制显示光标
+                            System.Windows.Forms.Cursor.Show();
+                            break;
+                        }
+                    }
+                }
             } else {
                 canvas.UseCustomCursor = false;
                 canvas.ForceCursor = false;
