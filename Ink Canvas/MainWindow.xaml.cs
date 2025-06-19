@@ -363,9 +363,35 @@ namespace Ink_Canvas {
                 HasNewUpdateWindow updateWindow = new HasNewUpdateWindow(currentVersion, AvailableLatestVersion, releaseDate, releaseNotes);
                 bool? dialogResult = updateWindow.ShowDialog();
                 
+                // 声明下载结果变量
+                bool isDownloadSuccessful;
+                
                 // 如果窗口被关闭但没有点击按钮，视为"稍后更新"
                 if (dialogResult != true) {
                     LogHelper.WriteLogToFile("AutoUpdate | Update dialog closed without selection");
+                    
+                    // 更新自动更新设置并保存
+                    Settings.Startup.IsAutoUpdate = updateWindow.IsAutoUpdateEnabled;
+                    Settings.Startup.IsAutoUpdateWithSilence = updateWindow.IsSilentUpdateEnabled;
+                    SaveSettingsToFile();
+                    
+                    // 如果启用了静默更新，则自动下载更新
+                    if (Settings.Startup.IsAutoUpdateWithSilence) {
+                        LogHelper.WriteLogToFile("AutoUpdate | Silent update enabled, downloading update automatically");
+                        
+                        // 静默下载更新
+                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion);
+                        
+                        if (isDownloadSuccessful) {
+                            LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when application closes");
+                            
+                            // 启动检查定时器
+                            timerCheckAutoUpdateWithSilence.Start();
+                        } else {
+                            LogHelper.WriteLogToFile("AutoUpdate | Silent update download failed", LogHelper.LogType.Error);
+                        }
+                    }
+                    
                     return;
                 }
                 
@@ -373,9 +399,6 @@ namespace Ink_Canvas {
                 Settings.Startup.IsAutoUpdate = updateWindow.IsAutoUpdateEnabled;
                 Settings.Startup.IsAutoUpdateWithSilence = updateWindow.IsSilentUpdateEnabled;
                 SaveSettingsToFile();
-                
-                // 声明下载结果变量
-                bool isDownloadSuccessful;
                 
                 // 根据用户选择处理更新
                 switch (updateWindow.Result) {

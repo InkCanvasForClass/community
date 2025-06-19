@@ -411,6 +411,7 @@ namespace Ink_Canvas.Helpers
                 
                 LogHelper.WriteLogToFile($"AutoUpdate | Current application directory: {currentAppDir}");
                 LogHelper.WriteLogToFile($"AutoUpdate | Current process ID: {currentProcessId}");
+                LogHelper.WriteLogToFile($"AutoUpdate | Silent update mode: {isInSilence}");
 
                 // 创建批处理文件来执行更新操作
                 string batchFilePath = Path.Combine(Path.GetTempPath(), "UpdateICC_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
@@ -468,21 +469,45 @@ namespace Ink_Canvas.Helpers
                 
                 // 启动更新后的应用程序
                 batchContent.AppendLine($"echo echo Update completed successfully! >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo :: 检查应用程序是否已经在运行 >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo tasklist /FI \"IMAGENAME eq Ink Canvas.exe\" | find /i \"Ink Canvas.exe\" > nul >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo     echo 启动应用程序... >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo     start \"\" \"{appPath}\" >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo ) else ( >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo     echo 应用程序已经在运行，不再重复启动 >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
+                
+                // 根据是否为静默更新模式决定是否自动启动应用程序
+                if (isInSilence)
+                {
+                    // 静默更新模式下，自动启动应用程序
+                    batchContent.AppendLine($"echo echo 自动启动应用程序... >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo start \"\" \"{appPath}\" >> \"{updateBatPath}\"");
+                }
+                else
+                {
+                    // 非静默模式下，检查应用程序是否已经在运行
+                    batchContent.AppendLine($"echo :: 检查应用程序是否已经在运行 >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo tasklist /FI \"IMAGENAME eq Ink Canvas.exe\" | find /i \"Ink Canvas.exe\" > nul >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo     echo 启动应用程序... >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo     start \"\" \"{appPath}\" >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo ) else ( >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo     echo 应用程序已经在运行，不再重复启动 >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
+                }
+                
                 batchContent.AppendLine($"echo exit /b 0 >> \"{updateBatPath}\"");
                 batchContent.AppendLine($"echo goto EXIT >> \"{updateBatPath}\"");
                 
                 // 错误退出处理
-                batchContent.AppendLine($"echo :ERROR_EXIT >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo start \"\" cmd /c \"echo Update failed! ^& pause\" >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo exit /b 1 >> \"{updateBatPath}\"");
+                if (isInSilence)
+                {
+                    // 静默模式下，不显示错误提示
+                    batchContent.AppendLine($"echo :ERROR_EXIT >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo echo Update failed! >> \"%temp%\\icc_update_error.log\" >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo exit /b 1 >> \"{updateBatPath}\"");
+                }
+                else
+                {
+                    // 非静默模式下，显示错误提示
+                    batchContent.AppendLine($"echo :ERROR_EXIT >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo start \"\" cmd /c \"echo Update failed! ^& pause\" >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo exit /b 1 >> \"{updateBatPath}\"");
+                }
                 
                 // 删除批处理文件自身
                 batchContent.AppendLine($"echo :EXIT >> \"{updateBatPath}\"");
