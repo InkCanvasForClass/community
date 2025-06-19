@@ -13,7 +13,6 @@ namespace Ink_Canvas {
     public partial class MainWindow : Window {
         private StrokeCollection newStrokes = new StrokeCollection();
         private List<Circle> circles = new List<Circle>();
-        private const double SNAP_THRESHOLD = 15.0; // Distance threshold for endpoint snapping
         private const double LINE_STRAIGHTEN_THRESHOLD = 0.10; // 降低阈值，让直线检测更严格
 
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e) {
@@ -120,25 +119,34 @@ namespace Ink_Canvas {
                 
                 // Apply line straightening and endpoint snapping if ink-to-shape is enabled
                 if (Settings.InkToShape.IsInkToShapeEnabled) {
-                    // Check if this stroke could be a straight line
-                    if (IsPotentialStraightLine(e.Stroke)) {
+                    // 检查是否启用了直线自动拉直功能
+                    if (Settings.Canvas.AutoStraightenLine && IsPotentialStraightLine(e.Stroke)) {
                         // Get start and end points of the stroke
                         Point startPoint = e.Stroke.StylusPoints[0].ToPoint();
                         Point endPoint = e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint();
                         
-                        // Try to snap endpoints to existing strokes
+                        // 端点吸附和直线拉直完全分离处理
                         bool snapped = false;
-                        if (Settings.InkToShape.IsInkToShapeRectangle || Settings.InkToShape.IsInkToShapeTriangle) {
-                            Point[] snappedPoints = GetSnappedEndpoints(startPoint, endPoint);
-                            if (snappedPoints != null) {
-                                startPoint = snappedPoints[0];
-                                endPoint = snappedPoints[1];
-                                snapped = true;
+                        
+                        // 只有在启用端点吸附时才尝试吸附
+                        if (Settings.Canvas.LineEndpointSnapping) {
+                            // 只有在启用了形状识别（矩形或三角形）时才执行端点吸附
+                            if (Settings.InkToShape.IsInkToShapeRectangle || Settings.InkToShape.IsInkToShapeTriangle) {
+                                Point[] snappedPoints = GetSnappedEndpoints(startPoint, endPoint);
+                                if (snappedPoints != null) {
+                                    startPoint = snappedPoints[0];
+                                    endPoint = snappedPoints[1];
+                                    snapped = true;
+                                }
                             }
                         }
 
-                        // Create straight line stroke
-                        if (snapped || ShouldStraightenLine(e.Stroke)) {
+                        // 独立检查是否应该拉直线条，无论端点吸附是否启用或成功
+                        bool shouldStraighten = ShouldStraightenLine(e.Stroke);
+                        
+                        // 如果满足任一条件（吸附成功或应该拉直），则创建直线
+                        // 这里的条件是"或"关系，只要有一个条件满足就会创建直线
+                        if (snapped || shouldStraighten) {
                             StylusPointCollection straightLinePoints = CreateStraightLine(startPoint, endPoint);
                             Stroke straightStroke = new Stroke(straightLinePoints) {
                                 DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
@@ -574,8 +582,8 @@ namespace Ink_Canvas {
             Point end = stroke.StylusPoints.Last().ToPoint();
             double lineLength = GetDistance(start, end);
             
-            // 线条必须足够长才考虑拉直，至少30像素
-            if (lineLength < 30)
+            // 线条必须足够长才考虑拉直，使用设置中的阈值
+            if (lineLength < Settings.Canvas.AutoStraightenLineThreshold)
                 return false;
                 
             // 获取用户设置的灵敏度值
@@ -620,8 +628,8 @@ namespace Ink_Canvas {
             double maxDeviation = 0;
             double lineLength = GetDistance(start, end);
             
-            // 如果线条太短，不进行拉直处理
-            if (lineLength < 50) {
+            // 如果线条太短，不进行拉直处理，使用设置中的阈值
+            if (lineLength < Settings.Canvas.AutoStraightenLineThreshold) {
                 return false;
             }
             
@@ -732,10 +740,18 @@ namespace Ink_Canvas {
         
         // New method: Attempts to snap endpoints to existing stroke endpoints
         private Point[] GetSnappedEndpoints(Point start, Point end) {
+            // 如果端点吸附功能关闭，直接返回null
+            // 这里不再返回原始点，因为调用此方法的地方会判断返回值是否为null
+            if (!Settings.Canvas.LineEndpointSnapping)
+                return null;
+                
             bool startSnapped = false;
             bool endSnapped = false;
             Point snappedStart = start;
             Point snappedEnd = end;
+            
+            // 使用设置中的吸附距离阈值
+            double snapThreshold = Settings.Canvas.LineEndpointSnappingThreshold;
             
             // Check all strokes in canvas for potential snap points
             foreach (Stroke stroke in inkCanvas.Strokes) {
@@ -747,10 +763,10 @@ namespace Ink_Canvas {
                 
                 // Check if start point should snap to an endpoint
                 if (!startSnapped) {
-                    if (GetDistance(start, strokeStart) < SNAP_THRESHOLD) {
+                    if (GetDistance(start, strokeStart) < snapThreshold) {
                         snappedStart = strokeStart;
                         startSnapped = true;
-                    } else if (GetDistance(start, strokeEnd) < SNAP_THRESHOLD) {
+                    } else if (GetDistance(start, strokeEnd) < snapThreshold) {
                         snappedStart = strokeEnd;
                         startSnapped = true;
                     }
@@ -758,10 +774,10 @@ namespace Ink_Canvas {
                 
                 // Check if end point should snap to an endpoint
                 if (!endSnapped) {
-                    if (GetDistance(end, strokeStart) < SNAP_THRESHOLD) {
+                    if (GetDistance(end, strokeStart) < snapThreshold) {
                         snappedEnd = strokeStart;
                         endSnapped = true;
-                    } else if (GetDistance(end, strokeEnd) < SNAP_THRESHOLD) {
+                    } else if (GetDistance(end, strokeEnd) < snapThreshold) {
                         snappedEnd = strokeEnd;
                         endSnapped = true;
                     }

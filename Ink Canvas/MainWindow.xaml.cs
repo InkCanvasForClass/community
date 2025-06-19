@@ -646,7 +646,9 @@ namespace Ink_Canvas {
         {
             // 关闭设置面板
             BorderSettings.Visibility = Visibility.Collapsed;
+            // 设置蒙版为不可点击，并清除背景
             BorderSettingsMask.IsHitTestVisible = false;
+            BorderSettingsMask.Background = null; // 确保清除蒙层背景
         }
 
         // 新增：折叠侧边栏
