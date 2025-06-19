@@ -13,7 +13,7 @@ namespace Ink_Canvas {
     public partial class MainWindow : Window {
         private StrokeCollection newStrokes = new StrokeCollection();
         private List<Circle> circles = new List<Circle>();
-        private const double LINE_STRAIGHTEN_THRESHOLD = 0.10; // 降低阈值，让直线检测更严格
+        private const double LINE_STRAIGHTEN_THRESHOLD = 0.20; // 默认灵敏度阈值，与UI默认值对应
 
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e) {
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = false;
@@ -125,10 +125,22 @@ namespace Ink_Canvas {
                         Point startPoint = e.Stroke.StylusPoints[0].ToPoint();
                         Point endPoint = e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint();
                         
-                        // 端点吸附和直线拉直完全分离处理
+                        // 记录是否需要拉直线条，默认不拉直
+                        bool shouldStraighten = false;
                         bool snapped = false;
                         
-                        // 只有在启用端点吸附时才尝试吸附
+                        // 首先检查是否应该拉直线条（使用灵敏度设置），这是主要判断条件
+                        // 读取实际的灵敏度设置值
+                        double sensitivity = Settings.InkToShape.LineStraightenSensitivity;
+                        System.Diagnostics.Debug.WriteLine($"当前灵敏度值: {sensitivity}");
+                        
+                        // 将灵敏度值传递给判断函数
+                        shouldStraighten = ShouldStraightenLine(e.Stroke);
+                        
+                        // 输出一些调试信息，帮助理解灵敏度设置的效果
+                        System.Diagnostics.Debug.WriteLine($"LineStraightenSensitivity: {Settings.InkToShape.LineStraightenSensitivity}, ShouldStraighten: {shouldStraighten}");
+                        
+                        // 再检查端点吸附功能，这是独立的可选功能
                         if (Settings.Canvas.LineEndpointSnapping) {
                             // 只有在启用了形状识别（矩形或三角形）时才执行端点吸附
                             if (Settings.InkToShape.IsInkToShapeRectangle || Settings.InkToShape.IsInkToShapeTriangle) {
@@ -141,12 +153,9 @@ namespace Ink_Canvas {
                             }
                         }
 
-                        // 独立检查是否应该拉直线条，无论端点吸附是否启用或成功
-                        bool shouldStraighten = ShouldStraightenLine(e.Stroke);
-                        
-                        // 如果满足任一条件（吸附成功或应该拉直），则创建直线
-                        // 这里的条件是"或"关系，只要有一个条件满足就会创建直线
-                        if (snapped || shouldStraighten) {
+                        // 如果满足任一条件（需要拉直或成功吸附），则创建直线
+                        // 这确保灵敏度设置独立于端点吸附功能发挥作用
+                        if (shouldStraighten || snapped) {
                             StylusPointCollection straightLinePoints = CreateStraightLine(startPoint, endPoint);
                             Stroke straightStroke = new Stroke(straightLinePoints) {
                                 DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
@@ -586,10 +595,25 @@ namespace Ink_Canvas {
             if (lineLength < Settings.Canvas.AutoStraightenLineThreshold)
                 return false;
                 
-            // 获取用户设置的灵敏度值
+            // 获取用户设置的灵敏度值，确保使用正确的设置
             double sensitivity = Settings.InkToShape.LineStraightenSensitivity;
-            // 快速检查使用略宽松的阈值
-            double quickThreshold = Math.Min(sensitivity * 1.5, 0.20);
+            
+            // 输出当前灵敏度值（调试用）
+            System.Diagnostics.Debug.WriteLine($"IsPotentialStraightLine - sensitivity: {sensitivity}, length: {lineLength}");
+            
+            // 根据灵敏度调整快速检查阈值
+            double quickThreshold;
+            
+            // 如果灵敏度超过1.0，使用更宽松的快速检查标准
+            if (sensitivity > 1.0) {
+                // 高灵敏度模式 - 使用更宽松的阈值
+                quickThreshold = Math.Min(0.2 + (sensitivity - 1.0) * 0.3, 0.5); // 映射到0.2-0.5范围
+            } else {
+                // 常规灵敏度模式
+                quickThreshold = Math.Min(sensitivity * 1.5, 0.20);
+            }
+            
+            System.Diagnostics.Debug.WriteLine($"使用快速检查阈值: {quickThreshold}");
                 
             // 快速检查：计算几个关键点与直线的距离
             if (stroke.StylusPoints.Count >= 10) {
@@ -606,12 +630,27 @@ namespace Ink_Canvas {
                 double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
                 double threeQuarterDeviation = DistanceFromLineToPoint(start, end, threeQuarterPoint);
                 
-                // 如果任一点偏离太大，直接排除
+                // 使用相对偏差：偏差与线长的比例，并使用灵敏度进行调整
                 double quickRelativeThreshold = lineLength * quickThreshold;
-                if (quarterDeviation > quickRelativeThreshold || 
-                    midDeviation > quickRelativeThreshold || 
-                    threeQuarterDeviation > quickRelativeThreshold) {
-                    return false;
+                
+                // 记录检测到的偏差（调试用）
+                System.Diagnostics.Debug.WriteLine($"Deviations: q={quarterDeviation}, m={midDeviation}, tq={threeQuarterDeviation}, threshold={quickRelativeThreshold}");
+                
+                // 如果灵敏度超过1.5，则即使有一个点满足条件也认为可能是直线
+                if (sensitivity > 1.5) {
+                    // 超高灵敏度模式：只要有一个关键点偏差小，就认为可能是直线
+                    if (quarterDeviation <= quickRelativeThreshold || 
+                        midDeviation <= quickRelativeThreshold || 
+                        threeQuarterDeviation <= quickRelativeThreshold) {
+                        return true;
+                    }
+                } else {
+                    // 常规判断：如果任一点偏离太大，直接排除
+                    if (quarterDeviation > quickRelativeThreshold || 
+                        midDeviation > quickRelativeThreshold || 
+                        threeQuarterDeviation > quickRelativeThreshold) {
+                        return false;
+                    }
                 }
             }
             
@@ -630,11 +669,19 @@ namespace Ink_Canvas {
             
             // 如果线条太短，不进行拉直处理，使用设置中的阈值
             if (lineLength < Settings.Canvas.AutoStraightenLineThreshold) {
+                // 显示调试信息 - 线条长度不足
+                // MessageBox.Show($"线条太短: {lineLength} < {Settings.Canvas.AutoStraightenLineThreshold}", "调试信息");
                 return false;
             }
             
-            // 获取用户设置的灵敏度值
+            // 获取用户设置的灵敏度值，确保使用正确的值进行后续判断
             double sensitivity = Settings.InkToShape.LineStraightenSensitivity;
+            
+            // 输出详细的调试信息
+            System.Diagnostics.Debug.WriteLine($"ShouldStraightenLine - sensitivity: {sensitivity}, length: {lineLength}");
+            
+            // 临时：显示调试消息框
+            // MessageBox.Show($"灵敏度值: {sensitivity}", "调试信息");
             
             // 计算点与直线的偏差
             double totalDeviation = 0;
@@ -652,38 +699,73 @@ namespace Ink_Canvas {
             // 计算平均偏差
             double avgDeviation = totalDeviation / pointCount;
             
-            // 检查点分布的一致性 - 如果有些点偏离很大而其他点很接近直线，表明线条有明显弯曲
-            double deviationVariance = 0;
-            foreach (StylusPoint sp in stroke.StylusPoints) {
-                Point p = sp.ToPoint();
-                double deviation = DistanceFromLineToPoint(start, end, p);
-                deviationVariance += Math.Pow(deviation - avgDeviation, 2);
-            }
-            deviationVariance /= pointCount;
+            // 更详细的调试信息
+            System.Diagnostics.Debug.WriteLine($"Max deviation: {maxDeviation}, Avg: {avgDeviation}, Threshold: {sensitivity * lineLength}");
             
-            // 如果最大偏差超过线长的阈值比例，或者偏差方差较大（表示不均匀弯曲），则不拉直
-            if ((maxDeviation / lineLength) > sensitivity) {
-                return false;
-            }
+            // 支持更广泛的灵敏度范围 (0.05-2.0)
             
-            // 如果偏差方差大，说明线条弯曲不均匀
-            if (deviationVariance > (sensitivity * lineLength * 0.05)) {
-                return false;
-            }
-            
-            // 检查中点偏离情况 - 针对弧形线条特别有效
-            if (stroke.StylusPoints.Count > 10) {
-                int midIndex = stroke.StylusPoints.Count / 2;
-                Point midPoint = stroke.StylusPoints[midIndex].ToPoint();
-                double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
+            // 如果灵敏度高于1.0，使用更宽松的判断标准
+            if (sensitivity > 1.0) {
+                // 高灵敏度模式 - 允许更大的偏差
+                double adjustedSensitivity = 0.5 + (sensitivity - 1.0) * 1.5; // 映射到0.5-2.0范围
                 
-                // 如果中点偏离过大，不拉直
-                if (midDeviation > (lineLength * sensitivity * 0.8)) {
+                // 只判断平均偏差和相对偏差
+                if (maxDeviation / lineLength < adjustedSensitivity && avgDeviation < lineLength * 0.1 * adjustedSensitivity) {
+                    System.Diagnostics.Debug.WriteLine("接受拉直 (高灵敏度模式)");
+                    return true;
+                }
+                
+                System.Diagnostics.Debug.WriteLine("拒绝拉直 (高灵敏度模式)");
+                return false;
+            }
+            // 否则使用常规判断标准
+            else {
+                // 检查点分布的一致性 - 如果有些点偏离很大而其他点很接近直线，表明线条有明显弯曲
+                double deviationVariance = 0;
+                foreach (StylusPoint sp in stroke.StylusPoints) {
+                    Point p = sp.ToPoint();
+                    double deviation = DistanceFromLineToPoint(start, end, p);
+                    deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                }
+                deviationVariance /= pointCount;
+                
+                // 输出更多调试信息
+                System.Diagnostics.Debug.WriteLine($"Deviation variance: {deviationVariance}, Threshold: {sensitivity * lineLength * 0.05}");
+                
+                // 如果最大偏差超过线长的阈值比例，或者偏差方差较大（表示不均匀弯曲），则不拉直
+                // 灵敏度越大，容许的偏差越大，更容易将线条识别为直线
+                if ((maxDeviation / lineLength) > sensitivity) {
+                    System.Diagnostics.Debug.WriteLine("拒绝拉直：最大偏差过大");
                     return false;
                 }
+                
+                // 如果偏差方差大，说明线条弯曲不均匀
+                // 灵敏度越大，容许的偏差方差越大
+                if (deviationVariance > (sensitivity * lineLength * 0.05)) {
+                    System.Diagnostics.Debug.WriteLine("拒绝拉直：偏差方差过大");
+                    return false;
+                }
+                
+                // 检查中点偏离情况 - 针对弧形线条特别有效
+                if (stroke.StylusPoints.Count > 10) {
+                    int midIndex = stroke.StylusPoints.Count / 2;
+                    Point midPoint = stroke.StylusPoints[midIndex].ToPoint();
+                    double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
+                    
+                    // 输出中点偏差信息
+                    System.Diagnostics.Debug.WriteLine($"Mid deviation: {midDeviation}, Threshold: {lineLength * sensitivity * 0.8}");
+                    
+                    // 如果中点偏离过大，不拉直
+                    // 使用灵敏度作为判断基准，灵敏度越大，容许的中点偏离越大
+                    if (midDeviation > (lineLength * sensitivity * 0.8)) {
+                        System.Diagnostics.Debug.WriteLine("拒绝拉直：中点偏差过大");
+                        return false;
+                    }
+                }
+                
+                System.Diagnostics.Debug.WriteLine("接受拉直");
+                return true;
             }
-            
-            return true;
         }
         
         // New method: Creates a straight line stroke between two points

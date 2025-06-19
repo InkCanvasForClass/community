@@ -753,7 +753,16 @@ namespace Ink_Canvas {
         private void LineStraightenSensitivitySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
             if (!isLoaded) return;
             
+            // 记录旧值用于调试
+            double oldValue = Settings.InkToShape.LineStraightenSensitivity;
+            
+            // 确保灵敏度值被正确保存到设置中
             Settings.InkToShape.LineStraightenSensitivity = e.NewValue;
+            
+            // 输出调试信息，观察值变化
+            System.Diagnostics.Debug.WriteLine($"LineStraightenSensitivity changed: {oldValue} -> {e.NewValue}");
+            
+            // 立即保存设置到文件，确保设置不会丢失
             SaveSettingsToFile();
         }
 
