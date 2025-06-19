@@ -6,6 +6,9 @@ using System.Runtime.CompilerServices;
 using System.Timers;
 using System.Windows;
 using MessageBox = System.Windows.MessageBox;
+using System.IO;
+using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Ink_Canvas {
     public class TimeViewModel : INotifyPropertyChanged {
@@ -302,24 +305,102 @@ namespace Ink_Canvas {
         }
 
         private void timerCheckAutoUpdateWithSilence_Elapsed(object sender, ElapsedEventArgs e) {
-            Dispatcher.Invoke(() => {
-                try {
-                    if (!Topmost || inkCanvas.Strokes.Count > 0) return;
-                }
-                catch (Exception ex) {
-                    LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-                }
-            });
+            // 停止计时器，避免重复触发
+            timerCheckAutoUpdateWithSilence.Stop();
+            
             try {
-                if (AutoUpdateWithSilenceTimeComboBox.CheckIsInSilencePeriod(
-                        Settings.Startup.AutoUpdateWithSilenceStartTime,
-                        Settings.Startup.AutoUpdateWithSilenceEndTime)) {
+                // 检查是否有可用的更新
+                if (string.IsNullOrEmpty(AvailableLatestVersion)) {
+                    LogHelper.WriteLogToFile("AutoUpdate | No available update version found");
+                    return;
+                }
+                
+                // 检查是否启用了静默更新
+                if (!Settings.Startup.IsAutoUpdateWithSilence) {
+                    LogHelper.WriteLogToFile("AutoUpdate | Silent update is disabled");
+                    return;
+                }
+                
+                // 检查更新文件是否已下载
+                string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
+                string statusFilePath = Path.Combine(updatesFolderPath, $"DownloadV{AvailableLatestVersion}Status.txt");
+                
+                if (!File.Exists(statusFilePath) || File.ReadAllText(statusFilePath).Trim().ToLower() != "true") {
+                    LogHelper.WriteLogToFile("AutoUpdate | Update file not downloaded yet");
+                    
+                    // 尝试下载更新文件
+                    Task.Run(async () => {
+                        bool isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion);
+                        if (isDownloadSuccessful) {
+                            LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will check again for installation");
+                            // 重新启动计时器，下次检查时安装
+                            timerCheckAutoUpdateWithSilence.Start();
+                        } else {
+                            LogHelper.WriteLogToFile("AutoUpdate | Failed to download update", LogHelper.LogType.Error);
+                        }
+                    });
+                    
+                    return;
+                }
+                
+                // 检查是否在静默更新时间段内
+                bool isInSilencePeriod = AutoUpdateWithSilenceTimeComboBox.CheckIsInSilencePeriod(
+                    Settings.Startup.AutoUpdateWithSilenceStartTime,
+                    Settings.Startup.AutoUpdateWithSilenceEndTime);
+                
+                if (!isInSilencePeriod) {
+                    LogHelper.WriteLogToFile("AutoUpdate | Not in silence update time period");
+                    // 重新启动计时器，稍后再检查
+                    timerCheckAutoUpdateWithSilence.Start();
+                    return;
+                }
+                
+                // 检查应用程序状态，确保可以安全更新
+                bool canSafelyUpdate = false;
+                
+                Dispatcher.Invoke(() => {
+                    try {
+                        // 检查是否处于桌面模式（Topmost为true）且没有墨迹内容
+                        if (Topmost && inkCanvas.Strokes.Count == 0) {
+                            // 检查是否有未保存的内容或正在进行的操作
+                            if (!isHidingSubPanelsWhenInking) {
+                                canSafelyUpdate = true;
+                                LogHelper.WriteLogToFile("AutoUpdate | Application is in a safe state for update");
+                            } else {
+                                LogHelper.WriteLogToFile("AutoUpdate | Application is currently performing operations");
+                            }
+                        } else {
+                            LogHelper.WriteLogToFile("AutoUpdate | Application has unsaved content or is not in desktop mode");
+                        }
+                    }
+                    catch (Exception ex) {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Error checking application state: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                });
+                
+                if (canSafelyUpdate) {
+                    LogHelper.WriteLogToFile("AutoUpdate | Installing update now");
+                    
+                    // 设置为用户主动退出，避免被看门狗判定为崩溃
+                    App.IsAppExitByUser = true;
+                    
+                    // 执行更新安装
                     AutoUpdateHelper.InstallNewVersionApp(AvailableLatestVersion, true);
-                    timerCheckAutoUpdateWithSilence.Stop();
+                    
+                    // 关闭应用程序
+                    Dispatcher.Invoke(() => {
+                        Application.Current.Shutdown();
+                    });
+                } else {
+                    LogHelper.WriteLogToFile("AutoUpdate | Cannot safely update now, will try again later");
+                    // 重新启动计时器，稍后再检查
+                    timerCheckAutoUpdateWithSilence.Start();
                 }
             }
             catch (Exception ex) {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"AutoUpdate | Error in silent update check: {ex.Message}", LogHelper.LogType.Error);
+                // 出错时重新启动计时器，稍后再检查
+                timerCheckAutoUpdateWithSilence.Start();
             }
         }
     }

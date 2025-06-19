@@ -170,7 +170,7 @@
     <Grid x:Name="Main_Grid">
 
         <!--// 设置界面 //-->
-        <Grid Panel.ZIndex="999" x:Name="BorderSettingsMask" MouseDown="SettingsOverlayClick" IsHitTestVisible="False"
+        <Grid Panel.ZIndex="999" x:Name="BorderSettingsMask" MouseDown="SettingsOverlayClick" IsHitTestVisible="True"
               Margin="0,0,0,0">
             <Border Name="BorderSettings" Background="#ee18181b" ui:ThemeManager.RequestedTheme="Dark" Width="490"
                     HorizontalAlignment="Left" Margin="300,150,0,350" Visibility="Visible">

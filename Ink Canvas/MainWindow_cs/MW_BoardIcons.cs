@@ -36,42 +36,10 @@ namespace Ink_Canvas {
             } else {
                 forceEraser = true;
                 forcePointEraser = true;
-                double k = 1;
-                if (Settings.Canvas.EraserShapeType == 0) {
-                    switch (BoardComboBoxEraserSize.SelectedIndex)
-                    {
-                        case 0:
-                            k = 0.5;
-                            break;
-                        case 1:
-                            k = 0.8;
-                            break;
-                        case 3:
-                            k = 1.25;
-                            break;
-                        case 4:
-                            k = 1.8;
-                            break;
-                    }
-                    inkCanvas.EraserShape = new EllipseStylusShape(k * 90, k * 90);
-                } else if (Settings.Canvas.EraserShapeType == 1) {
-                    switch (BoardComboBoxEraserSize.SelectedIndex)
-                    {
-                        case 0:
-                            k = 0.7;
-                            break;
-                        case 1:
-                            k = 0.9;
-                            break;
-                        case 3:
-                            k = 1.2;
-                            break;
-                        case 4:
-                            k = 1.6;
-                            break;
-                    }
-                    inkCanvas.EraserShape = new RectangleStylusShape(k * 90 * 0.6, k * 90);
-                }
+                
+                // 使用统一的方法应用橡皮擦形状，确保一致性
+                ApplyCurrentEraserShape();
+                
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
                 drawingShapeMode = 0;
 
