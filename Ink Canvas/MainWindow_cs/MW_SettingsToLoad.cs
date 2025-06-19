@@ -519,6 +519,8 @@ namespace Ink_Canvas {
                 // 初始化直线自动拉直相关设置
                 ToggleSwitchAutoStraightenLine.IsOn = Settings.Canvas.AutoStraightenLine;
                 AutoStraightenLineThresholdSlider.Value = Settings.Canvas.AutoStraightenLineThreshold;
+                // 直线拉直灵敏度也在这里初始化，即使它存储在InkToShape中
+                LineStraightenSensitivitySlider.Value = Settings.InkToShape.LineStraightenSensitivity;
                 
                 // 初始化直线端点吸附相关设置
                 ToggleSwitchLineEndpointSnapping.IsOn = Settings.Canvas.LineEndpointSnapping;
@@ -588,8 +590,7 @@ namespace Ink_Canvas {
 
                 ToggleCheckboxEnableInkToShapeRounded.IsChecked = Settings.InkToShape.IsInkToShapeRounded;
                 
-                // 初始化直线拉直灵敏度
-                LineStraightenSensitivitySlider.Value = Settings.InkToShape.LineStraightenSensitivity;
+                // 直线拉直灵敏度在Canvas部分已经初始化，这里不再重复
             } else {
                 Settings.InkToShape = new InkToShape();
             }

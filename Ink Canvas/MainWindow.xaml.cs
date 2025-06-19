@@ -646,7 +646,9 @@ namespace Ink_Canvas {
         {
             // 关闭设置面板
             BorderSettings.Visibility = Visibility.Collapsed;
+            // 设置蒙版为不可点击，并清除背景
             BorderSettingsMask.IsHitTestVisible = false;
+            BorderSettingsMask.Background = null; // 确保清除蒙层背景
         }
 
         // 新增：折叠侧边栏
@@ -679,7 +681,9 @@ namespace Ink_Canvas {
         {
             // 显示设置面板
             BorderSettings.Visibility = Visibility.Visible;
+            // 设置蒙版为可点击，并添加半透明背景
             BorderSettingsMask.IsHitTestVisible = true;
+            BorderSettingsMask.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(1, 0, 0, 0));
             
             // 获取SettingsPanelScrollViewer中的所有GroupBox
             var stackPanel = SettingsPanelScrollViewer.Content as StackPanel;
