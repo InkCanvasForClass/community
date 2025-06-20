@@ -454,6 +454,13 @@ namespace Ink_Canvas {
         #endregion
 
         private void inkCanvas_TouchMove(object sender, TouchEventArgs e) {
+            // 如果处于手掌擦状态，继续使用相同的橡皮形状
+            if (isLastTouchEraser && currentPalmEraserShape != null) {
+                inkCanvas.EraserShape = currentPalmEraserShape;
+                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+                return;
+            }
+            
             if (isSingleFingerDragMode) return;
 
             // 处理形状绘制模式
