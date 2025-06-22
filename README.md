@@ -18,7 +18,7 @@
 
 ## 🤔 发生了什么？
 
-由于众所周知的原因，[DotteringDoge471](https://github.com/DotteringDoge471) 不再积极负责 InkCanvasForClass 旧时代版本的开发与维护工作，而刚好 [CJKmkp](https://github,com/CJK-mkp) 由维护了这个社区版本的 icc，经过沟通后就顺理成章地成为了 icc 的官方版本。该分支版本 **目前还在开发之中** ，可能会有潜在的问题/ Bug 出现，请在出现 Bug 后与开发者或与 [DotteringDoge471](https://github.com/DotteringDoge471) 上报，方便我们迅速诊断并解决问题。
+由于众所周知的原因，[DotteringDoge471](https://github.com/DotteringDoge471) 不再积极负责 InkCanvasForClass 旧时代版本的开发与维护工作，而刚好 [CJKmkp](https://github,com/CJK-mkp) 又维护了这个社区版本的 icc，经过沟通后就顺理成章地成为了 icc 的官方版本。该分支版本 **目前还在开发之中** ，可能会有潜在的问题/ Bug 出现，请在出现 Bug 后与开发者或与 [DotteringDoge471](https://github.com/DotteringDoge471) 上报，方便我们迅速诊断并解决问题。
 
 > ⚠️ 请注意：[DotteringDoge471](https://github.com/DotteringDoge471) 不积极负责 **本社区版本** 的开发与维护工作，仅会在有空的时候对本项目开发新功能或修复 Bug。因此，任何问题反馈/Bug反馈/建议等，请优先找本项目主要维护者 [CJKmkp](https://github,com/CJK-mkp) 反馈或在 GitHub 仓库内提出 Issue！
 
