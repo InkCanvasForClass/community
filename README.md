@@ -64,5 +64,13 @@
 感谢 [yuwenhui2020](https://github.com/yuwenhui2020) 为 `Ink Canvas 使用说明` 做出的贡献！  
 感谢 [CN-Ironegg](https://github.com/CN-Ironegg)、[jiajiaxd](https://github.com/jiajiaxd)、[Kengwang](https://github.com/kengwang)、[Raspberry Kan](https://github.com/Raspberry-Monster)、[clover-yan](https://github.com/clover-yan)、[STBBRD](https://github.com/STBBRD)、[ChangSakura](https://github.com/WuChanging)、[DotteringDoge471](https://github.com/DotteringDoge471)、[Hydro11451](https://github.com/Hydro11451) 为本项目贡献代码！  
 
+## ✏️ 贡献指南
+> [!NOTE]
+> 
+> 请注意，本贡献指南由 Hydrogen（ @Hydro11451 ）撰写，尚未受到官方认可，并且尚未完成。
+
+**请注意，在贡献代码时，_务必_ 将所有代码提交到 _beta_ 分支，以保证beta版本总是新于main版本。**
+<br>TODO……
+
 ## License
 GPLv3
