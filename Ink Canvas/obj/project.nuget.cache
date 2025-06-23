@@ -1,21 +1,21 @@
 {
   "version": 2,
-  "dgSpecHash": "aYvBApY9Dj0=",
+  "dgSpecHash": "fbDnia5W9CY=",
   "success": true,
-  "projectFilePath": "E:\\ICC CE\\ICC CE main\\ICC-CE\\Ink Canvas\\InkCanvasForClass.csproj",
+  "projectFilePath": "D:\\Hydrogen\\Documents\\GitHub\\ICC-CE\\Ink Canvas\\InkCanvasForClass.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Administrator\\.nuget\\packages\\avalonedit\\6.3.0.90\\avalonedit.6.3.0.90.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\hardcodet.notifyicon.wpf\\1.1.0\\hardcodet.notifyicon.wpf.1.1.0.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\inkore.ui.wpf.modern\\0.9.27\\inkore.ui.wpf.modern.0.9.27.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\mdxaml\\1.27.0\\mdxaml.1.27.0.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\mdxaml.plugins\\1.27.0\\mdxaml.plugins.1.27.0.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\microsoft.office.interop.powerpoint\\15.0.4420.1018\\microsoft.office.interop.powerpoint.15.0.4420.1018.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\microsoftofficecore\\15.0.0\\microsoftofficecore.15.0.0.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\nhotkey\\3.0.0\\nhotkey.3.0.0.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\nhotkey.wpf\\3.0.0\\nhotkey.wpf.3.0.0.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\osversionext\\3.0.0\\osversionext.3.0.0.nupkg.sha512",
-    "C:\\Users\\Administrator\\.nuget\\packages\\system.valuetuple\\4.5.0\\system.valuetuple.4.5.0.nupkg.sha512"
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\avalonedit\\6.3.0.90\\avalonedit.6.3.0.90.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\hardcodet.notifyicon.wpf\\1.1.0\\hardcodet.notifyicon.wpf.1.1.0.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\inkore.ui.wpf.modern\\0.9.27\\inkore.ui.wpf.modern.0.9.27.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\mdxaml\\1.27.0\\mdxaml.1.27.0.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\mdxaml.plugins\\1.27.0\\mdxaml.plugins.1.27.0.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\microsoft.office.interop.powerpoint\\15.0.4420.1018\\microsoft.office.interop.powerpoint.15.0.4420.1018.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\microsoftofficecore\\15.0.0\\microsoftofficecore.15.0.0.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\nhotkey\\3.0.0\\nhotkey.3.0.0.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\nhotkey.wpf\\3.0.0\\nhotkey.wpf.3.0.0.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\osversionext\\3.0.0\\osversionext.3.0.0.nupkg.sha512",
+    "C:\\Users\\Hydrogen\\.nuget\\packages\\system.valuetuple\\4.5.0\\system.valuetuple.4.5.0.nupkg.sha512"
   ],
   "logs": []
 }

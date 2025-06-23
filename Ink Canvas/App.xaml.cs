@@ -56,6 +56,13 @@ namespace Ink_Canvas
             // 修改：仅当非用户主动退出时才触发自动重启
             if (CrashAction == CrashActionType.SilentRestart && !IsAppExitByUser)
             {
+                StartupCount.Increment();
+                if (StartupCount.GetCount() >= 5)
+                {
+                    MessageBox.Show("检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                    StartupCount.Reset();
+                    Environment.Exit(1);
+                }
                 try
                 {
                     string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
@@ -255,6 +262,13 @@ namespace Ink_Canvas
                     LogHelper.NewLog("检测到主线程无响应，自动重启。");
                     if (CrashAction == CrashActionType.SilentRestart)
                     {
+                        StartupCount.Increment();
+                        if (StartupCount.GetCount() >= 5)
+                        {
+                            MessageBox.Show("检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                            StartupCount.Reset();
+                            Environment.Exit(1);
+                        }
                         try
                         {
                             string exePath = Process.GetCurrentProcess().MainModule.FileName;
@@ -307,6 +321,13 @@ namespace Ink_Canvas
                         Thread.Sleep(2000);
                     }
                     // 主进程异常退出，自动重启
+                    StartupCount.Increment();
+                    if (StartupCount.GetCount() >= 5)
+                    {
+                        MessageBox.Show("检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                        StartupCount.Reset();
+                        Environment.Exit(1);
+                    }
                     string exePath = Process.GetCurrentProcess().MainModule.FileName;
                     Process.Start(exePath);
                 }
@@ -323,6 +344,7 @@ namespace Ink_Canvas
                 if (IsAppExitByUser)
                 {
                     // 写入退出信号文件，通知看门狗正常退出
+                    StartupCount.Reset();
                     File.WriteAllText(watchdogExitSignalFile, "exit");
                     if (watchdogProcess != null && !watchdogProcess.HasExited)
                     {
