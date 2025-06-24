@@ -74,10 +74,10 @@
 > 请注意，本贡献指南由 Hydrogen（ @Hydro11451 ）撰写，尚未受到官方认可，并且尚未完成。
 
 **请注意，在贡献代码时，_务必_ 将所有代码提交到 _beta_ 分支，以保证beta版本总是新于main版本。**
-<br>TODO LIST
-> 预备2.0版本开发
-> Ci联动插件
 
+## TODO LIST
+1. 预备2.0版本开发
+2. Ci联动插件
 
 由于众所周知的原因，[DotteringDoge471](https://github.com/DotteringDoge471) 不再积极负责 InkCanvasForClass 旧时代版本的开发与维护工作，而刚好 [CJKmkp](https://github,com/CJK-mkp) 又维护了这个社区版本的 icc，经过沟通后就顺理成章地成为了 icc 的官方版本。该分支版本 **目前还在开发之中** ，可能会有潜在的问题/ Bug 出现，请在出现 Bug 后与开发者或与 [DotteringDoge471](https://github.com/DotteringDoge471) 上报，方便我们迅速诊断并解决问题。
 
