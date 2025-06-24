@@ -36,7 +36,7 @@
 - 对于新功能的有效意见和合理建议，开发者会适时回复并进行开发。本软件并非商业性质软件或由营利性机构驱动，请不要催促开发者，耐心等待能让功能少些Bug，更加稳定。
 - 此软件仅用于个人使用，请勿商用。更新速度不会很快，如果有能力请通过PR贡献代码，而不是在 Issue 里无能狂怒。
 - 欢迎尝试 InkCanvas 家族的其他成员，包括 [Ink Canvas Plus](https://khyan.top/ic+) 和 [Ink Canvas Artistry](https://github.com/InkCanvas/Ink-Canvas-Artistry) 。您的大力宣传能让更多用户发现我们的软件。
-- **强烈建议使用 Microsoft Office 356 的 PowerPoint 搭配 InkCanvasForClass 使用，效果更好！！！**
+- **强烈建议使用 Microsoft Office 365 的 PowerPoint 搭配 InkCanvasForClass 使用，效果更好！！！**
 
 ## 📗 FAQ
 ### 在 Windows 10 以下版本系统中，部分图标显示为 “□” 怎么办？
@@ -71,7 +71,9 @@
 > 请注意，本贡献指南由 Hydrogen（ @Hydro11451 ）撰写，尚未受到官方认可，并且尚未完成。
 
 **请注意，在贡献代码时，_务必_ 将所有代码提交到 _beta_ 分支，以保证beta版本总是新于main版本。**
-<br>TODO……
+<br>TODO LIST
+> 预备2.0版本开发
+> Ci联动插件
 
 ## License
 GPLv3
