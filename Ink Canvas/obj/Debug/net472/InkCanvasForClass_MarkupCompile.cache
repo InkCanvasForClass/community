@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-E:\ICC CE\ICC CE main\ICC-CE\Ink Canvas\obj\Debug\net472\
+D:\Hydrogen\Documents\GitHub\ICC-CE\Ink Canvas\obj\Debug\net472\
 Ink_Canvas
 none
 false
-TRACE;DEBUG;NETFRAMEWORK;NET472;;NET30_OR_GREATER;NET35_OR_GREATER;NET40_OR_GREATER;NET45_OR_GREATER;NET451_OR_GREATER;NET452_OR_GREATER;NET46_OR_GREATER;NET461_OR_GREATER;NET462_OR_GREATER;NET47_OR_GREATER;NET471_OR_GREATER;NET472_OR_GREATER
-E:\ICC CE\ICC CE main\ICC-CE\Ink Canvas\App.xaml
+TRACE;DEBUG;NETFRAMEWORK;NET472;
+D:\Hydrogen\Documents\GitHub\ICC-CE\Ink Canvas\App.xaml
 13173459795
 
-56-1167124909
-46-47806484
+572134547572
+46-733365150
 MainWindow.xaml;Resources\DrawShapeImageDictionary.xaml;Resources\IconImageDictionary.xaml;Resources\SeewoImageDictionary.xaml;Resources\Styles\Dark.xaml;Resources\Styles\Light.xaml;Windows\CountdownTimerWindow.xaml;Windows\CycleProcessBar.xaml;Windows\HasNewUpdateWindow.xaml;Windows\NamesInputWindow.xaml;Windows\OperatingGuideWindow.xaml;Windows\RandWindow.xaml;Windows\YesOrNoNotificationWindow.xaml;
 
-False
+True
 

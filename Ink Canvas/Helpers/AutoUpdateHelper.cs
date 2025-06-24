@@ -23,8 +23,8 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | Local version: {localVersion}");
                 
                 string remoteAddress = proxy;
-                string primaryUrl = "https://raw.githubusercontent.com/awesome-iwb/icc-ce/refs/heads/main/AutomaticUpdateVersionControl.txt";
-                string fallbackUrl = "https://raw.bgithub.xyz/awesome-iwb/icc-ce/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                string primaryUrl = "https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                string fallbackUrl = "https://raw.bgithub.xyz/InkCanvasForClass/community/refs/heads/main/AutomaticUpdateVersionControl.txt";
                 
                 // 先尝试主地址
                 remoteAddress += primaryUrl;
@@ -170,9 +170,9 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 主下载地址
-                string primaryUrl = $"{proxy}https://github.com/awesome-iwb/icc-ce/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                string primaryUrl = $"{proxy}https://github.com/InkCanvasForClass/community/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
                 // 备用下载地址
-                string fallbackUrl = $"{proxy}https://bgithub.xyz/awesome-iwb/icc-ce/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                string fallbackUrl = $"{proxy}https://bgithub.xyz/InkCanvasForClass/community/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
                 
                 LogHelper.WriteLogToFile($"AutoUpdate | Primary download URL: {primaryUrl}");
 

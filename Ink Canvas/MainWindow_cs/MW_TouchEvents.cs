@@ -206,6 +206,8 @@ namespace Ink_Canvas {
         private Point iniP = new Point(0, 0);
         private bool isLastTouchEraser = false;
         private bool forcePointEraser = true;
+        // 用于记录手掌擦的尺寸和形状
+        private StylusShape currentPalmEraserShape = null;
 
         private void Main_Grid_TouchDown(object sender, TouchEventArgs e) {
             // 确保触摸时显示自定义光标
@@ -226,6 +228,14 @@ namespace Ink_Canvas {
             if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
             if (drawingShapeMode == 9 && isFirstTouchCuboid == false) MouseTouchMove(iniP);
             inkCanvas.Opacity = 1;
+            
+            // 如果已经处于手掌擦状态，保持状态不变
+            if (isLastTouchEraser && currentPalmEraserShape != null) {
+                inkCanvas.EraserShape = currentPalmEraserShape;
+                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+                return;
+            }
+            
             double boundsWidth = GetTouchBoundWidth(e), eraserMultiplier = 1.0;
             if (!Settings.Advanced.EraserBindTouchMultiplier && Settings.Advanced.IsSpecialScreen)
                 eraserMultiplier = 1 / Settings.Advanced.TouchMultiplier;
@@ -249,34 +259,38 @@ namespace Ink_Canvas {
                             break;
                     }
 
-                    // 根据EraserShapeType设置合适的橡皮擦形状
+                    // 根据EraserShapeType设置合适的橡皮擦形状并保存
                     if (Settings.Canvas.EraserShapeType == 0) {
                         // 圆形擦
-                        inkCanvas.EraserShape = new EllipseStylusShape(boundsWidth * k * eraserMultiplier,
+                        currentPalmEraserShape = new EllipseStylusShape(boundsWidth * k * eraserMultiplier,
                             boundsWidth * k * eraserMultiplier);
                     } else if (Settings.Canvas.EraserShapeType == 1) {
                         // 矩形黑板擦
-                        inkCanvas.EraserShape = new RectangleStylusShape(boundsWidth * k * eraserMultiplier * 0.6,
+                        currentPalmEraserShape = new RectangleStylusShape(boundsWidth * k * eraserMultiplier * 0.6,
                             boundsWidth * k * eraserMultiplier);
                     }
                     
+                    inkCanvas.EraserShape = currentPalmEraserShape;
                     inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
                 }
                 else {
                     if (StackPanelPPTControls.Visibility == Visibility.Visible && inkCanvas.Strokes.Count == 0 &&
                         Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl) {
                         isLastTouchEraser = false;
+                        currentPalmEraserShape = null;
                         inkCanvas.EditingMode = InkCanvasEditingMode.GestureOnly;
                         inkCanvas.Opacity = 0.1;
                     }
                     else {
-                        inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
+                        currentPalmEraserShape = new EllipseStylusShape(5, 5);
+                        inkCanvas.EraserShape = currentPalmEraserShape;
                         inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
                     }
                 }
             }
             else {
                 isLastTouchEraser = false;
+                currentPalmEraserShape = null;
                 // 修复面积擦时不显示橡皮形状：无论 forcePointEraser 状态，均显示 50x50 橡皮
                 inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
                 // 修复触屏状态下几何绘制功能不可用的问题：在几何绘制模式下不应该因为forceEraser而直接返回
@@ -328,7 +342,6 @@ namespace Ink_Canvas {
         }
 
         private void inkCanvas_PreviewTouchUp(object sender, TouchEventArgs e) {
-
             inkCanvas.ReleaseAllTouchCaptures();
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
@@ -343,6 +356,7 @@ namespace Ink_Canvas {
             // 如果是手掌触发的面积擦抬起，需要确保橡皮擦形状被正确重置
             if (isLastTouchEraser && dec.Count == 0) {
                 isLastTouchEraser = false;
+                currentPalmEraserShape = null; // 清除保存的手掌擦形状
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && forcePointEraser) {
                     // 重新应用当前设置的橡皮擦形状
                     ApplyCurrentEraserShape();
@@ -370,27 +384,12 @@ namespace Ink_Canvas {
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
         }
 
-        // -- removed --
-        //
-        //private void inkCanvas_ManipulationStarted(object sender, ManipulationStartedEventArgs e)
-        //{
-        //    if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture || inkCanvas.Strokes.Count == 0 || dec.Count() < 2) return;
-        //    _currentCommitType = CommitReason.Manipulation;
-        //    StrokeCollection strokes = inkCanvas.GetSelectedStrokes();
-        //    if (strokes.Count != 0)
-        //    {
-        //        inkCanvas.Strokes.Replace(strokes, strokes.Clone());
-        //    }
-        //    else
-        //    {
-        //        var originalStrokes = inkCanvas.Strokes;
-        //        var targetStrokes = originalStrokes.Clone();
-        //        originalStrokes.Replace(originalStrokes, targetStrokes);
-        //    }
-        //    _currentCommitType = CommitReason.UserInput;
-        //}
-
         private void Main_Grid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e) {
+            // 手掌擦时禁止移动/缩放
+            if (isLastTouchEraser || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                return;
+            // 三指及以上禁止缩放
+            bool disableScale = dec.Count >= 3;
             if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
             if ((dec.Count >= 2 && (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
                                     StackPanelPPTControls.Visibility != Visibility.Visible ||
@@ -415,7 +414,7 @@ namespace Ink_Canvas {
 
                     if (Settings.Gesture.IsEnableTwoFingerRotation)
                         m.RotateAt(rotate, center.X, center.Y); // 旋转
-                    if (Settings.Gesture.IsEnableTwoFingerZoom)
+                    if (Settings.Gesture.IsEnableTwoFingerZoom && !disableScale)
                         m.ScaleAt(scale.X, scale.Y, center.X, center.Y); // 缩放
                 }
 
