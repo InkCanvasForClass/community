@@ -30,7 +30,7 @@
                     <mdxam:MarkdownScrollViewer x:Name="markdownContent" xml:space="preserve" Foreground="Black" MarkdownStyleName="GithubLike">
                         # InkCanvasForClass v5.0.2更新
                         
-                        你好，旅行者们，本次InkCanvasForClass更新带来了如下新功能供您探索：
+                        你好，旅行者们，本次InkCanvasForClass Community Edition更新带来了如下新功能供您探索：
                         
                         1. 全新设计的UI界面，包括浮动工具栏和白板页面均经过重新设计，更加现代化的UI让您在使用的过程中更加舒适。
                         2. 带来了实时修改橡皮大小和橡皮形状的菜单。您可以选择使用圆形橡皮，方形橡皮，和类似希沃白板的真实黑板擦（矩形）橡皮。
