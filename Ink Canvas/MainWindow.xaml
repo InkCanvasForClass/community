@@ -2732,10 +2732,10 @@
                                     </Grid>
                                     <ui:SimpleStackPanel Spacing="3" Orientation="Vertical">
                                         <TextBlock
-                                            Text="© 2024 Dubi906w(Kriastans) 版权所有" FontWeight="Bold"
+                                            Text="© 2025 CJK_mkp 版权所有" FontWeight="Bold"
                                             TextWrapping="Wrap" Foreground="White" />
                                         <TextBlock
-                                            Text="© 2022-2024 HarkoTek Studio 提供技术支持"
+                                            Text="© 2022-2025 HarkoTek Studio 提供技术支持"
                                             TextWrapping="Wrap" Foreground="#a1a1aa" />
                                         <TextBlock
                                             Text="We love Open-Source forever!" FontWeight="Bold"
