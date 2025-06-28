@@ -12,7 +12,7 @@
 ![GitHub forks](https://img.shields.io/github/forks/InkCanvasForClass/community)
 [![All Contributors](https://img.shields.io/github/all-contributors/InkCanvasForClass/community)](#contributors)
 
-[![Discord](https://img.shields.io/discord/1383039050184917053?style=flat&label=Discord&logo=discord)](https://discord.gg/ahj7eJWhEG)
+[![Discord](https://img.shields.io/discord/1383039050184917053?label=Discord&logo=discord)](https://discord.gg/ahj7eJWhEG)
 [![交流群](https://img.shields.io/badge/-%E4%BA%A4%E6%B5%81%E7%BE%A4%201054377349-white?style=flat&logo=qq)](https://qm.qq.com/q/qo32AclNh6)
 
 
