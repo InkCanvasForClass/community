@@ -1,37 +1,37 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\",
+  "WorkspaceRootPath": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\administrator\\desktop\\icc ce\\icc ce 1.2.5\\ink canvas\\mainwindow_cs\\mw_floatingbaricons.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\dubi906w\\source\\repos\\icc-ce\\ink canvas\\mainwindow_cs\\mw_floatingbaricons.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|solutionrelative:ink canvas\\mainwindow_cs\\mw_floatingbaricons.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dubi906w\\source\\repos\\icc-ce\\README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:README.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\privacy.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dubi906w\\source\\repos\\icc-ce\\privacy.txt||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:privacy.txt||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Manual.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Manual.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Manual.md||{EFC0BB08-EA7D-40C6-A696-C870411A895B}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\LICENSE||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dubi906w\\source\\repos\\icc-ce\\LICENSE||{8B382828-6202-11D1-8870-0000F87579D2}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:LICENSE||{8B382828-6202-11D1-8870-0000F87579D2}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Ink Canvas.sln.DotSettings.user||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Ink Canvas.sln.DotSettings.user||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
       "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:Ink Canvas.sln.DotSettings.user||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\administrator\\desktop\\icc ce\\icc ce 1.2.5\\ink canvas\\mainwindow_cs\\mw_ppt.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\dubi906w\\source\\repos\\icc-ce\\ink canvas\\mainwindow_cs\\mw_ppt.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|solutionrelative:ink canvas\\mainwindow_cs\\mw_ppt.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\administrator\\desktop\\icc ce\\icc ce 1.2.5\\ink canvas\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|c:\\users\\dubi906w\\source\\repos\\icc-ce\\ink canvas\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{8D0EDFC7-F974-4571-BC49-6F3A6653FE81}|Ink Canvas\\InkCanvasForClass.csproj|solutionrelative:ink canvas\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
@@ -47,18 +47,210 @@
       "VerticalTabListWidth": 256,
       "DocumentGroups": [
         {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "DockedWidth": 210,
+          "SelectedChildIndex": 48,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e506b91c-c606-466a-90a9-123d1d1e12b3}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{387cb18d-6153-4156-9257-9ac3f9207bbe}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e8b06f52-6d01-11d2-aa7d-00c04f990343}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{46c87f81-5a06-43a8-9e25-85d33bac49f8}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{269a02dc-6af8-11d3-bdc4-00c04f688e50}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{99b8fa2f-ab90-4f57-9c32-949f146f1914}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{c79b74ff-f1d7-4c94-aefa-4d22bfe1b1f9}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:2:0:{34c7837f-3b3a-449c-bdf0-bdad86cbaf4a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{37aba9be-445a-11d3-9949-00c04f68fd0a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{dcc4ea97-1c0c-482b-b205-e541c0df9728}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{aa2115a1-9712-457b-9047-dbb71ca2cdd2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{4a9b7e51-aa16-11d0-a8c5-00a0c921a4d2}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:132:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:133:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:3:0:{34c7837f-3b3a-449c-bdf0-bdad86cbaf4a}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:153:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:154:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:152:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:151:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:150:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:148:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:149:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:136:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:144:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:147:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:145:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:146:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:143:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:142:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:141:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:140:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:139:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:138:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:137:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:135:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:134:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{13b12e3e-c1b4-4539-9371-4fe9a0d523fc}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:130:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{b1e99781-ab81-11d0-b683-00aa00a3ee26}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "MW_FloatingBarIcons.cs",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Ink Canvas\\MainWindow_cs\\MW_FloatingBarIcons.cs",
+              "DocumentMoniker": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Ink Canvas\\MainWindow_cs\\MW_FloatingBarIcons.cs",
               "RelativeDocumentMoniker": "Ink Canvas\\MainWindow_cs\\MW_FloatingBarIcons.cs",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Ink Canvas\\MainWindow_cs\\MW_FloatingBarIcons.cs*",
-              "RelativeToolTip": "Ink Canvas\\MainWindow_cs\\MW_FloatingBarIcons.cs*",
-              "ViewState": "AgIAAFgHAAAAAAAAAAAgwGcHAAAIAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Ink Canvas\\MainWindow_cs\\MW_FloatingBarIcons.cs",
+              "RelativeToolTip": "Ink Canvas\\MainWindow_cs\\MW_FloatingBarIcons.cs",
+              "ViewState": "AgIAAOgCAAAAAAAAAAAuwEoGAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-05-31T10:49:24.719Z",
               "EditorCaption": ""
@@ -67,22 +259,21 @@
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "README.md",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\README.md",
+              "DocumentMoniker": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\README.md",
               "RelativeDocumentMoniker": "README.md",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\README.md",
+              "ToolTip": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\README.md",
               "RelativeToolTip": "README.md",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2025-05-31T10:48:22.883Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-31T10:48:22.883Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 7,
               "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Ink Canvas\\MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Ink Canvas\\MainWindow.xaml",
               "RelativeDocumentMoniker": "Ink Canvas\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Ink Canvas\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Ink Canvas\\MainWindow.xaml",
               "RelativeToolTip": "Ink Canvas\\MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2025-05-24T13:22:56.715Z"
@@ -103,9 +294,9 @@
               "$type": "Document",
               "DocumentIndex": 6,
               "Title": "MW_PPT.cs",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
+              "DocumentMoniker": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
               "RelativeDocumentMoniker": "Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
+              "ToolTip": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
               "RelativeToolTip": "Ink Canvas\\MainWindow_cs\\MW_PPT.cs",
               "ViewState": "AgIAAFgAAAAAAAAAAAAUwHQAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
@@ -116,9 +307,9 @@
               "DocumentIndex": 8,
               "Title": "README.md",
               "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\README.md",
-              "RelativeDocumentMoniker": "..\\icc-0610.2.3\\README.md",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\README.md",
               "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\README.md",
-              "RelativeToolTip": "..\\icc-0610.2.3\\README.md",
+              "RelativeToolTip": "..\\..\\..\\..\\Administrator\\Desktop\\ICC CE\\icc-0610.2.3\\README.md",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
               "WhenOpened": "2025-05-24T13:04:01.407Z"
@@ -127,53 +318,77 @@
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "privacy.txt",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\privacy.txt",
+              "DocumentMoniker": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\privacy.txt",
               "RelativeDocumentMoniker": "privacy.txt",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\privacy.txt",
+              "ToolTip": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\privacy.txt",
               "RelativeToolTip": "privacy.txt",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003109|",
-              "WhenOpened": "2025-05-24T13:04:01.337Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-24T13:04:01.337Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "Manual.md",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Manual.md",
+              "DocumentMoniker": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Manual.md",
               "RelativeDocumentMoniker": "Manual.md",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Manual.md",
+              "ToolTip": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Manual.md",
               "RelativeToolTip": "Manual.md",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001818|",
-              "WhenOpened": "2025-05-24T13:04:00.986Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-24T13:04:00.986Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 4,
               "Title": "LICENSE",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\LICENSE",
+              "DocumentMoniker": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\LICENSE",
               "RelativeDocumentMoniker": "LICENSE",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\LICENSE",
+              "ToolTip": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\LICENSE",
               "RelativeToolTip": "LICENSE",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-05-24T13:04:00.902Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-24T13:04:00.902Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
               "Title": "Ink Canvas.sln.DotSettings.user",
-              "DocumentMoniker": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Ink Canvas.sln.DotSettings.user",
+              "DocumentMoniker": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Ink Canvas.sln.DotSettings.user",
               "RelativeDocumentMoniker": "Ink Canvas.sln.DotSettings.user",
-              "ToolTip": "C:\\Users\\Administrator\\Desktop\\ICC CE\\ICC CE 1.2.5\\Ink Canvas.sln.DotSettings.user",
+              "ToolTip": "C:\\Users\\dubi906w\\source\\repos\\icc-ce\\Ink Canvas.sln.DotSettings.user",
               "RelativeToolTip": "Ink Canvas.sln.DotSettings.user",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003464|",
-              "WhenOpened": "2025-05-24T13:04:00.792Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-24T13:04:00.792Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{d84ee353-0bef-5a41-a649-8f89aca5d84d}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 204,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{590a070c-4fcd-52d9-87da-dfaa11710261}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 190,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{f4fc5ff1-28ef-4b04-ad02-6b298310ccc7}"
             }
           ]
         }
