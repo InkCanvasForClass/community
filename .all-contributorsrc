@@ -1,4 +1,21 @@
 {
   "projectName": "community",
-  "projectOwner": "InkCanvasForClass"
+  "projectOwner": "InkCanvasForClass",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "contributors": [
+    {
+      "login": "CJKmkp",
+      "name": "CJK_mkp",
+      "avatar_url": "https://avatars.githubusercontent.com/u/113243675?v=4",
+      "profile": "https://github.com/CJKmkp",
+      "contributions": [
+        "maintenance"
+      ]
+    }
+  ]
 }
