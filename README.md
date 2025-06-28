@@ -74,11 +74,23 @@
 1. 预备2.0版本开发
 2. Ci联动插件
 
+## 贡献者
+此列表通过[All Contributers](https://allcontributors.org/)实现。
+[![All Contributors](https://img.shields.io/github/all-contributors/InkCanvasForClass/community?color=ee8449&style=flat-square)](#contributors)
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
 ## 🤝 感谢
 感谢 [DotteringDoge471](https://github.com/DotteringDoge471) 创造了 `InkCanvasForClass`！   
 感谢 [yuwenhui2020](https://github.com/yuwenhui2020) 为 `Ink Canvas 使用说明` 做出的贡献！  
 感谢 [CN-Ironegg](https://github.com/CN-Ironegg)、[jiajiaxd](https://github.com/jiajiaxd)、[Kengwang](https://github.com/kengwang)、[Raspberry Kan](https://github.com/Raspberry-Monster)、[clover-yan](https://github.com/clover-yan)、[STBBRD](https://github.com/STBBRD)、[ChangSakura](https://github.com/WuChanging)、[DotteringDoge471](https://github.com/DotteringDoge471)、[Hydro11451](https://github.com/Hydro11451) 为本项目贡献代码！  
-
 
 ## License
 GPLv3
