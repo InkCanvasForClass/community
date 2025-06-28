@@ -76,7 +76,7 @@
 
 ## 贡献者
 此列表通过[All Contributers](https://allcontributors.org/)实现。
-[![All Contributors](https://img.shields.io/github/all-contributors/projectOwner/projectName?color=ee8449&style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/github/all-contributors/InkCanvasForClass/community?color=ee8449&style=flat-square)](#contributors)
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
