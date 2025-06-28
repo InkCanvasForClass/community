@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="icc ce.png" width="128">
+<img src="icc.png" width="128">
 
 # InkCanvasForClass<br/>Community Edition
 
@@ -14,6 +14,8 @@
 [![Discord](https://img.shields.io/discord/1383039050184917053?style=social&label=Discord&logo=discord)](https://discord.gg/ahj7eJWhEG)
 
 [![交流群](https://img.shields.io/badge/-%E4%BA%A4%E6%B5%81%E7%BE%A4%201054377349-white?style=flat&logo=qq)](https://qm.qq.com/q/qo32AclNh6)
+
+<img src="Images/icc ce.png" width="2048">
 
 ![banner](https://private-user-images.bgithub.xyz/141403762/452763012-09f98879-06a4-4de2-8fc0-b9affdd7b966.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTA2MTgwODQsIm5iZiI6MTc1MDYxNzc4NCwicGF0aCI6Ii8xNDE0MDM3NjIvNDUyNzYzMDEyLTA5Zjk4ODc5LTA2YTQtNGRlMi04ZmMwLWI5YWZmZGQ3Yjk2Ni5wbmc_WC1BbXotQWxnb3JpdGhtPUFXUzQtSE1BQy1TSEEyNTYmWC1BbXotQ3JlZGVudGlhbD1BS0lBVkNPRFlMU0E1M1BRSzRaQSUyRjIwMjUwNjIyJTJGdXMtZWFzdC0xJTJGczMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDI1MDYyMlQxODQzMDRaJlgtQW16LUV4cGlyZXM9MzAwJlgtQW16LVNpZ25hdHVyZT03YWRlMmIwZGMxN2YzZDJmNTdlNDFlN2RiNzQyMzY1ODc0YTJkNTU0YTcxYWYzMTg4ZDg5YmI3YzZiMjQ2ZjQ0JlgtQW16LVNpZ25lZEhlYWRlcnM9aG9zdCJ9.DDFTSMf-6MNSneJXEU22O_X2_RnMiAf6oI6CBeFZrPU)
 
