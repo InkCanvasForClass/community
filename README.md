@@ -85,6 +85,7 @@
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/CJKmkp"><img src="https://avatars.githubusercontent.com/u/113243675?v=4?s=100" width="100px;" alt="CJK_mkp"/><br /><sub><b>CJK_mkp</b></sub></a><br /><a href="#maintenance-CJKmkp" title="Maintenance">🚧</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://bonjour.bio/dubi906w"><img src="https://avatars.githubusercontent.com/u/185512682?v=4?s=100" width="100px;" alt="DotteringDoge471"/><br /><sub><b>DotteringDoge471</b></sub></a><br /><a href="#maintenance-DotteringDoge471" title="Maintenance">🚧</a></td>
     </tr>
   </tbody>
 </table>
