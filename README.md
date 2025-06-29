@@ -85,7 +85,7 @@
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/CJKmkp"><img src="https://avatars.githubusercontent.com/u/113243675?v=4?s=100" width="100px;" alt="CJK_mkp"/><br /><sub><b>CJK_mkp</b></sub></a><br /><a href="#maintenance-CJKmkp" title="Maintenance">🚧</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Hydro11451"><img src="https://avatars.githubusercontent.com/u/214308559?v=4?s=100" width="100px;" alt="Hydrogen"/><br /><sub><b>Hydrogen</b></sub></a><br /><a href="#maintenance-Hydro11451" title="Maintenance">🚧</a> <a href="#doc-Hydro11451" title="Documentation">📖</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Hydro11451"><img src="https://avatars.githubusercontent.com/u/214308559?v=4?s=100" width="100px;" alt="Hydrogen"/><br /><sub><b>Hydrogen</b></sub></a><br /><a href="#maintenance-Hydro11451" title="Maintenance">🚧</a></td>
     </tr>
   </tbody>
 </table>
