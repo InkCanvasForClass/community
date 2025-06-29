@@ -21,16 +21,33 @@ namespace Ink_Canvas {
         private void ToggleSwitchIsAutoUpdate_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             Settings.Startup.IsAutoUpdate = ToggleSwitchIsAutoUpdate.IsOn;
-            ToggleSwitchIsAutoUpdateWithSilence.Visibility =
+            
+            // 自动更新关闭时隐藏静默更新选项
+            ToggleSwitchIsAutoUpdateWithSilence.Visibility = 
                 ToggleSwitchIsAutoUpdate.IsOn ? Visibility.Visible : Visibility.Collapsed;
+                
+            // 如果关闭了自动更新，同时也关闭静默更新
+            if (!ToggleSwitchIsAutoUpdate.IsOn) {
+                Settings.Startup.IsAutoUpdateWithSilence = false;
+                ToggleSwitchIsAutoUpdateWithSilence.IsOn = false;
+            }
+            
+            // 无论如何，静默更新时间区域的显示都要跟随静默更新设置
+            AutoUpdateTimePeriodBlock.Visibility =
+                (Settings.Startup.IsAutoUpdateWithSilence && Settings.Startup.IsAutoUpdate) ? 
+                Visibility.Visible : Visibility.Collapsed;
+                
             SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsAutoUpdateWithSilence_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             Settings.Startup.IsAutoUpdateWithSilence = ToggleSwitchIsAutoUpdateWithSilence.IsOn;
+            
+            // 静默更新的时间设置区域只在静默更新开启时显示
             AutoUpdateTimePeriodBlock.Visibility =
                 Settings.Startup.IsAutoUpdateWithSilence ? Visibility.Visible : Visibility.Collapsed;
+                
             SaveSettingsToFile();
         }
 
@@ -1515,8 +1532,8 @@ namespace Ink_Canvas {
             Settings.Startup.IsEnableNibMode = false;
             Settings.Startup.IsAutoUpdate = true;
             Settings.Startup.IsAutoUpdateWithSilence = true;
-            Settings.Startup.AutoUpdateWithSilenceStartTime = "18:20";
-            Settings.Startup.AutoUpdateWithSilenceEndTime = "07:40";
+            Settings.Startup.AutoUpdateWithSilenceStartTime = "06:00";
+            Settings.Startup.AutoUpdateWithSilenceEndTime = "22:00";
             Settings.Startup.IsFoldAtStartup = false;
         }
 
@@ -1780,6 +1797,62 @@ namespace Ink_Canvas {
         private void HyperlinkSourceToOringinalRepository_Click(object sender, RoutedEventArgs e) {
             Process.Start("https://github.com/WXRIW/Ink-Canvas");
             HideSubPanels();
+        }
+
+        private void UpdateChannelSelector_Checked(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            var radioButton = sender as System.Windows.Controls.RadioButton;
+            if (radioButton != null) {
+                string channel = radioButton.Tag.ToString();
+                Settings.Startup.UpdateChannel = channel == "Beta" ? UpdateChannel.Beta : UpdateChannel.Release;
+                LogHelper.WriteLogToFile($"Settings | Update channel changed to {Settings.Startup.UpdateChannel}");
+                SaveSettingsToFile();
+            }
+        }
+        
+        private async void FixVersionButton_Click(object sender, RoutedEventArgs e) {
+            // 显示确认对话框
+            var confirm = MessageBox.Show(
+                "此操作将下载当前选择通道的最新版本并安装，软件将自动关闭并更新。\n\n确定要执行版本修复吗？",
+                "版本修复确认",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+                
+            if (confirm == MessageBoxResult.Yes) {
+                // 禁用按钮，避免重复点击
+                FixVersionButton.IsEnabled = false;
+                FixVersionButton.Content = "正在修复...";
+                
+                try {
+                    // 执行版本修复
+                    bool result = await AutoUpdateHelper.FixVersion(Settings.Startup.UpdateChannel);
+                    
+                    if (!result) {
+                        MessageBox.Show(
+                            "版本修复失败，可能是网络问题或当前已是最新版本。",
+                            "修复失败",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                            
+                        // 恢复按钮状态
+                        FixVersionButton.IsEnabled = true;
+                        FixVersionButton.Content = "版本修复";
+                    }
+                    // 成功则会自动关闭应用程序并安装
+                }
+                catch (Exception ex) {
+                    LogHelper.WriteLogToFile($"Error in FixVersionButton_Click: {ex.Message}", LogHelper.LogType.Error);
+                    MessageBox.Show(
+                        $"版本修复过程中发生错误: {ex.Message}",
+                        "修复错误",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                        
+                    // 恢复按钮状态
+                    FixVersionButton.IsEnabled = true;
+                    FixVersionButton.Content = "版本修复";
+                }
+            }
         }
     }
 }

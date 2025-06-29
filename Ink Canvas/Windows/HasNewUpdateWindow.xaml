@@ -10,7 +10,7 @@
         ui:WindowHelper.UseModernWindowStyle = "True"
         ui:WindowHelper.SystemBackdropType="Mica"
         ui:TitleBar.Height="36"
-        Title="InkCanvasForClass CE有新版本可用" Height="680" Width="850" ResizeMode="NoResize" 
+        Title="InkCanvasForClass CE有新版本可用" Height="600" Width="850" ResizeMode="NoResize" 
         WindowStartupLocation="CenterScreen">
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Background="#fafafa" Margin="0,0,0,30">
@@ -50,28 +50,7 @@
                 <TextBlock x:Name="updateDateInfo" Text="2024年8月4日发布更新" FontSize="15" TextAlignment="Center"/>
             </ui:SimpleStackPanel>
             
-            <!-- 自动更新选项 -->
-            <Border Background="White" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="4" Margin="24,16,24,0">
-                <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0,16,0,16" Spacing="10">
-                    <TextBlock Text="更新设置" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,6"/>
-                    
-                    <!-- 水平排列两个ToggleSwitch -->
-                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="20">
-                        <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
-                            <ui:ToggleSwitch x:Name="EnableAutoUpdateToggle" Header="启用自动更新" OnContent="开启" OffContent="关闭" IsOn="True" Width="170" Foreground="Black"/>
-                        </ui:SimpleStackPanel>
-                        
-                        <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
-                            <ui:ToggleSwitch x:Name="EnableSilentUpdateToggle" Header="启用静默更新" OnContent="开启" OffContent="关闭" Width="170" Foreground="Black"/>
-                        </ui:SimpleStackPanel>
-                    </ui:SimpleStackPanel>
-                    
-                    <TextBlock Text="静默更新将在软件不使用时自动安装，无需手动操作" FontSize="13" Foreground="#71717a" HorizontalAlignment="Center"
-                               Margin="4,0,0,0" Width="360" TextWrapping="Wrap"/>
-                </ui:SimpleStackPanel>
-            </Border>
-            
-                            <!-- 更新按钮组 -->
+            <!-- 更新按钮组 -->
                 <Border Background="#f1f5f9" BorderBrush="#e2e8f0" BorderThickness="1" CornerRadius="4" Margin="24,16,24,20">
                     <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="14" Margin="0,16,0,16">
                         <TextBlock Text="请选择更新方式" FontWeight="Bold" FontSize="16" HorizontalAlignment="Center" Margin="0,0,0,6"/>

@@ -652,16 +652,36 @@
                                                FontSize="26" />
                                 </GroupBox.Header>
                                 <ui:SimpleStackPanel Spacing="6">
-                                    <ui:ToggleSwitch OnContent="" OffContent="" Visibility="Collapsed"
+                                    <ui:ToggleSwitch OnContent="" OffContent=""
                                                      Name="ToggleSwitchIsAutoUpdate" Header="自动检查更新"
                                                      FontFamily="Microsoft YaHei UI"
                                                      Toggled="ToggleSwitchIsAutoUpdate_Toggled" />
-                                    <ui:ToggleSwitch OnContent="" OffContent="" Visibility="Collapsed"
+                                    <ui:ToggleSwitch OnContent="" OffContent=""
                                                      Name="ToggleSwitchIsAutoUpdateWithSilence" Header="静默更新"
                                                      FontFamily="Microsoft YaHei UI"
                                                      Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
+                                    <TextBlock Text="# 静默更新将在软件不使用时自动安装，无需手动操作" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    
+                                    <!-- 更新通道选择 -->
+                                    <ui:SimpleStackPanel Spacing="8" Margin="0,8,0,0">
+                                        <TextBlock Text="更新通道" FontSize="15" FontWeight="Bold" Foreground="#fafafa"/>
+                                        <ui:RadioButtons x:Name="UpdateChannelSelector" Margin="0,4,0,0">
+                                            <RadioButton Content="稳定版 (Release)" GroupName="UpdateChannel" 
+                                                           Tag="Release" Checked="UpdateChannelSelector_Checked"/>
+                                            <RadioButton Content="测试版 (Beta)" GroupName="UpdateChannel" 
+                                                           Tag="Beta" Checked="UpdateChannelSelector_Checked"/>
+                                        </ui:RadioButtons>
+                                        <TextBlock Text="# 稳定版提供可靠更新，测试版提供新功能抢先体验" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <!-- 版本修复按钮 -->
+                                    <Button x:Name="FixVersionButton" Content="版本修复" Margin="0,8,0,0"
+                                            Width="120" HorizontalAlignment="Left" Click="FixVersionButton_Click"/>
+                                    <TextBlock Text="# 版本修复会根据当前选择的通道下载最新版本并执行安装，可用于修复损坏的安装" 
+                                               TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    
                                     <Border BorderBrush="Black" BorderThickness="1" CornerRadius="5" Padding="12"
-                                            Visibility="{Binding ElementName=ToggleSwitchIsAutoUpdateWithSilence, Path=Visibility}">
+                                            Visibility="{Binding ElementName=ToggleSwitchIsAutoUpdateWithSilence, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
                                         <ui:SimpleStackPanel Spacing="12">
                                             <TextBlock
                                                 Text="# 关闭静默更新后，已完成安装包的下载后将会弹窗询问是否进行更新，开启静默更新后将会在安装包下载完成后每隔十分钟进行如下检测：①处于静默更新时间段内 ②未处于书写模式 ③未处于画板内。若以上检测通过即会关闭软件进行自动更新。"

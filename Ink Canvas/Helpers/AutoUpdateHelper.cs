@@ -15,7 +15,10 @@ namespace Ink_Canvas.Helpers
 {
     internal class AutoUpdateHelper
     {
-        public static async Task<string> CheckForUpdates(string proxy = null)
+        // 定义超时时间为10秒
+        private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(10);
+        
+        public static async Task<string> CheckForUpdates(string proxy = null, UpdateChannel channel = UpdateChannel.Release)
         {
             try
             {
@@ -23,8 +26,24 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | Local version: {localVersion}");
                 
                 string remoteAddress = proxy;
-                string primaryUrl = "https://raw.githubusercontent.com/InkCanvasForClass/community/refs/heads/main/AutomaticUpdateVersionControl.txt";
-                string fallbackUrl = "https://raw.bgithub.xyz/InkCanvasForClass/community/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                
+                // 根据通道选择URL
+                string primaryUrl, fallbackUrl;
+                
+                if (channel == UpdateChannel.Release)
+                {
+                    // Release通道版本信息地址
+                    primaryUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/AutomaticUpdateVersionControl.txt";
+                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                }
+                else
+                {
+                    // Beta通道版本信息地址
+                    primaryUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                }
+                
+                LogHelper.WriteLogToFile($"AutoUpdate | Checking for updates on {channel} channel");
                 
                 // 先尝试主地址
                 remoteAddress += primaryUrl;
@@ -72,19 +91,19 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    // Set a reasonable timeout
-                    client.Timeout = TimeSpan.FromSeconds(10); // 减少超时时间以便更快切换到备用地址
+                    // 设置超时时间为10秒
+                    client.Timeout = RequestTimeout;
                     
                     LogHelper.WriteLogToFile($"AutoUpdate | Sending HTTP request to: {fileUrl}");
                     
                     // 使用带超时的Task.WhenAny来确保请求不会无限期等待
                     var downloadTask = client.GetAsync(fileUrl);
-                    var timeoutTask = Task.Delay(client.Timeout);
+                    var timeoutTask = Task.Delay(RequestTimeout);
                     
                     var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
                     if (completedTask == timeoutTask)
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | Request timed out after {client.Timeout.TotalSeconds} seconds", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"AutoUpdate | Request timed out after {RequestTimeout.TotalSeconds} seconds", LogHelper.LogType.Error);
                         return null;
                     }
                     
@@ -150,7 +169,7 @@ namespace Ink_Canvas.Helpers
         private static string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
         private static string statusFilePath = null;
 
-        public static async Task<bool> DownloadSetupFileAndSaveStatus(string version, string proxy = "")
+        public static async Task<bool> DownloadSetupFileAndSaveStatus(string version, string proxy = "", UpdateChannel channel = UpdateChannel.Release)
         {
             try
             {
@@ -169,10 +188,21 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"AutoUpdate | Created updates directory: {updatesFolderPath}");
                 }
 
-                // 主下载地址
-                string primaryUrl = $"{proxy}https://github.com/InkCanvasForClass/community/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
-                // 备用下载地址
-                string fallbackUrl = $"{proxy}https://bgithub.xyz/InkCanvasForClass/community/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                // 根据通道选择下载地址
+                string primaryUrl, fallbackUrl;
+                
+                if (channel == UpdateChannel.Release)
+                {
+                    // Release通道下载地址
+                    primaryUrl = $"{proxy}https://github.com/InkCanvasForClass/community/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                    fallbackUrl = $"{proxy}https://bgithub.xyz/InkCanvasForClass/community/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                }
+                else
+                {
+                    // Beta通道下载地址
+                    primaryUrl = $"{proxy}https://github.com/InkCanvasForClass/community-beta/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                    fallbackUrl = $"{proxy}https://bgithub.xyz/InkCanvasForClass/community-beta/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+                }
                 
                 LogHelper.WriteLogToFile($"AutoUpdate | Primary download URL: {primaryUrl}");
 
@@ -222,7 +252,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     // Configure client
-                    client.Timeout = TimeSpan.FromMinutes(5); // Longer timeout for downloading larger files
+                    client.Timeout = TimeSpan.FromMinutes(5); // 下载文件需要更长的超时时间
                     client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
                     
                     LogHelper.WriteLogToFile($"AutoUpdate | Downloading from: {fileUrl}");
@@ -239,7 +269,7 @@ namespace Ink_Canvas.Helpers
                     
                     // 使用带超时的Task.WhenAny来确保请求不会无限期等待
                     var downloadTask = client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
-                    var initialTimeoutTask = Task.Delay(TimeSpan.FromSeconds(30)); // 30秒内必须有响应
+                    var initialTimeoutTask = Task.Delay(RequestTimeout); // 使用全局定义的10秒超时
                     
                     var completedTask = await Task.WhenAny(downloadTask, initialTimeoutTask);
                     if (completedTask == initialTimeoutTask)
@@ -767,6 +797,150 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | Error deleting updates folder: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 新增：版本修复方法，强制下载并安装指定通道的最新版本
+        public static async Task<bool> FixVersion(UpdateChannel channel = UpdateChannel.Release)
+        {
+            try
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Starting version fix for {channel} channel");
+                
+                // 获取当前通道的最新版本
+                string latestVersion = await CheckForUpdates(null, channel);
+                
+                if (string.IsNullOrEmpty(latestVersion))
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | No newer version found for fixing", LogHelper.LogType.Warning);
+                    return false;
+                }
+                
+                // 下载最新版本
+                bool downloadResult = await DownloadSetupFileAndSaveStatus(latestVersion, "", channel);
+                
+                if (!downloadResult)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Failed to download update for fixing", LogHelper.LogType.Error);
+                    return false;
+                }
+                
+                // 执行安装，非静默模式
+                InstallNewVersionApp(latestVersion, false);
+                
+                // 设置为用户主动退出，避免被看门狗判定为崩溃
+                App.IsAppExitByUser = true;
+                
+                // 关闭应用程序
+                Application.Current.Dispatcher.Invoke(() => {
+                    Application.Current.Shutdown();
+                });
+                
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Error in FixVersion: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        // 获取更新日志
+        public static async Task<string> GetUpdateLog(UpdateChannel channel = UpdateChannel.Release)
+        {
+            try
+            {
+                string primaryUrl, fallbackUrl;
+                
+                if (channel == UpdateChannel.Release)
+                {
+                    // Release通道更新日志地址
+                    primaryUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/UpdateLog.txt";
+                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.txt";
+                }
+                else
+                {
+                    // Beta通道更新日志地址
+                    primaryUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.txt";
+                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.txt";
+                }
+                
+                LogHelper.WriteLogToFile($"AutoUpdate | Getting update log from {channel} channel");
+                
+                // 先尝试主地址
+                string updateLog = await GetRemoteContent(primaryUrl);
+
+                // 如果主地址失败，尝试备用地址
+                if (string.IsNullOrEmpty(updateLog))
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Primary URL failed for update log, trying fallback URL");
+                    updateLog = await GetRemoteContent(fallbackUrl);
+                }
+
+                if (!string.IsNullOrEmpty(updateLog))
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Successfully retrieved update log");
+                    return updateLog;
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Failed to retrieve update log from both URLs.", LogHelper.LogType.Error);
+                    return $"# 无法获取更新日志\n\n无法从服务器获取更新日志信息，请检查网络连接后重试。";
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Error in GetUpdateLog: {ex.Message}", LogHelper.LogType.Error);
+                return $"# 获取更新日志时发生错误\n\n错误信息: {ex.Message}";
+            }
+        }
+
+        // 获取远程内容的通用方法
+        private static async Task<string> GetRemoteContent(string fileUrl)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    // 设置超时时间为10秒
+                    client.Timeout = RequestTimeout;
+                    
+                    LogHelper.WriteLogToFile($"AutoUpdate | Sending HTTP request to: {fileUrl}");
+                    
+                    // 使用带超时的Task.WhenAny来确保请求不会无限期等待
+                    var downloadTask = client.GetAsync(fileUrl);
+                    var timeoutTask = Task.Delay(RequestTimeout);
+                    
+                    var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
+                    if (completedTask == timeoutTask)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | Request timed out after {RequestTimeout.TotalSeconds} seconds", LogHelper.LogType.Error);
+                        return null;
+                    }
+                    
+                    // 请求完成，检查结果
+                    HttpResponseMessage response = await downloadTask;
+                    
+                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP response status: {response.StatusCode}");
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+                    return content;
+                }
+                catch (HttpRequestException ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP request error: {ex.Message}", LogHelper.LogType.Error);
+                }
+                catch (TaskCanceledException ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Request timed out: {ex.Message}", LogHelper.LogType.Error);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Error: {ex.Message}", LogHelper.LogType.Error);
+                }
+
+                return null;
             }
         }
     }

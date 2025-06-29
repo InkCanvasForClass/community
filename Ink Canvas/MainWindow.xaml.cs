@@ -337,68 +337,79 @@ namespace Ink_Canvas {
         }
 
         private async void AutoUpdate() {
-            AvailableLatestVersion = await AutoUpdateHelper.CheckForUpdates();
+            // 使用当前选择的更新通道检查更新
+            AvailableLatestVersion = await AutoUpdateHelper.CheckForUpdates(null, Settings.Startup.UpdateChannel);
+            
+            // 声明下载状态变量，用于整个方法
+            bool isDownloadSuccessful = false;
 
             if (AvailableLatestVersion != null) {
-                // 打开更新提示窗口
+                // 检测到新版本
                 LogHelper.WriteLogToFile($"AutoUpdate | New version available: {AvailableLatestVersion}");
                 
-                // 获取当前版本和发布日期
-                string currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
-                string releaseDate = DateTime.Now.ToString("yyyy年MM月dd日");
+                // 检查是否是用户选择跳过的版本
+                if (!string.IsNullOrEmpty(Settings.Startup.SkippedVersion) && 
+                    Settings.Startup.SkippedVersion == AvailableLatestVersion) {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Version {AvailableLatestVersion} was marked to be skipped by the user");
+                    return; // 跳过此版本，不执行更新操作
+                }
                 
-                // 创建更新说明内容（可以从服务器获取或直接在此处设置）
-                string releaseNotes = $@"# InkCanvasForClass v{AvailableLatestVersion}更新
-                
-                你好，此次更新包含了一系列新功能和改进：
-
-                1. 修复了一些已知的bug
-                2. 优化了程序性能
-                3. 改进了用户界面
-                4. 添加了新的功能
-
-                感谢您使用InkCanvasForClass CE！";
-                
-                // 创建并显示更新窗口
-                HasNewUpdateWindow updateWindow = new HasNewUpdateWindow(currentVersion, AvailableLatestVersion, releaseDate, releaseNotes);
-                bool? dialogResult = updateWindow.ShowDialog();
-                
-                // 声明下载结果变量
-                bool isDownloadSuccessful;
-                
-                // 如果窗口被关闭但没有点击按钮，视为"稍后更新"
-                if (dialogResult != true) {
-                    LogHelper.WriteLogToFile("AutoUpdate | Update dialog closed without selection");
-                    
-                    // 更新自动更新设置并保存
-                    Settings.Startup.IsAutoUpdate = updateWindow.IsAutoUpdateEnabled;
-                    Settings.Startup.IsAutoUpdateWithSilence = updateWindow.IsSilentUpdateEnabled;
+                // 如果检测到的版本与跳过的版本不同，则清除跳过版本记录
+                // 这确保用户只能跳过当前最新版本，而不是永久跳过所有更新
+                if (!string.IsNullOrEmpty(Settings.Startup.SkippedVersion) && 
+                    Settings.Startup.SkippedVersion != AvailableLatestVersion) {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Detected new version {AvailableLatestVersion} different from skipped version {Settings.Startup.SkippedVersion}, clearing skip record");
+                    Settings.Startup.SkippedVersion = "";
                     SaveSettingsToFile();
+                }
+                
+                // 获取当前版本
+                string currentVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                
+                // 如果启用了静默更新，则自动下载更新而不显示提示
+                if (Settings.Startup.IsAutoUpdateWithSilence) {
+                    LogHelper.WriteLogToFile("AutoUpdate | Silent update enabled, downloading update automatically without notification");
                     
-                    // 如果启用了静默更新，则自动下载更新
-                    if (Settings.Startup.IsAutoUpdateWithSilence) {
-                        LogHelper.WriteLogToFile("AutoUpdate | Silent update enabled, downloading update automatically");
+                    // 静默下载更新，传递当前选择的更新通道
+                    isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion, "", Settings.Startup.UpdateChannel);
+                    
+                    if (isDownloadSuccessful) {
+                        LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when conditions are met");
                         
-                        // 静默下载更新
-                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion);
-                        
-                        if (isDownloadSuccessful) {
-                            LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when application closes");
-                            
-                            // 启动检查定时器
-                            timerCheckAutoUpdateWithSilence.Start();
-                        } else {
-                            LogHelper.WriteLogToFile("AutoUpdate | Silent update download failed", LogHelper.LogType.Error);
-                        }
+                        // 启动检查定时器，定期检查是否可以安装
+                        timerCheckAutoUpdateWithSilence.Start();
+                    } else {
+                        LogHelper.WriteLogToFile("AutoUpdate | Silent update download failed", LogHelper.LogType.Error);
                     }
                     
                     return;
                 }
                 
-                // 更新自动更新设置并保存
-                Settings.Startup.IsAutoUpdate = updateWindow.IsAutoUpdateEnabled;
-                Settings.Startup.IsAutoUpdateWithSilence = updateWindow.IsSilentUpdateEnabled;
-                SaveSettingsToFile();
+                // 如果没有启用静默更新，则显示常规更新窗口
+                string releaseDate = DateTime.Now.ToString("yyyy年MM月dd日");
+                
+                // 从服务器获取更新日志
+                string releaseNotes = await AutoUpdateHelper.GetUpdateLog(Settings.Startup.UpdateChannel);
+                
+                // 如果获取失败，使用默认文本
+                if (string.IsNullOrEmpty(releaseNotes))
+                {
+                    releaseNotes = $@"# InkCanvasForClass v{AvailableLatestVersion}更新
+                    
+                    无法获取更新日志，但新版本已准备就绪。";
+                }
+                
+                // 创建并显示更新窗口
+                HasNewUpdateWindow updateWindow = new HasNewUpdateWindow(currentVersion, AvailableLatestVersion, releaseDate, releaseNotes);
+                bool? dialogResult = updateWindow.ShowDialog();
+                
+                // 如果窗口被关闭但没有点击按钮，则不执行任何操作
+                if (dialogResult != true) {
+                    LogHelper.WriteLogToFile("AutoUpdate | Update dialog closed without selection");
+                    return;
+                }
+                
+                // 不再从更新窗口获取自动更新设置
                 
                 // 根据用户选择处理更新
                 switch (updateWindow.Result) {
@@ -409,8 +420,8 @@ namespace Ink_Canvas {
                         // 显示下载进度提示
                         MessageBox.Show("开始下载更新，请稍候...", "正在更新", MessageBoxButton.OK, MessageBoxImage.Information);
                         
-                        // 下载更新文件
-                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion);
+                        // 下载更新文件，传递当前选择的更新通道
+                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion, "", Settings.Startup.UpdateChannel);
                         
                         if (isDownloadSuccessful) {
                             // 下载成功，提示用户准备安装
@@ -440,7 +451,7 @@ namespace Ink_Canvas {
                         LogHelper.WriteLogToFile("AutoUpdate | User chose to update later");
                         
                         // 不管设置如何，都进行下载
-                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion);
+                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion, "", Settings.Startup.UpdateChannel);
                         
                         if (isDownloadSuccessful) {
                             LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when application closes");
@@ -463,7 +474,18 @@ namespace Ink_Canvas {
                     case HasNewUpdateWindow.UpdateResult.SkipVersion:
                         // 跳过该版本：记录到设置中
                         LogHelper.WriteLogToFile($"AutoUpdate | User chose to skip version {AvailableLatestVersion}");
-                        // 可以在设置中添加"已跳过的版本"列表
+                        
+                        // 记录要跳过的版本号
+                        Settings.Startup.SkippedVersion = AvailableLatestVersion;
+                        
+                        // 保存设置到文件
+                        SaveSettingsToFile();
+                        
+                        // 通知用户
+                        MessageBox.Show($"已设置跳过版本 {AvailableLatestVersion}，在下次发布新版本之前不会再提示更新。", 
+                                       "已跳过此版本", 
+                                       MessageBoxButton.OK, 
+                                       MessageBoxImage.Information);
                         break;
                 }
             } else {

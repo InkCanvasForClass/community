@@ -9,6 +9,7 @@ using MessageBox = System.Windows.MessageBox;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace Ink_Canvas {
     public class TimeViewModel : INotifyPropertyChanged {
@@ -355,22 +356,24 @@ namespace Ink_Canvas {
                     return;
                 }
                 
-                // 检查应用程序状态，确保可以安全更新
+                // 检查应用程序状态，确保可以安全更新 
+                // 空闲状态的判定为不处于批注模式和画板模式
                 bool canSafelyUpdate = false;
                 
                 Dispatcher.Invoke(() => {
                     try {
-                        // 检查是否处于桌面模式（Topmost为true）且没有墨迹内容
-                        if (Topmost && inkCanvas.Strokes.Count == 0) {
+                        // 判断是否处于批注模式（inkCanvas.EditingMode == InkCanvasEditingMode.Ink）
+                        // 判断是否处于画板模式（!Topmost）
+                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink && Topmost) {
                             // 检查是否有未保存的内容或正在进行的操作
                             if (!isHidingSubPanelsWhenInking) {
                                 canSafelyUpdate = true;
-                                LogHelper.WriteLogToFile("AutoUpdate | Application is in a safe state for update");
+                                LogHelper.WriteLogToFile("AutoUpdate | Application is in a safe state for update - not in ink or board mode");
                             } else {
                                 LogHelper.WriteLogToFile("AutoUpdate | Application is currently performing operations");
                             }
                         } else {
-                            LogHelper.WriteLogToFile("AutoUpdate | Application has unsaved content or is not in desktop mode");
+                            LogHelper.WriteLogToFile("AutoUpdate | Application is in ink or board mode, cannot update now");
                         }
                     }
                     catch (Exception ex) {
