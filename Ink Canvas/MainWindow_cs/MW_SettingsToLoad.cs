@@ -485,7 +485,7 @@ namespace Ink_Canvas {
                                 k = 1.25;
                                 break;
                             case 4:
-                                k = 1.8;
+                                k = 1.5;
                                 break;
                         }
 
@@ -506,7 +506,7 @@ namespace Ink_Canvas {
                                 k = 1.2;
                                 break;
                             case 4:
-                                k = 1.6;
+                                k = 1.5;
                                 break;
                         }
 

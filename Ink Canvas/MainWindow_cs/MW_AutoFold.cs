@@ -54,7 +54,7 @@ namespace Ink_Canvas {
 
             // FloatingBarIcons_MouseUp_New(sender);
             if (sender == null)
-                foldFloatingBarByUser = true;
+                foldFloatingBarByUser = false;
             else
                 foldFloatingBarByUser = true;
             unfoldFloatingBarByUser = false;
@@ -91,6 +91,7 @@ namespace Ink_Canvas {
                 RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                GridForFloatingBarDraging.Visibility = Visibility.Collapsed;
                 ViewboxFloatingBarMarginAnimation(-60);
                 HideSubPanels("cursor");
                 SidePannelMarginAnimation(-10);

@@ -886,14 +886,14 @@ namespace Ink_Canvas.Helpers
                 if (channel == UpdateChannel.Release)
                 {
                     // Release通道更新日志地址
-                    primaryUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/UpdateLog.txt";
-                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.txt";
+                    primaryUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/UpdateLog.md";
+                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md";
                 }
                 else
                 {
                     // Beta通道更新日志地址
-                    primaryUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.txt";
-                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.txt";
+                    primaryUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md";
+                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md";
                 }
                 
                 LogHelper.WriteLogToFile($"AutoUpdate | Getting update log from {channel} channel");

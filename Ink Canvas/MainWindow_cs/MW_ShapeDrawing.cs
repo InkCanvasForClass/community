@@ -521,7 +521,7 @@ namespace Ink_Canvas {
                             k = 1.25;
                             break;
                         case 4:
-                            k = 1.8;
+                            k = 1.5;
                             break;
                     }
 

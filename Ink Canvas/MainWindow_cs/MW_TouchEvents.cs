@@ -56,25 +56,10 @@ namespace Ink_Canvas {
             if ((Settings.Advanced.TouchMultiplier != 0 || !Settings.Advanced.IsSpecialScreen) //启用特殊屏幕且触摸倍数为 0 时禁用橡皮
                 && boundWidth > BoundsWidth * 2.5) {
                 if (drawingShapeMode == 0 && forceEraser) return;
-                double k = 1;
-                switch (Settings.Canvas.EraserSize) {
-                    case 0:
-                        k = 0.5;
-                        break;
-                    case 1:
-                        k = 0.8;
-                        break;
-                    case 3:
-                        k = 1.25;
-                        break;
-                    case 4:
-                        k = 1.8;
-                        break;
-                }
-
-                inkCanvas.EraserShape = new EllipseStylusShape(boundWidth * k * eraserMultiplier * 0.25,
-                    boundWidth * k * eraserMultiplier * 0.25);
+                currentPalmEraserShape = GetPalmRectangleEraserShape(eraserMultiplier);
+                inkCanvas.EraserShape = currentPalmEraserShape;
                 TouchDownPointsList[e.TouchDevice.Id] = InkCanvasEditingMode.EraseByPoint;
+                isLastTouchEraser = true;
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
             }
             else {
@@ -209,6 +194,34 @@ namespace Ink_Canvas {
         // 用于记录手掌擦的尺寸和形状
         private StylusShape currentPalmEraserShape = null;
 
+        /// <summary>
+        /// 根据用户在设置面板中选择的橡皮大小，生成"手掌橡皮"默认的矩形黑板擦形状。
+        /// 该形状大小不随触控面积等实时变化，仅受设置的橡皮大小影响。
+        /// </summary>
+        /// <param name="multiplier">特殊屏幕触摸倍数修正系数</param>
+        /// <returns>RectangleStylusShape</returns>
+        private StylusShape GetPalmRectangleEraserShape(double multiplier = 1.0) {
+            double k = 1;
+            switch (Settings.Canvas.EraserSize) {
+                case 0:
+                    k = 0.5;
+                    break;
+                case 1:
+                    k = 0.8;
+                    break;
+                case 3:
+                    k = 1.25;
+                    break;
+                case 4:
+                    k = 1.5;
+                    break;
+            }
+
+            // 参照圆形橡皮 k*90 的基准，将矩形宽度压缩到 0.6，保持高度一致
+            double baseLen = k * 90 * multiplier;
+            return new RectangleStylusShape(baseLen * 0.6, baseLen);
+        }
+
         private void Main_Grid_TouchDown(object sender, TouchEventArgs e) {
             // 确保触摸时显示自定义光标
             if (Settings.Canvas.IsShowCursor) {
@@ -243,35 +256,10 @@ namespace Ink_Canvas {
                 isLastTouchEraser = true;
                 if (drawingShapeMode == 0 && forceEraser) return;
                 if (boundsWidth > BoundsWidth * 2.5) {
-                    double k = 1;
-                    switch (Settings.Canvas.EraserSize) {
-                        case 0:
-                            k = 0.5;
-                            break;
-                        case 1:
-                            k = 0.8;
-                            break;
-                        case 3:
-                            k = 1.25;
-                            break;
-                        case 4:
-                            k = 1.8;
-                            break;
-                    }
-
-                    // 根据EraserShapeType设置合适的橡皮擦形状并保存
-                    if (Settings.Canvas.EraserShapeType == 0) {
-                        // 圆形擦
-                        currentPalmEraserShape = new EllipseStylusShape(boundsWidth * k * eraserMultiplier,
-                            boundsWidth * k * eraserMultiplier);
-                    } else if (Settings.Canvas.EraserShapeType == 1) {
-                        // 矩形黑板擦
-                        currentPalmEraserShape = new RectangleStylusShape(boundsWidth * k * eraserMultiplier * 0.6,
-                            boundsWidth * k * eraserMultiplier);
-                    }
-                    
+                    // 直接使用固定尺寸的矩形黑板擦形状，不随触控面积动态变化
+                    currentPalmEraserShape = GetPalmRectangleEraserShape(eraserMultiplier);
                     inkCanvas.EraserShape = currentPalmEraserShape;
-                    inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+                    TouchDownPointsList[e.TouchDevice.Id] = InkCanvasEditingMode.EraseByPoint;
                 }
                 else {
                     if (StackPanelPPTControls.Visibility == Visibility.Visible && inkCanvas.Strokes.Count == 0 &&
@@ -282,9 +270,10 @@ namespace Ink_Canvas {
                         inkCanvas.Opacity = 0.1;
                     }
                     else {
-                        currentPalmEraserShape = new EllipseStylusShape(5, 5);
+                        // 手掌橡皮固定为矩形黑板擦，大小由设置决定
+                        currentPalmEraserShape = GetPalmRectangleEraserShape(eraserMultiplier);
                         inkCanvas.EraserShape = currentPalmEraserShape;
-                        inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
+                        TouchDownPointsList[e.TouchDevice.Id] = InkCanvasEditingMode.EraseByPoint;
                     }
                 }
             }

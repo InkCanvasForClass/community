@@ -1444,7 +1444,7 @@ namespace Ink_Canvas {
             FloatingbarSelectionBG.Visibility = Visibility.Visible;
             System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 84);
 
-            forceEraser = true;
+            forceEraser = false;
             forcePointEraser = true;
             
             // 即使手掌触发过面积擦，也强制应用当前的EraserShapeType设置
@@ -1502,7 +1502,7 @@ namespace Ink_Canvas {
                     k = Settings.Canvas.EraserShapeType == 0 ? 1.25 : 1.2;
                     break;
                 case 4:
-                    k = Settings.Canvas.EraserShapeType == 0 ? 1.8 : 1.6;
+                    k = Settings.Canvas.EraserShapeType == 0 ? 1.5 : 1.3;
                     break;
             }
 
@@ -1524,7 +1524,7 @@ namespace Ink_Canvas {
             FloatingbarSelectionBG.Visibility = Visibility.Visible;
             System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 112);
 
-            forceEraser = true;
+            forceEraser = false;
             forcePointEraser = false;
 
             inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
