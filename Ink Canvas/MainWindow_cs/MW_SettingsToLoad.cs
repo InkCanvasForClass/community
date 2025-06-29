@@ -70,23 +70,35 @@ namespace Ink_Canvas {
                     BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
                 }
 
-                // Always show update setting in UI based on stored preference
+                // 设置自动更新相关选项
                 ToggleSwitchIsAutoUpdate.IsOn = Settings.Startup.IsAutoUpdate;
                 
-                // Always check for updates at startup, regardless of the setting
+                // 只有在启用了自动更新功能时才检查更新
+                if (Settings.Startup.IsAutoUpdate) {
                 if (isStartup) {
                     LogHelper.WriteLogToFile("AutoUpdate | Running auto-update check at startup");
                     AutoUpdate();
                 }
-                // Call auto-update when setting is changed (not at startup)
-                else if (Settings.Startup.IsAutoUpdate) {
+                    // 当设置被修改时也检查更新（非启动时）
+                    else {
                     LogHelper.WriteLogToFile("AutoUpdate | Running auto-update check after settings change");
                     AutoUpdate();
+                    }
                 }
 
                 // ToggleSwitchIsAutoUpdateWithSilence.Visibility = Settings.Startup.IsAutoUpdate ? Visibility.Visible : Visibility.Collapsed;
                 if (Settings.Startup.IsAutoUpdateWithSilence) {
                     ToggleSwitchIsAutoUpdateWithSilence.IsOn = true;
+                }
+
+                // 初始化更新通道选择
+                foreach (var radioButton in UpdateChannelSelector.Items) {
+                    if (radioButton is System.Windows.Controls.RadioButton rb) {
+                        if (rb.Tag.ToString() == Settings.Startup.UpdateChannel.ToString()) {
+                            rb.IsChecked = true;
+                            break;
+                        }
+                    }
                 }
 
                 AutoUpdateTimePeriodBlock.Visibility = Settings.Startup.IsAutoUpdateWithSilence

@@ -72,10 +72,6 @@ namespace Ink_Canvas
 
         public UpdateResult Result { get; private set; } = UpdateResult.UpdateLater;
 
-        // 更新设置
-        public bool IsAutoUpdateEnabled => EnableAutoUpdateToggle.IsOn;
-        public bool IsSilentUpdateEnabled => EnableSilentUpdateToggle.IsOn;
-
         public HasNewUpdateWindow(string currentVersion, string newVersion, string releaseDate, string releaseNotes = null)
         {
             InitializeComponent();
@@ -96,9 +92,7 @@ namespace Ink_Canvas
                 markdownContent.Markdown = ReleaseNotes;
             }
             
-            // 初始化自动更新设置
-            EnableAutoUpdateToggle.IsOn = MainWindow.Settings.Startup.IsAutoUpdate;
-            EnableSilentUpdateToggle.IsOn = MainWindow.Settings.Startup.IsAutoUpdateWithSilence;
+            // 自动更新和静默更新设置已移至设置界面，此处不再需要
             
             // 确保按钮可见且可用
             EnsureButtonsVisibility();
@@ -148,9 +142,6 @@ namespace Ink_Canvas
         {
             LogHelper.WriteLogToFile("AutoUpdate | Update Now button clicked");
             
-            // 保存自动更新设置
-            SaveUpdateSettings();
-            
             // 设置结果为立即更新
             Result = UpdateResult.UpdateNow;
             
@@ -162,9 +153,6 @@ namespace Ink_Canvas
         private void UpdateLaterButton_Click(object sender, RoutedEventArgs e)
         {
             LogHelper.WriteLogToFile("AutoUpdate | Update Later button clicked");
-            
-            // 保存自动更新设置
-            SaveUpdateSettings();
             
             // 设置结果为稍后更新
             Result = UpdateResult.UpdateLater;
@@ -178,9 +166,6 @@ namespace Ink_Canvas
         {
             LogHelper.WriteLogToFile("AutoUpdate | Skip Version button clicked");
             
-            // 保存自动更新设置
-            SaveUpdateSettings();
-            
             // 设置结果为跳过该版本
             Result = UpdateResult.SkipVersion;
             
@@ -189,15 +174,7 @@ namespace Ink_Canvas
             Close();
         }
         
-        private void SaveUpdateSettings()
-        {
-            // 保存自动更新设置
-            MainWindow.Settings.Startup.IsAutoUpdate = EnableAutoUpdateToggle.IsOn;
-            MainWindow.Settings.Startup.IsAutoUpdateWithSilence = EnableSilentUpdateToggle.IsOn;
             
-            // 记录到日志
-            LogHelper.WriteLogToFile($"AutoUpdate | User settings changed: AutoUpdate={EnableAutoUpdateToggle.IsOn}, SilentUpdate={EnableSilentUpdateToggle.IsOn}");
-        }
 
         // 根据屏幕分辨率调整窗口大小
         private void AdjustWindowSizeForScreenResolution()

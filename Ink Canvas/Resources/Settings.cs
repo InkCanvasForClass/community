@@ -95,6 +95,13 @@ namespace Ink_Canvas
         public bool IsEnableTwoFingerRotationOnSelection { get; set; } = false;
     }
 
+    // 更新通道枚举
+    public enum UpdateChannel
+    {
+        Release,
+        Beta
+    }
+
     public class Startup
     {
         [JsonProperty("isAutoUpdate")]
@@ -102,9 +109,14 @@ namespace Ink_Canvas
         [JsonProperty("isAutoUpdateWithSilence")]
         public bool IsAutoUpdateWithSilence { get; set; } = false;
         [JsonProperty("isAutoUpdateWithSilenceStartTime")]
-        public string AutoUpdateWithSilenceStartTime { get; set; } = "00:00";
+        public string AutoUpdateWithSilenceStartTime { get; set; } = "06:00";
         [JsonProperty("isAutoUpdateWithSilenceEndTime")]
-        public string AutoUpdateWithSilenceEndTime { get; set; } = "00:00";
+        public string AutoUpdateWithSilenceEndTime { get; set; } = "22:00";
+        [JsonProperty("updateChannel")]
+        public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Release;
+        
+        [JsonProperty("skippedVersion")]
+        public string SkippedVersion { get; set; } = "";
 
         [JsonProperty("isEnableNibMode")]
         public bool IsEnableNibMode { get; set; } = false;
