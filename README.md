@@ -76,8 +76,8 @@
 2. Ci联动插件
 
 ## 贡献者
-> 此列表通过[All Contributers](https://allcontributors.org/)实现。
-
+> [!NOTE]
+> 此列表通过[All Contributers](https://allcontributors.org/)实现。<br>由于此存储库使用“Beta优先”策略（即在`beta`分支中修改并PR到`main`），而@all-contributors Bot默认会将修改提交到`main`分支，这意味着此列表可能发生错误。<br>正在商议的解决方案：<br>1. 将默认分支切换为`beta`<br>2. *将代码迁移到`community-beta`（？）*
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
