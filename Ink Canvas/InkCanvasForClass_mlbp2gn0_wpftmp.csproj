@@ -1,0 +1,447 @@
+<Project>
+  <PropertyGroup>
+    <AssemblyName>InkCanvasForClass</AssemblyName>
+    <IntermediateOutputPath>obj\Debug\</IntermediateOutputPath>
+    <BaseIntermediateOutputPath>obj\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\</MSBuildProjectExtensionsPath>
+    <_TargetAssemblyProjectName>InkCanvasForClass</_TargetAssemblyProjectName>
+    <RootNamespace>Ink_Canvas</RootNamespace>
+  </PropertyGroup>
+  <Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk.WindowsDesktop" />
+  <PropertyGroup>
+    <RuntimeIdentifiers>win;win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>Ink_Canvas</RootNamespace>
+    <TargetFramework>net472</TargetFramework>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>2</ApplicationRevision>
+    <ApplicationVersion>2.0.2.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>false</BootstrapperEnabled>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <UseWPF>true</UseWPF>
+    <Configurations>Debug;Release;x86 Debug</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>embedded</DebugType>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <Prefer32Bit>True</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86 Debug|AnyCPU'">
+    <DebugType>embedded</DebugType>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <Prefer32Bit>True</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>embedded</DebugType>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <Prefer32Bit>True</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>Resources\icc.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>full</DebugType>
+    <LangVersion>7.3</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86 Debug|x86'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>full</DebugType>
+    <LangVersion>7.3</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>pdbonly</DebugType>
+    <LangVersion>7.3</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Title>InkCanvasForClass</Title>
+    <Version>5.0.4</Version>
+    <Authors>Dubi906w</Authors>
+    <Product>InkCanvasForClass</Product>
+    <Copyright>© Copyright HARKOTEK Studio 2024-now</Copyright>
+    <PackageProjectUrl>https://icc.bliemhax.com</PackageProjectUrl>
+    <FileVersion>bundled</FileVersion>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|ARM64'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>full</DebugType>
+    <LangVersion>7.3</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86 Debug|ARM64'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>full</DebugType>
+    <LangVersion>7.3</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|ARM64'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>pdbonly</DebugType>
+    <LangVersion>7.3</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>full</DebugType>
+    <LangVersion>7.3</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86 Debug|x64'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>full</DebugType>
+    <LangVersion>7.3</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+    <DebugType>pdbonly</DebugType>
+    <LangVersion>7.3</LangVersion>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.manifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+    <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.9.27" />
+    <PackageReference Include="MdXaml" Version="1.27.0" />
+    <PackageReference Include="Microsoft.Office.Interop.PowerPoint" Version="15.0.4420.1018" />
+    <PackageReference Include="MicrosoftOfficeCore" Version="15.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="NHotkey.Wpf" Version="3.0.0" />
+    <PackageReference Include="OSVersionExt" Version="3.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="IWshRuntimeLibrary">
+      <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
+      <VersionMajor>1</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="stdole">
+      <Guid>{00020430-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>2</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="VBIDE">
+      <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>5</VersionMajor>
+      <VersionMinor>3</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\TimerDownNotice.wav" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="MainWindow.xaml~RF6c3144.TMP" />
+    <None Remove="Resources\Cursors\Cursor.cur" />
+    <None Remove="Resources\Cursors\Pen.cur" />
+    <None Remove="Resources\DeveloperAvatars\aaaaaaccd.jpg" />
+    <None Remove="Resources\DeveloperAvatars\Alan-CRL.png" />
+    <None Remove="Resources\DeveloperAvatars\NetheriteBowl.png" />
+    <None Remove="Resources\DeveloperAvatars\NotYoojun.png" />
+    <None Remove="Resources\DeveloperAvatars\RaspberryKan.jpg" />
+    <None Remove="Resources\DeveloperAvatars\wwei.png" />
+    <None Remove="Resources\DeveloperAvatars\yuwenhui2020.png" />
+    <None Remove="Resources\icc.ico" />
+    <None Remove="Resources\Icons-png\AdmoxBooth.png" />
+    <None Remove="Resources\Icons-png\AdmoxWhiteboard.png" />
+    <None Remove="Resources\Icons-png\Donview.png" />
+    <None Remove="Resources\Icons-png\EasiNote3.png" />
+    <None Remove="Resources\Icons-png\HiteAnnotation.png" />
+    <None Remove="Resources\Icons-png\HiteLightBoard.png" />
+    <None Remove="Resources\Icons-png\ica.png" />
+    <None Remove="Resources\Icons-png\icc-transparent-dark-small.png" />
+    <None Remove="Resources\Icons-png\icc-transparent-dark.png" />
+    <None Remove="Resources\Icons-png\icc-transparent.png" />
+    <None Remove="Resources\Icons-png\icc.png" />
+    <None Remove="Resources\Icons-png\idt.png" />
+    <None Remove="Resources\Icons-png\InkCanvas.png" />
+    <None Remove="Resources\Icons-png\kuanciya.png" />
+    <None Remove="Resources\Icons-png\kuandogeyuanliangwo.png" />
+    <None Remove="Resources\Icons-png\kuandoujiyanhuaji.png" />
+    <None Remove="Resources\Icons-png\kuanneikuhuaji.png" />
+    <None Remove="Resources\Icons-png\kuanshounvhuaji.png" />
+    <None Remove="Resources\Icons-png\MaxHubWhiteboard.png" />
+    <None Remove="Resources\Icons-png\Seewo2Annotation.png" />
+    <None Remove="Resources\Icons-png\tiebahuaji.png" />
+    <None Remove="Resources\Icons-png\transparent-grid.png" />
+    <None Remove="Resources\Icons-png\VComYouJiao.png" />
+    <None Remove="Resources\Icons-png\WenXiang.png" />
+    <None Remove="Resources\Icons-png\YiYunVisualPresenter.png" />
+    <None Remove="Resources\Icons-png\YiYunWhiteboard.png" />
+    <None Remove="Resources\new-icons\chevron-left.png" />
+    <None Remove="Resources\new-icons\end-slides-show.png" />
+    <None Remove="Resources\new-icons\eye.png" />
+    <None Remove="Resources\new-icons\hand-move.png" />
+    <None Remove="Resources\new-icons\highlighter-white.png" />
+    <None Remove="Resources\new-icons\multi-touch.png" />
+    <None Remove="Resources\new-icons\osu-lazer-triangles.png" />
+    <None Remove="Resources\new-icons\pen-white.png" />
+    <None Remove="Resources\new-icons\rotate.png" />
+    <None Remove="Resources\new-icons\unfold-chevron.png" />
+    <None Remove="Resources\new-icons\zoom.png" />
+    <None Remove="Resources\PresentationExample\bottombar-dark.png" />
+    <None Remove="Resources\PresentationExample\bottombar-white.png" />
+    <None Remove="Resources\PresentationExample\page.jpg" />
+    <None Remove="Resources\PresentationExample\sidebar-dark.png" />
+    <None Remove="Resources\PresentationExample\sidebar-white.png" />
+    <None Remove="Resources\PresentationExample\toolbar.png" />
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\hardcodet.notifyicon.wpf\1.1.0\lib\net472\Hardcodet.NotifyIcon.Wpf.dll" />
+    <ReferencePath Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\IACore.dll" />
+    <ReferencePath Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\IALoader.dll" />
+    <ReferencePath Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\IAWinFX.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\avalonedit\6.3.0.90\lib\net462\ICSharpCode.AvalonEdit.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\inkore.ui.wpf.modern\0.9.27\lib\net452\iNKORE.UI.WPF.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\inkore.ui.wpf.modern\0.9.27\lib\net452\iNKORE.UI.WPF.Modern.Controls.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\inkore.ui.wpf.modern\0.9.27\lib\net452\iNKORE.UI.WPF.Modern.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\mdxaml\1.27.0\lib\net462\MdXaml.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\mdxaml.plugins\1.27.0\lib\net462\MdXaml.Plugins.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\Microsoft.CSharp.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\microsoft.office.interop.powerpoint\15.0.4420.1018\lib\net20\Microsoft.Office.Interop.PowerPoint.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\Microsoft.VisualBasic.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\mscorlib.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\Facades\netstandard.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\newtonsoft.json\13.0.3\lib\net45\Newtonsoft.Json.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\nhotkey\3.0.0\lib\net462\NHotkey.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\nhotkey.wpf\3.0.0\lib\net462\NHotkey.Wpf.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\microsoftofficecore\15.0.0\lib\net35\Office.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\osversionext\3.0.0\lib\net462\OSVersionExt.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\PresentationCore.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\PresentationFramework.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Core.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Data.DataSetExtensions.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Data.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Drawing.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.IO.Compression.FileSystem.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Net.Http.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Numerics.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Runtime.Serialization.dll" />
+    <ReferencePath Include="C:\Users\Administrator\.nuget\packages\system.valuetuple\4.5.0\ref\net47\System.ValueTuple.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Windows.Controls.Ribbon.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Windows.Forms.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Xaml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Xml.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Xml.Linq.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\UIAutomationClient.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\UIAutomationClientsideProviders.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\UIAutomationProvider.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\UIAutomationTypes.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\WindowsBase.dll" />
+    <ReferencePath Include="C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\WindowsFormsIntegration.dll" />
+    <ReferencePath Include="C:\Windows\assembly\GAC\stdole\7.0.3300.0__b03f5f7f11d50a3a\stdole.dll">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </ReferencePath>
+    <ReferencePath Include="C:\Windows\assembly\GAC_MSIL\Microsoft.Vbe.Interop\15.0.0.0__71e9bce111e9429c\Microsoft.Vbe.Interop.dll">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </ReferencePath>
+    <ReferencePath Include="obj\Debug\net472\Interop.IWshRuntimeLibrary.dll">
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </ReferencePath>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\MainWindow.g.cs" />
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\Windows\CountdownTimerWindow.g.cs" />
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\Windows\CycleProcessBar.g.cs" />
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\Windows\HasNewUpdateWindow.g.cs" />
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\Windows\NamesInputWindow.g.cs" />
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\Windows\OperatingGuideWindow.g.cs" />
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\Windows\RandWindow.g.cs" />
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\Windows\YesOrNoNotificationWindow.g.cs" />
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\App.g.cs" />
+    <Compile Include="C:\Users\Administrator\Desktop\ICC CE\ICC CE main\community\Ink Canvas\obj\Debug\net472\GeneratedInternalTypeHelper.g.cs" />
+  </ItemGroup>
+  <Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk.WindowsDesktop" />
+</Project>

@@ -211,7 +211,7 @@ namespace Ink_Canvas {
             // 自动收纳到侧边栏
             if (Settings.Startup.IsFoldAtStartup)
             {
-                FoldFloatingBar_MouseUp(null, null);
+                FoldFloatingBar_MouseUp(new object(), null);
             }
 
             // 恢复崩溃后操作设置
