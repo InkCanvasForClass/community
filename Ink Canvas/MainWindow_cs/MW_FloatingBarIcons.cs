@@ -1502,7 +1502,7 @@ namespace Ink_Canvas {
                     k = Settings.Canvas.EraserShapeType == 0 ? 1.25 : 1.2;
                     break;
                 case 4:
-                    k = Settings.Canvas.EraserShapeType == 0 ? 1.8 : 1.6;
+                    k = Settings.Canvas.EraserShapeType == 0 ? 1.5 : 1.3;
                     break;
             }
 
