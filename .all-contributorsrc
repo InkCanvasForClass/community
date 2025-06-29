@@ -1,5 +1,5 @@
 {
-  "projectName": "community-info",
+  "projectName": "community",
   "projectOwner": "InkCanvasForClass",
   "files": [
     "README.md"
@@ -23,7 +23,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/214308559?v=4",
       "profile": "https://github.com/Hydro11451",
       "contributions": [
-        "maintenance"
+        "maintenance",
+        "doc"
       ]
     }
   ]
