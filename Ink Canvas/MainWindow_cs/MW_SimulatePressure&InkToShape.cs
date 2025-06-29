@@ -687,20 +687,97 @@ namespace Ink_Canvas {
             double totalDeviation = 0;
             int pointCount = 0;
             
-            // Calculate deviation for each point
-            foreach (StylusPoint sp in stroke.StylusPoints) {
-                Point p = sp.ToPoint();
-                double deviation = DistanceFromLineToPoint(start, end, p);
-                maxDeviation = Math.Max(maxDeviation, deviation);
-                totalDeviation += deviation;
-                pointCount++;
+            // 检查是否启用了高精度直线拉直
+            bool useHighPrecision = Settings.Canvas.HighPrecisionLineStraighten;
+            
+            if (useHighPrecision) {
+                System.Diagnostics.Debug.WriteLine("使用高精度直线拉直模式");
+                
+                // 高精度模式：每隔10像素取一个计数点
+                double strokeLength = 0;
+                double sampleInterval = 10.0; // 10像素间隔
+                
+                // 计算笔画的总长度，用于后续采样
+                for (int i = 1; i < stroke.StylusPoints.Count; i++) {
+                    Point p1 = stroke.StylusPoints[i-1].ToPoint();
+                    Point p2 = stroke.StylusPoints[i].ToPoint();
+                    strokeLength += GetDistance(p1, p2);
+                }
+                
+                // 如果笔画太短，直接使用所有点
+                if (strokeLength < sampleInterval * 5) {
+                    foreach (StylusPoint sp in stroke.StylusPoints) {
+                        Point p = sp.ToPoint();
+                        double deviation = DistanceFromLineToPoint(start, end, p);
+                        maxDeviation = Math.Max(maxDeviation, deviation);
+                        totalDeviation += deviation;
+                        pointCount++;
+                    }
+                } else {
+                    // 使用等距采样点
+                    double currentLength = 0;
+                    double nextSampleAt = 0;
+                    
+                    // 总是包含起点
+                    Point lastPoint = start;
+                    double deviation = DistanceFromLineToPoint(start, end, lastPoint);
+                    maxDeviation = Math.Max(maxDeviation, deviation);
+                    totalDeviation += deviation;
+                    pointCount++;
+                    
+                    // 采样中间点
+                    for (int i = 1; i < stroke.StylusPoints.Count; i++) {
+                        Point currentPoint = stroke.StylusPoints[i].ToPoint();
+                        double segmentLength = GetDistance(lastPoint, currentPoint);
+                        
+                        // 如果这段线段跨越了下一个采样点
+                        while (currentLength + segmentLength >= nextSampleAt) {
+                            // 计算采样点在线段上的位置
+                            double t = (nextSampleAt - currentLength) / segmentLength;
+                            Point samplePoint = new Point(
+                                lastPoint.X + t * (currentPoint.X - lastPoint.X),
+                                lastPoint.Y + t * (currentPoint.Y - lastPoint.Y)
+                            );
+                            
+                            // 计算采样点的偏差
+                            deviation = DistanceFromLineToPoint(start, end, samplePoint);
+                            maxDeviation = Math.Max(maxDeviation, deviation);
+                            totalDeviation += deviation;
+                            pointCount++;
+                            
+                            // 设置下一个采样点位置
+                            nextSampleAt += sampleInterval;
+                            
+                            // 防止无限循环
+                            if (nextSampleAt > strokeLength) break;
+                        }
+                        
+                        currentLength += segmentLength;
+                        lastPoint = currentPoint;
+                    }
+                    
+                    // 总是包含终点
+                    deviation = DistanceFromLineToPoint(start, end, end);
+                    maxDeviation = Math.Max(maxDeviation, deviation);
+                    totalDeviation += deviation;
+                    pointCount++;
+                }
+            } else {
+                // 原始模式：使用所有点
+                foreach (StylusPoint sp in stroke.StylusPoints) {
+                    Point p = sp.ToPoint();
+                    double deviation = DistanceFromLineToPoint(start, end, p);
+                    maxDeviation = Math.Max(maxDeviation, deviation);
+                    totalDeviation += deviation;
+                    pointCount++;
+                }
             }
             
             // 计算平均偏差
             double avgDeviation = totalDeviation / pointCount;
             
             // 更详细的调试信息
-            System.Diagnostics.Debug.WriteLine($"Max deviation: {maxDeviation}, Avg: {avgDeviation}, Threshold: {sensitivity * lineLength}");
+            System.Diagnostics.Debug.WriteLine($"Max deviation: {maxDeviation}, Avg: {avgDeviation}, Threshold: {sensitivity * lineLength}, Points: {pointCount}");
             
             // 支持更广泛的灵敏度范围 (0.05-2.0)
             
@@ -722,11 +799,79 @@ namespace Ink_Canvas {
             else {
                 // 检查点分布的一致性 - 如果有些点偏离很大而其他点很接近直线，表明线条有明显弯曲
                 double deviationVariance = 0;
-                foreach (StylusPoint sp in stroke.StylusPoints) {
-                    Point p = sp.ToPoint();
-                    double deviation = DistanceFromLineToPoint(start, end, p);
-                    deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                
+                // 使用相同的高精度/原始模式来计算方差
+                if (useHighPrecision) {
+                    // 高精度模式：重新采样计算方差
+                    double strokeLength = 0;
+                    double sampleInterval = 10.0; // 10像素间隔
+                    
+                    // 计算笔画的总长度，用于后续采样
+                    for (int i = 1; i < stroke.StylusPoints.Count; i++) {
+                        Point p1 = stroke.StylusPoints[i-1].ToPoint();
+                        Point p2 = stroke.StylusPoints[i].ToPoint();
+                        strokeLength += GetDistance(p1, p2);
+                    }
+                    
+                    // 如果笔画太短，直接使用所有点
+                    if (strokeLength < sampleInterval * 5) {
+                        foreach (StylusPoint sp in stroke.StylusPoints) {
+                            Point p = sp.ToPoint();
+                            double deviation = DistanceFromLineToPoint(start, end, p);
+                            deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                        }
+                    } else {
+                        // 使用等距采样点
+                        double currentLength = 0;
+                        double nextSampleAt = 0;
+                        Point lastPoint = start;
+                        
+                        // 起点方差
+                        double deviation = DistanceFromLineToPoint(start, end, lastPoint);
+                        deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                        
+                        // 采样中间点
+                        for (int i = 1; i < stroke.StylusPoints.Count; i++) {
+                            Point currentPoint = stroke.StylusPoints[i].ToPoint();
+                            double segmentLength = GetDistance(lastPoint, currentPoint);
+                            
+                            // 如果这段线段跨越了下一个采样点
+                            while (currentLength + segmentLength >= nextSampleAt) {
+                                // 计算采样点在线段上的位置
+                                double t = (nextSampleAt - currentLength) / segmentLength;
+                                Point samplePoint = new Point(
+                                    lastPoint.X + t * (currentPoint.X - lastPoint.X),
+                                    lastPoint.Y + t * (currentPoint.Y - lastPoint.Y)
+                                );
+                                
+                                // 计算采样点的方差
+                                deviation = DistanceFromLineToPoint(start, end, samplePoint);
+                                deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                                
+                                // 设置下一个采样点位置
+                                nextSampleAt += sampleInterval;
+                                
+                                // 防止无限循环
+                                if (nextSampleAt > strokeLength) break;
+                            }
+                            
+                            currentLength += segmentLength;
+                            lastPoint = currentPoint;
+                        }
+                        
+                        // 终点方差
+                        deviation = DistanceFromLineToPoint(start, end, end);
+                        deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                    }
+                } else {
+                    // 原始模式：使用所有点计算方差
+                    foreach (StylusPoint sp in stroke.StylusPoints) {
+                        Point p = sp.ToPoint();
+                        double deviation = DistanceFromLineToPoint(start, end, p);
+                        deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                    }
                 }
+                
                 deviationVariance /= pointCount;
                 
                 // 输出更多调试信息

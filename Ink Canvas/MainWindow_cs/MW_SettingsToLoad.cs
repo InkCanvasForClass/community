@@ -533,6 +533,8 @@ namespace Ink_Canvas {
                 AutoStraightenLineThresholdSlider.Value = Settings.Canvas.AutoStraightenLineThreshold;
                 // 直线拉直灵敏度也在这里初始化，即使它存储在InkToShape中
                 LineStraightenSensitivitySlider.Value = Settings.InkToShape.LineStraightenSensitivity;
+                // 初始化高精度直线拉直设置
+                ToggleSwitchHighPrecisionLineStraighten.IsOn = Settings.Canvas.HighPrecisionLineStraighten;
                 
                 // 初始化直线端点吸附相关设置
                 ToggleSwitchLineEndpointSnapping.IsOn = Settings.Canvas.LineEndpointSnapping;

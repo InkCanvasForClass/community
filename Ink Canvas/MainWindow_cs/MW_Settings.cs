@@ -782,6 +782,14 @@ namespace Ink_Canvas {
             // 立即保存设置到文件，确保设置不会丢失
             SaveSettingsToFile();
         }
+        
+        private void ToggleSwitchHighPrecisionLineStraighten_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            Settings.Canvas.HighPrecisionLineStraighten = ToggleSwitchHighPrecisionLineStraighten.IsOn;
+            System.Diagnostics.Debug.WriteLine($"HighPrecisionLineStraighten changed: {Settings.Canvas.HighPrecisionLineStraighten}");
+            SaveSettingsToFile();
+        }
 
         #endregion
 
