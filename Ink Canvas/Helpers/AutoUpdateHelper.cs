@@ -807,17 +807,48 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | Starting version fix for {channel} channel");
                 
-                // 获取当前通道的最新版本
-                string latestVersion = await CheckForUpdates(null, channel);
+                // 获取远程版本号，而不是检查更新
+                string remoteVersion = null;
+                string proxy = null;
                 
-                if (string.IsNullOrEmpty(latestVersion))
+                // 根据通道选择URL
+                string primaryUrl, fallbackUrl;
+                
+                if (channel == UpdateChannel.Release)
                 {
-                    LogHelper.WriteLogToFile("AutoUpdate | No newer version found for fixing", LogHelper.LogType.Warning);
+                    // Release通道版本信息地址
+                    primaryUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/AutomaticUpdateVersionControl.txt";
+                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                }
+                else
+                {
+                    // Beta通道版本信息地址
+                    primaryUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                }
+                
+                LogHelper.WriteLogToFile($"AutoUpdate | Retrieving remote version from {channel} channel");
+                
+                // 先尝试主地址
+                remoteVersion = await GetRemoteVersion(primaryUrl);
+
+                // 如果主地址失败，尝试备用地址
+                if (remoteVersion == null)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Primary URL failed, trying fallback URL");
+                    remoteVersion = await GetRemoteVersion(fallbackUrl);
+                }
+                
+                if (string.IsNullOrEmpty(remoteVersion))
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Failed to retrieve remote version for fixing", LogHelper.LogType.Error);
                     return false;
                 }
                 
-                // 下载最新版本
-                bool downloadResult = await DownloadSetupFileAndSaveStatus(latestVersion, "", channel);
+                LogHelper.WriteLogToFile($"AutoUpdate | Remote version for fixing: {remoteVersion}");
+                
+                // 无论版本是否为最新，都下载远程版本
+                bool downloadResult = await DownloadSetupFileAndSaveStatus(remoteVersion, "", channel);
                 
                 if (!downloadResult)
                 {
@@ -826,7 +857,7 @@ namespace Ink_Canvas.Helpers
                 }
                 
                 // 执行安装，非静默模式
-                InstallNewVersionApp(latestVersion, false);
+                InstallNewVersionApp(remoteVersion, false);
                 
                 // 设置为用户主动退出，避免被看门狗判定为崩溃
                 App.IsAppExitByUser = true;
