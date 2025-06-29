@@ -437,5 +437,7 @@ namespace Ink_Canvas
         public int RandWindowOnceMaxStudents { get; set; } = 10;
         [JsonProperty("showRandomAndSingleDraw")]
         public bool ShowRandomAndSingleDraw { get; set; } = true;
+        [JsonProperty("directCallCiRand")]
+        public bool DirectCallCiRand { get; set; } = false;
     }
 }

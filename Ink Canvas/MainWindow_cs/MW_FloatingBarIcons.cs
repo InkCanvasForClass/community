@@ -23,6 +23,7 @@ using System.Text;
 using System.Globalization;
 using System.Windows.Data;
 using System.Xml.Linq;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -825,7 +826,24 @@ namespace Ink_Canvas {
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
 
-            new RandWindow(Settings, true).ShowDialog();
+            // 检查是否启用了直接调用ClassIsland点名功能
+            if (Settings.RandSettings.DirectCallCiRand) {
+                try {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo {
+                        FileName = "classisland://plugins/IslandCaller/Run",
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex) {
+                    MessageBox.Show("无法调用ClassIsland点名：" + ex.Message);
+                    
+                    // 调用失败时回退到默认的随机点名窗口
+                    new RandWindow(Settings, true).ShowDialog();
+                }
+            } else {
+                // 使用默认的随机点名窗口
+                new RandWindow(Settings, true).ShowDialog();
+            }
         }
 
         private void GridInkReplayButton_MouseUp(object sender, MouseButtonEventArgs e) {

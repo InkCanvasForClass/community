@@ -1775,6 +1775,16 @@ namespace Ink_Canvas {
             // 保存设置到文件
             SaveSettingsToFile();
         }
+        
+        private void ToggleSwitchDirectCallCiRand_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            // 获取开关状态并保存到设置中
+            Settings.RandSettings.DirectCallCiRand = ToggleSwitchDirectCallCiRand.IsOn;
+            
+            // 保存设置到文件
+            SaveSettingsToFile();
+        }
 
         #endregion
 

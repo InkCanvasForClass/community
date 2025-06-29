@@ -602,6 +602,7 @@ namespace Ink_Canvas {
                 RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
                 ToggleSwitchShowRandomAndSingleDraw.IsOn = Settings.RandSettings.ShowRandomAndSingleDraw;
+                ToggleSwitchDirectCallCiRand.IsOn = Settings.RandSettings.DirectCallCiRand;
                 RandomDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
                 SingleDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
             } else {
@@ -609,6 +610,7 @@ namespace Ink_Canvas {
                 ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn = Settings.RandSettings.DisplayRandWindowNamesInputBtn;
                 RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
+                ToggleSwitchDirectCallCiRand.IsOn = Settings.RandSettings.DirectCallCiRand;
             }
 
             // Automation
