@@ -547,41 +547,30 @@ namespace Ink_Canvas {
                 FingerModeBoundsWidthSlider.Value = Settings.Advanced.FingerModeBoundsWidth;
                 NibModeBoundsWidthSlider.Value = Settings.Advanced.NibModeBoundsWidth;
                 ToggleSwitchIsLogEnabled.IsOn = Settings.Advanced.IsLogEnabled;
-
+                ToggleSwitchIsSaveLogByDate.IsOn = Settings.Advanced.IsSaveLogByDate;
                 ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = Settings.Advanced.IsSecondConfirmWhenShutdownApp;
-
-                ToggleSwitchEraserBindTouchMultiplier.IsOn = Settings.Advanced.EraserBindTouchMultiplier;
-
                 ToggleSwitchIsSpecialScreen.IsOn = Settings.Advanced.IsSpecialScreen;
-
-                TouchMultiplierSlider.Visibility =
-                    ToggleSwitchIsSpecialScreen.IsOn ? Visibility.Visible : Visibility.Collapsed;
-
                 ToggleSwitchIsQuadIR.IsOn = Settings.Advanced.IsQuadIR;
-
+                ToggleSwitchEraserBindTouchMultiplier.IsOn = Settings.Advanced.EraserBindTouchMultiplier;
                 ToggleSwitchIsEnableFullScreenHelper.IsOn = Settings.Advanced.IsEnableFullScreenHelper;
+                ToggleSwitchIsEnableEdgeGestureUtil.IsOn = Settings.Advanced.IsEnableEdgeGestureUtil;
+                ToggleSwitchIsEnableForceFullScreen.IsOn = Settings.Advanced.IsEnableForceFullScreen;
+                ToggleSwitchIsEnableResolutionChangeDetection.IsOn = Settings.Advanced.IsEnableResolutionChangeDetection;
+                ToggleSwitchIsEnableDPIChangeDetection.IsOn = Settings.Advanced.IsEnableDPIChangeDetection;
+                ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn = Settings.Advanced.IsEnableAvoidFullScreenHelper;
                 if (Settings.Advanced.IsEnableFullScreenHelper) {
                     FullScreenHelper.MarkFullscreenWindowTaskbarList(new WindowInteropHelper(this).Handle, true);
                 }
-
-                ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn = Settings.Advanced.IsEnableAvoidFullScreenHelper;
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
                 {
                     AvoidFullScreenHelper.StartAvoidFullScreen(this);
                 }
-
-                ToggleSwitchIsEnableEdgeGestureUtil.IsOn = Settings.Advanced.IsEnableEdgeGestureUtil;
                 if (Settings.Advanced.IsEnableEdgeGestureUtil) {
                     if (OSVersion.GetOperatingSystem() >= OperatingSystem.Windows10)
                         EdgeGestureUtil.DisableEdgeGestures(new WindowInteropHelper(this).Handle, true);
                 }
-
-                ToggleSwitchIsEnableForceFullScreen.IsOn = Settings.Advanced.IsEnableForceFullScreen;
-
-                ToggleSwitchIsEnableDPIChangeDetection.IsOn = Settings.Advanced.IsEnableDPIChangeDetection;
-
-                ToggleSwitchIsEnableResolutionChangeDetection.IsOn =
-                    Settings.Advanced.IsEnableResolutionChangeDetection;
+                TouchMultiplierSlider.Visibility =
+                    ToggleSwitchIsSpecialScreen.IsOn ? Visibility.Visible : Visibility.Collapsed;
             } else {
                 Settings.Advanced = new Advanced();
             }

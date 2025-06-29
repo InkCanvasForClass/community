@@ -1693,7 +1693,14 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchIsLogEnabled_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 日志文件超过 512 KB 时会自动删除。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="日志以日期保存" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsSaveLogByDate"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchIsSaveLogByDate_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在Logs文件夹中，当文件夹大小超过5MB时自动清空。" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="关闭软件时二次弹窗确认" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
@@ -3641,7 +3648,7 @@
                                                                             TickFrequency="1" TickPlacement="None"
                                                                             ValueChanged="HighlighterWidthSlider_ValueChanged" />
                                                                     <TextBlock
-                                                                        Text="{Binding Value, ElementName=HighlighterWidthSlider, Mode=OneWay}"
+                                                                        Text="{Binding Value, ElementName=BoardHighlighterWidthSlider, Mode=OneWay}"
                                                                         FontFamily="Consolas"
                                                                         VerticalAlignment="Bottom"
                                                                         Margin="10,0,0,4.5" FontSize="15" />

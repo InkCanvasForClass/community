@@ -1724,6 +1724,12 @@ namespace Ink_Canvas {
             Settings.Advanced.IsLogEnabled = ToggleSwitchIsLogEnabled.IsOn;
             SaveSettingsToFile();
         }
+        
+        private void ToggleSwitchIsSaveLogByDate_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Advanced.IsSaveLogByDate = ToggleSwitchIsSaveLogByDate.IsOn;
+            SaveSettingsToFile();
+        }
 
         private void ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
