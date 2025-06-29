@@ -970,7 +970,15 @@
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=LineStraightenSensitivitySlider, Path=Value, StringFormat={}{0:F2}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围0.05-2.0，越小要求越严格，弯曲的线条越不容易被拉直；值越大越容易识别为直线。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                         Visibility="{Binding ElementName=ToggleSwitchAutoStraightenLine, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="高精度直线拉直" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchHighPrecisionLineStraighten"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围0.05-2.0，越小要求越严格，弯曲的线条越不容易被拉直；值越大越容易识别为直线。高精度模式下，每隔10像素取一个计数点，获取更准确的平均值用于判断。" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -1693,7 +1701,14 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchIsLogEnabled_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 日志文件超过 512 KB 时会自动删除。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="日志以日期保存" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsSaveLogByDate"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchIsSaveLogByDate_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 日志文件超过 512 KB 时会自动删除。开启日期保存后，日志将保存在Logs文件夹中，当文件夹大小超过5MB时自动清空。" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="关闭软件时二次弹窗确认" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
@@ -2410,6 +2425,15 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" 
                                                          FontWeight="Bold" 
                                                          Toggled="ToggleSwitchShowRandomAndSingleDraw_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="直接调用Ci点名"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchDirectCallCiRand"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchDirectCallCiRand_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
@@ -3641,7 +3665,7 @@
                                                                             TickFrequency="1" TickPlacement="None"
                                                                             ValueChanged="HighlighterWidthSlider_ValueChanged" />
                                                                     <TextBlock
-                                                                        Text="{Binding Value, ElementName=HighlighterWidthSlider, Mode=OneWay}"
+                                                                        Text="{Binding Value, ElementName=BoardHighlighterWidthSlider, Mode=OneWay}"
                                                                         FontFamily="Consolas"
                                                                         VerticalAlignment="Bottom"
                                                                         Margin="10,0,0,4.5" FontSize="15" />

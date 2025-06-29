@@ -395,7 +395,7 @@ namespace Ink_Canvas {
                 if (string.IsNullOrEmpty(releaseNotes))
                 {
                     releaseNotes = $@"# InkCanvasForClass v{AvailableLatestVersion}更新
-                    
+                
                     无法获取更新日志，但新版本已准备就绪。";
                 }
                 

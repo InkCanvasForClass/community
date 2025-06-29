@@ -56,6 +56,8 @@ namespace Ink_Canvas
         public bool AutoStraightenLine { get; set; } = true; // 是否启用直线自动拉直
         [JsonProperty("autoStraightenLineThreshold")]
         public int AutoStraightenLineThreshold { get; set; } = 30; // 直线自动拉直的长度阈值（像素）
+        [JsonProperty("highPrecisionLineStraighten")]
+        public bool HighPrecisionLineStraighten { get; set; } = true; // 是否启用高精度直线拉直
         [JsonProperty("lineEndpointSnapping")]
         public bool LineEndpointSnapping { get; set; } = true; // 是否启用直线端点吸附
         [JsonProperty("lineEndpointSnappingThreshold")]
@@ -381,6 +383,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isLogEnabled")]
         public bool IsLogEnabled { get; set; } = true;
+        
+        [JsonProperty("isSaveLogByDate")]
+        public bool IsSaveLogByDate { get; set; } = true;
 
         [JsonProperty("isEnableFullScreenHelper")]
         public bool IsEnableFullScreenHelper { get; set; } = false;
@@ -434,5 +439,7 @@ namespace Ink_Canvas
         public int RandWindowOnceMaxStudents { get; set; } = 10;
         [JsonProperty("showRandomAndSingleDraw")]
         public bool ShowRandomAndSingleDraw { get; set; } = true;
+        [JsonProperty("directCallCiRand")]
+        public bool DirectCallCiRand { get; set; } = false;
     }
 }

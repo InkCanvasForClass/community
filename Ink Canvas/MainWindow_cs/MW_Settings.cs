@@ -782,6 +782,14 @@ namespace Ink_Canvas {
             // 立即保存设置到文件，确保设置不会丢失
             SaveSettingsToFile();
         }
+        
+        private void ToggleSwitchHighPrecisionLineStraighten_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            Settings.Canvas.HighPrecisionLineStraighten = ToggleSwitchHighPrecisionLineStraighten.IsOn;
+            System.Diagnostics.Debug.WriteLine($"HighPrecisionLineStraighten changed: {Settings.Canvas.HighPrecisionLineStraighten}");
+            SaveSettingsToFile();
+        }
 
         #endregion
 
@@ -1724,6 +1732,12 @@ namespace Ink_Canvas {
             Settings.Advanced.IsLogEnabled = ToggleSwitchIsLogEnabled.IsOn;
             SaveSettingsToFile();
         }
+        
+        private void ToggleSwitchIsSaveLogByDate_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Advanced.IsSaveLogByDate = ToggleSwitchIsSaveLogByDate.IsOn;
+            SaveSettingsToFile();
+        }
 
         private void ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
@@ -1766,6 +1780,16 @@ namespace Ink_Canvas {
             RandomDrawPanel.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
             SingleDrawPanel.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
 
+            // 保存设置到文件
+            SaveSettingsToFile();
+        }
+        
+        private void ToggleSwitchDirectCallCiRand_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            // 获取开关状态并保存到设置中
+            Settings.RandSettings.DirectCallCiRand = ToggleSwitchDirectCallCiRand.IsOn;
+            
             // 保存设置到文件
             SaveSettingsToFile();
         }
