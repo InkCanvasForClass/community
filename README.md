@@ -69,6 +69,8 @@
 > 
 > 请注意，本贡献指南由 Hydrogen（ @Hydro11451 ）撰写，尚未受到官方认可，并且尚未完成。
 
+请前往 InkCanvasForClass/dubious-notes
+
 **请注意，在贡献代码时，_务必_ 将所有代码提交到 _beta_ 分支，以保证beta版本总是新于main版本。**
 
 ## TODO LIST
