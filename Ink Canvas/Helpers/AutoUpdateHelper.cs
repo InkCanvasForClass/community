@@ -10,6 +10,7 @@ using System.Linq;
 using System.Windows.Controls;
 using System.IO.Compression;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Ink_Canvas.Helpers
 {
@@ -576,358 +577,162 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private static bool CopyDirectory(string sourceDir, string destinationDir)
+        private static async Task<long> GetUrlDelay(string url)
         {
-            bool allCopiesSuccessful = true;
-            
             try
             {
-                // 创建目标目录（如果不存在）
-                Directory.CreateDirectory(destinationDir);
-                LogHelper.WriteLogToFile($"AutoUpdate | Created/verified destination directory: {destinationDir}");
-
-                // 复制所有文件
-                foreach (string filePath in Directory.GetFiles(sourceDir))
+                using (var client = new System.Net.Http.HttpClient())
                 {
-                    string fileName = Path.GetFileName(filePath);
-                    string destPath = Path.Combine(destinationDir, fileName);
-                    try
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | Copying file: {fileName}");
-                        
-                        // 如果目标文件存在，先删除
-                        if (File.Exists(destPath))
-                        {
-                            File.Delete(destPath);
-                        }
-                        
-                        File.Copy(filePath, destPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        allCopiesSuccessful = false;
-                        LogHelper.WriteLogToFile($"AutoUpdate | Error copying file {fileName}: {ex.Message}", LogHelper.LogType.Error);
-                    }
+                    client.Timeout = TimeSpan.FromSeconds(5);
+                    var sw = System.Diagnostics.Stopwatch.StartNew();
+                    var resp = await client.SendAsync(new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Head, url));
+                    sw.Stop();
+                    if (resp.IsSuccessStatusCode)
+                        return sw.ElapsedMilliseconds;
                 }
-
-                // 递归复制所有子目录
-                foreach (string subDirPath in Directory.GetDirectories(sourceDir))
-                {
-                    string subDirName = Path.GetFileName(subDirPath);
-                    string destSubDir = Path.Combine(destinationDir, subDirName);
-                    
-                    bool subDirCopyResult = CopyDirectory(subDirPath, destSubDir);
-                    if (!subDirCopyResult)
-                    {
-                        allCopiesSuccessful = false;
-                    }
-                }
-                
-                return allCopiesSuccessful;
             }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"AutoUpdate | Error copying directory {sourceDir}: {ex.Message}", LogHelper.LogType.Error);
-                return false;
-            }
+            catch { }
+            return -1;
         }
 
-        private static void RestartApplication()
+        // 线路组结构体（包含版本、下载、日志地址）
+        public class UpdateLineGroup
+        {
+            public string GroupName { get; set; } // 组名
+            public string VersionUrl { get; set; } // 版本检测地址
+            public string DownloadUrlFormat { get; set; } // 下载地址格式（带{0}占位符）
+            public string LogUrl { get; set; } // 更新日志地址
+        }
+
+        // 通道-线路组映射
+        private static readonly Dictionary<UpdateChannel, List<UpdateLineGroup>> ChannelLineGroups = new Dictionary<UpdateChannel, List<UpdateLineGroup>>
+        {
+            { UpdateChannel.Release, new List<UpdateLineGroup>
+                {
+                    new UpdateLineGroup
+                    {
+                        GroupName = "GitHub主线",
+                        VersionUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/UpdateLog.md"
+                    },
+                    new UpdateLineGroup
+                    {
+                        GroupName = "bgithub备用",
+                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
+                    }
+                }
+            },
+            { UpdateChannel.Beta, new List<UpdateLineGroup>
+                {
+                    new UpdateLineGroup
+                    {
+                        GroupName = "GitHub主线",
+                        VersionUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                    },
+                    new UpdateLineGroup
+                    {
+                        GroupName = "bgithub备用",
+                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                    }
+                }
+            }
+        };
+
+        // 检测线路组延迟，只检测当前通道下的所有线路组，返回最快组
+        private static async Task<UpdateLineGroup> GetFastestLineGroup(UpdateChannel channel)
+        {
+            var groups = ChannelLineGroups[channel];
+            long minDelay = long.MaxValue;
+            UpdateLineGroup bestGroup = null;
+            foreach (var group in groups)
+            {
+                var delay = await GetUrlDelay(group.VersionUrl);
+                if (delay >= 0 && delay < minDelay)
+                {
+                    minDelay = delay;
+                    bestGroup = group;
+                }
+            }
+            return bestGroup;
+        }
+
+        // 新的自动选择线路组的更新检测方法，返回远程版本号和所用线路组
+        public static async Task<(string remoteVersion, UpdateLineGroup lineGroup)> CheckForUpdatesWithAutoLine(UpdateChannel channel = UpdateChannel.Release, bool alwaysGetRemote = false)
         {
             try
             {
-                string appPath = Assembly.GetExecutingAssembly().Location;
-                LogHelper.WriteLogToFile($"AutoUpdate | Restarting application: {appPath}");
-                
-                // Create a batch file to wait briefly and then start the application
-                // This allows the current process to fully exit before starting the new instance
-                string batchFilePath = Path.Combine(Path.GetTempPath(), "RestartICC_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
-                
-                string batchContent = 
-                    "@echo off\r\n" +
-                    "timeout /t 2 /nobreak >nul\r\n" +
-                    ":: 检查应用程序是否已经在运行\r\n" +
-                    "tasklist /FI \"IMAGENAME eq Ink Canvas.exe\" | find /i \"Ink Canvas.exe\" > nul\r\n" +
-                    "if %ERRORLEVEL% neq 0 (\r\n" +
-                    "    echo 启动应用程序...\r\n" +
-                    $"    start \"\" \"{appPath}\"\r\n" +
-                    ") else (\r\n" +
-                    "    echo 应用程序已经在运行，不再重复启动\r\n" +
-                    ")\r\n" +
-                    "timeout /t 1 /nobreak >nul\r\n" +
-                    "del \"%~f0\"\r\n" +
-                    "exit\r\n"; // 确保批处理进程结束
-                
-                File.WriteAllText(batchFilePath, batchContent);
-                
-                // Start the batch file
-                Process.Start(new ProcessStartInfo
+                string localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                LogHelper.WriteLogToFile($"AutoUpdate | Local version: {localVersion}");
+                LogHelper.WriteLogToFile($"AutoUpdate | 检测通道 {channel} 下最快线路组...");
+                var bestGroup = await GetFastestLineGroup(channel);
+                if (bestGroup == null)
                 {
-                    FileName = "cmd.exe",
-                    Arguments = $"/c start \"\" \"{batchFilePath}\"",
-                    CreateNoWindow = true,
-                    UseShellExecute = false
-                });
-                
-                LogHelper.WriteLogToFile($"AutoUpdate | Created restart script at {batchFilePath}");
-                
-                // Shutdown the application
-                LogHelper.WriteLogToFile($"AutoUpdate | Shutting down application for restart");
-                Application.Current.Dispatcher.Invoke(() =>
+                    LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均不可用", LogHelper.LogType.Error);
+                    return (null, null);
+                }
+                LogHelper.WriteLogToFile($"AutoUpdate | 选择最快线路组: {bestGroup.GroupName} {bestGroup.VersionUrl}");
+                string remoteVersion = await GetRemoteVersion(bestGroup.VersionUrl);
+                if (remoteVersion != null)
                 {
-                    Application.Current.Shutdown();
-                });
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"AutoUpdate | Error restarting application: {ex.Message}", LogHelper.LogType.Error);
-                
-                // Fallback direct restart approach
-                try
-                {
-                    string appPath = Assembly.GetExecutingAssembly().Location;
-                    LogHelper.WriteLogToFile($"AutoUpdate | Attempting direct restart: {appPath}");
-                    
-                    // 检查是否已有实例运行
-                    Process[] processes = Process.GetProcessesByName("Ink Canvas");
-                    if (processes.Length <= 1) // 只有当前进程
+                    LogHelper.WriteLogToFile($"AutoUpdate | Remote version: {remoteVersion}");
+                    Version local = new Version(localVersion);
+                    Version remote = new Version(remoteVersion);
+                    if (remote > local || alwaysGetRemote)
                     {
-                        Process.Start(appPath);
+                        LogHelper.WriteLogToFile($"AutoUpdate | New version available or alwaysGetRemote: {remoteVersion}");
+                        return (remoteVersion, bestGroup);
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | Application already running, not starting a new instance");
-                    }
-                    
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        Application.Current.Shutdown();
-                    });
-                }
-                catch (Exception fallbackEx)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | Fallback restart also failed: {fallbackEx.Message}", LogHelper.LogType.Error);
-                }
-            }
-        }
-
-        private static void ExecuteCommandLine(string command)
-        {
-            try
-            {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo
-                {
-                    FileName = "cmd.exe",
-                    Arguments = $"/c {command} & exit", // 添加exit确保cmd进程退出
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                using (Process process = new Process { StartInfo = processStartInfo })
-                {
-                    process.Start();
-                    // 设置一个超时时间
-                    bool exited = process.WaitForExit(500); // 等待500毫秒
-                    if (!exited)
-                    {
-                        // 不等待进程完成，让它在后台运行
-                        LogHelper.WriteLogToFile($"AutoUpdate | Command is running in background");
-                    }
-                    Application.Current.Shutdown();
-                }
-            }
-            catch (Exception ex) 
-            {
-                LogHelper.WriteLogToFile($"AutoUpdate | Error executing command: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        public static void DeleteUpdatesFolder()
-        {
-            try
-            {
-                if (Directory.Exists(updatesFolderPath))
-                {
-                    // Try to delete all files first in case of locking issues
-                    foreach (string file in Directory.GetFiles(updatesFolderPath, "*", SearchOption.AllDirectories))
-                    {
-                        try
-                        {
-                            File.Delete(file);
-                            LogHelper.WriteLogToFile($"AutoUpdate | Deleted file: {file}");
-                        }
-                        catch (Exception fileEx)
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | Could not delete file {file}: {fileEx.Message}", LogHelper.LogType.Warning);
-                        }
-                    }
-                    
-                    // Then try to delete subdirectories
-                    foreach (string dir in Directory.GetDirectories(updatesFolderPath))
-                    {
-                        try
-                        {
-                            Directory.Delete(dir, true);
-                            LogHelper.WriteLogToFile($"AutoUpdate | Deleted directory: {dir}");
-                        }
-                        catch (Exception dirEx)
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | Could not delete directory {dir}: {dirEx.Message}", LogHelper.LogType.Warning);
-                        }
-                    }
-                    
-                    // Finally try to delete the main directory
-                    try
-                    {
-                        Directory.Delete(updatesFolderPath, true);
-                        LogHelper.WriteLogToFile($"AutoUpdate | Deleted updates folder: {updatesFolderPath}");
-                    }
-                    catch (Exception mainDirEx)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | Could not completely delete updates folder: {mainDirEx.Message}", LogHelper.LogType.Warning);
+                        LogHelper.WriteLogToFile($"AutoUpdate | Current version is up to date");
+                        return (null, bestGroup);
                     }
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | Updates folder does not exist: {updatesFolderPath}");
+                    LogHelper.WriteLogToFile("AutoUpdate | 获取远程版本失败", LogHelper.LogType.Error);
+                    return (null, bestGroup);
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"AutoUpdate | Error deleting updates folder: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"AutoUpdate | Error in CheckForUpdatesWithAutoLine: {ex.Message}", LogHelper.LogType.Error);
+                return (null, null);
             }
         }
 
-        // 新增：版本修复方法，强制下载并安装指定通道的最新版本
-        public static async Task<bool> FixVersion(UpdateChannel channel = UpdateChannel.Release)
+        // 使用指定线路组下载新版
+        public static async Task<bool> DownloadSetupFileWithLineGroup(string version, UpdateLineGroup group)
         {
             try
             {
-                LogHelper.WriteLogToFile($"AutoUpdate | Starting version fix for {channel} channel");
-                
-                // 获取远程版本号，而不是检查更新
-                string remoteVersion = null;
-                string proxy = null;
-                
-                // 根据通道选择URL
-                string primaryUrl, fallbackUrl;
-                
-                if (channel == UpdateChannel.Release)
-                {
-                    // Release通道版本信息地址
-                    primaryUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/AutomaticUpdateVersionControl.txt";
-                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
-                }
-                else
-                {
-                    // Beta通道版本信息地址
-                    primaryUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
-                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
-                }
-                
-                LogHelper.WriteLogToFile($"AutoUpdate | Retrieving remote version from {channel} channel");
-                
-                // 先尝试主地址
-                remoteVersion = await GetRemoteVersion(primaryUrl);
-
-                // 如果主地址失败，尝试备用地址
-                if (remoteVersion == null)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | Primary URL failed, trying fallback URL");
-                    remoteVersion = await GetRemoteVersion(fallbackUrl);
-                }
-                
-                if (string.IsNullOrEmpty(remoteVersion))
-                {
-                    LogHelper.WriteLogToFile("AutoUpdate | Failed to retrieve remote version for fixing", LogHelper.LogType.Error);
-                    return false;
-                }
-                
-                LogHelper.WriteLogToFile($"AutoUpdate | Remote version for fixing: {remoteVersion}");
-                
-                // 无论版本是否为最新，都下载远程版本
-                bool downloadResult = await DownloadSetupFileAndSaveStatus(remoteVersion, "", channel);
-                
-                if (!downloadResult)
-                {
-                    LogHelper.WriteLogToFile("AutoUpdate | Failed to download update for fixing", LogHelper.LogType.Error);
-                    return false;
-                }
-                
-                // 执行安装，非静默模式
-                InstallNewVersionApp(remoteVersion, false);
-                
-                // 设置为用户主动退出，避免被看门狗判定为崩溃
-                App.IsAppExitByUser = true;
-                
-                // 关闭应用程序
-                Application.Current.Dispatcher.Invoke(() => {
-                    Application.Current.Shutdown();
-                });
-                
-                return true;
+                string url = string.Format(group.DownloadUrlFormat, version);
+                string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
+                LogHelper.WriteLogToFile($"AutoUpdate | Downloading from: {url}");
+                return await DownloadFile(url, zipFilePath);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"AutoUpdate | Error in FixVersion: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"AutoUpdate | Error in DownloadSetupFileWithLineGroup: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
         }
 
-        // 获取更新日志
-        public static async Task<string> GetUpdateLog(UpdateChannel channel = UpdateChannel.Release)
+        // 使用指定线路组获取更新日志
+        public static async Task<string> GetUpdateLogWithLineGroup(UpdateLineGroup group)
         {
-            try
-            {
-                string primaryUrl, fallbackUrl;
-                
-                if (channel == UpdateChannel.Release)
-                {
-                    // Release通道更新日志地址
-                    primaryUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/UpdateLog.md";
-                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md";
-                }
-                else
-                {
-                    // Beta通道更新日志地址
-                    primaryUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md";
-                    fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md";
-                }
-                
-                LogHelper.WriteLogToFile($"AutoUpdate | Getting update log from {channel} channel");
-                
-                // 先尝试主地址
-                string updateLog = await GetRemoteContent(primaryUrl);
-
-                // 如果主地址失败，尝试备用地址
-                if (string.IsNullOrEmpty(updateLog))
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | Primary URL failed for update log, trying fallback URL");
-                    updateLog = await GetRemoteContent(fallbackUrl);
-                }
-
-                if (!string.IsNullOrEmpty(updateLog))
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | Successfully retrieved update log");
-                    return updateLog;
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile("AutoUpdate | Failed to retrieve update log from both URLs.", LogHelper.LogType.Error);
-                    return $"# 无法获取更新日志\n\n无法从服务器获取更新日志信息，请检查网络连接后重试。";
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"AutoUpdate | Error in GetUpdateLog: {ex.Message}", LogHelper.LogType.Error);
-                return $"# 获取更新日志时发生错误\n\n错误信息: {ex.Message}";
-            }
+            return await AutoUpdateHelper.GetRemoteContent(group.LogUrl);
         }
 
-        // 获取远程内容的通用方法
-        private static async Task<string> GetRemoteContent(string fileUrl)
+        // 获取远程内容的通用方法（public 以便线路组方法调用）
+        public static async Task<string> GetRemoteContent(string fileUrl)
         {
             using (HttpClient client = new HttpClient())
             {
@@ -935,26 +740,18 @@ namespace Ink_Canvas.Helpers
                 {
                     // 设置超时时间为10秒
                     client.Timeout = RequestTimeout;
-                    
                     LogHelper.WriteLogToFile($"AutoUpdate | Sending HTTP request to: {fileUrl}");
-                    
-                    // 使用带超时的Task.WhenAny来确保请求不会无限期等待
                     var downloadTask = client.GetAsync(fileUrl);
                     var timeoutTask = Task.Delay(RequestTimeout);
-                    
                     var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
                     if (completedTask == timeoutTask)
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | Request timed out after {RequestTimeout.TotalSeconds} seconds", LogHelper.LogType.Error);
                         return null;
                     }
-                    
-                    // 请求完成，检查结果
                     HttpResponseMessage response = await downloadTask;
-                    
                     LogHelper.WriteLogToFile($"AutoUpdate | HTTP response status: {response.StatusCode}");
                     response.EnsureSuccessStatusCode();
-
                     string content = await response.Content.ReadAsStringAsync();
                     return content;
                 }
@@ -970,8 +767,73 @@ namespace Ink_Canvas.Helpers
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | Error: {ex.Message}", LogHelper.LogType.Error);
                 }
-
                 return null;
+            }
+        }
+
+        // 兼容旧接口：获取更新日志（自动选择最快线路组）
+        public static async Task<string> GetUpdateLog(UpdateChannel channel = UpdateChannel.Release)
+        {
+            var group = await GetFastestLineGroup(channel);
+            if (group == null) return "# 无法获取更新日志\n\n所有线路均不可用。";
+            return await GetUpdateLogWithLineGroup(group);
+        }
+
+        // 兼容旧接口：删除更新文件夹
+        public static void DeleteUpdatesFolder()
+        {
+            try
+            {
+                if (Directory.Exists(updatesFolderPath))
+                {
+                    // Try to delete all files first in case of locking issues
+                    foreach (string file in Directory.GetFiles(updatesFolderPath, "*", SearchOption.AllDirectories))
+                    {
+                        try { File.Delete(file); } catch { }
+                    }
+                    foreach (string dir in Directory.GetDirectories(updatesFolderPath))
+                    {
+                        try { Directory.Delete(dir, true); } catch { }
+                    }
+                    try { Directory.Delete(updatesFolderPath, true); } catch { }
+                }
+            }
+            catch { }
+        }
+
+        // 兼容旧接口：版本修复方法，强制下载并安装指定通道的最新版本
+        public static async Task<bool> FixVersion(UpdateChannel channel = UpdateChannel.Release)
+        {
+            try
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Starting version fix for {channel} channel");
+                // 获取远程版本号（自动选择最快线路组，始终下载远程版本）
+                var (remoteVersion, group) = await CheckForUpdatesWithAutoLine(channel, true);
+                if (string.IsNullOrEmpty(remoteVersion) || group == null)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Failed to retrieve remote version for fixing", LogHelper.LogType.Error);
+                    return false;
+                }
+                LogHelper.WriteLogToFile($"AutoUpdate | Remote version for fixing: {remoteVersion}");
+                // 无论版本是否为最新，都下载远程版本
+                bool downloadResult = await DownloadSetupFileWithLineGroup(remoteVersion, group);
+                if (!downloadResult)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Failed to download update for fixing", LogHelper.LogType.Error);
+                    return false;
+                }
+                // 执行安装，非静默模式
+                InstallNewVersionApp(remoteVersion, false);
+                App.IsAppExitByUser = true;
+                Application.Current.Dispatcher.Invoke(() => {
+                    Application.Current.Shutdown();
+                });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Error in FixVersion: {ex.Message}", LogHelper.LogType.Error);
+                return false;
             }
         }
     }

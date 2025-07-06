@@ -116,19 +116,14 @@ namespace Ink_Canvas
         public string AutoUpdateWithSilenceEndTime { get; set; } = "22:00";
         [JsonProperty("updateChannel")]
         public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Release;
-        
         [JsonProperty("skippedVersion")]
         public string SkippedVersion { get; set; } = "";
-
         [JsonProperty("isEnableNibMode")]
         public bool IsEnableNibMode { get; set; } = false;
-        /*
-        [JsonProperty("isAutoHideCanvas")]
-        public bool IsAutoHideCanvas { get; set; } = true;
-        [JsonProperty("isAutoEnterModeFinger")]
-        public bool IsAutoEnterModeFinger { get; set; } = false;*/
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; } = false;
+        [JsonProperty("crashAction")]
+        public int CrashAction { get; set; } = 0;
     }
 
     public class Appearance

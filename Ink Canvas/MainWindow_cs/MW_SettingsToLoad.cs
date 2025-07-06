@@ -115,6 +115,22 @@ namespace Ink_Canvas {
                 Settings.Startup = new Startup();
             }
 
+            // 恢复崩溃后操作设置
+            if (Settings.Startup != null)
+            {
+                // 恢复崩溃后操作选项
+                if (Settings.Startup.CrashAction == 0)
+                {
+                    App.CrashAction = App.CrashActionType.SilentRestart;
+                    if (RadioCrashSilentRestart != null) RadioCrashSilentRestart.IsChecked = true;
+                }
+                else
+                {
+                    App.CrashAction = App.CrashActionType.NoAction;
+                    if (RadioCrashNoAction != null) RadioCrashNoAction.IsChecked = true;
+                }
+            }
+
             // Appearance
             if (Settings.Appearance != null) {
                 if (!Settings.Appearance.IsEnableDisPlayNibModeToggler) {

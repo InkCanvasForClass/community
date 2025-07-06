@@ -20,40 +20,45 @@ namespace Ink_Canvas {
             SaveInkCanvasStrokes(true, true);
         }
 
-        private void SaveInkCanvasStrokes(Boolean newNotice, Boolean saveByUser) {
+        private void SaveInkCanvasStrokes(Boolean newNotice, Boolean saveByUser, string userSavePath = null) {
             try {
-                // 修改保存路径为软件根目录下的Saves文件夹
-                string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                if (string.IsNullOrEmpty(appDirectory))
-                {
-                    appDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                }
-                
-                string savePath = Path.Combine(appDirectory, "Saves", 
-                    (saveByUser ? @"User Saved - " : @"Auto Saved - ") + 
-                    (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes"));
-                
-                if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
+                // 优先使用用户指定的保存路径，否则使用默认路径
                 string savePathWithName;
-                if (currentMode != 0) // 黑板模式下
-                    savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + " Page-" + 
-                               CurrentWhiteboardIndex + " StrokesCount-" + inkCanvas.Strokes.Count + ".icstk";
-                else
-                    savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + ".icstk";
+                if (!string.IsNullOrEmpty(userSavePath)) {
+                    // 用户指定了完整保存路径（含文件名）
+                    savePathWithName = userSavePath;
+                    string dir = Path.GetDirectoryName(savePathWithName);
+                    if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
+                } else {
+                    // 默认保存到软件根目录下的Saves文件夹
+                    string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    if (string.IsNullOrEmpty(appDirectory))
+                        appDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+                    string savePath = Path.Combine(appDirectory, "Saves",
+                        (saveByUser ? @"User Saved - " : @"Auto Saved - ") +
+                        (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes"));
+                    if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
+                    if (currentMode != 0) // 黑板模式下
+                        savePathWithName = Path.Combine(savePath, DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") +
+                            " Page-" + CurrentWhiteboardIndex + " StrokesCount-" + inkCanvas.Strokes.Count + ".icstk");
+                    else
+                        savePathWithName = Path.Combine(savePath, DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + ".icstk");
+                }
 
                 try {
-                    using (FileStream fs = new FileStream(savePathWithName, FileMode.Create)) { 
+                    using (FileStream fs = new FileStream(savePathWithName, FileMode.Create)) {
                         inkCanvas.Strokes.Save(fs);
                     }
                 }
                 catch (Exception ex) when (ex is UnauthorizedAccessException || ex is DirectoryNotFoundException) {
-                    // 修改异常处理中的备用路径为软件根目录下的Saves文件夹
+                    // 异常时备用路径仍为默认Saves文件夹
+                    string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                    if (string.IsNullOrEmpty(appDirectory))
+                        appDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
                     string fallbackPath = Path.Combine(appDirectory, "Saves");
                     Directory.CreateDirectory(fallbackPath);
-                    
                     string fileName = Path.GetFileNameWithoutExtension(savePathWithName) + "_retry.icstk";
                     string newPath = Path.Combine(fallbackPath, fileName);
-
                     try {
                         using (FileStream fs = new FileStream(newPath, FileMode.Create)) {
                             inkCanvas.Strokes.Save(fs);
