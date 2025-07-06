@@ -499,12 +499,16 @@ namespace Ink_Canvas {
             if (RadioCrashSilentRestart != null && RadioCrashSilentRestart.IsChecked == true)
             {
                 App.CrashAction = App.CrashActionType.SilentRestart;
+                Settings.Startup.CrashAction = 0;
             }
             else if (RadioCrashNoAction != null && RadioCrashNoAction.IsChecked == true)
             {
                 App.CrashAction = App.CrashActionType.NoAction;
+                Settings.Startup.CrashAction = 1;
             }
             SaveSettingsToFile();
+            // 强制同步全局变量，防止后台逻辑未及时感知
+            App.SyncCrashActionFromSettings();
         }
 
         // 添加一个辅助方法，根据当前编辑模式设置光标

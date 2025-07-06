@@ -37,15 +37,56 @@ namespace Ink_Canvas
 
         public App()
         {
+            // 如果是看门狗子进程，直接进入看门狗主循环并终止主流程
+            var args = Environment.GetCommandLineArgs();
+            if (args.Length >= 2 && args[1] == "--watchdog")
+            {
+                RunWatchdogIfNeeded();
+                Environment.Exit(0);
+                return;
+            }
+
+            // 启动时优先同步设置，确保CrashAction为最新
+            SyncCrashActionFromSettings();
+
             this.Startup += new StartupEventHandler(App_Startup);
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             StartHeartbeatMonitor();
-            StartWatchdogIfNeeded();
+
+            // 仅在崩溃后操作为静默重启时才启动看门狗
+            if (CrashAction == CrashActionType.SilentRestart)
+            {
+                StartWatchdogIfNeeded();
+            }
             this.Exit += App_Exit; // 注册退出事件
         }
 
         // 增加字段保存崩溃后操作设置
         public static CrashActionType CrashAction = CrashActionType.SilentRestart;
+
+        // 修正：允许静态调用
+        public static void SyncCrashActionFromSettings()
+        {
+            try
+            {
+                // 优先从 Settings.json 直接读取
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
+                if (File.Exists(settingsPath))
+                {
+                    var json = File.ReadAllText(settingsPath);
+                    dynamic obj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+                    int crashAction = 0;
+                    try { crashAction = (int)(obj["startup"]["crashAction"] ?? 0); } catch { }
+                    CrashAction = (CrashActionType)crashAction;
+                }
+                // 兜底：从主窗口同步
+                else if (Ink_Canvas.MainWindow.Settings != null && Ink_Canvas.MainWindow.Settings.Startup != null)
+                {
+                    CrashAction = (CrashActionType)Ink_Canvas.MainWindow.Settings.Startup.CrashAction;
+                }
+            }
+            catch { }
+        }
 
         private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
         {
@@ -53,7 +94,8 @@ namespace Ink_Canvas
             LogHelper.NewLog(e.Exception.ToString());
             e.Handled = true;
 
-            // 修改：仅当非用户主动退出时才触发自动重启
+            SyncCrashActionFromSettings(); // 新增：崩溃时同步最新设置
+
             if (CrashAction == CrashActionType.SilentRestart && !IsAppExitByUser)
             {
                 StartupCount.Increment();
@@ -78,7 +120,6 @@ namespace Ink_Canvas
 
         void App_Startup(object sender, StartupEventArgs e)
         {
-            RunWatchdogIfNeeded();
             /*if (!StoreHelper.IsStoreApp) */RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version.ToString()));
@@ -91,6 +132,16 @@ namespace Ink_Canvas
                 LogHelper.NewLog("Detected existing instance");
                 MessageBox.Show("已有一个程序实例正在运行");
                 LogHelper.NewLog("Ink Canvas automatically closed");
+                IsAppExitByUser = true; // 多开时标记为用户主动退出
+                // 写入退出信号，确保看门狗不会重启
+                try {
+                    StartupCount.Reset();
+                    File.WriteAllText(watchdogExitSignalFile, "exit");
+                    if (watchdogProcess != null && !watchdogProcess.HasExited)
+                    {
+                        watchdogProcess.Kill();
+                    }
+                } catch { }
                 Environment.Exit(0);
             }
 
@@ -260,6 +311,7 @@ namespace Ink_Canvas
                 if ((DateTime.Now - lastHeartbeat).TotalSeconds > 10)
                 {
                     LogHelper.NewLog("检测到主线程无响应，自动重启。");
+                    SyncCrashActionFromSettings(); // 新增：心跳检测时同步最新设置
                     if (CrashAction == CrashActionType.SilentRestart)
                     {
                         StartupCount.Increment();
@@ -320,16 +372,21 @@ namespace Ink_Canvas
                         }
                         Thread.Sleep(2000);
                     }
-                    // 主进程异常退出，自动重启
-                    StartupCount.Increment();
-                    if (StartupCount.GetCount() >= 5)
+                    // 主进程异常退出，自动重启前判断崩溃后操作
+                    SyncCrashActionFromSettings(); // 新增：同步设置
+                    if (CrashAction == CrashActionType.SilentRestart)
                     {
-                        MessageBox.Show("检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
-                        StartupCount.Reset();
-                        Environment.Exit(1);
+                        StartupCount.Increment();
+                        if (StartupCount.GetCount() >= 5)
+                        {
+                            MessageBox.Show("检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                            StartupCount.Reset();
+                            Environment.Exit(1);
+                        }
+                        string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                        Process.Start(exePath);
                     }
-                    string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                    Process.Start(exePath);
+                    // CrashActionType.NoAction 时不重启，直接退出
                 }
                 catch { }
                 Environment.Exit(0);
