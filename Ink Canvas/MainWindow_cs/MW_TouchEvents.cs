@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -40,10 +40,9 @@ namespace Ink_Canvas {
         }
 
         private void MainWindow_TouchDown(object sender, TouchEventArgs e) {
-            // 允许触摸在擦除、套索等模式下也能操作，不再直接 return
-            // if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
-            //     || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
-            //     || inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
+                || inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
 
             if (!isHidingSubPanelsWhenInking) {
                 isHidingSubPanelsWhenInking = true;
@@ -72,6 +71,7 @@ namespace Ink_Canvas {
         }
 
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e) {
+
             inkCanvas.CaptureStylus();
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
@@ -94,9 +94,9 @@ namespace Ink_Canvas {
                 System.Windows.Forms.Cursor.Show();
             }
 
-            // 只在橡皮和线擦时 return，套索选区不 return
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
-                || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+                || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
+                || inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
 
             TouchDownPointsList[e.StylusDevice.Id] = InkCanvasEditingMode.None;
         }
@@ -305,9 +305,6 @@ namespace Ink_Canvas {
         private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
         private bool isSingleFingerDragMode = false;
 
-        // 记录手掌擦前的编辑模式
-        private InkCanvasEditingMode prevEditingModeBeforePalmEraser = InkCanvasEditingMode.Ink;
-
         private void inkCanvas_PreviewTouchDown(object sender, TouchEventArgs e) {
 
             inkCanvas.CaptureTouch(e.TouchDevice);
@@ -315,7 +312,7 @@ namespace Ink_Canvas {
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
             dec.Add(e.TouchDevice.Id);
-            // 设备1个的时候，记录中心点
+            //设备1个的时候，记录中心点
             if (dec.Count == 1) {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
                 centerPoint = touchPoint.Position;
@@ -323,31 +320,13 @@ namespace Ink_Canvas {
                 //记录第一根手指点击时的 StrokeCollection
                 lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
             }
-
-            // 多指书写功能开启时禁用手掌擦
-            if (Settings.Gesture.IsEnableTwoFingerGesture) {
-                // 关闭手掌擦逻辑
-                if (dec.Count > 1) {
-                    if (inkCanvas.EditingMode != InkCanvasEditingMode.None && inkCanvas.EditingMode != InkCanvasEditingMode.Select) {
-                        lastInkCanvasEditingMode = inkCanvas.EditingMode;
-                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    }
-                }
-                return;
-            }
-
-            // 3指及以上触控时触发手掌擦
-            if (dec.Count >= 3) {
-                // 记录触发前的模式
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint) {
-                    prevEditingModeBeforePalmEraser = inkCanvas.EditingMode;
-                }
-                // 切换为橡皮
-                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-                isLastTouchEraser = true;
-                // 可自定义橡皮形状
-                currentPalmEraserShape = GetPalmRectangleEraserShape();
-                inkCanvas.EraserShape = currentPalmEraserShape;
+            //设备两个及两个以上，将画笔功能关闭
+            if (dec.Count > 1 || isSingleFingerDragMode || !Settings.Gesture.IsEnableTwoFingerGesture) {
+                if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.None ||
+                    inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
+                lastInkCanvasEditingMode = inkCanvas.EditingMode;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
             }
         }
 
@@ -356,23 +335,30 @@ namespace Ink_Canvas {
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 
+            //手势完成后切回之前的状态
+            if (dec.Count > 1)
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                    inkCanvas.EditingMode = lastInkCanvasEditingMode;
             dec.Remove(e.TouchDevice.Id);
             inkCanvas.Opacity = 1;
-
-            // 没有触控输入后，自动恢复手掌擦前的功能
-            if (dec.Count == 0) {
-                if (isLastTouchEraser) {
-                    isLastTouchEraser = false;
-                    currentPalmEraserShape = null;
-                    inkCanvas.EditingMode = prevEditingModeBeforePalmEraser;
+            
+            // 如果是手掌触发的面积擦抬起，需要确保橡皮擦形状被正确重置
+            if (isLastTouchEraser && dec.Count == 0) {
+                isLastTouchEraser = false;
+                currentPalmEraserShape = null; // 清除保存的手掌擦形状
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && forcePointEraser) {
+                    // 重新应用当前设置的橡皮擦形状
+                    ApplyCurrentEraserShape();
                 }
+            }
+            
+            if (dec.Count == 0)
                 if (lastTouchDownStrokeCollection.Count() != inkCanvas.Strokes.Count() &&
                     !(drawingShapeMode == 9 && !isFirstTouchCuboid)) {
                     var whiteboardIndex = CurrentWhiteboardIndex;
                     if (currentMode == 0) whiteboardIndex = 0;
                     strokeCollections[whiteboardIndex] = lastTouchDownStrokeCollection;
                 }
-            }
         }
 
         private void inkCanvas_ManipulationStarting(object sender, ManipulationStartingEventArgs e) {
