@@ -348,7 +348,7 @@ namespace Ink_Canvas
         public int MinimumAutomationStrokeNumber { get; set; } = 0;
 
         [JsonProperty("autoSavedStrokesLocation")]
-        public string AutoSavedStrokesLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "saves");
+        public string AutoSavedStrokesLocation = Path.Combine(AppContext.BaseDirectory, "saves");
 
         [JsonProperty("autoDelSavedFiles")]
         public bool AutoDelSavedFiles = false;
