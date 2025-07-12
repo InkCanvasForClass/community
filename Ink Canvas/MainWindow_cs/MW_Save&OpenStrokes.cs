@@ -20,61 +20,21 @@ namespace Ink_Canvas {
             SaveInkCanvasStrokes(true, true);
         }
 
-        private void SaveInkCanvasStrokes(Boolean newNotice, Boolean saveByUser, string userSavePath = null) {
+        private void SaveInkCanvasStrokes(bool newNotice = true, bool saveByUser = false) {
             try {
-                // 优先使用用户指定的保存路径，否则使用默认路径
+                var savePath = Settings.Automation.AutoSavedStrokesLocation
+                               + (saveByUser ? @"\User Saved - " : @"\Auto Saved - ")
+                               + (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes");
+                if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
                 string savePathWithName;
-                if (!string.IsNullOrEmpty(userSavePath)) {
-                    // 用户指定了完整保存路径（含文件名）
-                    savePathWithName = userSavePath;
-                    string dir = Path.GetDirectoryName(savePathWithName);
-                    if (!Directory.Exists(dir)) Directory.CreateDirectory(dir);
-                } else {
-                    // 默认保存到软件根目录下的Saves文件夹
-                    string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    if (string.IsNullOrEmpty(appDirectory))
-                        appDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                    string savePath = Path.Combine(appDirectory, "Saves",
-                        (saveByUser ? @"User Saved - " : @"Auto Saved - ") +
-                        (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes"));
-                    if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
-                    if (currentMode != 0) // 黑板模式下
-                        savePathWithName = Path.Combine(savePath, DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") +
-                            " Page-" + CurrentWhiteboardIndex + " StrokesCount-" + inkCanvas.Strokes.Count + ".icstk");
-                    else
-                        savePathWithName = Path.Combine(savePath, DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + ".icstk");
-                }
-
-                try {
-                    using (FileStream fs = new FileStream(savePathWithName, FileMode.Create)) {
-                        inkCanvas.Strokes.Save(fs);
-                    }
-                }
-                catch (Exception ex) when (ex is UnauthorizedAccessException || ex is DirectoryNotFoundException) {
-                    // 异常时备用路径仍为默认Saves文件夹
-                    string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                    if (string.IsNullOrEmpty(appDirectory))
-                        appDirectory = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
-                    string fallbackPath = Path.Combine(appDirectory, "Saves");
-                    Directory.CreateDirectory(fallbackPath);
-                    string fileName = Path.GetFileNameWithoutExtension(savePathWithName) + "_retry.icstk";
-                    string newPath = Path.Combine(fallbackPath, fileName);
-                    try {
-                        using (FileStream fs = new FileStream(newPath, FileMode.Create)) {
-                            inkCanvas.Strokes.Save(fs);
-                            savePathWithName = newPath;
-                        }
-                    }
-                    catch (Exception fallbackEx) {
-                        ShowNotification($"墨迹保存失败: {fallbackEx.Message}");
-                        return;
-                    }
-                }
-                catch (Exception ex) {
-                    ShowNotification($"墨迹保存失败: {ex.Message}");
-                    return;
-                }
-
+                if (currentMode != 0) // 黑板模式下
+                    savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + " Page-" +
+                                       CurrentWhiteboardIndex + " StrokesCount-" + inkCanvas.Strokes.Count + ".icstk";
+                else
+                    //savePathWithName = savePath + @"\" + DateTime.Now.ToString("u").Replace(':', '-') + ".icstk";
+                    savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + ".icstk";
+                var fs = new FileStream(savePathWithName, FileMode.Create);
+                inkCanvas.Strokes.Save(fs);
                 if (newNotice) ShowNotification("墨迹成功保存至 " + savePathWithName);
             }
             catch (Exception ex) {
@@ -89,6 +49,7 @@ namespace Ink_Canvas {
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
 
             var openFileDialog = new OpenFileDialog();
+            openFileDialog.InitialDirectory = Settings.Automation.AutoSavedStrokesLocation;
             openFileDialog.Title = "打开墨迹文件";
             openFileDialog.Filter = "Ink Canvas Strokes File (*.icstk)|*.icstk";
             if (openFileDialog.ShowDialog() != true) return;
