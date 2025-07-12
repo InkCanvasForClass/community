@@ -1259,15 +1259,18 @@ namespace Ink_Canvas {
             var folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             folderBrowser.ShowDialog();
             if (folderBrowser.SelectedPath.Length > 0) AutoSavedStrokesLocation.Text = folderBrowser.SelectedPath;
+            SaveSettingsToFile();
         }
 
         private void SetAutoSavedStrokesLocationToDiskDButton_Click(object sender, RoutedEventArgs e) {
             AutoSavedStrokesLocation.Text = @"D:\Ink Canvas";
+            SaveSettingsToFile();
         }
 
         private void SetAutoSavedStrokesLocationToDocumentFolderButton_Click(object sender, RoutedEventArgs e) {
             AutoSavedStrokesLocation.Text =
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\Ink Canvas";
+            SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoDelSavedFiles_Toggled(object sender, RoutedEventArgs e) {
