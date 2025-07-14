@@ -65,9 +65,6 @@
 不能，但是你可以期待 icc-gtk4，是正在开发的仅支持 Linux 平台的 icc 移植版本。
 
 ## ✏️ 贡献指南
-> [!NOTE]
-> 
-> 请注意，本贡献指南由 Hydrogen（ @Hydro11451 ）撰写，尚未受到官方认可，并且尚未完成。
 
 请前往 InkCanvasForClass/dubious-notes
 
@@ -79,7 +76,7 @@
 
 ## 贡献者
 > [!NOTE]
-> 此列表通过[All Contributers](https://allcontributors.org/)实现。<br>由于此存储库使用“Beta优先”策略（即在`beta`分支中修改并PR到`main`），而@all-contributors Bot默认会将修改提交到`main`分支，这意味着此列表可能发生错误。<br>正在商议的解决方案：<br>1. 将默认分支切换为`beta`<br>2. *将代码迁移到`community-beta`（？）*
+> 此列表通过[All Contributers](https://allcontributors.org/)实现。
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
