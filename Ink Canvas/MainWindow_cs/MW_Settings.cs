@@ -1259,18 +1259,18 @@ namespace Ink_Canvas {
             var folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
             folderBrowser.ShowDialog();
             if (folderBrowser.SelectedPath.Length > 0) AutoSavedStrokesLocation.Text = folderBrowser.SelectedPath;
+            SaveSettingsToFile();
         }
 
         private void SetAutoSavedStrokesLocationToDiskDButton_Click(object sender, RoutedEventArgs e) {
-            // 修改默认路径为软件根目录下的 Saves 文件夹
-            string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string savesPath = System.IO.Path.Combine(appDirectory, "Saves");
-            AutoSavedStrokesLocation.Text = savesPath;
+            AutoSavedStrokesLocation.Text = @"D:\Ink Canvas";
+            SaveSettingsToFile();
         }
 
         private void SetAutoSavedStrokesLocationToDocumentFolderButton_Click(object sender, RoutedEventArgs e) {
             AutoSavedStrokesLocation.Text =
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\Ink Canvas";
+            SaveSettingsToFile();
         }
 
         private void ToggleSwitchAutoDelSavedFiles_Toggled(object sender, RoutedEventArgs e) {
@@ -1814,12 +1814,12 @@ namespace Ink_Canvas {
         }
 
         private void HyperlinkSourceToPresentRepository_Click(object sender, RoutedEventArgs e) {
-            Process.Start("https://github.com/ChangSakura/Ink-Canvas");
+            Process.Start("https://bgithub.xyz/ChangSakura/Ink-Canvas");
             HideSubPanels();
         }
 
         private void HyperlinkSourceToOringinalRepository_Click(object sender, RoutedEventArgs e) {
-            Process.Start("https://github.com/WXRIW/Ink-Canvas");
+            Process.Start("https://bgithub.xyz/WXRIW/Ink-Canvas");
             HideSubPanels();
         }
 

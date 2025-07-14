@@ -665,12 +665,6 @@ namespace Ink_Canvas {
 
         private async void PptApplication_SlideShowBegin(SlideShowWindow Wn) {
             try {
-                // 修改加载路径到软件根目录下的Saves文件夹
-                var folderPath = Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory,
-                    "Saves",
-                    @"Auto Saved - Presentations\" + Wn.Presentation.Name + "_" + Wn.Presentation.Slides.Count
-                );
                 
                 if (Settings.Automation.IsAutoFoldInPPTSlideShow && !isFloatingBarFolded)
                     await FoldFloatingBar(new object());
@@ -710,9 +704,13 @@ namespace Ink_Canvas {
 
                     //检查是否有已有墨迹，并加载
                     if (Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint)
-                        if (Directory.Exists(folderPath)) {
+                        if (Directory.Exists(Settings.Automation.AutoSavedStrokesLocation +
+                                             @"\Auto Saved - Presentations\" + Wn.Presentation.Name + "_" +
+                                             Wn.Presentation.Slides.Count)) {
                             LogHelper.WriteLogToFile("Found saved strokes", LogHelper.LogType.Trace);
-                            var files = new DirectoryInfo(folderPath).GetFiles();
+                            var files = new DirectoryInfo(Settings.Automation.AutoSavedStrokesLocation +
+                                                          @"\Auto Saved - Presentations\" + Wn.Presentation.Name + "_" +
+                                                          Wn.Presentation.Slides.Count).GetFiles();
                             var count = 0;
                             foreach (var file in files)
                                 if (file.Name != "Position") {
@@ -794,16 +792,9 @@ namespace Ink_Canvas {
 
                 isEnteredSlideShowEndEvent = true;
                 if (Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint) {
-                    // 修改保存路径到软件根目录下的Saves文件夹
-                    var folderPath = Path.Combine(
-                        AppDomain.CurrentDomain.BaseDirectory, 
-                        "Saves",
-                        @"Auto Saved - Presentations\" + Pres.Name + "_" + Pres.Slides.Count
-                    );
-                    
-                    // 确保目录存在
+                   var folderPath = Settings.Automation.AutoSavedStrokesLocation + @"\Auto Saved - Presentations\" +
+                                     Pres.Name + "_" + Pres.Slides.Count;
                     if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
-
                     try {
                         File.WriteAllText(folderPath + "/Position", previousSlideID.ToString());
                     }
@@ -819,15 +810,21 @@ namespace Ink_Canvas {
                                     memoryStreams[i].Position = 0;
                                     var byteLength = memoryStreams[i].Read(srcBuf, 0, srcBuf.Length);
                                     // 使用Path.Combine构建文件路径
-                                    File.WriteAllBytes(Path.Combine(folderPath, i.ToString("0000") + ".icstk"), srcBuf);
+                                     File.WriteAllBytes(folderPath + @"\" + i.ToString("0000") + ".icstk", srcBuf);
+                                    LogHelper.WriteLogToFile(string.Format(
+                                        "Saved strokes for Slide {0}, size={1}, byteLength={2}", i.ToString(),
+                                        memoryStreams[i].Length, byteLength));
                                 } else {
-                                    var filePath = Path.Combine(folderPath, i.ToString("0000") + ".icstk");
-                                    if (File.Exists(filePath)) File.Delete(filePath);
+                                     if (File.Exists(folderPath + @"\" + i.ToString("0000") + ".icstk"))
+                                         File.Delete(folderPath + @"\" + i.ToString("0000") + ".icstk");
                                 }
                             }
                             catch (Exception ex) {
-                                // 新增错误处理逻辑
-                                LogHelper.WriteLogToFile($"保存第{i}页墨迹失败: {ex.Message}", LogHelper.LogType.Error);
+                                LogHelper.WriteLogToFile(
+                                    $"Failed to save strokes for Slide {i}\n{ex.ToString()}",
+                                    LogHelper.LogType.Error);
+                                if (File.Exists(folderPath + @"\" + i.ToString("0000") + ".icstk"))
+                                    File.Delete(folderPath + @"\" + i.ToString("0000") + ".icstk");
                             }
                 }
 

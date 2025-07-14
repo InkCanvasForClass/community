@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.IO;
 
 namespace Ink_Canvas
 {
@@ -347,7 +348,7 @@ namespace Ink_Canvas
         public int MinimumAutomationStrokeNumber { get; set; } = 0;
 
         [JsonProperty("autoSavedStrokesLocation")]
-        public string AutoSavedStrokesLocation = @"D:\Ink Canvas";
+        public string AutoSavedStrokesLocation = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "saves");
 
         [JsonProperty("autoDelSavedFiles")]
         public bool AutoDelSavedFiles = false;
