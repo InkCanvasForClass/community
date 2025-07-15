@@ -74,19 +74,26 @@ namespace Ink_Canvas
         {
             try
             {
-                // 创建pictures文件夹（如果不存在）
+                // 创建pictures/icons文件夹结构（如果不存在）
                 string picturesFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "pictures");
+                string iconsFolder = Path.Combine(picturesFolder, "icons");
+                
                 if (!Directory.Exists(picturesFolder))
                 {
                     Directory.CreateDirectory(picturesFolder);
                 }
                 
+                if (!Directory.Exists(iconsFolder))
+                {
+                    Directory.CreateDirectory(iconsFolder);
+                }
+                
                 // 生成一个唯一的文件名（使用GUID）
                 string extension = Path.GetExtension(selectedFilePath);
                 string newFileName = $"{Guid.NewGuid()}{extension}";
-                string destPath = Path.Combine(picturesFolder, newFileName);
+                string destPath = Path.Combine(iconsFolder, newFileName);
                 
-                // 复制文件到pictures文件夹
+                // 复制文件到pictures/icons文件夹
                 File.Copy(selectedFilePath, destPath);
                 
                 // 创建新的自定义图标对象
