@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Ink_Canvas
 {
@@ -139,6 +140,8 @@ namespace Ink_Canvas
         public double ViewboxFloatingBarScaleTransformValue { get; set; } = 1.0;
         [JsonProperty("floatingBarImg")] 
         public int FloatingBarImg { get; set; } = 0;
+        [JsonProperty("customFloatingBarImgs")]
+        public List<CustomFloatingBarIcon> CustomFloatingBarImgs { get; set; } = new List<CustomFloatingBarIcon>();
         [JsonProperty("viewboxFloatingBarOpacityValue")]
         public double ViewboxFloatingBarOpacityValue { get; set; } = 1.0;
         [JsonProperty("enableTrayIcon")]
@@ -437,5 +440,23 @@ namespace Ink_Canvas
         public bool ShowRandomAndSingleDraw { get; set; } = true;
         [JsonProperty("directCallCiRand")]
         public bool DirectCallCiRand { get; set; } = false;
+    }
+    
+    public class CustomFloatingBarIcon
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        
+        [JsonProperty("filePath")]
+        public string FilePath { get; set; }
+        
+        public CustomFloatingBarIcon(string name, string filePath)
+        {
+            Name = name;
+            FilePath = filePath;
+        }
+        
+        // 用于JSON序列化
+        public CustomFloatingBarIcon() { }
     }
 }

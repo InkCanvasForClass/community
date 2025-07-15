@@ -247,41 +247,20 @@ namespace Ink_Canvas {
                         new SolidColorBrush(StringToColor("#FF555555"));
                 }
 
-                ComboBoxFloatingBarImg.SelectedIndex = Settings.Appearance.FloatingBarImg;
-                if (ComboBoxFloatingBarImg.SelectedIndex == 0) {
-                    FloatingbarHeadIconImg.Source =
-                        new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc.png"));
-                    FloatingbarHeadIconImg.Margin = new Thickness(0.5);
-                } else if (ComboBoxFloatingBarImg.SelectedIndex == 1) {
-                    FloatingbarHeadIconImg.Source =
-                        new BitmapImage(
-                            new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-dark-small.png"));
-                    FloatingbarHeadIconImg.Margin = new Thickness(1.2);
-                } else if (ComboBoxFloatingBarImg.SelectedIndex == 2) {
-                    FloatingbarHeadIconImg.Source =
-                        new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandoujiyanhuaji.png"));
-                    FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
-                } else if (ComboBoxFloatingBarImg.SelectedIndex == 3) {
-                    FloatingbarHeadIconImg.Source =
-                        new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanshounvhuaji.png"));
-                    FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
-                } else if (ComboBoxFloatingBarImg.SelectedIndex == 4) {
-                    FloatingbarHeadIconImg.Source =
-                        new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanciya.png"));
-                    FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
-                } else if (ComboBoxFloatingBarImg.SelectedIndex == 5) {
-                    FloatingbarHeadIconImg.Source =
-                        new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanneikuhuaji.png"));
-                    FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
-                } else if (ComboBoxFloatingBarImg.SelectedIndex == 6) {
-                    FloatingbarHeadIconImg.Source =
-                        new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandogeyuanliangwo.png"));
-                    FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
-                } else if (ComboBoxFloatingBarImg.SelectedIndex == 7) {
-                    FloatingbarHeadIconImg.Source =
-                        new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/tiebahuaji.png"));
-                    FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1);
+                // 更新自定义图标下拉列表
+                UpdateCustomIconsInComboBox();
+                
+                // 设置选中的图标索引
+                // 如果索引超出范围(自定义图标可能已删除)，使用默认图标
+                if (Settings.Appearance.FloatingBarImg >= ComboBoxFloatingBarImg.Items.Count)
+                {
+                    Settings.Appearance.FloatingBarImg = 0;
                 }
+                
+                ComboBoxFloatingBarImg.SelectedIndex = Settings.Appearance.FloatingBarImg;
+                
+                // 更新浮动栏图标
+                UpdateFloatingBarIcon();
 
                 ToggleSwitchEnableTimeDisplayInWhiteboardMode.IsOn =
                     Settings.Appearance.EnableTimeDisplayInWhiteboardMode;

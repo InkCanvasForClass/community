@@ -226,7 +226,7 @@ namespace Ink_Canvas {
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
             if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
-            ShowNotification($"检测到显示器信息变化，变为{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height}");
+            ShowNotification($"检测到显示器信息变化，变为{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height}）");
             new Thread(() => {
                 var isFloatingBarOutsideScreen = false;
                 var isInPPTPresentationMode = false;
