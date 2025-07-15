@@ -493,77 +493,11 @@ namespace Ink_Canvas {
             }
 
             // 触摸移动时保持自定义光标显示
-            if (Settings.Canvas.IsShowCursor) {
-                inkCanvas.ForceCursor = true;
-                inkCanvas.UseCustomCursor = true; // 确保使用自定义光标
-                System.Windows.Forms.Cursor.Show();
-            }
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.None)
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+        
 
-            if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
-            if (drawingShapeMode == 9 && isFirstTouchCuboid == false) MouseTouchMove(iniP);
-            inkCanvas.Opacity = 1;
-            double boundsWidth = GetTouchBoundWidth(e), eraserMultiplier = 1.0;
-            if (!Settings.Advanced.EraserBindTouchMultiplier && Settings.Advanced.IsSpecialScreen)
-                eraserMultiplier = 1 / Settings.Advanced.TouchMultiplier;
-            if (boundsWidth > BoundsWidth) {
-                isLastTouchEraser = true;
-                if (drawingShapeMode == 0 && forceEraser) return;
-                if (boundsWidth > BoundsWidth * 2.5) {
-                    double k = 1;
-                    switch (Settings.Canvas.EraserSize) {
-                        case 0:
-                            k = 0.5;
-                            break;
-                        case 1:
-                            k = 0.8;
-                            break;
-                        case 3:
-                            k = 1.25;
-                            break;
-                        case 4:
-                            k = 1.5;
-                            break;
-                    }
-
-                    inkCanvas.EraserShape = new EllipseStylusShape(boundsWidth * k * eraserMultiplier,
-                        boundsWidth * k * eraserMultiplier);
-                    inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-                    
-                    // 立即应用光标设置
-                    if (Settings.Canvas.IsShowCursor) {
-                        inkCanvas.Cursor = Cursors.Cross;
-                        System.Windows.Forms.Cursor.Show();
-                    }
-                }
-                else {
-                    if (StackPanelPPTControls.Visibility == Visibility.Visible && inkCanvas.Strokes.Count == 0 &&
-                        Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl) {
-                        isLastTouchEraser = false;
-                        inkCanvas.EditingMode = InkCanvasEditingMode.GestureOnly;
-                        inkCanvas.Opacity = 0.1;
-                    }
-                    else {
-                        inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
-                        inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
-                    }
-                }
-            }
-            else {
-                isLastTouchEraser = false;
-                // 修复面积擦时不显示橡皮形状：无论 forcePointEraser 状态，均显示 50x50 橡皮
-                inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
-                if (forceEraser) return;
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-            }
-
-            if (inkCanvas.EditingMode != InkCanvasEditingMode.None)
-                return;
-
-            if (e.TouchDevice == null) {
-                System.Windows.Forms.Cursor.Show();
-            } else {
-                System.Windows.Forms.Cursor.Hide();
-            }
+            MouseTouchMove(e.GetTouchPoint(inkCanvas).Position);
         }
 
         private int drawMultiStepShapeCurrentStep = 0; //多笔完成的图形 当前所处在的笔画
