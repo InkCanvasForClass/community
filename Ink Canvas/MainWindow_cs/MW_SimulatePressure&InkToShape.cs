@@ -125,37 +125,31 @@ namespace Ink_Canvas {
                         Point startPoint = e.Stroke.StylusPoints[0].ToPoint();
                         Point endPoint = e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint();
                         
-                        // 记录是否需要拉直线条，默认不拉直
-                        bool shouldStraighten = false;
-                        bool snapped = false;
-                        
-                        // 首先检查是否应该拉直线条（使用灵敏度设置），这是主要判断条件
+                        // 先完成所有直线判定，再考虑端点吸附
                         // 读取实际的灵敏度设置值
                         double sensitivity = Settings.InkToShape.LineStraightenSensitivity;
                         System.Diagnostics.Debug.WriteLine($"当前灵敏度值: {sensitivity}");
                         
-                        // 将灵敏度值传递给判断函数
-                        shouldStraighten = ShouldStraightenLine(e.Stroke);
+                        // 判断是否应该拉直线条
+                        bool shouldStraighten = ShouldStraightenLine(e.Stroke);
                         
                         // 输出一些调试信息，帮助理解灵敏度设置的效果
                         System.Diagnostics.Debug.WriteLine($"LineStraightenSensitivity: {Settings.InkToShape.LineStraightenSensitivity}, ShouldStraighten: {shouldStraighten}");
                         
-                        // 再检查端点吸附功能，这是独立的可选功能
-                        if (Settings.Canvas.LineEndpointSnapping) {
+                        // 只有当确定要拉直线条时，才检查端点吸附
+                        if (shouldStraighten && Settings.Canvas.LineEndpointSnapping) {
                             // 只有在启用了形状识别（矩形或三角形）时才执行端点吸附
                             if (Settings.InkToShape.IsInkToShapeRectangle || Settings.InkToShape.IsInkToShapeTriangle) {
                                 Point[] snappedPoints = GetSnappedEndpoints(startPoint, endPoint);
                                 if (snappedPoints != null) {
                                     startPoint = snappedPoints[0];
                                     endPoint = snappedPoints[1];
-                                    snapped = true;
                                 }
                             }
                         }
 
-                        // 如果满足任一条件（需要拉直或成功吸附），则创建直线
-                        // 这确保灵敏度设置独立于端点吸附功能发挥作用
-                        if (shouldStraighten || snapped) {
+                        // 如果确定要拉直，则创建直线
+                        if (shouldStraighten) {
                             StylusPointCollection straightLinePoints = CreateStraightLine(startPoint, endPoint);
                             Stroke straightStroke = new Stroke(straightLinePoints) {
                                 DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
