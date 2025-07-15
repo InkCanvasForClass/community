@@ -22,6 +22,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media.Animation;
 using System.Reflection;
+using Point = System.Windows.Point;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -177,6 +178,13 @@ namespace Ink_Canvas {
             loadPenCanvas();
             //加载设置
             LoadSettings(true);
+            
+            // 注册设置面板滚动事件
+            if (SettingsPanelScrollViewer != null)
+            {
+                SettingsPanelScrollViewer.ScrollChanged += SettingsPanelScrollViewer_ScrollChanged;
+            }
+            
             // HasNewUpdateWindow hasNewUpdateWindow = new HasNewUpdateWindow();
             if (Environment.Is64BitProcess) GroupBoxInkRecognition.Visibility = Visibility.Collapsed;
 
@@ -706,7 +714,7 @@ namespace Ink_Canvas {
         }
 
         // 辅助方法：显示指定的设置部分
-        private void ShowSettingsSection(string sectionTag)
+        private async void ShowSettingsSection(string sectionTag)
         {
             // 显示设置面板
             BorderSettings.Visibility = Visibility.Visible;
@@ -718,81 +726,269 @@ namespace Ink_Canvas {
             var stackPanel = SettingsPanelScrollViewer.Content as StackPanel;
             if (stackPanel == null) return;
             
-            // 首先隐藏所有GroupBox
+            // 确保所有GroupBox都是可见的
             foreach (var child in stackPanel.Children)
             {
                 if (child is GroupBox groupBox)
                 {
-                    groupBox.Visibility = Visibility.Collapsed;
+                    groupBox.Visibility = Visibility.Visible;
                 }
             }
             
-            // 根据传入的sectionTag显示相应的设置部分
+            // 确保UI完全更新
+            await Dispatcher.InvokeAsync(() => {}, System.Windows.Threading.DispatcherPriority.Render);
+            
+            // 根据传入的sectionTag滚动到相应的设置部分
+            GroupBox targetGroupBox = null;
+            
             switch (sectionTag.ToLower())
             {
                 case "startup":
-                    // 显示启动设置
-                    ShowGroupBoxByHeader(stackPanel, "启动");
+                    targetGroupBox = FindGroupBoxByHeader(stackPanel, "启动");
                     break;
                 case "canvas":
-                    // 显示画板和墨迹设置
-                    ShowGroupBoxByHeader(stackPanel, "画板和墨迹");
+                    targetGroupBox = FindGroupBoxByHeader(stackPanel, "画板和墨迹");
                     break;
                 case "gesture":
-                    // 显示手势设置
-                    ShowGroupBoxByHeader(stackPanel, "手势");
+                    targetGroupBox = FindGroupBoxByHeader(stackPanel, "手势");
                     break;
                 case "inkrecognition":
-                    // 显示墨迹纠正设置
-                    ShowGroupBoxByHeader(stackPanel, "墨迹纠正");
-                    if (GroupBoxInkRecognition != null)
-                        GroupBoxInkRecognition.Visibility = Visibility.Visible;
+                    targetGroupBox = GroupBoxInkRecognition;
                     break;
                 case "crashaction":
-                    // 显示崩溃后操作设置
-                    ShowGroupBoxByHeader(stackPanel, "崩溃后操作");
+                    targetGroupBox = FindGroupBoxByHeader(stackPanel, "崩溃后操作");
                     break;
                 case "ppt":
-                    // 显示PPT联动设置
-                    ShowGroupBoxByHeader(stackPanel, "PPT联动");
+                    targetGroupBox = FindGroupBoxByHeader(stackPanel, "PPT联动");
                     break;
                 case "advanced":
-                    // 显示高级设置
-                    // 这里可能需要根据实际情况调整
+                    targetGroupBox = FindGroupBoxByHeader(stackPanel, "高级设置");
                     break;
                 case "automation":
-                    // 显示自动化设置
-                    // 这里可能需要根据实际情况调整
+                    targetGroupBox = FindGroupBoxByHeader(stackPanel, "自动化");
                     break;
                 case "randomwindow":
-                    // 显示随机窗口设置
-                    if (GroupBoxRandWindow != null)
-                        GroupBoxRandWindow.Visibility = Visibility.Visible;
+                    targetGroupBox = GroupBoxRandWindow;
                     break;
                 case "theme":
-                    // 显示主题设置
-                    if (GroupBoxAppearanceNewUI != null)
-                        GroupBoxAppearanceNewUI.Visibility = Visibility.Visible;
+                    targetGroupBox = GroupBoxAppearanceNewUI;
                     break;
                 case "shortcuts":
-                    // 显示快捷键设置
                     // 快捷键设置部分可能尚未实现
+                    targetGroupBox = FindGroupBoxByHeader(stackPanel, "快捷键");
                     break;
                 case "about":
-                    // 显示关于页面
-                    ShowGroupBoxByHeader(stackPanel, "关于");
+                    targetGroupBox = FindGroupBoxByHeader(stackPanel, "关于");
                     break;
                 default:
-                    // 默认显示第一个GroupBox
-                    if (stackPanel.Children.Count > 0 && stackPanel.Children[0] is GroupBox firstGroupBox)
-                    {
-                        firstGroupBox.Visibility = Visibility.Visible;
-                    }
-                    break;
+                    // 默认滚动到顶部
+                    SettingsPanelScrollViewer.ScrollToTop();
+                    return;
             }
             
-            // 滚动到顶部
-            SettingsPanelScrollViewer.ScrollToTop();
+            // 如果找到目标GroupBox，则滚动到它的位置
+            if (targetGroupBox != null)
+            {
+                // 使用动画平滑滚动到目标位置
+                ScrollToElement(targetGroupBox);
+                
+                // 高亮显示当前选中的导航项
+                UpdateNavigationButtonState(sectionTag);
+            }
+            else
+            {
+                // 如果没有找到目标GroupBox，则滚动到顶部
+                SettingsPanelScrollViewer.ScrollToTop();
+            }
+        }
+        
+        // 根据Header文本查找GroupBox
+        private GroupBox FindGroupBoxByHeader(StackPanel parent, string headerText)
+        {
+            foreach (var child in parent.Children)
+            {
+                if (child is GroupBox groupBox)
+                {
+                    // 查找GroupBox的Header
+                    if (groupBox.Header is TextBlock headerTextBlock && 
+                        headerTextBlock.Text != null && 
+                        headerTextBlock.Text.Contains(headerText))
+                    {
+                        return groupBox;
+                    }
+                }
+            }
+            return null;
+        }
+        
+        // 平滑滚动到指定元素
+        private async void ScrollToElement(FrameworkElement element)
+        {
+            if (element == null || SettingsPanelScrollViewer == null) return;
+            
+            try
+            {
+                // 暂时禁用滚动事件处理
+                SettingsPanelScrollViewer.ScrollChanged -= SettingsPanelScrollViewer_ScrollChanged;
+                
+                // 记录当前滚动位置
+                double originalOffset = SettingsPanelScrollViewer.VerticalOffset;
+                
+                // 将ScrollViewer内部的位置信息重置到顶部（不会触发视觉更新）
+                SettingsPanelScrollViewer.ScrollToHome();
+                
+                // 使用Dispatcher进行延迟处理，确保布局更新
+                await Dispatcher.InvokeAsync(() => {
+                    try
+                    {
+                        // 强制更新布局
+                        SettingsPanelScrollViewer.UpdateLayout();
+                        
+                        // 获取元素相对于顶部的准确位置
+                        Point elementPosition = element.TransformToAncestor(SettingsPanelScrollViewer).Transform(new Point(0, 0));
+                        
+                        // 计算目标位置，减去一些偏移，使元素不会贴在顶部
+                        double targetPosition = elementPosition.Y - 20;
+                        
+                        // 确保目标位置不小于0
+                        targetPosition = Math.Max(0, targetPosition);
+                        
+                        // 直接设置滚动位置，不使用动画
+                        SettingsPanelScrollViewer.ScrollToVerticalOffset(targetPosition);
+                    }
+                    catch (Exception ex)
+                    {
+                        // 如果出现异常，恢复到原来的滚动位置
+                        SettingsPanelScrollViewer.ScrollToVerticalOffset(originalOffset);
+                    }
+                    finally
+                    {
+                        // 重新启用滚动事件处理
+                        SettingsPanelScrollViewer.ScrollChanged += SettingsPanelScrollViewer_ScrollChanged;
+                    }
+                }, System.Windows.Threading.DispatcherPriority.Render);
+            }
+            catch (Exception)
+            {
+                // 确保在异常情况下也重新启用滚动事件处理
+                SettingsPanelScrollViewer.ScrollChanged += SettingsPanelScrollViewer_ScrollChanged;
+            }
+        }
+        
+        // 滚动条变化事件处理
+        private void SettingsPanelScrollViewer_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+        {
+            // 可以在这里添加滚动事件的处理逻辑，如果需要的话
+        }
+        
+        // 更新导航按钮状态
+        private void UpdateNavigationButtonState(string activeTag)
+        {
+            // 清除所有导航按钮的Tag属性
+            ClearAllNavButtonTags();
+            
+            // 设置当前活动按钮的Tag属性
+            switch (activeTag.ToLower())
+            {
+                case "startup":
+                    SetNavButtonTag("startup");
+                    break;
+                case "canvas":
+                    SetNavButtonTag("canvas");
+                    break;
+                case "gesture":
+                    SetNavButtonTag("gesture");
+                    break;
+                case "inkrecognition":
+                    SetNavButtonTag("inkrecognition");
+                    break;
+                case "crashaction":
+                    SetNavButtonTag("crashaction");
+                    break;
+                case "ppt":
+                    SetNavButtonTag("ppt");
+                    break;
+                case "advanced":
+                    SetNavButtonTag("advanced");
+                    break;
+                case "automation":
+                    SetNavButtonTag("automation");
+                    break;
+                case "randomwindow":
+                    SetNavButtonTag("randomwindow");
+                    break;
+                case "theme":
+                    SetNavButtonTag("theme");
+                    break;
+                case "shortcuts":
+                    SetNavButtonTag("shortcuts");
+                    break;
+                case "about":
+                    SetNavButtonTag("about");
+                    break;
+            }
+        }
+        
+        // 清除所有导航按钮的Tag属性
+        private void ClearAllNavButtonTags()
+        {
+            var grid = BorderSettings.Child as Grid;
+            if (grid == null) return;
+            
+            var navSidebar = grid.Children[0] as Border;
+            if (navSidebar == null) return;
+            
+            var navGrid = navSidebar.Child as Grid;
+            if (navGrid == null) return;
+            
+            var scrollViewer = navGrid.Children[1] as ScrollViewer;
+            if (scrollViewer == null) return;
+            
+            var stackPanel = scrollViewer.Content as StackPanel;
+            if (stackPanel == null) return;
+            
+            foreach (var child in stackPanel.Children)
+            {
+                if (child is Button button)
+                {
+                    button.Tag = null;
+                }
+            }
+        }
+        
+        // 设置导航按钮的Tag属性
+        private void SetNavButtonTag(string tag)
+        {
+            var grid = BorderSettings.Child as Grid;
+            if (grid == null) return;
+            
+            var navSidebar = grid.Children[0] as Border;
+            if (navSidebar == null) return;
+            
+            var navGrid = navSidebar.Child as Grid;
+            if (navGrid == null) return;
+            
+            var scrollViewer = navGrid.Children[1] as ScrollViewer;
+            if (scrollViewer == null) return;
+            
+            var stackPanel = scrollViewer.Content as StackPanel;
+            if (stackPanel == null) return;
+            
+            foreach (var child in stackPanel.Children)
+            {
+                if (child is Button button)
+                {
+                    // 检查按钮的ToolTip属性，根据tag设置对应的按钮
+                    string buttonTag = button.Tag as string;
+                    
+                    // 如果按钮的Tag与要设置的tag匹配，则设置Tag
+                    if (buttonTag != null && buttonTag.ToLower() == tag.ToLower())
+                    {
+                        button.Tag = tag;
+                        return;
+                    }
+                }
+            }
         }
         
         // 根据Header文本查找并显示GroupBox
