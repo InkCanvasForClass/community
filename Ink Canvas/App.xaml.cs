@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Win32;
-using System.Security;  // 添加SecurityException所需命名空间
+using System.Security;  
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -15,6 +15,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using MessageBox = System.Windows.MessageBox;
 using Window = System.Windows.Window;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Ink_Canvas
 {
@@ -34,6 +35,16 @@ namespace Ink_Canvas
         public static bool IsAppExitByUser = false;
         // 新增：退出信号文件路径
         private static string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + System.Diagnostics.Process.GetCurrentProcess().Id + ".flag");
+        // 新增：崩溃日志文件路径
+        private static string crashLogFile = Path.Combine(Environment.GetEnvironmentVariable("APPDATA"), "Ink Canvas", "crash_logs");
+        // 新增：进程ID
+        private static int currentProcessId = Process.GetCurrentProcess().Id;
+        // 新增：应用启动时间
+        private static DateTime appStartTime = DateTime.Now;
+        // 新增：最后一次错误信息
+        private static string lastErrorMessage = string.Empty;
+        // 新增：是否已初始化崩溃监听器
+        private static bool crashListenersInitialized = false;
 
         public App()
         {
@@ -53,12 +64,268 @@ namespace Ink_Canvas
             this.DispatcherUnhandledException += App_DispatcherUnhandledException;
             StartHeartbeatMonitor();
 
+            // 新增：初始化全局异常和进程结束处理
+            InitializeCrashListeners();
+
             // 仅在崩溃后操作为静默重启时才启动看门狗
             if (CrashAction == CrashActionType.SilentRestart)
             {
                 StartWatchdogIfNeeded();
             }
             this.Exit += App_Exit; // 注册退出事件
+        }
+
+        // 新增：初始化崩溃监听器
+        private void InitializeCrashListeners()
+        {
+            if (crashListenersInitialized) return;
+            
+            try
+            {
+                // 确保崩溃日志目录存在
+                if (!Directory.Exists(crashLogFile))
+                {
+                    Directory.CreateDirectory(crashLogFile);
+                }
+                
+                // 注册非UI线程未处理异常处理程序
+                AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
+                
+                // 注册控制台Ctrl+C等终止信号处理
+                Console.CancelKeyPress += Console_CancelKeyPress;
+                
+                // 注册系统会话结束事件（关机、注销等）
+                SystemEvents.SessionEnding += SystemEvents_SessionEnding;
+                
+                // 注册进程退出处理程序
+                AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
+                
+                // 尝试注册Windows关闭消息监听
+                SetConsoleCtrlHandler(ConsoleCtrlHandler, true);
+                
+                // 如果系统支持，添加Windows Management Instrumentation监听器
+                try
+                {
+                    // 使用反射动态加载和调用WMI
+                    TrySetupWmiMonitoring();
+                }
+                catch (Exception wmiEx)
+                {
+                    LogHelper.WriteLogToFile($"设置WMI进程监控失败: {wmiEx.Message}", LogHelper.LogType.Warning);
+                }
+                
+                crashListenersInitialized = true;
+                LogHelper.WriteLogToFile("已初始化崩溃监听器", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化崩溃监听器失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        // 新增：动态加载WMI监控（避免直接引用System.Management）
+        private void TrySetupWmiMonitoring()
+        {
+            try
+            {
+                // 检查System.Management程序集是否可用
+                var assemblyName = "System.Management, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
+                var assembly = Assembly.Load(assemblyName);
+                if (assembly == null)
+                {
+                    LogHelper.WriteLogToFile("未找到System.Management程序集，跳过WMI监控", LogHelper.LogType.Warning);
+                    return;
+                }
+                
+                // 使用反射创建WMI查询
+                var watcherType = assembly.GetType("System.Management.ManagementEventWatcher");
+                if (watcherType == null)
+                {
+                    LogHelper.WriteLogToFile("未找到ManagementEventWatcher类型，跳过WMI监控", LogHelper.LogType.Warning);
+                    return;
+                }
+                
+                // 构建WMI查询字符串
+                string queryString = $"SELECT * FROM __InstanceDeletionEvent WITHIN 1 WHERE TargetInstance ISA 'Win32_Process' AND TargetInstance.ProcessId = {currentProcessId}";
+                
+                // 创建ManagementEventWatcher实例
+                object watcher = Activator.CreateInstance(watcherType, queryString);
+                
+                // 获取EventArrived事件信息
+                var eventInfo = watcherType.GetEvent("EventArrived");
+                if (eventInfo == null)
+                {
+                    LogHelper.WriteLogToFile("未找到EventArrived事件，跳过WMI监控", LogHelper.LogType.Warning);
+                    return;
+                }
+                
+                // 创建委托并订阅事件
+                Type delegateType = eventInfo.EventHandlerType;
+                var handler = Delegate.CreateDelegate(delegateType, this, GetType().GetMethod("WmiEventHandler", BindingFlags.NonPublic | BindingFlags.Instance));
+                eventInfo.AddEventHandler(watcher, handler);
+                
+                // 启动监听
+                var startMethod = watcherType.GetMethod("Start");
+                startMethod.Invoke(watcher, null);
+                
+                LogHelper.WriteLogToFile("已成功启动WMI进程监控", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"动态加载WMI监控失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+        
+        // WMI事件处理方法（通过反射调用）
+        private void WmiEventHandler(object sender, EventArgs e)
+        {
+            try
+            {
+                // 尝试从事件参数中提取信息
+                dynamic eventArgs = e;
+                dynamic newEvent = eventArgs.NewEvent;
+                if (newEvent != null)
+                {
+                    dynamic targetInstance = newEvent["TargetInstance"];
+                    if (targetInstance != null)
+                    {
+                        string processName = targetInstance["Name"]?.ToString() ?? "未知进程";
+                        WriteCrashLog($"WMI检测到进程{processName}(ID:{currentProcessId})已终止");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理WMI事件时出错: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        // 新增：Windows控制台控制处理程序
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate handler, bool add);
+        
+        private delegate bool ConsoleCtrlDelegate(int ctrlType);
+        
+        private static bool ConsoleCtrlHandler(int ctrlType)
+        {
+            string eventType = "未知控制类型";
+            
+            // 使用传统switch语句替代switch表达式
+            switch (ctrlType)
+            {
+                case 0:
+                    eventType = "CTRL_C_EVENT";
+                    break;
+                case 1:
+                    eventType = "CTRL_BREAK_EVENT";
+                    break;
+                case 2:
+                    eventType = "CTRL_CLOSE_EVENT";
+                    break;
+                case 5:
+                    eventType = "CTRL_LOGOFF_EVENT";
+                    break;
+                case 6:
+                    eventType = "CTRL_SHUTDOWN_EVENT";
+                    break;
+                default:
+                    eventType = $"未知控制类型({ctrlType})";
+                    break;
+            }
+            
+            WriteCrashLog($"接收到系统控制信号: {eventType}");
+            
+            // 返回true表示已处理该事件
+            return false;
+        }
+        
+        // 新增：系统会话结束事件处理
+        private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
+            WriteCrashLog($"系统会话即将结束: {reason}");
+        }
+        
+        // 新增：控制台取消事件处理
+        private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
+        {
+            WriteCrashLog($"接收到控制台中断信号: {e.SpecialKey}");
+            e.Cancel = true; // 取消默认处理
+        }
+        
+        // 新增：处理非UI线程的未处理异常
+        private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            try
+            {
+                var exception = e.ExceptionObject as Exception;
+                string errorMessage = exception?.ToString() ?? "未知异常";
+                lastErrorMessage = errorMessage;
+                
+                WriteCrashLog($"捕获到未处理的异常: {errorMessage}");
+                
+                if (e.IsTerminating)
+                {
+                    WriteCrashLog("应用程序即将终止");
+                }
+            }
+            catch (Exception ex)
+            {
+                // 尝试在最后时刻记录错误
+                try
+                {
+                    File.AppendAllText(
+                        Path.Combine(crashLogFile, $"critical_error_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
+                        $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] 记录未处理异常时发生错误: {ex.Message}\r\n"
+                    );
+                }
+                catch { }
+            }
+        }
+        
+        // 新增：处理进程退出事件
+        private void CurrentDomain_ProcessExit(object sender, EventArgs e)
+        {
+            TimeSpan runDuration = DateTime.Now - appStartTime;
+            WriteCrashLog($"应用程序退出，运行时长: {runDuration}");
+            
+            // 如果有最后错误消息，记录到日志
+            if (!string.IsNullOrEmpty(lastErrorMessage))
+            {
+                WriteCrashLog($"最后错误信息: {lastErrorMessage}");
+            }
+        }
+        
+        // 新增：记录崩溃日志
+        private static void WriteCrashLog(string message)
+        {
+            try
+            {
+                // 确保目录存在
+                if (!Directory.Exists(crashLogFile))
+                {
+                    Directory.CreateDirectory(crashLogFile);
+                }
+                
+                string logFileName = Path.Combine(crashLogFile, $"crash_{DateTime.Now:yyyyMMdd}.log");
+                
+                // 收集系统状态信息
+                string memoryUsage = (Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024)).ToString() + " MB";
+                string cpuTime = Process.GetCurrentProcess().TotalProcessorTime.ToString();
+                string processUptime = (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString();
+                
+                string statusInfo = $"[内存: {memoryUsage}, CPU时间: {cpuTime}, 运行时长: {processUptime}]";
+                
+                // 写入日志
+                File.AppendAllText(
+                    logFileName,
+                    $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] [PID:{currentProcessId}] {message}\r\n{statusInfo}\r\n\r\n"
+                );
+                
+                // 同时记录到主日志
+                LogHelper.WriteLogToFile(message, LogHelper.LogType.Error);
+            }
+            catch { }
         }
 
         // 增加字段保存崩溃后操作设置
@@ -92,6 +359,11 @@ namespace Ink_Canvas
         {
             Ink_Canvas.MainWindow.ShowNewMessage("抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。", true);
             LogHelper.NewLog(e.Exception.ToString());
+            
+            // 新增：记录到崩溃日志
+            lastErrorMessage = e.Exception.ToString();
+            WriteCrashLog($"UI线程未处理异常: {e.Exception}");
+            
             e.Handled = true;
 
             SyncCrashActionFromSettings(); // 新增：崩溃时同步最新设置
@@ -398,6 +670,10 @@ namespace Ink_Canvas
             // 仅在软件内主动退出时关闭看门狗，并写入退出信号
             try
             {
+                // 新增：记录应用退出状态
+                string exitType = IsAppExitByUser ? "用户主动退出" : "应用程序退出";
+                WriteCrashLog($"{exitType}，退出代码: {e.ApplicationExitCode}");
+                
                 if (IsAppExitByUser)
                 {
                     // 写入退出信号文件，通知看门狗正常退出
@@ -409,7 +685,15 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch { }
+            catch (Exception ex) 
+            {
+                // 尝试记录最后的错误
+                try
+                {
+                    LogHelper.WriteLogToFile($"退出处理时发生错误: {ex.Message}", LogHelper.LogType.Error);
+                }
+                catch { }
+            }
         }
 
         /// <summary>
