@@ -15,17 +15,26 @@
       "profile": "https://github.com/CJKmkp",
       "contributions": [
         "maintenance",
-        "doc"
+        "doc",
+        "code"
       ]
     },
     {
       "login": "Hydro11451",
       "name": "Hydrogen",
       "avatar_url": "https://avatars.githubusercontent.com/u/214308559?v=4",
-      "profile": "https://github.com/Hydro11451",
+      "profile": "http://hydro11451.qzz.io",
       "contributions": [
-        "maintenance",
-        "doc"
+        "code"
+      ]
+    },
+    {
+      "login": "CreeperAWA",
+      "name": "CreeperAWA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/134939494?v=4",
+      "profile": "https://github.com/CreeperAWA",
+      "contributions": [
+        "code"
       ]
     }
   ]
