@@ -34,7 +34,7 @@ namespace Ink_Canvas.Helpers
                 if (channel == UpdateChannel.Release)
                 {
                     // Release通道版本信息地址
-                    primaryUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/beta/AutomaticUpdateVersionControl.txt";
+                    primaryUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
                     fallbackUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
                 }
                 else
@@ -622,6 +622,13 @@ namespace Ink_Canvas.Helpers
                         VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
                         LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
+                    },
+                    new UpdateLineGroup
+                    {
+                        GroupName = "kkgithub线路",
+                        VersionUrl = "https://kkgithub.com/InkCanvasForClass/community/raw/refs/heads/beta/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://kkgithub.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://kkgithub.com/InkCanvasForClass/community/raw/refs/heads/beta/UpdateLog.md"
                     }
                 }
             },
@@ -640,6 +647,13 @@ namespace Ink_Canvas.Helpers
                         VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
                         LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                    },
+                    new UpdateLineGroup
+                    {
+                        GroupName = "kkgithub线路",
+                        VersionUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://kkgithub.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
                     }
                 }
             }
