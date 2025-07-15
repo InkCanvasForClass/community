@@ -253,6 +253,9 @@ namespace Ink_Canvas
             || IsAutoFoldInYiYunVisualPresenter
             || IsAutoFoldInMaxHubWhiteboard;
 
+        [JsonProperty("isAutoEnterAnnotationModeWhenExitFoldMode")]
+        public bool IsAutoEnterAnnotationModeWhenExitFoldMode { get; set; } = false;
+
         [JsonProperty("isAutoFoldInEasiNote")]
         public bool IsAutoFoldInEasiNote { get; set; } = false;
 

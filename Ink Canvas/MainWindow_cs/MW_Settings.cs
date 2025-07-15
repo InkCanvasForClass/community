@@ -1235,6 +1235,13 @@ namespace Ink_Canvas {
             else
                 timerKillProcess.Stop();
         }
+        
+        private void ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode = ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode.IsOn;
+            SaveSettingsToFile();
+        }
 
         private void ToggleSwitchSaveScreenshotsInDateFolders_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;

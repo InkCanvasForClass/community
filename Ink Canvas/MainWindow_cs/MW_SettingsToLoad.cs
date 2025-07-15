@@ -706,6 +706,9 @@ namespace Ink_Canvas {
                 ToggleSwitchAutoDelSavedFiles.IsOn = Settings.Automation.AutoDelSavedFiles;
                 ComboBoxAutoDelSavedFilesDaysThreshold.Text =
                     Settings.Automation.AutoDelSavedFilesDaysThreshold.ToString();
+                    
+                // 加载退出收纳模式自动切换至批注模式设置
+                ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode.IsOn = Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode;
             } else {
                 Settings.Automation = new Automation();
             }
