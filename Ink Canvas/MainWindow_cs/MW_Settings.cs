@@ -1934,5 +1934,65 @@ namespace Ink_Canvas {
                 }
             }
         }
+
+        // 自定义点名背景相关方法
+        public void UpdatePickNameBackgroundsInComboBox()
+        {
+            // 清除现有的自定义背景选项
+            if (ComboBoxPickNameBackground != null) 
+            {
+                // 保留第一个默认选项
+                while (ComboBoxPickNameBackground.Items.Count > 1)
+                {
+                    ComboBoxPickNameBackground.Items.RemoveAt(ComboBoxPickNameBackground.Items.Count - 1);
+                }
+                
+                // 添加自定义背景选项
+                foreach (var background in Settings.RandSettings.CustomPickNameBackgrounds)
+                {
+                    ComboBoxItem item = new ComboBoxItem();
+                    item.Content = background.Name;
+                    item.FontFamily = new System.Windows.Media.FontFamily("Microsoft YaHei UI");
+                    ComboBoxPickNameBackground.Items.Add(item);
+                }
+            }
+        }
+
+        public void UpdatePickNameBackgroundDisplay()
+        {
+            // 此方法主要用于在外部窗口更改背景后更新UI
+            if (ComboBoxPickNameBackground != null)
+            {
+                ComboBoxPickNameBackground.SelectedIndex = Settings.RandSettings.SelectedBackgroundIndex;
+            }
+        }
+        
+        private void ComboBoxPickNameBackground_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded) return;
+            
+            Settings.RandSettings.SelectedBackgroundIndex = ComboBoxPickNameBackground.SelectedIndex;
+            SaveSettingsToFile();
+        }
+        
+        private void ButtonAddCustomBackground_Click(object sender, RoutedEventArgs e)
+        {
+            AddPickNameBackgroundWindow dialog = new AddPickNameBackgroundWindow(this);
+            dialog.Owner = this;
+            dialog.ShowDialog();
+            
+            if (dialog.IsSuccess)
+            {
+                // 自动选中新添加的背景
+                ComboBoxPickNameBackground.SelectedIndex = ComboBoxPickNameBackground.Items.Count - 1;
+            }
+        }
+        
+        private void ButtonManageBackgrounds_Click(object sender, RoutedEventArgs e)
+        {
+            ManagePickNameBackgroundsWindow dialog = new ManagePickNameBackgroundsWindow(this);
+            dialog.Owner = this;
+            dialog.ShowDialog();
+        }
     }
 }

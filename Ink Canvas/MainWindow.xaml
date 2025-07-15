@@ -2415,7 +2415,7 @@
                                     <TextBlock Margin="0,12,0,0" Text="随机点名" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
                                 </GroupBox.Header>
-                                <ui:SimpleStackPanel Spacing="6">
+                                <ui:SimpleStackPanel Spacing="12">
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="显示修改随机点名名单的按钮"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
@@ -2424,6 +2424,29 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI"
                                                          FontWeight="Bold"
                                                          Toggled="ToggleSwitchDisplayRandWindowNamesInputBtn_OnToggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <TextBlock Foreground="#fafafa" Text="点名窗口背景设置" 
+                                               FontSize="16" FontWeight="Bold" Margin="0,10,0,5" />
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="背景选择：" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxPickNameBackground" FontFamily="Microsoft YaHei UI"
+                                                  SelectedIndex="0" Width="180"
+                                                  SelectionChanged="ComboBoxPickNameBackground_SelectionChanged">
+                                            <ComboBoxItem Content="默认背景" FontFamily="Microsoft YaHei UI" />
+                                            <!-- 自定义背景会在代码中动态添加 -->
+                                        </ComboBox>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="自定义背景：" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Button Name="ButtonAddCustomBackground" Content="上传" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonAddCustomBackground_Click" Padding="10,3"/>
+                                        <Button Name="ButtonManageBackgrounds" Content="管理" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonManageBackgrounds_Click" Padding="10,3" Margin="5,0,0,0"/>
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="启用随机抽和单次抽按钮"

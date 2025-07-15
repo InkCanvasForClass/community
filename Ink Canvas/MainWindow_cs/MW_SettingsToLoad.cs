@@ -602,6 +602,16 @@ namespace Ink_Canvas {
                 ToggleSwitchDirectCallCiRand.IsOn = Settings.RandSettings.DirectCallCiRand;
                 RandomDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
                 SingleDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 加载自定义点名背景
+                UpdatePickNameBackgroundsInComboBox();
+                
+                // 设置选择的背景索引
+                if (Settings.RandSettings.SelectedBackgroundIndex >= ComboBoxPickNameBackground.Items.Count)
+                {
+                    Settings.RandSettings.SelectedBackgroundIndex = 0;
+                }
+                ComboBoxPickNameBackground.SelectedIndex = Settings.RandSettings.SelectedBackgroundIndex;
             } else {
                 Settings.RandSettings = new RandSettings();
                 ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn = Settings.RandSettings.DisplayRandWindowNamesInputBtn;

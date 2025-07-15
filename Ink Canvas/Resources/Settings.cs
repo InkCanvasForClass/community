@@ -440,6 +440,28 @@ namespace Ink_Canvas
         public bool ShowRandomAndSingleDraw { get; set; } = true;
         [JsonProperty("directCallCiRand")]
         public bool DirectCallCiRand { get; set; } = false;
+        [JsonProperty("selectedBackgroundIndex")]
+        public int SelectedBackgroundIndex { get; set; } = 0;
+        [JsonProperty("customPickNameBackgrounds")]
+        public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
+    }
+    
+    public class CustomPickNameBackground
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        
+        [JsonProperty("filePath")]
+        public string FilePath { get; set; }
+        
+        public CustomPickNameBackground(string name, string filePath)
+        {
+            Name = name;
+            FilePath = filePath;
+        }
+        
+        // 用于JSON序列化
+        public CustomPickNameBackground() { }
     }
     
     public class CustomFloatingBarIcon
