@@ -84,6 +84,10 @@ namespace Ink_Canvas.Windows
             // 设置数据上下文
             PluginDetailGrid.DataContext = this;
             
+            // 设置导出按钮初始状态
+            BtnExportPlugin.IsEnabled = false;
+            BtnExportPlugin.ToolTip = "请先选择要导出的插件";
+            
             // 加载插件列表
             LoadPlugins();
             
@@ -171,12 +175,25 @@ namespace Ink_Canvas.Windows
                 
                 // 设置删除按钮的可见性
                 BtnDeletePlugin.Visibility = !SelectedPlugin.IsBuiltIn ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 设置导出按钮的可用状态
+                BtnExportPlugin.IsEnabled = !SelectedPlugin.IsBuiltIn;
+                if (SelectedPlugin.IsBuiltIn)
+                {
+                    BtnExportPlugin.ToolTip = "内置插件无法导出";
+                }
+                else
+                {
+                    BtnExportPlugin.ToolTip = "将插件导出为.iccpp文件";
+                }
             }
             else
             {
                 SelectedPlugin = null;
                 PluginSettingsContainer.Content = null;
                 BtnDeletePlugin.Visibility = Visibility.Collapsed;
+                BtnExportPlugin.IsEnabled = false;
+                BtnExportPlugin.ToolTip = "请先选择要导出的插件";
             }
         }
         
@@ -292,6 +309,81 @@ namespace Ink_Canvas.Windows
                 {
                     MessageBox.Show("删除插件失败，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+        }
+        
+        /// <summary>
+        /// 导出插件按钮点击事件
+        /// </summary>
+        private void BtnExportPlugin_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 检查是否有选中的插件
+                if (SelectedPlugin == null)
+                {
+                    MessageBox.Show("请先选择要导出的插件", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // 检查是否为内置插件
+                if (SelectedPlugin.IsBuiltIn)
+                {
+                    MessageBox.Show("内置插件无法导出", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // 检查插件文件是否存在
+                string pluginPath = null;
+                if (SelectedPlugin is PluginBase pluginBase)
+                {
+                    pluginPath = pluginBase.PluginPath;
+                }
+
+                if (string.IsNullOrEmpty(pluginPath) || !File.Exists(pluginPath))
+                {
+                    MessageBox.Show("插件文件不存在或无法访问", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
+                // 创建保存文件对话框
+                SaveFileDialog dialog = new SaveFileDialog
+                {
+                    Filter = "ICC插件文件(*.iccpp)|*.iccpp",
+                    Title = "导出插件",
+                    FileName = Path.GetFileName(pluginPath)
+                };
+
+                // 显示对话框
+                if (dialog.ShowDialog() == true)
+                {
+                    // 获取目标路径
+                    string targetPath = dialog.FileName;
+
+                    // 如果目标文件已存在，询问是否覆盖
+                    if (File.Exists(targetPath) && !string.Equals(pluginPath, targetPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        MessageBoxResult result = MessageBox.Show("目标文件已存在，是否覆盖？", "确认", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                        if (result != MessageBoxResult.Yes)
+                        {
+                            return;
+                        }
+                    }
+
+                    // 复制插件文件到目标路径
+                    if (!string.Equals(pluginPath, targetPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Copy(pluginPath, targetPath, true);
+                    }
+
+                    LogHelper.WriteLogToFile($"插件 {SelectedPlugin.Name} 已成功导出到: {targetPath}", LogHelper.LogType.Info);
+                    MessageBox.Show($"插件 {SelectedPlugin.Name} 已成功导出！", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"导出插件时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"导出插件时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
         
