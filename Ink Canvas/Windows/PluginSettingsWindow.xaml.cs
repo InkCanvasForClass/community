@@ -410,6 +410,10 @@ namespace Ink_Canvas.Windows
                     // 切换插件状态
                     PluginManager.Instance.TogglePlugin(plugin, targetState);
                     
+                    // 立即同步保存配置到文件（确保状态被立即持久化）
+                    PluginManager.Instance.SaveConfig();
+                    LogHelper.WriteLogToFile($"插件状态已立即保存到配置文件", LogHelper.LogType.Info);
+                    
                     // 延迟一下再检查状态，确保变更已应用
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -499,6 +503,103 @@ namespace Ink_Canvas.Windows
         }
         
         /// <summary>
+        /// 保存插件状态按钮点击事件
+        /// </summary>
+        private void BtnSaveConfig_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                int syncCount = 0;
+                
+                // 遍历界面上所有插件视图模型，获取开关状态
+                foreach (var viewModel in Plugins)
+                {
+                    try
+                    {
+                        if (viewModel.Plugin != null)
+                        {
+                            // 获取UI中开关的当前状态（从界面控件读取）
+                            bool uiState = viewModel.IsEnabled;
+                            
+                            // 获取插件类型名，用于查找配置
+                            string pluginTypeName = viewModel.Plugin.GetType().FullName;
+                            
+                            // 查找实际的插件实例（可能与viewModel.Plugin不同，因为可能已经重新加载）
+                            IPlugin actualPlugin = null;
+                            foreach (var p in PluginManager.Instance.Plugins)
+                            {
+                                if (p.GetType().FullName == pluginTypeName)
+                                {
+                                    actualPlugin = p;
+                                    break;
+                                }
+                            }
+                            
+                            // 如果找不到对应的实际插件实例，跳过
+                            if (actualPlugin == null)
+                            {
+                                LogHelper.WriteLogToFile($"手动保存：无法找到与UI对应的插件实例：{viewModel.Name}", LogHelper.LogType.Warning);
+                                continue;
+                            }
+                            
+                            // 获取插件实际状态
+                            bool pluginState = false;
+                            if (actualPlugin is PluginBase pluginBase)
+                            {
+                                pluginState = pluginBase.IsEnabled;
+                            }
+                            
+                            // 如果界面状态与插件实际状态不一致，应用界面状态
+                            if (uiState != pluginState)
+                            {
+                                // 应用界面的状态到插件
+                                PluginManager.Instance.TogglePlugin(actualPlugin, uiState);
+                                LogHelper.WriteLogToFile($"手动保存：同步插件 {actualPlugin.Name} 状态 {pluginState} -> {uiState}", LogHelper.LogType.Info);
+                                syncCount++;
+                            }
+                            
+                            // 确保配置中的状态也与界面一致
+                            if (PluginManager.Instance.PluginStates.TryGetValue(pluginTypeName, out bool configState) && configState != uiState)
+                            {
+                                PluginManager.Instance.PluginStates[pluginTypeName] = uiState;
+                                LogHelper.WriteLogToFile($"手动保存：更新配置中插件 {actualPlugin.Name} 状态 {configState} -> {uiState}", LogHelper.LogType.Info);
+                                syncCount++;
+                            }
+                        }
+                    }
+                    catch (Exception pluginEx)
+                    {
+                        // 单个插件处理失败不应该影响其他插件
+                        LogHelper.WriteLogToFile($"手动保存：处理插件 {viewModel.Name} 时出错: {pluginEx.Message}", LogHelper.LogType.Error);
+                    }
+                }
+                
+                // 保存插件状态配置
+                PluginManager.Instance.SaveConfig();
+                
+                // 记录日志
+                LogHelper.WriteLogToFile($"用户手动保存插件状态配置，同步了 {syncCount} 个状态变更", LogHelper.LogType.Info);
+                
+                // 刷新插件列表，确保UI与最新状态同步
+                RefreshPluginList();
+                
+                // 显示保存成功提示
+                string message = syncCount > 0 
+                    ? $"插件状态已成功保存，同步了 {syncCount} 个状态变更" 
+                    : "插件状态已成功保存，所有插件状态已是最新";
+                MessageBox.Show(message, "保存成功", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                // 记录错误日志
+                LogHelper.WriteLogToFile($"手动保存插件状态时出错: {ex.Message}", LogHelper.LogType.Error);
+                
+                // 显示错误信息
+                MessageBox.Show($"保存插件状态时发生错误: {ex.Message}", "保存失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        /// <summary>
         /// 关闭按钮点击事件
         /// </summary>
         private void BtnClose_Click(object sender, RoutedEventArgs e)
@@ -565,6 +666,14 @@ namespace Ink_Canvas.Windows
             Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 IsEnabled = isEnabled;
+                
+                // 确保配置立即保存
+                if (sender is IPlugin plugin)
+                {
+                    LogHelper.WriteLogToFile($"视图模型捕获到插件 {plugin.Name} 状态变更: {(isEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                    Helpers.Plugins.PluginManager.Instance.SaveConfig();
+                    LogHelper.WriteLogToFile($"视图模型已触发配置保存", LogHelper.LogType.Info);
+                }
             }));
         }
         

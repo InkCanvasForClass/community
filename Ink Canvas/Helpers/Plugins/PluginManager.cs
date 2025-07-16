@@ -401,8 +401,9 @@ namespace Ink_Canvas.Helpers.Plugins
                         
                         LogHelper.WriteLogToFile($"插件状态变更: {plugin.Name} = {(isEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
                         
-                        // 触发自动保存
-                        TriggerAutoSave();
+                        // 立即同步保存配置（不再使用延迟自动保存）
+                        SaveConfig();
+                        LogHelper.WriteLogToFile($"插件 {plugin.Name} 状态已立即保存到配置文件", LogHelper.LogType.Info);
                     }
                 }
             }
