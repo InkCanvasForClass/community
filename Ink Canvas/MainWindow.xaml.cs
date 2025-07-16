@@ -22,6 +22,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Media.Animation;
 using System.Reflection;
+using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas {
@@ -179,6 +180,9 @@ namespace Ink_Canvas {
             //加载设置
             LoadSettings(true);
             
+            // 加载自定义背景颜色
+            LoadCustomBackgroundColor();
+            
             // 注册设置面板滚动事件
             if (SettingsPanelScrollViewer != null)
             {
@@ -206,6 +210,9 @@ namespace Ink_Canvas {
                 new SolidColorBrush(System.Windows.Media.Color.FromArgb(127, 24, 24, 27));
             BtnRightWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
 
+            // 应用颜色主题，这将考虑自定义背景色
+            CheckColorTheme(true);
+            
             BtnWhiteBoardSwitchPrevious.IsEnabled = CurrentWhiteboardIndex != 1;
             BorderInkReplayToolBox.Visibility = Visibility.Collapsed;
 
@@ -230,6 +237,30 @@ namespace Ink_Canvas {
                 
             // 注册系统关机事件处理
             RegisterShutdownHandler();
+            
+            // 设置默认为黑板模式
+            Settings.Canvas.UsingWhiteboard = false;
+            Settings.Canvas.CustomBackgroundColor = "#162924"; // 黑板默认颜色 RGB(22, 41, 36)
+            SaveSettingsToFile();
+            
+            // 如果当前不是黑板模式，则切换到黑板模式
+            if (currentMode == 0)
+            {
+                // 延迟执行，确保UI已完全加载
+                Dispatcher.BeginInvoke(new Action(() => {
+                    // 重新加载自定义背景颜色
+                    LoadCustomBackgroundColor();
+                    
+                    // 模拟点击切换按钮进入黑板模式
+                    if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
+                    {
+                        BtnSwitch_Click(BtnSwitch, null);
+                    }
+                    
+                    // 确保背景颜色正确设置为黑板颜色
+                    CheckColorTheme(true);
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {

@@ -66,7 +66,10 @@ namespace Ink_Canvas
         public int LineEndpointSnappingThreshold { get; set; } = 15; // 直线端点吸附的距离阈值（像素）
 
         [JsonProperty("usingWhiteboard")]
-        public bool UsingWhiteboard { get; set; }
+        public bool UsingWhiteboard { get; set; } = false;
+
+        [JsonProperty("customBackgroundColor")]
+        public string CustomBackgroundColor { get; set; } = "#162924";
 
         [JsonProperty("hyperbolaAsymptoteOption")]
         public OptionalOperation HyperbolaAsymptoteOption { get; set; } = OptionalOperation.Ask;

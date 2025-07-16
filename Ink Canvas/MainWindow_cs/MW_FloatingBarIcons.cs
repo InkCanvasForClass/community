@@ -281,6 +281,13 @@ namespace Ink_Canvas {
             AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
+            
+            // 隐藏背景设置面板
+            var bgPalette = LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") as Border;
+            if (bgPalette != null)
+            {
+                AnimationsHelper.HideWithSlideAndFade(bgPalette);
+            }
 
             if (BorderSettings.Visibility == Visibility.Visible) {
                 // 设置蒙版为不可点击，并移除背景
@@ -1850,11 +1857,22 @@ namespace Ink_Canvas {
 
                         if (Settings.Canvas.UsingWhiteboard)
                         {
-                            BtnColorBlack_Click(null, null);
+                            // 如果有自定义背景色并且是白板模式，应用自定义背景色
+                            if (CustomBackgroundColor.HasValue)
+                            {
+                                GridBackgroundCover.Background = new SolidColorBrush(CustomBackgroundColor.Value);
+                            }
+                            // 白板模式下设置墨迹颜色为黑色
+                            CheckLastColor(0);
+                            forceEraser = false;
+                            ColorSwitchCheck();
                         }
                         else
                         {
-                            BtnColorWhite_Click(null, null);
+                            // 黑板模式下设置墨迹颜色为白色
+                            CheckLastColor(5);
+                            forceEraser = false;
+                            ColorSwitchCheck();
                         }
 
                         StackPanelPPTButtons.Visibility = Visibility.Collapsed;
