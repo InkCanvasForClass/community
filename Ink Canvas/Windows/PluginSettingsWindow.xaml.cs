@@ -1,0 +1,487 @@
+using Ink_Canvas.Helpers.Plugins;
+using Ink_Canvas.Helpers.Plugins.BuiltIn;
+using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
+using Microsoft.Win32;
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using Ink_Canvas.Helpers;
+using System.Linq;
+
+namespace Ink_Canvas.Windows
+{
+    /// <summary>
+    /// PluginSettingsWindow.xaml 的交互逻辑
+    /// </summary>
+    public partial class PluginSettingsWindow : Window, INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+        
+        /// <summary>
+        /// 刷新插件列表
+        /// </summary>
+        public void RefreshPluginList()
+        {
+            LoadPlugins();
+            
+            // 如果当前选中的插件仍然存在，保持其选中状态
+            if (SelectedPlugin != null)
+            {
+                var matchingPlugin = Plugins.FirstOrDefault(p => p.Plugin.GetType().FullName == SelectedPlugin.GetType().FullName);
+                if (matchingPlugin != null)
+                {
+                    PluginListView.SelectedItem = matchingPlugin;
+                }
+            }
+            
+            OnPropertyChanged(nameof(SelectedPlugin));
+            LogHelper.WriteLogToFile("插件列表已刷新", LogHelper.LogType.Info);
+        }
+
+        private IPlugin _selectedPlugin;
+        
+        /// <summary>
+        /// 当前选中的插件
+        /// </summary>
+        public IPlugin SelectedPlugin
+        {
+            get => _selectedPlugin;
+            set
+            {
+                if (_selectedPlugin != value)
+                {
+                    _selectedPlugin = value;
+                    OnPropertyChanged(nameof(SelectedPlugin));
+                    OnPropertyChanged(nameof(Name));
+                    OnPropertyChanged(nameof(Version));
+                    OnPropertyChanged(nameof(Author));
+                    OnPropertyChanged(nameof(Description));
+                    OnPropertyChanged(nameof(IsEnabled));
+                    OnPropertyChanged(nameof(IsBuiltIn));
+                }
+            }
+        }
+
+        public string Name => SelectedPlugin?.Name ?? string.Empty;
+        public string Version => SelectedPlugin?.Version?.ToString() ?? string.Empty;
+        public string Author => SelectedPlugin?.Author ?? string.Empty;
+        public string Description => SelectedPlugin?.Description ?? string.Empty;
+        public bool IsEnabled => SelectedPlugin is PluginBase plugin && plugin.IsEnabled;
+        public bool IsBuiltIn => SelectedPlugin?.IsBuiltIn ?? false;
+
+        /// <summary>
+        /// 插件列表
+        /// </summary>
+        public ObservableCollection<PluginViewModel> Plugins { get; } = new ObservableCollection<PluginViewModel>();
+
+        public PluginSettingsWindow()
+        {
+            InitializeComponent();
+            
+            // 设置数据上下文
+            PluginDetailGrid.DataContext = this;
+            
+            // 加载插件列表
+            LoadPlugins();
+            
+            // 注册窗口关闭事件
+            this.Closing += PluginSettingsWindow_Closing;
+        }
+        
+        /// <summary>
+        /// 窗口关闭事件处理
+        /// </summary>
+        private void PluginSettingsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            try
+            {
+                // 保存插件配置
+                LogHelper.WriteLogToFile("插件管理窗口关闭，保存插件配置...", LogHelper.LogType.Info);
+                PluginManager.Instance.SaveConfig();
+                LogHelper.WriteLogToFile("插件配置已保存", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"关闭窗口时保存插件配置出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 加载插件列表
+        /// </summary>
+        private void LoadPlugins()
+        {
+            Plugins.Clear();
+            
+            // 添加所有已加载的插件
+            foreach (var plugin in PluginManager.Instance.Plugins)
+            {
+                bool isEnabled = false;
+                
+                // 从插件实例获取启用状态
+                if (plugin is PluginBase pluginBase)
+                {
+                    isEnabled = pluginBase.IsEnabled;
+                }
+                
+                // 创建视图模型并添加到集合
+                var viewModel = new PluginViewModel(plugin)
+                {
+                    IsEnabled = isEnabled
+                };
+                Plugins.Add(viewModel);
+                
+                LogHelper.WriteLogToFile($"已加载插件到UI列表: {plugin.Name}，状态: {(isEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
+            }
+            
+            // 绑定到ListView
+            PluginListView.ItemsSource = Plugins;
+            
+            // 如果有插件，选择第一个
+            if (Plugins.Count > 0)
+            {
+                PluginListView.SelectedIndex = 0;
+            }
+        }
+        
+        /// <summary>
+        /// 更新属性变更通知
+        /// </summary>
+        /// <param name="propertyName">属性名称</param>
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        
+        /// <summary>
+        /// 插件列表选择变更事件
+        /// </summary>
+        private void PluginListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (PluginListView.SelectedItem is PluginViewModel viewModel)
+            {
+                // 设置当前选中的插件
+                SelectedPlugin = viewModel.Plugin;
+                
+                // 加载插件设置界面
+                PluginSettingsContainer.Content = SelectedPlugin.GetSettingsView();
+                
+                // 设置删除按钮的可见性
+                BtnDeletePlugin.Visibility = !SelectedPlugin.IsBuiltIn ? Visibility.Visible : Visibility.Collapsed;
+            }
+            else
+            {
+                SelectedPlugin = null;
+                PluginSettingsContainer.Content = null;
+                BtnDeletePlugin.Visibility = Visibility.Collapsed;
+            }
+        }
+        
+        /// <summary>
+        /// 加载本地插件按钮点击事件
+        /// </summary>
+        private void BtnLoadPlugin_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 创建文件对话框
+                OpenFileDialog dialog = new OpenFileDialog
+                {
+                    Filter = "ICC插件文件(*.iccpp)|*.iccpp",
+                    Title = "选择要加载的插件文件"
+                };
+                
+                // 显示对话框
+                if (dialog.ShowDialog() == true)
+                {
+                    // 获取插件文件路径
+                    string pluginPath = dialog.FileName;
+                    
+                    // 检查是否在Plugins目录下
+                    string pluginsDirectory = Path.Combine(App.RootPath, "Plugins");
+                    string targetPath = Path.Combine(pluginsDirectory, Path.GetFileName(pluginPath));
+                    
+                    // 确保Plugins目录存在
+                    if (!Directory.Exists(pluginsDirectory))
+                    {
+                        Directory.CreateDirectory(pluginsDirectory);
+                    }
+                    
+                    // 如果插件不在Plugins目录下，复制过去
+                    if (!string.Equals(pluginPath, targetPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        File.Copy(pluginPath, targetPath, true);
+                        pluginPath = targetPath;
+                    }
+                    
+                    // 加载插件
+                    IPlugin plugin = PluginManager.Instance.LoadExternalPlugin(pluginPath);
+                    
+                    if (plugin != null)
+                    {
+                        // 刷新插件列表
+                        LoadPlugins();
+                        
+                        // 选择新加载的插件
+                        foreach (var item in Plugins)
+                        {
+                            if (item.Plugin == plugin)
+                            {
+                                PluginListView.SelectedItem = item;
+                                break;
+                            }
+                        }
+                        
+                        MessageBox.Show($"插件 {plugin.Name} v{plugin.Version} 已成功加载！", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show("插件加载失败，请检查文件是否有效。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"加载插件时发生错误：{ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 删除插件按钮点击事件
+        /// </summary>
+        private void BtnDeletePlugin_Click(object sender, RoutedEventArgs e)
+        {
+            if (SelectedPlugin == null) return;
+            
+            // 不能删除内置插件
+            if (SelectedPlugin.IsBuiltIn)
+            {
+                MessageBox.Show("内置插件无法删除。", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            
+            // 确认删除
+            MessageBoxResult result = MessageBox.Show(
+                $"确定要删除插件 {SelectedPlugin.Name} 吗？\n此操作将永久删除插件文件，无法恢复。", 
+                "删除确认", 
+                MessageBoxButton.YesNo, 
+                MessageBoxImage.Warning);
+            
+            if (result == MessageBoxResult.Yes)
+            {
+                // 删除插件
+                bool success = PluginManager.Instance.DeletePlugin(SelectedPlugin);
+                
+                if (success)
+                {
+                    // 刷新插件列表
+                    LoadPlugins();
+                    
+                    // 如果还有插件，选择第一个
+                    if (Plugins.Count > 0)
+                    {
+                        PluginListView.SelectedIndex = 0;
+                    }
+                    
+                    MessageBox.Show($"插件 {SelectedPlugin.Name} 已成功删除。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                else
+                {
+                    MessageBox.Show("删除插件失败，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+        
+        /// <summary>
+        /// 插件开关切换事件
+        /// </summary>
+        private void PluginToggleSwitch_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (sender is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch toggleSwitch && 
+                    toggleSwitch.Tag is IPlugin plugin)
+                {
+                    // 记录当前开关状态
+                    bool targetState = toggleSwitch.IsOn;
+                    
+                    // 记录插件类型名称和名称，用于稍后查找重载后的插件
+                    string pluginTypeName = plugin.GetType().FullName;
+                    string pluginName = plugin.Name;
+                    bool wasBuiltIn = plugin.IsBuiltIn;
+                    
+                    LogHelper.WriteLogToFile($"UI开关切换: {pluginName}, 目标状态: {(targetState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                    
+                    // 切换插件状态
+                    PluginManager.Instance.TogglePlugin(plugin, targetState);
+                    
+                    // 延迟一下再检查状态，确保变更已应用
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        try
+                        {
+                            // 查找最新的插件实例
+                            IPlugin currentPlugin = null;
+                            foreach (var p in PluginManager.Instance.Plugins)
+                            {
+                                if (p.GetType().FullName == pluginTypeName || p.Name == pluginName)
+                                {
+                                    currentPlugin = p;
+                                    break;
+                                }
+                            }
+                            
+                            if (currentPlugin == null)
+                            {
+                                LogHelper.WriteLogToFile($"无法找到插件: {pluginName}，UI状态可能不准确", LogHelper.LogType.Warning);
+                                return;
+                            }
+                            
+                            // 检查实际状态
+                            bool actualState = currentPlugin is PluginBase pb && pb.IsEnabled;
+                            LogHelper.WriteLogToFile($"插件 {pluginName} 实际状态: {(actualState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                            
+                            // 更新视图模型
+                            PluginViewModel viewModel = null;
+                            if (toggleSwitch.DataContext is PluginViewModel vm)
+                            {
+                                viewModel = vm;
+                            }
+                            else
+                            {
+                                viewModel = Plugins.FirstOrDefault(p => p.Plugin == currentPlugin);
+                            }
+                            
+                            if (viewModel != null)
+                            {
+                                // 确保视图模型状态与实际状态一致
+                                if (viewModel.IsEnabled != actualState)
+                                {
+                                    LogHelper.WriteLogToFile($"同步视图模型状态: {(actualState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                                    viewModel.IsEnabled = actualState;
+                                }
+                                
+                                // 确保UI开关状态与实际状态一致
+                                if (toggleSwitch.IsOn != actualState)
+                                {
+                                    LogHelper.WriteLogToFile($"同步UI开关状态: {(actualState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                                    toggleSwitch.IsOn = actualState;
+                                }
+                            }
+                            
+                            // 如果是当前选中的插件，更新属性
+                            if (currentPlugin == SelectedPlugin)
+                            {
+                                OnPropertyChanged(nameof(IsEnabled));
+                            }
+                            
+                            // 对于内置插件，特别处理
+                            if (wasBuiltIn)
+                            {
+                                // 特殊插件刷新逻辑，如果是超级启动台插件，立即刷新UI
+                                if (currentPlugin is Helpers.Plugins.BuiltIn.SuperLauncherPlugin && 
+                                    PluginSettingsContainer.Content is Helpers.Plugins.BuiltIn.SuperLauncher.LauncherSettingsControl)
+                                {
+                                    // 重新获取设置界面
+                                    PluginSettingsContainer.Content = currentPlugin.GetSettingsView();
+                                }
+                            }
+                            
+                            LogHelper.WriteLogToFile($"插件 {pluginName} UI状态同步完成", LogHelper.LogType.Info);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"同步UI状态时出错: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    }), System.Windows.Threading.DispatcherPriority.Background);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换插件状态时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"切换插件状态时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 关闭按钮点击事件
+        /// </summary>
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
+        {
+            // 直接关闭窗口，窗口关闭事件会处理配置保存
+            Close();
+        }
+    }
+    
+    /// <summary>
+    /// 插件视图模型
+    /// </summary>
+    public class PluginViewModel : INotifyPropertyChanged
+    {
+        public event PropertyChangedEventHandler PropertyChanged;
+        
+        /// <summary>
+        /// 插件实例
+        /// </summary>
+        public IPlugin Plugin { get; }
+        
+        /// <summary>
+        /// 插件名称
+        /// </summary>
+        public string Name => Plugin.Name;
+        
+        /// <summary>
+        /// 插件是否启用
+        /// </summary>
+        private bool _isEnabled;
+        public bool IsEnabled
+        {
+            get => _isEnabled;
+            set
+            {
+                if (_isEnabled != value)
+                {
+                    _isEnabled = value;
+                    OnPropertyChanged(nameof(IsEnabled));
+                }
+            }
+        }
+        
+        public PluginViewModel(IPlugin plugin)
+        {
+            Plugin = plugin;
+            
+            // 获取实际状态
+            _isEnabled = plugin is PluginBase pluginBase && pluginBase.IsEnabled;
+            
+            // 注册插件状态变更事件
+            if (plugin is PluginBase pb)
+            {
+                pb.EnabledStateChanged += Plugin_EnabledStateChanged;
+            }
+        }
+        
+        /// <summary>
+        /// 处理插件状态变更事件
+        /// </summary>
+        private void Plugin_EnabledStateChanged(object sender, bool isEnabled)
+        {
+            // 在UI线程上更新状态
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                IsEnabled = isEnabled;
+            }));
+        }
+        
+        /// <summary>
+        /// 属性变更通知
+        /// </summary>
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+} 

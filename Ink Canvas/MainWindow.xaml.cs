@@ -261,6 +261,9 @@ namespace Ink_Canvas {
                     CheckColorTheme(true);
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
+
+            // 初始化插件系统
+            InitializePluginSystem();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
@@ -811,6 +814,9 @@ namespace Ink_Canvas {
                 case "about":
                     targetGroupBox = FindGroupBoxByHeader(stackPanel, "关于");
                     break;
+                case "plugins":
+                    targetGroupBox = GroupBoxPlugins;
+                    break;
                 default:
                     // 默认滚动到顶部
                     SettingsPanelScrollViewer.ScrollToTop();
@@ -957,6 +963,9 @@ namespace Ink_Canvas {
                 case "about":
                     SetNavButtonTag("about");
                     break;
+                case "plugins":
+                    SetNavButtonTag("plugins");
+                    break;
             }
         }
         
@@ -1042,5 +1051,60 @@ namespace Ink_Canvas {
         }
 
         #endregion Navigation Sidebar Methods
+
+        // 添加插件系统初始化方法
+        private void InitializePluginSystem()
+        {
+            try
+            {
+                // 初始化插件管理器
+                Helpers.Plugins.PluginManager.Instance.Initialize();
+                LogHelper.WriteLogToFile("插件系统已初始化", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化插件系统时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 添加插件管理导航点击事件处理
+        private void NavPlugins_Click(object sender, RoutedEventArgs e)
+        {
+            ShowSettingsSection("plugins");
+        }
+
+        // 添加打开插件管理器按钮点击事件
+        private void BtnOpenPluginManager_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 暂时隐藏设置面板
+                BorderSettings.Visibility = Visibility.Hidden;
+                BorderSettingsMask.Visibility = Visibility.Hidden;
+                
+                // 创建并显示插件设置窗口
+                Windows.PluginSettingsWindow pluginSettingsWindow = new Windows.PluginSettingsWindow();
+                
+                // 设置窗口关闭事件，用于在插件管理窗口关闭后恢复设置面板
+                pluginSettingsWindow.Closed += (s, args) =>
+                {
+                    // 恢复设置面板显示
+                    BorderSettings.Visibility = Visibility.Visible;
+                    BorderSettingsMask.Visibility = Visibility.Visible;
+                };
+                
+                // 显示插件设置窗口
+                pluginSettingsWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                // 确保在发生错误时也恢复设置面板显示
+                BorderSettings.Visibility = Visibility.Visible;
+                BorderSettingsMask.Visibility = Visibility.Visible;
+                
+                LogHelper.WriteLogToFile($"打开插件管理器时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"打开插件管理器时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
     }
 }
