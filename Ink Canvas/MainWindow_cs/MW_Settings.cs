@@ -1356,6 +1356,12 @@ namespace Ink_Canvas {
                 ToggleSwitchAutoSaveScreenShotInPowerPoint.IsOn;
             SaveSettingsToFile();
         }
+        
+        private void ToggleSwitchSaveFullPageStrokes_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Automation.IsSaveFullPageStrokes = ToggleSwitchSaveFullPageStrokes.IsOn;
+            SaveSettingsToFile();
+        }
 
         #endregion
 
