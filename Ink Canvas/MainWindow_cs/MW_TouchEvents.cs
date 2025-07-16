@@ -26,8 +26,18 @@ namespace Ink_Canvas {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 inkCanvas.Children.Clear();
                 isInMultiTouchMode = false;
+                
+                // 退出多指书写模式后，恢复手掌擦功能
+                // 这里不需要特别操作，因为设置了isInMultiTouchMode = false后，
+                // 下次触发Main_Grid_TouchDown时会自动判断并启用手掌擦功能
             }
             else {
+                // 进入多指书写模式前，如果当前处于手掌擦状态，先关闭手掌擦
+                if (isLastTouchEraser) {
+                    isLastTouchEraser = false;
+                    currentPalmEraserShape = null;
+                }
+                
                 inkCanvas.StylusDown += MainWindow_StylusDown;
                 inkCanvas.StylusMove += MainWindow_StylusMove;
                 inkCanvas.StylusUp += MainWindow_StylusUp;
@@ -242,6 +252,13 @@ namespace Ink_Canvas {
             if (drawingShapeMode == 9 && isFirstTouchCuboid == false) MouseTouchMove(iniP);
             inkCanvas.Opacity = 1;
             
+            // 如果已处于多指书写模式，禁用手掌擦功能
+            if (isInMultiTouchMode) {
+                isLastTouchEraser = false;
+                currentPalmEraserShape = null;
+                return;
+            }
+            
             // 如果已经处于手掌擦状态，保持状态不变
             if (isLastTouchEraser && currentPalmEraserShape != null) {
                 inkCanvas.EraserShape = currentPalmEraserShape;
@@ -252,7 +269,16 @@ namespace Ink_Canvas {
             double boundsWidth = GetTouchBoundWidth(e), eraserMultiplier = 1.0;
             if (!Settings.Advanced.EraserBindTouchMultiplier && Settings.Advanced.IsSpecialScreen)
                 eraserMultiplier = 1 / Settings.Advanced.TouchMultiplier;
-            if (boundsWidth > BoundsWidth) {
+                
+            // 检查触控点数量，只有大于等于三个触控点时才激活手掌擦功能
+            if (dec.Count >= 3 && boundsWidth > BoundsWidth) {
+                // 保存当前的编辑模式，以便恢复
+                if (!isLastTouchEraser) {
+                    prePalmEraserEditingMode = inkCanvas.EditingMode;
+                    // 模拟点击橡皮选项卡
+                    EraserIcon_Click(null, null);
+                }
+                
                 isLastTouchEraser = true;
                 if (drawingShapeMode == 0 && forceEraser) return;
                 if (boundsWidth > BoundsWidth * 2.5) {
@@ -305,6 +331,9 @@ namespace Ink_Canvas {
         private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
         private bool isSingleFingerDragMode = false;
 
+        // 保存触发手掌擦前的编辑模式，用于手掌擦结束后恢复
+        private InkCanvasEditingMode prePalmEraserEditingMode = InkCanvasEditingMode.Ink;
+        
         private void inkCanvas_PreviewTouchDown(object sender, TouchEventArgs e) {
 
             inkCanvas.CaptureTouch(e.TouchDevice);
@@ -346,9 +375,25 @@ namespace Ink_Canvas {
             if (isLastTouchEraser && dec.Count == 0) {
                 isLastTouchEraser = false;
                 currentPalmEraserShape = null; // 清除保存的手掌擦形状
-                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && forcePointEraser) {
-                    // 重新应用当前设置的橡皮擦形状
-                    ApplyCurrentEraserShape();
+                
+                // 当手掌擦消失时，恢复到之前的编辑模式
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                    // 根据之前的编辑模式模拟点击相应的选项卡
+                    if (prePalmEraserEditingMode == InkCanvasEditingMode.Ink) {
+                        // 模拟点击批注选项卡
+                        PenIcon_Click(null, null);
+                    } else if (prePalmEraserEditingMode == InkCanvasEditingMode.None || 
+                               prePalmEraserEditingMode == InkCanvasEditingMode.Select) {
+                        // 模拟点击光标选项卡
+                        CursorIcon_Click(null, null);
+                    } else {
+                        // 其他编辑模式时恢复之前的模式
+                        inkCanvas.EditingMode = prePalmEraserEditingMode;
+                        if (forcePointEraser) {
+                            // 重新应用当前设置的橡皮擦形状
+                            ApplyCurrentEraserShape();
+                        }
+                    }
                 }
             }
             
