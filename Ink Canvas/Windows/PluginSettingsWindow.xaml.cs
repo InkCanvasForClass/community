@@ -120,6 +120,8 @@ namespace Ink_Canvas.Windows
         {
             Plugins.Clear();
             
+            LogHelper.WriteLogToFile($"开始加载插件列表到UI，插件总数: {PluginManager.Instance.Plugins.Count}", LogHelper.LogType.Info);
+            
             // 添加所有已加载的插件
             foreach (var plugin in PluginManager.Instance.Plugins)
             {
@@ -130,6 +132,10 @@ namespace Ink_Canvas.Windows
                 {
                     isEnabled = pluginBase.IsEnabled;
                 }
+                
+                // 记录插件详细信息
+                LogHelper.WriteLogToFile($"正在加载插件到UI: 类型={plugin.GetType().FullName}, 名称={plugin.Name ?? "未命名"}, 状态={isEnabled}", 
+                    LogHelper.LogType.Info);
                 
                 // 创建视图模型并添加到集合
                 var viewModel = new PluginViewModel(plugin)
@@ -142,12 +148,18 @@ namespace Ink_Canvas.Windows
             }
             
             // 绑定到ListView
+            LogHelper.WriteLogToFile($"绑定 {Plugins.Count} 个插件到ListView", LogHelper.LogType.Info);
             PluginListView.ItemsSource = Plugins;
             
             // 如果有插件，选择第一个
             if (Plugins.Count > 0)
             {
+                LogHelper.WriteLogToFile($"选择第一个插件: {Plugins[0].Name}", LogHelper.LogType.Info);
                 PluginListView.SelectedIndex = 0;
+            }
+            else
+            {
+                LogHelper.WriteLogToFile("没有找到任何插件", LogHelper.LogType.Warning);
             }
         }
         
@@ -624,7 +636,15 @@ namespace Ink_Canvas.Windows
         /// <summary>
         /// 插件名称
         /// </summary>
-        public string Name => Plugin.Name;
+        public string Name 
+        { 
+            get 
+            {
+                string name = Plugin?.Name ?? "未命名插件";
+                LogHelper.WriteLogToFile($"获取插件名称: {name}，类型: {Plugin?.GetType().FullName ?? "未知"}", LogHelper.LogType.Info);
+                return name;
+            }
+        }
         
         /// <summary>
         /// 插件是否启用
@@ -649,6 +669,9 @@ namespace Ink_Canvas.Windows
             
             // 获取实际状态
             _isEnabled = plugin is PluginBase pluginBase && pluginBase.IsEnabled;
+            
+            // 记录日志
+            LogHelper.WriteLogToFile($"创建插件视图模型: {plugin?.GetType().FullName ?? "未知"}, 名称: {plugin?.Name ?? "未命名"}", LogHelper.LogType.Info);
             
             // 注册插件状态变更事件
             if (plugin is PluginBase pb)

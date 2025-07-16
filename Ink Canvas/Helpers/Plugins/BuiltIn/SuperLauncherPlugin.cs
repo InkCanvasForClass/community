@@ -272,7 +272,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                     new LauncherItem
                     {
                         Name = "资源管理器",
-                        Path = "explorer.exe",
+                        Path = @"C:\Windows\explorer.exe",
                         IsVisible = true,
                         Position = 0
                     }

@@ -75,6 +75,23 @@ namespace Ink_Canvas.Helpers.Plugins
         public virtual void Initialize()
         {
             Id = GetType().FullName;
+            
+            // 添加日志，记录插件名称
+            try
+            {
+                string name = Name;
+                LogHelper.WriteLogToFile($"初始化插件: ID={Id}, 名称={name ?? "未命名"}", LogHelper.LogType.Info);
+                
+                if (string.IsNullOrEmpty(name))
+                {
+                    LogHelper.WriteLogToFile($"警告: 插件 {Id} 的名称为空", LogHelper.LogType.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取插件名称时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+            
             LogHelper.WriteLogToFile($"插件 {Name} 已初始化", LogHelper.LogType.Info);
         }
 

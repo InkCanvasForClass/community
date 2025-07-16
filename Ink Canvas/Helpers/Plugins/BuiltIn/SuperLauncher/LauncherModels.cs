@@ -163,6 +163,32 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 // 对于资源管理器，使用特定图标
                 if (Path.EndsWith("explorer.exe", StringComparison.OrdinalIgnoreCase))
                 {
+                    try
+                    {
+                        // 直接从C:\Windows\explorer.exe获取图标
+                        string explorerPath = @"C:\Windows\explorer.exe";
+                        if (File.Exists(explorerPath))
+                        {
+                            Icon icon = System.Drawing.Icon.ExtractAssociatedIcon(explorerPath);
+                            if (icon != null)
+                            {
+                                _iconCache = Imaging.CreateBitmapSourceFromHIcon(
+                                    icon.Handle,
+                                    Int32Rect.Empty,
+                                    BitmapSizeOptions.FromEmptyOptions());
+                                
+                                icon.Dispose();
+                                return _iconCache;
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"获取资源管理器图标时出错: {ex.Message}", LogHelper.LogType.Warning);
+                        // 如果获取Windows图标失败，回退到默认图标
+                    }
+                    
+                    // 回退到备用图标
                     string explorerIconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Icons-Fluent", "ic_fluent_folder_24_regular.png");
                     if (File.Exists(explorerIconPath))
                     {

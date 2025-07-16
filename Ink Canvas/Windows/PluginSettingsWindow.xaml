@@ -65,7 +65,8 @@
                                         <ColumnDefinition Width="*"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Text="{Binding Name}" Grid.Column="0" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Name}" Grid.Column="0" VerticalAlignment="Center" 
+                                              Foreground="Black" FontWeight="Normal" FontSize="14"/>
                                     <ui:ToggleSwitch Grid.Column="1" IsOn="{Binding IsEnabled}" 
                                                     Toggled="PluginToggleSwitch_Toggled" 
                                                     Tag="{Binding}" MinWidth="40"/>
@@ -141,11 +142,11 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0">
                     <Button x:Name="BtnLoadPlugin" Content="加载本地插件" Click="BtnLoadPlugin_Click"
                             Padding="15,5" Background="{DynamicResource SystemAccentColor}" Foreground="White"/>
-                    <Button x:Name="BtnExportPlugin" Content="导出插件" Click="BtnExportPlugin_Click"
-                            Padding="15,5" Margin="10,0,0,0" Background="{DynamicResource SystemAccentColor}" Foreground="White"/>
                     <Button x:Name="BtnSaveConfig" Content="保存状态" Click="BtnSaveConfig_Click"
                             Padding="15,5" Margin="10,0,0,0" Background="{DynamicResource SystemAccentColor}" Foreground="White"
                             ToolTip="手动保存当前所有插件的启用/禁用状态到配置文件"/>
+                    <Button x:Name="BtnExportPlugin" Content="导出插件" Click="BtnExportPlugin_Click"
+                            Padding="15,5" Margin="10,0,0,0" Background="{DynamicResource SystemAccentColor}" Foreground="White"/>
                 </StackPanel>
             </Grid>
         </Border>
