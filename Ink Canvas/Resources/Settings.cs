@@ -418,6 +418,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isEnableAvoidFullScreenHelper")]
         public bool IsEnableAvoidFullScreenHelper { get; set; } = false;
+        
+        [JsonProperty("isAutoBackupBeforeUpdate")]
+        public bool IsAutoBackupBeforeUpdate { get; set; } = true;
     }
 
     public class InkToShape

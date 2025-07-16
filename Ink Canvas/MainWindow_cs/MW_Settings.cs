@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Interop;
 using Hardcodet.Wpf.TaskbarNotification;
 using OSVersionExtension;
+using Microsoft.Win32;
+using System.IO;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -1812,6 +1814,100 @@ namespace Ink_Canvas {
             if (!isLoaded) return;
             Settings.Advanced.IsSecondConfirmWhenShutdownApp = ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn;
             SaveSettingsToFile();
+        }
+        
+        private void ToggleSwitchIsAutoBackupBeforeUpdate_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Advanced.IsAutoBackupBeforeUpdate = ToggleSwitchIsAutoBackupBeforeUpdate.IsOn;
+            SaveSettingsToFile();
+        }
+        
+        private void BtnManualBackup_Click(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            try {
+                // 确保Backups目录存在
+                string backupDir = Path.Combine(App.RootPath, "Backups");
+                if (!Directory.Exists(backupDir)) {
+                    Directory.CreateDirectory(backupDir);
+                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}", LogHelper.LogType.Info);
+                }
+                
+                // 创建备份文件名（使用当前日期时间）
+                string backupFileName = $"Settings_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+                string backupPath = Path.Combine(backupDir, backupFileName);
+                
+                // 序列化当前设置并保存到备份文件
+                string settingsJson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                File.WriteAllText(backupPath, settingsJson);
+                
+                LogHelper.WriteLogToFile($"成功创建设置备份: {backupPath}", LogHelper.LogType.Info);
+                MessageBox.Show($"设置已成功备份到:\n{backupPath}", "备份成功", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex) {
+                LogHelper.WriteLogToFile($"创建设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"创建备份失败: {ex.Message}", "备份失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        private void BtnRestoreBackup_Click(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            try {
+                // 确保Backups目录存在
+                string backupDir = Path.Combine(App.RootPath, "Backups");
+                if (!Directory.Exists(backupDir)) {
+                    Directory.CreateDirectory(backupDir);
+                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}", LogHelper.LogType.Info);
+                    MessageBox.Show("没有找到备份文件，请先创建备份", "还原失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                
+                // 打开文件选择对话框
+                OpenFileDialog dlg = new OpenFileDialog();
+                dlg.InitialDirectory = backupDir;
+                dlg.Filter = "设置备份文件|Settings_Backup_*.json|所有JSON文件|*.json";
+                dlg.Title = "选择要还原的备份文件";
+                
+                if (dlg.ShowDialog() == true) {
+                    // 读取备份文件
+                    string backupJson = File.ReadAllText(dlg.FileName);
+                    
+                    // 反序列化备份数据
+                    Settings backupSettings = JsonConvert.DeserializeObject<Settings>(backupJson);
+                    
+                    if (backupSettings != null) {
+                        // 确认是否要还原
+                        if (MessageBox.Show("确定要还原选择的备份文件吗？当前设置将被覆盖。", "确认还原", 
+                                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes) {
+                            
+                            // 备份当前设置，以防出错
+                            string currentSettingsJson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                            string tempBackupPath = Path.Combine(backupDir, $"Settings_Before_Restore_{DateTime.Now:yyyyMMdd_HHmmss}.json");
+                            File.WriteAllText(tempBackupPath, currentSettingsJson);
+                            
+                            // 还原设置
+                            Settings = backupSettings;
+                            
+                            // 保存还原后的设置到文件
+                            SaveSettingsToFile();
+                            
+                            // 重新加载设置到UI
+                            LoadSettings();
+                            
+                            LogHelper.WriteLogToFile($"成功从备份还原设置: {dlg.FileName}", LogHelper.LogType.Info);
+                            MessageBox.Show("设置已成功还原，部分设置可能需要重启软件后生效。", "还原成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                    else {
+                        MessageBox.Show("无法解析备份文件，文件可能已损坏", "还原失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex) {
+                LogHelper.WriteLogToFile($"还原设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"还原备份失败: {ex.Message}", "还原失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         #endregion

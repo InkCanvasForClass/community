@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.IO.Compression;
 using System.Text;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers
 {
@@ -417,6 +418,40 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                // 在更新前备份设置文件
+                try
+                {
+                    // 检查是否开启了自动备份
+                    if (MainWindow.Settings.Advanced.IsAutoBackupBeforeUpdate)
+                    {
+                        // 确保Backups目录存在
+                        string backupDir = Path.Combine(App.RootPath, "Backups");
+                        if (!Directory.Exists(backupDir))
+                        {
+                            Directory.CreateDirectory(backupDir);
+                            LogHelper.WriteLogToFile($"创建备份目录: {backupDir}", LogHelper.LogType.Info);
+                        }
+                        
+                        // 创建备份文件名（使用当前日期时间和版本号）
+                        string backupFileName = $"Settings_BeforeUpdate_v{version}_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+                        string backupPath = Path.Combine(backupDir, backupFileName);
+                        
+                        // 序列化当前设置并保存到备份文件
+                        string settingsJson = Newtonsoft.Json.JsonConvert.SerializeObject(MainWindow.Settings, Newtonsoft.Json.Formatting.Indented);
+                        File.WriteAllText(backupPath, settingsJson);
+                        
+                        LogHelper.WriteLogToFile($"更新前自动备份设置成功: {backupPath}", LogHelper.LogType.Info);
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("更新前自动备份功能已禁用，跳过备份", LogHelper.LogType.Info);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"更新前自动备份设置时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+                
                 string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
                 LogHelper.WriteLogToFile($"AutoUpdate | Checking for ZIP file: {zipFilePath}");
 
