@@ -1,0 +1,91 @@
+<Window x:Class="Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher.LauncherWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher"
+        mc:Ignorable="d"
+        Title="启动台" 
+        Width="400" 
+        Height="300" 
+        WindowStyle="None" 
+        AllowsTransparency="True" 
+        Background="#80000000"
+        ResizeMode="NoResize"
+        Topmost="True"
+        Deactivated="Window_Deactivated"
+        ShowInTaskbar="False">
+    
+    <Window.Resources>
+        <!-- 应用项样式 -->
+        <Style x:Key="LauncherItemStyle" TargetType="Button">
+            <Setter Property="Width" Value="80"/>
+            <Setter Property="Height" Value="80"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="Background" Value="#40FFFFFF"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="8">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                <Image Grid.Row="0" Source="{Binding Icon}" Width="32" Height="32" Margin="0,10,0,5"/>
+                                <TextBlock Grid.Row="1" Text="{Binding Name}" TextWrapping="Wrap" TextAlignment="Center" 
+                                           Margin="2,0,2,8" FontSize="11" Foreground="White"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#80FFFFFF"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="#C0FFFFFF"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+    
+    <Border CornerRadius="15" Background="#80000000" BorderThickness="1" BorderBrush="#40FFFFFF">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            
+            <!-- 标题栏 -->
+            <Grid Grid.Row="0" Height="40">
+                <TextBlock Text="启动台" Foreground="White" FontSize="18" FontWeight="Bold" 
+                           VerticalAlignment="Center" Margin="15,0,0,0"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,0,10,0">
+                    <Button x:Name="BtnFixMode" Click="BtnFixMode_Click" Width="30" Height="30" 
+                            Margin="5,0" Background="Transparent" BorderThickness="0" 
+                            ToolTip="切换固定模式">
+                        <Path x:Name="FixModeIcon" Data="M7,2V13H10V22L17,10H13L17,2H7Z" Fill="White" Stretch="Uniform" Width="16" Height="16"/>
+                    </Button>
+                    <Button x:Name="BtnClose" Click="BtnClose_Click" Width="30" Height="30" 
+                            Background="Transparent" BorderThickness="0" 
+                            ToolTip="关闭">
+                        <Path Data="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z" 
+                              Fill="White" Stretch="Uniform" Width="16" Height="16"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+            
+            <!-- 应用网格 -->
+            <ScrollViewer Grid.Row="1" Margin="10" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <WrapPanel x:Name="AppPanel" Orientation="Horizontal" HorizontalAlignment="Center"/>
+            </ScrollViewer>
+        </Grid>
+    </Border>
+</Window> 

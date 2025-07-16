@@ -21,6 +21,40 @@ namespace Ink_Canvas {
             BorderBtnHelp.Visibility = settings.RandSettings.DisplayRandWindowNamesInputBtn == false ? Visibility.Collapsed : Visibility.Visible;
             RandMaxPeopleOneTime = settings.RandSettings.RandWindowOnceMaxStudents;
             RandDoneAutoCloseWaitTime = (int)settings.RandSettings.RandWindowOnceCloseLatency*1000;
+            
+            // 加载背景
+            LoadBackground(settings);
+        }
+        
+        private void LoadBackground(Settings settings)
+        {
+            try
+            {
+                int selectedIndex = settings.RandSettings.SelectedBackgroundIndex;
+                if (selectedIndex <= 0)
+                {
+                    // 默认背景（无背景）
+                    BackgroundImage.ImageSource = null;
+                    MainBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(240, 243, 249));
+                }
+                else if (selectedIndex <= settings.RandSettings.CustomPickNameBackgrounds.Count)
+                {
+                    // 自定义背景
+                    var customBackground = settings.RandSettings.CustomPickNameBackgrounds[selectedIndex - 1];
+                    if (File.Exists(customBackground.FilePath))
+                    {
+                        var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                        bitmap.BeginInit();
+                        bitmap.UriSource = new Uri(customBackground.FilePath);
+                        bitmap.EndInit();
+                        BackgroundImage.ImageSource = bitmap;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"加载点名背景出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         public RandWindow(Settings settings, bool IsAutoClose) {
@@ -31,6 +65,9 @@ namespace Ink_Canvas {
             BorderBtnHelp.Visibility = settings.RandSettings.DisplayRandWindowNamesInputBtn == false ? Visibility.Collapsed : Visibility.Visible;
             RandMaxPeopleOneTime = settings.RandSettings.RandWindowOnceMaxStudents;
             RandDoneAutoCloseWaitTime = (int)settings.RandSettings.RandWindowOnceCloseLatency * 1000;
+            
+            // 加载背景
+            LoadBackground(settings);
 
             new Thread(new ThreadStart(() => {
                 Thread.Sleep(100);

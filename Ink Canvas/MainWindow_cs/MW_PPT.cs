@@ -1226,5 +1226,90 @@ namespace Ink_Canvas {
         private void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e) {
             BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }
+
+        // 添加关机事件注册方法
+        private void RegisterShutdownHandler()
+        {
+            try
+            {
+                SystemEvents.SessionEnding += SystemEvents_SessionEnding;
+                LogHelper.WriteLogToFile("已注册系统关机事件处理", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"注册系统关机事件处理失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 系统关机事件处理
+        private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
+        {
+            LogHelper.WriteLogToFile("检测到系统关机事件，正在清理PowerPoint进程", LogHelper.LogType.Info);
+            
+            // 终止PowerPoint进程守护
+            try
+            {
+                // 停止计时器以终止进程守护
+                timerCheckPPT.Stop();
+                
+                // 清理COM对象
+                ResetPresentationObjects();
+                
+                // 强制结束所有PowerPoint进程
+                foreach (var process in Process.GetProcessesByName("POWERPNT"))
+                {
+                    try
+                    {
+                        process.Kill();
+                        LogHelper.WriteLogToFile($"已终止PowerPoint进程: {process.Id}", LogHelper.LogType.Info);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"终止PowerPoint进程失败: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                }
+                
+                // 强制结束所有WPS进程
+                foreach (var processName in GetPossibleWPSProcessNames())
+                {
+                    foreach (var process in Process.GetProcessesByName(processName))
+                    {
+                        try
+                        {
+                            process.Kill();
+                            LogHelper.WriteLogToFile($"已终止WPS进程: {process.ProcessName}({process.Id})", LogHelper.LogType.Info);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"终止WPS进程失败: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    }
+                }
+                
+                // 强制GC回收
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"系统关机清理过程中出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        // 在主窗口初始化方法中添加以下调用
+        // 在适当的初始化方法中调用 RegisterShutdownHandler();
+        
+        // 在主窗口关闭时取消注册关机事件
+        protected override void OnClosed(EventArgs e)
+        {
+            try
+            {
+                // 取消注册系统关机事件
+                SystemEvents.SessionEnding -= SystemEvents_SessionEnding;
+            }
+            catch { }
+            
+            base.OnClosed(e);
+        }
     }
 }

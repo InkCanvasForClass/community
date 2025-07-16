@@ -70,14 +70,24 @@ namespace Ink_Canvas {
             if (changeColorTheme)
                 if (currentMode != 0) {
                     if (Settings.Canvas.UsingWhiteboard) {
-                        GridBackgroundCover.Background = new SolidColorBrush(Color.FromRgb(234, 235, 237));
+                        // 检查是否有自定义背景色，如果有则使用自定义背景色
+                        if (CustomBackgroundColor.HasValue) {
+                            GridBackgroundCover.Background = new SolidColorBrush(CustomBackgroundColor.Value);
+                        } else {
+                            GridBackgroundCover.Background = new SolidColorBrush(Color.FromRgb(234, 235, 237));
+                        }
                         WaterMarkTime.Foreground = new SolidColorBrush(Color.FromRgb(22, 41, 36));
                         WaterMarkDate.Foreground = new SolidColorBrush(Color.FromRgb(22, 41, 36));
                         BlackBoardWaterMark.Foreground = new SolidColorBrush(Color.FromRgb(22, 41, 36));
                         isUselightThemeColor = false;
                     }
                     else {
-                        GridBackgroundCover.Background = new SolidColorBrush(Color.FromRgb(22, 41, 36));
+                        // 黑板模式下，检查是否有自定义背景色
+                        if (CustomBackgroundColor.HasValue) {
+                            GridBackgroundCover.Background = new SolidColorBrush(CustomBackgroundColor.Value);
+                        } else {
+                            GridBackgroundCover.Background = new SolidColorBrush(Color.FromRgb(22, 41, 36));
+                        }
                         WaterMarkTime.Foreground = new SolidColorBrush(Color.FromRgb(234, 235, 237));
                         WaterMarkDate.Foreground = new SolidColorBrush(Color.FromRgb(234, 235, 237));
                         BlackBoardWaterMark.Foreground = new SolidColorBrush(Color.FromRgb(234, 235, 237));

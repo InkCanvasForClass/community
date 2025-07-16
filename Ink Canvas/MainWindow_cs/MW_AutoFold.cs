@@ -218,6 +218,13 @@ namespace Ink_Canvas {
             await Task.Delay(0);
 
             await Dispatcher.InvokeAsync(() => {
+                // 根据设置决定是否自动切换至批注模式
+                if (Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode && currentMode == 0)
+                {
+                    // 切换至批注模式
+                    PenIcon_Click(null, null);
+                }
+                
                 if (StackPanelPPTControls.Visibility == Visibility.Visible)
                 {
                     var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();

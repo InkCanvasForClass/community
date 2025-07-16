@@ -113,6 +113,9 @@
                               <DataTrigger Binding="{Binding Tag}" Value="about">
                                   <Setter Property="Background" Value="#3b82f6"/>
                               </DataTrigger>
+                              <DataTrigger Binding="{Binding Tag}" Value="plugins">
+                                  <Setter Property="Background" Value="#3b82f6"/>
+                              </DataTrigger>
                           </ControlTemplate.Triggers>
                       </ControlTemplate>
                   </Setter.Value>
@@ -197,6 +200,11 @@
                             <!-- 主要导航按钮 -->
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel>
+                                    <!-- Plugins -->
+                                    <Button Width="40" Height="40" Margin="0,5,0,0" Style="{StaticResource NavButton}"
+                                            Click="NavPlugins_Click" Tag="plugins" ToolTip="插件">
+                                        <TextBlock Text="&#xE735;" FontFamily="Segoe MDL2 Assets" FontSize="18"/>
+                                    </Button>
                                     <!-- Startup -->
                                     <Button Width="40" Height="40" Margin="0,10,0,0" Style="{StaticResource NavButton}" 
                                             Click="NavStartup_Click" Tag="startup" ToolTip="启动设置">
@@ -572,80 +580,21 @@
                                     </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                             </Border>
-                            <Border Margin="0,0,0,10" Height="100" CornerRadius="5" BorderBrush="#a1a1aa"
-                                    BorderThickness="1">
-                                <ui:SimpleStackPanel VerticalAlignment="Center">
-                                    <TextBlock Foreground="#fafafa" HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" FontSize="15" Margin="0,0,0,10"
-                                               Text="开发中...请不要点击，可能会导致ICC异常崩溃" />
-                                    <ui:SimpleStackPanel Spacing="5">
-                                        <ui:SimpleStackPanel Spacing="5" Orientation="Horizontal"
-                                                             HorizontalAlignment="Center">
-                                            <Button Width="116" Height="45" FontFamily="Microsoft YaHei UI"
-                                                    Click="BtnRestart_Click">
-                                                <Button.Resources>
-                                                </Button.Resources>
-                                                <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                     VerticalAlignment="Center"
-                                                                     HorizontalAlignment="Center" Spacing="0">
-                                                    <Image RenderOptions.BitmapScalingMode="HighQuality"
-                                                           Margin="0,0,6,0" Height="20" Width="20">
-                                                        <Image.Source>
-                                                            <DrawingImage>
-                                                                <DrawingImage.Drawing>
-                                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                        <GeometryDrawing Brush="White"
-                                                                            Geometry="F1 M24,24z M0,0z M6.34315,6.34315C7.84299,4.8433 9.87707,4.0005 11.9981,4 14.2527,4.00897 16.4167,4.88785 18.039,6.45324L18.5858,7 16,7C15.4477,7 15,7.44772 15,8 15,8.55228 15.4477,9 16,9L21,9C21.1356,9 21.2649,8.97301 21.3828,8.92412 21.5007,8.87532 21.6112,8.80298 21.7071,8.70711 21.8902,8.52405 21.9874,8.28768 21.9989,8.04797 21.9996,8.03199 22,8.016 22,8L22,3C22,2.44772 21.5523,2 21,2 20.4477,2 20,2.44772 20,3L20,5.58579 19.4471,5.03289 19.435,5.02103C17.4405,3.09289,14.7779,2.01044,12.0038,2L12,2C9.34784,2 6.8043,3.05357 4.92893,4.92893 3.05357,6.8043 2,9.34784 2,12 2,12.5523 2.44772,13 3,13 3.55228,13 4,12.5523 4,12 4,9.87827 4.84285,7.84344 6.34315,6.34315z" />
-                                                                        <GeometryDrawing Brush="White"
-                                                                            Geometry="F1 M24,24z M0,0z M22,12C22,14.6522 20.9464,17.1957 19.0711,19.0711 17.1957,20.9464 14.6522,22 12,22L11.9962,22C9.22213,21.9896,6.55946,20.9071,4.56496,18.979L4.55289,18.9671 4,18.4142 4,21C4,21.5523 3.55228,22 3,22 2.44772,22 2,21.5523 2,21L2,16.0002C2,15.8646 2.02699,15.7351 2.07588,15.6172 2.12432,15.5001 2.19595,15.3904 2.29078,15.295 2.29219,15.2936 2.2936,15.2922 2.29502,15.2908 2.48924,15.0977 2.74301,15.0008 2.997,15 2.998,15 2.999,15 3,15L8,15C8.55228,15 9,15.4477 9,16 9,16.5523 8.55228,17 8,17L5.41421,17 5.96095,17.5467C7.5833,19.1122 9.74736,19.9911 12.002,20 14.123,19.9995 16.157,19.1567 17.6569,17.6569 19.1571,16.1566 20,14.1217 20,12 20,11.4477 20.4477,11 21,11 21.5523,11 22,11.4477 22,12z" />
-                                                                    </DrawingGroup>
-                                                                </DrawingImage.Drawing>
-                                                            </DrawingImage>
-                                                        </Image.Source>
-                                                    </Image>
-                                                    <Label FontSize="16" Foreground="#fafafa"
-                                                           VerticalAlignment="Center" FontFamily="Microsoft YaHei UI"
-                                                           FontWeight="Bold">
-                                                        测试
-                                                    </Label>
-                                                </ui:SimpleStackPanel>
-                                            </Button>
-                                            <Button Width="116" Height="45" FontFamily="Microsoft YaHei UI"
-                                                    Click="BtnResetToSuggestion_Click"
-                                                    Margin="0,0,0,0">
-                                                <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                     VerticalAlignment="Center"
-                                                                     HorizontalAlignment="Center" Spacing="0">
-                                                    <Image
-                                                        Margin="0,0,4,0" RenderOptions.BitmapScalingMode="HighQuality"
-                                                        Height="20" Width="20">
-                                                        <Image.Source>
-                                                            <DrawingImage>
-                                                                <DrawingImage.Drawing>
-                                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                        <GeometryDrawing Brush="White"
-                                                                            Geometry="F1 M24,24z M0,0z M2,6C2,5.44772,2.44772,5,3,5L21,5C21.5523,5 22,5.44772 22,6 22,6.55228 21.5523,7 21,7L3,7C2.44772,7,2,6.55228,2,6z" />
-                                                                        <GeometryDrawing Brush="White"
-                                                                            Geometry="F1 M24,24z M0,0z M2,12C2,11.4477,2.44772,11,3,11L7,11C7.55228,11 8,11.4477 8,12 8,12.5523 7.55228,13 7,13L3,13C2.44772,13,2,12.5523,2,12z" />
-                                                                        <GeometryDrawing Brush="White"
-                                                                            Geometry="F1 M24,24z M0,0z M3,17C2.44772,17 2,17.4477 2,18 2,18.5523 2.44772,19 3,19L7,19C7.55228,19 8,18.5523 8,18 8,17.4477 7.55228,17 7,17L3,17z" />
-                                                                        <GeometryDrawing Brush="White"
-                                                                            Geometry="F1 M24,24z M0,0z M12.3829,11.2029C13.4335,10.1522 14.8952,9.5 16.5,9.5 17.9587,9.5 19.3576,10.0795 20.3891,11.1109 21.4205,12.1424 22,13.5413 22,15 22,16.2593 21.6038,17.4867 20.8675,18.5083 20.1311,19.5299 19.092,20.2939 17.8974,20.6921 16.7027,21.0903 15.413,21.1026 14.211,20.7271 13.009,20.3516 11.9556,19.6074 11.2,18.6 10.8686,18.1582 10.9582,17.5314 11.4,17.2 11.8418,16.8686 12.4686,16.9582 12.8,17.4 13.3037,18.0716 14.006,18.5677 14.8073,18.8181 15.6087,19.0684 16.4685,19.0602 17.2649,18.7947 18.0614,18.5292 18.7541,18.0199 19.245,17.3388 19.7359,16.6578 20,15.8395 20,15 20,14.0717 19.6313,13.1815 18.9749,12.5251 18.3185,11.8687 17.4283,11.5 16.5,11.5 15.4448,11.5 14.4865,11.9278 13.7971,12.6171L13.4142,13 15,13C15.5523,13 16,13.4477 16,14 16,14.5523 15.5523,15 15,15L11.0007,15C10.9997,15 10.998,15 10.997,15 10.8625,14.9996 10.7343,14.9727 10.6172,14.9241 10.5001,14.8757 10.3904,14.804 10.295,14.7092 10.2936,14.7078 10.2922,14.7064 10.2908,14.705 10.196,14.6096 10.1243,14.4999 10.0759,14.3828 10.027,14.2649 10,14.1356 10,14L10,10C10,9.44772 10.4477,9 11,9 11.5523,9 12,9.44772 12,10L12,11.5858 12.3829,11.2029z" />
-                                                                    </DrawingGroup>
-                                                                </DrawingImage.Drawing>
-                                                            </DrawingImage>
-                                                        </Image.Source>
-                                                    </Image>
-                                                    <Label Margin="2,0,0,0" FontSize="16" VerticalAlignment="Center"
-                                                           FontFamily="Microsoft YaHei UI">
-                                                        测试
-                                                    </Label>
-                                                </ui:SimpleStackPanel>
-                                            </Button>
-                                        </ui:SimpleStackPanel>
-                                    </ui:SimpleStackPanel>
+                            <GroupBox Name="GroupBoxPlugins">
+                                <GroupBox.Header>
+                                    <TextBlock Margin="0,12,0,0" Text="插件管理" FontWeight="Bold" Foreground="#fafafa"
+                                               FontSize="26" />
+                                </GroupBox.Header>
+                                <ui:SimpleStackPanel Spacing="6" Margin="0,10,0,0">
+                                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" Foreground="#fafafa">
+                                        通过插件扩展InkCanvas的功能。您可以启用或禁用插件，或加载自定义插件。
+                                    </TextBlock>
+                                    <Button x:Name="BtnOpenPluginManager" Content="打开插件管理器" 
+                                            HorizontalAlignment="Left" Click="BtnOpenPluginManager_Click" 
+                                            Padding="15,5" Margin="0,10,0,0"/>
                                 </ui:SimpleStackPanel>
-                            </Border>
+                            </GroupBox>
+                            
                             <GroupBox>
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="启动" FontWeight="Bold" Foreground="#fafafa"
@@ -1022,6 +971,15 @@
                                             <ComboBoxItem Content="酷安绿帽Doge" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="贴吧滑稽" FontFamily="Microsoft YaHei UI" />
                                         </ComboBox>
+                                    </ui:SimpleStackPanel>
+                                                      
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,6,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="自定义浮动栏图标" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Button Name="ButtonAddCustomIcon" Content="上传" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonAddCustomIcon_Click" Padding="10,3"/>
+                                        <Button Name="ButtonManageCustomIcons" Content="管理" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonManageCustomIcons_Click" Padding="10,3" Margin="5,0,0,0"/>
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="浮动工具栏缩放" VerticalAlignment="Center"
@@ -2326,6 +2284,17 @@
                                                          FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="墨迹全页面保存" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchSaveFullPageStrokes" IsOn="False"
+                                                         FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchSaveFullPageStrokes_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后自动保存和手动保存墨迹时将以全屏模式保存而非单独保存每条墨迹" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                           StrokeThickness="1" Margin="0,4,0,4" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -2399,6 +2368,23 @@
                                         <TextBlock Foreground="#fafafa" Text="天" VerticalAlignment="Center"
                                                    FontSize="14" Margin="8,0,0,0" />
                                     </ui:SimpleStackPanel>
+                                    
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
+                                          StrokeThickness="1" Margin="0,8,0,8" />
+                                    
+                                    <TextBlock Margin="0,0,0,8" Text="收纳模式" FontWeight="Bold" Foreground="#fafafa"
+                                               FontSize="20" />
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="退出收纳模式时自动切换至批注模式"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <TextBlock Text="# 开启后，退出收纳模式时将自动切换至批注模式，便于快速批注" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <GroupBox Name="GroupBoxRandWindow">
@@ -2406,7 +2392,7 @@
                                     <TextBlock Margin="0,12,0,0" Text="随机点名" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
                                 </GroupBox.Header>
-                                <ui:SimpleStackPanel Spacing="6">
+                                <ui:SimpleStackPanel Spacing="12">
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="显示修改随机点名名单的按钮"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
@@ -2415,6 +2401,29 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI"
                                                          FontWeight="Bold"
                                                          Toggled="ToggleSwitchDisplayRandWindowNamesInputBtn_OnToggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <TextBlock Foreground="#fafafa" Text="点名窗口背景设置" 
+                                               FontSize="16" FontWeight="Bold" Margin="0,10,0,5" />
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="背景选择：" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxPickNameBackground" FontFamily="Microsoft YaHei UI"
+                                                  SelectedIndex="0" Width="180"
+                                                  SelectionChanged="ComboBoxPickNameBackground_SelectionChanged">
+                                            <ComboBoxItem Content="默认背景" FontFamily="Microsoft YaHei UI" />
+                                            <!-- 自定义背景会在代码中动态添加 -->
+                                        </ComboBox>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="自定义背景：" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Button Name="ButtonAddCustomBackground" Content="上传" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonAddCustomBackground_Click" Padding="10,3"/>
+                                        <Button Name="ButtonManageBackgrounds" Content="管理" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonManageBackgrounds_Click" Padding="10,3" Margin="5,0,0,0"/>
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="启用随机抽和单次抽按钮"
@@ -6986,6 +6995,9 @@
                                     </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                                 <Grid Width="0">
+                                    <Grid x:Name="BackgroundPaletteGrid" Margin="-203,-128,83,37">
+                                        <!-- 背景面板将在代码中动态添加 -->
+                                    </Grid>
                                     <Border Visibility="Visible" ClipToBounds="True" Name="EraserSizePanel"
                                             Margin="-203,-128,83,37" CornerRadius="5" Background="#fafafa" Opacity="1"
                                             BorderBrush="#2563eb" BorderThickness="1">

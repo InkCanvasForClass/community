@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.IO;
+using System.Collections.Generic;
 
 namespace Ink_Canvas
 {
@@ -65,7 +66,10 @@ namespace Ink_Canvas
         public int LineEndpointSnappingThreshold { get; set; } = 15; // 直线端点吸附的距离阈值（像素）
 
         [JsonProperty("usingWhiteboard")]
-        public bool UsingWhiteboard { get; set; }
+        public bool UsingWhiteboard { get; set; } = false;
+
+        [JsonProperty("customBackgroundColor")]
+        public string CustomBackgroundColor { get; set; } = "#162924";
 
         [JsonProperty("hyperbolaAsymptoteOption")]
         public OptionalOperation HyperbolaAsymptoteOption { get; set; } = OptionalOperation.Ask;
@@ -139,6 +143,8 @@ namespace Ink_Canvas
         public double ViewboxFloatingBarScaleTransformValue { get; set; } = 1.0;
         [JsonProperty("floatingBarImg")] 
         public int FloatingBarImg { get; set; } = 0;
+        [JsonProperty("customFloatingBarImgs")]
+        public List<CustomFloatingBarIcon> CustomFloatingBarImgs { get; set; } = new List<CustomFloatingBarIcon>();
         [JsonProperty("viewboxFloatingBarOpacityValue")]
         public double ViewboxFloatingBarOpacityValue { get; set; } = 1.0;
         [JsonProperty("enableTrayIcon")]
@@ -250,6 +256,9 @@ namespace Ink_Canvas
             || IsAutoFoldInYiYunVisualPresenter
             || IsAutoFoldInMaxHubWhiteboard;
 
+        [JsonProperty("isAutoEnterAnnotationModeWhenExitFoldMode")]
+        public bool IsAutoEnterAnnotationModeWhenExitFoldMode { get; set; } = false;
+
         [JsonProperty("isAutoFoldInEasiNote")]
         public bool IsAutoFoldInEasiNote { get; set; } = false;
 
@@ -355,6 +364,9 @@ namespace Ink_Canvas
 
         [JsonProperty("autoDelSavedFilesDaysThreshold")]
         public int AutoDelSavedFilesDaysThreshold = 15;
+        
+        [JsonProperty("isSaveFullPageStrokes")]
+        public bool IsSaveFullPageStrokes = false;
     }
 
     public class Advanced
@@ -437,5 +449,45 @@ namespace Ink_Canvas
         public bool ShowRandomAndSingleDraw { get; set; } = true;
         [JsonProperty("directCallCiRand")]
         public bool DirectCallCiRand { get; set; } = false;
+        [JsonProperty("selectedBackgroundIndex")]
+        public int SelectedBackgroundIndex { get; set; } = 0;
+        [JsonProperty("customPickNameBackgrounds")]
+        public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
+    }
+    
+    public class CustomPickNameBackground
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        
+        [JsonProperty("filePath")]
+        public string FilePath { get; set; }
+        
+        public CustomPickNameBackground(string name, string filePath)
+        {
+            Name = name;
+            FilePath = filePath;
+        }
+        
+        // 用于JSON序列化
+        public CustomPickNameBackground() { }
+    }
+    
+    public class CustomFloatingBarIcon
+    {
+        [JsonProperty("name")]
+        public string Name { get; set; }
+        
+        [JsonProperty("filePath")]
+        public string FilePath { get; set; }
+        
+        public CustomFloatingBarIcon(string name, string filePath)
+        {
+            Name = name;
+            FilePath = filePath;
+        }
+        
+        // 用于JSON序列化
+        public CustomFloatingBarIcon() { }
     }
 }
