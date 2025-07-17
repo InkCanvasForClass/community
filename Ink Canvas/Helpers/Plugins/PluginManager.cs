@@ -195,8 +195,12 @@ namespace Ink_Canvas.Helpers.Plugins
                     return;
                 }
                 
-                // 获取所有插件文件
-                var pluginFiles = Directory.GetFiles(PluginsDirectory, "*.iccpp", SearchOption.TopDirectoryOnly);
+                // 获取所有插件文件（支持 .iccpp 和 .dll 格式）
+                var pluginFiles = Directory.GetFiles(PluginsDirectory, "*.iccpp", SearchOption.TopDirectoryOnly)
+                    .Concat(Directory.GetFiles(PluginsDirectory, "*.dll", SearchOption.TopDirectoryOnly))
+                    .ToArray();
+                
+                LogHelper.WriteLogToFile($"发现 {pluginFiles.Length} 个外部插件文件", LogHelper.LogType.Info);
                 
                 foreach (var pluginFile in pluginFiles)
                 {
@@ -221,6 +225,14 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 计算文件哈希
                 string fileHash = CalculateFileHash(pluginPath);
                 _pluginHashes[pluginPath] = fileHash;
+                
+                // 检查文件扩展名
+                string extension = Path.GetExtension(pluginPath).ToLowerInvariant();
+                if (extension == ".iccpp")
+                {
+                    // 创建 ICCPP 插件适配器
+                    return CreateICCPPPluginAdapter(pluginPath);
+                }
                 
                 // 加载插件程序集
                 Assembly pluginAssembly = LoadPluginAssembly(pluginPath);
@@ -253,16 +265,48 @@ namespace Ink_Canvas.Helpers.Plugins
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"实例化插件 {pluginType.Name} 时出错: {ex.Message}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"实例化插件类型 {pluginType.Name} 时出错: {ex.Message}", LogHelper.LogType.Error);
                     }
                 }
+                
+                LogHelper.WriteLogToFile($"在程序集 {Path.GetFileName(pluginPath)} 中未找到有效的插件类型", LogHelper.LogType.Warning);
+                return null;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"加载插件 {Path.GetFileName(pluginPath)} 时出错: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"加载外部插件 {Path.GetFileName(pluginPath)} 时出错: {ex.Message}", LogHelper.LogType.Error);
+                return null;
             }
-            
-            return null;
+        }
+        
+        /// <summary>
+        /// 创建 ICCPP 插件适配器
+        /// </summary>
+        /// <param name="pluginPath">插件文件路径</param>
+        /// <returns>适配的插件实例</returns>
+        private IPlugin CreateICCPPPluginAdapter(string pluginPath)
+        {
+            try
+            {
+                // 读取插件文件内容
+                byte[] pluginData = File.ReadAllBytes(pluginPath);
+                
+                // 创建适配器插件实例
+                var pluginAdapter = new ICCPPPluginAdapter(pluginPath, pluginData);
+                
+                // 添加到插件列表
+                Plugins.Add(pluginAdapter);
+                
+                LogHelper.WriteLogToFile($"已创建 ICCPP 插件适配器: {pluginAdapter.Name} 来自 {Path.GetFileName(pluginPath)}", 
+                    LogHelper.LogType.Info);
+                
+                return pluginAdapter;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"创建 ICCPP 插件适配器时出错: {ex.Message}", LogHelper.LogType.Error);
+                return null;
+            }
         }
         
         /// <summary>
@@ -280,7 +324,7 @@ namespace Ink_Canvas.Helpers.Plugins
                     return loadedAssembly;
                 }
                 
-                // 加载程序集
+                // 直接加载程序集
                 Assembly pluginAssembly = Assembly.LoadFrom(pluginPath);
                 _loadedAssemblies[pluginPath] = pluginAssembly;
                 
@@ -483,117 +527,63 @@ namespace Ink_Canvas.Helpers.Plugins
         {
             try
             {
-                LogHelper.WriteLogToFile($"开始重载插件: {plugin.Name}", LogHelper.LogType.Info);
-                
-                // 记录插件状态和信息
-                bool wasEnabled = plugin.IsEnabled;
                 string pluginPath = plugin.PluginPath;
-                string pluginTypeName = plugin.GetType().FullName;
-                
-                // 记录日志，方便排查问题
-                LogHelper.WriteLogToFile($"重载前插件状态 - 类型: {pluginTypeName}, 状态: {(wasEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
-                
-                // 如果配置中有该插件的状态，记录配置中的状态
-                if (PluginStates.TryGetValue(pluginTypeName, out bool currentConfigState))
+                if (string.IsNullOrEmpty(pluginPath) || !File.Exists(pluginPath))
                 {
-                    LogHelper.WriteLogToFile($"配置中插件状态: {(currentConfigState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"无法重新加载插件 {plugin.Name}: 插件文件不存在", LogHelper.LogType.Error);
+                    return;
                 }
                 
-                // 卸载插件，但不从PluginStates中移除状态信息
-                UnloadPlugin(plugin);
+                LogHelper.WriteLogToFile($"开始热重载插件: {plugin.Name} ({Path.GetFileName(pluginPath)})", LogHelper.LogType.Info);
                 
-                // 清除程序集缓存，确保加载最新版本
-                _loadedAssemblies.Remove(pluginPath);
+                // 保存插件的当前状态
+                bool wasEnabled = plugin.IsEnabled;
+                string pluginTypeName = plugin.GetType().FullName;
+                
+                // 卸载插件
+                UnloadPlugin(plugin, false);
+                
+                // 从加载缓存中移除
+                if (_loadedAssemblies.ContainsKey(pluginPath))
+                {
+                    _loadedAssemblies.Remove(pluginPath);
+                }
+                
+                // 计算新的文件哈希
+                string newHash = CalculateFileHash(pluginPath);
+                _pluginHashes[pluginPath] = newHash;
                 
                 // 重新加载插件
                 IPlugin newPlugin = LoadExternalPlugin(pluginPath);
                 
                 if (newPlugin != null)
                 {
-                    // 更新配置中的插件状态
-                    string newPluginTypeName = newPlugin.GetType().FullName;
+                    // 恢复插件状态
+                    if (wasEnabled)
+                    {
+                        newPlugin.Enable();
+                    }
                     
-                    // 如果插件类型名称变化，需要更新配置
-                    if (newPluginTypeName != pluginTypeName && PluginStates.ContainsKey(pluginTypeName))
+                    // 更新配置（如果类型名称变化）
+                    string newPluginTypeName = newPlugin.GetType().FullName;
+                    if (pluginTypeName != newPluginTypeName && PluginStates.ContainsKey(pluginTypeName))
                     {
                         bool state = PluginStates[pluginTypeName];
                         PluginStates.Remove(pluginTypeName);
                         PluginStates[newPluginTypeName] = state;
-                        LogHelper.WriteLogToFile($"插件类型名称已变更: {pluginTypeName} -> {newPluginTypeName}, 已更新配置", LogHelper.LogType.Info);
+                        _configDirty = true;
+                        SaveConfig();
                     }
                     
-                    // 应用正确的状态
-                    bool shouldBeEnabled = false;
-                    if (PluginStates.TryGetValue(newPluginTypeName, out bool storedConfigState))
-                    {
-                        shouldBeEnabled = storedConfigState;
-                        LogHelper.WriteLogToFile($"从配置获取插件状态: {(shouldBeEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
-                    }
-                    else
-                    {
-                        shouldBeEnabled = wasEnabled;
-                        PluginStates[newPluginTypeName] = shouldBeEnabled;
-                        LogHelper.WriteLogToFile($"使用之前的状态: {(shouldBeEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
-                    }
+                    LogHelper.WriteLogToFile($"插件 {newPlugin.Name} v{newPlugin.Version} 热重载成功", LogHelper.LogType.Info);
                     
-                    // 获取重载后的实际状态
-                    bool currentState = newPlugin is PluginBase pluginBaseState && pluginBaseState.IsEnabled;
-                    LogHelper.WriteLogToFile($"重载后实际状态: {(currentState ? "启用" : "禁用")}", LogHelper.LogType.Info);
-                    
-                    // 根据应该启用的状态启用或禁用插件
-                    if (shouldBeEnabled != currentState)
-                    {
-                        if (shouldBeEnabled)
-                        {
-                            newPlugin.Enable();
-                            LogHelper.WriteLogToFile($"插件 {newPlugin.Name} 已重载并启用", LogHelper.LogType.Info);
-                        }
-                        else
-                        {
-                            newPlugin.Disable();
-                            LogHelper.WriteLogToFile($"插件 {newPlugin.Name} 已重载并禁用", LogHelper.LogType.Info);
-                        }
-                        
-                        // 检查状态是否正确应用
-                        currentState = newPlugin is PluginBase reloadedBase && reloadedBase.IsEnabled;
-                        LogHelper.WriteLogToFile($"应用状态后实际状态: {(currentState ? "启用" : "禁用")}", LogHelper.LogType.Info);
-                        
-                        if (currentState != shouldBeEnabled)
-                        {
-                            LogHelper.WriteLogToFile($"警告: 插件状态应用失败，目标状态: {(shouldBeEnabled ? "启用" : "禁用")}, 实际状态: {(currentState ? "启用" : "禁用")}", LogHelper.LogType.Warning);
-                        }
-                    }
-                    else
-                    {
-                        LogHelper.WriteLogToFile($"插件 {newPlugin.Name} 已重载并保持{(shouldBeEnabled ? "启用" : "禁用")}状态", LogHelper.LogType.Info);
-                    }
-                    
-                    // 保存插件设置
-                    if (newPlugin is PluginBase pluginBaseInstance)
-                    {
-                        try
-                        {
-                            // 保存插件设置（与启用状态无关）
-                            pluginBaseInstance.SavePluginSettings();
-                            LogHelper.WriteLogToFile($"已保存插件 {newPlugin.Name} 设置", LogHelper.LogType.Info);
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"保存插件 {newPlugin.Name} 设置时出错: {ex.Message}", LogHelper.LogType.Error);
-                        }
-                    }
-                    
-                    // 立即保存配置
-                    LogHelper.WriteLogToFile($"重载后保存插件配置...", LogHelper.LogType.Info);
-                    SaveConfig();
+                    // 通知UI刷新
+                    NotifyUIRefresh();
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile($"插件 {plugin.Name} 重载失败: 无法加载新插件", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"插件 {plugin.Name} 热重载失败", LogHelper.LogType.Error);
                 }
-                
-                // 更新UI
-                NotifyUIRefresh();
             }
             catch (Exception ex)
             {
@@ -605,11 +595,14 @@ namespace Ink_Canvas.Helpers.Plugins
         /// 卸载插件
         /// </summary>
         /// <param name="plugin">要卸载的插件</param>
-        /// <param name="removeFromConfig">是否从配置中移除插件状态（默认为false）</param>
+        /// <param name="removeFromConfig">是否从配置中移除</param>
         public void UnloadPlugin(IPlugin plugin, bool removeFromConfig = false)
         {
             try
             {
+                // 保存插件名称，以便在卸载后使用
+                string pluginName = plugin.Name;
+                
                 // 如果插件已启用，先禁用它
                 if (plugin is PluginBase pluginBase && pluginBase.IsEnabled)
                 {
@@ -633,11 +626,11 @@ namespace Ink_Canvas.Helpers.Plugins
                     }
                 }
                 
-                LogHelper.WriteLogToFile($"已卸载插件: {plugin.Name}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"已卸载插件: {pluginName}", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"卸载插件 {plugin.Name} 时出错: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"卸载插件时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
         
@@ -655,6 +648,9 @@ namespace Ink_Canvas.Helpers.Plugins
                 {
                     return false;
                 }
+                
+                // 保存插件名称，以便在删除后使用
+                string pluginName = plugin.Name;
                 
                 // 获取插件路径
                 string pluginPath = null;
@@ -681,12 +677,12 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 保存配置
                 SaveConfig();
                 
-                LogHelper.WriteLogToFile($"已删除插件: {plugin.Name}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"已删除插件: {pluginName}", LogHelper.LogType.Info);
                 return true;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"删除插件 {plugin.Name} 时出错: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"删除插件时出错: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
         }
