@@ -316,6 +316,16 @@ namespace Ink_Canvas {
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 
+            // 新增：几何绘制模式下，触摸抬手时自动落笔
+            if (drawingShapeMode != 0) {
+                var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+                {
+                    RoutedEvent = UIElement.MouseLeftButtonUpEvent,
+                    Source = inkCanvas
+                };
+                inkCanvas_MouseUp(inkCanvas, mouseArgs);
+            }
+
             //手势完成后切回之前的状态
             if (dec.Count > 1)
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
