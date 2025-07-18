@@ -688,29 +688,13 @@ namespace Ink_Canvas {
             }
         }
 
-        private void BoardEraserIcon_Click(object sender, RoutedEventArgs e) {
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint ||
-                inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke) {
-                if (BoardEraserSizePanel.Visibility == Visibility.Collapsed) {
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardEraserSizePanel);
-                } else {
-                    AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
-                }
-            } else {
-                forceEraser = true;
-                forcePointEraser = true;
-                
-                // 使用统一的方法应用橡皮擦形状，确保一致性
-                ApplyCurrentEraserShape();
-                
-                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-                drawingShapeMode = 0;
-
-                inkCanvas_EditingModeChanged(inkCanvas, null);
-                CancelSingleFingerDragMode();
-
-                HideSubPanels("eraser");
-            }
+        private void BoardLassoIcon_Click(object sender, RoutedEventArgs e) {
+            forceEraser = false;
+            forcePointEraser = false;
+            isLastTouchEraser = false;
+            drawingShapeMode = 0;
+            inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+            SetCursorBasedOnEditingMode(inkCanvas);
         }
 
         private void BoardEraserIconByStrokes_Click(object sender, RoutedEventArgs e) {

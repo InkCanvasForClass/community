@@ -1440,82 +1440,49 @@ namespace Ink_Canvas {
         }
 
         private void EraserIcon_Click(object sender, RoutedEventArgs e) {
-
-            if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
-                ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == Eraser_Icon && lastBorderMouseDownObject != Eraser_Icon) return;
-
-            FloatingbarSelectionBG.Visibility = Visibility.Visible;
-            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 84);
-
-            forceEraser = true;
+            bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
+            forceEraser = false;
             forcePointEraser = true;
-            
-            // 即使手掌触发过面积擦，也强制应用当前的EraserShapeType设置
+            isLastTouchEraser = false;
+            drawingShapeMode = 0;
+            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
             ApplyCurrentEraserShape();
-
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+            SetCursorBasedOnEditingMode(inkCanvas);
+            HideSubPanels("eraser"); // 高亮橡皮按钮
+            if (isAlreadyEraser) {
+                // 已是橡皮状态，再次点击才弹出/收起面板
                 if (EraserSizePanel.Visibility == Visibility.Collapsed) {
-                    AnimationsHelper.HideWithSlideAndFade(BorderTools);
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
-                    AnimationsHelper.HideWithSlideAndFade(PenPalette);
-                    AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
-                    AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
-                    AnimationsHelper.HideWithSlideAndFade(BorderTools);
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(EraserSizePanel);
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardEraserSizePanel);
+                    if (BoardEraserSizePanel != null)
+                        AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardEraserSizePanel);
                 } else {
                     AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
-                    AnimationsHelper.HideWithSlideAndFade(BorderTools);
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
-                    AnimationsHelper.HideWithSlideAndFade(PenPalette);
-                    AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
-                    AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
-                    AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
-                    AnimationsHelper.HideWithSlideAndFade(BorderTools);
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
-                    AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
-                    AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                    if (BoardEraserSizePanel != null)
+                        AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
                 }
             }
-            else {
-                HideSubPanels("eraser");
-            }
-
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-            drawingShapeMode = 0;
-
-            inkCanvas_EditingModeChanged(inkCanvas, null);
-            CancelSingleFingerDragMode();
         }
-        
-        // 新增方法，根据当前设置应用橡皮擦形状
-        public void ApplyCurrentEraserShape() {
-            double k = 1;
-            switch (Settings.Canvas.EraserSize) {
-                case 0:
-                    k = Settings.Canvas.EraserShapeType == 0 ? 0.5 : 0.7;
-                    break;
-                case 1:
-                    k = Settings.Canvas.EraserShapeType == 0 ? 0.8 : 0.9;
-                    break;
-                case 3:
-                    k = Settings.Canvas.EraserShapeType == 0 ? 1.25 : 1.2;
-                    break;
-                case 4:
-                    k = Settings.Canvas.EraserShapeType == 0 ? 1.5 : 1.3;
-                    break;
-            }
 
-            if (Settings.Canvas.EraserShapeType == 0) {
-                // 圆形擦
-                inkCanvas.EraserShape = new EllipseStylusShape(k * 90, k * 90);
-            } else if (Settings.Canvas.EraserShapeType == 1) {
-                // 矩形黑板擦
-                inkCanvas.EraserShape = new RectangleStylusShape(k * 90 * 0.6, k * 90);
+        private void BoardEraserIcon_Click(object sender, RoutedEventArgs e) {
+            bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
+            forceEraser = false;
+            forcePointEraser = true;
+            isLastTouchEraser = false;
+            drawingShapeMode = 0;
+            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            ApplyCurrentEraserShape();
+            SetCursorBasedOnEditingMode(inkCanvas);
+            HideSubPanels("eraser"); // 高亮橡皮按钮
+            if (isAlreadyEraser) {
+                // 已是橡皮状态，再次点击才弹出/收起面板
+                if (BoardEraserSizePanel != null && BoardEraserSizePanel.Visibility == Visibility.Collapsed) {
+                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardEraserSizePanel);
+                    AnimationsHelper.ShowWithSlideFromBottomAndFade(EraserSizePanel);
+                } else {
+                    if (BoardEraserSizePanel != null)
+                        AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
+                    AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
+                }
             }
         }
 

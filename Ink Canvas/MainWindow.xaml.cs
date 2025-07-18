@@ -109,8 +109,6 @@ namespace Ink_Canvas {
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
             inkCanvas.StylusDown += inkCanvas_StylusDown;
-            inkCanvas.TouchDown += inkCanvas_TouchDown;
-            inkCanvas.TouchUp += inkCanvas_TouchUp;
         }
 
         #endregion
@@ -182,6 +180,7 @@ namespace Ink_Canvas {
         public static Settings Settings = new Settings();
         public static string settingsFileName = "Settings.json";
         private bool isLoaded = false;
+        private bool forcePointEraser = false;
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             loadPenCanvas();
@@ -565,7 +564,7 @@ namespace Ink_Canvas {
         }
 
         // 添加一个辅助方法，根据当前编辑模式设置光标
-        private void SetCursorBasedOnEditingMode(InkCanvas canvas)
+        public void SetCursorBasedOnEditingMode(InkCanvas canvas)
         {
             if (Settings.Canvas.IsShowCursor) {
                 canvas.UseCustomCursor = true;
@@ -619,26 +618,7 @@ namespace Ink_Canvas {
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 
-        // 触摸输入，不隐藏光标
-        private void inkCanvas_TouchDown(object sender, TouchEventArgs e)
-        {
-            // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(inkCanvas);
-        }
-
         // 触摸结束，恢复光标
-        private void inkCanvas_TouchUp(object sender, TouchEventArgs e)
-        {
-            // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(inkCanvas);
-            
-            // 确保光标可见
-            if (Settings.Canvas.IsShowCursor) {
-                inkCanvas.ForceCursor = true;
-                inkCanvas.UseCustomCursor = true;
-                System.Windows.Forms.Cursor.Show();
-            }
-        }
 
         #endregion Definations and Loading
 
@@ -1112,6 +1092,35 @@ namespace Ink_Canvas {
                 
                 LogHelper.WriteLogToFile($"打开插件管理器时出错: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show($"打开插件管理器时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        // 在MainWindow类中添加：
+        private void ApplyCurrentEraserShape()
+        {
+            double k = 1;
+            switch (Settings.Canvas.EraserSize)
+            {
+                case 0:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 0.5 : 0.7;
+                    break;
+                case 1:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 0.8 : 0.9;
+                    break;
+                case 3:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 1.25 : 1.2;
+                    break;
+                case 4:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 1.5 : 1.3;
+                    break;
+            }
+            if (Settings.Canvas.EraserShapeType == 0)
+            {
+                inkCanvas.EraserShape = new EllipseStylusShape(k * 90, k * 90);
+            }
+            else if (Settings.Canvas.EraserShapeType == 1)
+            {
+                inkCanvas.EraserShape = new RectangleStylusShape(k * 90 * 0.6, k * 90);
             }
         }
     }

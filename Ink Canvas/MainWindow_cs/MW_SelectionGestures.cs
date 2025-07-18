@@ -422,5 +422,24 @@ namespace Ink_Canvas {
                 StrokesSelectionClone = new StrokeCollection();
             }
         }
+
+        private void LassoSelect_Click(object sender, RoutedEventArgs e) {
+            forceEraser = false;
+            forcePointEraser = false;
+            isLastTouchEraser = false;
+            drawingShapeMode = 0;
+            inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+            SetCursorBasedOnEditingMode(inkCanvas);
+        }
+
+        private void BtnLassoSelect_Click(object sender, RoutedEventArgs e) {
+            forceEraser = false;
+            forcePointEraser = false;
+            isLastTouchEraser = false;
+            drawingShapeMode = 0;
+            inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+            inkCanvas.IsManipulationEnabled = true;
+            SetCursorBasedOnEditingMode(inkCanvas);
+        }
     }
 }

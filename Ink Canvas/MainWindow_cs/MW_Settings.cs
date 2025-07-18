@@ -869,12 +869,16 @@ namespace Ink_Canvas {
         private void ComboBoxEraserSize_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (!isLoaded) return;
             Settings.Canvas.EraserSize = ComboBoxEraserSize.SelectedIndex;
+            ApplyCurrentEraserShape();
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            }
             SaveSettingsToFile();
         }
 
         private void ComboBoxEraserSizeFloatingBar_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (!isLoaded) return;
-
             ComboBox s = (ComboBox)sender;
             Settings.Canvas.EraserSize = s.SelectedIndex;
             if (s == ComboBoxEraserSizeFloatingBar) {
@@ -884,17 +888,11 @@ namespace Ink_Canvas {
                 ComboBoxEraserSizeFloatingBar.SelectedIndex = s.SelectedIndex;
                 ComboBoxEraserSize.SelectedIndex = s.SelectedIndex;
             }
-            
-            // 使用统一的方法应用橡皮擦形状
             ApplyCurrentEraserShape();
-            
-            // 确保当前处于橡皮擦模式时能立即看到效果
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
-                // 先切换一下模式，再切回来，确保橡皮擦形状得到刷新
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
             }
-            
             SaveSettingsToFile();
         }
 
