@@ -103,10 +103,18 @@ namespace Ink_Canvas {
         }
 
         private void BtnPen_Click(object sender, RoutedEventArgs e) {
+            // 如果当前已是批注模式，再次点击弹出批注子面板
+            if (penType == 0 && inkCanvas.EditingMode == InkCanvasEditingMode.Ink && !drawingAttributes.IsHighlighter) {
+                return;
+            }
+            // 否则只切换到批注模式，不弹出子面板
             forceEraser = false;
             forcePointEraser = false;
             isLastTouchEraser = false;
             drawingShapeMode = 0;
+            penType = 0;
+            drawingAttributes.IsHighlighter = false;
+            drawingAttributes.StylusTip = StylusTip.Ellipse;
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             SetCursorBasedOnEditingMode(inkCanvas);
         }
