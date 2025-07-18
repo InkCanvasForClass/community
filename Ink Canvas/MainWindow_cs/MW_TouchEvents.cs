@@ -292,6 +292,11 @@ namespace Ink_Canvas {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
                 centerPoint = touchPoint.Position;
 
+                // 新增：几何绘制模式下，记录初始点
+                if (drawingShapeMode != 0) {
+                    iniP = touchPoint.Position;
+                }
+
                 //记录第一根手指点击时的 StrokeCollection
                 lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
             }
