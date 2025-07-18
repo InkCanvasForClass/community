@@ -194,7 +194,7 @@ namespace Ink_Canvas {
                     var pptProcesses = Process.GetProcessesByName("POWERPNT");
                     
                     // 根据设置和进程状态决定模式
-                    isWPSMode = isWPSSupportOn && wpsRunning;
+                    isWPSMode = isWPSSupportOn;
                     
                     LogHelper.WriteLogToFile($"初始化模式: {(isWPSMode ? "WPS" : "PowerPoint")}", LogHelper.LogType.Info);
 
@@ -489,6 +489,18 @@ namespace Ink_Canvas {
             }
             catch (Exception ex) {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            }
+            // ========== 新增：WPS进程清理调用 ==========
+            if (isWPSMode && pptApplication != null)
+            {
+                try
+                {
+                    if (pptApplication.Presentations.Count == 0)
+                    {
+                        TryCloseExtraWpsProcesses();
+                    }
+                }
+                catch { }
             }
         }
 
@@ -872,6 +884,18 @@ namespace Ink_Canvas {
                 await Application.Current.Dispatcher.InvokeAsync(() => {
                     ViewboxFloatingBarMarginAnimation(100, true);
                 });
+            // ========== 新增：WPS进程清理调用 ==========
+            if (isWPSMode && pptApplication != null)
+            {
+                try
+                {
+                    if (pptApplication.Presentations.Count == 0)
+                    {
+                        TryCloseExtraWpsProcesses();
+                    }
+                }
+                catch { }
+            }
             }
             catch (Exception ex) {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
@@ -1310,6 +1334,68 @@ namespace Ink_Canvas {
             catch { }
             
             base.OnClosed(e);
+        }
+
+        // ========== 新增：安全关闭多余WPS进程的方法 ==========
+        /// <summary>
+        /// 检查并安全关闭多余的WPS进程（仅当所有WPS都未打开PPT时）
+        /// </summary>
+        private void TryCloseExtraWpsProcesses()
+        {
+            try
+            {
+                // 检查所有WPS进程是否都没有打开PPT
+                bool allWpsNoPpt = true;
+                foreach (var processName in GetPossibleWPSProcessNames())
+                {
+                    foreach (var process in Process.GetProcessesByName(processName))
+                    {
+                        try
+                        {
+                            dynamic wpsApp = null;
+                            try
+                            {
+                                wpsApp = Marshal.GetActiveObject(processName + ".Application");
+                            }
+                            catch { }
+                            if (wpsApp != null)
+                            {
+                                if (wpsApp.Presentations.Count > 0)
+                                {
+                                    allWpsNoPpt = false;
+                                    break;
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                    if (!allWpsNoPpt) break;
+                }
+
+                if (allWpsNoPpt)
+                {
+                    // 所有WPS都没有打开PPT，可以安全关闭
+                    foreach (var processName in GetPossibleWPSProcessNames())
+                    {
+                        foreach (var process in Process.GetProcessesByName(processName))
+                        {
+                            try
+                            {
+                                process.Kill();
+                                LogHelper.WriteLogToFile($"已终止WPS进程: {process.ProcessName}({process.Id})", LogHelper.LogType.Info);
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"终止WPS进程失败: {ex.Message}", LogHelper.LogType.Error);
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"WPS进程清理异常: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
     }
 }
