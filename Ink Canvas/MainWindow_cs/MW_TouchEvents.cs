@@ -479,5 +479,43 @@ namespace Ink_Canvas {
                 }
             }
         }
+
+        // 退出多指书写模式，恢复InkCanvas的TouchDown事件绑定
+        private void ExitMultiTouchModeIfNeeded()
+        {
+            if (isInMultiTouchMode)
+            {
+                inkCanvas.StylusDown -= MainWindow_StylusDown;
+                inkCanvas.StylusMove -= MainWindow_StylusMove;
+                inkCanvas.StylusUp -= MainWindow_StylusUp;
+                inkCanvas.TouchDown -= MainWindow_TouchDown;
+                inkCanvas.TouchDown += Main_Grid_TouchDown;
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                }
+                inkCanvas.Children.Clear();
+                isInMultiTouchMode = false;
+            }
+        }
+
+        // 进入多指书写模式，绑定Main_Grid_TouchDown
+        private void EnterMultiTouchModeIfNeeded()
+        {
+            if (!isInMultiTouchMode)
+            {
+                inkCanvas.StylusDown += MainWindow_StylusDown;
+                inkCanvas.StylusMove += MainWindow_StylusMove;
+                inkCanvas.StylusUp += MainWindow_StylusUp;
+                inkCanvas.TouchDown += MainWindow_TouchDown;
+                inkCanvas.TouchDown -= Main_Grid_TouchDown;
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                }
+                inkCanvas.Children.Clear();
+                isInMultiTouchMode = true;
+            }
+        }
     }
 }

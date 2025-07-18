@@ -1440,6 +1440,7 @@ namespace Ink_Canvas {
         }
 
         private void EraserIcon_Click(object sender, RoutedEventArgs e) {
+            EnterMultiTouchModeIfNeeded();
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
             forceEraser = false;
             forcePointEraser = true;
@@ -1464,6 +1465,7 @@ namespace Ink_Canvas {
         }
 
         private void BoardEraserIcon_Click(object sender, RoutedEventArgs e) {
+            EnterMultiTouchModeIfNeeded();
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
             forceEraser = false;
             forcePointEraser = true;
@@ -1487,6 +1489,7 @@ namespace Ink_Canvas {
         }
 
         private void EraserIconByStrokes_Click(object sender, RoutedEventArgs e) {
+            EnterMultiTouchModeIfNeeded();
 
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
                 ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
