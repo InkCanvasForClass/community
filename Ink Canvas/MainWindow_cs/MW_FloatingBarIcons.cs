@@ -514,6 +514,8 @@ namespace Ink_Canvas {
                     Thread.Sleep(100);
                     Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
                 })).Start();
+                
+                HideSubPanels();
 
                 if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
                 {
@@ -527,11 +529,6 @@ namespace Ink_Canvas {
                     }
 
                     BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
-                    HideSubPanels();
-                }
-                else
-                {
-                    HideSubPanels();
                 }
 
                 if (Settings.Gesture.AutoSwitchTwoFingerGesture) // 自动关闭多指书写、开启双指移动
