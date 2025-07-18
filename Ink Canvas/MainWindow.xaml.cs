@@ -24,9 +24,15 @@ using System.Windows.Media.Animation;
 using System.Reflection;
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
+using System.Collections.Generic;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
+        // 新增：每一页一个Canvas对象
+        private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();
+        private int currentPageIndex = 0;
+        private System.Windows.Controls.Canvas currentCanvas = null;
+
         #region Window Initialization
 
         public MainWindow() {
@@ -109,6 +115,13 @@ namespace Ink_Canvas {
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
             inkCanvas.StylusDown += inkCanvas_StylusDown;
+
+            // 初始化第一页Canvas
+            var firstCanvas = new System.Windows.Controls.Canvas();
+            whiteboardPages.Add(firstCanvas);
+            InkCanvasGridForInkReplay.Children.Add(firstCanvas);
+            currentPageIndex = 0;
+            ShowPage(currentPageIndex);
         }
 
         #endregion
@@ -1122,6 +1135,37 @@ namespace Ink_Canvas {
             {
                 inkCanvas.EraserShape = new RectangleStylusShape(k * 90 * 0.6, k * 90);
             }
+        }
+
+        // 显示指定页
+        private void ShowPage(int index)
+        {
+            if (index < 0 || index >= whiteboardPages.Count) return;
+            // 只切换可见性
+            for (int i = 0; i < whiteboardPages.Count; i++)
+            {
+                whiteboardPages[i].Visibility = (i == index) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+            }
+            currentCanvas = whiteboardPages[index];
+            currentPageIndex = index;
+        }
+        // 新建页面
+        private void AddNewPage()
+        {
+            var newCanvas = new System.Windows.Controls.Canvas();
+            whiteboardPages.Add(newCanvas);
+            InkCanvasGridForInkReplay.Children.Add(newCanvas);
+            ShowPage(whiteboardPages.Count - 1);
+        }
+        // 删除当前页面
+        private void DeleteCurrentPage()
+        {
+            if (whiteboardPages.Count <= 1) return;
+            InkCanvasGridForInkReplay.Children.Remove(currentCanvas);
+            whiteboardPages.RemoveAt(currentPageIndex);
+            if (currentPageIndex >= whiteboardPages.Count)
+                currentPageIndex = whiteboardPages.Count - 1;
+            ShowPage(currentPageIndex);
         }
     }
 }
