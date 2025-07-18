@@ -74,6 +74,8 @@ namespace Ink_Canvas {
             }
             else {
                 TouchDownPointsList[e.TouchDevice.Id] = InkCanvasEditingMode.None;
+                // 修复面积擦时不显示橡皮形状：无论 forcePointEraser 状态，均显示 50x50 橡皮
+                inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
             }
         }
