@@ -33,6 +33,16 @@ namespace Ink_Canvas.Helpers.Plugins
             // 尝试从插件数据中读取更多信息
             TryReadPluginMetadata();
         }
+
+        public ICCPPPluginAdapter()
+        {
+            _pluginPath = string.Empty;
+            _pluginData = new byte[0];
+            PluginPath = string.Empty;
+            _pluginName = "ICCPPPlugin";
+            _pluginVersion = new Version(1, 0, 0);
+            // 可选：初始化其他字段
+        }
         
         /// <summary>
         /// 尝试从插件数据中读取元数据
