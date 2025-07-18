@@ -160,11 +160,9 @@ namespace Ink_Canvas {
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e) {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
-<<<<<<< HEAD
             
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(inkCanvas1);
-=======
             if (Settings.Canvas.IsShowCursor) {
                 if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink || drawingShapeMode != 0)
                     inkCanvas1.ForceCursor = true;
@@ -173,7 +171,6 @@ namespace Ink_Canvas {
             } else {
                 inkCanvas1.ForceCursor = false;
             }
->>>>>>> parent of ab88c34 (fix:issue #23)
 
             if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) forcePointEraser = !forcePointEraser;
         }

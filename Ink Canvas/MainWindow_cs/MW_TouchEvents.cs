@@ -303,17 +303,14 @@ namespace Ink_Canvas {
             }
             else {
                 isLastTouchEraser = false;
-<<<<<<< HEAD
                 currentPalmEraserShape = null;
                 // 修复面积擦时不显示橡皮形状：无论 forcePointEraser 状态，均显示 50x50 橡皮
                 inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
                 // 修复触屏状态下几何绘制功能不可用的问题：在几何绘制模式下不应该因为forceEraser而直接返回
                 if (forceEraser && drawingShapeMode == 0) return;
-=======
                 inkCanvas.EraserShape =
                     forcePointEraser ? new EllipseStylusShape(50, 50) : new EllipseStylusShape(5, 5);
                 if (forceEraser) return;
->>>>>>> parent of b46cbcc (fix:issue #23)
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             }
         }
