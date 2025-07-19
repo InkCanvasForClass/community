@@ -196,14 +196,14 @@
                                     <Storyboard RepeatBehavior="Forever">
                                         <DoubleAnimation
                                             Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
-                                            From="0" To="360" Duration="0:0:1"/>
+                                            From="0" To="360" Duration="0:0:0.2"/>
                                     </Storyboard>
                                 </BeginStoryboard>
                             </EventTrigger>
                         </Ellipse.Triggers>
                     </Ellipse>
                 </Grid>
-                <TextBlock Text="正在连接 PowerPoint..." 
+                <TextBlock Text="正在连接 PPT..." 
                            Foreground="White" 
                            Margin="0,20,0,0" 
                            HorizontalAlignment="Center"
