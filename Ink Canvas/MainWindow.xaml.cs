@@ -278,9 +278,6 @@ namespace Ink_Canvas {
                 RadioCrashSilentRestart.IsChecked = true;
             else
                 RadioCrashNoAction.IsChecked = true;
-                
-            // 注册系统关机事件处理
-            RegisterShutdownHandler();
             
             // 设置默认为黑板模式
             Settings.Canvas.UsingWhiteboard = false;
