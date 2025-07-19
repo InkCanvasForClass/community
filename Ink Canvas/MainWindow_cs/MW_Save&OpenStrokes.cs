@@ -364,16 +364,22 @@ namespace Ink_Canvas {
                     // 检查当前是否处于PPT模式
                     bool isCurrentlyInPPTMode = BtnPPTSlideShowEnd.Visibility == Visibility.Visible && pptApplication != null;
                     
-                    // 根据当前模式和保存模式决定恢复策略
+                    // 检查当前是否处于白板模式
+                    bool isCurrentlyInWhiteboardMode = currentMode != 0;
+                    
+                    // 严格模式隔离：只在对应模式下恢复对应墨迹
                     if (isPPTMode && isCurrentlyInPPTMode) {
-                        // PPT模式下恢复PPT墨迹
+                        // 只在PPT放映模式下恢复PPT墨迹
                         RestorePPTStrokesFromZip(tempDir, metadata);
-                    } else if (isWhiteboardMode) {
-                        // 白板模式下恢复白板墨迹
+                    } else if (isWhiteboardMode && isCurrentlyInWhiteboardMode) {
+                        // 只在白板模式下恢复白板墨迹
                         RestoreWhiteboardStrokesFromZip(tempDir, metadata);
                     } else {
-                        // 其他情况只恢复白板墨迹
-                        RestoreWhiteboardStrokesFromZip(tempDir, metadata);
+                        // 模式不匹配时，显示提示信息
+                        string savedMode = isPPTMode ? "PPT放映" : (isWhiteboardMode ? "白板" : "未知");
+                        string currentMode = isCurrentlyInPPTMode ? "PPT放映" : (isCurrentlyInWhiteboardMode ? "白板" : "桌面");
+                        ShowNotification($"墨迹保存模式({savedMode})与当前模式({currentMode})不匹配，无法恢复墨迹");
+                        LogHelper.WriteLogToFile($"模式不匹配：保存模式={savedMode}，当前模式={currentMode}", LogHelper.LogType.Warning);
                     }
                     
                     ShowNotification($"成功打开ICC压缩包，共{(metadata.ContainsKey("总页数") ? metadata["总页数"] : "0")}页");
@@ -421,6 +427,11 @@ namespace Ink_Canvas {
         /// </summary>
         private void RestorePPTStrokesFromZip(string tempDir, Dictionary<string, string> metadata) {
             try {
+                // 确保当前处于PPT放映模式
+                if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || pptApplication == null) {
+                    throw new InvalidOperationException("当前不在PPT放映模式，无法恢复PPT墨迹");
+                }
+                
                 // 清空当前墨迹
                 ClearStrokes(true);
                 timeMachine.ClearStrokeHistory();
@@ -448,7 +459,7 @@ namespace Ink_Canvas {
                 }
                 
                 // 恢复当前页面的墨迹
-                if (pptApplication != null && pptApplication.SlideShowWindows.Count > 0) {
+                if (pptApplication.SlideShowWindows.Count > 0) {
                     int currentSlide = pptApplication.SlideShowWindows[1].View.CurrentShowPosition;
                     if (memoryStreams[currentSlide] != null && memoryStreams[currentSlide].Length > 0) {
                         memoryStreams[currentSlide].Position = 0;
@@ -470,6 +481,11 @@ namespace Ink_Canvas {
         /// </summary>
         private void RestoreWhiteboardStrokesFromZip(string tempDir, Dictionary<string, string> metadata) {
             try {
+                // 确保当前处于白板模式
+                if (currentMode == 0) {
+                    throw new InvalidOperationException("当前不在白板模式，无法恢复白板墨迹");
+                }
+                
                 // 清空当前墨迹
                 ClearStrokes(true);
                 timeMachine.ClearStrokeHistory();
@@ -525,27 +541,27 @@ namespace Ink_Canvas {
         /// 打开单个墨迹文件
         /// </summary>
         private void OpenSingleStrokeFile(string filePath) {
-            var fileStreamHasNoStroke = false;
+                var fileStreamHasNoStroke = false;
             using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read)) {
-                var strokes = new StrokeCollection(fs);
-                fileStreamHasNoStroke = strokes.Count == 0;
-                if (!fileStreamHasNoStroke) {
-                    ClearStrokes(true);
-                    timeMachine.ClearStrokeHistory();
-                    inkCanvas.Strokes.Add(strokes);
-                    LogHelper.NewLog($"Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count.ToString()}");
+                    var strokes = new StrokeCollection(fs);
+                    fileStreamHasNoStroke = strokes.Count == 0;
+                    if (!fileStreamHasNoStroke) {
+                        ClearStrokes(true);
+                        timeMachine.ClearStrokeHistory();
+                        inkCanvas.Strokes.Add(strokes);
+                        LogHelper.NewLog($"Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count.ToString()}");
+                    }
                 }
-            }
 
-            if (fileStreamHasNoStroke)
+                if (fileStreamHasNoStroke)
                 using (var ms = new MemoryStream(File.ReadAllBytes(filePath))) {
-                    ms.Seek(0, SeekOrigin.Begin);
-                    var strokes = new StrokeCollection(ms);
-                    ClearStrokes(true);
-                    timeMachine.ClearStrokeHistory();
-                    inkCanvas.Strokes.Add(strokes);
-                    LogHelper.NewLog($"Strokes Insert (2): Strokes Count: {strokes.Count.ToString()}");
-                }
+                        ms.Seek(0, SeekOrigin.Begin);
+                        var strokes = new StrokeCollection(ms);
+                        ClearStrokes(true);
+                        timeMachine.ClearStrokeHistory();
+                        inkCanvas.Strokes.Add(strokes);
+                        LogHelper.NewLog($"Strokes Insert (2): Strokes Count: {strokes.Count.ToString()}");
+            }
         }
     }
 }
