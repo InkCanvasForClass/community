@@ -6,7 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Ink_Canvas.Helpers;
 using System.Windows.Shapes;
 
@@ -38,7 +37,6 @@ namespace Ink_Canvas {
         private DrawingVisual eraserVisual = new DrawingVisual();
         private VisualCanvas eraserOverlayCanvas = null;
         private Border eraserVisualBorder = null; // 用于显示橡皮擦视觉反馈的Border
-        private Image eraserImage = null; // 用于显示橡皮擦DrawingGroup的Image
 
         // 兼容性属性：模拟原有的EraserOverlay_DrawingVisual
         private VisualCanvas EraserOverlay_DrawingVisual => eraserOverlayCanvas;
@@ -335,7 +333,7 @@ namespace Ink_Canvas {
                 // 获取或创建橡皮擦视觉反馈Border
                 if (eraserVisualBorder == null) {
                     eraserVisualBorder = new Border {
-                        Background = new SolidColorBrush(Colors.Transparent),
+                        Background = new SolidColorBrush(Colors.White),
                         BorderBrush = new SolidColorBrush(Colors.Transparent),
                         BorderThickness = new Thickness(0),
                         IsHitTestVisible = false,
@@ -357,76 +355,30 @@ namespace Ink_Canvas {
                 }
 
                 if (eraserVisualBorder != null) {
-                    // 计算橡皮擦尺寸
-                    double eraserWidth, eraserHeight;
+                    // 更新橡皮擦位置和大小
                     if (isCurrentEraserCircle) {
-                        eraserWidth = currentEraserSize;
-                        eraserHeight = currentEraserSize;
+                        var radius = currentEraserSize / 2;
+                        eraserVisualBorder.Width = currentEraserSize;
+                        eraserVisualBorder.Height = currentEraserSize;
+                        eraserVisualBorder.CornerRadius = new CornerRadius(radius);
+                        
+                        // 使用Margin来定位，因为Border在Grid中
+                        eraserVisualBorder.Margin = new Thickness(
+                            position.X - radius, 
+                            position.Y - radius, 
+                            0, 0);
                     } else {
                         // 矩形橡皮擦，使用与原来相同的逻辑
-                        eraserWidth = currentEraserSize;
-                        eraserHeight = currentEraserSize * 56 / 38;
-                    }
-
-                    // 更新Border尺寸
-                    eraserVisualBorder.Width = eraserWidth;
-                    eraserVisualBorder.Height = eraserHeight;
-                    
-                    // 使用Margin来定位，因为Border在Grid中
-                    eraserVisualBorder.Margin = new Thickness(
-                        position.X - eraserWidth / 2, 
-                        position.Y - eraserHeight / 2, 
-                        0, 0);
-                    
-                    // 创建或更新Image来显示橡皮擦样式
-                    if (eraserImage == null) {
-                        eraserImage = new Image {
-                            Stretch = Stretch.Fill
-                        };
-                        RenderOptions.SetBitmapScalingMode(eraserImage, BitmapScalingMode.HighQuality);
-                        eraserVisualBorder.Child = eraserImage;
-                    }
-                    
-                    // 获取橡皮擦DrawingGroup资源并转换为BitmapSource
-                    DrawingGroup eraserDrawing = null;
-                    try {
-                        if (isCurrentEraserCircle) {
-                            eraserDrawing = FindResource("EraserCircleDrawingGroup") as DrawingGroup;
-                        } else {
-                            eraserDrawing = FindResource("EraserDrawingGroup") as DrawingGroup;
-                        }
-                    } catch (Exception ex) {
-                        Trace.WriteLine($"Advanced Eraser: Failed to find eraser drawing resource - {ex.Message}");
-                        // 如果找不到资源，使用简单的矩形作为后备
-                        eraserDrawing = new DrawingGroup();
-                        var geometry = new RectangleGeometry(new Rect(0, 0, 1, 1));
-                        var brush = new SolidColorBrush(Colors.White);
-                        eraserDrawing.Children.Add(new GeometryDrawing(brush, null, geometry));
-                    }
-                    
-                    if (eraserDrawing != null) {
-                        // 将DrawingGroup转换为BitmapSource
-                        var drawingVisual = new DrawingVisual();
-                        using (var context = drawingVisual.RenderOpen()) {
-                            // 应用变换矩阵
-                            var transform = new MatrixTransform();
-                            var scaleX = eraserWidth / (isCurrentEraserCircle ? 56.0 : 38.0);
-                            var scaleY = eraserHeight / 56.0;
-                            transform.Matrix = new Matrix(scaleX, 0, 0, scaleY, 0, 0);
-                            context.PushTransform(transform);
-                            
-                            // 绘制橡皮擦DrawingGroup
-                            context.DrawDrawing(eraserDrawing);
-                            
-                            context.Pop(); // 弹出变换
-                        }
+                        var height = currentEraserSize / 0.6;
+                        eraserVisualBorder.Width = currentEraserSize;
+                        eraserVisualBorder.Height = height;
+                        eraserVisualBorder.CornerRadius = new CornerRadius(0);
                         
-                        // 将DrawingVisual转换为BitmapSource
-                        var bitmap = new RenderTargetBitmap(
-                            (int)eraserWidth, (int)eraserHeight, 
-                            96, 96, PixelFormats.Pbgra32);
-                        bitmap.Render(drawingVisual);
-                        eraserImage.Source = bitmap;
+                        // 使用Margin来定位，因为Border在Grid中
+                        eraserVisualBorder.Margin = new Thickness(
+                            position.X - currentEraserSize / 2, 
+                            position.Y - height / 2, 
+                            0, 0);
                     }
                     
                     eraserVisualBorder.Visibility = Visibility.Visible;
