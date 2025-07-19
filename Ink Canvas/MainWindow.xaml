@@ -33,7 +33,13 @@
         Stylus.IsTouchFeedbackEnabled="False">
     <!--资源中添加命令-->
     <Window.Resources>
-        <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
+        <ResourceDictionary>
+            <!-- 合并新橡皮擦资源 -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="MainWindow_cs/MW_Eraser.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
         <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <c:IntNumberToString x:Key="IntNumberToString" />
         <c:IntNumberToString2 x:Key="IntNumberToString2" />
@@ -121,6 +127,7 @@
                   </Setter.Value>
               </Setter>
           </Style>
+        </ResourceDictionary>
       </Window.Resources>
     <!--输入命令绑定-->
     <Window.InputBindings>
@@ -2884,6 +2891,13 @@
                        ManipulationStarting="inkCanvas_ManipulationStarting"
                        SelectionChanged="inkCanvas_SelectionChanged"
                        StrokeCollected="inkCanvas_StrokeCollected" ClipToBounds="False" Background="Transparent" />
+            
+            <!-- 新橡皮擦覆盖层 - 用于高级橡皮擦系统 -->
+            <Border x:Name="AdvancedEraserOverlay" 
+                    Background="Transparent" 
+                    IsHitTestVisible="False"
+                    Loaded="EraserOverlay_Loaded"
+                    Panel.ZIndex="1000" />
         </Grid>
 
         <Canvas IsHitTestVisible="False">

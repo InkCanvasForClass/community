@@ -1277,6 +1277,10 @@ namespace Ink_Canvas {
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
                 ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
             if (sender==Cursor_Icon && lastBorderMouseDownObject != Cursor_Icon) return;
+            
+            // 禁用高级橡皮擦系统
+            DisableAdvancedEraserSystem();
+            
             // 隱藏高亮
             FloatingbarSelectionBG.Visibility = Visibility.Hidden;
             System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
@@ -1354,6 +1358,9 @@ namespace Ink_Canvas {
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
                 ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
             if (sender == Pen_Icon && lastBorderMouseDownObject != Pen_Icon) return;
+
+            // 禁用高级橡皮擦系统
+            DisableAdvancedEraserSystem();
 
             FloatingbarSelectionBG.Visibility = Visibility.Visible;
             System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 28);
@@ -1446,10 +1453,20 @@ namespace Ink_Canvas {
             forcePointEraser = true;
             isLastTouchEraser = false;
             drawingShapeMode = 0;
+
+            // 启用新的高级橡皮擦系统
+            EnableAdvancedEraserSystem();
+            
+            // 使用新的高级橡皮擦系统
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-            ApplyCurrentEraserShape();
+            ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
+
+            // 显示橡皮擦视觉反馈（用于测试）
+            // 注意：eraserVisualBorder在MW_Eraser.cs中定义，这里无法直接访问
+            Trace.WriteLine($"Advanced Eraser: Eraser button clicked, current size: {currentEraserSize}, circle: {isCurrentEraserCircle}");
+
             if (isAlreadyEraser) {
                 // 已是橡皮状态，再次点击才弹出/收起面板
                 if (EraserSizePanel.Visibility == Visibility.Collapsed) {
@@ -1471,10 +1488,16 @@ namespace Ink_Canvas {
             forcePointEraser = true;
             isLastTouchEraser = false;
             drawingShapeMode = 0;
+
+            // 启用新的高级橡皮擦系统
+            EnableAdvancedEraserSystem();
+            
+            // 使用新的高级橡皮擦系统
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-            ApplyCurrentEraserShape();
+            ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
+
             if (isAlreadyEraser) {
                 // 已是橡皮状态，再次点击才弹出/收起面板
                 if (BoardEraserSizePanel != null && BoardEraserSizePanel.Visibility == Visibility.Collapsed) {
@@ -1522,6 +1545,9 @@ namespace Ink_Canvas {
         }
 
         private void SelectIcon_MouseUp(object sender, RoutedEvent e) {
+            // 禁用高级橡皮擦系统
+            DisableAdvancedEraserSystem();
+            
             forceEraser = true;
             drawingShapeMode = 0;
             inkCanvas.IsManipulationEnabled = false;

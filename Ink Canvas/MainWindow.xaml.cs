@@ -191,6 +191,22 @@ namespace Ink_Canvas {
             }
 
             if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) forcePointEraser = !forcePointEraser;
+            
+            // 处理高级橡皮擦覆盖层的启用/禁用
+            var eraserOverlay = this.FindName("AdvancedEraserOverlay") as Border;
+            if (eraserOverlay != null) {
+                if (inkCanvas1.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                    // 橡皮擦模式下启用覆盖层
+                    eraserOverlay.IsHitTestVisible = true;
+                    Trace.WriteLine("Advanced Eraser: Overlay enabled in eraser mode");
+                } else {
+                    // 其他模式下禁用覆盖层
+                    eraserOverlay.IsHitTestVisible = false;
+                    // 同时禁用高级橡皮擦系统
+                    DisableAdvancedEraserSystem();
+                    Trace.WriteLine("Advanced Eraser: Overlay disabled in non-eraser mode");
+                }
+            }
         }
 
         #endregion Ink Canvas
