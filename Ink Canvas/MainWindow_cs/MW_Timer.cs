@@ -331,7 +331,15 @@ namespace Ink_Canvas {
                     
                     // 尝试下载更新文件
                     Task.Run(async () => {
-                        bool isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion);
+                        bool isDownloadSuccessful = false;
+                        if (AvailableLatestLineGroup != null)
+                            isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, AvailableLatestLineGroup);
+                        else
+                        {
+                            var (_, lineGroup2) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel, true);
+                            if (lineGroup2 != null)
+                                isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, lineGroup2);
+                        }
                         if (isDownloadSuccessful) {
                             LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will check again for installation");
                             // 重新启动计时器，下次检查时安装

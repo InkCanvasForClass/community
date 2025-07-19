@@ -32,6 +32,7 @@ namespace Ink_Canvas {
         private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();
         private int currentPageIndex = 0;
         private System.Windows.Controls.Canvas currentCanvas = null;
+        private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup = null;
 
         #region Window Initialization
 
@@ -426,7 +427,9 @@ namespace Ink_Canvas {
 
         private async void AutoUpdate() {
             // 使用当前选择的更新通道检查更新
-            AvailableLatestVersion = await AutoUpdateHelper.CheckForUpdates(null, Settings.Startup.UpdateChannel);
+            var (remoteVersion, lineGroup) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
+            AvailableLatestVersion = remoteVersion;
+            AvailableLatestLineGroup = lineGroup;
             
             // 声明下载状态变量，用于整个方法
             bool isDownloadSuccessful = false;
@@ -459,7 +462,14 @@ namespace Ink_Canvas {
                     LogHelper.WriteLogToFile("AutoUpdate | Silent update enabled, downloading update automatically without notification");
                     
                     // 静默下载更新，传递当前选择的更新通道
-                    isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion, "", Settings.Startup.UpdateChannel);
+                    if (AvailableLatestLineGroup != null)
+                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, AvailableLatestLineGroup);
+                    else
+                    {
+                        var (_, lineGroup2) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel, true);
+                        if (lineGroup2 != null)
+                            isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, lineGroup2);
+                    }
                     
                     if (isDownloadSuccessful) {
                         LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when conditions are met");
@@ -509,7 +519,14 @@ namespace Ink_Canvas {
                         MessageBox.Show("开始下载更新，请稍候...", "正在更新", MessageBoxButton.OK, MessageBoxImage.Information);
                         
                         // 下载更新文件，传递当前选择的更新通道
-                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion, "", Settings.Startup.UpdateChannel);
+                        if (AvailableLatestLineGroup != null)
+                            isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, AvailableLatestLineGroup);
+                        else
+                        {
+                            var (_, lineGroup2) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel, true);
+                            if (lineGroup2 != null)
+                                isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, lineGroup2);
+                        }
                         
                         if (isDownloadSuccessful) {
                             // 下载成功，提示用户准备安装
@@ -539,7 +556,14 @@ namespace Ink_Canvas {
                         LogHelper.WriteLogToFile("AutoUpdate | User chose to update later");
                         
                         // 不管设置如何，都进行下载
-                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion, "", Settings.Startup.UpdateChannel);
+                        if (AvailableLatestLineGroup != null)
+                            isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, AvailableLatestLineGroup);
+                        else
+                        {
+                            var (_, lineGroup2) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel, true);
+                            if (lineGroup2 != null)
+                                isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, lineGroup2);
+                        }
                         
                         if (isDownloadSuccessful) {
                             LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when application closes");
