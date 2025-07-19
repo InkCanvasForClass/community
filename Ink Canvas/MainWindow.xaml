@@ -2323,7 +2323,7 @@
                                                          FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchSaveFullPageStrokes_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 开启后自动保存和手动保存墨迹时将以全屏模式保存而非单独保存每条墨迹" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <TextBlock Text="# 开启后自动保存和手动保存墨迹时将以全屏模式保存。如果存在多个画布和墨迹，将把所有页面的墨迹按照每页为单位保存进一个压缩包中" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                           StrokeThickness="1" Margin="0,4,0,4" />
