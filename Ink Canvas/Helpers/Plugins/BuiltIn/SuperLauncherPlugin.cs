@@ -21,7 +21,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
         
         public override string Description => "在浮动栏添加一个启动台按钮，可快速启动常用应用程序。";
         
-        public override Version Version => new Version(1, 0, 0);
+        public override Version Version => new Version(1, 0, 1);
         
         public override string Author => "ICC CE 团队";
         
