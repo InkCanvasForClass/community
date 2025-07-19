@@ -1992,14 +1992,42 @@ namespace Ink_Canvas {
             HideSubPanels();
         }
 
-        private void UpdateChannelSelector_Checked(object sender, RoutedEventArgs e) {
+        private async void UpdateChannelSelector_Checked(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             var radioButton = sender as System.Windows.Controls.RadioButton;
             if (radioButton != null) {
                 string channel = radioButton.Tag.ToString();
-                Settings.Startup.UpdateChannel = channel == "Beta" ? UpdateChannel.Beta : UpdateChannel.Release;
+                UpdateChannel newChannel = channel == "Beta" ? UpdateChannel.Beta : UpdateChannel.Release;
+                
+                // 如果通道没有变化，不需要执行更新检查
+                if (Settings.Startup.UpdateChannel == newChannel) {
+                    return;
+                }
+                
+                Settings.Startup.UpdateChannel = newChannel;
                 LogHelper.WriteLogToFile($"Settings | Update channel changed to {Settings.Startup.UpdateChannel}");
                 SaveSettingsToFile();
+                
+                // 如果启用了自动更新，立即执行完整的检查更新操作
+                if (Settings.Startup.IsAutoUpdate) {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, performing immediate update check");
+                    
+                    // 执行完整的更新检查
+                    await Task.Run(async () => {
+                        try {
+                            // 调用主窗口的AutoUpdate方法，它会自动清除之前的更新状态并使用新通道重新检查
+                            Dispatcher.Invoke(() => {
+                                AutoUpdate();
+                            });
+                        }
+                        catch (Exception ex) {
+                            LogHelper.WriteLogToFile($"AutoUpdate | Error during channel switch update check: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    });
+                }
+                else {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, but auto-update is disabled");
+                }
             }
         }
         

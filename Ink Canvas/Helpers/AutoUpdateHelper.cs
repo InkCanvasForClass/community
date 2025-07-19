@@ -105,12 +105,18 @@ namespace Ink_Canvas.Helpers
             return -1;
         }
 
-        // 检测线路组延迟，返回最快组
+        // 检测线路组延迟，返回最快组（保持向后兼容）
         private static async Task<UpdateLineGroup> GetFastestLineGroup(UpdateChannel channel)
         {
+            var availableGroups = await GetAvailableLineGroupsOrdered(channel);
+            return availableGroups.Count > 0 ? availableGroups[0] : null;
+        }
+
+        // 获取所有可用线路组，按延迟排序
+        public static async Task<List<UpdateLineGroup>> GetAvailableLineGroupsOrdered(UpdateChannel channel)
+        {
             var groups = ChannelLineGroups[channel];
-            long minDelay = long.MaxValue;
-            UpdateLineGroup bestGroup = null;
+            var availableGroups = new List<(UpdateLineGroup group, long delay)>();
             
             LogHelper.WriteLogToFile($"AutoUpdate | 开始检测通道 {channel} 下所有线路组延迟...");
             
@@ -121,11 +127,7 @@ namespace Ink_Canvas.Helpers
                 if (delay >= 0)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 延迟: {delay}ms");
-                    if (delay < minDelay)
-                    {
-                        minDelay = delay;
-                        bestGroup = group;
-                    }
+                    availableGroups.Add((group, delay));
                 }
                 else
                 {
@@ -133,16 +135,26 @@ namespace Ink_Canvas.Helpers
                 }
             }
             
-            if (bestGroup != null)
+            // 按延迟排序，延迟最小的排在前面
+            var orderedGroups = availableGroups
+                .OrderBy(x => x.delay)
+                .Select(x => x.group)
+                .ToList();
+            
+            if (orderedGroups.Count > 0)
             {
-                LogHelper.WriteLogToFile($"AutoUpdate | 选择最快线路组: {bestGroup.GroupName} (延迟: {minDelay}ms)");
+                LogHelper.WriteLogToFile($"AutoUpdate | 找到 {orderedGroups.Count} 个可用线路组，按延迟排序:");
+                for (int i = 0; i < orderedGroups.Count; i++)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | {i + 1}. {orderedGroups[i].GroupName}");
+                }
             }
             else
             {
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均不可用", LogHelper.LogType.Error);
             }
             
-            return bestGroup;
+            return orderedGroups;
         }
 
         // 获取远程版本号
@@ -218,7 +230,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        // 主要的更新检测方法（优先检测延迟）
+        // 主要的更新检测方法（优先检测延迟，失败时自动切换线路组）
         public static async Task<(string remoteVersion, UpdateLineGroup lineGroup)> CheckForUpdates(UpdateChannel channel = UpdateChannel.Release, bool alwaysGetRemote = false)
         {
             try
@@ -227,39 +239,45 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | 本地版本: {localVersion}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 检测通道 {channel} 下最快线路组...");
                 
-                // 优先检测延迟，选择最快线路组
-                var bestGroup = await GetFastestLineGroup(channel);
-                if (bestGroup == null)
+                // 获取所有可用线路组（按延迟排序）
+                var availableGroups = await GetAvailableLineGroupsOrdered(channel);
+                if (availableGroups.Count == 0)
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均不可用", LogHelper.LogType.Error);
                     return (null, null);
                 }
                 
-                LogHelper.WriteLogToFile($"AutoUpdate | 使用最快线路组获取版本信息: {bestGroup.GroupName}");
-                string remoteVersion = await GetRemoteVersion(bestGroup.VersionUrl);
-                
-                if (remoteVersion != null)
+                // 依次尝试每个线路组，直到成功获取版本信息
+                foreach (var group in availableGroups)
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 远程版本: {remoteVersion}");
-                    Version local = new Version(localVersion);
-                    Version remote = new Version(remoteVersion);
+                    LogHelper.WriteLogToFile($"AutoUpdate | 尝试使用线路组获取版本信息: {group.GroupName}");
+                    string remoteVersion = await GetRemoteVersion(group.VersionUrl);
                     
-                    if (remote > local || alwaysGetRemote)
+                    if (remoteVersion != null)
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 发现新版本或强制获取: {remoteVersion}");
-                        return (remoteVersion, bestGroup);
+                        LogHelper.WriteLogToFile($"AutoUpdate | 成功从线路组 {group.GroupName} 获取远程版本: {remoteVersion}");
+                        Version local = new Version(localVersion);
+                        Version remote = new Version(remoteVersion);
+                        
+                        if (remote > local || alwaysGetRemote)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 发现新版本或强制获取: {remoteVersion}");
+                            return (remoteVersion, group);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 当前版本已是最新");
+                            return (null, group);
+                        }
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 当前版本已是最新");
-                        return (null, bestGroup);
+                        LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 获取版本失败，尝试下一个线路组", LogHelper.LogType.Warning);
                     }
                 }
-                else
-                {
-                    LogHelper.WriteLogToFile("AutoUpdate | 获取远程版本失败", LogHelper.LogType.Error);
-                    return (null, bestGroup);
-                }
+                
+                LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均无法获取版本信息", LogHelper.LogType.Error);
+                return (null, null);
             }
             catch (Exception ex)
             {
@@ -270,6 +288,12 @@ namespace Ink_Canvas.Helpers
 
         // 使用指定线路组下载新版
         public static async Task<bool> DownloadSetupFile(string version, UpdateLineGroup group)
+        {
+            return await DownloadSetupFileWithFallback(version, new List<UpdateLineGroup> { group });
+        }
+
+        // 使用多线路组下载新版（支持自动切换）
+        public static async Task<bool> DownloadSetupFileWithFallback(string version, List<UpdateLineGroup> groups)
         {
             try
             {
@@ -288,26 +312,33 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"AutoUpdate | 创建更新目录: {updatesFolderPath}");
                 }
 
-                string url = string.Format(group.DownloadUrlFormat, version);
                 string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
-                
-                LogHelper.WriteLogToFile($"AutoUpdate | 从线路组 {group.GroupName} 下载: {url}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 目标文件路径: {zipFilePath}");
 
                 SaveDownloadStatus(false);
-                bool downloadSuccess = await DownloadFile(url, zipFilePath);
+
+                // 依次尝试每个线路组
+                foreach (var group in groups)
+                {
+                    string url = string.Format(group.DownloadUrlFormat, version);
+                    LogHelper.WriteLogToFile($"AutoUpdate | 尝试从线路组 {group.GroupName} 下载: {url}");
+                    
+                    bool downloadSuccess = await DownloadFile(url, zipFilePath);
+                    
+                    if (downloadSuccess)
+                    {
+                        SaveDownloadStatus(true);
+                        LogHelper.WriteLogToFile($"AutoUpdate | 从线路组 {group.GroupName} 下载成功");
+                        return true;
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 下载失败，尝试下一个线路组", LogHelper.LogType.Warning);
+                    }
+                }
                 
-                if (downloadSuccess)
-                {
-                    SaveDownloadStatus(true);
-                    LogHelper.WriteLogToFile("AutoUpdate | 安装包下载成功");
-                    return true;
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile("AutoUpdate | 下载失败", LogHelper.LogType.Error);
-                    return false;
-                }
+                LogHelper.WriteLogToFile("AutoUpdate | 所有线路组下载均失败", LogHelper.LogType.Error);
+                return false;
             }
             catch (Exception ex)
             {

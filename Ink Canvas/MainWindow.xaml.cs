@@ -425,7 +425,42 @@ namespace Ink_Canvas {
             }
         }
 
+        // 辅助方法：使用多线路组下载更新
+        private async Task<bool> DownloadUpdateWithFallback(string version, AutoUpdateHelper.UpdateLineGroup primaryGroup, UpdateChannel channel)
+        {
+            try
+            {
+                // 如果主要线路组可用，直接使用
+                if (primaryGroup != null)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 使用主要线路组下载: {primaryGroup.GroupName}");
+                    return await AutoUpdateHelper.DownloadSetupFile(version, primaryGroup);
+                }
+                
+                // 如果主要线路组不可用，获取所有可用线路组
+                LogHelper.WriteLogToFile("AutoUpdate | 主要线路组不可用，获取所有可用线路组");
+                var availableGroups = await AutoUpdateHelper.GetAvailableLineGroupsOrdered(channel);
+                if (availableGroups.Count == 0)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 没有可用的线路组", LogHelper.LogType.Error);
+                    return false;
+                }
+                
+                LogHelper.WriteLogToFile($"AutoUpdate | 使用 {availableGroups.Count} 个可用线路组进行下载");
+                return await AutoUpdateHelper.DownloadSetupFileWithFallback(version, availableGroups);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 下载更新时出错: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
         private async void AutoUpdate() {
+            // 清除之前的更新状态，确保使用新通道重新检查
+            AvailableLatestVersion = null;
+            AvailableLatestLineGroup = null;
+            
             // 使用当前选择的更新通道检查更新
             var (remoteVersion, lineGroup) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
             AvailableLatestVersion = remoteVersion;
@@ -461,15 +496,8 @@ namespace Ink_Canvas {
                 if (Settings.Startup.IsAutoUpdateWithSilence) {
                     LogHelper.WriteLogToFile("AutoUpdate | Silent update enabled, downloading update automatically without notification");
                     
-                    // 静默下载更新，传递当前选择的更新通道
-                    if (AvailableLatestLineGroup != null)
-                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, AvailableLatestLineGroup);
-                    else
-                    {
-                        var (_, lineGroup2) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel, true);
-                        if (lineGroup2 != null)
-                            isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, lineGroup2);
-                    }
+                    // 静默下载更新，使用多线路组下载功能
+                    isDownloadSuccessful = await DownloadUpdateWithFallback(AvailableLatestVersion, AvailableLatestLineGroup, Settings.Startup.UpdateChannel);
                     
                     if (isDownloadSuccessful) {
                         LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when conditions are met");
@@ -518,15 +546,8 @@ namespace Ink_Canvas {
                         // 显示下载进度提示
                         MessageBox.Show("开始下载更新，请稍候...", "正在更新", MessageBoxButton.OK, MessageBoxImage.Information);
                         
-                        // 下载更新文件，传递当前选择的更新通道
-                        if (AvailableLatestLineGroup != null)
-                            isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, AvailableLatestLineGroup);
-                        else
-                        {
-                            var (_, lineGroup2) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel, true);
-                            if (lineGroup2 != null)
-                                isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, lineGroup2);
-                        }
+                        // 下载更新文件，使用多线路组下载功能
+                        isDownloadSuccessful = await DownloadUpdateWithFallback(AvailableLatestVersion, AvailableLatestLineGroup, Settings.Startup.UpdateChannel);
                         
                         if (isDownloadSuccessful) {
                             // 下载成功，提示用户准备安装
@@ -555,15 +576,8 @@ namespace Ink_Canvas {
                         // 稍后更新：静默下载，在软件关闭时自动安装
                         LogHelper.WriteLogToFile("AutoUpdate | User chose to update later");
                         
-                        // 不管设置如何，都进行下载
-                        if (AvailableLatestLineGroup != null)
-                            isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, AvailableLatestLineGroup);
-                        else
-                        {
-                            var (_, lineGroup2) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel, true);
-                            if (lineGroup2 != null)
-                                isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, lineGroup2);
-                        }
+                        // 不管设置如何，都进行下载，使用多线路组下载功能
+                        isDownloadSuccessful = await DownloadUpdateWithFallback(AvailableLatestVersion, AvailableLatestLineGroup, Settings.Startup.UpdateChannel);
                         
                         if (isDownloadSuccessful) {
                             LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when application closes");
