@@ -91,14 +91,41 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                using (var client = new HttpClient())
+                // 检测是否为Windows 7
+                var osVersion = Environment.OSVersion;
+                bool isWindows7 = osVersion.Version.Major == 6 && osVersion.Version.Minor == 1;
+                
+                if (isWindows7)
                 {
-                    client.Timeout = TimeSpan.FromSeconds(5);
-                    var sw = Stopwatch.StartNew();
-                    var resp = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
-                    sw.Stop();
-                    if (resp.IsSuccessStatusCode)
-                        return sw.ElapsedMilliseconds;
+                    // Windows 7使用特殊配置
+                    using (var handler = new HttpClientHandler())
+                    {
+                        // 配置HttpClientHandler以支持Windows 7
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        
+                        using (var client = new HttpClient(handler))
+                        {
+                            client.Timeout = TimeSpan.FromSeconds(5);
+                            var sw = Stopwatch.StartNew();
+                            var resp = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+                            sw.Stop();
+                            if (resp.IsSuccessStatusCode)
+                                return sw.ElapsedMilliseconds;
+                        }
+                    }
+                }
+                else
+                {
+                    // 其他Windows版本使用标准配置
+                    using (var client = new HttpClient())
+                    {
+                        client.Timeout = TimeSpan.FromSeconds(5);
+                        var sw = Stopwatch.StartNew();
+                        var resp = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+                        sw.Stop();
+                        if (resp.IsSuccessStatusCode)
+                            return sw.ElapsedMilliseconds;
+                    }
                 }
             }
             catch { }
@@ -160,73 +187,159 @@ namespace Ink_Canvas.Helpers
         // 获取远程版本号
         private static async Task<string> GetRemoteVersion(string fileUrl)
         {
-            using (HttpClient client = new HttpClient())
+            // 检测是否为Windows 7
+            var osVersion = Environment.OSVersion;
+            bool isWindows7 = osVersion.Version.Major == 6 && osVersion.Version.Minor == 1;
+            
+            if (isWindows7)
             {
-                try
+                // Windows 7使用特殊配置
+                using (var handler = new HttpClientHandler())
                 {
-                    client.Timeout = RequestTimeout;
-                    LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
-                    
-                    var downloadTask = client.GetAsync(fileUrl);
-                    var timeoutTask = Task.Delay(RequestTimeout);
-                    
-                    var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
-                    if (completedTask == timeoutTask)
+                    try
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
-                        return null;
-                    }
-                    
-                    HttpResponseMessage response = await downloadTask;
-                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
-                    response.EnsureSuccessStatusCode();
-
-                    string content = await response.Content.ReadAsStringAsync();
-                    content = content.Trim();
-                    
-                    // 如果内容包含HTML（可能是GitHub页面而不是原始内容），尝试提取版本号
-                    if (content.Contains("<html") || content.Contains("<!DOCTYPE"))
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 收到HTML内容而不是原始版本号 - 尝试提取版本");
-                        int startPos = content.IndexOf("<table");
-                        if (startPos > 0)
+                        // 配置HttpClientHandler以支持Windows 7
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        
+                        using (HttpClient client = new HttpClient(handler))
                         {
-                            int endPos = content.IndexOf("</table>", startPos);
-                            if (endPos > startPos)
+                            client.Timeout = RequestTimeout;
+                            LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
+                            
+                            var downloadTask = client.GetAsync(fileUrl);
+                            var timeoutTask = Task.Delay(RequestTimeout);
+                            
+                            var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
+                            if (completedTask == timeoutTask)
                             {
-                                string tableContent = content.Substring(startPos, endPos - startPos);
-                                var match = System.Text.RegularExpressions.Regex.Match(tableContent, @"(\d+\.\d+\.\d+(\.\d+)?)");
-                                if (match.Success)
+                                LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
+                                return null;
+                            }
+                            
+                            HttpResponseMessage response = await downloadTask;
+                            LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                            response.EnsureSuccessStatusCode();
+
+                            string content = await response.Content.ReadAsStringAsync();
+                            content = content.Trim();
+                            
+                            // 如果内容包含HTML（可能是GitHub页面而不是原始内容），尝试提取版本号
+                            if (content.Contains("<html") || content.Contains("<!DOCTYPE"))
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 收到HTML内容而不是原始版本号 - 尝试提取版本");
+                                int startPos = content.IndexOf("<table");
+                                if (startPos > 0)
                                 {
-                                    content = match.Groups[1].Value;
-                                    LogHelper.WriteLogToFile($"AutoUpdate | 从HTML提取版本: {content}");
+                                    int endPos = content.IndexOf("</table>", startPos);
+                                    if (endPos > startPos)
+                                    {
+                                        string tableContent = content.Substring(startPos, endPos - startPos);
+                                        var match = System.Text.RegularExpressions.Regex.Match(tableContent, @"(\d+\.\d+\.\d+(\.\d+)?)");
+                                        if (match.Success)
+                                        {
+                                            content = match.Groups[1].Value;
+                                            LogHelper.WriteLogToFile($"AutoUpdate | 从HTML提取版本: {content}");
+                                        }
+                                        else
+                                        {
+                                            LogHelper.WriteLogToFile($"AutoUpdate | 无法从HTML内容提取版本");
+                                            return null;
+                                        }
+                                    }
                                 }
-                                else
+                            }
+                            
+                            LogHelper.WriteLogToFile($"AutoUpdate | 响应内容: {content}");
+                            return content;
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
+                    }
+
+                    return null;
+                }
+            }
+            else
+            {
+                // 其他Windows版本使用标准配置
+                using (HttpClient client = new HttpClient())
+                {
+                    try
+                    {
+                        client.Timeout = RequestTimeout;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
+                        
+                        var downloadTask = client.GetAsync(fileUrl);
+                        var timeoutTask = Task.Delay(RequestTimeout);
+                        
+                        var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
+                        if (completedTask == timeoutTask)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
+                            return null;
+                        }
+                        
+                        HttpResponseMessage response = await downloadTask;
+                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                        response.EnsureSuccessStatusCode();
+
+                        string content = await response.Content.ReadAsStringAsync();
+                        content = content.Trim();
+                        
+                        // 如果内容包含HTML（可能是GitHub页面而不是原始内容），尝试提取版本号
+                        if (content.Contains("<html") || content.Contains("<!DOCTYPE"))
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 收到HTML内容而不是原始版本号 - 尝试提取版本");
+                            int startPos = content.IndexOf("<table");
+                            if (startPos > 0)
+                            {
+                                int endPos = content.IndexOf("</table>", startPos);
+                                if (endPos > startPos)
                                 {
-                                    LogHelper.WriteLogToFile($"AutoUpdate | 无法从HTML内容提取版本");
-                                    return null;
+                                    string tableContent = content.Substring(startPos, endPos - startPos);
+                                    var match = System.Text.RegularExpressions.Regex.Match(tableContent, @"(\d+\.\d+\.\d+(\.\d+)?)");
+                                    if (match.Success)
+                                    {
+                                        content = match.Groups[1].Value;
+                                        LogHelper.WriteLogToFile($"AutoUpdate | 从HTML提取版本: {content}");
+                                    }
+                                    else
+                                    {
+                                        LogHelper.WriteLogToFile($"AutoUpdate | 无法从HTML内容提取版本");
+                                        return null;
+                                    }
                                 }
                             }
                         }
+                        
+                        LogHelper.WriteLogToFile($"AutoUpdate | 响应内容: {content}");
+                        return content;
                     }
-                    
-                    LogHelper.WriteLogToFile($"AutoUpdate | 响应内容: {content}");
-                    return content;
-                }
-                catch (HttpRequestException ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
-                }
-                catch (TaskCanceledException ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
-                }
+                    catch (HttpRequestException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
+                    }
 
-                return null;
+                    return null;
+                }
             }
         }
 
@@ -356,131 +469,275 @@ namespace Ink_Canvas.Helpers
         // 下载文件的具体实现
         private static async Task<bool> DownloadFile(string fileUrl, string destinationPath)
         {
-            using (HttpClient client = new HttpClient())
+            // 检测是否为Windows 7
+            var osVersion = Environment.OSVersion;
+            bool isWindows7 = osVersion.Version.Major == 6 && osVersion.Version.Minor == 1;
+            
+            if (isWindows7)
             {
-                try
+                // Windows 7使用特殊配置
+                using (var handler = new HttpClientHandler())
                 {
-                    client.Timeout = TimeSpan.FromMinutes(5);
-                    client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
-                    
-                    LogHelper.WriteLogToFile($"AutoUpdate | 开始下载: {fileUrl}");
-                    
-                    string tempFilePath = destinationPath + ".tmp";
-                    
-                    string directory = Path.GetDirectoryName(destinationPath);
-                    if (!Directory.Exists(directory))
+                    try
                     {
-                        Directory.CreateDirectory(directory);
-                    }
-                    
-                    var downloadTask = client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
-                    var initialTimeoutTask = Task.Delay(RequestTimeout);
-                    
-                    var completedTask = await Task.WhenAny(downloadTask, initialTimeoutTask);
-                    if (completedTask == initialTimeoutTask)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 初始连接超时", LogHelper.LogType.Error);
-                        return false;
-                    }
-                    
-                    HttpResponseMessage response = await downloadTask;
-                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
-                    response.EnsureSuccessStatusCode();
-                    
-                    long? totalBytes = response.Content.Headers.ContentLength;
-                    LogHelper.WriteLogToFile($"AutoUpdate | 文件大小: {(totalBytes.HasValue ? (totalBytes.Value / 1024.0 / 1024.0).ToString("F2") + " MB" : "未知")}");
-                    
-                    using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                    {
-                        using (var downloadStream = await response.Content.ReadAsStreamAsync())
+                        // 配置HttpClientHandler以支持Windows 7
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        
+                        using (HttpClient client = new HttpClient(handler))
                         {
-                            byte[] buffer = new byte[8192];
-                            long totalBytesRead = 0;
-                            int bytesRead;
-                            DateTime lastProgressUpdate = DateTime.Now;
+                            client.Timeout = TimeSpan.FromMinutes(5);
+                            client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
                             
-                            var downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
-                            var readTask = Task.Run(async () => {
-                                while ((bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                                {
-                                    await fileStream.WriteAsync(buffer, 0, bytesRead);
-                                    totalBytesRead += bytesRead;
-                                    
-                                    if ((DateTime.Now - lastProgressUpdate).TotalSeconds >= 5)
-                                    {
-                                        if (totalBytes.HasValue)
-                                        {
-                                            double percentage = (double)totalBytesRead / totalBytes.Value * 100;
-                                            LogHelper.WriteLogToFile($"AutoUpdate | 下载进度: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
-                                        }
-                                        else
-                                        {
-                                            LogHelper.WriteLogToFile($"AutoUpdate | 已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
-                                        }
-                                        lastProgressUpdate = DateTime.Now;
-                                        downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
-                                    }
-                                }
-                                return true;
-                            });
+                            LogHelper.WriteLogToFile($"AutoUpdate | 开始下载: {fileUrl}");
                             
-                            if (await Task.WhenAny(readTask, downloadTimeoutTask) == downloadTimeoutTask)
+                            string tempFilePath = destinationPath + ".tmp";
+                            
+                            string directory = Path.GetDirectoryName(destinationPath);
+                            if (!Directory.Exists(directory))
                             {
-                                LogHelper.WriteLogToFile($"AutoUpdate | 下载超时（60秒无数据传输）", LogHelper.LogType.Error);
+                                Directory.CreateDirectory(directory);
+                            }
+                            
+                            var downloadTask = client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+                            var initialTimeoutTask = Task.Delay(RequestTimeout);
+                            
+                            var completedTask = await Task.WhenAny(downloadTask, initialTimeoutTask);
+                            if (completedTask == initialTimeoutTask)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 初始连接超时", LogHelper.LogType.Error);
                                 return false;
                             }
                             
-                            bool downloadCompleted = await readTask;
+                            HttpResponseMessage response = await downloadTask;
+                            LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                            response.EnsureSuccessStatusCode();
                             
-                            if (downloadCompleted)
+                            long? totalBytes = response.Content.Headers.ContentLength;
+                            LogHelper.WriteLogToFile($"AutoUpdate | 文件大小: {(totalBytes.HasValue ? (totalBytes.Value / 1024.0 / 1024.0).ToString("F2") + " MB" : "未知")}");
+                            
+                            using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                             {
-                                LogHelper.WriteLogToFile($"AutoUpdate | 下载完成: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                using (var downloadStream = await response.Content.ReadAsStreamAsync())
+                                {
+                                    byte[] buffer = new byte[8192];
+                                    long totalBytesRead = 0;
+                                    int bytesRead;
+                                    DateTime lastProgressUpdate = DateTime.Now;
+                                    
+                                    var downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                                    var readTask = Task.Run(async () => {
+                                        while ((bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                        {
+                                            await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                            totalBytesRead += bytesRead;
+                                            
+                                            if ((DateTime.Now - lastProgressUpdate).TotalSeconds >= 5)
+                                            {
+                                                if (totalBytes.HasValue)
+                                                {
+                                                    double percentage = (double)totalBytesRead / totalBytes.Value * 100;
+                                                    LogHelper.WriteLogToFile($"AutoUpdate | 下载进度: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
+                                                }
+                                                else
+                                                {
+                                                    LogHelper.WriteLogToFile($"AutoUpdate | 已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                                }
+                                                lastProgressUpdate = DateTime.Now;
+                                                downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                                            }
+                                        }
+                                        return true;
+                                    });
+                                    
+                                    if (await Task.WhenAny(readTask, downloadTimeoutTask) == downloadTimeoutTask)
+                                    {
+                                        LogHelper.WriteLogToFile($"AutoUpdate | 下载超时（60秒无数据传输）", LogHelper.LogType.Error);
+                                        return false;
+                                    }
+                                    
+                                    bool downloadCompleted = await readTask;
+                                    
+                                    if (downloadCompleted)
+                                    {
+                                        LogHelper.WriteLogToFile($"AutoUpdate | 下载完成: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                    }
+                                }
                             }
+                            
+                            if (File.Exists(tempFilePath))
+                            {
+                                if (File.Exists(destinationPath))
+                                {
+                                    File.Delete(destinationPath);
+                                }
+                                
+                                File.Move(tempFilePath, destinationPath);
+                                LogHelper.WriteLogToFile($"AutoUpdate | 文件保存到: {destinationPath}");
+                                return true;
+                            }
+                            
+                            return false;
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 下载超时: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 下载文件时出错: {ex.Message}", LogHelper.LogType.Error);
+                        if (ex.InnerException != null)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 内部异常: {ex.InnerException.Message}", LogHelper.LogType.Error);
                         }
                     }
                     
-                    if (File.Exists(tempFilePath))
+                    try
                     {
-                        if (File.Exists(destinationPath))
+                        string tempFilePath = destinationPath + ".tmp";
+                        if (File.Exists(tempFilePath))
                         {
-                            File.Delete(destinationPath);
+                            File.Delete(tempFilePath);
                         }
-                        
-                        File.Move(tempFilePath, destinationPath);
-                        LogHelper.WriteLogToFile($"AutoUpdate | 文件保存到: {destinationPath}");
-                        return true;
                     }
+                    catch { }
                     
                     return false;
                 }
-                catch (HttpRequestException ex)
+            }
+            else
+            {
+                // 其他Windows版本使用标准配置
+                using (HttpClient client = new HttpClient())
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
-                }
-                catch (TaskCanceledException ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 下载超时: {ex.Message}", LogHelper.LogType.Error);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 下载文件时出错: {ex.Message}", LogHelper.LogType.Error);
-                    if (ex.InnerException != null)
+                    try
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 内部异常: {ex.InnerException.Message}", LogHelper.LogType.Error);
+                        client.Timeout = TimeSpan.FromMinutes(5);
+                        client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                        
+                        LogHelper.WriteLogToFile($"AutoUpdate | 开始下载: {fileUrl}");
+                        
+                        string tempFilePath = destinationPath + ".tmp";
+                        
+                        string directory = Path.GetDirectoryName(destinationPath);
+                        if (!Directory.Exists(directory))
+                        {
+                            Directory.CreateDirectory(directory);
+                        }
+                        
+                        var downloadTask = client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+                        var initialTimeoutTask = Task.Delay(RequestTimeout);
+                        
+                        var completedTask = await Task.WhenAny(downloadTask, initialTimeoutTask);
+                        if (completedTask == initialTimeoutTask)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 初始连接超时", LogHelper.LogType.Error);
+                            return false;
+                        }
+                        
+                        HttpResponseMessage response = await downloadTask;
+                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                        response.EnsureSuccessStatusCode();
+                        
+                        long? totalBytes = response.Content.Headers.ContentLength;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 文件大小: {(totalBytes.HasValue ? (totalBytes.Value / 1024.0 / 1024.0).ToString("F2") + " MB" : "未知")}");
+                        
+                        using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                        {
+                            using (var downloadStream = await response.Content.ReadAsStreamAsync())
+                            {
+                                byte[] buffer = new byte[8192];
+                                long totalBytesRead = 0;
+                                int bytesRead;
+                                DateTime lastProgressUpdate = DateTime.Now;
+                                
+                                var downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                                var readTask = Task.Run(async () => {
+                                    while ((bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                    {
+                                        await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                        totalBytesRead += bytesRead;
+                                        
+                                        if ((DateTime.Now - lastProgressUpdate).TotalSeconds >= 5)
+                                        {
+                                            if (totalBytes.HasValue)
+                                            {
+                                                double percentage = (double)totalBytesRead / totalBytes.Value * 100;
+                                                LogHelper.WriteLogToFile($"AutoUpdate | 下载进度: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
+                                            }
+                                            else
+                                            {
+                                                LogHelper.WriteLogToFile($"AutoUpdate | 已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                            }
+                                            lastProgressUpdate = DateTime.Now;
+                                            downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                                        }
+                                    }
+                                    return true;
+                                });
+                                
+                                if (await Task.WhenAny(readTask, downloadTimeoutTask) == downloadTimeoutTask)
+                                {
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 下载超时（60秒无数据传输）", LogHelper.LogType.Error);
+                                    return false;
+                                }
+                                
+                                bool downloadCompleted = await readTask;
+                                
+                                if (downloadCompleted)
+                                {
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 下载完成: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                }
+                            }
+                        }
+                        
+                        if (File.Exists(tempFilePath))
+                        {
+                            if (File.Exists(destinationPath))
+                            {
+                                File.Delete(destinationPath);
+                            }
+                            
+                            File.Move(tempFilePath, destinationPath);
+                            LogHelper.WriteLogToFile($"AutoUpdate | 文件保存到: {destinationPath}");
+                            return true;
+                        }
+                        
+                        return false;
                     }
-                }
-                
-                try
-                {
-                    string tempFilePath = destinationPath + ".tmp";
-                    if (File.Exists(tempFilePath))
+                    catch (HttpRequestException ex)
                     {
-                        File.Delete(tempFilePath);
+                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
                     }
+                    catch (TaskCanceledException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 下载超时: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 下载文件时出错: {ex.Message}", LogHelper.LogType.Error);
+                        if (ex.InnerException != null)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 内部异常: {ex.InnerException.Message}", LogHelper.LogType.Error);
+                        }
+                    }
+                    
+                    try
+                    {
+                        string tempFilePath = destinationPath + ".tmp";
+                        if (File.Exists(tempFilePath))
+                        {
+                            File.Delete(tempFilePath);
+                        }
+                    }
+                    catch { }
+                    
+                    return false;
                 }
-                catch { }
-                
-                return false;
             }
         }
 
@@ -678,39 +935,91 @@ namespace Ink_Canvas.Helpers
         // 获取远程内容的通用方法
         public static async Task<string> GetRemoteContent(string fileUrl)
         {
-            using (HttpClient client = new HttpClient())
+            // 检测是否为Windows 7
+            var osVersion = Environment.OSVersion;
+            bool isWindows7 = osVersion.Version.Major == 6 && osVersion.Version.Minor == 1;
+            
+            if (isWindows7)
             {
-                try
+                // Windows 7使用特殊配置
+                using (var handler = new HttpClientHandler())
                 {
-                    client.Timeout = RequestTimeout;
-                    LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
-                    var downloadTask = client.GetAsync(fileUrl);
-                    var timeoutTask = Task.Delay(RequestTimeout);
-                    var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
-                    if (completedTask == timeoutTask)
+                    try
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
-                        return null;
+                        // 配置HttpClientHandler以支持Windows 7
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                        
+                        using (HttpClient client = new HttpClient(handler))
+                        {
+                            client.Timeout = RequestTimeout;
+                            LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
+                            var downloadTask = client.GetAsync(fileUrl);
+                            var timeoutTask = Task.Delay(RequestTimeout);
+                            var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
+                            if (completedTask == timeoutTask)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
+                                return null;
+                            }
+                            HttpResponseMessage response = await downloadTask;
+                            LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                            response.EnsureSuccessStatusCode();
+                            string content = await response.Content.ReadAsStringAsync();
+                            return content;
+                        }
                     }
-                    HttpResponseMessage response = await downloadTask;
-                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
-                    response.EnsureSuccessStatusCode();
-                    string content = await response.Content.ReadAsStringAsync();
-                    return content;
+                    catch (HttpRequestException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    return null;
                 }
-                catch (HttpRequestException ex)
+            }
+            else
+            {
+                // 其他Windows版本使用标准配置
+                using (HttpClient client = new HttpClient())
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                    try
+                    {
+                        client.Timeout = RequestTimeout;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
+                        var downloadTask = client.GetAsync(fileUrl);
+                        var timeoutTask = Task.Delay(RequestTimeout);
+                        var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
+                        if (completedTask == timeoutTask)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
+                            return null;
+                        }
+                        HttpResponseMessage response = await downloadTask;
+                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                        response.EnsureSuccessStatusCode();
+                        string content = await response.Content.ReadAsStringAsync();
+                        return content;
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                    return null;
                 }
-                catch (TaskCanceledException ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
-                }
-                return null;
             }
         }
 
@@ -785,6 +1094,55 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | FixVersion错误: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        // 测试Windows 7 TLS连接的方法
+        public static async Task<bool> TestWindows7TlsConnection()
+        {
+            try
+            {
+                // 检测是否为Windows 7
+                var osVersion = Environment.OSVersion;
+                bool isWindows7 = osVersion.Version.Major == 6 && osVersion.Version.Minor == 1;
+                
+                if (!isWindows7)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 当前系统不是Windows 7，跳过TLS连接测试", LogHelper.LogType.Info);
+                    return true; // 非Windows 7系统直接返回成功
+                }
+                
+                LogHelper.WriteLogToFile("AutoUpdate | 开始测试Windows 7 TLS连接...");
+                
+                // 测试GitHub连接
+                var testUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                
+                using (var handler = new HttpClientHandler())
+                {
+                    handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                    
+                    using (var client = new HttpClient(handler))
+                    {
+                        client.Timeout = TimeSpan.FromSeconds(10);
+                        var response = await client.GetAsync(testUrl);
+                        
+                        if (response.IsSuccessStatusCode)
+                        {
+                            LogHelper.WriteLogToFile("AutoUpdate | Windows 7 TLS连接测试成功");
+                            return true;
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | Windows 7 TLS连接测试失败，状态码: {response.StatusCode}", LogHelper.LogType.Error);
+                            return false;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Windows 7 TLS连接测试异常: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
         }
