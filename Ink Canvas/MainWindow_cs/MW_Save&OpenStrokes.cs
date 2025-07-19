@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using Microsoft.Win32;
 using System;
 using System.IO;
+using System.IO.Compression;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
@@ -311,38 +312,240 @@ namespace Ink_Canvas {
             var openFileDialog = new OpenFileDialog();
             openFileDialog.InitialDirectory = Settings.Automation.AutoSavedStrokesLocation;
             openFileDialog.Title = "打开墨迹文件";
-            openFileDialog.Filter = "Ink Canvas Strokes File (*.icstk)|*.icstk";
+            openFileDialog.Filter = "Ink Canvas Strokes File (*.icstk)|*.icstk|ICC压缩包 (*.zip)|*.zip";
             if (openFileDialog.ShowDialog() != true) return;
             LogHelper.WriteLogToFile($"Strokes Insert: Name: {openFileDialog.FileName}",
                 LogHelper.LogType.Event);
+            
             try {
-                var fileStreamHasNoStroke = false;
-                using (var fs = new FileStream(openFileDialog.FileName, FileMode.Open, FileAccess.Read)) {
-                    var strokes = new StrokeCollection(fs);
-                    fileStreamHasNoStroke = strokes.Count == 0;
-                    if (!fileStreamHasNoStroke) {
-                        ClearStrokes(true);
-                        timeMachine.ClearStrokeHistory();
-                        inkCanvas.Strokes.Add(strokes);
-                        LogHelper.NewLog($"Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count.ToString()}");
-                    }
+                string fileExtension = Path.GetExtension(openFileDialog.FileName).ToLower();
+                
+                if (fileExtension == ".zip") {
+                    // 处理ICC压缩包
+                    OpenICCZipFile(openFileDialog.FileName);
+                } else {
+                    // 处理单个墨迹文件
+                    OpenSingleStrokeFile(openFileDialog.FileName);
                 }
-
-                if (fileStreamHasNoStroke)
-                    using (var ms = new MemoryStream(File.ReadAllBytes(openFileDialog.FileName))) {
-                        ms.Seek(0, SeekOrigin.Begin);
-                        var strokes = new StrokeCollection(ms);
-                        ClearStrokes(true);
-                        timeMachine.ClearStrokeHistory();
-                        inkCanvas.Strokes.Add(strokes);
-                        LogHelper.NewLog($"Strokes Insert (2): Strokes Count: {strokes.Count.ToString()}");
-                    }
 
                 if (inkCanvas.Visibility != Visibility.Visible) SymbolIconCursor_Click(sender, null);
             }
-            catch {
+            catch (Exception ex) {
                 ShowNotification("墨迹打开失败");
+                LogHelper.WriteLogToFile($"墨迹打开失败: {ex.ToString()}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 打开ICC创建的.zip压缩包
+        /// </summary>
+        private void OpenICCZipFile(string zipFilePath) {
+            try {
+                // 创建临时目录来解压文件
+                string tempDir = Path.Combine(Path.GetTempPath(), $"InkCanvas_Open_{DateTime.Now:yyyyMMdd_HHmmss}");
+                Directory.CreateDirectory(tempDir);
+                
+                try {
+                    // 解压ZIP文件
+                    System.IO.Compression.ZipFile.ExtractToDirectory(zipFilePath, tempDir);
+                    
+                    // 读取元数据文件
+                    string metadataFile = Path.Combine(tempDir, "metadata.txt");
+                    if (!File.Exists(metadataFile)) {
+                        throw new Exception("压缩包中未找到元数据文件");
+                    }
+                    
+                    var metadata = ReadMetadataFile(metadataFile);
+                    
+                    // 根据元数据信息决定恢复模式
+                    bool isPPTMode = metadata.ContainsKey("模式") && metadata["模式"].Contains("PPT放映");
+                    bool isWhiteboardMode = metadata.ContainsKey("模式") && metadata["模式"].Contains("白板");
+                    
+                    // 检查当前是否处于PPT模式
+                    bool isCurrentlyInPPTMode = BtnPPTSlideShowEnd.Visibility == Visibility.Visible && pptApplication != null;
+                    
+                    // 根据当前模式和保存模式决定恢复策略
+                    if (isPPTMode && isCurrentlyInPPTMode) {
+                        // PPT模式下恢复PPT墨迹
+                        RestorePPTStrokesFromZip(tempDir, metadata);
+                    } else if (isWhiteboardMode) {
+                        // 白板模式下恢复白板墨迹
+                        RestoreWhiteboardStrokesFromZip(tempDir, metadata);
+                    } else {
+                        // 其他情况只恢复白板墨迹
+                        RestoreWhiteboardStrokesFromZip(tempDir, metadata);
+                    }
+                    
+                    ShowNotification($"成功打开ICC压缩包，共{(metadata.ContainsKey("总页数") ? metadata["总页数"] : "0")}页");
+                }
+                finally {
+                    // 清理临时目录
+                    try {
+                        if (Directory.Exists(tempDir))
+                            Directory.Delete(tempDir, true);
+                    }
+                    catch (Exception ex) {
+                        LogHelper.WriteLogToFile($"清理临时目录失败: {ex.ToString()}", LogHelper.LogType.Warning);
+                    }
+                }
+            }
+            catch (Exception ex) {
+                LogHelper.WriteLogToFile($"打开ICC压缩包失败: {ex.ToString()}", LogHelper.LogType.Error);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 读取元数据文件
+        /// </summary>
+        private Dictionary<string, string> ReadMetadataFile(string metadataPath) {
+            var metadata = new Dictionary<string, string>();
+            
+            using (var reader = new StreamReader(metadataPath, System.Text.Encoding.UTF8)) {
+                string line;
+                while ((line = reader.ReadLine()) != null) {
+                    if (line.Contains(":")) {
+                        var parts = line.Split(new[] { ':' }, 2);
+                        if (parts.Length == 2) {
+                            metadata[parts[0].Trim()] = parts[1].Trim();
+                        }
+                    }
+                }
+            }
+            
+            return metadata;
+        }
+
+        /// <summary>
+        /// 从ZIP文件恢复PPT墨迹
+        /// </summary>
+        private void RestorePPTStrokesFromZip(string tempDir, Dictionary<string, string> metadata) {
+            try {
+                // 清空当前墨迹
+                ClearStrokes(true);
+                timeMachine.ClearStrokeHistory();
+                
+                // 重置PPT墨迹存储
+                if (memoryStreams == null) {
+                    memoryStreams = new MemoryStream[50];
+                }
+                
+                // 读取所有页面的墨迹文件
+                var files = Directory.GetFiles(tempDir, "page_*.icstk");
+                foreach (var file in files) {
+                    var fileName = Path.GetFileNameWithoutExtension(file);
+                    if (fileName.StartsWith("page_") && int.TryParse(fileName.Substring(5), out int pageNumber)) {
+                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read)) {
+                            var strokes = new StrokeCollection(fs);
+                            if (strokes.Count > 0) {
+                                var ms = new MemoryStream();
+                                strokes.Save(ms);
+                                ms.Position = 0;
+                                memoryStreams[pageNumber] = ms;
+                            }
+                        }
+                    }
+                }
+                
+                // 恢复当前页面的墨迹
+                if (pptApplication != null && pptApplication.SlideShowWindows.Count > 0) {
+                    int currentSlide = pptApplication.SlideShowWindows[1].View.CurrentShowPosition;
+                    if (memoryStreams[currentSlide] != null && memoryStreams[currentSlide].Length > 0) {
+                        memoryStreams[currentSlide].Position = 0;
+                        inkCanvas.Strokes.Add(new StrokeCollection(memoryStreams[currentSlide]));
+                    }
+                    previousSlideID = currentSlide;
+                }
+                
+                LogHelper.WriteLogToFile($"成功恢复PPT墨迹，共{files.Length}页");
+            }
+            catch (Exception ex) {
+                LogHelper.WriteLogToFile($"恢复PPT墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 从ZIP文件恢复白板墨迹
+        /// </summary>
+        private void RestoreWhiteboardStrokesFromZip(string tempDir, Dictionary<string, string> metadata) {
+            try {
+                // 清空当前墨迹
+                ClearStrokes(true);
+                timeMachine.ClearStrokeHistory();
+                
+                // 读取总页数
+                int totalPages = 1;
+                if (metadata.ContainsKey("总页数") && int.TryParse(metadata["总页数"], out int parsedPages)) {
+                    totalPages = parsedPages;
+                }
+                
+                // 重置白板状态
+                WhiteboardTotalCount = totalPages;
+                CurrentWhiteboardIndex = 1;
+                
+                // 清空历史记录
+                for (int i = 0; i < TimeMachineHistories.Length; i++) {
+                    TimeMachineHistories[i] = null;
+                }
+                
+                // 读取所有页面的墨迹文件
+                var files = Directory.GetFiles(tempDir, "page_*.icstk");
+                foreach (var file in files) {
+                    var fileName = Path.GetFileNameWithoutExtension(file);
+                    if (fileName.StartsWith("page_") && int.TryParse(fileName.Substring(5), out int pageNumber)) {
+                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read)) {
+                            var strokes = new StrokeCollection(fs);
+                            if (strokes.Count > 0) {
+                                // 创建历史记录
+                                var history = new TimeMachineHistory(strokes, TimeMachineHistoryType.UserInput, false);
+                                TimeMachineHistories[pageNumber] = new TimeMachineHistory[] { history };
+                            }
+                        }
+                    }
+                }
+                
+                // 恢复第一页的墨迹
+                if (TimeMachineHistories[1] != null) {
+                    RestoreStrokes();
+                }
+                
+                // 更新UI显示
+                UpdateIndexInfoDisplay();
+                
+                LogHelper.WriteLogToFile($"成功恢复白板墨迹，共{totalPages}页");
+            }
+            catch (Exception ex) {
+                LogHelper.WriteLogToFile($"恢复白板墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// 打开单个墨迹文件
+        /// </summary>
+        private void OpenSingleStrokeFile(string filePath) {
+            var fileStreamHasNoStroke = false;
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read)) {
+                var strokes = new StrokeCollection(fs);
+                fileStreamHasNoStroke = strokes.Count == 0;
+                if (!fileStreamHasNoStroke) {
+                    ClearStrokes(true);
+                    timeMachine.ClearStrokeHistory();
+                    inkCanvas.Strokes.Add(strokes);
+                    LogHelper.NewLog($"Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count.ToString()}");
+                }
+            }
+
+            if (fileStreamHasNoStroke)
+                using (var ms = new MemoryStream(File.ReadAllBytes(filePath))) {
+                    ms.Seek(0, SeekOrigin.Begin);
+                    var strokes = new StrokeCollection(ms);
+                    ClearStrokes(true);
+                    timeMachine.ClearStrokeHistory();
+                    inkCanvas.Strokes.Add(strokes);
+                    LogHelper.NewLog($"Strokes Insert (2): Strokes Count: {strokes.Count.ToString()}");
+                }
         }
     }
 }
