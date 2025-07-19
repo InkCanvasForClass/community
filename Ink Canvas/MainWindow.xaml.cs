@@ -171,16 +171,23 @@ namespace Ink_Canvas {
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e) {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
-            
+
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(inkCanvas1);
             if (Settings.Canvas.IsShowCursor) {
-                if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink || drawingShapeMode != 0)
+                if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink ||
+                    inkCanvas1.EditingMode == InkCanvasEditingMode.Select ||
+                    drawingShapeMode != 0)
                     inkCanvas1.ForceCursor = true;
                 else
                     inkCanvas1.ForceCursor = false;
             } else {
-                inkCanvas1.ForceCursor = false;
+                // 套索选择模式下始终强制显示光标，即使用户设置不显示光标
+                if (inkCanvas1.EditingMode == InkCanvasEditingMode.Select) {
+                    inkCanvas1.ForceCursor = true;
+                } else {
+                    inkCanvas1.ForceCursor = false;
+                }
             }
 
             if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) forcePointEraser = !forcePointEraser;
@@ -579,23 +586,20 @@ namespace Ink_Canvas {
         // 添加一个辅助方法，根据当前编辑模式设置光标
         public void SetCursorBasedOnEditingMode(InkCanvas canvas)
         {
-            // 套索选模式下光标始终显示
-            if (!Settings.Canvas.IsShowCursor) {
+            // 套索选择模式下光标始终显示，无论用户设置如何
+            if (canvas.EditingMode == InkCanvasEditingMode.Select) {
                 canvas.UseCustomCursor = true;
                 canvas.ForceCursor = true;
-                
-                if (canvas.EditingMode == InkCanvasEditingMode.Select) {
-                    canvas.Cursor = Cursors.Cross;
-                }
-                
+                canvas.Cursor = Cursors.Cross;
                 System.Windows.Forms.Cursor.Show();
                 return;
             }
 
+            // 其他模式按照用户设置处理
             if (Settings.Canvas.IsShowCursor) {
                 canvas.UseCustomCursor = true;
                 canvas.ForceCursor = true;
-                
+
                 // 根据编辑模式设置不同的光标
                 if (canvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                     canvas.Cursor = Cursors.Cross;
@@ -603,16 +607,11 @@ namespace Ink_Canvas {
                     var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
                     if (sri != null)
                         canvas.Cursor = new Cursor(sri.Stream);
-                } else if (canvas.EditingMode == InkCanvasEditingMode.Select) {
-                    canvas.Cursor = Cursors.Cross;
                 }
-                
+
                 // 确保光标可见，无论是鼠标、触控还是手写笔
                 System.Windows.Forms.Cursor.Show();
-                
-                // 强制应用光标设置
-                canvas.ForceCursor = true;
-                
+
                 // 确保手写笔模式下也能显示光标
                 if (Tablet.TabletDevices.Count > 0) {
                     foreach (TabletDevice device in Tablet.TabletDevices) {
@@ -634,14 +633,14 @@ namespace Ink_Canvas {
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(inkCanvas);
+            SetCursorBasedOnEditingMode(sender as InkCanvas);
         }
 
         // 手写笔输入
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
             // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(inkCanvas);
+            SetCursorBasedOnEditingMode(sender as InkCanvas);
         }
 
         // 触摸结束，恢复光标

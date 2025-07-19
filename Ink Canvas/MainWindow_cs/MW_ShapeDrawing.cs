@@ -371,6 +371,11 @@ namespace Ink_Canvas {
         #endregion
 
         private void inkCanvas_TouchMove(object sender, TouchEventArgs e) {
+            // 确保套索选择模式下触摸移动时光标保持可见
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.Select) {
+                SetCursorBasedOnEditingMode(inkCanvas);
+            }
+
             // 如果处于手掌擦状态，继续使用相同的橡皮形状
             if (isLastTouchEraser && currentPalmEraserShape != null) {
                 inkCanvas.EraserShape = currentPalmEraserShape;
