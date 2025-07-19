@@ -210,8 +210,18 @@
                                     <!-- Plugins -->
                                     <Button Width="40" Height="40" Margin="0,5,0,0" Style="{StaticResource NavButton}"
                                             Click="NavPlugins_Click" Tag="plugins" ToolTip="插件">
-                                        <TextBlock Text="&#xE735;" FontFamily="Segoe MDL2 Assets" FontSize="18"/>
+                                        <Image Width="20" Height="20">
+                                            <Image.Source>
+                                                <DrawingImage>
+                                                    <DrawingImage.Drawing>
+                                                        <GeometryDrawing Brush="White"
+                                                                         Geometry="M4 24V12H13V10C13 6.68629 15.6863 4 19 4C22.3137 4 25 6.68629 25 10V12H34V24H38C41.3137 24 44 26.6863 44 30C44 33.3137 41.3137 36 38 36H34V44H4V36H8C11.3137 36 14 33.3137 14 30C14 26.6863 11.3137 24 8 24H4Z"/>
+                                                    </DrawingImage.Drawing>
+                                                </DrawingImage>
+                                            </Image.Source>
+                                        </Image>
                                     </Button>
+
                                     <!-- Startup -->
                                     <Button Width="40" Height="40" Margin="0,10,0,0" Style="{StaticResource NavButton}" 
                                             Click="NavStartup_Click" Tag="startup" ToolTip="启动设置">
