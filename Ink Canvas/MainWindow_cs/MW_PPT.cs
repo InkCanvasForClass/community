@@ -28,8 +28,6 @@ namespace Ink_Canvas {
 
         private void BtnCheckPPT_Click(object sender, RoutedEventArgs e) {
             try {
-                // 显示加载动画
-                Application.Current.Dispatcher.Invoke(() => { LoadingMask.Visibility = Visibility.Visible; });
                 pptApplication =
                     (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("kwpp.Application");
                 //pptApplication.SlideShowWindows[1].View.Next();
@@ -69,10 +67,6 @@ namespace Ink_Canvas {
                 RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 MessageBox.Show("未找到幻灯片");
             }
-            finally {
-                // 隐藏加载动画
-                Application.Current.Dispatcher.Invoke(() => { LoadingMask.Visibility = Visibility.Collapsed; });
-            }
         }
 
         private void ToggleSwitchSupportWPS_Toggled(object sender, RoutedEventArgs e) {
@@ -91,8 +85,16 @@ namespace Ink_Canvas {
         private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e) {
             if (IsShowingRestoreHiddenSlidesWindow || IsShowingAutoplaySlidesWindow) return;
             try {
-                // 显示加载动画
-                Application.Current.Dispatcher.Invoke(() => { LoadingMask.Visibility = Visibility.Visible; });
+                //var processes = Process.GetProcessesByName("wpp");
+                //if (processes.Length > 0 && !isWPSSupportOn) return;
+
+                //使用下方提前创建 PowerPoint 实例，将导致 PowerPoint 不再有启动界面
+                //pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
+                //new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowBegin").AddEventHandler(pptApplication, new EApplication_SlideShowBeginEventHandler(this.PptApplication_SlideShowBegin));
+                //new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowEnd").AddEventHandler(pptApplication, new EApplication_SlideShowEndEventHandler(this.PptApplication_SlideShowEnd));
+                //new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").AddEventHandler(pptApplication, new EApplication_SlideShowNextSlideEventHandler(this.PptApplication_SlideShowNextSlide));
+                //ConfigHelper.Instance.IsInitApplicationSuccessful = true;
+
                 pptApplication =
                     (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
 
@@ -139,10 +141,6 @@ namespace Ink_Canvas {
                 //StackPanelPPTControls.Visibility = Visibility.Collapsed;
                 Application.Current.Dispatcher.Invoke(() => { BtnPPTSlideShow.Visibility = Visibility.Collapsed; });
                 timerCheckPPT.Start();
-            }
-            finally {
-                // 隐藏加载动画
-                Application.Current.Dispatcher.Invoke(() => { LoadingMask.Visibility = Visibility.Collapsed; });
             }
         }
 
