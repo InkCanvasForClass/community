@@ -339,7 +339,7 @@ namespace Ink_Canvas {
                         IsHitTestVisible = false,
                         HorizontalAlignment = HorizontalAlignment.Left,
                         VerticalAlignment = VerticalAlignment.Top,
-                        Opacity = 0.6
+                        Opacity = 0.8
                     };
                     Panel.SetZIndex(eraserVisualBorder, 1001);
                     
