@@ -26,10 +26,22 @@ namespace Ink_Canvas {
         public static Slide slide = null;
         public static int slidescount = 0;
 
+        // 新增：安全切换LoadingMask可见性的方法，避免重复赋值导致动画闪动
+        private void SetLoadingMaskVisibility(Visibility visibility)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                if (LoadingMask.Visibility != visibility)
+                {
+                    LoadingMask.Visibility = visibility;
+                }
+            });
+        }
+
         private void BtnCheckPPT_Click(object sender, RoutedEventArgs e) {
             try {
                 // 显示加载动画
-                Application.Current.Dispatcher.Invoke(() => { LoadingMask.Visibility = Visibility.Visible; });
+                SetLoadingMaskVisibility(Visibility.Visible);
                 pptApplication =
                     (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("kwpp.Application");
                 //pptApplication.SlideShowWindows[1].View.Next();
@@ -71,7 +83,7 @@ namespace Ink_Canvas {
             }
             finally {
                 // 隐藏加载动画
-                Application.Current.Dispatcher.Invoke(() => { LoadingMask.Visibility = Visibility.Collapsed; });
+                SetLoadingMaskVisibility(Visibility.Collapsed);
             }
         }
 
@@ -92,7 +104,7 @@ namespace Ink_Canvas {
             if (IsShowingRestoreHiddenSlidesWindow || IsShowingAutoplaySlidesWindow) return;
             try {
                 // 显示加载动画
-                Application.Current.Dispatcher.Invoke(() => { LoadingMask.Visibility = Visibility.Visible; });
+                SetLoadingMaskVisibility(Visibility.Visible);
                 pptApplication =
                     (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
 
@@ -142,7 +154,7 @@ namespace Ink_Canvas {
             }
             finally {
                 // 隐藏加载动画
-                Application.Current.Dispatcher.Invoke(() => { LoadingMask.Visibility = Visibility.Collapsed; });
+                SetLoadingMaskVisibility(Visibility.Collapsed);
             }
         }
 
