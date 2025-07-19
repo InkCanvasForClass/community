@@ -8,6 +8,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Ink_Canvas.Helpers;
 using System.Windows.Shapes;
+using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -333,13 +334,13 @@ namespace Ink_Canvas {
                 // 获取或创建橡皮擦视觉反馈Border
                 if (eraserVisualBorder == null) {
                     eraserVisualBorder = new Border {
-                        Background = new SolidColorBrush(Colors.White),
+                        Background = new SolidColorBrush(Colors.Transparent),
                         BorderBrush = new SolidColorBrush(Colors.Transparent),
                         BorderThickness = new Thickness(0),
                         IsHitTestVisible = false,
                         HorizontalAlignment = HorizontalAlignment.Left,
                         VerticalAlignment = VerticalAlignment.Top,
-                        Opacity = 0.8
+                        Opacity = 1
                     };
                     Panel.SetZIndex(eraserVisualBorder, 1001);
                     
@@ -355,12 +356,17 @@ namespace Ink_Canvas {
                 }
 
                 if (eraserVisualBorder != null) {
+                    // 创建橡皮擦视觉反馈
+                    var eraserImage = CreateEraserVisualImage();
+                    
+                    // 清除Border的内容并添加新的图像
+                    eraserVisualBorder.Child = eraserImage;
+                    
                     // 更新橡皮擦位置和大小
                     if (isCurrentEraserCircle) {
                         var radius = currentEraserSize / 2;
                         eraserVisualBorder.Width = currentEraserSize;
                         eraserVisualBorder.Height = currentEraserSize;
-                        eraserVisualBorder.CornerRadius = new CornerRadius(radius);
                         
                         // 使用Margin来定位，因为Border在Grid中
                         eraserVisualBorder.Margin = new Thickness(
@@ -372,7 +378,6 @@ namespace Ink_Canvas {
                         var height = currentEraserSize / 0.6;
                         eraserVisualBorder.Width = currentEraserSize;
                         eraserVisualBorder.Height = height;
-                        eraserVisualBorder.CornerRadius = new CornerRadius(0);
                         
                         // 使用Margin来定位，因为Border在Grid中
                         eraserVisualBorder.Margin = new Thickness(
@@ -386,6 +391,103 @@ namespace Ink_Canvas {
                 }
             } catch (Exception ex) {
                 Trace.WriteLine($"Advanced Eraser: Error updating visual feedback - {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 创建橡皮擦视觉图像
+        /// </summary>
+        private Image CreateEraserVisualImage() {
+            try {
+                // 根据橡皮擦形状选择对应的DrawingGroup资源
+                string resourceKey = isCurrentEraserCircle ? "EraserCircleDrawingGroup" : "EraserDrawingGroup";
+                
+                // 尝试从资源字典中获取DrawingGroup
+                var drawingGroup = this.TryFindResource(resourceKey) as DrawingGroup;
+                if (drawingGroup == null) {
+                    // 如果找不到资源，创建默认的橡皮擦图像
+                    return CreateDefaultEraserImage();
+                }
+
+                // 创建变换后的DrawingGroup
+                var transformedGroup = new DrawingGroup();
+                transformedGroup.Children.Add(drawingGroup);
+                
+                // 应用缩放变换
+                var transform = new ScaleTransform();
+                if (isCurrentEraserCircle) {
+                    var scale = currentEraserSize / 56.0; // 基于56x56的基准尺寸
+                    transform.ScaleX = scale;
+                    transform.ScaleY = scale;
+                } else {
+                    var scaleX = currentEraserSize / 38.0;
+                    var scaleY = (currentEraserSize / 0.6) / 56.0;
+                    transform.ScaleX = scaleX;
+                    transform.ScaleY = scaleY;
+                }
+                transformedGroup.Transform = transform;
+
+                // 创建DrawingImage
+                var drawingImage = new DrawingImage(transformedGroup);
+                
+                // 创建Image控件
+                var image = new Image {
+                    Source = drawingImage,
+                    Stretch = Stretch.None
+                };
+                RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.HighQuality);
+
+                return image;
+            } catch (Exception ex) {
+                Trace.WriteLine($"Advanced Eraser: Error creating eraser visual image - {ex.Message}");
+                return CreateDefaultEraserImage();
+            }
+        }
+
+        /// <summary>
+        /// 创建默认的橡皮擦图像（当资源不可用时）
+        /// </summary>
+        private Image CreateDefaultEraserImage() {
+            try {
+                // 创建一个简单的几何图形作为默认橡皮擦
+                Geometry geometry;
+                if (isCurrentEraserCircle) {
+                    geometry = new EllipseGeometry(new Point(28, 28), 28, 28);
+                } else {
+                    geometry = new RectangleGeometry(new Rect(0, 0, 38, 56));
+                }
+
+                var brush = new SolidColorBrush(Colors.LightGray);
+                var pen = new Pen(new SolidColorBrush(Colors.DarkGray), 1);
+
+                var geometryDrawing = new GeometryDrawing(brush, pen, geometry);
+                var drawingGroup = new DrawingGroup();
+                drawingGroup.Children.Add(geometryDrawing);
+
+                // 应用缩放变换
+                var transform = new ScaleTransform();
+                if (isCurrentEraserCircle) {
+                    var scale = currentEraserSize / 56.0;
+                    transform.ScaleX = scale;
+                    transform.ScaleY = scale;
+                } else {
+                    var scaleX = currentEraserSize / 38.0;
+                    var scaleY = (currentEraserSize / 0.6) / 56.0;
+                    transform.ScaleX = scaleX;
+                    transform.ScaleY = scaleY;
+                }
+                drawingGroup.Transform = transform;
+
+                var drawingImage = new DrawingImage(drawingGroup);
+                var image = new Image {
+                    Source = drawingImage,
+                    Stretch = Stretch.None
+                };
+
+                return image;
+            } catch (Exception ex) {
+                Trace.WriteLine($"Advanced Eraser: Error creating default eraser image - {ex.Message}");
+                return null;
             }
         }
 
