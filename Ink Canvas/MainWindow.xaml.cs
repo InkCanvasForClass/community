@@ -579,6 +579,19 @@ namespace Ink_Canvas {
         // 添加一个辅助方法，根据当前编辑模式设置光标
         public void SetCursorBasedOnEditingMode(InkCanvas canvas)
         {
+            // 套索选模式下光标始终显示
+            if (!Settings.Canvas.IsShowCursor) {
+                canvas.UseCustomCursor = true;
+                canvas.ForceCursor = true;
+                
+                if (canvas.EditingMode == InkCanvasEditingMode.Select) {
+                    canvas.Cursor = Cursors.Cross;
+                }
+                
+                System.Windows.Forms.Cursor.Show();
+                return;
+            }
+
             if (Settings.Canvas.IsShowCursor) {
                 canvas.UseCustomCursor = true;
                 canvas.ForceCursor = true;
