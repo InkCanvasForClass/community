@@ -178,7 +178,40 @@
     </Window.CommandBindings>
 
     <Grid x:Name="Main_Grid">
-
+        <!-- 等待COM组件加载动画 -->
+        <Grid x:Name="LoadingMask" Background="#80000000" Visibility="Collapsed" Panel.ZIndex="10000">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" >
+                <!-- 圆形旋转动画 -->
+                <Grid Width="60" Height="60">
+                    <Ellipse Width="60" Height="60" Stroke="#40FFFFFF" StrokeThickness="6"/>
+                    <Ellipse Width="60" Height="60" Stroke="White" StrokeThickness="6"
+                             StrokeDashArray="0,1.5"
+                             RenderTransformOrigin="0.5,0.5">
+                        <Ellipse.RenderTransform>
+                            <RotateTransform x:Name="SpinnerRotate"/>
+                        </Ellipse.RenderTransform>
+                        <Ellipse.Triggers>
+                            <EventTrigger RoutedEvent="FrameworkElement.Loaded">
+                                <BeginStoryboard>
+                                    <Storyboard RepeatBehavior="Forever">
+                                        <DoubleAnimation
+                                            Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)"
+                                            From="0" To="360" Duration="0:0:1"/>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </EventTrigger>
+                        </Ellipse.Triggers>
+                    </Ellipse>
+                </Grid>
+                <TextBlock Text="正在连接 PowerPoint..." 
+                           Foreground="White" 
+                           Margin="0,20,0,0" 
+                           HorizontalAlignment="Center"
+                           FontSize="18"
+                           FontWeight="Bold"
+                           Opacity="0.9"/>
+            </StackPanel>
+        </Grid>
         <!--// 设置界面 //-->
         <Grid Panel.ZIndex="999" x:Name="BorderSettingsMask" MouseDown="SettingsOverlayClick" IsHitTestVisible="True"
               Margin="0,0,0,0">
