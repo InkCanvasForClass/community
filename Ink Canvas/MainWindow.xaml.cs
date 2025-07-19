@@ -24,9 +24,16 @@ using System.Windows.Media.Animation;
 using System.Reflection;
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
+using System.Collections.Generic;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
+        // 新增：每一页一个Canvas对象
+        private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();
+        private int currentPageIndex = 0;
+        private System.Windows.Controls.Canvas currentCanvas = null;
+        private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup = null;
+
         #region Window Initialization
 
         public MainWindow() {
@@ -109,8 +116,13 @@ namespace Ink_Canvas {
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
             inkCanvas.StylusDown += inkCanvas_StylusDown;
-            inkCanvas.TouchDown += inkCanvas_TouchDown;
-            inkCanvas.TouchUp += inkCanvas_TouchUp;
+
+            // 初始化第一页Canvas
+            var firstCanvas = new System.Windows.Controls.Canvas();
+            whiteboardPages.Add(firstCanvas);
+            InkCanvasGridForInkReplay.Children.Add(firstCanvas);
+            currentPageIndex = 0;
+            ShowPage(currentPageIndex);
         }
 
         #endregion
@@ -160,11 +172,42 @@ namespace Ink_Canvas {
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e) {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
-            
+
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(inkCanvas1);
+            if (Settings.Canvas.IsShowCursor) {
+                if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink ||
+                    inkCanvas1.EditingMode == InkCanvasEditingMode.Select ||
+                    drawingShapeMode != 0)
+                    inkCanvas1.ForceCursor = true;
+                else
+                    inkCanvas1.ForceCursor = false;
+            } else {
+                // 套索选择模式下始终强制显示光标，即使用户设置不显示光标
+                if (inkCanvas1.EditingMode == InkCanvasEditingMode.Select) {
+                    inkCanvas1.ForceCursor = true;
+                } else {
+                    inkCanvas1.ForceCursor = false;
+                }
+            }
 
             if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) forcePointEraser = !forcePointEraser;
+            
+            // 处理高级橡皮擦覆盖层的启用/禁用
+            var eraserOverlay = this.FindName("AdvancedEraserOverlay") as Border;
+            if (eraserOverlay != null) {
+                if (inkCanvas1.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                    // 橡皮擦模式下启用覆盖层
+                    eraserOverlay.IsHitTestVisible = true;
+                    Trace.WriteLine("Advanced Eraser: Overlay enabled in eraser mode");
+                } else {
+                    // 其他模式下禁用覆盖层
+                    eraserOverlay.IsHitTestVisible = false;
+                    // 同时禁用高级橡皮擦系统
+                    DisableAdvancedEraserSystem();
+                    Trace.WriteLine("Advanced Eraser: Overlay disabled in non-eraser mode");
+                }
+            }
         }
 
         #endregion Ink Canvas
@@ -174,6 +217,7 @@ namespace Ink_Canvas {
         public static Settings Settings = new Settings();
         public static string settingsFileName = "Settings.json";
         private bool isLoaded = false;
+        private bool forcePointEraser = false;
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             loadPenCanvas();
@@ -381,9 +425,46 @@ namespace Ink_Canvas {
             }
         }
 
+        // 辅助方法：使用多线路组下载更新
+        private async Task<bool> DownloadUpdateWithFallback(string version, AutoUpdateHelper.UpdateLineGroup primaryGroup, UpdateChannel channel)
+        {
+            try
+            {
+                // 如果主要线路组可用，直接使用
+                if (primaryGroup != null)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 使用主要线路组下载: {primaryGroup.GroupName}");
+                    return await AutoUpdateHelper.DownloadSetupFile(version, primaryGroup);
+                }
+                
+                // 如果主要线路组不可用，获取所有可用线路组
+                LogHelper.WriteLogToFile("AutoUpdate | 主要线路组不可用，获取所有可用线路组");
+                var availableGroups = await AutoUpdateHelper.GetAvailableLineGroupsOrdered(channel);
+                if (availableGroups.Count == 0)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 没有可用的线路组", LogHelper.LogType.Error);
+                    return false;
+                }
+                
+                LogHelper.WriteLogToFile($"AutoUpdate | 使用 {availableGroups.Count} 个可用线路组进行下载");
+                return await AutoUpdateHelper.DownloadSetupFileWithFallback(version, availableGroups);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 下载更新时出错: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
         private async void AutoUpdate() {
+            // 清除之前的更新状态，确保使用新通道重新检查
+            AvailableLatestVersion = null;
+            AvailableLatestLineGroup = null;
+            
             // 使用当前选择的更新通道检查更新
-            AvailableLatestVersion = await AutoUpdateHelper.CheckForUpdates(null, Settings.Startup.UpdateChannel);
+            var (remoteVersion, lineGroup) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
+            AvailableLatestVersion = remoteVersion;
+            AvailableLatestLineGroup = lineGroup;
             
             // 声明下载状态变量，用于整个方法
             bool isDownloadSuccessful = false;
@@ -415,8 +496,8 @@ namespace Ink_Canvas {
                 if (Settings.Startup.IsAutoUpdateWithSilence) {
                     LogHelper.WriteLogToFile("AutoUpdate | Silent update enabled, downloading update automatically without notification");
                     
-                    // 静默下载更新，传递当前选择的更新通道
-                    isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion, "", Settings.Startup.UpdateChannel);
+                    // 静默下载更新，使用多线路组下载功能
+                    isDownloadSuccessful = await DownloadUpdateWithFallback(AvailableLatestVersion, AvailableLatestLineGroup, Settings.Startup.UpdateChannel);
                     
                     if (isDownloadSuccessful) {
                         LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when conditions are met");
@@ -465,8 +546,8 @@ namespace Ink_Canvas {
                         // 显示下载进度提示
                         MessageBox.Show("开始下载更新，请稍候...", "正在更新", MessageBoxButton.OK, MessageBoxImage.Information);
                         
-                        // 下载更新文件，传递当前选择的更新通道
-                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion, "", Settings.Startup.UpdateChannel);
+                        // 下载更新文件，使用多线路组下载功能
+                        isDownloadSuccessful = await DownloadUpdateWithFallback(AvailableLatestVersion, AvailableLatestLineGroup, Settings.Startup.UpdateChannel);
                         
                         if (isDownloadSuccessful) {
                             // 下载成功，提示用户准备安装
@@ -495,8 +576,8 @@ namespace Ink_Canvas {
                         // 稍后更新：静默下载，在软件关闭时自动安装
                         LogHelper.WriteLogToFile("AutoUpdate | User chose to update later");
                         
-                        // 不管设置如何，都进行下载
-                        isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion, "", Settings.Startup.UpdateChannel);
+                        // 不管设置如何，都进行下载，使用多线路组下载功能
+                        isDownloadSuccessful = await DownloadUpdateWithFallback(AvailableLatestVersion, AvailableLatestLineGroup, Settings.Startup.UpdateChannel);
                         
                         if (isDownloadSuccessful) {
                             LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will install when application closes");
@@ -557,12 +638,22 @@ namespace Ink_Canvas {
         }
 
         // 添加一个辅助方法，根据当前编辑模式设置光标
-        private void SetCursorBasedOnEditingMode(InkCanvas canvas)
+        public void SetCursorBasedOnEditingMode(InkCanvas canvas)
         {
+            // 套索选择模式下光标始终显示，无论用户设置如何
+            if (canvas.EditingMode == InkCanvasEditingMode.Select) {
+                canvas.UseCustomCursor = true;
+                canvas.ForceCursor = true;
+                canvas.Cursor = Cursors.Cross;
+                System.Windows.Forms.Cursor.Show();
+                return;
+            }
+
+            // 其他模式按照用户设置处理
             if (Settings.Canvas.IsShowCursor) {
                 canvas.UseCustomCursor = true;
                 canvas.ForceCursor = true;
-                
+
                 // 根据编辑模式设置不同的光标
                 if (canvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                     canvas.Cursor = Cursors.Cross;
@@ -570,16 +661,11 @@ namespace Ink_Canvas {
                     var sri = Application.GetResourceStream(new Uri("Resources/Cursors/Pen.cur", UriKind.Relative));
                     if (sri != null)
                         canvas.Cursor = new Cursor(sri.Stream);
-                } else if (canvas.EditingMode == InkCanvasEditingMode.Select) {
-                    canvas.Cursor = Cursors.Cross;
                 }
-                
+
                 // 确保光标可见，无论是鼠标、触控还是手写笔
                 System.Windows.Forms.Cursor.Show();
-                
-                // 强制应用光标设置
-                canvas.ForceCursor = true;
-                
+
                 // 确保手写笔模式下也能显示光标
                 if (Tablet.TabletDevices.Count > 0) {
                     foreach (TabletDevice device in Tablet.TabletDevices) {
@@ -601,36 +687,17 @@ namespace Ink_Canvas {
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(inkCanvas);
+            SetCursorBasedOnEditingMode(sender as InkCanvas);
         }
 
         // 手写笔输入
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
             // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(inkCanvas);
-        }
-
-        // 触摸输入，不隐藏光标
-        private void inkCanvas_TouchDown(object sender, TouchEventArgs e)
-        {
-            // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(inkCanvas);
+            SetCursorBasedOnEditingMode(sender as InkCanvas);
         }
 
         // 触摸结束，恢复光标
-        private void inkCanvas_TouchUp(object sender, TouchEventArgs e)
-        {
-            // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(inkCanvas);
-            
-            // 确保光标可见
-            if (Settings.Canvas.IsShowCursor) {
-                inkCanvas.ForceCursor = true;
-                inkCanvas.UseCustomCursor = true;
-                System.Windows.Forms.Cursor.Show();
-            }
-        }
 
         #endregion Definations and Loading
 
@@ -1105,6 +1172,66 @@ namespace Ink_Canvas {
                 LogHelper.WriteLogToFile($"打开插件管理器时出错: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show($"打开插件管理器时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        // 在MainWindow类中添加：
+        private void ApplyCurrentEraserShape()
+        {
+            double k = 1;
+            switch (Settings.Canvas.EraserSize)
+            {
+                case 0:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 0.5 : 0.7;
+                    break;
+                case 1:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 0.8 : 0.9;
+                    break;
+                case 3:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 1.25 : 1.2;
+                    break;
+                case 4:
+                    k = Settings.Canvas.EraserShapeType == 0 ? 1.5 : 1.3;
+                    break;
+            }
+            if (Settings.Canvas.EraserShapeType == 0)
+            {
+                inkCanvas.EraserShape = new EllipseStylusShape(k * 90, k * 90);
+            }
+            else if (Settings.Canvas.EraserShapeType == 1)
+            {
+                inkCanvas.EraserShape = new RectangleStylusShape(k * 90 * 0.6, k * 90);
+            }
+        }
+
+        // 显示指定页
+        private void ShowPage(int index)
+        {
+            if (index < 0 || index >= whiteboardPages.Count) return;
+            // 只切换可见性
+            for (int i = 0; i < whiteboardPages.Count; i++)
+            {
+                whiteboardPages[i].Visibility = (i == index) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+            }
+            currentCanvas = whiteboardPages[index];
+            currentPageIndex = index;
+        }
+        // 新建页面
+        private void AddNewPage()
+        {
+            var newCanvas = new System.Windows.Controls.Canvas();
+            whiteboardPages.Add(newCanvas);
+            InkCanvasGridForInkReplay.Children.Add(newCanvas);
+            ShowPage(whiteboardPages.Count - 1);
+        }
+        // 删除当前页面
+        private void DeleteCurrentPage()
+        {
+            if (whiteboardPages.Count <= 1) return;
+            InkCanvasGridForInkReplay.Children.Remove(currentCanvas);
+            whiteboardPages.RemoveAt(currentPageIndex);
+            if (currentPageIndex >= whiteboardPages.Count)
+                currentPageIndex = whiteboardPages.Count - 1;
+            ShowPage(currentPageIndex);
         }
     }
 }

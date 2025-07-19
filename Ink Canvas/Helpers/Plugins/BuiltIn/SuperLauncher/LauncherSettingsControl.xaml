@@ -71,7 +71,7 @@
                     
                     <!-- 操作按钮 -->
                     <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="5">
-                        <Button x:Name="BtnAdd" Content="添加应用" Padding="10,5" Margin="0,5,5,5" Click="BtnAdd_Click"/>
+                        <Button x:Name="BtnAdd" Content="添加" Padding="10,5" Margin="0,5,5,5" Click="BtnAdd_Click"/>
                         <Button x:Name="BtnEdit" Content="编辑" Padding="10,5" Margin="5" Click="BtnEdit_Click"/>
                         <Button x:Name="BtnDelete" Content="删除" Padding="10,5" Margin="5" Click="BtnDelete_Click"/>
                     </StackPanel>

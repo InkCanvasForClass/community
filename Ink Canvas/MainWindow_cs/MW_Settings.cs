@@ -13,6 +13,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Interop;
 using Hardcodet.Wpf.TaskbarNotification;
 using OSVersionExtension;
+using Microsoft.Win32;
+using System.IO;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -867,12 +869,19 @@ namespace Ink_Canvas {
         private void ComboBoxEraserSize_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (!isLoaded) return;
             Settings.Canvas.EraserSize = ComboBoxEraserSize.SelectedIndex;
+
+            // 使用新的高级橡皮擦形状应用方法
+            ApplyAdvancedEraserShape();
+
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            }
             SaveSettingsToFile();
         }
 
         private void ComboBoxEraserSizeFloatingBar_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (!isLoaded) return;
-
             ComboBox s = (ComboBox)sender;
             Settings.Canvas.EraserSize = s.SelectedIndex;
             if (s == ComboBoxEraserSizeFloatingBar) {
@@ -882,17 +891,14 @@ namespace Ink_Canvas {
                 ComboBoxEraserSizeFloatingBar.SelectedIndex = s.SelectedIndex;
                 ComboBoxEraserSize.SelectedIndex = s.SelectedIndex;
             }
-            
-            // 使用统一的方法应用橡皮擦形状
-            ApplyCurrentEraserShape();
-            
-            // 确保当前处于橡皮擦模式时能立即看到效果
+
+            // 使用新的高级橡皮擦形状应用方法
+            ApplyAdvancedEraserShape();
+
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
-                // 先切换一下模式，再切回来，确保橡皮擦形状得到刷新
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
             }
-            
             SaveSettingsToFile();
         }
 
@@ -901,10 +907,10 @@ namespace Ink_Canvas {
             Settings.Canvas.EraserShapeType = 0;
             SaveSettingsToFile();
             CheckEraserTypeTab();
-            
-            // 使用统一的方法应用橡皮擦形状
-            ApplyCurrentEraserShape();
-            
+
+            // 使用新的高级橡皮擦形状应用方法
+            ApplyAdvancedEraserShape();
+
             // 确保当前处于橡皮擦模式时能立即看到效果
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
@@ -915,10 +921,10 @@ namespace Ink_Canvas {
             Settings.Canvas.EraserShapeType = 1;
             SaveSettingsToFile();
             CheckEraserTypeTab();
-            
-            // 使用统一的方法应用橡皮擦形状
-            ApplyCurrentEraserShape();
-            
+
+            // 使用新的高级橡皮擦形状应用方法
+            ApplyAdvancedEraserShape();
+
             // 确保当前处于橡皮擦模式时能立即看到效果
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
@@ -1813,6 +1819,100 @@ namespace Ink_Canvas {
             Settings.Advanced.IsSecondConfirmWhenShutdownApp = ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn;
             SaveSettingsToFile();
         }
+        
+        private void ToggleSwitchIsAutoBackupBeforeUpdate_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Advanced.IsAutoBackupBeforeUpdate = ToggleSwitchIsAutoBackupBeforeUpdate.IsOn;
+            SaveSettingsToFile();
+        }
+        
+        private void BtnManualBackup_Click(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            try {
+                // 确保Backups目录存在
+                string backupDir = Path.Combine(App.RootPath, "Backups");
+                if (!Directory.Exists(backupDir)) {
+                    Directory.CreateDirectory(backupDir);
+                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}", LogHelper.LogType.Info);
+                }
+                
+                // 创建备份文件名（使用当前日期时间）
+                string backupFileName = $"Settings_Backup_{DateTime.Now:yyyyMMdd_HHmmss}.json";
+                string backupPath = Path.Combine(backupDir, backupFileName);
+                
+                // 序列化当前设置并保存到备份文件
+                string settingsJson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                File.WriteAllText(backupPath, settingsJson);
+                
+                LogHelper.WriteLogToFile($"成功创建设置备份: {backupPath}", LogHelper.LogType.Info);
+                MessageBox.Show($"设置已成功备份到:\n{backupPath}", "备份成功", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex) {
+                LogHelper.WriteLogToFile($"创建设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"创建备份失败: {ex.Message}", "备份失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        
+        private void BtnRestoreBackup_Click(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            
+            try {
+                // 确保Backups目录存在
+                string backupDir = Path.Combine(App.RootPath, "Backups");
+                if (!Directory.Exists(backupDir)) {
+                    Directory.CreateDirectory(backupDir);
+                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}", LogHelper.LogType.Info);
+                    MessageBox.Show("没有找到备份文件，请先创建备份", "还原失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+                
+                // 打开文件选择对话框
+                OpenFileDialog dlg = new OpenFileDialog();
+                dlg.InitialDirectory = backupDir;
+                dlg.Filter = "设置备份文件|Settings_Backup_*.json|所有JSON文件|*.json";
+                dlg.Title = "选择要还原的备份文件";
+                
+                if (dlg.ShowDialog() == true) {
+                    // 读取备份文件
+                    string backupJson = File.ReadAllText(dlg.FileName);
+                    
+                    // 反序列化备份数据
+                    Settings backupSettings = JsonConvert.DeserializeObject<Settings>(backupJson);
+                    
+                    if (backupSettings != null) {
+                        // 确认是否要还原
+                        if (MessageBox.Show("确定要还原选择的备份文件吗？当前设置将被覆盖。", "确认还原", 
+                                MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes) {
+                            
+                            // 备份当前设置，以防出错
+                            string currentSettingsJson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                            string tempBackupPath = Path.Combine(backupDir, $"Settings_Before_Restore_{DateTime.Now:yyyyMMdd_HHmmss}.json");
+                            File.WriteAllText(tempBackupPath, currentSettingsJson);
+                            
+                            // 还原设置
+                            Settings = backupSettings;
+                            
+                            // 保存还原后的设置到文件
+                            SaveSettingsToFile();
+                            
+                            // 重新加载设置到UI
+                            LoadSettings();
+                            
+                            LogHelper.WriteLogToFile($"成功从备份还原设置: {dlg.FileName}", LogHelper.LogType.Info);
+                            MessageBox.Show("设置已成功还原，部分设置可能需要重启软件后生效。", "还原成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                    else {
+                        MessageBox.Show("无法解析备份文件，文件可能已损坏", "还原失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex) {
+                LogHelper.WriteLogToFile($"还原设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"还原备份失败: {ex.Message}", "还原失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
 
         #endregion
 
@@ -1892,14 +1992,42 @@ namespace Ink_Canvas {
             HideSubPanels();
         }
 
-        private void UpdateChannelSelector_Checked(object sender, RoutedEventArgs e) {
+        private async void UpdateChannelSelector_Checked(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             var radioButton = sender as System.Windows.Controls.RadioButton;
             if (radioButton != null) {
                 string channel = radioButton.Tag.ToString();
-                Settings.Startup.UpdateChannel = channel == "Beta" ? UpdateChannel.Beta : UpdateChannel.Release;
+                UpdateChannel newChannel = channel == "Beta" ? UpdateChannel.Beta : UpdateChannel.Release;
+                
+                // 如果通道没有变化，不需要执行更新检查
+                if (Settings.Startup.UpdateChannel == newChannel) {
+                    return;
+                }
+                
+                Settings.Startup.UpdateChannel = newChannel;
                 LogHelper.WriteLogToFile($"Settings | Update channel changed to {Settings.Startup.UpdateChannel}");
                 SaveSettingsToFile();
+                
+                // 如果启用了自动更新，立即执行完整的检查更新操作
+                if (Settings.Startup.IsAutoUpdate) {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, performing immediate update check");
+                    
+                    // 执行完整的更新检查
+                    await Task.Run(async () => {
+                        try {
+                            // 调用主窗口的AutoUpdate方法，它会自动清除之前的更新状态并使用新通道重新检查
+                            Dispatcher.Invoke(() => {
+                                AutoUpdate();
+                            });
+                        }
+                        catch (Exception ex) {
+                            LogHelper.WriteLogToFile($"AutoUpdate | Error during channel switch update check: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    });
+                }
+                else {
+                    LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, but auto-update is disabled");
+                }
             }
         }
         

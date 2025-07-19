@@ -292,9 +292,12 @@ namespace Ink_Canvas.Windows
                 return;
             }
             
+            // 保存插件名称，以便在删除后使用
+            string pluginName = SelectedPlugin.Name;
+            
             // 确认删除
             MessageBoxResult result = MessageBox.Show(
-                $"确定要删除插件 {SelectedPlugin.Name} 吗？\n此操作将永久删除插件文件，无法恢复。", 
+                $"确定要删除插件 {pluginName} 吗？\n此操作将永久删除插件文件，无法恢复。", 
                 "删除确认", 
                 MessageBoxButton.YesNo, 
                 MessageBoxImage.Warning);
@@ -315,11 +318,11 @@ namespace Ink_Canvas.Windows
                         PluginListView.SelectedIndex = 0;
                     }
                     
-                    MessageBox.Show($"插件 {SelectedPlugin.Name} 已成功删除。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"插件 {pluginName} 已成功删除。", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 else
                 {
-                    MessageBox.Show("删除插件失败，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"删除插件 {pluginName} 失败，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }

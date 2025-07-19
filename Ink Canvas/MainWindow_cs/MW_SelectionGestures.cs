@@ -244,6 +244,7 @@ namespace Ink_Canvas {
         }
 
         private void BtnSelect_Click(object sender, RoutedEventArgs e) {
+            ExitMultiTouchModeIfNeeded();
             forceEraser = true;
             drawingShapeMode = 0;
             inkCanvas.IsManipulationEnabled = false;
@@ -421,6 +422,27 @@ namespace Ink_Canvas {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
                 StrokesSelectionClone = new StrokeCollection();
             }
+        }
+
+        private void LassoSelect_Click(object sender, RoutedEventArgs e) {
+            ExitMultiTouchModeIfNeeded();
+            forceEraser = false;
+            forcePointEraser = false;
+            isLastTouchEraser = false;
+            drawingShapeMode = 0;
+            inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+            SetCursorBasedOnEditingMode(inkCanvas);
+        }
+
+        private void BtnLassoSelect_Click(object sender, RoutedEventArgs e) {
+            ExitMultiTouchModeIfNeeded();
+            forceEraser = false;
+            forcePointEraser = false;
+            isLastTouchEraser = false;
+            drawingShapeMode = 0;
+            inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+            inkCanvas.IsManipulationEnabled = true;
+            SetCursorBasedOnEditingMode(inkCanvas);
         }
     }
 }

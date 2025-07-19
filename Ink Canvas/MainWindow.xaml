@@ -33,7 +33,13 @@
         Stylus.IsTouchFeedbackEnabled="False">
     <!--资源中添加命令-->
     <Window.Resources>
-        <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
+        <ResourceDictionary>
+            <!-- 合并新橡皮擦资源 -->
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="MainWindow_cs/MW_Eraser.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
         <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         <c:IntNumberToString x:Key="IntNumberToString" />
         <c:IntNumberToString2 x:Key="IntNumberToString2" />
@@ -121,6 +127,7 @@
                   </Setter.Value>
               </Setter>
           </Style>
+        </ResourceDictionary>
       </Window.Resources>
     <!--输入命令绑定-->
     <Window.InputBindings>
@@ -1877,6 +1884,29 @@
                                     </ui:SimpleStackPanel>
                                     <TextBlock TextWrapping="Wrap" Foreground="#a1a1aa"
                                                Text="# 当检测到系统分辨率变化时，会尝试检测FloatingBar是否在屏幕内显示，如果不在屏幕内显示将会尝试移动到屏幕内可见区域（分辨率调小可能会触发，如果在屏幕内不会自动调整位置，请手动挡）。" />
+                                    
+                                    <!-- 添加备份相关按钮 -->
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
+                                          StrokeThickness="1" Margin="0,4,0,4" />
+                                    <TextBlock Text="设置备份与还原" FontWeight="Bold" Foreground="#fafafa"
+                                               FontSize="16" Margin="0,5,0,5" />
+                                    <TextBlock TextWrapping="Wrap" Foreground="#a1a1aa"
+                                               Text="# 可手动备份当前设置或还原之前的备份，自动更新前也会自动备份" />
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="自动更新前备份" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsAutoBackupBeforeUpdate"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchIsAutoBackupBeforeUpdate_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <Button x:Name="BtnManualBackup" Content="手动备份" Click="BtnManualBackup_Click"
+                                                Background="#2563eb" Foreground="White" Padding="12,6" Margin="0,0,12,0" />
+                                        <Button x:Name="BtnRestoreBackup" Content="还原备份" Click="BtnRestoreBackup_Click"
+                                                Background="#2563eb" Foreground="White" Padding="12,6" />
+                                    </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <GroupBox>
@@ -2293,7 +2323,7 @@
                                                          FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchSaveFullPageStrokes_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 开启后自动保存和手动保存墨迹时将以全屏模式保存而非单独保存每条墨迹" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <TextBlock Text="# 开启后自动保存和手动保存墨迹时将以全屏模式保存。如果存在多个画布和墨迹，将把所有页面的墨迹按照每页为单位保存进一个压缩包中（注意，白板的墨迹只能在白板模式下打开，PPT的墨迹只能在PPT放映模式下打开）" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                           StrokeThickness="1" Margin="0,4,0,4" />
@@ -2846,7 +2876,7 @@
         <Label Name="Label" Visibility="Collapsed" Foreground="Gray" Content="0" />
         <Grid Name="InkCanvasGridForInkReplay">
             <InkCanvas x:Name="inkCanvas" ForceCursor="True" UseCustomCursor="True"
-                       TouchUp="Main_Grid_TouchUp" TouchDown="Main_Grid_TouchDown"
+                       TouchDown="Main_Grid_TouchDown"
                        TouchMove="inkCanvas_TouchMove"
                        ManipulationDelta="Main_Grid_ManipulationDelta"
                        ManipulationCompleted="Main_Grid_ManipulationCompleted"
@@ -2861,6 +2891,13 @@
                        ManipulationStarting="inkCanvas_ManipulationStarting"
                        SelectionChanged="inkCanvas_SelectionChanged"
                        StrokeCollected="inkCanvas_StrokeCollected" ClipToBounds="False" Background="Transparent" />
+            
+            <!-- 新橡皮擦覆盖层 - 用于高级橡皮擦系统 -->
+            <Border x:Name="AdvancedEraserOverlay" 
+                    Background="Transparent" 
+                    IsHitTestVisible="False"
+                    Loaded="EraserOverlay_Loaded"
+                    Panel.ZIndex="1000" />
         </Grid>
 
         <Canvas IsHitTestVisible="False">
@@ -5707,7 +5744,7 @@
         </Viewbox>
 
         <Grid Name="FloatingbarUIForInkReplay">
-            <Viewbox Name="ViewboxFloatingBar" Margin="100,5,0,0"
+            <Viewbox Name="ViewboxFloatingBar" Margin="100,5,0,0" Cursor="Arrow"
                      HorizontalAlignment="Left" Height="58" VerticalAlignment="Top" Width="733"
                      RenderTransformOrigin="0.5,0.5">
                 <Viewbox.LayoutTransform>
@@ -5736,7 +5773,7 @@
                                     </Canvas>
                                 </Border>
                             </Canvas>
-                            <ui:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal">
+                            <ui:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow">
                                 <!--<ui:SimpleStackPanel Name="Cursor_Icon" MouseDown="Border_MouseDown" MouseUp="CursorIcon_Click"-->
                                 <ui:SimpleStackPanel Name="Cursor_Icon"
                                                      MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"

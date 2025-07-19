@@ -329,9 +329,36 @@ namespace Ink_Canvas {
                 if (!File.Exists(statusFilePath) || File.ReadAllText(statusFilePath).Trim().ToLower() != "true") {
                     LogHelper.WriteLogToFile("AutoUpdate | Update file not downloaded yet");
                     
-                    // 尝试下载更新文件
+                    // 尝试下载更新文件，使用多线路组下载功能
                     Task.Run(async () => {
-                        bool isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileAndSaveStatus(AvailableLatestVersion);
+                        bool isDownloadSuccessful = false;
+                        
+                        try
+                        {
+                            // 如果主要线路组可用，直接使用
+                            if (AvailableLatestLineGroup != null)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 使用主要线路组下载: {AvailableLatestLineGroup.GroupName}");
+                                isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFile(AvailableLatestVersion, AvailableLatestLineGroup);
+                            }
+                            
+                            // 如果主要线路组不可用或下载失败，获取所有可用线路组
+                            if (!isDownloadSuccessful)
+                            {
+                                LogHelper.WriteLogToFile("AutoUpdate | 主要线路组不可用或下载失败，获取所有可用线路组");
+                                var availableGroups = await AutoUpdateHelper.GetAvailableLineGroupsOrdered(Settings.Startup.UpdateChannel);
+                                if (availableGroups.Count > 0)
+                                {
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 使用 {availableGroups.Count} 个可用线路组进行下载");
+                                    isDownloadSuccessful = await AutoUpdateHelper.DownloadSetupFileWithFallback(AvailableLatestVersion, availableGroups);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 下载更新时出错: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                        
                         if (isDownloadSuccessful) {
                             LogHelper.WriteLogToFile("AutoUpdate | Update downloaded successfully, will check again for installation");
                             // 重新启动计时器，下次检查时安装

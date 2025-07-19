@@ -88,34 +88,23 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         }
         
         /// <summary>
-        /// 添加应用按钮点击事件
+        /// 添加按钮点击事件
         /// </summary>
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // 弹出文件选择对话框
-                OpenFileDialog dialog = new OpenFileDialog
+                // 创建新的启动项
+                LauncherItem item = new LauncherItem
                 {
-                    Title = "选择应用程序",
-                    Filter = "应用程序 (*.exe)|*.exe|所有文件 (*.*)|*.*",
-                    Multiselect = false
+                    Name = "",
+                    Path = "",
+                    IsVisible = true,
+                    Position = -1 // 让插件管理器分配位置
                 };
                 
-                if (dialog.ShowDialog() == true)
-                {
-                    // 创建新的启动项
-                    LauncherItem item = new LauncherItem
-                    {
-                        Name = System.IO.Path.GetFileNameWithoutExtension(dialog.FileName),
-                        Path = dialog.FileName,
-                        IsVisible = true,
-                        Position = -1 // 让插件管理器分配位置
-                    };
-                    
-                    // 显示编辑对话框
-                    EditLauncherItem(item, true);
-                }
+                // 直接显示编辑对话框
+                EditLauncherItem(item, true);
             }
             catch (Exception ex)
             {
@@ -217,7 +206,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             // 创建简单的编辑窗口
             Window editWindow = new Window
             {
-                Title = isNew ? "添加应用" : "编辑应用",
+                Title = isNew ? "添加" : "编辑应用",
                 Width = 400,
                 Height = 200,
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
@@ -292,6 +281,17 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 if (dialog.ShowDialog() == true)
                 {
                     pathTextBox.Text = dialog.FileName;
+                    
+                    // 如果选择的是.exe文件，自动获取文件名填入名称字段
+                    if (System.IO.Path.GetExtension(dialog.FileName).ToLower() == ".exe")
+                    {
+                        string fileName = System.IO.Path.GetFileNameWithoutExtension(dialog.FileName);
+                        // 只有在名称字段为空或者是新建项目时才自动填入
+                        if (string.IsNullOrWhiteSpace(nameTextBox.Text) || isNew)
+                        {
+                            nameTextBox.Text = fileName;
+                        }
+                    }
                 }
             };
             

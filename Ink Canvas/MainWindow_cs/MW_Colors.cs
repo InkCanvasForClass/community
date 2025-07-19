@@ -54,7 +54,6 @@ namespace Ink_Canvas {
                 drawingShapeMode = 0;
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 CancelSingleFingerDragMode();
-                forceEraser = false;
                 CheckColorTheme();
             }
 
@@ -553,62 +552,52 @@ namespace Ink_Canvas {
 
         private void BtnColorBlack_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(0);
-            forceEraser = false;
             ColorSwitchCheck();
         }
 
         private void BtnColorRed_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(1);
-            forceEraser = false;
             ColorSwitchCheck();
         }
 
         private void BtnColorGreen_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(2);
-            forceEraser = false;
             ColorSwitchCheck();
         }
 
         private void BtnColorBlue_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(3);
-            forceEraser = false;
             ColorSwitchCheck();
         }
 
         private void BtnColorYellow_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(4);
-            forceEraser = false;
             ColorSwitchCheck();
         }
 
         private void BtnColorWhite_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(5);
-            forceEraser = false;
             ColorSwitchCheck();
         }
 
         private void BtnColorPink_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(6);
-            forceEraser = false;
             ColorSwitchCheck();
         }
 
         private void BtnColorOrange_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(8);
-            forceEraser = false;
             ColorSwitchCheck();
         }
 
         private void BtnColorTeal_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(7);
-            forceEraser = false;
             ColorSwitchCheck();
         }
 
         private void BtnHighlighterColorBlack_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(100, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
@@ -616,7 +605,6 @@ namespace Ink_Canvas {
         private void BtnHighlighterColorWhite_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(101, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
@@ -624,7 +612,6 @@ namespace Ink_Canvas {
         private void BtnHighlighterColorRed_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(102, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
@@ -632,7 +619,6 @@ namespace Ink_Canvas {
         private void BtnHighlighterColorYellow_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(103, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
@@ -640,7 +626,6 @@ namespace Ink_Canvas {
         private void BtnHighlighterColorGreen_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(104, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
@@ -648,7 +633,6 @@ namespace Ink_Canvas {
         private void BtnHighlighterColorZinc_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(105, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
@@ -656,7 +640,6 @@ namespace Ink_Canvas {
         private void BtnHighlighterColorBlue_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(106, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
@@ -664,7 +647,6 @@ namespace Ink_Canvas {
         private void BtnHighlighterColorPurple_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(107, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
@@ -672,7 +654,6 @@ namespace Ink_Canvas {
         private void BtnHighlighterColorTeal_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(108, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
@@ -680,7 +661,6 @@ namespace Ink_Canvas {
         private void BtnHighlighterColorOrange_Click(object sender, RoutedEventArgs e) {
             CheckLastColor(109, true);
             penType = 1;
-            forceEraser = false;
             CheckPenTypeUIState();
             ColorSwitchCheck();
         }
