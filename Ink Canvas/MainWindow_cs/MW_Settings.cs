@@ -2159,5 +2159,11 @@ namespace Ink_Canvas {
             dialog.Owner = this;
             dialog.ShowDialog();
         }
+
+        private void ToggleSwitchEnableWppProcessKill_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.EnableWppProcessKill = ToggleSwitchEnableWppProcessKill.IsOn;
+            SaveSettingsToFile();
+        }
     }
 }

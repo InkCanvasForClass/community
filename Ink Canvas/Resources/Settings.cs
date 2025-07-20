@@ -235,6 +235,8 @@ namespace Ink_Canvas
         public bool IsEnableFingerGestureSlideShowControl { get; set; } = true;
         [JsonProperty("isSupportWPS")]
         public bool IsSupportWPS { get; set; } = true;
+        [JsonProperty("enableWppProcessKill")]
+        public bool EnableWppProcessKill { get; set; } = true;
     }
 
     public class Automation

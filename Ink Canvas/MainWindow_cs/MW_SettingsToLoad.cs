@@ -375,6 +375,7 @@ namespace Ink_Canvas {
 
                 ToggleSwitchAutoSaveScreenShotInPowerPoint.IsOn =
                     Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
+                ToggleSwitchEnableWppProcessKill.IsOn = Settings.PowerPointSettings.EnableWppProcessKill;
             } else {
                 Settings.PowerPointSettings = new PowerPointSettings();
             }
@@ -548,7 +549,6 @@ namespace Ink_Canvas {
                 
                 // 初始化直线端点吸附相关设置
                 ToggleSwitchLineEndpointSnapping.IsOn = Settings.Canvas.LineEndpointSnapping;
-                LineEndpointSnappingThresholdSlider.Value = Settings.Canvas.LineEndpointSnappingThreshold;
             } else {
                 Settings.Canvas = new Canvas();
             }

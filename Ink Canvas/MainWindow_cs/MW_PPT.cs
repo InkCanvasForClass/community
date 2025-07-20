@@ -1315,6 +1315,13 @@ namespace Ink_Canvas {
                     return;
                 }
 
+                if (!Settings.PowerPointSettings.EnableWppProcessKill)
+                {
+                    LogHelper.WriteLogToFile("WPP进程查杀功能已被关闭，跳过查杀", LogHelper.LogType.Trace);
+                    StopWppProcessCheckTimer();
+                    return;
+                }
+
                 // 刷新进程状态
                 wppProcess.Refresh();
                 wppProcessCheckCount++;
