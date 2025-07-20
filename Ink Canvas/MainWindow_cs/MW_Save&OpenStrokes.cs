@@ -168,6 +168,7 @@ namespace Ink_Canvas {
                         {
                             writer.WriteLine($"PPT名称: {pptApplication.SlideShowWindows[1].Presentation.Name}");
                             writer.WriteLine($"PPT总页数: {pptApplication.SlideShowWindows[1].Presentation.Slides.Count}");
+                            writer.WriteLine($"PPT文件路径: {pptApplication.SlideShowWindows[1].Presentation.FullName}");
                         }
                         
                         for (int i = 0; i < allPageStrokes.Count; i++)
@@ -430,6 +431,25 @@ namespace Ink_Canvas {
                 // 确保当前处于PPT放映模式
                 if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || pptApplication == null) {
                     throw new InvalidOperationException("当前不在PPT放映模式，无法恢复PPT墨迹");
+                }
+                
+                // 检查PPT文件路径是否匹配
+                if (metadata.ContainsKey("PPT文件路径"))
+                {
+                    string savedPptPath = metadata["PPT文件路径"];
+                    string currentPptPath = pptApplication.SlideShowWindows[1].Presentation.FullName;
+                    
+                    if (!string.IsNullOrEmpty(savedPptPath) && !string.IsNullOrEmpty(currentPptPath))
+                    {
+                        // 使用文件路径哈希值进行比较，避免路径格式差异
+                        string savedHash = GetFileHash(savedPptPath);
+                        string currentHash = GetFileHash(currentPptPath);
+                        
+                        if (savedHash != currentHash)
+                        {
+                            throw new InvalidOperationException($"墨迹文件与当前PPT文件不匹配。保存的PPT: {savedPptPath}，当前PPT: {currentPptPath}");
+                        }
+                    }
                 }
                 
                 // 清空当前墨迹

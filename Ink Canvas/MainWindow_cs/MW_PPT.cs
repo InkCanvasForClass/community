@@ -194,9 +194,12 @@ namespace Ink_Canvas {
                             return;
                         }
 
+                        // 使用更精确的文件标识符：文件名_页数_文件路径哈希值
+                        string presentationPath = presentation.FullName;
+                        string fileHash = GetFileHash(presentationPath);
+                        string folderName = presentation.Name + "_" + presentation.Slides.Count + "_" + fileHash;
                         var folderPath = Settings.Automation.AutoSavedStrokesLocation +
-                                         @"\Auto Saved - Presentations\" + presentation.Name + "_" +
-                                         presentation.Slides.Count;
+                                         @"\Auto Saved - Presentations\" + folderName;
                         try {
                             if (!File.Exists(folderPath + "/Position")) return;
                             if (!int.TryParse(File.ReadAllText(folderPath + "/Position"), out var page)) return;
@@ -560,13 +563,17 @@ namespace Ink_Canvas {
 
                     //检查是否有已有墨迹，并加载
                     if (Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint)
+                    {
+                        // 使用更精确的文件标识符：文件名_页数_文件路径哈希值
+                        string presentationPath = Wn.Presentation.FullName;
+                        string fileHash = GetFileHash(presentationPath);
+                        string folderName = Wn.Presentation.Name + "_" + Wn.Presentation.Slides.Count + "_" + fileHash;
+                        
                         if (Directory.Exists(Settings.Automation.AutoSavedStrokesLocation +
-                                             @"\Auto Saved - Presentations\" + Wn.Presentation.Name + "_" +
-                                             Wn.Presentation.Slides.Count)) {
+                                             @"\Auto Saved - Presentations\" + folderName)) {
                             LogHelper.WriteLogToFile("Found saved strokes", LogHelper.LogType.Trace);
                             var files = new DirectoryInfo(Settings.Automation.AutoSavedStrokesLocation +
-                                                          @"\Auto Saved - Presentations\" + Wn.Presentation.Name + "_" +
-                                                          Wn.Presentation.Slides.Count).GetFiles();
+                                                          @"\Auto Saved - Presentations\" + folderName).GetFiles();
                             var count = 0;
                             foreach (var file in files)
                                 if (file.Name != "Position") {
@@ -586,6 +593,7 @@ namespace Ink_Canvas {
 
                             LogHelper.WriteLogToFile($"Loaded {count.ToString()} saved strokes");
                         }
+                    }
 
                     StackPanelPPTControls.Visibility = Visibility.Visible;
                     UpdatePPTBtnDisplaySettingsStatus();
@@ -660,8 +668,11 @@ namespace Ink_Canvas {
 
                 isEnteredSlideShowEndEvent = true;
                 if (Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint) {
-                   var folderPath = Settings.Automation.AutoSavedStrokesLocation + @"\Auto Saved - Presentations\" +
-                                     Pres.Name + "_" + Pres.Slides.Count;
+                   // 使用更精确的文件标识符：文件名_页数_文件路径哈希值
+                   string presentationPath = Pres.FullName;
+                   string fileHash = GetFileHash(presentationPath);
+                   string folderName = Pres.Name + "_" + Pres.Slides.Count + "_" + fileHash;
+                   var folderPath = Settings.Automation.AutoSavedStrokesLocation + @"\Auto Saved - Presentations\" + folderName;
                     if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
                     try {
                         File.WriteAllText(folderPath + "/Position", previousSlideID.ToString());
@@ -1462,6 +1473,32 @@ namespace Ink_Canvas {
             wppProcessRecordTime = DateTime.MinValue;
             wppProcessCheckCount = 0;
             LogHelper.WriteLogToFile("停止 WPP 进程检测定时器", LogHelper.LogType.Trace);
+        }
+
+        /// <summary>
+        /// 计算文件路径的哈希值，用于生成唯一的文件夹标识符
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        /// <returns>文件路径的哈希值字符串</returns>
+        private string GetFileHash(string filePath)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(filePath))
+                    return "unknown";
+                
+                // 使用文件路径的哈希值作为唯一标识符
+                using (var md5 = System.Security.Cryptography.MD5.Create())
+                {
+                    byte[] hashBytes = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(filePath));
+                    return BitConverter.ToString(hashBytes).Replace("-", "").Substring(0, 8);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"计算文件哈希值失败: {ex.ToString()}", LogHelper.LogType.Error);
+                return "error";
+            }
         }
     }
 }
