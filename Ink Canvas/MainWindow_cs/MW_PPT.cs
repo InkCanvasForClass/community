@@ -1,6 +1,7 @@
 ﻿using Ink_Canvas.Helpers;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -20,6 +21,9 @@ using Microsoft.Office.Core;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
         public static Microsoft.Office.Interop.PowerPoint.Application pptApplication = null;
         public static Presentation presentation = null;
         public static Slides slides = null;
@@ -80,6 +84,11 @@ namespace Ink_Canvas {
 
         public static bool IsShowingRestoreHiddenSlidesWindow = false;
         private static bool IsShowingAutoplaySlidesWindow = false;
+
+        // WPS 相关变量
+        private static bool autoCloseWPS = false;
+        private static Process wpsProcess = null;
+        private static bool hasWpsProcessID = false;
 
 
         private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e) {
@@ -540,6 +549,15 @@ namespace Ink_Canvas {
         private async void PptApplication_SlideShowEnd(Presentation Pres) {
             try {
                 if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
+
+                // 对于延迟未关闭的 WPP，先记录进程 ID，待所有结束事件处理完毕后强制关闭
+                if (autoCloseWPS && pptApplication != null && pptApplication.Path.Contains("Kingsoft\\WPS Office\\") && pptApplication.Presentations.Count <= 1)
+                {
+                    uint processId;
+                    GetWindowThreadProcessId((IntPtr)pptApplication.HWND, out processId);
+                    wpsProcess = Process.GetProcessById((int)processId);
+                    hasWpsProcessID = true;
+                }
 
                 LogHelper.WriteLogToFile(string.Format("PowerPoint Slide Show End"), LogHelper.LogType.Event);
                 if (isEnteredSlideShowEndEvent) {
