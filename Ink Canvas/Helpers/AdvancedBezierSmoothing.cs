@@ -10,20 +10,24 @@ using Point = System.Windows.Point;
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
-    /// 高级贝塞尔曲线平滑算法
+    /// 高级贝塞尔曲线平滑算法 - 优化版本
     /// 用于解决墨迹闪烁问题，提供更平滑的笔迹效果
+    /// 优化特性：
+    /// 1. 更平滑的墨迹：改进的贝塞尔曲线算法
+    /// 2. 更平滑的拐点：优化的控制点计算
+    /// 3. 1像素级别插点：精确到像素级别的曲线生成
     /// </summary>
     public class AdvancedBezierSmoothing
     {
         /// <summary>
-        /// 平滑强度 (0.0 - 1.0)
+        /// 平滑强度 (0.0 - 1.0) - 优化为更平滑的默认值
         /// </summary>
-        public double SmoothingStrength { get; set; } = 0.6;
+        public double SmoothingStrength { get; set; } = 0.7;
 
         /// <summary>
-        /// 张力参数 (0.0 - 1.0)
+        /// 张力参数 (0.0 - 1.0) - 优化为更平滑的默认值
         /// </summary>
-        public double Tension { get; set; } = 0.5;
+        public double Tension { get; set; } = 0.4;
 
         /// <summary>
         /// 是否启用自适应平滑
@@ -31,29 +35,39 @@ namespace Ink_Canvas.Helpers
         public bool EnableAdaptiveSmoothing { get; set; } = true;
 
         /// <summary>
-        /// 最小点间距阈值
+        /// 最小点间距阈值 - 优化为1像素级别
         /// </summary>
-        public double MinPointDistance { get; set; } = 3.0; // 增加最小间距，减少毛刺
+        public double MinPointDistance { get; set; } = 1.0; // 降低到1像素级别
 
         /// <summary>
-        /// 最大点间距阈值
+        /// 最大点间距阈值 - 优化为更精细的控制
         /// </summary>
-        public double MaxPointDistance { get; set; } = 30.0; // 减少最大间距，提高平滑度
+        public double MaxPointDistance { get; set; } = 15.0; // 进一步减少最大间距，提高平滑度
 
         /// <summary>
-        /// 手抖修正强度 (0.0 - 1.0)
+        /// 手抖修正强度 (0.0 - 1.0) - 优化为更平滑的默认值
         /// </summary>
-        public double ShakeCorrectionStrength { get; set; } = 0.6;
+        public double ShakeCorrectionStrength { get; set; } = 0.8;
 
         /// <summary>
-        /// 速度加权平滑强度 (0.0 - 1.0)
+        /// 速度加权平滑强度 (0.0 - 1.0) - 优化为更平滑的默认值
         /// </summary>
-        public double VelocityWeightedSmoothingStrength { get; set; } = 0.7;
+        public double VelocityWeightedSmoothingStrength { get; set; } = 0.8;
 
         /// <summary>
-        /// 时间加权平滑强度 (0.0 - 1.0)
+        /// 时间加权平滑强度 (0.0 - 1.0) - 优化为更平滑的默认值
         /// </summary>
-        public double TimeWeightedSmoothingStrength { get; set; } = 0.5;
+        public double TimeWeightedSmoothingStrength { get; set; } = 0.6;
+
+        /// <summary>
+        /// 拐点平滑强度 (0.0 - 1.0) - 新增参数，优化为更平滑的默认值
+        /// </summary>
+        public double CornerSmoothingStrength { get; set; } = 0.8;
+
+        /// <summary>
+        /// 1像素级别插点精度 - 新增参数
+        /// </summary>
+        public double PixelLevelPrecision { get; set; } = 1.0;
 
         /// <summary>
         /// 对笔画进行高级贝塞尔曲线平滑处理
@@ -83,19 +97,22 @@ namespace Ink_Canvas.Helpers
             // 第二步：基于速度和时间的加权平滑
             var velocityTimeWeightedPoints = ApplyVelocityTimeWeightedSmoothing(shakeCorrectedPoints);
 
-            // 第三步：点过滤和重采样
-            var filteredPoints = FilterAndResamplePoints(velocityTimeWeightedPoints);
+            // 第三步：拐点检测和平滑
+            var cornerSmoothedPoints = ApplyCornerSmoothing(velocityTimeWeightedPoints);
 
-            // 第四步：计算控制点
-            var controlPoints = CalculateControlPoints(filteredPoints);
+            // 第四步：点过滤和重采样（1像素级别）
+            var filteredPoints = FilterAndResamplePoints(cornerSmoothedPoints);
 
-            // 第五步：生成平滑曲线点
-            var curvePoints = GenerateCurvePoints(filteredPoints, controlPoints);
+            // 第五步：计算优化的控制点
+            var controlPoints = CalculateOptimizedControlPoints(filteredPoints);
 
-            // 第六步：修正收尾相连问题
+            // 第六步：生成1像素级别的平滑曲线点
+            var curvePoints = GeneratePixelLevelCurvePoints(filteredPoints, controlPoints);
+
+            // 第七步：修正收尾相连问题
             var fixedStylusPoints = FixEndToEndConnection(new StylusPointCollection(curvePoints));
             
-            // 第七步：创建新的笔画
+            // 第八步：创建新的笔画
             var smoothedStroke = new Stroke(fixedStylusPoints)
             {
                 DrawingAttributes = stroke.DrawingAttributes.Clone()
@@ -125,7 +142,7 @@ namespace Ink_Canvas.Helpers
             double endToEndDistance = GetDistance(firstPoint.ToPoint(), lastPoint.ToPoint());
 
             // 如果首尾距离太近，可能是收尾相连问题
-            if (endToEndDistance < 5.0)
+            if (endToEndDistance < 3.0) // 降低阈值到3像素
             {
                 // 移除最后一个点，避免收尾相连
                 if (resultPoints.Count > 1)
@@ -138,7 +155,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 过滤和重采样点
+        /// 过滤和重采样点（1像素级别优化）
         /// </summary>
         private List<StylusPoint> FilterAndResamplePoints(List<StylusPoint> points)
         {
@@ -149,9 +166,9 @@ namespace Ink_Canvas.Helpers
             // 添加第一个点
             filteredPoints.Add(points[0]);
 
-            // 使用移动平均来减少毛刺
+            // 使用改进的移动平均来减少毛刺
             var smoothedPoints = new List<StylusPoint>();
-            int windowSize = 3; // 移动平均窗口大小
+            int windowSize = 5; // 增加窗口大小以获得更平滑的效果
 
             for (int i = 0; i < points.Count; i++)
             {
@@ -160,33 +177,41 @@ namespace Ink_Canvas.Helpers
 
                 double distance = GetDistance(lastPoint.ToPoint(), currentPoint.ToPoint());
 
-                // 如果距离太近，跳过
+                // 如果距离太近，跳过（1像素级别）
                 if (distance < MinPointDistance)
                     continue;
 
-                // 应用移动平均平滑
+                // 应用改进的移动平均平滑
                 if (i >= windowSize - 1)
                 {
                     double avgX = 0, avgY = 0, avgPressure = 0;
+                    double totalWeight = 0;
+                    
+                    // 使用加权移动平均，中心点权重更高
                     for (int j = 0; j < windowSize; j++)
                     {
                         var point = points[i - j];
-                        avgX += point.X;
-                        avgY += point.Y;
-                        avgPressure += point.PressureFactor;
+                        double weight = 1.0 - Math.Abs(j - (windowSize - 1) / 2.0) / (windowSize / 2.0);
+                        weight = Math.Max(0.1, weight); // 确保最小权重
+                        
+                        avgX += point.X * weight;
+                        avgY += point.Y * weight;
+                        avgPressure += point.PressureFactor * weight;
+                        totalWeight += weight;
                     }
-                    avgX /= windowSize;
-                    avgY /= windowSize;
-                    avgPressure /= windowSize;
+                    
+                    avgX /= totalWeight;
+                    avgY /= totalWeight;
+                    avgPressure /= totalWeight;
 
                     var smoothedPoint = new StylusPoint(avgX, avgY, (float)avgPressure);
                     currentPoint = smoothedPoint;
                 }
 
-                // 如果距离太远，插入中间点
+                // 如果距离太远，插入中间点（1像素级别精度）
                 if (distance > MaxPointDistance)
                 {
-                    int segments = (int)(distance / MaxPointDistance) + 1;
+                    int segments = Math.Max(2, (int)(distance / PixelLevelPrecision));
                     for (int j = 1; j < segments; j++)
                     {
                         double ratio = (double)j / segments;
@@ -202,9 +227,9 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 计算贝塞尔曲线的控制点
+        /// 计算优化的控制点（改进拐点平滑）
         /// </summary>
-        private List<Point> CalculateControlPoints(List<StylusPoint> points)
+        private List<Point> CalculateOptimizedControlPoints(List<StylusPoint> points)
         {
             var controlPoints = new List<Point>();
             
@@ -212,8 +237,8 @@ namespace Ink_Canvas.Helpers
 
             // 检查点密度，如果点太稀疏则使用更保守的控制点计算
             bool isSparsePoints = points.Count < 5;
-            double tensionMultiplier = isSparsePoints ? 0.1 : 0.3; // 稀疏点时使用更小的张力
-            double maxOffset = isSparsePoints ? 5.0 : 10.0; // 稀疏点时使用更小的最大偏移
+            double tensionMultiplier = isSparsePoints ? 0.05 : 0.2; // 进一步减少张力
+            double maxOffset = isSparsePoints ? 3.0 : 8.0; // 减少最大偏移
 
             for (int i = 0; i < points.Count; i++)
             {
@@ -227,15 +252,17 @@ namespace Ink_Canvas.Helpers
                     double distance = GetDistance(currentPoint, nextPoint);
                     
                     // 如果距离太远，使用更保守的控制点
-                    if (distance > 50.0)
+                    if (distance > 30.0) // 降低阈值
                     {
                         controlPoint = currentPoint; // 直接使用当前点作为控制点
                     }
                     else
                     {
+                        // 使用更平滑的控制点计算
+                        double tension = Tension * tensionMultiplier * CornerSmoothingStrength;
                         controlPoint = new Point(
-                            currentPoint.X + (nextPoint.X - currentPoint.X) * Tension * tensionMultiplier,
-                            currentPoint.Y + (nextPoint.Y - currentPoint.Y) * Tension * tensionMultiplier
+                            currentPoint.X + (nextPoint.X - currentPoint.X) * tension,
+                            currentPoint.Y + (nextPoint.Y - currentPoint.Y) * tension
                         );
                     }
                 }
@@ -246,21 +273,23 @@ namespace Ink_Canvas.Helpers
                     double distance = GetDistance(currentPoint, prevPoint);
                     
                     // 如果距离太远，使用更保守的控制点
-                    if (distance > 50.0)
+                    if (distance > 30.0) // 降低阈值
                     {
                         controlPoint = currentPoint; // 直接使用当前点作为控制点
                     }
                     else
                     {
+                        // 使用更平滑的控制点计算
+                        double tension = Tension * tensionMultiplier * CornerSmoothingStrength;
                         controlPoint = new Point(
-                            currentPoint.X + (currentPoint.X - prevPoint.X) * Tension * tensionMultiplier,
-                            currentPoint.Y + (currentPoint.Y - prevPoint.Y) * Tension * tensionMultiplier
+                            currentPoint.X + (currentPoint.X - prevPoint.X) * tension,
+                            currentPoint.Y + (currentPoint.Y - prevPoint.Y) * tension
                         );
                     }
                 }
                 else
                 {
-                    // 中间点的控制点
+                    // 中间点的控制点（改进拐点平滑）
                     Point prevPoint = points[i - 1].ToPoint();
                     Point nextPoint = points[i + 1].ToPoint();
 
@@ -268,7 +297,7 @@ namespace Ink_Canvas.Helpers
                     double prevDistance = GetDistance(currentPoint, prevPoint);
                     double nextDistance = GetDistance(currentPoint, nextPoint);
                     
-                    if (prevDistance > 50.0 || nextDistance > 50.0)
+                    if (prevDistance > 30.0 || nextDistance > 30.0) // 降低阈值
                     {
                         // 距离太远，使用线性插值作为控制点
                         controlPoint = new Point(
@@ -278,13 +307,13 @@ namespace Ink_Canvas.Helpers
                     }
                     else
                     {
-                        // 计算切线方向，使用更保守的方法
+                        // 计算改进的切线方向，使用更平滑的方法
                         double tangentX = (nextPoint.X - prevPoint.X) * tensionMultiplier;
                         double tangentY = (nextPoint.Y - prevPoint.Y) * tensionMultiplier;
 
-                        // 应用张力参数，但限制最大偏移
-                        double offsetX = tangentX * Tension;
-                        double offsetY = tangentY * Tension;
+                        // 应用张力参数和拐点平滑，但限制最大偏移
+                        double offsetX = tangentX * Tension * CornerSmoothingStrength;
+                        double offsetY = tangentY * Tension * CornerSmoothingStrength;
                         
                         // 限制偏移距离
                         double offsetDistance = Math.Sqrt(offsetX * offsetX + offsetY * offsetY);
@@ -308,9 +337,9 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 生成曲线点
+        /// 生成1像素级别的平滑曲线点
         /// </summary>
-        private List<StylusPoint> GenerateCurvePoints(List<StylusPoint> points, List<Point> controlPoints)
+        private List<StylusPoint> GeneratePixelLevelCurvePoints(List<StylusPoint> points, List<Point> controlPoints)
         {
             var curvePoints = new List<StylusPoint>();
             
@@ -324,19 +353,14 @@ namespace Ink_Canvas.Helpers
                 var startControl = controlPoints[i];
                 var endControl = controlPoints[i + 1];
 
-                // 计算自适应步长，减少步数以避免毛刺
+                // 计算1像素级别的步长
                 double distance = GetDistance(startPoint.ToPoint(), endPoint.ToPoint());
                 
-                // 根据点密度调整步数
-                int steps;
-                if (points.Count < 5) // 低密度点
-                {
-                    steps = Math.Max(1, Math.Min(3, (int)(distance / 15.0))); // 更少的步数
-                }
-                else
-                {
-                    steps = Math.Max(2, Math.Min(15, (int)(distance / 8.0))); // 正常步数
-                }
+                // 根据距离计算精确的步数，确保1像素级别精度
+                int steps = Math.Max(1, (int)(distance / PixelLevelPrecision));
+                
+                // 限制最大步数以避免过度细分
+                steps = Math.Min(steps, 50);
 
                 // 生成贝塞尔曲线点
                 for (int j = 0; j <= steps; j++)
@@ -360,6 +384,53 @@ namespace Ink_Canvas.Helpers
             }
 
             return curvePoints;
+        }
+
+        /// <summary>
+        /// 应用拐点平滑
+        /// </summary>
+        private List<StylusPoint> ApplyCornerSmoothing(List<StylusPoint> points)
+        {
+            if (points.Count < 3) return points;
+
+            var smoothedPoints = new List<StylusPoint>();
+            smoothedPoints.Add(points[0]); // 添加第一个点
+
+            for (int i = 1; i < points.Count - 1; i++)
+            {
+                var prev = points[i - 1];
+                var curr = points[i];
+                var next = points[i + 1];
+
+                // 计算角度变化
+                double angle1 = Math.Atan2(curr.Y - prev.Y, curr.X - prev.X);
+                double angle2 = Math.Atan2(next.Y - curr.Y, next.X - curr.X);
+                double angleDiff = Math.Abs(angle2 - angle1);
+                
+                // 标准化角度差
+                if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+
+                // 如果角度变化太大，认为是拐点
+                if (angleDiff > Math.PI / 4) // 45度阈值
+                {
+                    // 应用拐点平滑
+                    double smoothingFactor = CornerSmoothingStrength;
+                    double smoothedX = curr.X * (1.0 - smoothingFactor) + 
+                                     (prev.X + next.X) * 0.5 * smoothingFactor;
+                    double smoothedY = curr.Y * (1.0 - smoothingFactor) + 
+                                     (prev.Y + next.Y) * 0.5 * smoothingFactor;
+
+                    var smoothedPoint = new StylusPoint(smoothedX, smoothedY, curr.PressureFactor);
+                    smoothedPoints.Add(smoothedPoint);
+                }
+                else
+                {
+                    smoothedPoints.Add(curr);
+                }
+            }
+
+            smoothedPoints.Add(points[points.Count - 1]); // 添加最后一个点
+            return smoothedPoints;
         }
 
         /// <summary>
@@ -445,7 +516,7 @@ namespace Ink_Canvas.Helpers
                 double deviation = Math.Sqrt(deviationX * deviationX + deviationY * deviationY);
 
                 // 如果偏差超过阈值，认为是手抖
-                double shakeThreshold = 5.0; // 手抖检测阈值
+                double shakeThreshold = 3.0; // 降低手抖检测阈值
                 if (deviation > shakeThreshold)
                 {
                     // 应用手抖修正
@@ -505,11 +576,11 @@ namespace Ink_Canvas.Helpers
                 {
                     // 如果点过于密集，增加时间权重
                     double avgDistance = velocity;
-                    if (avgDistance < 2.0)
+                    if (avgDistance < 1.0) // 降低阈值
                     {
                         timeWeight = 1.5; // 增加权重
                     }
-                    else if (avgDistance > 20.0)
+                    else if (avgDistance > 15.0) // 降低阈值
                     {
                         timeWeight = 0.5; // 减少权重
                     }
@@ -530,7 +601,7 @@ namespace Ink_Canvas.Helpers
                 {
                     double velocity = velocities[i - 1];
                     // 速度越快，权重越大（更平滑）
-                    velocityWeight = Math.Min(2.0, velocity / 10.0 + 0.5);
+                    velocityWeight = Math.Min(2.0, velocity / 8.0 + 0.5); // 调整参数
                 }
 
                 // 计算加速度权重
@@ -539,7 +610,7 @@ namespace Ink_Canvas.Helpers
                 {
                     double acceleration = Math.Abs(accelerations[i - 1]);
                     // 加速度越大，权重越大（更平滑）
-                    accelerationWeight = Math.Min(2.0, acceleration / 5.0 + 0.5);
+                    accelerationWeight = Math.Min(2.0, acceleration / 3.0 + 0.5); // 调整参数
                 }
 
                 // 获取时间权重
@@ -557,7 +628,7 @@ namespace Ink_Canvas.Helpers
                 if (totalWeight > 1.0)
                 {
                     // 向相邻点加权平均
-                    double weight = (totalWeight - 1.0) * 0.3; // 限制最大影响
+                    double weight = (totalWeight - 1.0) * 0.2; // 减少最大影响
                     smoothedX = curr.X * (1.0 - weight) + (prev.X + next.X) * 0.5 * weight;
                     smoothedY = curr.Y * (1.0 - weight) + (prev.Y + next.Y) * 0.5 * weight;
                 }
@@ -590,10 +661,10 @@ namespace Ink_Canvas.Helpers
                 // 计算两点间距离
                 double distance = GetDistance(currentPoint.ToPoint(), nextPoint.ToPoint());
 
-                // 如果距离太远，插入中间点
-                if (distance > 20.0) // 低采样率下使用更大的阈值
+                // 如果距离太远，插入中间点（1像素级别）
+                if (distance > 15.0) // 降低阈值
                 {
-                    int segments = Math.Max(2, Math.Min(5, (int)(distance / 10.0))); // 限制插值段数
+                    int segments = Math.Max(2, Math.Min(8, (int)(distance / PixelLevelPrecision))); // 使用像素级别精度
                     for (int j = 1; j < segments; j++)
                     {
                         double ratio = (double)j / segments;

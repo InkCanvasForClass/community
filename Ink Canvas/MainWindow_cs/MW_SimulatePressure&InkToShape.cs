@@ -594,7 +594,9 @@ namespace Ink_Canvas {
                             EnableAdaptiveSmoothing = Settings.Canvas.EnableAdaptiveSmoothing,
                             ShakeCorrectionStrength = Settings.Canvas.ShakeCorrectionStrength,
                             VelocityWeightedSmoothingStrength = Settings.Canvas.VelocityWeightedSmoothingStrength,
-                            TimeWeightedSmoothingStrength = Settings.Canvas.TimeWeightedSmoothingStrength
+                            TimeWeightedSmoothingStrength = Settings.Canvas.TimeWeightedSmoothingStrength,
+                            CornerSmoothingStrength = Settings.Canvas.CornerSmoothingStrength,
+                            PixelLevelPrecision = Settings.Canvas.PixelLevelPrecision
                         };
 
                         var smoothedStroke = advancedSmoothing.SmoothStroke(e.Stroke);

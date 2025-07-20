@@ -543,6 +543,7 @@ namespace Ink_Canvas {
                 ShakeCorrectionStrengthSlider.Value = Settings.Canvas.ShakeCorrectionStrength;
                 VelocityWeightedSmoothingStrengthSlider.Value = Settings.Canvas.VelocityWeightedSmoothingStrength;
                 TimeWeightedSmoothingStrengthSlider.Value = Settings.Canvas.TimeWeightedSmoothingStrength;
+                CornerSmoothingStrengthSlider.Value = Settings.Canvas.CornerSmoothingStrength;
                 
                 // 初始化直线自动拉直相关设置
                 ToggleSwitchAutoStraightenLine.IsOn = Settings.Canvas.AutoStraightenLine;

@@ -51,17 +51,21 @@ namespace Ink_Canvas
         [JsonProperty("useAdvancedBezierSmoothing")]
         public bool UseAdvancedBezierSmoothing { get; set; } = true; // 默认启用高级贝塞尔曲线平滑
         [JsonProperty("advancedSmoothingStrength")]
-        public double AdvancedSmoothingStrength { get; set; } = 0.4; // 高级平滑强度 (0.0 - 1.0)，降低以减少毛刺
+        public double AdvancedSmoothingStrength { get; set; } = 0.7; // 高级平滑强度 (0.0 - 1.0)，提高以获得更平滑的效果
         [JsonProperty("advancedSmoothingTension")]
-        public double AdvancedSmoothingTension { get; set; } = 0.3; // 高级平滑张力 (0.0 - 1.0)，降低以减少毛刺
+        public double AdvancedSmoothingTension { get; set; } = 0.4; // 高级平滑张力 (0.0 - 1.0)，适度提高以获得更平滑的曲线
         [JsonProperty("enableAdaptiveSmoothing")]
         public bool EnableAdaptiveSmoothing { get; set; } = true; // 是否启用自适应平滑
         [JsonProperty("shakeCorrectionStrength")]
-        public double ShakeCorrectionStrength { get; set; } = 0.6; // 手抖修正强度 (0.0 - 1.0)
+        public double ShakeCorrectionStrength { get; set; } = 0.8; // 手抖修正强度 (0.0 - 1.0)，提高以减少手抖
         [JsonProperty("velocityWeightedSmoothingStrength")]
-        public double VelocityWeightedSmoothingStrength { get; set; } = 0.7; // 速度加权平滑强度 (0.0 - 1.0)
+        public double VelocityWeightedSmoothingStrength { get; set; } = 0.8; // 速度加权平滑强度 (0.0 - 1.0)，提高以获得更平滑的效果
         [JsonProperty("timeWeightedSmoothingStrength")]
-        public double TimeWeightedSmoothingStrength { get; set; } = 0.5; // 时间加权平滑强度 (0.0 - 1.0)
+        public double TimeWeightedSmoothingStrength { get; set; } = 0.6; // 时间加权平滑强度 (0.0 - 1.0)，提高以获得更平滑的效果
+        [JsonProperty("cornerSmoothingStrength")]
+        public double CornerSmoothingStrength { get; set; } = 0.8; // 拐点平滑强度 (0.0 - 1.0)，新增参数用于更平滑的拐点
+        [JsonProperty("pixelLevelPrecision")]
+        public double PixelLevelPrecision { get; set; } = 1.0; // 1像素级别插点精度，新增参数用于精确控制
         [JsonProperty("clearCanvasAndClearTimeMachine")]
         public bool ClearCanvasAndClearTimeMachine { get; set; } = false;
         [JsonProperty("enablePressureTouchMode")]

@@ -1347,6 +1347,12 @@ namespace Ink_Canvas {
             SaveSettingsToFile();
         }
 
+        private void CornerSmoothingStrengthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            Settings.Canvas.CornerSmoothingStrength = CornerSmoothingStrengthSlider.Value;
+            SaveSettingsToFile();
+        }
+
         private void ToggleSwitchAutoSaveStrokesInPowerPoint_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = ToggleSwitchAutoSaveStrokesInPowerPoint.IsOn;

@@ -799,7 +799,7 @@
                                         <TextBlock Foreground="#fafafa" Text="平滑强度" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <Slider Name="AdvancedSmoothingStrengthSlider" Width="150" Minimum="0.1" Maximum="1.0" 
-                                                Value="0.4" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                Value="0.7" TickFrequency="0.1" IsSnapToTickEnabled="True"
                                                 ValueChanged="AdvancedSmoothingStrengthSlider_ValueChanged" />
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=AdvancedSmoothingStrengthSlider, Path=Value, StringFormat={}{0:F1}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
@@ -809,7 +809,7 @@
                                         <TextBlock Foreground="#fafafa" Text="张力参数" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <Slider Name="AdvancedSmoothingTensionSlider" Width="150" Minimum="0.1" Maximum="1.0" 
-                                                Value="0.3" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                Value="0.4" TickFrequency="0.1" IsSnapToTickEnabled="True"
                                                 ValueChanged="AdvancedSmoothingTensionSlider_ValueChanged" />
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=AdvancedSmoothingTensionSlider, Path=Value, StringFormat={}{0:F1}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
@@ -827,7 +827,7 @@
                                         <TextBlock Foreground="#fafafa" Text="手抖修正强度" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <Slider Name="ShakeCorrectionStrengthSlider" Width="150" Minimum="0.0" Maximum="1.0" 
-                                                Value="0.6" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                Value="0.8" TickFrequency="0.1" IsSnapToTickEnabled="True"
                                                 ValueChanged="ShakeCorrectionStrengthSlider_ValueChanged" />
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=ShakeCorrectionStrengthSlider, Path=Value, StringFormat={}{0:F1}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
@@ -837,7 +837,7 @@
                                         <TextBlock Foreground="#fafafa" Text="速度加权强度" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <Slider Name="VelocityWeightedSmoothingStrengthSlider" Width="150" Minimum="0.0" Maximum="1.0" 
-                                                Value="0.7" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                Value="0.8" TickFrequency="0.1" IsSnapToTickEnabled="True"
                                                 ValueChanged="VelocityWeightedSmoothingStrengthSlider_ValueChanged" />
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=VelocityWeightedSmoothingStrengthSlider, Path=Value, StringFormat={}{0:F1}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
@@ -847,9 +847,19 @@
                                         <TextBlock Foreground="#fafafa" Text="时间加权强度" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <Slider Name="TimeWeightedSmoothingStrengthSlider" Width="150" Minimum="0.0" Maximum="1.0" 
-                                                Value="0.5" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                Value="0.6" TickFrequency="0.1" IsSnapToTickEnabled="True"
                                                 ValueChanged="TimeWeightedSmoothingStrengthSlider_ValueChanged" />
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=TimeWeightedSmoothingStrengthSlider, Path=Value, StringFormat={}{0:F1}}" 
+                                                   VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                         Visibility="{Binding ElementName=ToggleSwitchAdvancedBezierSmoothing, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="拐点平滑强度" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider Name="CornerSmoothingStrengthSlider" Width="150" Minimum="0.0" Maximum="1.0" 
+                                                Value="0.8" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                ValueChanged="CornerSmoothingStrengthSlider_ValueChanged" />
+                                        <TextBlock Foreground="#fafafa" Text="{Binding ElementName=CornerSmoothingStrengthSlider, Path=Value, StringFormat={}{0:F1}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
                                     </ui:SimpleStackPanel>
                                     <TextBlock Text="# 高级贝塞尔曲线平滑（推荐）：使用自定义算法替代系统默认的FitToCurve，提供更平滑的笔迹效果并解决墨迹闪烁、毛刺和低采样率收尾相连问题。启用高级平滑时会自动禁用系统默认平滑。手抖修正可自动检测并修正手抖造成的偏差，速度加权平滑根据笔迹速度调整平滑强度，时间加权平滑根据点密度调整平滑参数，自适应平滑会根据笔迹速度自动调整平滑参数。低采样率时自动使用线性插值避免收尾相连。" TextWrapping="Wrap" Foreground="#a1a1aa" />
