@@ -1308,8 +1308,8 @@ namespace Ink_Canvas {
                     // 计算从记录进程开始的时间
                     var timeSinceRecord = DateTime.Now - wppProcessRecordTime;
                     
-                    // 更保守的关闭策略：只有在超过3秒且检查次数超过2次时才强制关闭
-                    if (timeSinceRecord.TotalSeconds > 3 && wppProcessCheckCount >= 2)
+                    // 更保守的关闭策略：只有在超过0.5秒且检查次数超过2次时才强制关闭
+                    if (timeSinceRecord.TotalSeconds > 0.5 && wppProcessCheckCount >= 2)
                     {
                         LogHelper.WriteLogToFile($"检测到长时间未关闭的 WPP 进程（已运行{timeSinceRecord.TotalSeconds:F1}秒，检查{wppProcessCheckCount}次），开始强制关闭", LogHelper.LogType.Event);
                         wppProcess.Kill();
