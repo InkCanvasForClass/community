@@ -589,14 +589,6 @@ namespace Ink_Canvas {
                     {
                         var advancedSmoothing = new Helpers.AdvancedBezierSmoothing
                         {
-                            SmoothingStrength = Settings.Canvas.AdvancedSmoothingStrength,
-                            Tension = Settings.Canvas.AdvancedSmoothingTension,
-                            EnableAdaptiveSmoothing = Settings.Canvas.EnableAdaptiveSmoothing,
-                            ShakeCorrectionStrength = Settings.Canvas.ShakeCorrectionStrength,
-                            VelocityWeightedSmoothingStrength = Settings.Canvas.VelocityWeightedSmoothingStrength,
-                            TimeWeightedSmoothingStrength = Settings.Canvas.TimeWeightedSmoothingStrength,
-                            CornerSmoothingStrength = Settings.Canvas.CornerSmoothingStrength,
-                            PixelLevelPrecision = Settings.Canvas.PixelLevelPrecision
                         };
 
                         var smoothedStroke = advancedSmoothing.SmoothStroke(e.Stroke);

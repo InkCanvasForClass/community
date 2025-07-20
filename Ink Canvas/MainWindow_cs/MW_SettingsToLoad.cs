@@ -537,13 +537,6 @@ namespace Ink_Canvas {
                     ToggleSwitchAdvancedBezierSmoothing.IsOn = false;
                     drawingAttributes.FitToCurve = false;
                 }
-                AdvancedSmoothingStrengthSlider.Value = Settings.Canvas.AdvancedSmoothingStrength;
-                AdvancedSmoothingTensionSlider.Value = Settings.Canvas.AdvancedSmoothingTension;
-                ToggleSwitchEnableAdaptiveSmoothing.IsOn = Settings.Canvas.EnableAdaptiveSmoothing;
-                ShakeCorrectionStrengthSlider.Value = Settings.Canvas.ShakeCorrectionStrength;
-                VelocityWeightedSmoothingStrengthSlider.Value = Settings.Canvas.VelocityWeightedSmoothingStrength;
-                TimeWeightedSmoothingStrengthSlider.Value = Settings.Canvas.TimeWeightedSmoothingStrength;
-                CornerSmoothingStrengthSlider.Value = Settings.Canvas.CornerSmoothingStrength;
                 
                 // 初始化直线自动拉直相关设置
                 ToggleSwitchAutoStraightenLine.IsOn = Settings.Canvas.AutoStraightenLine;
