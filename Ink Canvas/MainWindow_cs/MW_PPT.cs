@@ -33,6 +33,10 @@ namespace Ink_Canvas {
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId, out uint lpdwThreadId);
 
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool IsWindowVisible(IntPtr hWnd);
+
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
         public static Microsoft.Office.Interop.PowerPoint.Application pptApplication = null;
@@ -174,12 +178,24 @@ namespace Ink_Canvas {
                     }
                 }
             }
-            catch (Exception ex) {
-                // 只记录非“操作无法使用”异常
-                if (!(ex is System.Runtime.InteropServices.COMException comEx && (uint)comEx.HResult == 0x800401E3))
+            catch (Exception ex)
+            {
+                // 忽略常见的COM对象失效错误
+                if (ex is System.Runtime.InteropServices.COMException comEx)
                 {
-                    LogHelper.WriteLogToFile($"检查PPT状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    uint hr = (uint)comEx.HResult;
+                    // 0x800401E3: 操作无法使用
+                    // 0x80004005: 未指定错误（常见于PPT已关闭）
+                    // 0x800706B5: RPC服务器不可用
+                    if (hr == 0x800401E3 || hr == 0x80004005 || hr == 0x800706B5)
+                    {
+                        // 可选：LogHelper.WriteLogToFile($"忽略已知COM异常: {hr:X}", LogHelper.LogType.Trace);
+                        Application.Current.Dispatcher.Invoke(() => { BtnPPTSlideShow.Visibility = Visibility.Collapsed; });
+                        timerCheckPPT.Start();
+                        return;
+                    }
                 }
+                LogHelper.WriteLogToFile($"检查PPT状态失败: {ex.ToString()}", LogHelper.LogType.Error);
                 //StackPanelPPTControls.Visibility = Visibility.Collapsed;
                 Application.Current.Dispatcher.Invoke(() => { BtnPPTSlideShow.Visibility = Visibility.Collapsed; });
                 timerCheckPPT.Start();
@@ -1348,41 +1364,51 @@ namespace Ink_Canvas {
         {
             try
             {
-                if (wppProcess != null)
+                // 检查所有WPS相关进程（wpp、wps、et）是否有前台窗口
+                string[] wpsProcessNames = { "wpp", "wps", "et" };
+                var wpsPids = new System.Collections.Generic.HashSet<int>();
+                foreach (var name in wpsProcessNames)
                 {
-                    int windowCount = 0;
-                    EnumWindows((hWnd, lParam) =>
+                    foreach (var proc in System.Diagnostics.Process.GetProcessesByName(name))
                     {
-                        try
+                        wpsPids.Add(proc.Id);
+                    }
+                }
+
+                bool hasVisibleWpsWindow = false;
+                EnumWindows((hWnd, lParam) =>
+                {
+                    try
+                    {
+                        uint windowProcessId;
+                        GetWindowThreadProcessId(hWnd, out windowProcessId);
+                        if (wpsPids.Contains((int)windowProcessId))
                         {
-                            uint windowProcessId;
-                            GetWindowThreadProcessId(hWnd, out windowProcessId);
-                            if (windowProcessId == wppProcess.Id)
+                            // 检查窗口是否可见
+                            if (IsWindowVisible(hWnd))
                             {
-                                // 检查窗口标题是否为空，避免统计后台窗口
+                                // 检查窗口标题是否为空
                                 var windowTitle = new System.Text.StringBuilder(256);
                                 GetWindowText(hWnd, windowTitle, 256);
                                 var title = windowTitle.ToString().Trim();
                                 if (!string.IsNullOrEmpty(title))
                                 {
-                                    windowCount++;
+                                    hasVisibleWpsWindow = true;
+                                    return false; // 找到一个就停止枚举
                                 }
                             }
                         }
-                        catch { }
-                        return true;
-                    }, IntPtr.Zero);
+                    }
+                    catch { }
+                    return true;
+                }, IntPtr.Zero);
 
-                    // 只要不是多文档演示（即窗口数<=1），就允许Kill
-                    if (windowCount <= 1)
-                        return false; // 没有其他文档窗口，可以Kill
-                    else
-                        return true;  // 有多个窗口，说明是多文档演示，不Kill
-                }
+                // 只要没有任何WPS相关可见窗口，就允许Kill
+                return hasVisibleWpsWindow;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"检查WPP进程窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"检查WPS前台窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
             }
             return false; // 出错时，默认允许Kill
         }
