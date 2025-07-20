@@ -175,7 +175,11 @@ namespace Ink_Canvas {
                 }
             }
             catch (Exception ex) {
-                LogHelper.WriteLogToFile($"检查PPT状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                // 只记录非“操作无法使用”异常
+                if (!(ex is System.Runtime.InteropServices.COMException comEx && (uint)comEx.HResult == 0x800401E3))
+                {
+                    LogHelper.WriteLogToFile($"检查PPT状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                }
                 //StackPanelPPTControls.Visibility = Visibility.Collapsed;
                 Application.Current.Dispatcher.Invoke(() => { BtnPPTSlideShow.Visibility = Visibility.Collapsed; });
                 timerCheckPPT.Start();
