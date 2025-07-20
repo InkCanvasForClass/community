@@ -540,6 +540,9 @@ namespace Ink_Canvas {
                 AdvancedSmoothingStrengthSlider.Value = Settings.Canvas.AdvancedSmoothingStrength;
                 AdvancedSmoothingTensionSlider.Value = Settings.Canvas.AdvancedSmoothingTension;
                 ToggleSwitchEnableAdaptiveSmoothing.IsOn = Settings.Canvas.EnableAdaptiveSmoothing;
+                ShakeCorrectionStrengthSlider.Value = Settings.Canvas.ShakeCorrectionStrength;
+                VelocityWeightedSmoothingStrengthSlider.Value = Settings.Canvas.VelocityWeightedSmoothingStrength;
+                TimeWeightedSmoothingStrengthSlider.Value = Settings.Canvas.TimeWeightedSmoothingStrength;
                 
                 // 初始化直线自动拉直相关设置
                 ToggleSwitchAutoStraightenLine.IsOn = Settings.Canvas.AutoStraightenLine;

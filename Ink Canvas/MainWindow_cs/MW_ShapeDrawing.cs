@@ -1599,7 +1599,10 @@ namespace Ink_Canvas {
                     {
                         SmoothingStrength = Settings.Canvas.AdvancedSmoothingStrength,
                         Tension = Settings.Canvas.AdvancedSmoothingTension,
-                        EnableAdaptiveSmoothing = Settings.Canvas.EnableAdaptiveSmoothing
+                        EnableAdaptiveSmoothing = Settings.Canvas.EnableAdaptiveSmoothing,
+                        ShakeCorrectionStrength = Settings.Canvas.ShakeCorrectionStrength,
+                        VelocityWeightedSmoothingStrength = Settings.Canvas.VelocityWeightedSmoothingStrength,
+                        TimeWeightedSmoothingStrength = Settings.Canvas.TimeWeightedSmoothingStrength
                     };
 
                     // 对临时笔画应用平滑

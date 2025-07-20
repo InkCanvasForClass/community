@@ -1329,6 +1329,24 @@ namespace Ink_Canvas {
             SaveSettingsToFile();
         }
 
+        private void ShakeCorrectionStrengthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            Settings.Canvas.ShakeCorrectionStrength = ShakeCorrectionStrengthSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void VelocityWeightedSmoothingStrengthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            Settings.Canvas.VelocityWeightedSmoothingStrength = VelocityWeightedSmoothingStrengthSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void TimeWeightedSmoothingStrengthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            Settings.Canvas.TimeWeightedSmoothingStrength = TimeWeightedSmoothingStrengthSlider.Value;
+            SaveSettingsToFile();
+        }
+
         private void ToggleSwitchAutoSaveStrokesInPowerPoint_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = ToggleSwitchAutoSaveStrokesInPowerPoint.IsOn;
@@ -1634,6 +1652,9 @@ namespace Ink_Canvas {
             Settings.Canvas.AdvancedSmoothingStrength = 0.4;
             Settings.Canvas.AdvancedSmoothingTension = 0.3;
             Settings.Canvas.EnableAdaptiveSmoothing = true;
+            Settings.Canvas.ShakeCorrectionStrength = 0.6;
+            Settings.Canvas.VelocityWeightedSmoothingStrength = 0.7;
+            Settings.Canvas.TimeWeightedSmoothingStrength = 0.5;
             Settings.Canvas.EnablePressureTouchMode = false;
             Settings.Canvas.DisablePressure = false;
             Settings.Canvas.AutoStraightenLine = true;

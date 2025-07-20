@@ -56,6 +56,12 @@ namespace Ink_Canvas
         public double AdvancedSmoothingTension { get; set; } = 0.3; // 高级平滑张力 (0.0 - 1.0)，降低以减少毛刺
         [JsonProperty("enableAdaptiveSmoothing")]
         public bool EnableAdaptiveSmoothing { get; set; } = true; // 是否启用自适应平滑
+        [JsonProperty("shakeCorrectionStrength")]
+        public double ShakeCorrectionStrength { get; set; } = 0.6; // 手抖修正强度 (0.0 - 1.0)
+        [JsonProperty("velocityWeightedSmoothingStrength")]
+        public double VelocityWeightedSmoothingStrength { get; set; } = 0.7; // 速度加权平滑强度 (0.0 - 1.0)
+        [JsonProperty("timeWeightedSmoothingStrength")]
+        public double TimeWeightedSmoothingStrength { get; set; } = 0.5; // 时间加权平滑强度 (0.0 - 1.0)
         [JsonProperty("clearCanvasAndClearTimeMachine")]
         public bool ClearCanvasAndClearTimeMachine { get; set; } = false;
         [JsonProperty("enablePressureTouchMode")]
