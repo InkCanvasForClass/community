@@ -1631,8 +1631,8 @@ namespace Ink_Canvas {
             Settings.Canvas.ClearCanvasAndClearTimeMachine = false;
             Settings.Canvas.FitToCurve = false;
             Settings.Canvas.UseAdvancedBezierSmoothing = true;
-            Settings.Canvas.AdvancedSmoothingStrength = 0.6;
-            Settings.Canvas.AdvancedSmoothingTension = 0.5;
+            Settings.Canvas.AdvancedSmoothingStrength = 0.4;
+            Settings.Canvas.AdvancedSmoothingTension = 0.3;
             Settings.Canvas.EnableAdaptiveSmoothing = true;
             Settings.Canvas.EnablePressureTouchMode = false;
             Settings.Canvas.DisablePressure = false;

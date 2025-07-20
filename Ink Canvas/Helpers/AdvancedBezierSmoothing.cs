@@ -33,12 +33,12 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 最小点间距阈值
         /// </summary>
-        public double MinPointDistance { get; set; } = 2.0;
+        public double MinPointDistance { get; set; } = 3.0; // 增加最小间距，减少毛刺
 
         /// <summary>
         /// 最大点间距阈值
         /// </summary>
-        public double MaxPointDistance { get; set; } = 50.0;
+        public double MaxPointDistance { get; set; } = 30.0; // 减少最大间距，提高平滑度
 
         /// <summary>
         /// 对笔画进行高级贝塞尔曲线平滑处理
@@ -84,7 +84,11 @@ namespace Ink_Canvas.Helpers
             // 添加第一个点
             filteredPoints.Add(points[0]);
 
-            for (int i = 1; i < points.Count; i++)
+            // 使用移动平均来减少毛刺
+            var smoothedPoints = new List<StylusPoint>();
+            int windowSize = 3; // 移动平均窗口大小
+
+            for (int i = 0; i < points.Count; i++)
             {
                 var currentPoint = points[i];
                 var lastPoint = filteredPoints[filteredPoints.Count - 1];
@@ -94,6 +98,25 @@ namespace Ink_Canvas.Helpers
                 // 如果距离太近，跳过
                 if (distance < MinPointDistance)
                     continue;
+
+                // 应用移动平均平滑
+                if (i >= windowSize - 1)
+                {
+                    double avgX = 0, avgY = 0, avgPressure = 0;
+                    for (int j = 0; j < windowSize; j++)
+                    {
+                        var point = points[i - j];
+                        avgX += point.X;
+                        avgY += point.Y;
+                        avgPressure += point.PressureFactor;
+                    }
+                    avgX /= windowSize;
+                    avgY /= windowSize;
+                    avgPressure /= windowSize;
+
+                    var smoothedPoint = new StylusPoint(avgX, avgY, (float)avgPressure);
+                    currentPoint = smoothedPoint;
+                }
 
                 // 如果距离太远，插入中间点
                 if (distance > MaxPointDistance)
@@ -132,8 +155,8 @@ namespace Ink_Canvas.Helpers
                     // 第一个点的控制点
                     Point nextPoint = points[i + 1].ToPoint();
                     controlPoint = new Point(
-                        currentPoint.X + (nextPoint.X - currentPoint.X) * Tension * 0.5,
-                        currentPoint.Y + (nextPoint.Y - currentPoint.Y) * Tension * 0.5
+                        currentPoint.X + (nextPoint.X - currentPoint.X) * Tension * 0.3, // 减少张力，减少毛刺
+                        currentPoint.Y + (nextPoint.Y - currentPoint.Y) * Tension * 0.3
                     );
                 }
                 else if (i == points.Count - 1)
@@ -141,8 +164,8 @@ namespace Ink_Canvas.Helpers
                     // 最后一个点的控制点
                     Point prevPoint = points[i - 1].ToPoint();
                     controlPoint = new Point(
-                        currentPoint.X + (currentPoint.X - prevPoint.X) * Tension * 0.5,
-                        currentPoint.Y + (currentPoint.Y - prevPoint.Y) * Tension * 0.5
+                        currentPoint.X + (currentPoint.X - prevPoint.X) * Tension * 0.3,
+                        currentPoint.Y + (currentPoint.Y - prevPoint.Y) * Tension * 0.3
                     );
                 }
                 else
@@ -151,14 +174,26 @@ namespace Ink_Canvas.Helpers
                     Point prevPoint = points[i - 1].ToPoint();
                     Point nextPoint = points[i + 1].ToPoint();
 
-                    // 计算切线方向
-                    double tangentX = (nextPoint.X - prevPoint.X) * 0.5;
-                    double tangentY = (nextPoint.Y - prevPoint.Y) * 0.5;
+                    // 计算切线方向，使用更保守的方法
+                    double tangentX = (nextPoint.X - prevPoint.X) * 0.3; // 减少切线强度
+                    double tangentY = (nextPoint.Y - prevPoint.Y) * 0.3;
 
-                    // 应用张力参数
+                    // 应用张力参数，但限制最大偏移
+                    double maxOffset = 10.0; // 限制控制点最大偏移距离
+                    double offsetX = tangentX * Tension;
+                    double offsetY = tangentY * Tension;
+                    
+                    // 限制偏移距离
+                    double offsetDistance = Math.Sqrt(offsetX * offsetX + offsetY * offsetY);
+                    if (offsetDistance > maxOffset)
+                    {
+                        offsetX = offsetX * maxOffset / offsetDistance;
+                        offsetY = offsetY * maxOffset / offsetDistance;
+                    }
+
                     controlPoint = new Point(
-                        currentPoint.X + tangentX * Tension,
-                        currentPoint.Y + tangentY * Tension
+                        currentPoint.X + offsetX,
+                        currentPoint.Y + offsetY
                     );
                 }
 
@@ -185,9 +220,9 @@ namespace Ink_Canvas.Helpers
                 var startControl = controlPoints[i];
                 var endControl = controlPoints[i + 1];
 
-                // 计算自适应步长
+                // 计算自适应步长，减少步数以避免毛刺
                 double distance = GetDistance(startPoint.ToPoint(), endPoint.ToPoint());
-                int steps = Math.Max(3, Math.Min(20, (int)(distance / 5.0)));
+                int steps = Math.Max(2, Math.Min(15, (int)(distance / 8.0))); // 减少步数，增加步长
 
                 // 生成贝塞尔曲线点
                 for (int j = 0; j <= steps; j++)
@@ -195,8 +230,15 @@ namespace Ink_Canvas.Helpers
                     double t = (double)j / steps;
                     var curvePoint = CalculateBezierPoint(startPoint.ToPoint(), startControl, endControl, endPoint.ToPoint(), t);
                     
-                    // 插值压感值
+                    // 插值压感值，使用更平滑的插值
                     float pressure = InterpolatePressure(startPoint.PressureFactor, endPoint.PressureFactor, t);
+                    
+                    // 对压感值进行额外的平滑处理
+                    if (j > 0 && j < steps)
+                    {
+                        float prevPressure = curvePoints[curvePoints.Count - 1].PressureFactor;
+                        pressure = (prevPressure + pressure) * 0.5f; // 简单的移动平均
+                    }
                     
                     var stylusPoint = new StylusPoint(curvePoint.X, curvePoint.Y, pressure);
                     curvePoints.Add(stylusPoint);
@@ -249,7 +291,18 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private float InterpolatePressure(float p1, float p2, double ratio)
         {
-            return (float)(p1 + (p2 - p1) * ratio);
+            // 使用平滑的插值函数来减少毛刺
+            double smoothRatio = SmoothStep(ratio);
+            return (float)(p1 + (p2 - p1) * smoothRatio);
+        }
+
+        /// <summary>
+        /// 平滑步进函数，用于减少插值时的毛刺
+        /// </summary>
+        private double SmoothStep(double t)
+        {
+            // 使用三次平滑函数
+            return t * t * (3.0 - 2.0 * t);
         }
 
         /// <summary>

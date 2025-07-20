@@ -51,9 +51,9 @@ namespace Ink_Canvas
         [JsonProperty("useAdvancedBezierSmoothing")]
         public bool UseAdvancedBezierSmoothing { get; set; } = true; // 默认启用高级贝塞尔曲线平滑
         [JsonProperty("advancedSmoothingStrength")]
-        public double AdvancedSmoothingStrength { get; set; } = 0.6; // 高级平滑强度 (0.0 - 1.0)
+        public double AdvancedSmoothingStrength { get; set; } = 0.4; // 高级平滑强度 (0.0 - 1.0)，降低以减少毛刺
         [JsonProperty("advancedSmoothingTension")]
-        public double AdvancedSmoothingTension { get; set; } = 0.5; // 高级平滑张力 (0.0 - 1.0)
+        public double AdvancedSmoothingTension { get; set; } = 0.3; // 高级平滑张力 (0.0 - 1.0)，降低以减少毛刺
         [JsonProperty("enableAdaptiveSmoothing")]
         public bool EnableAdaptiveSmoothing { get; set; } = true; // 是否启用自适应平滑
         [JsonProperty("clearCanvasAndClearTimeMachine")]

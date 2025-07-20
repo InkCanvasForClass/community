@@ -799,7 +799,7 @@
                                         <TextBlock Foreground="#fafafa" Text="平滑强度" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <Slider Name="AdvancedSmoothingStrengthSlider" Width="150" Minimum="0.1" Maximum="1.0" 
-                                                Value="0.6" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                Value="0.4" TickFrequency="0.1" IsSnapToTickEnabled="True"
                                                 ValueChanged="AdvancedSmoothingStrengthSlider_ValueChanged" />
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=AdvancedSmoothingStrengthSlider, Path=Value, StringFormat={}{0:F1}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
@@ -809,7 +809,7 @@
                                         <TextBlock Foreground="#fafafa" Text="张力参数" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <Slider Name="AdvancedSmoothingTensionSlider" Width="150" Minimum="0.1" Maximum="1.0" 
-                                                Value="0.5" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                Value="0.3" TickFrequency="0.1" IsSnapToTickEnabled="True"
                                                 ValueChanged="AdvancedSmoothingTensionSlider_ValueChanged" />
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=AdvancedSmoothingTensionSlider, Path=Value, StringFormat={}{0:F1}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
@@ -822,7 +822,7 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchEnableAdaptiveSmoothing_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 高级贝塞尔曲线平滑（推荐）：使用自定义算法替代系统默认的FitToCurve，提供更平滑的笔迹效果并解决墨迹闪烁问题。启用高级平滑时会自动禁用系统默认平滑。平滑强度控制平滑程度，张力参数控制曲线的紧绷程度，自适应平滑会根据笔迹速度自动调整平滑参数。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <TextBlock Text="# 高级贝塞尔曲线平滑（推荐）：使用自定义算法替代系统默认的FitToCurve，提供更平滑的笔迹效果并解决墨迹闪烁和毛刺问题。启用高级平滑时会自动禁用系统默认平滑。平滑强度控制平滑程度（较低值减少毛刺），张力参数控制曲线的紧绷程度（较低值减少毛刺），自适应平滑会根据笔迹速度自动调整平滑参数。" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <!-- 新增：崩溃后操作设置 -->
