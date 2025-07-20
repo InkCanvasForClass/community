@@ -1364,51 +1364,41 @@ namespace Ink_Canvas {
         {
             try
             {
-                // 检查所有WPS相关进程（wpp、wps、et）是否有前台窗口
-                string[] wpsProcessNames = { "wpp", "wps", "et" };
-                var wpsPids = new System.Collections.Generic.HashSet<int>();
-                foreach (var name in wpsProcessNames)
+                if (wppProcess != null)
                 {
-                    foreach (var proc in System.Diagnostics.Process.GetProcessesByName(name))
+                    bool hasVisibleWppWindow = false;
+                    EnumWindows((hWnd, lParam) =>
                     {
-                        wpsPids.Add(proc.Id);
-                    }
-                }
-
-                bool hasVisibleWpsWindow = false;
-                EnumWindows((hWnd, lParam) =>
-                {
-                    try
-                    {
-                        uint windowProcessId;
-                        GetWindowThreadProcessId(hWnd, out windowProcessId);
-                        if (wpsPids.Contains((int)windowProcessId))
+                        try
                         {
-                            // 检查窗口是否可见
-                            if (IsWindowVisible(hWnd))
+                            uint windowProcessId;
+                            GetWindowThreadProcessId(hWnd, out windowProcessId);
+                            if ((int)windowProcessId == wppProcess.Id)
                             {
-                                // 检查窗口标题是否为空
-                                var windowTitle = new System.Text.StringBuilder(256);
-                                GetWindowText(hWnd, windowTitle, 256);
-                                var title = windowTitle.ToString().Trim();
-                                if (!string.IsNullOrEmpty(title))
+                                if (IsWindowVisible(hWnd))
                                 {
-                                    hasVisibleWpsWindow = true;
-                                    return false; // 找到一个就停止枚举
+                                    var windowTitle = new System.Text.StringBuilder(256);
+                                    GetWindowText(hWnd, windowTitle, 256);
+                                    var title = windowTitle.ToString().Trim();
+                                    if (!string.IsNullOrEmpty(title))
+                                    {
+                                        hasVisibleWppWindow = true;
+                                        return false; // 找到一个就停止枚举
+                                    }
                                 }
                             }
                         }
-                    }
-                    catch { }
-                    return true;
-                }, IntPtr.Zero);
+                        catch { }
+                        return true;
+                    }, IntPtr.Zero);
 
-                // 只要没有任何WPS相关可见窗口，就允许Kill
-                return hasVisibleWpsWindow;
+                    // 只要当前wpp进程没有可见窗口，就允许Kill
+                    return hasVisibleWppWindow;
+                }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"检查WPS前台窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"检查WPP窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
             }
             return false; // 出错时，默认允许Kill
         }
