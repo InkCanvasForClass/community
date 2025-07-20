@@ -287,10 +287,7 @@ namespace Ink_Canvas {
             else
                 RadioCrashNoAction.IsChecked = true;
             
-            // 设置默认为黑板模式
-            Settings.Canvas.UsingWhiteboard = false;
-            Settings.Canvas.CustomBackgroundColor = "#162924"; // 黑板默认颜色 RGB(22, 41, 36)
-            SaveSettingsToFile();
+
             
             // 如果当前不是黑板模式，则切换到黑板模式
             if (currentMode == 0)
