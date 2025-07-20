@@ -85,9 +85,10 @@ namespace Ink_Canvas {
         public static bool IsShowingRestoreHiddenSlidesWindow = false;
         private static bool IsShowingAutoplaySlidesWindow = false;
 
-        // WPS 相关变量
-        private static Process wpsProcess = null;
-        private static bool hasWpsProcessID = false;
+        // WPP 相关变量
+        private static Process wppProcess = null;
+        private static bool hasWppProcessID = false;
+        private static System.Timers.Timer wppProcessCheckTimer = null;
 
 
         private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e) {
@@ -549,13 +550,14 @@ namespace Ink_Canvas {
             try {
                 if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
 
-                // 对于延迟未关闭的 WPP，先记录进程 ID，待所有结束事件处理完毕后强制关闭
-                if (pptApplication != null && pptApplication.Path.Contains("Kingsoft\\WPS Office\\") && pptApplication.Presentations.Count <= 1)
+                // 记录 WPP 进程 ID，用于后续检测未关闭的进程
+                if (pptApplication != null && pptApplication.Path.Contains("Kingsoft\\WPS Office\\"))
                 {
                     uint processId;
                     GetWindowThreadProcessId((IntPtr)pptApplication.HWND, out processId);
-                    wpsProcess = Process.GetProcessById((int)processId);
-                    hasWpsProcessID = true;
+                    wppProcess = Process.GetProcessById((int)processId);
+                    hasWppProcessID = true;
+                    LogHelper.WriteLogToFile($"记录 WPP 进程 ID: {processId}", LogHelper.LogType.Trace);
                 } 
 
                 LogHelper.WriteLogToFile(string.Format("PowerPoint Slide Show End"), LogHelper.LogType.Event);
@@ -646,6 +648,12 @@ namespace Ink_Canvas {
                 await Application.Current.Dispatcher.InvokeAsync(() => {
                     ViewboxFloatingBarMarginAnimation(100, true);
                 });
+
+                // 启动 WPP 进程检测定时器
+                if (hasWppProcessID && wppProcess != null)
+                {
+                    StartWppProcessCheckTimer();
+                }
             }
             catch (Exception ex) {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
@@ -999,6 +1007,74 @@ namespace Ink_Canvas {
 
         private void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e) {
             BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
+        }
+
+        private void StartWppProcessCheckTimer()
+        {
+            if (wppProcessCheckTimer != null)
+            {
+                wppProcessCheckTimer.Stop();
+                wppProcessCheckTimer.Dispose();
+            }
+
+            wppProcessCheckTimer = new System.Timers.Timer(2000); // 2秒检查一次
+            wppProcessCheckTimer.Elapsed += WppProcessCheckTimer_Elapsed;
+            wppProcessCheckTimer.Start();
+            LogHelper.WriteLogToFile("启动 WPP 进程检测定时器", LogHelper.LogType.Trace);
+        }
+
+        private void WppProcessCheckTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            try
+            {
+                if (wppProcess == null || hasWppProcessID == false)
+                {
+                    StopWppProcessCheckTimer();
+                    return;
+                }
+
+                // 刷新进程状态
+                wppProcess.Refresh();
+
+                if (wppProcess.HasExited)
+                {
+                    LogHelper.WriteLogToFile("WPP 进程已正常关闭", LogHelper.LogType.Trace);
+                    StopWppProcessCheckTimer();
+                }
+                else
+                {
+                    // 检查是否超过 5 秒仍未关闭
+                    var processStartTime = wppProcess.StartTime;
+                    var timeSinceStart = DateTime.Now - processStartTime;
+                    
+                    if (timeSinceStart.TotalSeconds > 5)
+                    {
+                        LogHelper.WriteLogToFile("检测到长时间未关闭的 WPP 进程，开始强制关闭", LogHelper.LogType.Event);
+                        wppProcess.Kill();
+                        LogHelper.WriteLogToFile("强制关闭 WPP 进程成功", LogHelper.LogType.Event);
+                        StopWppProcessCheckTimer();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"WPP 进程检测失败: {ex.ToString()}", LogHelper.LogType.Error);
+                StopWppProcessCheckTimer();
+            }
+        }
+
+        private void StopWppProcessCheckTimer()
+        {
+            if (wppProcessCheckTimer != null)
+            {
+                wppProcessCheckTimer.Stop();
+                wppProcessCheckTimer.Dispose();
+                wppProcessCheckTimer = null;
+            }
+            
+            wppProcess = null;
+            hasWppProcessID = false;
+            LogHelper.WriteLogToFile("停止 WPP 进程检测定时器", LogHelper.LogType.Trace);
         }
     }
 }
