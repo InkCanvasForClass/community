@@ -34,6 +34,14 @@ namespace Ink_Canvas {
         private System.Windows.Controls.Canvas currentCanvas = null;
         private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup = null;
 
+        // Win32 API声明和常量（用于无焦点窗口）
+        [DllImport("user32.dll")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+        [DllImport("user32.dll")]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_NOACTIVATE = 0x08000000;
+
         #region Window Initialization
 
         public MainWindow() {
@@ -310,6 +318,11 @@ namespace Ink_Canvas {
 
             // 初始化插件系统
             InitializePluginSystem();
+
+            // 设置窗口为无焦点（不会抢占焦点）
+            var hwnd = new WindowInteropHelper(this).Handle;
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
