@@ -86,7 +86,6 @@ namespace Ink_Canvas {
         private static bool IsShowingAutoplaySlidesWindow = false;
 
         // WPS 相关变量
-        private static bool autoCloseWPS = false;
         private static Process wpsProcess = null;
         private static bool hasWpsProcessID = false;
 
@@ -551,13 +550,13 @@ namespace Ink_Canvas {
                 if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
 
                 // 对于延迟未关闭的 WPP，先记录进程 ID，待所有结束事件处理完毕后强制关闭
-                if (autoCloseWPS && pptApplication != null && pptApplication.Path.Contains("Kingsoft\\WPS Office\\") && pptApplication.Presentations.Count <= 1)
+                if (pptApplication != null && pptApplication.Path.Contains("Kingsoft\\WPS Office\\") && pptApplication.Presentations.Count <= 1)
                 {
                     uint processId;
                     GetWindowThreadProcessId((IntPtr)pptApplication.HWND, out processId);
                     wpsProcess = Process.GetProcessById((int)processId);
                     hasWpsProcessID = true;
-                }
+                } 
 
                 LogHelper.WriteLogToFile(string.Format("PowerPoint Slide Show End"), LogHelper.LogType.Event);
                 if (isEnteredSlideShowEndEvent) {
