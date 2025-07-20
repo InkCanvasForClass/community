@@ -351,10 +351,12 @@ namespace Ink_Canvas {
                     if (prePalmEraserEditingMode == InkCanvasEditingMode.Ink) {
                         // 模拟点击批注选项卡
                         PenIcon_Click(null, null);
+                        HideSubPanels("pen", true); // 新增：确保高光切换
                     } else if (prePalmEraserEditingMode == InkCanvasEditingMode.None || 
                                prePalmEraserEditingMode == InkCanvasEditingMode.Select) {
                         // 模拟点击光标选项卡
                         CursorIcon_Click(null, null);
+                        HideSubPanels("cursor", true); // 新增：确保高光切换
                     } else {
                         // 其他编辑模式时恢复之前的模式
                         inkCanvas.EditingMode = prePalmEraserEditingMode;
