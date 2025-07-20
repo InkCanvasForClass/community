@@ -983,51 +983,5 @@ namespace Ink_Canvas {
         private void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e) {
             BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }
-
-        // 检查并安全关闭多余的WPS进程（仅当所有WPS都未打开PPT时）
-        private static void CloseExtraWpsProcessesIfNoPptOpen()
-        {
-            try
-            {
-                var wpsProcesses = System.Diagnostics.Process.GetProcessesByName("wpp");
-                if (wpsProcesses.Length == 0) return;
-
-                bool anyWpsHasPpt = false;
-
-                foreach (var proc in wpsProcesses)
-                {
-                    try
-                    {
-                        // 通过窗口标题判断是否有PPT文档（WPS窗口标题通常包含文档名）
-                        if (!string.IsNullOrEmpty(proc.MainWindowTitle) && proc.MainWindowTitle.Contains(".ppt"))
-                        {
-                            anyWpsHasPpt = true;
-                            break;
-                        }
-                    }
-                    catch { }
-                }
-
-                // 如果没有任何WPS打开PPT，则关闭所有WPS进程
-                if (!anyWpsHasPpt)
-                {
-                    foreach (var proc in wpsProcesses)
-                    {
-                        try
-                        {
-                            if (!proc.CloseMainWindow())
-                            {
-                                proc.Kill();
-                            }
-                        }
-                        catch { }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show("关闭多余WPS进程时出错：" + ex.Message);
-            }
-        }
     }
 }
