@@ -1348,66 +1348,43 @@ namespace Ink_Canvas {
         {
             try
             {
-                // 检查是否有其他WPS窗口打开
-                var wpsProcesses = Process.GetProcessesByName("wpp");
-                if (wpsProcesses.Length > 1)
-                {
-                    LogHelper.WriteLogToFile($"检测到{wpsProcesses.Length}个WPP进程", LogHelper.LogType.Trace);
-                    return true;
-                }
-
-                // 检查是否有WPS相关的其他进程
-                var kingsoftProcesses = Process.GetProcessesByName("wps");
-                if (kingsoftProcesses.Length > 0)
-                {
-                    LogHelper.WriteLogToFile("检测到WPS主程序进程", LogHelper.LogType.Trace);
-                    return true;
-                }
-
-                // 检查是否有其他WPS相关进程
-                var etProcesses = Process.GetProcessesByName("et"); // WPS表格
-                var wpsProcesses2 = Process.GetProcessesByName("wps"); // WPS文字
-                if (etProcesses.Length > 0 || wpsProcesses2.Length > 0)
-                {
-                    LogHelper.WriteLogToFile($"检测到其他WPS组件进程：ET进程{etProcesses.Length}个，WPS进程{wpsProcesses2.Length}个", LogHelper.LogType.Trace);
-                    return true;
-                }
-
-                // 检查当前WPP进程是否有多个窗口
                 if (wppProcess != null)
                 {
-                    try
+                    int windowCount = 0;
+                    EnumWindows((hWnd, lParam) =>
                     {
-                        var windowCount = 0;
-                        foreach (ProcessThread thread in wppProcess.Threads)
+                        try
                         {
-                            // 简单检查是否有多个窗口句柄
-                            if (thread.ThreadState == System.Diagnostics.ThreadState.Running)
+                            uint windowProcessId;
+                            GetWindowThreadProcessId(hWnd, out windowProcessId);
+                            if (windowProcessId == wppProcess.Id)
                             {
-                                windowCount++;
+                                // 检查窗口标题是否为空，避免统计后台窗口
+                                var windowTitle = new System.Text.StringBuilder(256);
+                                GetWindowText(hWnd, windowTitle, 256);
+                                var title = windowTitle.ToString().Trim();
+                                if (!string.IsNullOrEmpty(title))
+                                {
+                                    windowCount++;
+                                }
                             }
                         }
-                        
-                        if (windowCount > 1)
-                        {
-                            LogHelper.WriteLogToFile($"当前WPP进程有{windowCount}个活动线程，可能存在多个窗口", LogHelper.LogType.Trace);
-                            return true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"检查WPP进程窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
-                    }
-                }
+                        catch { }
+                        return true;
+                    }, IntPtr.Zero);
 
-                // 通过枚举窗口检查是否有其他WPS窗口
-                return CheckForWpsWindowsByEnumeration();
+                    // 只要不是多文档演示（即窗口数<=1），就允许Kill
+                    if (windowCount <= 1)
+                        return false; // 没有其他文档窗口，可以Kill
+                    else
+                        return true;  // 有多个窗口，说明是多文档演示，不Kill
+                }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"检查其他WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
-                return false; // 出错时保守处理，不强制关闭
+                LogHelper.WriteLogToFile($"检查WPP进程窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
             }
+            return false; // 出错时，默认允许Kill
         }
 
         private bool CheckForWpsWindowsByEnumeration()
