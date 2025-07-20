@@ -1285,6 +1285,47 @@ namespace Ink_Canvas {
             if (!isLoaded) return;
             drawingAttributes.FitToCurve = ToggleSwitchFitToCurve.IsOn;
             Settings.Canvas.FitToCurve = ToggleSwitchFitToCurve.IsOn;
+            
+            // 启用原来的FitToCurve时自动禁用高级贝塞尔平滑
+            if (ToggleSwitchFitToCurve.IsOn)
+            {
+                ToggleSwitchAdvancedBezierSmoothing.IsOn = false;
+                Settings.Canvas.UseAdvancedBezierSmoothing = false;
+            }
+            
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAdvancedBezierSmoothing_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Canvas.UseAdvancedBezierSmoothing = ToggleSwitchAdvancedBezierSmoothing.IsOn;
+            
+            // 启用高级贝塞尔平滑时自动禁用原来的FitToCurve
+            if (ToggleSwitchAdvancedBezierSmoothing.IsOn)
+            {
+                ToggleSwitchFitToCurve.IsOn = false;
+                Settings.Canvas.FitToCurve = false;
+                drawingAttributes.FitToCurve = false;
+            }
+            
+            SaveSettingsToFile();
+        }
+
+        private void AdvancedSmoothingStrengthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            Settings.Canvas.AdvancedSmoothingStrength = AdvancedSmoothingStrengthSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void AdvancedSmoothingTensionSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            Settings.Canvas.AdvancedSmoothingTension = AdvancedSmoothingTensionSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableAdaptiveSmoothing_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Canvas.EnableAdaptiveSmoothing = ToggleSwitchEnableAdaptiveSmoothing.IsOn;
             SaveSettingsToFile();
         }
 
@@ -1588,7 +1629,11 @@ namespace Ink_Canvas {
             Settings.Canvas.EraserShapeType = 1;
             Settings.Canvas.HideStrokeWhenSelecting = false;
             Settings.Canvas.ClearCanvasAndClearTimeMachine = false;
-            Settings.Canvas.FitToCurve = true;
+            Settings.Canvas.FitToCurve = false;
+            Settings.Canvas.UseAdvancedBezierSmoothing = true;
+            Settings.Canvas.AdvancedSmoothingStrength = 0.6;
+            Settings.Canvas.AdvancedSmoothingTension = 0.5;
+            Settings.Canvas.EnableAdaptiveSmoothing = true;
             Settings.Canvas.EnablePressureTouchMode = false;
             Settings.Canvas.DisablePressure = false;
             Settings.Canvas.AutoStraightenLine = true;

@@ -515,13 +515,31 @@ namespace Ink_Canvas {
 
                 ToggleSwitchHideStrokeWhenSelecting.IsOn = Settings.Canvas.HideStrokeWhenSelecting;
 
-                if (Settings.Canvas.FitToCurve) {
-                    ToggleSwitchFitToCurve.IsOn = true;
-                    drawingAttributes.FitToCurve = true;
-                } else {
+                // 初始化贝塞尔曲线平滑设置
+                if (Settings.Canvas.UseAdvancedBezierSmoothing)
+                {
+                    // 如果启用高级贝塞尔平滑，则禁用原来的FitToCurve
+                    ToggleSwitchAdvancedBezierSmoothing.IsOn = true;
                     ToggleSwitchFitToCurve.IsOn = false;
                     drawingAttributes.FitToCurve = false;
                 }
+                else if (Settings.Canvas.FitToCurve)
+                {
+                    // 如果启用原来的FitToCurve，则禁用高级贝塞尔平滑
+                    ToggleSwitchFitToCurve.IsOn = true;
+                    ToggleSwitchAdvancedBezierSmoothing.IsOn = false;
+                    drawingAttributes.FitToCurve = true;
+                }
+                else
+                {
+                    // 两者都禁用
+                    ToggleSwitchFitToCurve.IsOn = false;
+                    ToggleSwitchAdvancedBezierSmoothing.IsOn = false;
+                    drawingAttributes.FitToCurve = false;
+                }
+                AdvancedSmoothingStrengthSlider.Value = Settings.Canvas.AdvancedSmoothingStrength;
+                AdvancedSmoothingTensionSlider.Value = Settings.Canvas.AdvancedSmoothingTension;
+                ToggleSwitchEnableAdaptiveSmoothing.IsOn = Settings.Canvas.EnableAdaptiveSmoothing;
                 
                 // 初始化直线自动拉直相关设置
                 ToggleSwitchAutoStraightenLine.IsOn = Settings.Canvas.AutoStraightenLine;

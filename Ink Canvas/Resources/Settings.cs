@@ -47,7 +47,15 @@ namespace Ink_Canvas
         [JsonProperty("hideStrokeWhenSelecting")]
         public bool HideStrokeWhenSelecting { get; set; } = true;
         [JsonProperty("fitToCurve")]
-        public bool FitToCurve { get; set; } = true;
+        public bool FitToCurve { get; set; } = false; // 默认关闭原来的贝塞尔平滑
+        [JsonProperty("useAdvancedBezierSmoothing")]
+        public bool UseAdvancedBezierSmoothing { get; set; } = true; // 默认启用高级贝塞尔曲线平滑
+        [JsonProperty("advancedSmoothingStrength")]
+        public double AdvancedSmoothingStrength { get; set; } = 0.6; // 高级平滑强度 (0.0 - 1.0)
+        [JsonProperty("advancedSmoothingTension")]
+        public double AdvancedSmoothingTension { get; set; } = 0.5; // 高级平滑张力 (0.0 - 1.0)
+        [JsonProperty("enableAdaptiveSmoothing")]
+        public bool EnableAdaptiveSmoothing { get; set; } = true; // 是否启用自适应平滑
         [JsonProperty("clearCanvasAndClearTimeMachine")]
         public bool ClearCanvasAndClearTimeMachine { get; set; } = false;
         [JsonProperty("enablePressureTouchMode")]

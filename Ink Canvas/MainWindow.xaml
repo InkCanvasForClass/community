@@ -781,12 +781,48 @@
                                     <TextBlock Text="# 请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响用。" TextWrapping="Wrap"
                                                Foreground="#a1a1aa" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="让墨迹使用贝塞尔曲线平滑处理"
-                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                                                            <TextBlock Foreground="#fafafa" Text="使用WPF默认贝塞尔曲线平滑"
+                                               VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchFitToCurve"
-                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchFitToCurve_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                                                            <TextBlock Foreground="#fafafa" Text="使用高级贝塞尔曲线平滑（推荐）"
+                                               VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAdvancedBezierSmoothing"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAdvancedBezierSmoothing_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                         Visibility="{Binding ElementName=ToggleSwitchAdvancedBezierSmoothing, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="平滑强度" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider Name="AdvancedSmoothingStrengthSlider" Width="150" Minimum="0.1" Maximum="1.0" 
+                                                Value="0.6" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                ValueChanged="AdvancedSmoothingStrengthSlider_ValueChanged" />
+                                        <TextBlock Foreground="#fafafa" Text="{Binding ElementName=AdvancedSmoothingStrengthSlider, Path=Value, StringFormat={}{0:F1}}" 
+                                                   VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                         Visibility="{Binding ElementName=ToggleSwitchAdvancedBezierSmoothing, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="张力参数" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider Name="AdvancedSmoothingTensionSlider" Width="150" Minimum="0.1" Maximum="1.0" 
+                                                Value="0.5" TickFrequency="0.1" IsSnapToTickEnabled="True"
+                                                ValueChanged="AdvancedSmoothingTensionSlider_ValueChanged" />
+                                        <TextBlock Foreground="#fafafa" Text="{Binding ElementName=AdvancedSmoothingTensionSlider, Path=Value, StringFormat={}{0:F1}}" 
+                                                   VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                         Visibility="{Binding ElementName=ToggleSwitchAdvancedBezierSmoothing, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="启用自适应平滑" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableAdaptiveSmoothing"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchEnableAdaptiveSmoothing_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 高级贝塞尔曲线平滑（推荐）：使用自定义算法替代系统默认的FitToCurve，提供更平滑的笔迹效果并解决墨迹闪烁问题。启用高级平滑时会自动禁用系统默认平滑。平滑强度控制平滑程度，张力参数控制曲线的紧绷程度，自适应平滑会根据笔迹速度自动调整平滑参数。" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <!-- 新增：崩溃后操作设置 -->

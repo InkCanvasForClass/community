@@ -16,6 +16,7 @@ namespace Ink_Canvas {
         private const double LINE_STRAIGHTEN_THRESHOLD = 0.20; // 默认灵敏度阈值，与UI默认值对应
 
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e) {
+            // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = false;
 
             try {
@@ -572,7 +573,37 @@ namespace Ink_Canvas {
             }
             catch { }
 
-            if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = true;
+            // 应用高级贝塞尔曲线平滑
+            if (Settings.Canvas.UseAdvancedBezierSmoothing)
+            {
+                try
+                {
+                    var advancedSmoothing = new Helpers.AdvancedBezierSmoothing
+                    {
+                        SmoothingStrength = Settings.Canvas.AdvancedSmoothingStrength,
+                        Tension = Settings.Canvas.AdvancedSmoothingTension,
+                        EnableAdaptiveSmoothing = Settings.Canvas.EnableAdaptiveSmoothing
+                    };
+
+                    var smoothedStroke = advancedSmoothing.SmoothStroke(e.Stroke);
+                    
+                    // 替换原始笔画
+                    SetNewBackupOfStroke();
+                    _currentCommitType = CommitReason.ShapeRecognition;
+                    inkCanvas.Strokes.Remove(e.Stroke);
+                    inkCanvas.Strokes.Add(smoothedStroke);
+                    _currentCommitType = CommitReason.UserInput;
+                }
+                catch (Exception ex)
+                {
+                    // 如果高级平滑失败，回退到原始笔画
+                    System.Diagnostics.Debug.WriteLine($"高级贝塞尔曲线平滑失败: {ex.Message}");
+                }
+            }
+            else if (Settings.Canvas.FitToCurve == true) 
+            {
+                drawingAttributes.FitToCurve = true;
+            }
         }
 
         // New method: Checks if a stroke is potentially a straight line

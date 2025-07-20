@@ -143,7 +143,15 @@ namespace Ink_Canvas {
                 drawingAttributes.Height = 2.5;
                 drawingAttributes.Width = 2.5;
                 drawingAttributes.IsHighlighter = false;
-                drawingAttributes.FitToCurve = Settings.Canvas.FitToCurve;
+                // 默认使用高级贝塞尔曲线平滑，如果未启用则使用原来的FitToCurve
+                if (Settings.Canvas.UseAdvancedBezierSmoothing)
+                {
+                    drawingAttributes.FitToCurve = false;
+                }
+                else
+                {
+                    drawingAttributes.FitToCurve = Settings.Canvas.FitToCurve;
+                }
 
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 inkCanvas.Gesture += InkCanvas_Gesture;

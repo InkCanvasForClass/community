@@ -433,6 +433,7 @@ namespace Ink_Canvas {
         #region 形状绘制主函数
 
         private void MouseTouchMove(Point endP) {
+            // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = false;
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
@@ -1589,7 +1590,36 @@ namespace Ink_Canvas {
                 }
             }
 
-            if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = true;
+            // 应用高级贝塞尔曲线平滑
+            if (Settings.Canvas.UseAdvancedBezierSmoothing)
+            {
+                try
+                {
+                    var advancedSmoothing = new Helpers.AdvancedBezierSmoothing
+                    {
+                        SmoothingStrength = Settings.Canvas.AdvancedSmoothingStrength,
+                        Tension = Settings.Canvas.AdvancedSmoothingTension,
+                        EnableAdaptiveSmoothing = Settings.Canvas.EnableAdaptiveSmoothing
+                    };
+
+                    // 对临时笔画应用平滑
+                    if (lastTempStroke != null)
+                    {
+                        var smoothedStroke = advancedSmoothing.SmoothStroke(lastTempStroke);
+                        inkCanvas.Strokes.Remove(lastTempStroke);
+                        lastTempStroke = smoothedStroke;
+                        inkCanvas.Strokes.Add(smoothedStroke);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"形状绘制高级贝塞尔曲线平滑失败: {ex.Message}");
+                }
+            }
+            else if (Settings.Canvas.FitToCurve == true) 
+            {
+                drawingAttributes.FitToCurve = true;
+            }
         }
 
         private bool NeedUpdateIniP() {
