@@ -24,6 +24,17 @@ namespace Ink_Canvas {
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
+        [DllImport("user32.dll")]
+        private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId, out uint lpdwThreadId);
+
+        private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
         public static Microsoft.Office.Interop.PowerPoint.Application pptApplication = null;
         public static Presentation presentation = null;
         public static Slides slides = null;
@@ -89,21 +100,14 @@ namespace Ink_Canvas {
         private static Process wppProcess = null;
         private static bool hasWppProcessID = false;
         private static System.Timers.Timer wppProcessCheckTimer = null;
+        private static DateTime wppProcessRecordTime = DateTime.MinValue; // 记录进程时间
+        private static int wppProcessCheckCount = 0; // 检查次数计数器
 
 
         private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e) {
             if (IsShowingRestoreHiddenSlidesWindow || IsShowingAutoplaySlidesWindow) return;
             try {
-                //var processes = Process.GetProcessesByName("wpp");
-                //if (processes.Length > 0 && !isWPSSupportOn) return;
-
-                //使用下方提前创建 PowerPoint 实例，将导致 PowerPoint 不再有启动界面
-                //pptApplication = (Microsoft.Office.Interop.PowerPoint.Application)Activator.CreateInstance(Marshal.GetTypeFromCLSID(new Guid("91493441-5A91-11CF-8700-00AA0060263B")));
-                //new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowBegin").AddEventHandler(pptApplication, new EApplication_SlideShowBeginEventHandler(this.PptApplication_SlideShowBegin));
-                //new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowEnd").AddEventHandler(pptApplication, new EApplication_SlideShowEndEventHandler(this.PptApplication_SlideShowEnd));
-                //new ComAwareEventInfo(typeof(EApplication_Event), "SlideShowNextSlide").AddEventHandler(pptApplication, new EApplication_SlideShowNextSlideEventHandler(this.PptApplication_SlideShowNextSlide));
-                //ConfigHelper.Instance.IsInitApplicationSuccessful = true;
-
+                
                 pptApplication =
                     (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
 
@@ -557,6 +561,8 @@ namespace Ink_Canvas {
                     GetWindowThreadProcessId((IntPtr)pptApplication.HWND, out processId);
                     wppProcess = Process.GetProcessById((int)processId);
                     hasWppProcessID = true;
+                    wppProcessRecordTime = DateTime.Now;
+                    wppProcessCheckCount = 0;
                     LogHelper.WriteLogToFile($"记录 WPP 进程 ID: {processId}", LogHelper.LogType.Trace);
                 } 
 
@@ -1035,6 +1041,7 @@ namespace Ink_Canvas {
 
                 // 刷新进程状态
                 wppProcess.Refresh();
+                wppProcessCheckCount++;
 
                 if (wppProcess.HasExited)
                 {
@@ -1043,16 +1050,30 @@ namespace Ink_Canvas {
                 }
                 else
                 {
-                    // 检查是否超过 5 秒仍未关闭
-                    var processStartTime = wppProcess.StartTime;
-                    var timeSinceStart = DateTime.Now - processStartTime;
+                    // 检查是否有其他WPS窗口打开
+                    bool hasOtherWpsWindows = CheckForOtherWpsWindows();
                     
-                    if (timeSinceStart.TotalSeconds > 5)
+                    if (hasOtherWpsWindows)
                     {
-                        LogHelper.WriteLogToFile("检测到长时间未关闭的 WPP 进程，开始强制关闭", LogHelper.LogType.Event);
+                        LogHelper.WriteLogToFile("检测到其他WPS窗口打开，停止强制关闭进程", LogHelper.LogType.Trace);
+                        StopWppProcessCheckTimer();
+                        return;
+                    }
+
+                    // 计算从记录进程开始的时间
+                    var timeSinceRecord = DateTime.Now - wppProcessRecordTime;
+                    
+                    // 更保守的关闭策略：只有在超过3秒且检查次数超过2次时才强制关闭
+                    if (timeSinceRecord.TotalSeconds > 3 && wppProcessCheckCount >= 2)
+                    {
+                        LogHelper.WriteLogToFile($"检测到长时间未关闭的 WPP 进程（已运行{timeSinceRecord.TotalSeconds:F1}秒，检查{wppProcessCheckCount}次），开始强制关闭", LogHelper.LogType.Event);
                         wppProcess.Kill();
                         LogHelper.WriteLogToFile("强制关闭 WPP 进程成功", LogHelper.LogType.Event);
                         StopWppProcessCheckTimer();
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"WPP 进程仍在运行，已检查{wppProcessCheckCount}次，运行时间{timeSinceRecord.TotalSeconds:F1}秒", LogHelper.LogType.Trace);
                     }
                 }
             }
@@ -1060,6 +1081,125 @@ namespace Ink_Canvas {
             {
                 LogHelper.WriteLogToFile($"WPP 进程检测失败: {ex.ToString()}", LogHelper.LogType.Error);
                 StopWppProcessCheckTimer();
+            }
+        }
+
+        private bool CheckForOtherWpsWindows()
+        {
+            try
+            {
+                // 检查是否有其他WPS窗口打开
+                var wpsProcesses = Process.GetProcessesByName("wpp");
+                if (wpsProcesses.Length > 1)
+                {
+                    LogHelper.WriteLogToFile($"检测到{wpsProcesses.Length}个WPP进程", LogHelper.LogType.Trace);
+                    return true;
+                }
+
+                // 检查是否有WPS相关的其他进程
+                var kingsoftProcesses = Process.GetProcessesByName("wps");
+                if (kingsoftProcesses.Length > 0)
+                {
+                    LogHelper.WriteLogToFile("检测到WPS主程序进程", LogHelper.LogType.Trace);
+                    return true;
+                }
+
+                // 检查是否有其他WPS相关进程
+                var etProcesses = Process.GetProcessesByName("et"); // WPS表格
+                var wpsProcesses2 = Process.GetProcessesByName("wps"); // WPS文字
+                if (etProcesses.Length > 0 || wpsProcesses2.Length > 0)
+                {
+                    LogHelper.WriteLogToFile($"检测到其他WPS组件进程：ET进程{etProcesses.Length}个，WPS进程{wpsProcesses2.Length}个", LogHelper.LogType.Trace);
+                    return true;
+                }
+
+                // 检查当前WPP进程是否有多个窗口
+                if (wppProcess != null)
+                {
+                    try
+                    {
+                        var windowCount = 0;
+                        foreach (ProcessThread thread in wppProcess.Threads)
+                        {
+                            // 简单检查是否有多个窗口句柄
+                            if (thread.ThreadState == System.Diagnostics.ThreadState.Running)
+                            {
+                                windowCount++;
+                            }
+                        }
+                        
+                        if (windowCount > 1)
+                        {
+                            LogHelper.WriteLogToFile($"当前WPP进程有{windowCount}个活动线程，可能存在多个窗口", LogHelper.LogType.Trace);
+                            return true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"检查WPP进程窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    }
+                }
+
+                // 通过枚举窗口检查是否有其他WPS窗口
+                return CheckForWpsWindowsByEnumeration();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查其他WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                return false; // 出错时保守处理，不强制关闭
+            }
+        }
+
+        private bool CheckForWpsWindowsByEnumeration()
+        {
+            try
+            {
+                var wpsWindowCount = 0;
+                var currentProcessId = wppProcess?.Id ?? 0;
+
+                EnumWindows((IntPtr hWnd, IntPtr lParam) =>
+                {
+                    try
+                    {
+                        uint windowProcessId;
+                        GetWindowThreadProcessId(hWnd, out windowProcessId);
+                        
+                        // 检查是否是WPP进程的窗口
+                        if (windowProcessId == currentProcessId)
+                        {
+                            var windowTitle = new System.Text.StringBuilder(256);
+                            GetWindowText(hWnd, windowTitle, 256);
+                            var title = windowTitle.ToString().Trim();
+                            
+                            // 检查窗口标题是否包含WPS相关标识
+                            if (!string.IsNullOrEmpty(title) && 
+                                (title.Contains("WPS") || title.Contains("演示文稿") || title.Contains(".ppt") || title.Contains(".pptx")))
+                            {
+                                wpsWindowCount++;
+                                LogHelper.WriteLogToFile($"发现WPS窗口: {title}", LogHelper.LogType.Trace);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"枚举窗口时出错: {ex.ToString()}", LogHelper.LogType.Error);
+                    }
+                    
+                    return true; // 继续枚举
+                }, IntPtr.Zero);
+
+                if (wpsWindowCount > 1)
+                {
+                    LogHelper.WriteLogToFile($"检测到{wpsWindowCount}个WPS窗口，可能存在多个文档", LogHelper.LogType.Trace);
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"通过枚举检查WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                return false;
             }
         }
 
@@ -1074,6 +1214,8 @@ namespace Ink_Canvas {
             
             wppProcess = null;
             hasWppProcessID = false;
+            wppProcessRecordTime = DateTime.MinValue;
+            wppProcessCheckCount = 0;
             LogHelper.WriteLogToFile("停止 WPP 进程检测定时器", LogHelper.LogType.Trace);
         }
     }
