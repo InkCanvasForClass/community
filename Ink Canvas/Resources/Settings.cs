@@ -47,7 +47,9 @@ namespace Ink_Canvas
         [JsonProperty("hideStrokeWhenSelecting")]
         public bool HideStrokeWhenSelecting { get; set; } = true;
         [JsonProperty("fitToCurve")]
-        public bool FitToCurve { get; set; } = true;
+        public bool FitToCurve { get; set; } = false; // 默认关闭原来的贝塞尔平滑
+        [JsonProperty("useAdvancedBezierSmoothing")]
+        public bool UseAdvancedBezierSmoothing { get; set; } = true; // 默认启用高级贝塞尔曲线平滑
         [JsonProperty("clearCanvasAndClearTimeMachine")]
         public bool ClearCanvasAndClearTimeMachine { get; set; } = false;
         [JsonProperty("enablePressureTouchMode")]
@@ -233,6 +235,8 @@ namespace Ink_Canvas
         public bool IsEnableFingerGestureSlideShowControl { get; set; } = true;
         [JsonProperty("isSupportWPS")]
         public bool IsSupportWPS { get; set; } = true;
+        [JsonProperty("enableWppProcessKill")]
+        public bool EnableWppProcessKill { get; set; } = true;
     }
 
     public class Automation

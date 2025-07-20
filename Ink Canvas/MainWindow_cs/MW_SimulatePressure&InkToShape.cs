@@ -16,6 +16,10 @@ namespace Ink_Canvas {
         private const double LINE_STRAIGHTEN_THRESHOLD = 0.20; // 默认灵敏度阈值，与UI默认值对应
 
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e) {
+            // 标记是否进行了直线拉直
+            bool wasStraightened = false;
+            
+            // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = false;
 
             try {
@@ -117,8 +121,9 @@ namespace Ink_Canvas {
                     }
                 }
                 
-                // Apply line straightening and endpoint snapping if ink-to-shape is enabled
-                if (Settings.InkToShape.IsInkToShapeEnabled) {
+                            // Apply line straightening and endpoint snapping if ink-to-shape is enabled
+            
+            if (Settings.InkToShape.IsInkToShapeEnabled) {
                     // 检查是否启用了直线自动拉直功能
                     if (Settings.Canvas.AutoStraightenLine && IsPotentialStraightLine(e.Stroke)) {
                         // Get start and end points of the stroke
@@ -168,6 +173,8 @@ namespace Ink_Canvas {
                                 newStrokes.Remove(e.Stroke);
                                 newStrokes.Add(straightStroke);
                             }
+                            
+                            wasStraightened = true; // 标记已进行直线拉直
                         }
                     }
                 }
@@ -572,7 +579,38 @@ namespace Ink_Canvas {
             }
             catch { }
 
-            if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = true;
+            // 应用高级贝塞尔曲线平滑（仅在未进行直线拉直时）
+            if (Settings.Canvas.UseAdvancedBezierSmoothing && !wasStraightened)
+            {
+                try
+                {
+                    // 检查原始笔画是否仍然存在于画布中
+                    if (inkCanvas.Strokes.Contains(e.Stroke))
+                    {
+                        var advancedSmoothing = new Helpers.AdvancedBezierSmoothing
+                        {
+                        };
+
+                        var smoothedStroke = advancedSmoothing.SmoothStroke(e.Stroke);
+                        
+                        // 替换原始笔画
+                        SetNewBackupOfStroke();
+                        _currentCommitType = CommitReason.ShapeRecognition;
+                        inkCanvas.Strokes.Remove(e.Stroke);
+                        inkCanvas.Strokes.Add(smoothedStroke);
+                        _currentCommitType = CommitReason.UserInput;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 如果高级平滑失败，回退到原始笔画
+                    System.Diagnostics.Debug.WriteLine($"高级贝塞尔曲线平滑失败: {ex.Message}");
+                }
+            }
+            else if (Settings.Canvas.FitToCurve == true && !wasStraightened) 
+            {
+                drawingAttributes.FitToCurve = true;
+            }
         }
 
         // New method: Checks if a stroke is potentially a straight line

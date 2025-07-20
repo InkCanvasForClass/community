@@ -34,6 +34,14 @@ namespace Ink_Canvas {
         private System.Windows.Controls.Canvas currentCanvas = null;
         private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup = null;
 
+        // Win32 API声明和常量（用于无焦点窗口）
+        [DllImport("user32.dll")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+        [DllImport("user32.dll")]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_NOACTIVATE = 0x08000000;
+
         #region Window Initialization
 
         public MainWindow() {
@@ -125,6 +133,15 @@ namespace Ink_Canvas {
             ShowPage(currentPageIndex);
         }
 
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            // 设置窗口为无焦点（不会抢占焦点）
+            var hwnd = new WindowInteropHelper(this).Handle;
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+        }
+
         #endregion
 
         #region Ink Canvas Functions
@@ -143,7 +160,15 @@ namespace Ink_Canvas {
                 drawingAttributes.Height = 2.5;
                 drawingAttributes.Width = 2.5;
                 drawingAttributes.IsHighlighter = false;
-                drawingAttributes.FitToCurve = Settings.Canvas.FitToCurve;
+                // 默认使用高级贝塞尔曲线平滑，如果未启用则使用原来的FitToCurve
+                if (Settings.Canvas.UseAdvancedBezierSmoothing)
+                {
+                    drawingAttributes.FitToCurve = false;
+                }
+                else
+                {
+                    drawingAttributes.FitToCurve = Settings.Canvas.FitToCurve;
+                }
 
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 inkCanvas.Gesture += InkCanvas_Gesture;
@@ -278,14 +303,8 @@ namespace Ink_Canvas {
                 RadioCrashSilentRestart.IsChecked = true;
             else
                 RadioCrashNoAction.IsChecked = true;
-                
-            // 注册系统关机事件处理
-            RegisterShutdownHandler();
             
-            // 设置默认为黑板模式
-            Settings.Canvas.UsingWhiteboard = false;
-            Settings.Canvas.CustomBackgroundColor = "#162924"; // 黑板默认颜色 RGB(22, 41, 36)
-            SaveSettingsToFile();
+
             
             // 如果当前不是黑板模式，则切换到黑板模式
             if (currentMode == 0)

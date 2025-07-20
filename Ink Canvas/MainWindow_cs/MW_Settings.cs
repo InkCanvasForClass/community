@@ -1285,9 +1285,32 @@ namespace Ink_Canvas {
             if (!isLoaded) return;
             drawingAttributes.FitToCurve = ToggleSwitchFitToCurve.IsOn;
             Settings.Canvas.FitToCurve = ToggleSwitchFitToCurve.IsOn;
+            
+            // 启用原来的FitToCurve时自动禁用高级贝塞尔平滑
+            if (ToggleSwitchFitToCurve.IsOn)
+            {
+                ToggleSwitchAdvancedBezierSmoothing.IsOn = false;
+                Settings.Canvas.UseAdvancedBezierSmoothing = false;
+            }
+            
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchAdvancedBezierSmoothing_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Canvas.UseAdvancedBezierSmoothing = ToggleSwitchAdvancedBezierSmoothing.IsOn;
+            
+            // 启用高级贝塞尔平滑时自动禁用原来的FitToCurve
+            if (ToggleSwitchAdvancedBezierSmoothing.IsOn)
+            {
+                ToggleSwitchFitToCurve.IsOn = false;
+                Settings.Canvas.FitToCurve = false;
+                drawingAttributes.FitToCurve = false;
+            }
+            
+            SaveSettingsToFile();
+        }
+        
         private void ToggleSwitchAutoSaveStrokesInPowerPoint_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint = ToggleSwitchAutoSaveStrokesInPowerPoint.IsOn;
@@ -1588,7 +1611,8 @@ namespace Ink_Canvas {
             Settings.Canvas.EraserShapeType = 1;
             Settings.Canvas.HideStrokeWhenSelecting = false;
             Settings.Canvas.ClearCanvasAndClearTimeMachine = false;
-            Settings.Canvas.FitToCurve = true;
+            Settings.Canvas.FitToCurve = false;
+            Settings.Canvas.UseAdvancedBezierSmoothing = true;
             Settings.Canvas.EnablePressureTouchMode = false;
             Settings.Canvas.DisablePressure = false;
             Settings.Canvas.AutoStraightenLine = true;
@@ -2134,6 +2158,12 @@ namespace Ink_Canvas {
             ManagePickNameBackgroundsWindow dialog = new ManagePickNameBackgroundsWindow(this);
             dialog.Owner = this;
             dialog.ShowDialog();
+        }
+
+        private void ToggleSwitchEnableWppProcessKill_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.EnableWppProcessKill = ToggleSwitchEnableWppProcessKill.IsOn;
+            SaveSettingsToFile();
         }
     }
 }
