@@ -133,6 +133,15 @@ namespace Ink_Canvas {
             ShowPage(currentPageIndex);
         }
 
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            base.OnSourceInitialized(e);
+            // 设置窗口为无焦点（不会抢占焦点）
+            var hwnd = new WindowInteropHelper(this).Handle;
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+        }
+
         #endregion
 
         #region Ink Canvas Functions
@@ -318,11 +327,6 @@ namespace Ink_Canvas {
 
             // 初始化插件系统
             InitializePluginSystem();
-
-            // 设置窗口为无焦点（不会抢占焦点）
-            var hwnd = new WindowInteropHelper(this).Handle;
-            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
