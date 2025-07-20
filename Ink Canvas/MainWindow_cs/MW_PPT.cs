@@ -1342,6 +1342,46 @@ namespace Ink_Canvas {
                     // 更保守的关闭策略：只有在超过0.5秒且检查次数超过2次时才强制关闭
                     if (timeSinceRecord.TotalSeconds > 0.5 && wppProcessCheckCount >= 2)
                     {
+                        // 新增：检查所有WPS文档是否已保存
+                        bool allSaved = true;
+                        try
+                        {
+                            if (pptApplication != null)
+                            {
+                                foreach (Presentation pres in pptApplication.Presentations)
+                                {
+                                    if (pres.Saved == MsoTriState.msoFalse)
+                                    {
+                                        allSaved = false;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"检查WPS文档保存状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                            allSaved = false; // 出错时默认不安全
+                        }
+
+                        if (!allSaved)
+                        {
+                            // 弹窗提示用户
+                            bool userContinue = false;
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                var result = MessageBox.Show(
+                                    "检测到有未保存的WPS文档，强制关闭可能导致数据丢失。是否继续？",
+                                    "警告", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                                userContinue = (result == MessageBoxResult.Yes);
+                            });
+                            if (!userContinue)
+                            {
+                                LogHelper.WriteLogToFile("用户取消了强制关闭WPS进程", LogHelper.LogType.Trace);
+                                StopWppProcessCheckTimer();
+                                return;
+                            }
+                        }
                         LogHelper.WriteLogToFile($"检测到长时间未关闭的 WPP 进程（已运行{timeSinceRecord.TotalSeconds:F1}秒，检查{wppProcessCheckCount}次），开始强制关闭", LogHelper.LogType.Event);
                         wppProcess.Kill();
                         LogHelper.WriteLogToFile("强制关闭 WPP 进程成功", LogHelper.LogType.Event);
