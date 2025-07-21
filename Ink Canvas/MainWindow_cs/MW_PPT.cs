@@ -682,6 +682,26 @@ namespace Ink_Canvas {
                     PPTBtnPageTotal.Text = $"/ {Wn.Presentation.Slides.Count}";
                     LogHelper.NewLog("PowerPoint Slide Show Loading process complete");
 
+                    // 新增：主动加载当前页墨迹，解决首次放映时当前页墨迹不显示的问题
+                    try
+                    {
+                        var currentPage = Wn.View.CurrentShowPosition;
+                        if (memoryStreams != null && currentPage < memoryStreams.Length && memoryStreams[currentPage] != null && memoryStreams[currentPage].Length > 0)
+                        {
+                            memoryStreams[currentPage].Position = 0;
+                            inkCanvas.Strokes.Clear();
+                            inkCanvas.Strokes.Add(new StrokeCollection(memoryStreams[currentPage]));
+                        }
+                        else
+                        {
+                            inkCanvas.Strokes.Clear();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"加载当前页墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    }
+
                     if (!isFloatingBarFolded) {
                         new Thread(new ThreadStart(() => {
                             Thread.Sleep(100);
