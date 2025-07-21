@@ -323,6 +323,9 @@ namespace Ink_Canvas
         [JsonProperty("isAutoFoldInPPTSlideShow")]
         public bool IsAutoFoldInPPTSlideShow { get; set; } = false;
 
+        [JsonProperty("isAutoFoldAfterPPTSlideShow")]
+        public bool IsAutoFoldAfterPPTSlideShow { get; set; } = false;
+
         [JsonProperty("isAutoKillPptService")]
         public bool IsAutoKillPptService { get; set; } = false;
 

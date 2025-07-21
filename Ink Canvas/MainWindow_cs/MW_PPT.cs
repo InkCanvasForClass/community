@@ -78,6 +78,9 @@ namespace Ink_Canvas {
         public static Slide slide = null;
         public static int slidescount = 0;
 
+        // 在类中添加字段
+        private bool wasFloatingBarFoldedWhenEnterSlideShow = false;
+
         private void BtnCheckPPT_Click(object sender, RoutedEventArgs e) {
             try {
                 pptApplication =
@@ -579,6 +582,8 @@ namespace Ink_Canvas {
 
         private async void PptApplication_SlideShowBegin(SlideShowWindow Wn) {
             try {
+                // 记录进入放映时浮动栏收纳状态
+                wasFloatingBarFoldedWhenEnterSlideShow = isFloatingBarFolded;
                 
                 if (Settings.Automation.IsAutoFoldInPPTSlideShow && !isFloatingBarFolded)
                     await FoldFloatingBar(new object());
@@ -728,7 +733,12 @@ namespace Ink_Canvas {
 
         private async void PptApplication_SlideShowEnd(Presentation Pres) {
             try {
-                if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
+                // 新增逻辑：如果设置开启且进入PPT放映时浮动栏是收纳的，退出时也自动收纳；否则自动展开
+                if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && wasFloatingBarFoldedWhenEnterSlideShow) {
+                    if (!isFloatingBarFolded) await FoldFloatingBar(new object());
+                } else {
+                    if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
+                }
 
                 // 记录 WPP 进程 ID，用于后续检测未关闭的进程
                 if (pptApplication != null)

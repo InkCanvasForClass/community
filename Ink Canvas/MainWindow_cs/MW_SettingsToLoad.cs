@@ -683,6 +683,8 @@ namespace Ink_Canvas {
 
                 ToggleSwitchAutoFoldInPPTSlideShow.IsOn = Settings.Automation.IsAutoFoldInPPTSlideShow;
 
+                ToggleSwitchAutoFoldAfterPPTSlideShow.IsOn = Settings.Automation.IsAutoFoldAfterPPTSlideShow;
+
                 if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                     Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas
                     || Settings.Automation.IsAutoKillICA || Settings.Automation.IsAutoKillIDT ||

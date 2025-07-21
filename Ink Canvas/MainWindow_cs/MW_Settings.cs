@@ -2171,5 +2171,11 @@ namespace Ink_Canvas {
             Settings.Canvas.IsCompressPicturesUploaded = ToggleSwitchCompressPicturesUploaded.IsOn;
             SaveSettingsToFile();
         }
+
+        private void ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Automation.IsAutoFoldAfterPPTSlideShow = ToggleSwitchAutoFoldAfterPPTSlideShow.IsOn;
+            SaveSettingsToFile();
+        }
     }
 }
