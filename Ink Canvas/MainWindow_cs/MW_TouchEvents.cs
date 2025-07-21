@@ -72,6 +72,8 @@ namespace Ink_Canvas {
             double boundWidth = e.GetTouchPoint(null).Bounds.Width, eraserMultiplier = 1.0;
             if (!Settings.Advanced.EraserBindTouchMultiplier && Settings.Advanced.IsSpecialScreen)
                 eraserMultiplier = 1 / Settings.Advanced.TouchMultiplier;
+            if ((Settings.Advanced.TouchMultiplier != 0 || !Settings.Advanced.IsSpecialScreen))  //启用特殊屏幕且触摸倍数为 0 时禁用橡皮
+
 
             // 修复：只有多指且面积大时才允许手掌擦，单指始终为批注
             if (dec != null && dec.Count >= 2 && (Settings.Advanced.TouchMultiplier != 0 || !Settings.Advanced.IsSpecialScreen)
