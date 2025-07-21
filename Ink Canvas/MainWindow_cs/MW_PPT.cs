@@ -1,8 +1,10 @@
 ﻿using Ink_Canvas.Helpers;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -36,6 +38,37 @@ namespace Ink_Canvas {
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool IsWindowVisible(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsIconic(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsZoomed(IntPtr hWnd);
+
+
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetWindow(IntPtr hWnd, uint uCmd);
+
+        [DllImport("user32.dll")]
+        private static extern bool IsWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool GetWindowRect(IntPtr hWnd, out ForegroundWindowInfo.RECT lpRect);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
+
+        private const int GWL_STYLE = -16;
+        private const int WS_VISIBLE = 0x10000000;
+        private const int WS_MINIMIZE = 0x20000000;
+        private const uint GW_HWNDNEXT = 2;
+        private const uint GW_HWNDPREV = 3;
+
+
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
@@ -669,15 +702,62 @@ namespace Ink_Canvas {
                 if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
 
                 // 记录 WPP 进程 ID，用于后续检测未关闭的进程
-                if (pptApplication != null && pptApplication.Path.Contains("Kingsoft\\WPS Office\\"))
+                if (pptApplication != null)
                 {
-                    uint processId;
-                    GetWindowThreadProcessId((IntPtr)pptApplication.HWND, out processId);
-                    wppProcess = Process.GetProcessById((int)processId);
-                    hasWppProcessID = true;
-                    wppProcessRecordTime = DateTime.Now;
-                    wppProcessCheckCount = 0;
-                    LogHelper.WriteLogToFile($"记录 WPP 进程 ID: {processId}", LogHelper.LogType.Trace);
+                    try
+                    {
+                        // 尝试多种方式获取WPS进程
+                        Process wpsProcess = null;
+                        
+                        // 方法1：通过应用程序路径检测
+                        if (pptApplication.Path.Contains("Kingsoft\\WPS Office\\") || 
+                            pptApplication.Path.Contains("WPS Office\\"))
+                        {
+                            uint processId;
+                            GetWindowThreadProcessId((IntPtr)pptApplication.HWND, out processId);
+                            wpsProcess = Process.GetProcessById((int)processId);
+                            LogHelper.WriteLogToFile($"通过路径检测到WPS进程: {processId}", LogHelper.LogType.Trace);
+                        }
+                        
+                        // 方法2：通过前台窗口检测
+                        if (wpsProcess == null)
+                        {
+                            var foregroundWpsWindow = GetForegroundWpsWindow();
+                            if (foregroundWpsWindow != null)
+                            {
+                                wpsProcess = Process.GetProcessById((int)foregroundWpsWindow.ProcessId);
+                                LogHelper.WriteLogToFile($"通过前台窗口检测到WPS进程: {foregroundWpsWindow.ProcessId}", LogHelper.LogType.Trace);
+                            }
+                        }
+                        
+                        // 方法3：通过进程名检测
+                        if (wpsProcess == null)
+                        {
+                            var wpsProcesses = GetWpsProcesses();
+                            if (wpsProcesses.Count > 0)
+                            {
+                                wpsProcess = wpsProcesses.First();
+                                LogHelper.WriteLogToFile($"通过进程名检测到WPS进程: {wpsProcess.Id}", LogHelper.LogType.Trace);
+                            }
+                        }
+                        
+                        if (wpsProcess != null)
+                        {
+                            wppProcess = wpsProcess;
+                            hasWppProcessID = true;
+                            wppProcessRecordTime = DateTime.Now;
+                            wppProcessCheckCount = 0;
+                            LogHelper.WriteLogToFile($"成功记录 WPP 进程 ID: {wpsProcess.Id}", LogHelper.LogType.Trace);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("未能检测到WPS进程", LogHelper.LogType.Warning);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"记录WPS进程失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    }
                 } 
 
                 LogHelper.WriteLogToFile(string.Format("PowerPoint Slide Show End"), LogHelper.LogType.Event);
@@ -1333,14 +1413,21 @@ namespace Ink_Canvas {
                 }
                 else
                 {
-                    // 检查是否有其他WPS窗口打开
-                    bool hasOtherWpsWindows = CheckForOtherWpsWindows();
+                    // 使用改进的WPS窗口检测方法
+                    bool hasActiveWpsWindows = HasActiveWpsWindows();
                     
-                    if (hasOtherWpsWindows)
+                    if (hasActiveWpsWindows)
                     {
-                        LogHelper.WriteLogToFile("检测到其他WPS窗口打开，停止强制关闭进程", LogHelper.LogType.Trace);
+                        LogHelper.WriteLogToFile("检测到活跃的WPS窗口，停止强制关闭进程", LogHelper.LogType.Trace);
                         StopWppProcessCheckTimer();
                         return;
+                    }
+                    
+                    // 如果检测失败且是第一次检查，输出调试信息
+                    if (wppProcessCheckCount == 1)
+                    {
+                        LogHelper.WriteLogToFile("首次检测未发现活跃WPS窗口，输出调试信息", LogHelper.LogType.Trace);
+                        DebugAllWindows();
                     }
 
                     // 计算从记录进程开始的时间
@@ -1413,34 +1500,16 @@ namespace Ink_Canvas {
             {
                 if (wppProcess != null)
                 {
-                    bool hasVisibleWppWindow = false;
-                    EnumWindows((hWnd, lParam) =>
+                    var wpsWindows = GetWpsWindowsByProcess(wppProcess.Id);
+                    LogHelper.WriteLogToFile($"检测到{wpsWindows.Count}个WPS窗口", LogHelper.LogType.Trace);
+                    
+                    foreach (var window in wpsWindows)
                     {
-                        try
-                        {
-                            uint windowProcessId;
-                            GetWindowThreadProcessId(hWnd, out windowProcessId);
-                            if ((int)windowProcessId == wppProcess.Id)
-                            {
-                                if (IsWindowVisible(hWnd))
-                                {
-                                    var windowTitle = new System.Text.StringBuilder(256);
-                                    GetWindowText(hWnd, windowTitle, 256);
-                                    var title = windowTitle.ToString().Trim();
-                                    if (!string.IsNullOrEmpty(title))
-                                    {
-                                        hasVisibleWppWindow = true;
-                                        return false; // 找到一个就停止枚举
-                                    }
-                                }
-                            }
-                        }
-                        catch { }
-                        return true;
-                    }, IntPtr.Zero);
-
+                        LogHelper.WriteLogToFile($"WPS窗口: 标题='{window.Title}', 类名='{window.ClassName}', 可见={window.IsVisible}, 最小化={window.IsMinimized}", LogHelper.LogType.Trace);
+                    }
+                    
                     // 只要当前wpp进程没有可见窗口，就允许Kill
-                    return hasVisibleWppWindow;
+                    return wpsWindows.Any(w => w.IsVisible && !w.IsMinimized);
                 }
             }
             catch (Exception ex)
@@ -1448,6 +1517,378 @@ namespace Ink_Canvas {
                 LogHelper.WriteLogToFile($"检查WPP窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
             }
             return false; // 出错时，默认允许Kill
+        }
+
+        /// <summary>
+        /// WPS窗口信息结构
+        /// </summary>
+        private class WpsWindowInfo
+        {
+            public IntPtr Handle { get; set; }
+            public string Title { get; set; }
+            public string ClassName { get; set; }
+            public bool IsVisible { get; set; }
+            public bool IsMinimized { get; set; }
+            public bool IsMaximized { get; set; }
+            public ForegroundWindowInfo.RECT Rect { get; set; }
+            public uint ProcessId { get; set; }
+        }
+
+        /// <summary>
+        /// 获取指定进程的所有WPS窗口
+        /// </summary>
+        private List<WpsWindowInfo> GetWpsWindowsByProcess(int processId)
+        {
+            var wpsWindows = new List<WpsWindowInfo>();
+            
+            try
+            {
+                EnumWindows((hWnd, lParam) =>
+                {
+                    try
+                    {
+                        if (!IsWindow(hWnd)) return true;
+                        
+                        uint windowProcessId;
+                        GetWindowThreadProcessId(hWnd, out windowProcessId);
+                        
+                        if ((int)windowProcessId == processId)
+                        {
+                            var windowInfo = GetWindowInfo(hWnd);
+                            if (IsWpsWindow(windowInfo))
+                            {
+                                wpsWindows.Add(windowInfo);
+                                LogHelper.WriteLogToFile($"发现WPS窗口: {windowInfo.Title} ({windowInfo.ClassName})", LogHelper.LogType.Trace);
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"枚举窗口时出错: {ex.ToString()}", LogHelper.LogType.Error);
+                    }
+                    return true;
+                }, IntPtr.Zero);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+            }
+            
+            return wpsWindows;
+        }
+
+        /// <summary>
+        /// 获取窗口详细信息
+        /// </summary>
+        private WpsWindowInfo GetWindowInfo(IntPtr hWnd)
+        {
+            var windowInfo = new WpsWindowInfo
+            {
+                Handle = hWnd,
+                IsVisible = IsWindowVisible(hWnd),
+                IsMinimized = IsIconic(hWnd),
+                IsMaximized = IsZoomed(hWnd)
+            };
+
+            // 获取窗口标题
+            var windowTitle = new System.Text.StringBuilder(256);
+            GetWindowText(hWnd, windowTitle, 256);
+            windowInfo.Title = windowTitle.ToString().Trim();
+
+            // 获取窗口类名
+            var className = new System.Text.StringBuilder(256);
+            GetClassName(hWnd, className, 256);
+            windowInfo.ClassName = className.ToString().Trim();
+
+            // 获取窗口位置
+            GetWindowRect(hWnd, out ForegroundWindowInfo.RECT rect);
+            windowInfo.Rect = rect;
+
+            // 获取进程ID
+            uint processId;
+            GetWindowThreadProcessId(hWnd, out processId);
+            windowInfo.ProcessId = processId;
+
+            return windowInfo;
+        }
+
+        /// <summary>
+        /// 判断是否为WPS窗口
+        /// </summary>
+        private bool IsWpsWindow(WpsWindowInfo windowInfo)
+        {
+            if (string.IsNullOrEmpty(windowInfo.Title) && string.IsNullOrEmpty(windowInfo.ClassName))
+                return false;
+
+            // 检查窗口标题
+            var title = windowInfo.Title.ToLower();
+            var className = windowInfo.ClassName.ToLower();
+
+            // WPS相关关键词（扩展版）
+            var wpsKeywords = new[]
+            {
+                "wps", "演示文稿", "presentation", "powerpoint", "ppt", "pptx",
+                "kingsoft", "金山", "office", "幻灯片", "slide", "presentation",
+                "wpp", "wps演示", "wps presentation", "wps office", "kingsoft office"
+            };
+
+            // 检查标题是否包含WPS相关关键词
+            bool hasWpsTitle = wpsKeywords.Any(keyword => title.Contains(keyword));
+            
+            // 检查类名是否包含WPS相关关键词
+            bool hasWpsClass = wpsKeywords.Any(keyword => className.Contains(keyword));
+
+            // 检查是否为WPS特有的窗口类名
+            bool isWpsClass = className.Contains("wps") || 
+                             className.Contains("kingsoft") || 
+                             className.Contains("presentation") ||
+                             className.Contains("powerpoint") ||
+                             className.Contains("wpp") ||
+                             className.Contains("office");
+
+            // 检查窗口是否有有效尺寸（排除0尺寸窗口）
+            bool hasValidSize = (windowInfo.Rect.Right - windowInfo.Rect.Left) > 0 && 
+                               (windowInfo.Rect.Bottom - windowInfo.Rect.Top) > 0;
+
+            // 检查窗口是否可见且不是最小化状态
+            bool isActiveWindow = windowInfo.IsVisible && !windowInfo.IsMinimized;
+
+            // 检查是否为前台窗口
+            bool isForegroundWindow = windowInfo.Handle == GetForegroundWindow();
+
+            // 综合判断是否为WPS窗口
+            bool isWpsWindow = (hasWpsTitle || hasWpsClass || isWpsClass) && hasValidSize;
+
+            // 如果是前台窗口且包含相关关键词，更可能是WPS窗口
+            if (isForegroundWindow && (hasWpsTitle || hasWpsClass))
+            {
+                isWpsWindow = true;
+            }
+
+            if (isWpsWindow)
+            {
+                var windowType = isForegroundWindow ? "前台" : (isActiveWindow ? "活跃" : "后台");
+                LogHelper.WriteLogToFile($"确认WPS窗口: 标题='{windowInfo.Title}', 类名='{windowInfo.ClassName}', 类型={windowType}, 尺寸={windowInfo.Rect.Right - windowInfo.Rect.Left}x{windowInfo.Rect.Bottom - windowInfo.Rect.Top}", LogHelper.LogType.Trace);
+            }
+
+            return isWpsWindow;
+        }
+
+        /// <summary>
+        /// 获取前台WPS窗口
+        /// </summary>
+        private WpsWindowInfo GetForegroundWpsWindow()
+        {
+            try
+            {
+                var foregroundHwnd = GetForegroundWindow();
+                if (foregroundHwnd != IntPtr.Zero && IsWindow(foregroundHwnd))
+                {
+                    var windowInfo = GetWindowInfo(foregroundHwnd);
+                    if (IsWpsWindow(windowInfo))
+                    {
+                        LogHelper.WriteLogToFile($"前台WPS窗口: {windowInfo.Title}", LogHelper.LogType.Trace);
+                        return windowInfo;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取前台WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 获取顶级WPS窗口（包括前台窗口和最近的活跃窗口）
+        /// </summary>
+        private List<WpsWindowInfo> GetTopLevelWpsWindows()
+        {
+            var topLevelWindows = new List<WpsWindowInfo>();
+            
+            try
+            {
+                // 获取前台窗口
+                var foregroundWindow = GetForegroundWpsWindow();
+                if (foregroundWindow != null)
+                {
+                    topLevelWindows.Add(foregroundWindow);
+                }
+
+                // 获取所有可见的WPS窗口，按层级排序
+                var allWpsWindows = new List<WpsWindowInfo>();
+                var wpsProcesses = GetWpsProcesses();
+                
+                foreach (var process in wpsProcesses)
+                {
+                    var windows = GetWpsWindowsByProcess(process.Id);
+                    allWpsWindows.AddRange(windows.Where(w => w.IsVisible && !w.IsMinimized));
+                }
+
+                // 按窗口位置排序，优先选择屏幕中央的窗口
+                var screenCenter = new System.Drawing.Point(
+                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width / 2,
+                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height / 2
+                );
+
+                var sortedWindows = allWpsWindows
+                    .Where(w => !topLevelWindows.Any(t => t.Handle == w.Handle)) // 排除已添加的前台窗口
+                    .OrderBy(w => Math.Abs((w.Rect.Left + w.Rect.Right) / 2 - screenCenter.X) + 
+                                   Math.Abs((w.Rect.Top + w.Rect.Bottom) / 2 - screenCenter.Y))
+                    .Take(3); // 取最近的3个窗口
+
+                topLevelWindows.AddRange(sortedWindows);
+                
+                LogHelper.WriteLogToFile($"找到{topLevelWindows.Count}个顶级WPS窗口", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取顶级WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+            }
+            
+            return topLevelWindows;
+        }
+
+        /// <summary>
+        /// 检查是否有活跃的WPS窗口（包括前台窗口）
+        /// </summary>
+        private bool HasActiveWpsWindows()
+        {
+            return HasActiveWpsWindowsWithRetry(3); // 重试3次
+        }
+
+        /// <summary>
+        /// 带重试机制的WPS窗口检测
+        /// </summary>
+        private bool HasActiveWpsWindowsWithRetry(int maxRetries)
+        {
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
+            {
+                try
+                {
+                    LogHelper.WriteLogToFile($"第{attempt}次尝试检测WPS窗口", LogHelper.LogType.Trace);
+                    
+                    // 首先检查前台窗口
+                    var foregroundWpsWindow = GetForegroundWpsWindow();
+                    if (foregroundWpsWindow != null)
+                    {
+                        LogHelper.WriteLogToFile($"第{attempt}次尝试检测到前台WPS窗口", LogHelper.LogType.Trace);
+                        return true;
+                    }
+
+                    // 检查顶级WPS窗口
+                    var topLevelWindows = GetTopLevelWpsWindows();
+                    if (topLevelWindows.Any())
+                    {
+                        LogHelper.WriteLogToFile($"第{attempt}次尝试检测到{topLevelWindows.Count}个顶级WPS窗口", LogHelper.LogType.Trace);
+                        return true;
+                    }
+
+                    // 然后检查所有WPS进程的窗口
+                    var wpsProcesses = GetWpsProcesses();
+                    foreach (var process in wpsProcesses)
+                    {
+                        var windows = GetWpsWindowsByProcess(process.Id);
+                        if (windows.Any(w => w.IsVisible && !w.IsMinimized))
+                        {
+                            LogHelper.WriteLogToFile($"第{attempt}次尝试检测到进程{process.Id}的活跃WPS窗口", LogHelper.LogType.Trace);
+                            return true;
+                        }
+                    }
+
+                    // 如果还有重试机会，等待一小段时间再重试
+                    if (attempt < maxRetries)
+                    {
+                        Thread.Sleep(100); // 等待100ms
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"第{attempt}次尝试检查活跃WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    
+                    // 如果还有重试机会，等待一小段时间再重试
+                    if (attempt < maxRetries)
+                    {
+                        Thread.Sleep(100); // 等待100ms
+                    }
+                }
+            }
+            
+            LogHelper.WriteLogToFile($"经过{maxRetries}次尝试，未检测到活跃的WPS窗口", LogHelper.LogType.Trace);
+            return false;
+        }
+
+        /// <summary>
+        /// 获取所有WPS相关进程
+        /// </summary>
+        private List<Process> GetWpsProcesses()
+        {
+            var wpsProcesses = new List<Process>();
+            try
+            {
+                var allProcesses = Process.GetProcesses();
+                foreach (var process in allProcesses)
+                {
+                    try
+                    {
+                        if (process.ProcessName.ToLower().Contains("wps") ||
+                            process.ProcessName.ToLower().Contains("powerpnt") ||
+                            process.ProcessName.ToLower().Contains("presentation") ||
+                            process.ProcessName.ToLower().Contains("wpp"))
+                        {
+                            wpsProcesses.Add(process);
+                            LogHelper.WriteLogToFile($"发现WPS进程: {process.ProcessName} (PID: {process.Id})", LogHelper.LogType.Trace);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"检查进程{process.ProcessName}失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取WPS进程失败: {ex.ToString()}", LogHelper.LogType.Error);
+            }
+            return wpsProcesses;
+        }
+
+        /// <summary>
+        /// 调试方法：输出所有窗口信息
+        /// </summary>
+        private void DebugAllWindows()
+        {
+            try
+            {
+                LogHelper.WriteLogToFile("开始调试所有窗口信息", LogHelper.LogType.Trace);
+                var windowCount = 0;
+                
+                EnumWindows((hWnd, lParam) =>
+                {
+                    try
+                    {
+                        if (!IsWindow(hWnd)) return true;
+                        
+                        var windowInfo = GetWindowInfo(hWnd);
+                        if (!string.IsNullOrEmpty(windowInfo.Title) || !string.IsNullOrEmpty(windowInfo.ClassName))
+                        {
+                            windowCount++;
+                            LogHelper.WriteLogToFile($"窗口{windowCount}: 标题='{windowInfo.Title}', 类名='{windowInfo.ClassName}', 进程ID={windowInfo.ProcessId}, 可见={windowInfo.IsVisible}, 最小化={windowInfo.IsMinimized}", LogHelper.LogType.Trace);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"调试窗口时出错: {ex.ToString()}", LogHelper.LogType.Error);
+                    }
+                    return true;
+                }, IntPtr.Zero);
+                
+                LogHelper.WriteLogToFile($"调试完成，共发现{windowCount}个有效窗口", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"调试窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+            }
         }
 
         private bool CheckForWpsWindowsByEnumeration()
