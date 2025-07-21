@@ -222,16 +222,16 @@ namespace Ink_Canvas {
                     // 0x800401E3: 操作无法使用
                     // 0x80004005: 未指定错误（常见于PPT已关闭）
                     // 0x800706B5: RPC服务器不可用
-                    if (hr == 0x800401E3 || hr == 0x80004005 || hr == 0x800706B5)
+                    // 0x80048240: 没有活动的演示文稿
+                    // 0x800706BE: 远程过程调用失败
+                    if (hr == 0x800401E3 || hr == 0x80004005 || hr == 0x800706B5 || hr == 0x80048240 || hr == 0x800706BE)
                     {
-                        // 可选：LogHelper.WriteLogToFile($"忽略已知COM异常: {hr:X}", LogHelper.LogType.Trace);
                         Application.Current.Dispatcher.Invoke(() => { BtnPPTSlideShow.Visibility = Visibility.Collapsed; });
                         timerCheckPPT.Start();
                         return;
                     }
                 }
                 LogHelper.WriteLogToFile($"检查PPT状态失败: {ex.ToString()}", LogHelper.LogType.Error);
-                //StackPanelPPTControls.Visibility = Visibility.Collapsed;
                 Application.Current.Dispatcher.Invoke(() => { BtnPPTSlideShow.Visibility = Visibility.Collapsed; });
                 timerCheckPPT.Start();
             }
@@ -1410,6 +1410,13 @@ namespace Ink_Canvas {
 
         private void StartWppProcessCheckTimer()
         {
+            // 新增：WPS联动未启用时不查杀wpp进程
+            if (!Settings.PowerPointSettings.IsSupportWPS)
+            {
+                LogHelper.WriteLogToFile("WPS联动未启用，跳过WPP进程查杀", LogHelper.LogType.Trace);
+                return;
+            }
+
             if (wppProcessCheckTimer != null)
             {
                 wppProcessCheckTimer.Stop();
@@ -1424,6 +1431,14 @@ namespace Ink_Canvas {
 
         private void WppProcessCheckTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
+            // 新增：WPS联动未启用时不查杀wpp进程
+            if (!Settings.PowerPointSettings.IsSupportWPS)
+            {
+                LogHelper.WriteLogToFile("WPS联动未启用，跳过WPP进程查杀", LogHelper.LogType.Trace);
+                StopWppProcessCheckTimer();
+                return;
+            }
+
             try
             {
                 if (wppProcess == null || hasWppProcessID == false)
@@ -1970,10 +1985,10 @@ namespace Ink_Canvas {
                 {
                     try
                     {
-                        if (process.ProcessName.ToLower().Contains("wps") ||
-                            process.ProcessName.ToLower().Contains("powerpnt") ||
-                            process.ProcessName.ToLower().Contains("presentation") ||
-                            process.ProcessName.ToLower().Contains("wpp"))
+                        var pname = process.ProcessName.ToLower();
+                        if ((pname.Contains("wps") || pname.Contains("wpp") || pname.Contains("presentation"))
+                            // 排除PowerPoint官方进程
+                            && !pname.Contains("powerpnt"))
                         {
                             wpsProcesses.Add(process);
                             LogHelper.WriteLogToFile($"发现WPS进程: {process.ProcessName} (PID: {process.Id})", LogHelper.LogType.Trace);
