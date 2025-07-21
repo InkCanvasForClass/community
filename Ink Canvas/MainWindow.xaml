@@ -2888,7 +2888,7 @@
                     </ui:ScrollViewerEx>
                         
                         <!-- 底部按钮区域 -->
-                        <Grid Grid.Row="2" VerticalAlignment="Bottom" Height="50">
+                        <Grid Grid.Row="2" VerticalAlignment="Bottom" Height="65">
                             <Button FontFamily="Microsoft YaHei UI"
                                 Width="120" Margin="10"
                                 HorizontalAlignment="Right"
