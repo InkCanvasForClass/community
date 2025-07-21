@@ -12,6 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Linq;
 using System.Windows.Controls;
+using Newtonsoft.Json;
+using System.Collections.Generic;
+using System.IO;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -23,6 +26,7 @@ namespace Ink_Canvas {
         private int WhiteboardTotalCount = 1;
         private TimeMachineHistory[][] TimeMachineHistories = new TimeMachineHistory[101][]; //最多99页，0用来存储非白板时的墨迹以便还原
 
+        // 保存每页白板图片信息
         private void SaveStrokes(bool isBackupMain = false) {
             if (isBackupMain) {
                 var timeMachineHistory = timeMachine.ExportTimeMachineHistory();
@@ -32,6 +36,26 @@ namespace Ink_Canvas {
                 var timeMachineHistory = timeMachine.ExportTimeMachineHistory();
                 TimeMachineHistories[CurrentWhiteboardIndex] = timeMachineHistory;
                 timeMachine.ClearStrokeHistory();
+                // 保存当前页图片信息
+                var elementInfos = new List<CanvasElementInfo>();
+                foreach (var child in inkCanvas.Children)
+                {
+                    if (child is Image img && img.Source is BitmapImage bmp)
+                    {
+                        elementInfos.Add(new CanvasElementInfo
+                        {
+                            Type = "Image",
+                            SourcePath = bmp.UriSource?.LocalPath ?? "",
+                            Left = InkCanvas.GetLeft(img),
+                            Top = InkCanvas.GetTop(img),
+                            Width = img.Width,
+                            Height = img.Height
+                        });
+                    }
+                }
+                var savePath = Settings.Automation.AutoSavedStrokesLocation;
+                if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
+                File.WriteAllText(System.IO.Path.Combine(savePath, $"elements_page{CurrentWhiteboardIndex}.json"), JsonConvert.SerializeObject(elementInfos, Formatting.Indented));
             }
         }
 
@@ -42,6 +66,7 @@ namespace Ink_Canvas {
             _currentCommitType = CommitReason.UserInput;
         }
 
+        // 恢复每页白板图片信息
         private void RestoreStrokes(bool isBackupMain = false) {
             try {
                 if (TimeMachineHistories[CurrentWhiteboardIndex] == null) return; //防止白板打开后不居中
@@ -51,6 +76,29 @@ namespace Ink_Canvas {
                 } else {
                     timeMachine.ImportTimeMachineHistory(TimeMachineHistories[CurrentWhiteboardIndex]);
                     foreach (var item in TimeMachineHistories[CurrentWhiteboardIndex]) ApplyHistoryToCanvas(item);
+                    // 恢复当前页图片信息
+                    inkCanvas.Children.Clear();
+                    var savePath = Settings.Automation.AutoSavedStrokesLocation;
+                    var elementsFile = System.IO.Path.Combine(savePath, $"elements_page{CurrentWhiteboardIndex}.json");
+                    if (File.Exists(elementsFile))
+                    {
+                        var elementInfos = JsonConvert.DeserializeObject<List<CanvasElementInfo>>(File.ReadAllText(elementsFile));
+                        foreach (var info in elementInfos)
+                        {
+                            if (info.Type == "Image" && File.Exists(info.SourcePath))
+                            {
+                                var img = new Image
+                                {
+                                    Source = new BitmapImage(new Uri(info.SourcePath)),
+                                    Width = info.Width,
+                                    Height = info.Height
+                                };
+                                InkCanvas.SetLeft(img, info.Left);
+                                InkCanvas.SetTop(img, info.Top);
+                                inkCanvas.Children.Add(img);
+                            }
+                        }
+                    }
                 }
             }
             catch {

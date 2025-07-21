@@ -130,6 +130,16 @@ namespace Ink_Canvas {
                             if (canvas.Strokes.Contains(currentStroke))
                                 canvas.Strokes.Remove(currentStroke);
                 }
+            } else if (item.CommitType == TimeMachineHistoryType.ElementInsert) {
+                if (!item.StrokeHasBeenCleared) {
+                    // Undo: 移除元素
+                    if (item.InsertedElement != null && inkCanvas.Children.Contains(item.InsertedElement))
+                        inkCanvas.Children.Remove(item.InsertedElement);
+                } else {
+                    // Redo: 添加元素
+                    if (item.InsertedElement != null && !inkCanvas.Children.Contains(item.InsertedElement))
+                        inkCanvas.Children.Add(item.InsertedElement);
+                }
             }
 
             _currentCommitType = CommitReason.UserInput;

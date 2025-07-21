@@ -1766,6 +1766,9 @@ namespace Ink_Canvas {
                     ClearStrokes(true);
                     RestoreStrokes();
 
+                    // 退出白板时清空图片
+                    inkCanvas.Children.Clear();
+
                     if (BtnSwitchTheme.Content.ToString() == "浅色") {
                         BtnSwitch.Content = "黑板";
                         BtnExit.Foreground = Brushes.White;
@@ -1774,12 +1777,10 @@ namespace Ink_Canvas {
                         BtnSwitch.Content = "白板";
                         if (isPresentationHaveBlackSpace) {
                             BtnExit.Foreground = Brushes.White;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else {
                             BtnExit.Foreground = Brushes.Black;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         }
                     }
@@ -1803,22 +1804,22 @@ namespace Ink_Canvas {
                         ClearStrokes(true);
                         RestoreStrokes(true);
 
+                        // 退出白板时清空图片
+                        inkCanvas.Children.Clear();
+
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
                             BtnSwitch.Content = "黑板";
                             BtnExit.Foreground = Brushes.White;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.Black;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else {
                             BtnSwitch.Content = "白板";
                             if (isPresentationHaveBlackSpace) {
                                 BtnExit.Foreground = Brushes.White;
-                                //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                             }
                             else {
                                 BtnExit.Foreground = Brushes.Black;
-                                //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                             }
                         }
@@ -1840,12 +1841,10 @@ namespace Ink_Canvas {
                         BtnSwitch.Content = "屏幕";
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
                             BtnExit.Foreground = Brushes.White;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.Black;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else {
                             BtnExit.Foreground = Brushes.Black;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         }
 
@@ -1990,53 +1989,6 @@ namespace Ink_Canvas {
 
         #endregion
 
-        /// <summary>
-        /// 创建并压缩图片的异步方法
-        /// </summary>
-        private async Task<Image> CreateAndCompressImageAsync(string filePath)
-        {
-            string savePath = System.IO.Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
-            if (!System.IO.Directory.Exists(savePath))
-                System.IO.Directory.CreateDirectory(savePath);
-
-            string fileExtension = System.IO.Path.GetExtension(filePath);
-            string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
-            string newFilePath = System.IO.Path.Combine(savePath, timestamp + fileExtension);
-
-            await Task.Run(() => System.IO.File.Copy(filePath, newFilePath, true));
-
-            return await Dispatcher.InvokeAsync(() =>
-            {
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.UriSource = new Uri(newFilePath);
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-
-                int width = bitmapImage.PixelWidth;
-                int height = bitmapImage.PixelHeight;
-
-                Image image = new Image();
-                if (Settings.Canvas.IsCompressPicturesUploaded && (width > 1920 || height > 1080))
-                {
-                    double scaleX = 1920.0 / width;
-                    double scaleY = 1080.0 / height;
-                    double scale = Math.Min(scaleX, scaleY);
-                    var transformedBitmap = new TransformedBitmap(bitmapImage, new ScaleTransform(scale, scale));
-                    image.Source = transformedBitmap;
-                    image.Width = transformedBitmap.PixelWidth;
-                    image.Height = transformedBitmap.PixelHeight;
-                }
-                else
-                {
-                    image.Source = bitmapImage;
-                    image.Width = width;
-                    image.Height = height;
-                }
-                return image;
-            });
-        }
-
         private async void InsertImage_MouseUp(object sender, MouseButtonEventArgs e)
         {
             var dialog = new Microsoft.Win32.OpenFileDialog
@@ -2045,9 +1997,21 @@ namespace Ink_Canvas {
             };
             if (dialog.ShowDialog() == true)
             {
-                var image = await CreateAndCompressImageAsync(dialog.FileName);
-                // TODO: 这里可以将image添加到画布或其他控件
-                MessageBox.Show("图片已处理完成，可在此处插入到画布。");
+                string filePath = dialog.FileName;
+                Image image = await CreateAndCompressImageAsync(filePath); // 补充image定义
+                if (image != null)
+                {
+                    string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                    image.Name = timestamp;
+
+                    CenterAndScaleElement(image);
+
+                    InkCanvas.SetLeft(image, 0);
+                    InkCanvas.SetTop(image, 0);
+                    inkCanvas.Children.Add(image);
+
+                    timeMachine.CommitElementInsertHistory(image);
+                }
             }
         }
     }
