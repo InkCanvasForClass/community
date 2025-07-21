@@ -7,8 +7,6 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using Ink_Canvas.Helpers;
-using System.Windows.Shapes;
-using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {

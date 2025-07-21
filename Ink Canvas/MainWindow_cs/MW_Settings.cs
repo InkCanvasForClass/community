@@ -8,7 +8,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using File = System.IO.File;
 using System.Windows.Media;
-using System.Windows.Ink;
 using System.Windows.Media.Imaging;
 using System.Windows.Interop;
 using Hardcodet.Wpf.TaskbarNotification;
@@ -2163,6 +2162,31 @@ namespace Ink_Canvas {
         private void ToggleSwitchEnableWppProcessKill_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             Settings.PowerPointSettings.EnableWppProcessKill = ToggleSwitchEnableWppProcessKill.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchCompressPicturesUploaded_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Canvas.IsCompressPicturesUploaded = ToggleSwitchCompressPicturesUploaded.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Automation.IsAutoFoldAfterPPTSlideShow = ToggleSwitchAutoFoldAfterPPTSlideShow.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter = ToggleSwitchAlwaysGoToFirstPageOnReenter.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Automation.IsAutoEnterAnnotationAfterKillHite = ToggleSwitchAutoEnterAnnotationAfterKillHite.IsOn;
             SaveSettingsToFile();
         }
     }

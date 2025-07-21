@@ -1,7 +1,6 @@
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,15 +11,10 @@ using File = System.IO.File;
 using MessageBox = System.Windows.MessageBox;
 using System.Runtime.InteropServices;
 using System.Windows.Interop;
-using System.Windows.Controls.Primitives;
-using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using System.Windows.Input;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Media.Animation;
 using System.Reflection;
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
@@ -41,6 +35,20 @@ namespace Ink_Canvas {
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
+        
+        // 新增：设置窗口置顶并兼容无焦点
+        private void SetTopmostWithNoActivate(bool topmost)
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            // 先移除 WS_EX_NOACTIVATE
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
+            // 设置 Topmost
+            this.Topmost = topmost;
+            // 再加回 WS_EX_NOACTIVATE
+            exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+        }
 
         #region Window Initialization
 
@@ -131,15 +139,61 @@ namespace Ink_Canvas {
             InkCanvasGridForInkReplay.Children.Add(firstCanvas);
             currentPageIndex = 0;
             ShowPage(currentPageIndex);
+
+            // 手动实现触摸滑动
+            double leftTouchStartY = 0;
+            double leftScrollStartOffset = 0;
+            bool leftIsTouching = false;
+            BlackBoardLeftSidePageListScrollViewer.TouchDown += (s, e) => {
+                leftIsTouching = true;
+                leftTouchStartY = e.GetTouchPoint(BlackBoardLeftSidePageListScrollViewer).Position.Y;
+                leftScrollStartOffset = BlackBoardLeftSidePageListScrollViewer.VerticalOffset;
+                BlackBoardLeftSidePageListScrollViewer.CaptureTouch(e.TouchDevice);
+                e.Handled = true;
+            };
+            BlackBoardLeftSidePageListScrollViewer.TouchMove += (s, e) => {
+                if (leftIsTouching) {
+                    double currentY = e.GetTouchPoint(BlackBoardLeftSidePageListScrollViewer).Position.Y;
+                    double delta = leftTouchStartY - currentY;
+                    BlackBoardLeftSidePageListScrollViewer.ScrollToVerticalOffset(leftScrollStartOffset + delta);
+                    e.Handled = true;
+                }
+            };
+            BlackBoardLeftSidePageListScrollViewer.TouchUp += (s, e) => {
+                leftIsTouching = false;
+                BlackBoardLeftSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                e.Handled = true;
+            };
+            double rightTouchStartY = 0;
+            double rightScrollStartOffset = 0;
+            bool rightIsTouching = false;
+            BlackBoardRightSidePageListScrollViewer.TouchDown += (s, e) => {
+                rightIsTouching = true;
+                rightTouchStartY = e.GetTouchPoint(BlackBoardRightSidePageListScrollViewer).Position.Y;
+                rightScrollStartOffset = BlackBoardRightSidePageListScrollViewer.VerticalOffset;
+                BlackBoardRightSidePageListScrollViewer.CaptureTouch(e.TouchDevice);
+                e.Handled = true;
+            };
+            BlackBoardRightSidePageListScrollViewer.TouchMove += (s, e) => {
+                if (rightIsTouching) {
+                    double currentY = e.GetTouchPoint(BlackBoardRightSidePageListScrollViewer).Position.Y;
+                    double delta = rightTouchStartY - currentY;
+                    BlackBoardRightSidePageListScrollViewer.ScrollToVerticalOffset(rightScrollStartOffset + delta);
+                    e.Handled = true;
+                }
+            };
+            BlackBoardRightSidePageListScrollViewer.TouchUp += (s, e) => {
+                rightIsTouching = false;
+                BlackBoardRightSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                e.Handled = true;
+            };
         }
 
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            // 设置窗口为无焦点（不会抢占焦点）
-            var hwnd = new WindowInteropHelper(this).Handle;
-            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+            // 设置窗口为无焦点且置顶（不会抢占焦点且始终在最前）
+            SetTopmostWithNoActivate(true);
         }
 
         #endregion
@@ -1251,6 +1305,12 @@ namespace Ink_Canvas {
             if (currentPageIndex >= whiteboardPages.Count)
                 currentPageIndex = whiteboardPages.Count - 1;
             ShowPage(currentPageIndex);
+        }
+        // 快速面板退出PPT放映按钮事件
+        private void ExitPPTSlideShow_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            // 直接调用PPT放映结束按钮的逻辑
+            BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }
     }
 }

@@ -1,20 +1,28 @@
 using Ink_Canvas.Helpers;
-using Microsoft.Win32;
 using System;
 using System.IO;
-using System.IO.Compression;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using File = System.IO.File;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Forms;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using System.Collections.Generic;
 using System.Windows.Controls;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas {
+    // 1. 定义元素信息结构
+    public class CanvasElementInfo
+    {
+        public string Type { get; set; } // "Image"
+        public string SourcePath { get; set; }
+        public double Left { get; set; }
+        public double Top { get; set; }
+        public double Width { get; set; }
+        public double Height { get; set; }
+    }
     public partial class MainWindow : Window {
         private void SymbolIconSaveStrokes_MouseUp(object sender, MouseButtonEventArgs e) {
             if (lastBorderMouseDownObject != sender || inkCanvas.Visibility != Visibility.Visible) return;
@@ -108,6 +116,24 @@ namespace Ink_Canvas {
                     var fs = new FileStream(savePathWithName, FileMode.Create);
                     inkCanvas.Strokes.Save(fs);
                     fs.Close();
+                    // 保存元素信息
+                    var elementInfos = new List<CanvasElementInfo>();
+                    foreach (var child in inkCanvas.Children)
+                    {
+                        if (child is Image img && img.Source is BitmapImage bmp)
+                        {
+                            elementInfos.Add(new CanvasElementInfo
+                            {
+                                Type = "Image",
+                                SourcePath = bmp.UriSource?.LocalPath ?? "",
+                                Left = InkCanvas.GetLeft(img),
+                                Top = InkCanvas.GetTop(img),
+                                Width = img.Width,
+                                Height = img.Height
+                            });
+                        }
+                    }
+                    File.WriteAllText(Path.ChangeExtension(savePathWithName, ".elements.json"), JsonConvert.SerializeObject(elementInfos, Formatting.Indented));
                     if (newNotice) ShowNotification("墨迹成功保存至 " + savePathWithName);
                 }
             }
@@ -570,6 +596,28 @@ namespace Ink_Canvas {
                         timeMachine.ClearStrokeHistory();
                         inkCanvas.Strokes.Add(strokes);
                         LogHelper.NewLog($"Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count.ToString()}");
+                    }
+                }
+
+                // 恢复元素信息
+                var elementsFile = Path.ChangeExtension(filePath, ".elements.json");
+                if (File.Exists(elementsFile))
+                {
+                    var elementInfos = JsonConvert.DeserializeObject<List<CanvasElementInfo>>(File.ReadAllText(elementsFile));
+                    foreach (var info in elementInfos)
+                    {
+                        if (info.Type == "Image" && File.Exists(info.SourcePath))
+                        {
+                            var img = new Image
+                            {
+                                Source = new BitmapImage(new Uri(info.SourcePath)),
+                                Width = info.Width,
+                                Height = info.Height
+                            };
+                            InkCanvas.SetLeft(img, info.Left);
+                            InkCanvas.SetTop(img, info.Top);
+                            inkCanvas.Children.Add(img);
+                        }
                     }
                 }
 

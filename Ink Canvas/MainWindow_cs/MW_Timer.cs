@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Timers;
 using System.Windows;
-using MessageBox = System.Windows.MessageBox;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -151,6 +150,10 @@ namespace Ink_Canvas {
                     if (arg.Contains("HiteAnnotation")) {
                         Dispatcher.Invoke(() => {
                             ShowNotification("“鸿合屏幕书写”已自动关闭");
+                            if (Settings.Automation.IsAutoKillHiteAnnotation && Settings.Automation.IsAutoEnterAnnotationAfterKillHite) {
+                                // 自动进入批注状态
+                                PenIcon_Click(null, null);
+                            }
                         });
                     }
 

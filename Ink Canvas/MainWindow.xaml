@@ -215,7 +215,7 @@
                                                 <DrawingImage>
                                                     <DrawingImage.Drawing>
                                                         <GeometryDrawing Brush="White"
-                                                                         Geometry="M4 24V12H13V10C13 6.68629 15.6863 4 19 4C22.3137 4 25 6.68629 25 10V12H34V24H38C41.3137 24 44 26.6863 44 30C44 33.3137 41.3137 36 38 36H34V44H4V36H8C11.3137 36 14 33.3137 14 30C14 26.6863 11.3137 24 8 24H4Z"/>
+                                                                         Geometry="M342.826667 213.333333a149.333333 149.333333 0 0 1 295.68 0H682.666667a128 128 0 0 1 128 128v44.16a149.333333 149.333333 0 0 1 0 295.68V725.333333a128 128 0 0 1-128 128h-128v-21.333333a64 64 0 0 0-128 0v21.333333H298.666667a128 128 0 0 1-128-128v-128h21.333333a64 64 0 0 0 0-128H170.666667V341.333333a128 128 0 0 1 128-128h44.16zM426.666667 234.666667V298.666667H298.666667q-17.664 0-30.165334 12.501333T256 341.333333v56.576q22.528 10.752 41.6 29.866667Q341.333333 471.466667 341.333333 533.333333q0 61.866667-43.733333 105.6-19.072 19.072-41.6 29.824V725.333333q0 17.664 12.501333 30.165334T298.666667 768h56.576q10.752-22.528 29.866666-41.6Q428.8 682.666667 490.666667 682.666667q61.866667 0 105.6 43.733333 19.072 19.072 29.824 41.6H682.666667q17.664 0 30.165333-12.501333T725.333333 725.333333v-128h64a64 64 0 0 0 0-128H725.333333V341.333333q0-17.664-12.501333-30.165333T682.666667 298.666667h-128V234.666667a64 64 0 1 0-128 0z"/>
                                                     </DrawingImage.Drawing>
                                                 </DrawingImage>
                                             </Image.Source>
@@ -764,6 +764,12 @@
                                                          Name="ToggleSwitchClearCanvasAndClearTimeMachine" IsOn="True"
                                                          FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchClearCanvasAndClearTimeMachine_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="插入图片时自动压缩（大于1920x1080）" VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchCompressPicturesUploaded"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchCompressPicturesUploaded_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                           StrokeThickness="1" Margin="0,4,0,4" />
@@ -1579,6 +1585,14 @@
                                                          Toggled="ToggleSwitchNotifyPreviousPage_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="进入放映时回到首页" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchAlwaysGoToFirstPageOnReenter" IsOn="False"
+                                                         FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="提示隐藏幻灯片" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchNotifyHiddenPage"
@@ -1598,7 +1612,7 @@
                             </GroupBox>
                             <GroupBox>
                                 <GroupBox.Header>
-                                    <TextBlock Margin="0,12,0,0" Text="高级项" FontWeight="Bold" Foreground="#fafafa"
+                                    <TextBlock Margin="0,12,0,0" Text="高级设置" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
                                 </GroupBox.Header>
                                 <ui:SimpleStackPanel Spacing="6">
@@ -2249,6 +2263,15 @@
                                                          Toggled="ToggleSwitchAutoKillHiteAnnotation_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="鸿合屏幕书写查杀后自动进入批注" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchAutoEnterAnnotationAfterKillHite"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled" />
+                                    </ui:SimpleStackPanel>
+
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <Image Source="/Resources/Icons-png/VComYouJiao.png" Margin="0,0,6,0"
                                                Width="28"
                                                Height="28" VerticalAlignment="Center" />
@@ -2440,8 +2463,16 @@
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    
                                     <TextBlock Text="# 开启后，退出收纳模式时将自动切换至批注模式，便于快速批注" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="退出PPT放映后自动恢复浮动栏状态"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchAutoFoldAfterPPTSlideShow"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后，如果进入PPT放映前为收纳模式则退出后也为收纳模式，如果进入前不是收纳模式则退出后也不是收纳模式" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <GroupBox Name="GroupBoxRandWindow">
@@ -3155,7 +3186,9 @@
                                             <ui:ScrollViewerEx Name="BlackBoardLeftSidePageListScrollViewer"
                                                                Height="460"
                                                                VerticalScrollBarVisibility="Hidden"
-                                                               ForceUseSmoothScroll="True">
+                                                               ForceUseSmoothScroll="True"
+                                                               PanningMode="VerticalOnly"
+                                                               IsManipulationEnabled="True">
                                                 <ListView ScrollViewer.CanContentScroll="False" SelectionMode="Single"
                                                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                                           ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -4778,6 +4811,29 @@
                                             </Viewbox>
                                         </Border>
                                     </Border>
+                                    <Border x:Name="BoardInsertImage" Width="60" Height="50" MouseDown="Border_MouseDown"
+                                            MouseUp="InsertImage_MouseUp" BorderThickness="0,1,0,1"
+                                            BorderBrush="#a1a1aa"
+                                            Background="#f4f4f5"
+                                            Opacity="0.95">
+                                        <Grid Margin="6,6,6,4">
+                                            <Image VerticalAlignment="Top"
+                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
+                                                <Image.Source>
+                                                    <DrawingImage>
+                                                        <DrawingImage.Drawing>
+                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                <GeometryDrawing Brush="#18181b"
+                                                                    Geometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"/>
+                                                            </DrawingGroup>
+                                                        </DrawingImage.Drawing>
+                                                    </DrawingImage>
+                                                </Image.Source>
+                                            </Image>
+                                            <TextBlock Text="插入图片" Foreground="Black" VerticalAlignment="Bottom"
+                                                       HorizontalAlignment="Center" FontSize="12" />
+                                        </Grid>
+                                    </Border>
                                     <Border x:Name="BoardUndo" Width="60" Height="50" MouseDown="Border_MouseDown"
                                             MouseUp="SymbolIconUndo_MouseUp" BorderThickness="0,1,0,1"
                                             BorderBrush="#a1a1aa"
@@ -5193,7 +5249,9 @@
                                             <ui:ScrollViewerEx Name="BlackBoardRightSidePageListScrollViewer"
                                                                Height="460"
                                                                VerticalScrollBarVisibility="Hidden"
-                                                               ForceUseSmoothScroll="True">
+                                                               ForceUseSmoothScroll="True"
+                                                               PanningMode="VerticalOnly"
+                                                               IsManipulationEnabled="True">
                                                 <ListView ScrollViewer.CanContentScroll="False" SelectionMode="Single"
                                                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                                           ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -7809,6 +7867,16 @@
                         <TextBlock Text="白板" Foreground="Black" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
                     <ui:SimpleStackPanel
+                        x:Name="BtnExitPptFromSidebarLeft"
+                        MouseUp="ExitPPTSlideShow_MouseUp"
+                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
+                        Width="32" Margin="0" Visibility="Collapsed">
+                        <Image Source="/Resources/new-icons/end-slides-show.png"
+                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
+                        <TextBlock Text="退出放映" Foreground="Black" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
+                    </ui:SimpleStackPanel>
+
+                    <ui:SimpleStackPanel
                         MouseUp="UnFoldFloatingBar_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
@@ -7881,6 +7949,16 @@
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="白板" Foreground="Black" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
+                    <ui:SimpleStackPanel
+                        x:Name="BtnExitPptFromSidebarRight"
+                        MouseUp="ExitPPTSlideShow_MouseUp"
+                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
+                        Width="32" Margin="0" Visibility="Collapsed">
+                        <Image Source="/Resources/new-icons/end-slides-show.png"
+                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
+                        <TextBlock Text="退出放映" Foreground="Black" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
+                    </ui:SimpleStackPanel>
+
                     <ui:SimpleStackPanel
                         MouseUp="UnFoldFloatingBar_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"

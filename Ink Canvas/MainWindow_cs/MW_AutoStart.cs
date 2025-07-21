@@ -1,6 +1,6 @@
-﻿using IWshRuntimeLibrary;
-using System;
+﻿using System;
 using System.Windows;
+using IWshRuntimeLibrary;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {

@@ -1,17 +1,10 @@
 ﻿using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms.VisualStyles;
 using System.Windows.Interop;
-using System.Windows.Media.Animation;
 using Hardcodet.Wpf.TaskbarNotification;
 
 namespace Ink_Canvas

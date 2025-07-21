@@ -15,14 +15,8 @@ using System.Threading;
 using Application = System.Windows.Application;
 using Point = System.Windows.Point;
 using System.Diagnostics;
-using iNKORE.UI.WPF.Modern.Controls;
-using System.IO;
-using System.Windows.Media.Effects;
-using static System.Net.Mime.MediaTypeNames;
-using System.Text;
-using System.Globalization;
-using System.Windows.Data;
 using System.Xml.Linq;
+using Image = System.Windows.Controls.Image;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas {
@@ -1433,6 +1427,10 @@ namespace Ink_Canvas {
                     }
                 }
                 else {
+                    // 切换到批注模式时，确保保存当前图片信息
+                    if (currentMode != 0) {
+                        SaveStrokes();
+                    }
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                     ColorSwitchCheck();
                     HideSubPanels("pen", true);
@@ -1454,9 +1452,14 @@ namespace Ink_Canvas {
             isLastTouchEraser = false;
             drawingShapeMode = 0;
 
+            // 切换到橡皮擦模式时，确保保存当前图片信息
+            if (!isAlreadyEraser && currentMode != 0) {
+                SaveStrokes();
+            }
+
             // 启用新的高级橡皮擦系统
             EnableAdvancedEraserSystem();
-            
+
             // 使用新的高级橡皮擦系统
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
@@ -1765,6 +1768,9 @@ namespace Ink_Canvas {
                     ClearStrokes(true);
                     RestoreStrokes();
 
+                    // 退出白板时清空图片
+                    inkCanvas.Children.Clear();
+
                     if (BtnSwitchTheme.Content.ToString() == "浅色") {
                         BtnSwitch.Content = "黑板";
                         BtnExit.Foreground = Brushes.White;
@@ -1773,12 +1779,10 @@ namespace Ink_Canvas {
                         BtnSwitch.Content = "白板";
                         if (isPresentationHaveBlackSpace) {
                             BtnExit.Foreground = Brushes.White;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else {
                             BtnExit.Foreground = Brushes.Black;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         }
                     }
@@ -1802,22 +1806,22 @@ namespace Ink_Canvas {
                         ClearStrokes(true);
                         RestoreStrokes(true);
 
+                        // 退出白板时清空图片
+                        inkCanvas.Children.Clear();
+
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
                             BtnSwitch.Content = "黑板";
                             BtnExit.Foreground = Brushes.White;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.Black;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else {
                             BtnSwitch.Content = "白板";
                             if (isPresentationHaveBlackSpace) {
                                 BtnExit.Foreground = Brushes.White;
-                                //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                             }
                             else {
                                 BtnExit.Foreground = Brushes.Black;
-                                //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                             }
                         }
@@ -1839,12 +1843,10 @@ namespace Ink_Canvas {
                         BtnSwitch.Content = "屏幕";
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
                             BtnExit.Foreground = Brushes.White;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.Black;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
                         }
                         else {
                             BtnExit.Foreground = Brushes.Black;
-                            //SymbolIconBtnColorBlackContent.Foreground = Brushes.White;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
                         }
 
@@ -1989,7 +1991,37 @@ namespace Ink_Canvas {
 
         #endregion
 
+        private async void InsertImage_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif"
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                string filePath = dialog.FileName;
+                Image image = await CreateAndCompressImageAsync(filePath); // 补充image定义
+                if (image != null)
+                {
+                    string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                    image.Name = timestamp;
 
-        
+                    // 新缩放逻辑：最大宽高为画布一半，并居中
+                    double maxWidth = inkCanvas.ActualWidth / 2;
+                    double maxHeight = inkCanvas.ActualHeight / 2;
+                    double scaleX = maxWidth / image.Width;
+                    double scaleY = maxHeight / image.Height;
+                    double scale = Math.Min(1, Math.Min(scaleX, scaleY));
+                    image.Width = image.Width * scale;
+                    image.Height = image.Height * scale;
+                    InkCanvas.SetLeft(image, (inkCanvas.ActualWidth - image.Width) / 2);
+                    InkCanvas.SetTop(image, (inkCanvas.ActualHeight - image.Height) / 2);
+
+                    inkCanvas.Children.Add(image);
+
+                    timeMachine.CommitElementInsertHistory(image);
+                }
+            }
+        }
     }
 }

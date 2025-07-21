@@ -9,6 +9,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using Point = System.Windows.Point;
+using System.Diagnostics;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -71,8 +72,11 @@ namespace Ink_Canvas {
             double boundWidth = e.GetTouchPoint(null).Bounds.Width, eraserMultiplier = 1.0;
             if (!Settings.Advanced.EraserBindTouchMultiplier && Settings.Advanced.IsSpecialScreen)
                 eraserMultiplier = 1 / Settings.Advanced.TouchMultiplier;
+            if ((Settings.Advanced.TouchMultiplier != 0 || !Settings.Advanced.IsSpecialScreen))  //启用特殊屏幕且触摸倍数为 0 时禁用橡皮
 
-            if ((Settings.Advanced.TouchMultiplier != 0 || !Settings.Advanced.IsSpecialScreen) //启用特殊屏幕且触摸倍数为 0 时禁用橡皮
+
+            // 修复：只有多指且面积大时才允许手掌擦，单指始终为批注
+            if (dec != null && dec.Count >= 2 && (Settings.Advanced.TouchMultiplier != 0 || !Settings.Advanced.IsSpecialScreen)
                 && boundWidth > BoundsWidth * 2.5) {
                 if (drawingShapeMode == 0 && forceEraser) return;
                 currentPalmEraserShape = GetPalmRectangleEraserShape(eraserMultiplier);
@@ -82,14 +86,16 @@ namespace Ink_Canvas {
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint) {
                     inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
                 }
+                Trace.WriteLine($"[PalmEraser] 触发手掌擦: TouchId={e.TouchDevice.Id}, boundWidth={boundWidth:F2}, eraserMultiplier={eraserMultiplier:F2}, EraserShape={currentPalmEraserShape?.GetType().Name}, TouchCount={dec.Count}");
             }
             else {
                 TouchDownPointsList[e.TouchDevice.Id] = InkCanvasEditingMode.None;
                 // 修复面积擦时不显示橡皮形状：无论 forcePointEraser 状态，均显示 50x50 橡皮
                 inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint) {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
+                Trace.WriteLine($"[PalmEraser] 非手掌擦: TouchId={e.TouchDevice.Id}, boundWidth={boundWidth:F2}, eraserMultiplier={eraserMultiplier:F2}, TouchCount={(dec != null ? dec.Count : 0)}");
             }
         }
 
@@ -351,10 +357,12 @@ namespace Ink_Canvas {
                     if (prePalmEraserEditingMode == InkCanvasEditingMode.Ink) {
                         // 模拟点击批注选项卡
                         PenIcon_Click(null, null);
+                        HideSubPanels("pen", true); // 新增：确保高光切换
                     } else if (prePalmEraserEditingMode == InkCanvasEditingMode.None || 
                                prePalmEraserEditingMode == InkCanvasEditingMode.Select) {
                         // 模拟点击光标选项卡
                         CursorIcon_Click(null, null);
+                        HideSubPanels("cursor", true); // 新增：确保高光切换
                     } else {
                         // 其他编辑模式时恢复之前的模式
                         inkCanvas.EditingMode = prePalmEraserEditingMode;

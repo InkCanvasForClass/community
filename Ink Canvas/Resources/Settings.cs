@@ -75,6 +75,8 @@ namespace Ink_Canvas
 
         [JsonProperty("hyperbolaAsymptoteOption")]
         public OptionalOperation HyperbolaAsymptoteOption { get; set; } = OptionalOperation.Ask;
+        [JsonProperty("isCompressPicturesUploaded")]
+        public bool IsCompressPicturesUploaded { get; set; } = false;
     }
 
     public enum OptionalOperation
@@ -237,6 +239,8 @@ namespace Ink_Canvas
         public bool IsSupportWPS { get; set; } = true;
         [JsonProperty("enableWppProcessKill")]
         public bool EnableWppProcessKill { get; set; } = true;
+        [JsonProperty("isAlwaysGoToFirstPageOnReenter")]
+        public bool IsAlwaysGoToFirstPageOnReenter { get; set; } = false;
     }
 
     public class Automation
@@ -321,6 +325,9 @@ namespace Ink_Canvas
         [JsonProperty("isAutoFoldInPPTSlideShow")]
         public bool IsAutoFoldInPPTSlideShow { get; set; } = false;
 
+        [JsonProperty("isAutoFoldAfterPPTSlideShow")]
+        public bool IsAutoFoldAfterPPTSlideShow { get; set; } = false;
+
         [JsonProperty("isAutoKillPptService")]
         public bool IsAutoKillPptService { get; set; } = false;
 
@@ -371,6 +378,9 @@ namespace Ink_Canvas
         
         [JsonProperty("isSaveFullPageStrokes")]
         public bool IsSaveFullPageStrokes = false;
+
+        [JsonProperty("isAutoEnterAnnotationAfterKillHite")]
+        public bool IsAutoEnterAnnotationAfterKillHite { get; set; } = false;
     }
 
     public class Advanced

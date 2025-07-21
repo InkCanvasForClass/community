@@ -1,7 +1,6 @@
 ﻿using Ink_Canvas.Helpers;
 using System;
 using System.Media;
-using System.Runtime.InteropServices;
 using System.Timers;
 using System.Windows;
 using System.Windows.Input;

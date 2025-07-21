@@ -8,7 +8,6 @@ using System.Windows;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows.Controls;
-using System.IO.Compression;
 using System.Text;
 using System.Collections.Generic;
 using Newtonsoft.Json;

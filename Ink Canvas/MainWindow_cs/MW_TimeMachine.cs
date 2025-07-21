@@ -7,7 +7,6 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Diagnostics;
-using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -129,6 +128,16 @@ namespace Ink_Canvas {
                         foreach (var currentStroke in item.CurrentStroke)
                             if (canvas.Strokes.Contains(currentStroke))
                                 canvas.Strokes.Remove(currentStroke);
+                }
+            } else if (item.CommitType == TimeMachineHistoryType.ElementInsert) {
+                if (!item.StrokeHasBeenCleared) {
+                    // Undo: 移除元素
+                    if (item.InsertedElement != null && inkCanvas.Children.Contains(item.InsertedElement))
+                        inkCanvas.Children.Remove(item.InsertedElement);
+                } else {
+                    // Redo: 添加元素
+                    if (item.InsertedElement != null && !inkCanvas.Children.Contains(item.InsertedElement))
+                        inkCanvas.Children.Add(item.InsertedElement);
                 }
             }
 

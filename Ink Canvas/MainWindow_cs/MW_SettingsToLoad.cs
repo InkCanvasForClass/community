@@ -10,7 +10,6 @@ using System.Windows.Ink;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using File = System.IO.File;
 using OperatingSystem = OSVersionExtension.OperatingSystem;
 
@@ -376,6 +375,7 @@ namespace Ink_Canvas {
                 ToggleSwitchAutoSaveScreenShotInPowerPoint.IsOn =
                     Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
                 ToggleSwitchEnableWppProcessKill.IsOn = Settings.PowerPointSettings.EnableWppProcessKill;
+                ToggleSwitchAlwaysGoToFirstPageOnReenter.IsOn = Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter;
             } else {
                 Settings.PowerPointSettings = new PowerPointSettings();
             }
@@ -549,6 +549,7 @@ namespace Ink_Canvas {
                 
                 // 初始化直线端点吸附相关设置
                 ToggleSwitchLineEndpointSnapping.IsOn = Settings.Canvas.LineEndpointSnapping;
+                ToggleSwitchCompressPicturesUploaded.IsOn = Settings.Canvas.IsCompressPicturesUploaded;
             } else {
                 Settings.Canvas = new Canvas();
             }
@@ -682,6 +683,8 @@ namespace Ink_Canvas {
                 
 
                 ToggleSwitchAutoFoldInPPTSlideShow.IsOn = Settings.Automation.IsAutoFoldInPPTSlideShow;
+
+                ToggleSwitchAutoFoldAfterPPTSlideShow.IsOn = Settings.Automation.IsAutoFoldAfterPPTSlideShow;
 
                 if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                     Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas

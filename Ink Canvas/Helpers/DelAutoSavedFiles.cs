@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Windows;
 
 namespace Ink_Canvas.Helpers {
     internal class DelAutoSavedFiles {

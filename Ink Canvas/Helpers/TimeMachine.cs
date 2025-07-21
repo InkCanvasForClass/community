@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Windows.Ink;
 using System.Windows.Input;
-using System.Windows.Media;
+using System.Windows; // Added for UIElement
 
 namespace Ink_Canvas.Helpers
 {
-    public class TimeMachine
+    public partial class TimeMachine
     {
         private readonly List<TimeMachineHistory> _currentStrokeHistory = new List<TimeMachineHistory>();
 
@@ -139,6 +139,7 @@ namespace Ink_Canvas.Helpers
         //这里说一下 Tuple的 Value1 是初始值 ; Value 2 是改变值
         public Dictionary<Stroke, Tuple<StylusPointCollection, StylusPointCollection>> StylusPointDictionary;
         public Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>> DrawingAttributes;
+        public UIElement InsertedElement; // 新增
         public TimeMachineHistory(StrokeCollection currentStroke, TimeMachineHistoryType commitType, bool strokeHasBeenCleared)
         {
             CommitType = commitType;
@@ -163,6 +164,11 @@ namespace Ink_Canvas.Helpers
             StrokeHasBeenCleared = strokeHasBeenCleared;
             ReplacedStroke = replacedStroke;
         }
+        public TimeMachineHistory(UIElement element, TimeMachineHistoryType commitType) // 新增
+        {
+            CommitType = commitType;
+            InsertedElement = element;
+        }
     }
 
     public enum TimeMachineHistoryType
@@ -171,6 +177,21 @@ namespace Ink_Canvas.Helpers
         ShapeRecognition,
         Clear,
         Manipulation,
-        DrawingAttributes
+        DrawingAttributes,
+        ElementInsert // 新增
+    }
+
+    public partial class TimeMachine // 新增partial，便于扩展
+    {
+        public void CommitElementInsertHistory(UIElement element)
+        {
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+            {
+                _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);
+            }
+            _currentStrokeHistory.Add(new TimeMachineHistory(element, TimeMachineHistoryType.ElementInsert));
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
+        }
     }
 }
