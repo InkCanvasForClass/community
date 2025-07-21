@@ -152,7 +152,7 @@ namespace Ink_Canvas {
                             ShowNotification("“鸿合屏幕书写”已自动关闭");
                             if (Settings.Automation.IsAutoKillHiteAnnotation && Settings.Automation.IsAutoEnterAnnotationAfterKillHite) {
                                 // 自动进入批注状态
-                                EnterAnnotationMode();
+                                PenIcon_Click(null, null);
                             }
                         });
                     }
