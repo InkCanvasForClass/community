@@ -928,6 +928,11 @@ namespace Ink_Canvas {
                 currentMode = 0;
             }
 
+            // 切换前同步保存墨迹
+            Application.Current.Dispatcher.Invoke(() => {
+                SaveCurrentSlideInkStrokes();
+            });
+
             _isPptClickingBtnTurned = true;
 
             // 添加安全检查
@@ -1010,6 +1015,11 @@ namespace Ink_Canvas {
                 AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
                 currentMode = 0;
             }
+
+            // 切换前同步保存墨迹
+            Application.Current.Dispatcher.Invoke(() => {
+                SaveCurrentSlideInkStrokes();
+            });
 
             _isPptClickingBtnTurned = true;
             
@@ -1213,6 +1223,11 @@ namespace Ink_Canvas {
                 LogHelper.WriteLogToFile("PPT应用程序为空，无法结束放映", LogHelper.LogType.Warning);
                 return;
             }
+
+            // 切换前同步保存墨迹
+            Application.Current.Dispatcher.Invoke(() => {
+                SaveCurrentSlideInkStrokes();
+            });
 
             try
             {
@@ -2089,6 +2104,29 @@ namespace Ink_Canvas {
             {
                 LogHelper.WriteLogToFile($"计算文件哈希值失败: {ex.ToString()}", LogHelper.LogType.Error);
                 return "error";
+            }
+        }
+
+        // 新增：同步保存当前页面墨迹的方法
+        private void SaveCurrentSlideInkStrokes()
+        {
+            try
+            {
+                if (pptApplication != null && pptApplication.SlideShowWindows != null && pptApplication.SlideShowWindows.Count >= 1)
+                {
+                    var slideShowWindow = pptApplication.SlideShowWindows[1];
+                    if (slideShowWindow != null && slideShowWindow.View != null)
+                    {
+                        var ms = new MemoryStream();
+                        inkCanvas.Strokes.Save(ms);
+                        ms.Position = 0;
+                        memoryStreams[slideShowWindow.View.CurrentShowPosition] = ms;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存当前页面墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
             }
         }
     }
