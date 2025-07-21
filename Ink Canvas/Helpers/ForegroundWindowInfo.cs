@@ -101,9 +101,9 @@ namespace Ink_Canvas.Helpers
                 IntPtr result = SHAppBarMessage(ABM_GETTASKBARPOS, ref abd);
                 if (result != IntPtr.Zero)
                 {
-                    // 获取当前屏幕的工作区
-                    RECT workArea = new RECT();
-                    SystemParametersInfo(SPI_GETWORKAREA, 0, Marshal.AllocHGlobal(Marshal.SizeOf(workArea)), 0);
+                    RECT taskbarRect = abd.rc;
+                    System.Drawing.Rectangle screenRect = screen.Bounds;
+                    System.Drawing.Rectangle taskbarRectangle = new System.Drawing.Rectangle(taskbarRect.Left, taskbarRect.Top, taskbarRect.Width, taskbarRect.Height);
 
                     // 根据任务栏位置计算高度
                     int taskbarHeight = 0;
