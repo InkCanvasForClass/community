@@ -145,6 +145,54 @@ namespace Ink_Canvas {
             InkCanvasGridForInkReplay.Children.Add(firstCanvas);
             currentPageIndex = 0;
             ShowPage(currentPageIndex);
+
+            // 手动实现触摸滑动
+            double leftTouchStartY = 0;
+            double leftScrollStartOffset = 0;
+            bool leftIsTouching = false;
+            BlackBoardLeftSidePageListScrollViewer.TouchDown += (s, e) => {
+                leftIsTouching = true;
+                leftTouchStartY = e.GetTouchPoint(BlackBoardLeftSidePageListScrollViewer).Position.Y;
+                leftScrollStartOffset = BlackBoardLeftSidePageListScrollViewer.VerticalOffset;
+                BlackBoardLeftSidePageListScrollViewer.CaptureTouch(e.TouchDevice);
+                e.Handled = true;
+            };
+            BlackBoardLeftSidePageListScrollViewer.TouchMove += (s, e) => {
+                if (leftIsTouching) {
+                    double currentY = e.GetTouchPoint(BlackBoardLeftSidePageListScrollViewer).Position.Y;
+                    double delta = leftTouchStartY - currentY;
+                    BlackBoardLeftSidePageListScrollViewer.ScrollToVerticalOffset(leftScrollStartOffset + delta);
+                    e.Handled = true;
+                }
+            };
+            BlackBoardLeftSidePageListScrollViewer.TouchUp += (s, e) => {
+                leftIsTouching = false;
+                BlackBoardLeftSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                e.Handled = true;
+            };
+            double rightTouchStartY = 0;
+            double rightScrollStartOffset = 0;
+            bool rightIsTouching = false;
+            BlackBoardRightSidePageListScrollViewer.TouchDown += (s, e) => {
+                rightIsTouching = true;
+                rightTouchStartY = e.GetTouchPoint(BlackBoardRightSidePageListScrollViewer).Position.Y;
+                rightScrollStartOffset = BlackBoardRightSidePageListScrollViewer.VerticalOffset;
+                BlackBoardRightSidePageListScrollViewer.CaptureTouch(e.TouchDevice);
+                e.Handled = true;
+            };
+            BlackBoardRightSidePageListScrollViewer.TouchMove += (s, e) => {
+                if (rightIsTouching) {
+                    double currentY = e.GetTouchPoint(BlackBoardRightSidePageListScrollViewer).Position.Y;
+                    double delta = rightTouchStartY - currentY;
+                    BlackBoardRightSidePageListScrollViewer.ScrollToVerticalOffset(rightScrollStartOffset + delta);
+                    e.Handled = true;
+                }
+            };
+            BlackBoardRightSidePageListScrollViewer.TouchUp += (s, e) => {
+                rightIsTouching = false;
+                BlackBoardRightSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
+                e.Handled = true;
+            };
         }
 
         protected override void OnSourceInitialized(EventArgs e)

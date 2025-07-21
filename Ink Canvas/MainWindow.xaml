@@ -3155,7 +3155,9 @@
                                             <ui:ScrollViewerEx Name="BlackBoardLeftSidePageListScrollViewer"
                                                                Height="460"
                                                                VerticalScrollBarVisibility="Hidden"
-                                                               ForceUseSmoothScroll="True">
+                                                               ForceUseSmoothScroll="True"
+                                                               PanningMode="VerticalOnly"
+                                                               IsManipulationEnabled="True">
                                                 <ListView ScrollViewer.CanContentScroll="False" SelectionMode="Single"
                                                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                                           ScrollViewer.VerticalScrollBarVisibility="Disabled"
@@ -5193,7 +5195,9 @@
                                             <ui:ScrollViewerEx Name="BlackBoardRightSidePageListScrollViewer"
                                                                Height="460"
                                                                VerticalScrollBarVisibility="Hidden"
-                                                               ForceUseSmoothScroll="True">
+                                                               ForceUseSmoothScroll="True"
+                                                               PanningMode="VerticalOnly"
+                                                               IsManipulationEnabled="True">
                                                 <ListView ScrollViewer.CanContentScroll="False" SelectionMode="Single"
                                                           ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                                                           ScrollViewer.VerticalScrollBarVisibility="Disabled"
