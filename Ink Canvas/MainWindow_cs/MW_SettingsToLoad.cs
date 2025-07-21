@@ -549,6 +549,7 @@ namespace Ink_Canvas {
                 
                 // 初始化直线端点吸附相关设置
                 ToggleSwitchLineEndpointSnapping.IsOn = Settings.Canvas.LineEndpointSnapping;
+                ToggleSwitchCompressPicturesUploaded.IsOn = Settings.Canvas.IsCompressPicturesUploaded;
             } else {
                 Settings.Canvas = new Canvas();
             }

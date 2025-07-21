@@ -23,6 +23,7 @@ using System.Text;
 using System.Globalization;
 using System.Windows.Data;
 using System.Xml.Linq;
+using Image = System.Windows.Controls.Image;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas {
@@ -1989,7 +1990,65 @@ namespace Ink_Canvas {
 
         #endregion
 
+        /// <summary>
+        /// 创建并压缩图片的异步方法
+        /// </summary>
+        private async Task<Image> CreateAndCompressImageAsync(string filePath)
+        {
+            string savePath = System.IO.Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
+            if (!System.IO.Directory.Exists(savePath))
+                System.IO.Directory.CreateDirectory(savePath);
 
-        
+            string fileExtension = System.IO.Path.GetExtension(filePath);
+            string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+            string newFilePath = System.IO.Path.Combine(savePath, timestamp + fileExtension);
+
+            await Task.Run(() => System.IO.File.Copy(filePath, newFilePath, true));
+
+            return await Dispatcher.InvokeAsync(() =>
+            {
+                var bitmapImage = new BitmapImage();
+                bitmapImage.BeginInit();
+                bitmapImage.UriSource = new Uri(newFilePath);
+                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                bitmapImage.EndInit();
+
+                int width = bitmapImage.PixelWidth;
+                int height = bitmapImage.PixelHeight;
+
+                Image image = new Image();
+                if (Settings.Canvas.IsCompressPicturesUploaded && (width > 1920 || height > 1080))
+                {
+                    double scaleX = 1920.0 / width;
+                    double scaleY = 1080.0 / height;
+                    double scale = Math.Min(scaleX, scaleY);
+                    var transformedBitmap = new TransformedBitmap(bitmapImage, new ScaleTransform(scale, scale));
+                    image.Source = transformedBitmap;
+                    image.Width = transformedBitmap.PixelWidth;
+                    image.Height = transformedBitmap.PixelHeight;
+                }
+                else
+                {
+                    image.Source = bitmapImage;
+                    image.Width = width;
+                    image.Height = height;
+                }
+                return image;
+            });
+        }
+
+        private async void InsertImage_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            var dialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Filter = "图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif"
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                var image = await CreateAndCompressImageAsync(dialog.FileName);
+                // TODO: 这里可以将image添加到画布或其他控件
+                MessageBox.Show("图片已处理完成，可在此处插入到画布。");
+            }
+        }
     }
 }

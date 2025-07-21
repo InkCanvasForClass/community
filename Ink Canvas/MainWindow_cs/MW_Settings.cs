@@ -2165,5 +2165,12 @@ namespace Ink_Canvas {
             Settings.PowerPointSettings.EnableWppProcessKill = ToggleSwitchEnableWppProcessKill.IsOn;
             SaveSettingsToFile();
         }
+
+        private void ToggleSwitchCompressPicturesUploaded_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Canvas.IsCompressPicturesUploaded = ToggleSwitchCompressPicturesUploaded.IsOn;
+            SaveSettingsToFile();
+        }
     }
 }
