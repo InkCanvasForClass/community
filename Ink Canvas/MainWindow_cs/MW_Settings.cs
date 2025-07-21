@@ -2177,5 +2177,11 @@ namespace Ink_Canvas {
             Settings.Automation.IsAutoFoldAfterPPTSlideShow = ToggleSwitchAutoFoldAfterPPTSlideShow.IsOn;
             SaveSettingsToFile();
         }
+
+        private void ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter = ToggleSwitchAlwaysGoToFirstPageOnReenter.IsOn;
+            SaveSettingsToFile();
+        }
     }
 }

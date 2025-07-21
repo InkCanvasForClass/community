@@ -241,8 +241,29 @@ namespace Ink_Canvas {
         }
 
         private void PptApplication_PresentationOpen(Presentation Pres) {
-            // 跳转到上次播放页
-            if (Settings.PowerPointSettings.IsNotifyPreviousPage)
+            // 新增逻辑：如果开启"重新进入放映时回到首页"，则直接跳转第一页
+            if (Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter)
+            {
+                Application.Current.Dispatcher.BeginInvoke(new Action(() => {
+                    try
+                    {
+                        if (presentation == null)
+                        {
+                            LogHelper.WriteLogToFile("演示文稿为空，无法跳转到首页", LogHelper.LogType.Warning);
+                            return;
+                        }
+                        if (pptApplication != null && pptApplication.SlideShowWindows != null && pptApplication.SlideShowWindows.Count >= 1)
+                            presentation.SlideShowWindow.View.GotoSlide(1);
+                        else if (presentation.Windows != null && presentation.Windows.Count >= 1)
+                            presentation.Windows[1].View.GotoSlide(1);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"跳转到首页失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    }
+                }), DispatcherPriority.Normal);
+            }
+            else if (Settings.PowerPointSettings.IsNotifyPreviousPage)
                 Application.Current.Dispatcher.BeginInvoke(new Action(() => {
                     try {
                         // 添加安全检查
@@ -594,6 +615,21 @@ namespace Ink_Canvas {
                 LogHelper.WriteLogToFile("PowerPoint Application Slide Show Begin", LogHelper.LogType.Event);
 
                 await Application.Current.Dispatcher.InvokeAsync(() => {
+                    // 新增：如果设置开启，进入放映时强制跳转到第一页
+                    if (Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter)
+                    {
+                        try
+                        {
+                            if (Wn != null && Wn.Presentation != null && Wn.View != null)
+                            {
+                                Wn.View.GotoSlide(1);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"放映开始时跳转首页失败: {ex.ToString()}", LogHelper.LogType.Error);
+                        }
+                    }
 
                     //调整颜色
                     var screenRatio = SystemParameters.PrimaryScreenWidth / SystemParameters.PrimaryScreenHeight;

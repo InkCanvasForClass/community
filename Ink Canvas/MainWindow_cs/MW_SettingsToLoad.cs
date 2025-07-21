@@ -375,6 +375,7 @@ namespace Ink_Canvas {
                 ToggleSwitchAutoSaveScreenShotInPowerPoint.IsOn =
                     Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
                 ToggleSwitchEnableWppProcessKill.IsOn = Settings.PowerPointSettings.EnableWppProcessKill;
+                ToggleSwitchAlwaysGoToFirstPageOnReenter.IsOn = Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter;
             } else {
                 Settings.PowerPointSettings = new PowerPointSettings();
             }

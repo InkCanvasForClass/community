@@ -1585,6 +1585,14 @@
                                                          Toggled="ToggleSwitchNotifyPreviousPage_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="进入放映时回到首页" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchAlwaysGoToFirstPageOnReenter" IsOn="False"
+                                                         FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="提示隐藏幻灯片" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchNotifyHiddenPage"
