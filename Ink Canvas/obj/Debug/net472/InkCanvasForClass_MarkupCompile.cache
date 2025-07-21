@@ -16,5 +16,5 @@ E:\ICC CE\ICC CE main\community\Ink Canvas\App.xaml
 471037513499
 Helpers\Plugins\BuiltIn\SuperLauncher\LauncherSettingsControl.xaml;Helpers\Plugins\BuiltIn\SuperLauncher\LauncherWindow.xaml;MainWindow.xaml;MainWindow_cs\MW_Eraser.xaml;Resources\DrawShapeImageDictionary.xaml;Resources\IconImageDictionary.xaml;Resources\SeewoImageDictionary.xaml;Resources\Styles\Dark.xaml;Resources\Styles\Light.xaml;Windows\AddCustomIconWindow.xaml;Windows\AddPickNameBackgroundWindow.xaml;Windows\CountdownTimerWindow.xaml;Windows\CustomIconWindow.xaml;Windows\CycleProcessBar.xaml;Windows\HasNewUpdateWindow.xaml;Windows\ManagePickNameBackgroundsWindow.xaml;Windows\NamesInputWindow.xaml;Windows\OperatingGuideWindow.xaml;Windows\PluginSettingsWindow.xaml;Windows\RandWindow.xaml;Windows\YesOrNoNotificationWindow.xaml;
 
-False
+True
 

@@ -378,6 +378,9 @@ namespace Ink_Canvas
         
         [JsonProperty("isSaveFullPageStrokes")]
         public bool IsSaveFullPageStrokes = false;
+
+        [JsonProperty("isAutoEnterAnnotationAfterKillHite")]
+        public bool IsAutoEnterAnnotationAfterKillHite { get; set; } = false;
     }
 
     public class Advanced

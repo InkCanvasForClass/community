@@ -2263,6 +2263,15 @@
                                                          Toggled="ToggleSwitchAutoKillHiteAnnotation_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="鸿合屏幕书写查杀后自动进入批注" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchAutoEnterAnnotationAfterKillHite"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled" />
+                                    </ui:SimpleStackPanel>
+
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <Image Source="/Resources/Icons-png/VComYouJiao.png" Margin="0,0,6,0"
                                                Width="28"
                                                Height="28" VerticalAlignment="Center" />
