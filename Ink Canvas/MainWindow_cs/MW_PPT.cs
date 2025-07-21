@@ -941,6 +941,10 @@ namespace Ink_Canvas {
         private int previousSlideID = 0;
         private MemoryStream[] memoryStreams = new MemoryStream[50];
 
+        private DateTime inkLockUntil = DateTime.MinValue;
+        private int lockedSlideIndex = 0;
+        private const int InkLockMilliseconds = 500;
+
         private void PptApplication_SlideShowNextSlide(SlideShowWindow Wn) {
             try {
                 // 添加安全检查
@@ -969,6 +973,7 @@ namespace Ink_Canvas {
                     PPTBtnPageNow.Text = $"{Wn.View.CurrentShowPosition}";
                     PPTBtnPageTotal.Text = $"/ {Wn.Presentation.Slides.Count}";
                     previousSlideID = newPage; // 最后赋值，确保索引同步
+                    LockInkForCurrentSlide(newPage); // 翻页后加锁
                 });
             }
             catch (Exception ex) {
@@ -1010,6 +1015,7 @@ namespace Ink_Canvas {
                                     slideShowWindow.View.CurrentShowPosition);
                             slideShowWindow.Activate();
                             slideShowWindow.View.Previous();
+                            LockInkForCurrentSlide(slideShowWindow.View.CurrentShowPosition); // 翻页后加锁
                         }
                     }
                 }
@@ -1056,6 +1062,7 @@ namespace Ink_Canvas {
                                     slideShowWindow.View.CurrentShowPosition);
                             slideShowWindow.Activate();
                             slideShowWindow.View.Next();
+                            LockInkForCurrentSlide(slideShowWindow.View.CurrentShowPosition); // 翻页后加锁
                         }
                     }
                 }
@@ -2113,10 +2120,16 @@ namespace Ink_Canvas {
                     var slideShowWindow = pptApplication.SlideShowWindows[1];
                     if (slideShowWindow != null && slideShowWindow.View != null)
                     {
+                        int currentSlide = slideShowWindow.View.CurrentShowPosition;
+                        if (!CanWriteInk(currentSlide))
+                        {
+                            LogHelper.WriteLogToFile($"墨迹写入被锁定或页码不符，当前页:{currentSlide}，锁定页:{lockedSlideIndex}", LogHelper.LogType.Warning);
+                            return;
+                        }
                         var ms = new MemoryStream();
                         inkCanvas.Strokes.Save(ms);
                         ms.Position = 0;
-                        memoryStreams[slideShowWindow.View.CurrentShowPosition] = ms;
+                        memoryStreams[currentSlide] = ms;
                     }
                 }
             }
@@ -2124,6 +2137,21 @@ namespace Ink_Canvas {
             {
                 LogHelper.WriteLogToFile($"保存当前页面墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
             }
+        }
+
+        // 翻页后调用
+        private void LockInkForCurrentSlide(int slideIndex)
+        {
+            inkLockUntil = DateTime.Now.AddMilliseconds(InkLockMilliseconds);
+            lockedSlideIndex = slideIndex;
+        }
+
+        // 写入墨迹前调用
+        private bool CanWriteInk(int currentSlideIndex)
+        {
+            if (DateTime.Now < inkLockUntil) return false;
+            if (currentSlideIndex != lockedSlideIndex) return false;
+            return true;
         }
     }
 }
