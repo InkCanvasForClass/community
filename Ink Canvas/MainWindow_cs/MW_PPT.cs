@@ -148,6 +148,8 @@ namespace Ink_Canvas {
         private static System.Timers.Timer wppProcessCheckTimer = null;
         private static DateTime wppProcessRecordTime = DateTime.MinValue; // 记录进程时间
         private static int wppProcessCheckCount = 0; // 检查次数计数器
+        private static WpsWindowInfo lastForegroundWpsWindow = null; // 记录上次检测到的前台WPS窗口
+        private static DateTime lastWindowCheckTime = DateTime.MinValue; // 记录上次窗口检查时间
 
 
         private void TimerCheckPPT_Elapsed(object sender, ElapsedEventArgs e) {
@@ -712,9 +714,9 @@ namespace Ink_Canvas {
                         // 方法1：通过应用程序路径检测
                         if (pptApplication.Path.Contains("Kingsoft\\WPS Office\\") || 
                             pptApplication.Path.Contains("WPS Office\\"))
-                        {
-                            uint processId;
-                            GetWindowThreadProcessId((IntPtr)pptApplication.HWND, out processId);
+                {
+                    uint processId;
+                    GetWindowThreadProcessId((IntPtr)pptApplication.HWND, out processId);
                             wpsProcess = Process.GetProcessById((int)processId);
                             LogHelper.WriteLogToFile($"通过路径检测到WPS进程: {processId}", LogHelper.LogType.Trace);
                         }
@@ -744,9 +746,9 @@ namespace Ink_Canvas {
                         if (wpsProcess != null)
                         {
                             wppProcess = wpsProcess;
-                            hasWppProcessID = true;
-                            wppProcessRecordTime = DateTime.Now;
-                            wppProcessCheckCount = 0;
+                    hasWppProcessID = true;
+                    wppProcessRecordTime = DateTime.Now;
+                    wppProcessCheckCount = 0;
                             LogHelper.WriteLogToFile($"成功记录 WPP 进程 ID: {wpsProcess.Id}", LogHelper.LogType.Trace);
                         }
                         else
@@ -1379,10 +1381,10 @@ namespace Ink_Canvas {
                 wppProcessCheckTimer.Dispose();
             }
 
-            wppProcessCheckTimer = new System.Timers.Timer(2000); // 2秒检查一次
+            wppProcessCheckTimer = new System.Timers.Timer(500); // 改为500ms检查一次，提高响应速度
             wppProcessCheckTimer.Elapsed += WppProcessCheckTimer_Elapsed;
             wppProcessCheckTimer.Start();
-            LogHelper.WriteLogToFile("启动 WPP 进程检测定时器", LogHelper.LogType.Trace);
+            LogHelper.WriteLogToFile("启动 WPP 进程检测定时器（前台窗口监控模式）", LogHelper.LogType.Trace);
         }
 
         private void WppProcessCheckTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
@@ -1410,81 +1412,108 @@ namespace Ink_Canvas {
                 {
                     LogHelper.WriteLogToFile("WPP 进程已正常关闭", LogHelper.LogType.Trace);
                     StopWppProcessCheckTimer();
+                    return;
                 }
-                else
+
+                // 检查前台WPS窗口是否存在
+                bool isForegroundWpsWindowActive = IsForegroundWpsWindowStillActive();
+                
+                if (isForegroundWpsWindowActive)
                 {
-                    // 使用改进的WPS窗口检测方法
-                    bool hasActiveWpsWindows = HasActiveWpsWindows();
-                    
-                    if (hasActiveWpsWindows)
+                    // 前台窗口仍然存在，继续监控
+                    if (wppProcessCheckCount % 10 == 0) // 每5秒记录一次日志，避免日志过多
                     {
-                        LogHelper.WriteLogToFile("检测到活跃的WPS窗口，停止强制关闭进程", LogHelper.LogType.Trace);
+                        LogHelper.WriteLogToFile($"前台WPS窗口仍然存在，继续监控（已检查{wppProcessCheckCount}次）", LogHelper.LogType.Trace);
+                    }
+                    return;
+                }
+                
+                // 前台窗口已消失，立即结束WPP进程
+                LogHelper.WriteLogToFile("检测到前台WPS窗口已消失，立即结束WPP进程", LogHelper.LogType.Event);
+                
+                // 检查所有WPS文档是否已保存
+                bool allSaved = true;
+                try
+                {
+                    if (pptApplication != null)
+                    {
+                        foreach (Presentation pres in pptApplication.Presentations)
+                        {
+                            if (pres.Saved == MsoTriState.msoFalse)
+                            {
+                                allSaved = false;
+                                break;
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"检查WPS文档保存状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    allSaved = false; // 出错时默认不安全
+                }
+
+                if (!allSaved)
+                {
+                    // 弹窗提示用户
+                    bool userContinue = false;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        var result = MessageBox.Show(
+                            "检测到有未保存的WPS文档，强制关闭可能导致数据丢失。是否继续？",
+                            "警告", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                        userContinue = (result == MessageBoxResult.Yes);
+                    });
+                    if (!userContinue)
+                    {
+                        LogHelper.WriteLogToFile("用户取消了强制关闭WPS进程", LogHelper.LogType.Trace);
                         StopWppProcessCheckTimer();
                         return;
                     }
-                    
-                    // 如果检测失败且是第一次检查，输出调试信息
-                    if (wppProcessCheckCount == 1)
-                    {
-                        LogHelper.WriteLogToFile("首次检测未发现活跃WPS窗口，输出调试信息", LogHelper.LogType.Trace);
-                        DebugAllWindows();
-                    }
+                }
 
-                    // 计算从记录进程开始的时间
-                    var timeSinceRecord = DateTime.Now - wppProcessRecordTime;
+                // 立即结束WPP进程
+                try
+                {
+                    LogHelper.WriteLogToFile("前台窗口消失，开始结束WPP进程", LogHelper.LogType.Event);
                     
-                    // 更保守的关闭策略：只有在超过0.5秒且检查次数超过2次时才强制关闭
-                    if (timeSinceRecord.TotalSeconds > 0.5 && wppProcessCheckCount >= 2)
+                    // 尝试优雅地结束进程
+                    if (!wppProcess.HasExited)
                     {
-                        // 新增：检查所有WPS文档是否已保存
-                        bool allSaved = true;
-                        try
-                        {
-                            if (pptApplication != null)
-                            {
-                                foreach (Presentation pres in pptApplication.Presentations)
-                                {
-                                    if (pres.Saved == MsoTriState.msoFalse)
-                                    {
-                                        allSaved = false;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"检查WPS文档保存状态失败: {ex.ToString()}", LogHelper.LogType.Error);
-                            allSaved = false; // 出错时默认不安全
-                        }
-
-                        if (!allSaved)
-                        {
-                            // 弹窗提示用户
-                            bool userContinue = false;
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                var result = MessageBox.Show(
-                                    "检测到有未保存的WPS文档，强制关闭可能导致数据丢失。是否继续？",
-                                    "警告", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                                userContinue = (result == MessageBoxResult.Yes);
-                            });
-                            if (!userContinue)
-                            {
-                                LogHelper.WriteLogToFile("用户取消了强制关闭WPS进程", LogHelper.LogType.Trace);
-                                StopWppProcessCheckTimer();
-                                return;
-                            }
-                        }
-                        LogHelper.WriteLogToFile($"检测到长时间未关闭的 WPP 进程（已运行{timeSinceRecord.TotalSeconds:F1}秒，检查{wppProcessCheckCount}次），开始强制关闭", LogHelper.LogType.Event);
                         wppProcess.Kill();
-                        LogHelper.WriteLogToFile("强制关闭 WPP 进程成功", LogHelper.LogType.Event);
-                        StopWppProcessCheckTimer();
+                        LogHelper.WriteLogToFile("前台窗口消失，成功结束WPP进程", LogHelper.LogType.Event);
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile($"WPP 进程仍在运行，已检查{wppProcessCheckCount}次，运行时间{timeSinceRecord.TotalSeconds:F1}秒", LogHelper.LogType.Trace);
+                        LogHelper.WriteLogToFile("WPP进程已经自然结束", LogHelper.LogType.Trace);
                     }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"结束WPP进程失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    
+                    // 如果常规方法失败，尝试强制结束
+                    try
+                    {
+                        var processes = Process.GetProcessesByName(wppProcess.ProcessName);
+                        foreach (var process in processes)
+                        {
+                            if (process.Id == wppProcess.Id)
+                            {
+                                process.Kill();
+                                LogHelper.WriteLogToFile("强制结束WPP进程成功", LogHelper.LogType.Event);
+                                break;
+                            }
+                        }
+                    }
+                    catch (Exception forceKillEx)
+                    {
+                        LogHelper.WriteLogToFile($"强制结束WPP进程也失败: {forceKillEx.ToString()}", LogHelper.LogType.Error);
+                    }
+                }
+                finally
+                {
+                    StopWppProcessCheckTimer();
                 }
             }
             catch (Exception ex)
@@ -1543,14 +1572,14 @@ namespace Ink_Canvas {
             
             try
             {
-                EnumWindows((hWnd, lParam) =>
-                {
-                    try
+                    EnumWindows((hWnd, lParam) =>
                     {
+                        try
+                        {
                         if (!IsWindow(hWnd)) return true;
                         
-                        uint windowProcessId;
-                        GetWindowThreadProcessId(hWnd, out windowProcessId);
+                            uint windowProcessId;
+                            GetWindowThreadProcessId(hWnd, out windowProcessId);
                         
                         if ((int)windowProcessId == processId)
                         {
@@ -1700,6 +1729,81 @@ namespace Ink_Canvas {
         }
 
         /// <summary>
+        /// 检查前台WPS窗口是否仍然存在（更精确的检测）
+        /// </summary>
+        private bool IsForegroundWpsWindowStillActive()
+        {
+            try
+            {
+                var currentTime = DateTime.Now;
+                var currentForegroundWindow = GetForegroundWpsWindow();
+                
+                // 检查窗口状态是否发生变化
+                bool windowStateChanged = false;
+                if (lastForegroundWpsWindow != null && currentForegroundWindow != null)
+                {
+                    // 检查窗口是否发生了变化
+                    if (lastForegroundWpsWindow.Handle != currentForegroundWindow.Handle ||
+                        lastForegroundWpsWindow.Title != currentForegroundWindow.Title)
+                    {
+                        windowStateChanged = true;
+                        LogHelper.WriteLogToFile($"前台WPS窗口发生变化: {lastForegroundWpsWindow.Title} -> {currentForegroundWindow.Title}", LogHelper.LogType.Trace);
+                    }
+                }
+                else if (lastForegroundWpsWindow == null && currentForegroundWindow != null)
+                {
+                    // 从无窗口变为有窗口
+                    windowStateChanged = true;
+                    LogHelper.WriteLogToFile($"检测到新的前台WPS窗口: {currentForegroundWindow.Title}", LogHelper.LogType.Trace);
+                }
+                else if (lastForegroundWpsWindow != null && currentForegroundWindow == null)
+                {
+                    // 从有窗口变为无窗口
+                    windowStateChanged = true;
+                    LogHelper.WriteLogToFile($"前台WPS窗口已消失: {lastForegroundWpsWindow.Title}", LogHelper.LogType.Trace);
+                }
+
+                // 更新记录
+                lastForegroundWpsWindow = currentForegroundWindow;
+                lastWindowCheckTime = currentTime;
+
+                if (currentForegroundWindow != null)
+                {
+                    // 验证窗口仍然有效
+                    if (IsWindow(currentForegroundWindow.Handle) && IsWindowVisible(currentForegroundWindow.Handle))
+                    {
+                        return true;
+                    }
+                }
+
+                // 方法2：检查所有WPS进程的活跃窗口
+                var wpsProcesses = GetWpsProcesses();
+                foreach (var process in wpsProcesses)
+                {
+                    var windows = GetWpsWindowsByProcess(process.Id);
+                    if (windows.Any(w => w.IsVisible && !w.IsMinimized && w.Handle == GetForegroundWindow()))
+                    {
+                        return true;
+                    }
+                }
+
+                // 方法3：检查顶级WPS窗口
+                var topLevelWindows = GetTopLevelWpsWindows();
+                if (topLevelWindows.Any(w => w.IsVisible && !w.IsMinimized))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查前台WPS窗口状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// 获取顶级WPS窗口（包括前台窗口和最近的活跃窗口）
         /// </summary>
         private List<WpsWindowInfo> GetTopLevelWpsWindows()
@@ -1800,10 +1904,10 @@ namespace Ink_Canvas {
                     if (attempt < maxRetries)
                     {
                         Thread.Sleep(100); // 等待100ms
-                    }
                 }
-                catch (Exception ex)
-                {
+            }
+            catch (Exception ex)
+            {
                     LogHelper.WriteLogToFile($"第{attempt}次尝试检查活跃WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
                     
                     // 如果还有重试机会，等待一小段时间再重试
@@ -1957,6 +2061,8 @@ namespace Ink_Canvas {
             hasWppProcessID = false;
             wppProcessRecordTime = DateTime.MinValue;
             wppProcessCheckCount = 0;
+            lastForegroundWpsWindow = null;
+            lastWindowCheckTime = DateTime.MinValue;
             LogHelper.WriteLogToFile("停止 WPP 进程检测定时器", LogHelper.LogType.Trace);
         }
 
