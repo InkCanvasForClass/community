@@ -586,7 +586,7 @@ namespace Ink_Canvas {
                 wasFloatingBarFoldedWhenEnterSlideShow = isFloatingBarFolded;
                 
                 if (Settings.Automation.IsAutoFoldInPPTSlideShow && !isFloatingBarFolded)
-                    await FoldFloatingBar(new object());
+                    FoldFloatingBar_MouseUp(new object(), null);
                 else if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
 
                 isStopInkReplay = true;
@@ -735,7 +735,7 @@ namespace Ink_Canvas {
             try {
                 // 新增逻辑：如果设置开启且进入PPT放映时浮动栏是收纳的，退出时也自动收纳；否则自动展开
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && wasFloatingBarFoldedWhenEnterSlideShow) {
-                    if (!isFloatingBarFolded) await FoldFloatingBar(new object());
+                    if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
                 } else {
                     if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
                 }
