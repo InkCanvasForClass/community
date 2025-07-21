@@ -2004,10 +2004,17 @@ namespace Ink_Canvas {
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     image.Name = timestamp;
 
-                    CenterAndScaleElement(image);
+                    // 新缩放逻辑：最大宽高为画布一半，并居中
+                    double maxWidth = inkCanvas.ActualWidth / 2;
+                    double maxHeight = inkCanvas.ActualHeight / 2;
+                    double scaleX = maxWidth / image.Width;
+                    double scaleY = maxHeight / image.Height;
+                    double scale = Math.Min(1, Math.Min(scaleX, scaleY));
+                    image.Width = image.Width * scale;
+                    image.Height = image.Height * scale;
+                    InkCanvas.SetLeft(image, (inkCanvas.ActualWidth - image.Width) / 2);
+                    InkCanvas.SetTop(image, (inkCanvas.ActualHeight - image.Height) / 2);
 
-                    InkCanvas.SetLeft(image, 0);
-                    InkCanvas.SetTop(image, 0);
                     inkCanvas.Children.Add(image);
 
                     timeMachine.CommitElementInsertHistory(image);

@@ -96,7 +96,6 @@ namespace Ink_Canvas {
                                 InkCanvas.SetLeft(img, info.Left);
                                 InkCanvas.SetTop(img, info.Top);
                                 inkCanvas.Children.Add(img);
-                                CenterAndScaleElement(img);
                             }
                         }
                     }
