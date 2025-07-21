@@ -7842,6 +7842,16 @@
                         <TextBlock Text="白板" Foreground="Black" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
                     <ui:SimpleStackPanel
+                        x:Name="BtnExitPptFromSidebarLeft"
+                        MouseUp="ExitPPTSlideShow_MouseUp"
+                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
+                        Width="32" Margin="0" Visibility="Collapsed">
+                        <Image Source="/Resources/new-icons/end-slides-show.png"
+                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
+                        <TextBlock Text="退出放映" Foreground="Black" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
+                    </ui:SimpleStackPanel>
+
+                    <ui:SimpleStackPanel
                         MouseUp="UnFoldFloatingBar_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
@@ -7914,6 +7924,16 @@
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="白板" Foreground="Black" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
+                    <ui:SimpleStackPanel
+                        x:Name="BtnExitPptFromSidebarRight"
+                        MouseUp="ExitPPTSlideShow_MouseUp"
+                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
+                        Width="32" Margin="0" Visibility="Collapsed">
+                        <Image Source="/Resources/new-icons/end-slides-show.png"
+                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
+                        <TextBlock Text="退出放映" Foreground="Black" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
+                    </ui:SimpleStackPanel>
+
                     <ui:SimpleStackPanel
                         MouseUp="UnFoldFloatingBar_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"

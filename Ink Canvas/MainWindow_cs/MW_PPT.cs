@@ -711,8 +711,15 @@ namespace Ink_Canvas {
                         })).Start();
                     }
                 });
+                await Application.Current.Dispatcher.InvokeAsync(() => {
+                    if (BtnExitPptFromSidebarLeft != null)
+                        BtnExitPptFromSidebarLeft.Visibility = Visibility.Visible;
+                    if (BtnExitPptFromSidebarRight != null)
+                        BtnExitPptFromSidebarRight.Visibility = Visibility.Visible;
+                });
             }
             catch (Exception ex) {
+                LogHelper.WriteLogToFile("PowerPoint Application Slide Show Begin Error: " + ex.ToString(), LogHelper.LogType.Error);
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
             }
         }
@@ -1304,6 +1311,12 @@ namespace Ink_Canvas {
             {
                 LogHelper.WriteLogToFile($"结束PPT放映操作异常: {ex.ToString()}", LogHelper.LogType.Error);
             }
+            await Application.Current.Dispatcher.InvokeAsync(() => {
+                if (BtnExitPptFromSidebarLeft != null)
+                    BtnExitPptFromSidebarLeft.Visibility = Visibility.Collapsed;
+                if (BtnExitPptFromSidebarRight != null)
+                    BtnExitPptFromSidebarRight.Visibility = Visibility.Collapsed;
+            });
         }
 
         private void GridPPTControlPrevious_MouseDown(object sender, MouseButtonEventArgs e)

@@ -1306,5 +1306,11 @@ namespace Ink_Canvas {
                 currentPageIndex = whiteboardPages.Count - 1;
             ShowPage(currentPageIndex);
         }
+        // 快速面板退出PPT放映按钮事件
+        private void ExitPPTSlideShow_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            // 直接调用PPT放映结束按钮的逻辑
+            BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
+        }
     }
 }
