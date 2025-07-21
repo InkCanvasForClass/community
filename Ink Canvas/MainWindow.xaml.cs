@@ -41,6 +41,20 @@ namespace Ink_Canvas {
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
+        
+        // 新增：设置窗口置顶并兼容无焦点
+        private void SetTopmostWithNoActivate(bool topmost)
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            // 先移除 WS_EX_NOACTIVATE
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
+            // 设置 Topmost
+            this.Topmost = topmost;
+            // 再加回 WS_EX_NOACTIVATE
+            exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+        }
 
         #region Window Initialization
 
@@ -136,10 +150,8 @@ namespace Ink_Canvas {
         protected override void OnSourceInitialized(EventArgs e)
         {
             base.OnSourceInitialized(e);
-            // 设置窗口为无焦点（不会抢占焦点）
-            var hwnd = new WindowInteropHelper(this).Handle;
-            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+            // 设置窗口为无焦点且置顶（不会抢占焦点且始终在最前）
+            SetTopmostWithNoActivate(true);
         }
 
         #endregion
