@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Collections.Generic;
 
 namespace Ink_Canvas.Helpers.Plugins
 {

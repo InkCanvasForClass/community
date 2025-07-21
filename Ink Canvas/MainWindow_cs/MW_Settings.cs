@@ -8,7 +8,6 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using File = System.IO.File;
 using System.Windows.Media;
-using System.Windows.Ink;
 using System.Windows.Media.Imaging;
 using System.Windows.Interop;
 using Hardcodet.Wpf.TaskbarNotification;

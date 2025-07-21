@@ -15,13 +15,6 @@ using System.Threading;
 using Application = System.Windows.Application;
 using Point = System.Windows.Point;
 using System.Diagnostics;
-using iNKORE.UI.WPF.Modern.Controls;
-using System.IO;
-using System.Windows.Media.Effects;
-using static System.Net.Mime.MediaTypeNames;
-using System.Text;
-using System.Globalization;
-using System.Windows.Data;
 using System.Xml.Linq;
 using Image = System.Windows.Controls.Image;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
@@ -1434,6 +1427,10 @@ namespace Ink_Canvas {
                     }
                 }
                 else {
+                    // 切换到批注模式时，确保保存当前图片信息
+                    if (currentMode != 0) {
+                        SaveStrokes();
+                    }
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                     ColorSwitchCheck();
                     HideSubPanels("pen", true);
@@ -1455,9 +1452,14 @@ namespace Ink_Canvas {
             isLastTouchEraser = false;
             drawingShapeMode = 0;
 
+            // 切换到橡皮擦模式时，确保保存当前图片信息
+            if (!isAlreadyEraser && currentMode != 0) {
+                SaveStrokes();
+            }
+
             // 启用新的高级橡皮擦系统
             EnableAdvancedEraserSystem();
-            
+
             // 使用新的高级橡皮擦系统
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法

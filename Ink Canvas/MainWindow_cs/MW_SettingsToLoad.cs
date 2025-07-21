@@ -10,7 +10,6 @@ using System.Windows.Ink;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using File = System.IO.File;
 using OperatingSystem = OSVersionExtension.OperatingSystem;
 

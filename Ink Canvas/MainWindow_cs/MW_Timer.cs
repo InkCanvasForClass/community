@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Timers;
 using System.Windows;
-using MessageBox = System.Windows.MessageBox;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;

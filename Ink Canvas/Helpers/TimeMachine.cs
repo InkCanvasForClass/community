@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Windows.Ink;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows; // Added for UIElement
 
 namespace Ink_Canvas.Helpers

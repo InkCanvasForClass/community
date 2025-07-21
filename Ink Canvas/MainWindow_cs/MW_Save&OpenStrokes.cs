@@ -1,15 +1,12 @@
 using Ink_Canvas.Helpers;
-using Microsoft.Win32;
 using System;
 using System.IO;
-using System.IO.Compression;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using File = System.IO.File;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Forms;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using System.Collections.Generic;
 using System.Windows.Controls;

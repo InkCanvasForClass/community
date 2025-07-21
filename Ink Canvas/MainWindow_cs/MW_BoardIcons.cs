@@ -6,8 +6,6 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Controls.Primitives;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {

@@ -1,16 +1,12 @@
 ﻿using Ink_Canvas.Helpers;
 using System;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Ink;
-using System.Windows.Input;
-using System.Windows.Media.Animation;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Xml.Linq;
 using System.Windows.Controls;
 using Newtonsoft.Json;
 using System.Collections.Generic;

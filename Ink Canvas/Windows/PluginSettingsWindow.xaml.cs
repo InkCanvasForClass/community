@@ -1,6 +1,4 @@
 using Ink_Canvas.Helpers.Plugins;
-using Ink_Canvas.Helpers.Plugins.BuiltIn;
-using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
