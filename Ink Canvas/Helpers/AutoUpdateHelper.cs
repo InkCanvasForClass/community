@@ -517,280 +517,320 @@ namespace Ink_Canvas.Helpers
         private static async Task<bool> DownloadFile(string fileUrl, string destinationPath, Action<double, string> progressCallback = null)
         {
             LogHelper.WriteLogToFile($"AutoUpdate | 正在尝试下载: {fileUrl}");
-            // 检测是否为Windows 7
-            var osVersion = Environment.OSVersion;
-            bool isWindows7 = osVersion.Version.Major == 6 && osVersion.Version.Minor == 1;
-            
-            if (isWindows7)
+            int maxRetry = 3;
+            int retryCount = 0;
+            while (retryCount < maxRetry)
             {
-                // Windows 7使用特殊配置
-                using (var handler = new HttpClientHandler())
+                try
                 {
-                    try
+                    // 检测是否为Windows 7
+                    var osVersion = Environment.OSVersion;
+                    bool isWindows7 = osVersion.Version.Major == 6 && osVersion.Version.Minor == 1;
+                    if (isWindows7)
                     {
-                        // 配置HttpClientHandler以支持Windows 7
-                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
-                        
-                        using (HttpClient client = new HttpClient(handler))
+                        // Windows 7使用特殊配置
+                        using (var handler = new HttpClientHandler())
                         {
-                            client.Timeout = TimeSpan.FromMinutes(5);
-                            client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
-                            
-                            LogHelper.WriteLogToFile($"AutoUpdate | 开始下载: {fileUrl}");
-                            
-                            string tempFilePath = destinationPath + ".tmp";
-                            
-                            string directory = Path.GetDirectoryName(destinationPath);
-                            if (!Directory.Exists(directory))
+                            try
                             {
-                                Directory.CreateDirectory(directory);
-                            }
-                            
-                            var downloadTask = client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
-                            var initialTimeoutTask = Task.Delay(RequestTimeout);
-                            
-                            var completedTask = await Task.WhenAny(downloadTask, initialTimeoutTask);
-                            if (completedTask == initialTimeoutTask)
-                            {
-                                LogHelper.WriteLogToFile($"AutoUpdate | 初始连接超时", LogHelper.LogType.Error);
-                                return false;
-                            }
-                            
-                            HttpResponseMessage response = await downloadTask;
-                            LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
-                            response.EnsureSuccessStatusCode();
-                            
-                            long? totalBytes = response.Content.Headers.ContentLength;
-                            LogHelper.WriteLogToFile($"AutoUpdate | 文件大小: {(totalBytes.HasValue ? (totalBytes.Value / 1024.0 / 1024.0).ToString("F2") + " MB" : "未知")}");
-                            
-                            using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                            {
-                                using (var downloadStream = await response.Content.ReadAsStreamAsync())
+                                // 配置HttpClientHandler以支持Windows 7
+                                handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+                                
+                                using (HttpClient client = new HttpClient(handler))
                                 {
-                                    byte[] buffer = new byte[8192];
-                                    long totalBytesRead = 0;
-                                    int bytesRead;
-                                    DateTime lastProgressUpdate = DateTime.Now;
+                                    client.Timeout = TimeSpan.FromMinutes(5);
+                                    client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
                                     
-                                    var downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
-                                    var readTask = Task.Run(async () => {
-                                        while ((bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                                        {
-                                            await fileStream.WriteAsync(buffer, 0, bytesRead);
-                                            totalBytesRead += bytesRead;
-                                            
-                                            if ((DateTime.Now - lastProgressUpdate).TotalSeconds >= 5)
-                                            {
-                                                if (totalBytes.HasValue)
-                                                {
-                                                    double percentage = (double)totalBytesRead / totalBytes.Value * 100;
-                                                    LogHelper.WriteLogToFile($"AutoUpdate | 下载进度: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
-                                                    progressCallback?.Invoke(percentage, $"下载中: {percentage:F1}%");
-                                                }
-                                                else
-                                                {
-                                                    LogHelper.WriteLogToFile($"AutoUpdate | 已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
-                                                    progressCallback?.Invoke(0, $"已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
-                                                }
-                                                lastProgressUpdate = DateTime.Now;
-                                                downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
-                                            }
-                                        }
-                                        return true;
-                                    });
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 开始下载: {fileUrl}");
                                     
-                                    if (await Task.WhenAny(readTask, downloadTimeoutTask) == downloadTimeoutTask)
+                                    string tempFilePath = destinationPath + ".tmp";
+                                    
+                                    string directory = Path.GetDirectoryName(destinationPath);
+                                    if (!Directory.Exists(directory))
                                     {
-                                        LogHelper.WriteLogToFile($"AutoUpdate | 下载超时（60秒无数据传输）", LogHelper.LogType.Error);
+                                        Directory.CreateDirectory(directory);
+                                    }
+                                    
+                                    var downloadTask = client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+                                    var initialTimeoutTask = Task.Delay(RequestTimeout);
+                                    
+                                    var completedTask = await Task.WhenAny(downloadTask, initialTimeoutTask);
+                                    if (completedTask == initialTimeoutTask)
+                                    {
+                                        LogHelper.WriteLogToFile($"AutoUpdate | 初始连接超时", LogHelper.LogType.Error);
                                         return false;
                                     }
                                     
-                                    bool downloadCompleted = await readTask;
+                                    HttpResponseMessage response = await downloadTask;
+                                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                                    response.EnsureSuccessStatusCode();
                                     
-                                    if (downloadCompleted)
+                                    long? totalBytes = response.Content.Headers.ContentLength;
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 文件大小: {(totalBytes.HasValue ? (totalBytes.Value / 1024.0 / 1024.0).ToString("F2") + " MB" : "未知")}");
+                                    
+                                    using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                                     {
-                                        LogHelper.WriteLogToFile($"AutoUpdate | 下载完成: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
-                                    }
-                                }
-                            }
-                            
-                            if (File.Exists(tempFilePath))
-                            {
-                                if (File.Exists(destinationPath))
-                                {
-                                    File.Delete(destinationPath);
-                                }
-                                
-                                File.Move(tempFilePath, destinationPath);
-                                LogHelper.WriteLogToFile($"AutoUpdate | 文件保存到: {destinationPath}");
-                                return true;
-                            }
-                            
-                            return false;
-                        }
-                    }
-                    catch (HttpRequestException ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                    catch (TaskCanceledException ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 下载超时: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 下载文件时出错: {ex.Message}", LogHelper.LogType.Error);
-                        if (ex.InnerException != null)
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | 内部异常: {ex.InnerException.Message}", LogHelper.LogType.Error);
-                        }
-                    }
-                    
-                    try
-                    {
-                        string tempFilePath = destinationPath + ".tmp";
-                        if (File.Exists(tempFilePath))
-                        {
-                            File.Delete(tempFilePath);
-                        }
-                    }
-                    catch { }
-                    
-                    return false;
-                }
-            }
-            else
-            {
-                // 其他Windows版本使用标准配置
-                using (HttpClient client = new HttpClient())
-                {
-                    try
-                    {
-                        client.Timeout = TimeSpan.FromMinutes(5);
-                        client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
-                        
-                        LogHelper.WriteLogToFile($"AutoUpdate | 开始下载: {fileUrl}");
-                        
-                        string tempFilePath = destinationPath + ".tmp";
-                        
-                        string directory = Path.GetDirectoryName(destinationPath);
-                        if (!Directory.Exists(directory))
-                        {
-                            Directory.CreateDirectory(directory);
-                        }
-                        
-                        var downloadTask = client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
-                        var initialTimeoutTask = Task.Delay(RequestTimeout);
-                        
-                        var completedTask = await Task.WhenAny(downloadTask, initialTimeoutTask);
-                        if (completedTask == initialTimeoutTask)
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | 初始连接超时", LogHelper.LogType.Error);
-                            return false;
-                        }
-                        
-                        HttpResponseMessage response = await downloadTask;
-                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
-                        response.EnsureSuccessStatusCode();
-                        
-                        long? totalBytes = response.Content.Headers.ContentLength;
-                        LogHelper.WriteLogToFile($"AutoUpdate | 文件大小: {(totalBytes.HasValue ? (totalBytes.Value / 1024.0 / 1024.0).ToString("F2") + " MB" : "未知")}");
-                        
-                        using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
-                        {
-                            using (var downloadStream = await response.Content.ReadAsStreamAsync())
-                            {
-                                byte[] buffer = new byte[8192];
-                                long totalBytesRead = 0;
-                                int bytesRead;
-                                DateTime lastProgressUpdate = DateTime.Now;
-                                
-                                var downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
-                                var readTask = Task.Run(async () => {
-                                    while ((bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                                    {
-                                        await fileStream.WriteAsync(buffer, 0, bytesRead);
-                                        totalBytesRead += bytesRead;
-                                        
-                                        if ((DateTime.Now - lastProgressUpdate).TotalSeconds >= 5)
+                                        using (var downloadStream = await response.Content.ReadAsStreamAsync())
                                         {
-                                            if (totalBytes.HasValue)
+                                            byte[] buffer = new byte[8192];
+                                            long totalBytesRead = 0;
+                                            int bytesRead;
+                                            DateTime lastProgressUpdate = DateTime.Now;
+                                            
+                                            var downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                                            var readTask = Task.Run(async () => {
+                                                while ((bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                                {
+                                                    await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                                    totalBytesRead += bytesRead;
+                                                    
+                                                    if ((DateTime.Now - lastProgressUpdate).TotalSeconds >= 5)
+                                                    {
+                                                        if (totalBytes.HasValue)
+                                                        {
+                                                            double percentage = (double)totalBytesRead / totalBytes.Value * 100;
+                                                            LogHelper.WriteLogToFile($"AutoUpdate | 下载进度: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
+                                                            progressCallback?.Invoke(percentage, $"下载中: {percentage:F1}%");
+                                                        }
+                                                        else
+                                                        {
+                                                            LogHelper.WriteLogToFile($"AutoUpdate | 已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                                            progressCallback?.Invoke(0, $"已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                                        }
+                                                        lastProgressUpdate = DateTime.Now;
+                                                        downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                                                    }
+                                                }
+                                                return true;
+                                            });
+                                            
+                                            if (await Task.WhenAny(readTask, downloadTimeoutTask) == downloadTimeoutTask)
                                             {
-                                                double percentage = (double)totalBytesRead / totalBytes.Value * 100;
-                                                LogHelper.WriteLogToFile($"AutoUpdate | 下载进度: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
-                                                progressCallback?.Invoke(percentage, $"下载中: {percentage:F1}%");
+                                                LogHelper.WriteLogToFile($"AutoUpdate | 下载超时（60秒无数据传输）", LogHelper.LogType.Error);
+                                                return false;
                                             }
-                                            else
+                                            
+                                            bool downloadCompleted = await readTask;
+                                            
+                                            if (downloadCompleted)
                                             {
-                                                LogHelper.WriteLogToFile($"AutoUpdate | 已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
-                                                progressCallback?.Invoke(0, $"已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                                LogHelper.WriteLogToFile($"AutoUpdate | 下载完成: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
                                             }
-                                            lastProgressUpdate = DateTime.Now;
-                                            downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
                                         }
                                     }
-                                    return true;
-                                });
-                                
-                                if (await Task.WhenAny(readTask, downloadTimeoutTask) == downloadTimeoutTask)
+                                    
+                                    if (File.Exists(tempFilePath))
+                                    {
+                                        if (File.Exists(destinationPath))
+                                        {
+                                            File.Delete(destinationPath);
+                                        }
+                                        
+                                        File.Move(tempFilePath, destinationPath);
+                                        LogHelper.WriteLogToFile($"AutoUpdate | 文件保存到: {destinationPath}");
+                                        return true;
+                                    }
+                                    
+                                    return false;
+                                }
+                            }
+                            catch (HttpRequestException ex)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                            }
+                            catch (TaskCanceledException ex)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 下载超时: {ex.Message}", LogHelper.LogType.Error);
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 下载文件时出错: {ex.Message}", LogHelper.LogType.Error);
+                                if (ex.InnerException != null)
                                 {
-                                    LogHelper.WriteLogToFile($"AutoUpdate | 下载超时（60秒无数据传输）", LogHelper.LogType.Error);
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 内部异常: {ex.InnerException.Message}", LogHelper.LogType.Error);
+                                }
+                            }
+                            
+                            try
+                            {
+                                string tempFilePath = destinationPath + ".tmp";
+                                if (File.Exists(tempFilePath))
+                                {
+                                    File.Delete(tempFilePath);
+                                }
+                            }
+                            catch { }
+                            
+                            return false;
+                        }
+                    }
+                    else
+                    {
+                        // 其他Windows版本使用标准配置
+                        using (HttpClient client = new HttpClient())
+                        {
+                            try
+                            {
+                                client.Timeout = TimeSpan.FromMinutes(5);
+                                client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                                
+                                LogHelper.WriteLogToFile($"AutoUpdate | 开始下载: {fileUrl}");
+                                
+                                string tempFilePath = destinationPath + ".tmp";
+                                
+                                string directory = Path.GetDirectoryName(destinationPath);
+                                if (!Directory.Exists(directory))
+                                {
+                                    Directory.CreateDirectory(directory);
+                                }
+                                
+                                var downloadTask = client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead);
+                                var initialTimeoutTask = Task.Delay(RequestTimeout);
+                                
+                                var completedTask = await Task.WhenAny(downloadTask, initialTimeoutTask);
+                                if (completedTask == initialTimeoutTask)
+                                {
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 初始连接超时", LogHelper.LogType.Error);
                                     return false;
                                 }
                                 
-                                bool downloadCompleted = await readTask;
+                                HttpResponseMessage response = await downloadTask;
+                                LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                                response.EnsureSuccessStatusCode();
                                 
-                                if (downloadCompleted)
+                                long? totalBytes = response.Content.Headers.ContentLength;
+                                LogHelper.WriteLogToFile($"AutoUpdate | 文件大小: {(totalBytes.HasValue ? (totalBytes.Value / 1024.0 / 1024.0).ToString("F2") + " MB" : "未知")}");
+                                
+                                using (var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write, FileShare.None))
                                 {
-                                    LogHelper.WriteLogToFile($"AutoUpdate | 下载完成: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                    using (var downloadStream = await response.Content.ReadAsStreamAsync())
+                                    {
+                                        byte[] buffer = new byte[8192];
+                                        long totalBytesRead = 0;
+                                        int bytesRead;
+                                        DateTime lastProgressUpdate = DateTime.Now;
+                                        
+                                        var downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                                        var readTask = Task.Run(async () => {
+                                            while ((bytesRead = await downloadStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                            {
+                                                await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                                totalBytesRead += bytesRead;
+                                                
+                                                if ((DateTime.Now - lastProgressUpdate).TotalSeconds >= 5)
+                                                {
+                                                    if (totalBytes.HasValue)
+                                                    {
+                                                        double percentage = (double)totalBytesRead / totalBytes.Value * 100;
+                                                        LogHelper.WriteLogToFile($"AutoUpdate | 下载进度: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
+                                                        progressCallback?.Invoke(percentage, $"下载中: {percentage:F1}%");
+                                                    }
+                                                    else
+                                                    {
+                                                        LogHelper.WriteLogToFile($"AutoUpdate | 已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                                        progressCallback?.Invoke(0, $"已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                                    }
+                                                    lastProgressUpdate = DateTime.Now;
+                                                    downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
+                                                }
+                                            }
+                                            return true;
+                                        });
+                                        
+                                        if (await Task.WhenAny(readTask, downloadTimeoutTask) == downloadTimeoutTask)
+                                        {
+                                            LogHelper.WriteLogToFile($"AutoUpdate | 下载超时（60秒无数据传输）", LogHelper.LogType.Error);
+                                            return false;
+                                        }
+                                        
+                                        bool downloadCompleted = await readTask;
+                                        
+                                        if (downloadCompleted)
+                                        {
+                                            LogHelper.WriteLogToFile($"AutoUpdate | 下载完成: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                        }
+                                    }
+                                }
+                                
+                                if (File.Exists(tempFilePath))
+                                {
+                                    if (File.Exists(destinationPath))
+                                    {
+                                        File.Delete(destinationPath);
+                                    }
+                                    
+                                    File.Move(tempFilePath, destinationPath);
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 文件保存到: {destinationPath}");
+                                    return true;
+                                }
+                                
+                                return false;
+                            }
+                            catch (HttpRequestException ex)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                            }
+                            catch (TaskCanceledException ex)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 下载超时: {ex.Message}", LogHelper.LogType.Error);
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 下载文件时出错: {ex.Message}", LogHelper.LogType.Error);
+                                if (ex.InnerException != null)
+                                {
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 内部异常: {ex.InnerException.Message}", LogHelper.LogType.Error);
                                 }
                             }
-                        }
-                        
-                        if (File.Exists(tempFilePath))
-                        {
-                            if (File.Exists(destinationPath))
-                            {
-                                File.Delete(destinationPath);
-                            }
                             
-                            File.Move(tempFilePath, destinationPath);
-                            LogHelper.WriteLogToFile($"AutoUpdate | 文件保存到: {destinationPath}");
-                            return true;
+                            try
+                            {
+                                string tempFilePath = destinationPath + ".tmp";
+                                if (File.Exists(tempFilePath))
+                                {
+                                    File.Delete(tempFilePath);
+                                }
+                            }
+                            catch { }
+                            
+                            return false;
                         }
-                        
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    retryCount++;
+                    if (retryCount >= maxRetry)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 下载失败，已重试{retryCount}次: {ex.Message}", LogHelper.LogType.Error);
+                        progressCallback?.Invoke(0, $"下载失败，已重试{retryCount}次: {ex.Message}");
                         return false;
                     }
-                    catch (HttpRequestException ex)
+                    else
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"AutoUpdate | 网络异常，{15 * retryCount}s后第{retryCount}次重试: {ex.Message}", LogHelper.LogType.Warning);
+                        progressCallback?.Invoke(0, $"网络异常，{15 * retryCount}s后第{retryCount}次重试...");
+                        await Task.Delay(15000);
                     }
-                    catch (TaskCanceledException ex)
+                }
+                catch (IOException ex)
+                {
+                    retryCount++;
+                    if (retryCount >= maxRetry)
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 下载超时: {ex.Message}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"AutoUpdate | IO异常，已重试{retryCount}次: {ex.Message}", LogHelper.LogType.Error);
+                        progressCallback?.Invoke(0, $"IO异常，已重试{retryCount}次: {ex.Message}");
+                        return false;
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 下载文件时出错: {ex.Message}", LogHelper.LogType.Error);
-                        if (ex.InnerException != null)
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | 内部异常: {ex.InnerException.Message}", LogHelper.LogType.Error);
-                        }
+                        LogHelper.WriteLogToFile($"AutoUpdate | IO异常，{15 * retryCount}s后第{retryCount}次重试: {ex.Message}", LogHelper.LogType.Warning);
+                        progressCallback?.Invoke(0, $"IO异常，{15 * retryCount}s后第{retryCount}次重试...");
+                        await Task.Delay(15000);
                     }
-                    
-                    try
-                    {
-                        string tempFilePath = destinationPath + ".tmp";
-                        if (File.Exists(tempFilePath))
-                        {
-                            File.Delete(tempFilePath);
-                        }
-                    }
-                    catch { }
-                    
-                    return false;
                 }
             }
+            return false;
         }
 
         // 保存下载状态

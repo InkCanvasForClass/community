@@ -137,73 +137,106 @@ namespace Ink_Canvas
                 Directory.CreateDirectory(updatesFolderPath);
             string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
             string tmpFilePath = zipFilePath + ".tmp";
-            long existingLength = 0;
-            if (File.Exists(tmpFilePath))
-                existingLength = new FileInfo(tmpFilePath).Length;
-            try
+            int maxRetry = 3;
+            int retryCount = 0;
+            while (retryCount < maxRetry)
             {
-                using (var client = new System.Net.Http.HttpClient())
+                long existingLength = 0;
+                if (File.Exists(tmpFilePath))
+                    existingLength = new FileInfo(tmpFilePath).Length;
+                try
                 {
-                    client.Timeout = TimeSpan.FromMinutes(10);
-                    client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
-                    if (existingLength > 0)
-                        client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(existingLength, null);
-                    using (var response = await client.GetAsync(downloadUrl, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, token))
+                    using (var client = new System.Net.Http.HttpClient())
                     {
-                        response.EnsureSuccessStatusCode();
-                        var totalBytes = response.Content.Headers.ContentLength.HasValue
-                            ? response.Content.Headers.ContentLength.Value + existingLength
-                            : -1L;
-                        using (var stream = await response.Content.ReadAsStreamAsync())
-                        using (var fs = new FileStream(tmpFilePath, FileMode.Append, FileAccess.Write, FileShare.None))
+                        client.Timeout = TimeSpan.FromMinutes(10);
+                        client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                        if (existingLength > 0)
+                            client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(existingLength, null);
+                        using (var response = await client.GetAsync(downloadUrl, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, token))
                         {
-                            byte[] buffer = new byte[8192];
-                            long totalRead = existingLength;
-                            int read;
-                            var lastUpdate = DateTime.Now;
-                            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+                            response.EnsureSuccessStatusCode();
+                            var totalBytes = response.Content.Headers.ContentLength.HasValue
+                                ? response.Content.Headers.ContentLength.Value + existingLength
+                                : -1L;
+                            using (var stream = await response.Content.ReadAsStreamAsync())
+                            using (var fs = new FileStream(tmpFilePath, FileMode.Append, FileAccess.Write, FileShare.None))
                             {
-                                token.ThrowIfCancellationRequested();
-                                await fs.WriteAsync(buffer, 0, read, token);
-                                totalRead += read;
-                                if ((DateTime.Now - lastUpdate).TotalMilliseconds > 200)
+                                byte[] buffer = new byte[8192];
+                                long totalRead = existingLength;
+                                int read;
+                                var lastUpdate = DateTime.Now;
+                                while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
                                 {
-                                    int percent = totalBytes > 0 ? (int)(totalRead * 100 / totalBytes) : 0;
-                                    DownloadProgressBar.Value = percent;
-                                    DownloadProgressText.Text = totalBytes > 0
-                                        ? $"已下载 {totalRead / 1024 / 1024.0:F2} MB / {totalBytes / 1024 / 1024.0:F2} MB ({percent}%)"
-                                        : $"已下载 {totalRead / 1024 / 1024.0:F2} MB";
-                                    lastUpdate = DateTime.Now;
+                                    token.ThrowIfCancellationRequested();
+                                    await fs.WriteAsync(buffer, 0, read, token);
+                                    totalRead += read;
+                                    if ((DateTime.Now - lastUpdate).TotalMilliseconds > 200)
+                                    {
+                                        int percent = totalBytes > 0 ? (int)(totalRead * 100 / totalBytes) : 0;
+                                        Dispatcher.Invoke(() => {
+                                            DownloadProgressBar.Value = percent;
+                                            DownloadProgressText.Text = totalBytes > 0
+                                                ? $"已下载 {totalRead / 1024 / 1024.0:F2} MB / {totalBytes / 1024 / 1024.0:F2} MB ({percent}%)"
+                                                : $"已下载 {totalRead / 1024 / 1024.0:F2} MB";
+                                        });
+                                        lastUpdate = DateTime.Now;
+                                    }
                                 }
+                                Dispatcher.Invoke(() => {
+                                    DownloadProgressBar.Value = 100;
+                                    DownloadProgressText.Text = "下载完成，正在校验...";
+                                });
+                                await fs.FlushAsync(token);
                             }
-                            DownloadProgressBar.Value = 100;
-                            DownloadProgressText.Text = "下载完成，正在校验...";
-                            await fs.FlushAsync(token);
+                            if (File.Exists(zipFilePath)) File.Delete(zipFilePath);
+                            File.Move(tmpFilePath, zipFilePath);
                         }
-                        if (File.Exists(zipFilePath)) File.Delete(zipFilePath);
-                        File.Move(tmpFilePath, zipFilePath);
+                    }
+                    // 下载完成后，调用现有安装流程
+                    LogHelper.WriteLogToFile($"HistoryRollback | 开始安装版本: {version}");
+                    AutoUpdateHelper.InstallNewVersionApp(version, false);
+                    App.IsAppExitByUser = true;
+                    Application.Current.Dispatcher.Invoke(() => {
+                        Application.Current.Shutdown();
+                    });
+                    return true;
+                }
+                catch (OperationCanceledException)
+                {
+                    LogHelper.WriteLogToFile($"HistoryRollback | 用户取消下载", LogHelper.LogType.Info);
+                    return false;
+                }
+                catch (Exception ex) when (ex is System.Net.Http.HttpRequestException || ex is IOException)
+                {
+                    retryCount++;
+                    if (retryCount >= maxRetry)
+                    {
+                        LogHelper.WriteLogToFile($"HistoryRollback | 下载失败，已重试{retryCount}次: {ex.Message}", LogHelper.LogType.Error);
+                        Dispatcher.Invoke(() => {
+                            DownloadProgressText.Text = $"下载失败，已重试{retryCount}次: {ex.Message}";
+                        });
+                        return false;
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"HistoryRollback | 网络异常，{15 * retryCount}s后第{retryCount}次重试: {ex.Message}", LogHelper.LogType.Warning);
+                        Dispatcher.Invoke(() => {
+                            DownloadProgressText.Text = $"网络异常，{15 * retryCount}s后第{retryCount}次重试...";
+                        });
+                        await Task.Delay(15000);
                     }
                 }
-                // 下载完成后，调用现有安装流程
-                LogHelper.WriteLogToFile($"HistoryRollback | 开始安装版本: {version}");
-                AutoUpdateHelper.InstallNewVersionApp(version, false);
-                App.IsAppExitByUser = true;
-                Application.Current.Dispatcher.Invoke(() => {
-                    Application.Current.Shutdown();
-                });
-                return true;
+                catch (Exception ex)
+                {
+                    if (File.Exists(tmpFilePath)) { /* 不删除，便于断点续传 */ }
+                    LogHelper.WriteLogToFile($"HistoryRollback | 下载或安装异常: {ex.Message}", LogHelper.LogType.Error);
+                    Dispatcher.Invoke(() => {
+                        DownloadProgressText.Text = $"下载异常: {ex.Message}";
+                    });
+                    return false;
+                }
             }
-            catch (OperationCanceledException)
-            {
-                LogHelper.WriteLogToFile($"HistoryRollback | 用户取消下载", LogHelper.LogType.Info);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                if (File.Exists(tmpFilePath)) { /* 不删除，便于断点续传 */ }
-                LogHelper.WriteLogToFile($"HistoryRollback | 下载或安装异常: {ex.Message}", LogHelper.LogType.Error);
-                return false;
-            }
+            return false;
         }
 
         protected override void OnClosing(CancelEventArgs e)
