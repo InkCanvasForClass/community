@@ -1329,5 +1329,17 @@ namespace Ink_Canvas {
             // 直接调用PPT放映结束按钮的逻辑
             BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }
+
+        private void HistoryRollbackButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 收起设置面板（与插件面板一致）
+            BorderSettings.Visibility = Visibility.Hidden;
+            BorderSettingsMask.Visibility = Visibility.Hidden;
+            var win = new HistoryRollbackWindow(Settings.Startup.UpdateChannel);
+            win.ShowDialog();
+            // 可选：回滚窗口关闭后恢复设置面板显示
+            BorderSettings.Visibility = Visibility.Visible;
+            BorderSettingsMask.Visibility = Visibility.Visible;
+        }
     }
 }
