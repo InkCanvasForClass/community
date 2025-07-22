@@ -9,6 +9,9 @@ using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Net;
+using System.Net.Sockets;
+using System.Linq;
 
 namespace Ink_Canvas {
     public class TimeViewModel : INotifyPropertyChanged {
@@ -55,6 +58,35 @@ namespace Ink_Canvas {
 
         private TimeViewModel nowTimeVM = new TimeViewModel();
 
+        private async Task<DateTime> GetNetworkTimeAsync()
+        {
+            try
+            {
+                const string ntpServer = "ntp.ntsc.ac.cn";
+                var ntpData = new byte[48];
+                ntpData[0] = 0x1B;
+                var addresses = await Dns.GetHostAddressesAsync(ntpServer);
+                var ipEndPoint = new IPEndPoint(addresses[0], 123);
+                using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
+                {
+                    socket.ReceiveTimeout = 2000;
+                    socket.Connect(ipEndPoint);
+                    await Task.Factory.FromAsync(socket.BeginSend(ntpData, 0, ntpData.Length, SocketFlags.None, null, socket), socket.EndSend);
+                    await Task.Factory.FromAsync(socket.BeginReceive(ntpData, 0, ntpData.Length, SocketFlags.None, null, socket), socket.EndReceive);
+                }
+                const byte serverReplyTime = 40;
+                ulong intPart = BitConverter.ToUInt32(ntpData.Skip(serverReplyTime).Take(4).Reverse().ToArray(), 0);
+                ulong fractPart = BitConverter.ToUInt32(ntpData.Skip(serverReplyTime + 4).Take(4).Reverse().ToArray(), 0);
+                var milliseconds = (intPart * 1000) + ((fractPart * 1000) / 0x100000000L);
+                var networkDateTime = (new DateTime(1900, 1, 1)).AddMilliseconds((long)milliseconds);
+                return networkDateTime.ToLocalTime();
+            }
+            catch
+            {
+                return DateTime.Now;
+            }
+        }
+
         private void InitTimers() {
             timerCheckPPT.Elapsed += TimerCheckPPT_Elapsed;
             timerCheckPPT.Interval = 500;
@@ -66,7 +98,7 @@ namespace Ink_Canvas {
             timerCheckAutoUpdateWithSilence.Interval = 1000 * 60 * 10;
             WaterMarkTime.DataContext = nowTimeVM;
             WaterMarkDate.DataContext = nowTimeVM;
-            timerDisplayTime.Elapsed += TimerDisplayTime_Elapsed;
+            timerDisplayTime.Elapsed += async (s, e) => await TimerDisplayTime_ElapsedAsync();
             timerDisplayTime.Interval = 1000;
             timerDisplayTime.Start();
             timerDisplayDate.Elapsed += TimerDisplayDate_Elapsed;
@@ -77,8 +109,14 @@ namespace Ink_Canvas {
             nowTimeVM.nowTime = DateTime.Now.ToShortTimeString().ToString();
         }
 
-        private void TimerDisplayTime_Elapsed(object sender, ElapsedEventArgs e) {
-            nowTimeVM.nowTime = DateTime.Now.ToShortTimeString().ToString();
+        private async Task TimerDisplayTime_ElapsedAsync()
+        {
+            DateTime now = await GetNetworkTimeAsync();
+            // 只更新时间，日期由原有逻辑定时更新即可
+            Dispatcher.Invoke(() =>
+            {
+                nowTimeVM.nowTime = now.ToShortTimeString();
+            });
         }
 
         private void TimerDisplayDate_Elapsed(object sender, ElapsedEventArgs e) {
