@@ -173,10 +173,10 @@ namespace Ink_Canvas
                 DownloadProgressBar.Value = 100;
                 DownloadProgressText.Text = "下载完成，准备安装...";
                 await Task.Delay(800);
-                // 设置结果为立即更新
-                Result = UpdateResult.UpdateNow;
-                DialogResult = true;
-                Close();
+            // 设置结果为立即更新
+            Result = UpdateResult.UpdateNow;
+            DialogResult = true;
+            Close();
             }
             else
             {
