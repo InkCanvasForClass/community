@@ -1208,6 +1208,7 @@
                                                          Toggled="ToggleSwitchEnableWppProcessKill_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <TextBlock Text="# 关闭后将不会自动查杀WPP残留进程，可能导致WPP关闭卡顿或无法彻底退出。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <TextBlock Text="# 如果您只使用PowerPoint请不要打开WPS联动开关，如果使用WPS建议不要使用PowerPoint！" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <Border BorderBrush="#ef4444"
                                             BorderThickness="2" Padding="8" CornerRadius="6" Background="#991b1b">
                                         <ui:SimpleStackPanel Orientation="Horizontal" Spacing="4">
