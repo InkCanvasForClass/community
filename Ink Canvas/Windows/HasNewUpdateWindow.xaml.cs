@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Threading.Tasks;
+using System.IO;
 
 namespace Ink_Canvas
 {
@@ -129,16 +131,46 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("AutoUpdate | Update dialog buttons visibility ensured");
         }
 
-        private void UpdateNowButton_Click(object sender, RoutedEventArgs e)
+        private async void UpdateNowButton_Click(object sender, RoutedEventArgs e)
         {
             LogHelper.WriteLogToFile("AutoUpdate | Update Now button clicked");
-            
-            // 设置结果为立即更新
-            Result = UpdateResult.UpdateNow;
-            
-            // 关闭窗口，返回到MainWindow处理后续下载和安装流程
-            DialogResult = true;
-            Close();
+            // 禁用按钮，显示进度条
+            UpdateNowButton.IsEnabled = false;
+            UpdateLaterButton.IsEnabled = false;
+            SkipVersionButton.IsEnabled = false;
+            DownloadProgressPanel.Visibility = Visibility.Visible;
+            DownloadProgressBar.Value = 0;
+            DownloadProgressText.Text = "正在准备下载...";
+
+            // 启动下载
+            bool downloadSuccess = false;
+            try
+            {
+                downloadSuccess = await DownloadUpdateAsync();
+            }
+            catch (Exception ex)
+            {
+                DownloadProgressText.Text = $"下载失败: {ex.Message}";
+                LogHelper.WriteLogToFile($"AutoUpdate | 下载异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            if (downloadSuccess)
+            {
+                DownloadProgressBar.Value = 100;
+                DownloadProgressText.Text = "下载完成，准备安装...";
+                await Task.Delay(800);
+                // 设置结果为立即更新
+                Result = UpdateResult.UpdateNow;
+                DialogResult = true;
+                Close();
+            }
+            else
+            {
+                DownloadProgressText.Text = "下载失败，请检查网络后重试。";
+                UpdateNowButton.IsEnabled = true;
+                UpdateLaterButton.IsEnabled = true;
+                SkipVersionButton.IsEnabled = true;
+            }
         }
 
         private void UpdateLaterButton_Click(object sender, RoutedEventArgs e)
@@ -277,6 +309,85 @@ namespace Ink_Canvas
                         yield return childOfChild;
                     }
                 }
+            }
+        }
+
+        // 下载更新并实时更新进度条（支持断点续传）
+        private async Task<bool> DownloadUpdateAsync()
+        {
+            string version = NewVersion;
+            string updatesFolderPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "AutoUpdate");
+            if (!Directory.Exists(updatesFolderPath))
+                Directory.CreateDirectory(updatesFolderPath);
+            string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
+            string tmpFilePath = zipFilePath + ".tmp";
+
+            // 获取下载链接（此处假设主程序已将下载直链传入，或可通过AutoUpdateHelper获取）
+            string downloadUrl = null;
+            if (App.Current.Properties.Contains("UpdateDirectDownloadUrl"))
+                downloadUrl = App.Current.Properties["UpdateDirectDownloadUrl"] as string;
+            if (string.IsNullOrEmpty(downloadUrl))
+            {
+                // 兜底：用GitHub主线格式
+                downloadUrl = $"https://github.com/InkCanvasForClass/community/releases/download/{version}/InkCanvasForClass.CE.{version}.zip";
+            }
+
+            long existingLength = 0;
+            if (File.Exists(tmpFilePath))
+                existingLength = new FileInfo(tmpFilePath).Length;
+
+            try
+            {
+                using (var client = new System.Net.Http.HttpClient())
+                {
+                    client.Timeout = System.TimeSpan.FromMinutes(10);
+                    client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    if (existingLength > 0)
+                        client.DefaultRequestHeaders.Range = new System.Net.Http.Headers.RangeHeaderValue(existingLength, null);
+
+                    using (var response = await client.GetAsync(downloadUrl, System.Net.Http.HttpCompletionOption.ResponseHeadersRead))
+                    {
+                        response.EnsureSuccessStatusCode();
+                        var totalBytes = response.Content.Headers.ContentLength.HasValue
+                            ? response.Content.Headers.ContentLength.Value + existingLength
+                            : -1L;
+
+                        using (var stream = await response.Content.ReadAsStreamAsync())
+                        using (var fs = new FileStream(tmpFilePath, FileMode.Append, FileAccess.Write, FileShare.None))
+                        {
+                            byte[] buffer = new byte[8192];
+                            long totalRead = existingLength;
+                            int read;
+                            var lastUpdate = DateTime.Now;
+                            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                            {
+                                await fs.WriteAsync(buffer, 0, read);
+                                totalRead += read;
+                                if ((DateTime.Now - lastUpdate).TotalMilliseconds > 200)
+                                {
+                                    int percent = totalBytes > 0 ? (int)(totalRead * 100 / totalBytes) : 0;
+                                    DownloadProgressBar.Value = percent;
+                                    DownloadProgressText.Text = totalBytes > 0
+                                        ? $"已下载 {totalRead / 1024 / 1024.0:F2} MB / {totalBytes / 1024 / 1024.0:F2} MB ({percent}%)"
+                                        : $"已下载 {totalRead / 1024 / 1024.0:F2} MB";
+                                    lastUpdate = DateTime.Now;
+                                }
+                            }
+                            DownloadProgressBar.Value = 100;
+                            DownloadProgressText.Text = "下载完成，正在校验...";
+                            await fs.FlushAsync();
+                        }
+                        if (File.Exists(zipFilePath)) File.Delete(zipFilePath);
+                        File.Move(tmpFilePath, zipFilePath);
+                        return true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 断点续传下载失败: {ex.Message}", LogHelper.LogType.Error);
+                // 不删除 .tmp 文件，便于下次断点续传
+                return false;
             }
         }
     }

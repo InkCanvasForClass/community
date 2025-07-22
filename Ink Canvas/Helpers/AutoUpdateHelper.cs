@@ -11,6 +11,7 @@ using System.Windows.Controls;
 using System.Text;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Ink_Canvas.Helpers
 {
@@ -342,44 +343,92 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        // 通过GitHub API获取最新Release信息
+        private static async Task<(string version, string downloadUrl, string releaseNotes)> GetLatestGithubRelease(UpdateChannel channel)
+        {
+            try
+            {
+                string apiUrl = channel == UpdateChannel.Beta
+                    ? "https://api.github.com/repos/InkCanvasForClass/community-beta/releases/latest"
+                    : "https://api.github.com/repos/InkCanvasForClass/community/releases/latest";
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    var response = await client.GetStringAsync(apiUrl);
+                    var json = JObject.Parse(response);
+                    string version = json["tag_name"]?.ToString();
+                    string releaseNotes = json["body"]?.ToString();
+                    string downloadUrl = json["assets"]?.First?["browser_download_url"]?.ToString();
+                    if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(downloadUrl))
+                        return (version, downloadUrl, releaseNotes);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | GitHub Releases API 获取失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+            return (null, null, null);
+        }
+
         // 主要的更新检测方法（优先检测延迟，失败时自动切换线路组）
-        public static async Task<(string remoteVersion, UpdateLineGroup lineGroup)> CheckForUpdates(UpdateChannel channel = UpdateChannel.Release, bool alwaysGetRemote = false)
+        public static async Task<(string remoteVersion, UpdateLineGroup lineGroup, string releaseNotes, string directDownloadUrl)> CheckForUpdates(UpdateChannel channel = UpdateChannel.Release, bool alwaysGetRemote = false)
         {
             try
             {
                 string localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 LogHelper.WriteLogToFile($"AutoUpdate | 本地版本: {localVersion}");
-                LogHelper.WriteLogToFile($"AutoUpdate | 检测通道 {channel} 下最快线路组...");
-                
-                // 获取所有可用线路组（按延迟排序）
+                LogHelper.WriteLogToFile($"AutoUpdate | 优先通过GitHub Releases API检测...");
+                // 1. 优先通过GitHub Releases API获取
+                var (apiVersion, apiDownloadUrl, apiReleaseNotes) = await GetLatestGithubRelease(channel);
+                if (!string.IsNullOrEmpty(apiVersion) && !string.IsNullOrEmpty(apiDownloadUrl))
+                {
+                    Version local = new Version(localVersion);
+                    Version remote = new Version(apiVersion.TrimStart('v', 'V'));
+                    if (remote > local || alwaysGetRemote)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 通过GitHub Releases API发现新版本: {apiVersion}");
+                        // 用一个虚拟的UpdateLineGroup表示API直链
+                        var apiGroup = new UpdateLineGroup
+                        {
+                            GroupName = "GitHub Releases API",
+                            VersionUrl = "",
+                            DownloadUrlFormat = apiDownloadUrl,
+                            LogUrl = ""
+                        };
+                        return (apiVersion, apiGroup, apiReleaseNotes, apiDownloadUrl);
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 当前版本已是最新 (GitHub Releases API)");
+                        return (null, null, apiReleaseNotes, null);
+                    }
+                }
+                // 2. 回退到原有txt方案
+                LogHelper.WriteLogToFile($"AutoUpdate | GitHub Releases API获取失败，回退到txt方案...");
                 var availableGroups = await GetAvailableLineGroupsOrdered(channel);
                 if (availableGroups.Count == 0)
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均不可用", LogHelper.LogType.Error);
-                    return (null, null);
+                    return (null, null, null, null);
                 }
-                
-                // 依次尝试每个线路组，直到成功获取版本信息
                 foreach (var group in availableGroups)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 尝试使用线路组获取版本信息: {group.GroupName}");
                     string remoteVersion = await GetRemoteVersion(group.VersionUrl);
-                    
                     if (remoteVersion != null)
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 成功从线路组 {group.GroupName} 获取远程版本: {remoteVersion}");
                         Version local = new Version(localVersion);
                         Version remote = new Version(remoteVersion);
-                        
                         if (remote > local || alwaysGetRemote)
                         {
                             LogHelper.WriteLogToFile($"AutoUpdate | 发现新版本或强制获取: {remoteVersion}");
-                            return (remoteVersion, group);
+                            return (remoteVersion, group, null, null);
                         }
                         else
                         {
                             LogHelper.WriteLogToFile($"AutoUpdate | 当前版本已是最新");
-                            return (null, group);
+                            return (null, group, null, null);
                         }
                     }
                     else
@@ -387,14 +436,13 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 获取版本失败，尝试下一个线路组", LogHelper.LogType.Warning);
                     }
                 }
-                
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均无法获取版本信息", LogHelper.LogType.Error);
-                return (null, null);
+                return (null, null, null, null);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | CheckForUpdates错误: {ex.Message}", LogHelper.LogType.Error);
-                return (null, null);
+                return (null, null, null, null);
             }
         }
 
@@ -1065,7 +1113,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | 开始修复版本，通道: {channel}");
                 
                 // 获取远程版本号（自动选择最快线路组，始终下载远程版本）
-                var (remoteVersion, group) = await CheckForUpdates(channel, true);
+                var (remoteVersion, group, _, _) = await CheckForUpdates(channel, true);
                 if (string.IsNullOrEmpty(remoteVersion) || group == null)
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 修复版本时获取远程版本失败", LogHelper.LogType.Error);
@@ -1095,6 +1143,37 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | FixVersion错误: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
+        }
+
+        // 获取所有GitHub历史版本（Release）
+        public static async Task<List<(string version, string downloadUrl, string releaseNotes)>> GetAllGithubReleases(UpdateChannel channel = UpdateChannel.Release)
+        {
+            var result = new List<(string, string, string)>();
+            try
+            {
+                string apiUrl = channel == UpdateChannel.Beta
+                    ? "https://api.github.com/repos/InkCanvasForClass/community-beta/releases"
+                    : "https://api.github.com/repos/InkCanvasForClass/community/releases";
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    var response = await client.GetStringAsync(apiUrl);
+                    var arr = JArray.Parse(response);
+                    foreach (var item in arr)
+                    {
+                        string version = item["tag_name"]?.ToString();
+                        string releaseNotes = item["body"]?.ToString();
+                        string downloadUrl = item["assets"]?.First?["browser_download_url"]?.ToString();
+                        if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(downloadUrl))
+                            result.Add((version, downloadUrl, releaseNotes));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 获取历史版本失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            return result;
         }
 
         // 测试Windows 7 TLS连接的方法
