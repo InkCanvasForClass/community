@@ -1117,7 +1117,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var groups = ChannelLineGroups[channel];
+                // 先检测并排序所有可用线路组
+                var groups = await GetAvailableLineGroupsOrdered(channel);
                 bool downloadSuccess = await DownloadSetupFileWithFallback(version, groups, progressCallback);
                 if (!downloadSuccess)
                 {
