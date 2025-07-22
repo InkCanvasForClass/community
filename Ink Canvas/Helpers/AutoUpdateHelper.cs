@@ -32,7 +32,7 @@ namespace Ink_Canvas.Helpers
         }
 
         // 通道-线路组映射
-        private static readonly Dictionary<UpdateChannel, List<UpdateLineGroup>> ChannelLineGroups = new Dictionary<UpdateChannel, List<UpdateLineGroup>>
+        public static readonly Dictionary<UpdateChannel, List<UpdateLineGroup>> ChannelLineGroups = new Dictionary<UpdateChannel, List<UpdateLineGroup>>
         {
             { UpdateChannel.Release, new List<UpdateLineGroup>
                 {
@@ -371,7 +371,8 @@ namespace Ink_Canvas.Helpers
         }
 
         // 主要的更新检测方法（优先检测延迟，失败时自动切换线路组）
-        public static async Task<(string remoteVersion, UpdateLineGroup lineGroup, string releaseNotes, string directDownloadUrl)> CheckForUpdates(UpdateChannel channel = UpdateChannel.Release, bool alwaysGetRemote = false)
+        // 仅检测新版本时用GitHub API，实际下载时只用线路组
+        public static async Task<(string remoteVersion, UpdateLineGroup lineGroup, string releaseNotes)> CheckForUpdates(UpdateChannel channel = UpdateChannel.Release, bool alwaysGetRemote = false)
         {
             try
             {
@@ -379,28 +380,23 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | 本地版本: {localVersion}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 优先通过GitHub Releases API检测...");
                 // 1. 优先通过GitHub Releases API获取
-                var (apiVersion, apiDownloadUrl, apiReleaseNotes) = await GetLatestGithubRelease(channel);
-                if (!string.IsNullOrEmpty(apiVersion) && !string.IsNullOrEmpty(apiDownloadUrl))
+                var (apiVersion, _, apiReleaseNotes) = await GetLatestGithubRelease(channel);
+                if (!string.IsNullOrEmpty(apiVersion))
                 {
                     Version local = new Version(localVersion);
                     Version remote = new Version(apiVersion.TrimStart('v', 'V'));
                     if (remote > local || alwaysGetRemote)
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 通过GitHub Releases API发现新版本: {apiVersion}");
-                        // 用一个虚拟的UpdateLineGroup表示API直链
-                        var apiGroup = new UpdateLineGroup
-                        {
-                            GroupName = "GitHub Releases API",
-                            VersionUrl = "",
-                            DownloadUrlFormat = apiDownloadUrl,
-                            LogUrl = ""
-                        };
-                        return (apiVersion, apiGroup, apiReleaseNotes, apiDownloadUrl);
+                        // 只返回版本号和日志，不返回直链
+                        var group = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
+                        return (apiVersion, group, apiReleaseNotes);
                     }
                     else
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 当前版本已是最新 (GitHub Releases API)");
-                        return (null, null, apiReleaseNotes, null);
+                        var group = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
+                        return (null, group, apiReleaseNotes);
                     }
                 }
                 // 2. 回退到原有txt方案
@@ -409,7 +405,7 @@ namespace Ink_Canvas.Helpers
                 if (availableGroups.Count == 0)
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均不可用", LogHelper.LogType.Error);
-                    return (null, null, null, null);
+                    return (null, null, null);
                 }
                 foreach (var group in availableGroups)
                 {
@@ -423,12 +419,12 @@ namespace Ink_Canvas.Helpers
                         if (remote > local || alwaysGetRemote)
                         {
                             LogHelper.WriteLogToFile($"AutoUpdate | 发现新版本或强制获取: {remoteVersion}");
-                            return (remoteVersion, group, null, null);
+                            return (remoteVersion, group, null);
                         }
                         else
                         {
                             LogHelper.WriteLogToFile($"AutoUpdate | 当前版本已是最新");
-                            return (null, group, null, null);
+                            return (null, group, null);
                         }
                     }
                     else
@@ -437,12 +433,12 @@ namespace Ink_Canvas.Helpers
                     }
                 }
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均无法获取版本信息", LogHelper.LogType.Error);
-                return (null, null, null, null);
+                return (null, null, null);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | CheckForUpdates错误: {ex.Message}", LogHelper.LogType.Error);
-                return (null, null, null, null);
+                return (null, null, null);
             }
         }
 
@@ -453,7 +449,7 @@ namespace Ink_Canvas.Helpers
         }
 
         // 使用多线路组下载新版（支持自动切换）
-        public static async Task<bool> DownloadSetupFileWithFallback(string version, List<UpdateLineGroup> groups)
+        public static async Task<bool> DownloadSetupFileWithFallback(string version, List<UpdateLineGroup> groups, Action<double, string> progressCallback = null)
         {
             try
             {
@@ -462,6 +458,7 @@ namespace Ink_Canvas.Helpers
                 if (File.Exists(statusFilePath) && File.ReadAllText(statusFilePath).Trim().ToLower() == "true")
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 安装包已下载");
+                    progressCallback?.Invoke(100, "已下载完成");
                     return true;
                 }
 
@@ -482,13 +479,14 @@ namespace Ink_Canvas.Helpers
                 {
                     string url = string.Format(group.DownloadUrlFormat, version);
                     LogHelper.WriteLogToFile($"AutoUpdate | 尝试从线路组 {group.GroupName} 下载: {url}");
-                    
-                    bool downloadSuccess = await DownloadFile(url, zipFilePath);
-                    
+
+                    bool downloadSuccess = await DownloadFile(url, zipFilePath, progressCallback);
+
                     if (downloadSuccess)
                     {
                         SaveDownloadStatus(true);
                         LogHelper.WriteLogToFile($"AutoUpdate | 从线路组 {group.GroupName} 下载成功");
+                        progressCallback?.Invoke(100, "下载完成");
                         return true;
                     }
                     else
@@ -496,8 +494,9 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 下载失败，尝试下一个线路组", LogHelper.LogType.Warning);
                     }
                 }
-                
+
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组下载均失败", LogHelper.LogType.Error);
+                progressCallback?.Invoke(0, "所有线路组下载均失败");
                 return false;
             }
             catch (Exception ex)
@@ -509,13 +508,15 @@ namespace Ink_Canvas.Helpers
                 }
 
                 SaveDownloadStatus(false);
+                progressCallback?.Invoke(0, $"下载异常: {ex.Message}");
                 return false;
             }
         }
 
         // 下载文件的具体实现
-        private static async Task<bool> DownloadFile(string fileUrl, string destinationPath)
+        private static async Task<bool> DownloadFile(string fileUrl, string destinationPath, Action<double, string> progressCallback = null)
         {
+            LogHelper.WriteLogToFile($"AutoUpdate | 正在尝试下载: {fileUrl}");
             // 检测是否为Windows 7
             var osVersion = Environment.OSVersion;
             bool isWindows7 = osVersion.Version.Major == 6 && osVersion.Version.Minor == 1;
@@ -584,10 +585,12 @@ namespace Ink_Canvas.Helpers
                                                 {
                                                     double percentage = (double)totalBytesRead / totalBytes.Value * 100;
                                                     LogHelper.WriteLogToFile($"AutoUpdate | 下载进度: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
+                                                    progressCallback?.Invoke(percentage, $"下载中: {percentage:F1}%");
                                                 }
                                                 else
                                                 {
                                                     LogHelper.WriteLogToFile($"AutoUpdate | 已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                                    progressCallback?.Invoke(0, $"已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
                                                 }
                                                 lastProgressUpdate = DateTime.Now;
                                                 downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
@@ -715,10 +718,12 @@ namespace Ink_Canvas.Helpers
                                             {
                                                 double percentage = (double)totalBytesRead / totalBytes.Value * 100;
                                                 LogHelper.WriteLogToFile($"AutoUpdate | 下载进度: {percentage:F1}% ({(totalBytesRead / 1024.0 / 1024.0):F2} MB / {(totalBytes.Value / 1024.0 / 1024.0):F2} MB)");
+                                                progressCallback?.Invoke(percentage, $"下载中: {percentage:F1}%");
                                             }
                                             else
                                             {
                                                 LogHelper.WriteLogToFile($"AutoUpdate | 已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
+                                                progressCallback?.Invoke(0, $"已下载: {(totalBytesRead / 1024.0 / 1024.0):F2} MB");
                                             }
                                             lastProgressUpdate = DateTime.Now;
                                             downloadTimeoutTask = Task.Delay(TimeSpan.FromSeconds(60));
@@ -1113,7 +1118,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | 开始修复版本，通道: {channel}");
                 
                 // 获取远程版本号（自动选择最快线路组，始终下载远程版本）
-                var (remoteVersion, group, _, _) = await CheckForUpdates(channel, true);
+                var (remoteVersion, group, _) = await CheckForUpdates(channel, true);
                 if (string.IsNullOrEmpty(remoteVersion) || group == null)
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 修复版本时获取远程版本失败", LogHelper.LogType.Error);

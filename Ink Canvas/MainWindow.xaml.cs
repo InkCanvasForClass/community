@@ -552,7 +552,7 @@ namespace Ink_Canvas {
             AvailableLatestLineGroup = null;
             
             // 使用当前选择的更新通道检查更新
-            var (remoteVersion, lineGroup, apiReleaseNotes, directDownloadUrl) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
+            var (remoteVersion, lineGroup, apiReleaseNotes) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
             AvailableLatestVersion = remoteVersion;
             AvailableLatestLineGroup = lineGroup;
             
