@@ -480,9 +480,9 @@ namespace Ink_Canvas.Helpers
                 {
                     string url = string.Format(group.DownloadUrlFormat, version);
                     LogHelper.WriteLogToFile($"AutoUpdate | 尝试从线路组 {group.GroupName} 下载: {url}");
-
+                    
                     bool downloadSuccess = await DownloadFile(url, zipFilePath, progressCallback);
-
+                    
                     if (downloadSuccess)
                     {
                         SaveDownloadStatus(true);
@@ -495,7 +495,7 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 下载失败，尝试下一个线路组", LogHelper.LogType.Warning);
                     }
                 }
-
+                
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组下载均失败", LogHelper.LogType.Error);
                 progressCallback?.Invoke(0, "所有线路组下载均失败");
                 return false;
@@ -525,8 +525,8 @@ namespace Ink_Canvas.Helpers
             if (totalSize <= 0)
             {
                 progressCallback?.Invoke(0, "无法获取文件大小，取消下载");
-                return false;
-            }
+                                return false;
+                            }
             int blockSize = (int)Math.Ceiling((double)totalSize / threadCount);
             long[] blockDownloaded = new long[threadCount];
             var tasks = new List<Task>();
@@ -600,8 +600,8 @@ namespace Ink_Canvas.Helpers
                     string tempPath = destinationPath + $".part{i}";
                     if (File.Exists(tempPath)) File.Delete(tempPath);
                 }
-                return false;
-            }
+                            return false;
+                        }
             // 3. 合并所有块
             using (var output = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
@@ -616,7 +616,7 @@ namespace Ink_Canvas.Helpers
                 }
             }
             progressCallback?.Invoke(100, "多线程下载完成");
-            return true;
+                                    return true;
         }
 
         // 获取文件总大小
@@ -630,9 +630,9 @@ namespace Ink_Canvas.Helpers
                     var resp = await client.SendAsync(req);
                     if (resp.IsSuccessStatusCode && resp.Content.Headers.ContentLength.HasValue)
                         return resp.Content.Headers.ContentLength.Value;
-                }
-            }
-            catch { }
+                        }
+                    }
+                    catch { }
             return -1;
         }
 
@@ -1069,6 +1069,36 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | Windows 7 TLS连接测试异常: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 启动手动指定版本的多线路多线程下载并自动安装（用于历史版本回滚等场景）
+        /// </summary>
+        public static async Task<bool> StartManualDownloadAndInstall(string version, UpdateChannel channel, Action<double, string> progressCallback = null)
+        {
+            try
+            {
+                var groups = ChannelLineGroups[channel];
+                bool downloadSuccess = await DownloadSetupFileWithFallback(version, groups, progressCallback);
+                if (!downloadSuccess)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 手动下载版本{version}失败");
+                    return false;
+                }
+                LogHelper.WriteLogToFile($"AutoUpdate | 手动安装版本: {version}");
+                InstallNewVersionApp(version, false);
+                App.IsAppExitByUser = true;
+                Application.Current.Dispatcher.Invoke(() => {
+                    Application.Current.Shutdown();
+                });
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 手动下载或安装异常: {ex.Message}", LogHelper.LogType.Error);
+                progressCallback?.Invoke(0, $"下载异常: {ex.Message}");
                 return false;
             }
         }

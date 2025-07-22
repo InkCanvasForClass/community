@@ -95,53 +95,13 @@ namespace Ink_Canvas
             DownloadProgressPanel.Visibility = Visibility.Visible;
             DownloadProgressBar.Value = 0;
             DownloadProgressText.Text = "正在准备下载...";
-            bool downloadSuccess = false;
-            downloadCts = new CancellationTokenSource();
-            try
-            {
-                downloadSuccess = await DownloadAndInstallVersion(selectedItem.Version, selectedItem.DownloadUrl, downloadCts.Token);
-            }
-            catch (OperationCanceledException)
-            {
-                DownloadProgressText.Text = "下载已取消。";
-                LogHelper.WriteLogToFile($"HistoryRollback | 用户取消下载", LogHelper.LogType.Info);
-            }
-            catch (Exception ex)
-            {
-                DownloadProgressText.Text = $"下载失败: {ex.Message}";
-                LogHelper.WriteLogToFile($"HistoryRollback | 下载异常: {ex.Message}", LogHelper.LogType.Error);
-            }
-            if (downloadSuccess)
-            {
-                DownloadProgressBar.Value = 100;
-                DownloadProgressText.Text = "下载完成，准备安装...";
-                await Task.Delay(800);
-                LogHelper.WriteLogToFile($"HistoryRollback | 版本 {selectedItem.Version} 下载并准备安装成功");
-                this.DialogResult = true;
-                this.Close();
-            }
-            else if (!downloadCts.IsCancellationRequested)
-            {
-                DownloadProgressText.Text = "下载失败，请检查网络后重试。";
-                LogHelper.WriteLogToFile($"HistoryRollback | 版本 {selectedItem?.Version} 下载失败", LogHelper.LogType.Error);
-                RollbackButton.IsEnabled = true;
-                VersionComboBox.IsEnabled = true;
-            }
-        }
 
-        private async Task<bool> DownloadAndInstallVersion(string version, string downloadUrl, CancellationToken token)
-        {
-            LogHelper.WriteLogToFile($"HistoryRollback | 开始下载版本: {version}, url: {downloadUrl}");
-            string updatesFolderPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "AutoUpdate");
-            if (!Directory.Exists(updatesFolderPath))
-                Directory.CreateDirectory(updatesFolderPath);
-            string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
             bool downloadSuccess = false;
             try
             {
-                downloadSuccess = await AutoUpdateHelper.DownloadFile(
-                    downloadUrl,
-                    zipFilePath,
+                downloadSuccess = await AutoUpdateHelper.StartManualDownloadAndInstall(
+                    selectedItem.Version,
+                    channel,
                     (percent, text) =>
                     {
                         Dispatcher.Invoke(() => {
@@ -150,32 +110,26 @@ namespace Ink_Canvas
                         });
                     }
                 );
-                if (!downloadSuccess)
-                {
-                    LogHelper.WriteLogToFile($"HistoryRollback | 多线程下载失败");
-                    return false;
-                }
-                // 下载完成后，调用现有安装流程
-                LogHelper.WriteLogToFile($"HistoryRollback | 开始安装版本: {version}");
-                AutoUpdateHelper.InstallNewVersionApp(version, false);
-                App.IsAppExitByUser = true;
-                Application.Current.Dispatcher.Invoke(() => {
-                    Application.Current.Shutdown();
-                });
-                return true;
-            }
-            catch (OperationCanceledException)
-            {
-                LogHelper.WriteLogToFile($"HistoryRollback | 用户取消下载", LogHelper.LogType.Info);
-                return false;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"HistoryRollback | 下载或安装异常: {ex.Message}", LogHelper.LogType.Error);
-                Dispatcher.Invoke(() => {
-                    DownloadProgressText.Text = $"下载异常: {ex.Message}";
-                });
-                return false;
+                DownloadProgressText.Text = $"下载失败: {ex.Message}";
+                LogHelper.WriteLogToFile($"HistoryRollback | 下载异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            if (downloadSuccess)
+            {
+                DownloadProgressBar.Value = 100;
+                DownloadProgressText.Text = "下载完成，准备安装...";
+                await Task.Delay(800);
+                this.DialogResult = true;
+                this.Close();
+            }
+            else
+            {
+                DownloadProgressText.Text = "下载失败，请检查网络后重试。";
+                RollbackButton.IsEnabled = true;
+                VersionComboBox.IsEnabled = true;
             }
         }
 
