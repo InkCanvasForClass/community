@@ -528,119 +528,132 @@ namespace Ink_Canvas.Helpers
         {
             LogHelper.WriteLogToFile($"AutoUpdate | 正在尝试多线程下载: {fileUrl}");
             int maxRetry = 3;
-            int threadCount = 32;
-            long totalSize = await GetContentLength(fileUrl);
-            if (totalSize <= 0)
+            int[] threadOptions = new int[] { 32, 4 };
+            foreach (int threadCount in threadOptions)
             {
-                progressCallback?.Invoke(0, "无法获取文件大小，取消下载");
-                return false;
-            }
-            int blockSize = (int)Math.Ceiling((double)totalSize / threadCount);
-            int blockCount = (int)Math.Ceiling((double)totalSize / blockSize);
-
-            // 这里不再定义BlockTask类，直接使用
-            var blockQueue = new System.Collections.Concurrent.ConcurrentQueue<BlockTask>();
-            var finishedBlocks = new System.Collections.Concurrent.ConcurrentDictionary<int, bool>();
-            long[] blockDownloaded = new long[blockCount];
-            for (int i = 0; i < blockCount; i++)
-            {
-                long start = i * blockSize;
-                long end = Math.Min(start + blockSize - 1, totalSize - 1);
-                blockQueue.Enqueue(new BlockTask { Index = i, Start = start, End = end, RetryCount = 0 });
-            }
-            CancellationTokenSource cts = new CancellationTokenSource();
-            var tasks = new List<Task>();
-            for (int t = 0; t < threadCount; t++)
-            {
-                tasks.Add(Task.Run(async () =>
+                long totalSize = await GetContentLength(fileUrl);
+                if (totalSize <= 0)
                 {
-                    while (blockQueue.TryDequeue(out var block))
+                    progressCallback?.Invoke(0, "无法获取文件大小，取消下载");
+                    return false;
+                }
+                int blockSize = (int)Math.Ceiling((double)totalSize / threadCount);
+                int blockCount = (int)Math.Ceiling((double)totalSize / blockSize);
+                var blockQueue = new System.Collections.Concurrent.ConcurrentQueue<BlockTask>();
+                var finishedBlocks = new System.Collections.Concurrent.ConcurrentDictionary<int, bool>();
+                long[] blockDownloaded = new long[blockCount];
+                for (int i = 0; i < blockCount; i++)
+                {
+                    long start = i * blockSize;
+                    long end = Math.Min(start + blockSize - 1, totalSize - 1);
+                    blockQueue.Enqueue(new BlockTask { Index = i, Start = start, End = end, RetryCount = 0 });
+                }
+                CancellationTokenSource cts = new CancellationTokenSource();
+                var tasks = new List<Task>();
+                for (int t = 0; t < threadCount; t++)
+                {
+                    tasks.Add(Task.Run(async () =>
                     {
-                        bool success = false;
-                        for (int retry = block.RetryCount; retry < maxRetry && !success; retry++)
+                        while (blockQueue.TryDequeue(out var block))
                         {
-                            try
+                            bool success = false;
+                            for (int retry = block.RetryCount; retry < maxRetry && !success; retry++)
                             {
-                                using (var client = new HttpClient())
+                                try
                                 {
-                                    var req = new HttpRequestMessage(HttpMethod.Get, fileUrl);
-                                    req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(block.Start, block.End);
-                                    using (var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cts.Token))
+                                    using (var client = new HttpClient())
                                     {
-                                        resp.EnsureSuccessStatusCode();
-                                        string tempPath = destinationPath + $".part{block.Index}";
-                                        using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                                        var req = new HttpRequestMessage(HttpMethod.Get, fileUrl);
+                                        req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(block.Start, block.End);
+                                        using (var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cts.Token))
                                         {
-                                            var stream = await resp.Content.ReadAsStreamAsync();
-                                            byte[] buffer = new byte[8192];
-                                            int read;
-                                            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, cts.Token)) > 0)
+                                            resp.EnsureSuccessStatusCode();
+                                            string tempPath = destinationPath + $".part{block.Index}";
+                                            using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
                                             {
-                                                await fs.WriteAsync(buffer, 0, read, cts.Token);
-                                                blockDownloaded[block.Index] += read;
-                                                // 合并所有块进度
-                                                long totalDownloaded = blockDownloaded.Sum();
-                                                double percent = (double)totalDownloaded / totalSize * 100;
-                                                progressCallback?.Invoke(percent, $"多线程下载中: {percent:F1}%");
+                                                var stream = await resp.Content.ReadAsStreamAsync();
+                                                byte[] buffer = new byte[8192];
+                                                int read;
+                                                while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, cts.Token)) > 0)
+                                                {
+                                                    await fs.WriteAsync(buffer, 0, read, cts.Token);
+                                                    blockDownloaded[block.Index] += read;
+                                                    // 合并所有块进度
+                                                    long totalDownloaded = blockDownloaded.Sum();
+                                                    double percent = (double)totalDownloaded / totalSize * 100;
+                                                    progressCallback?.Invoke(percent, $"多线程下载中({threadCount}线程): {percent:F1}%");
+                                                }
                                             }
                                         }
                                     }
+                                    success = true;
                                 }
-                                success = true;
+                                catch (Exception ex) when (ex is HttpRequestException || ex is IOException)
+                                {
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 分块{block.Index}下载失败，第{retry + 1}次: {ex.Message}", LogHelper.LogType.Warning);
+                                    progressCallback?.Invoke(0, $"分块{block.Index}下载失败，第{retry + 1}次: {ex.Message}");
+                                    await Task.Delay(15000);
+                                }
                             }
-                            catch (Exception ex) when (ex is HttpRequestException || ex is IOException)
+                            if (success)
                             {
-                                LogHelper.WriteLogToFile($"AutoUpdate | 分块{block.Index}下载失败，第{retry + 1}次: {ex.Message}", LogHelper.LogType.Warning);
-                                progressCallback?.Invoke(0, $"分块{block.Index}下载失败，第{retry + 1}次: {ex.Message}");
-                                await Task.Delay(15000);
+                                finishedBlocks[block.Index] = true;
+                            }
+                            else if (block.RetryCount + 1 < maxRetry)
+                            {
+                                // 失败但未超最大重试，重新入队
+                                block.RetryCount++;
+                                blockQueue.Enqueue(block);
+                            }
+                            else
+                            {
+                                // 超过最大重试，取消所有任务
+                                cts.Cancel();
+                                break;
                             }
                         }
-                        if (success)
-                        {
-                            finishedBlocks[block.Index] = true;
-                        }
-                        else if (block.RetryCount + 1 < maxRetry)
-                        {
-                            // 失败但未超最大重试，重新入队
-                            block.RetryCount++;
-                            blockQueue.Enqueue(block);
-                        }
-                        else
-                        {
-                            // 超过最大重试，取消所有任务
-                            cts.Cancel();
-                            break;
-                        }
-                    }
-                }));
-            }
-            await Task.WhenAll(tasks);
-            if (cts.IsCancellationRequested || finishedBlocks.Count != blockCount)
-            {
-                progressCallback?.Invoke(0, "多线程下载失败");
-                // 清理分块文件
-                for (int i = 0; i < blockCount; i++)
-                {
-                    string tempPath = destinationPath + $".part{i}";
-                    if (File.Exists(tempPath)) File.Delete(tempPath);
+                    }));
                 }
-                return false;
-            }
-            // 合并所有块
-            using (var output = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                for (int i = 0; i < blockCount; i++)
+                await Task.WhenAll(tasks);
+                if (cts.IsCancellationRequested || finishedBlocks.Count != blockCount)
                 {
-                    string tempPath = destinationPath + $".part{i}";
-                    using (var input = new FileStream(tempPath, FileMode.Open, FileAccess.Read))
+                    progressCallback?.Invoke(0, $"多线程下载失败({threadCount}线程)");
+                    // 清理分块文件
+                    for (int i = 0; i < blockCount; i++)
                     {
-                        await input.CopyToAsync(output);
+                        string tempPath = destinationPath + $".part{i}";
+                        if (File.Exists(tempPath)) File.Delete(tempPath);
                     }
-                    File.Delete(tempPath);
+                    if (threadCount == threadOptions.Last())
+                    {
+                        // 已经是最后一次尝试
+                        return false;
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | {threadCount}线程下载失败，尝试降级为{threadOptions.Last()}线程");
+                        progressCallback?.Invoke(0, $"{threadCount}线程下载失败，尝试降级为{threadOptions.Last()}线程");
+                        continue;
+                    }
                 }
+                // 合并所有块
+                using (var output = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                {
+                    for (int i = 0; i < blockCount; i++)
+                    {
+                        string tempPath = destinationPath + $".part{i}";
+                        using (var input = new FileStream(tempPath, FileMode.Open, FileAccess.Read))
+                        {
+                            await input.CopyToAsync(output);
+                        }
+                        File.Delete(tempPath);
+                    }
+                }
+                progressCallback?.Invoke(100, $"多线程下载完成({threadCount}线程)");
+                return true;
             }
-            progressCallback?.Invoke(100, "多线程下载完成");
-            return true;
+            // 理论上不会到这里
+            return false;
         }
 
         // 获取文件总大小
