@@ -7,6 +7,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Threading.Tasks;
+using System.IO;
+using System.Threading;
 
 namespace Ink_Canvas
 {
@@ -129,16 +132,59 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("AutoUpdate | Update dialog buttons visibility ensured");
         }
 
-        private void UpdateNowButton_Click(object sender, RoutedEventArgs e)
+        private async void UpdateNowButton_Click(object sender, RoutedEventArgs e)
         {
             LogHelper.WriteLogToFile("AutoUpdate | Update Now button clicked");
-            
+            // 禁用按钮，显示进度条
+            UpdateNowButton.IsEnabled = false;
+            UpdateLaterButton.IsEnabled = false;
+            SkipVersionButton.IsEnabled = false;
+            DownloadProgressPanel.Visibility = Visibility.Visible;
+            DownloadProgressBar.Value = 0;
+            DownloadProgressText.Text = "正在准备下载...";
+
+            // 启动多线路下载
+            bool downloadSuccess = false;
+            try
+            {
+                // 获取当前通道的所有线路组
+                var groups = AutoUpdateHelper.ChannelLineGroups[MainWindow.Settings.Startup.UpdateChannel];
+                downloadSuccess = await AutoUpdateHelper.DownloadSetupFileWithFallback(NewVersion, groups, (percent, text) =>
+                {
+                    Dispatcher.Invoke(() => {
+                        DownloadProgressBar.Value = percent;
+                        DownloadProgressText.Text = text;
+                    });
+                });
+                if (downloadSuccess)
+                {
+                    // 下载完成后自动安装
+                    await DownloadAndInstallVersion(NewVersion, null, CancellationToken.None);
+                }
+            }
+            catch (Exception ex)
+            {
+                DownloadProgressText.Text = $"下载失败: {ex.Message}";
+                LogHelper.WriteLogToFile($"AutoUpdate | 下载异常: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            if (downloadSuccess)
+            {
+                DownloadProgressBar.Value = 100;
+                DownloadProgressText.Text = "下载完成，准备安装...";
+                await Task.Delay(800);
             // 设置结果为立即更新
             Result = UpdateResult.UpdateNow;
-            
-            // 关闭窗口，返回到MainWindow处理后续下载和安装流程
             DialogResult = true;
             Close();
+            }
+            else
+            {
+                DownloadProgressText.Text = "下载失败，请检查网络后重试。";
+                UpdateNowButton.IsEnabled = true;
+                UpdateLaterButton.IsEnabled = true;
+                SkipVersionButton.IsEnabled = true;
+            }
         }
 
         private void UpdateLaterButton_Click(object sender, RoutedEventArgs e)
@@ -278,6 +324,24 @@ namespace Ink_Canvas
                     }
                 }
             }
+        }
+
+        // 多线程分块下载并自动安装
+        private async Task<bool> DownloadAndInstallVersion(string version, string downloadUrl, CancellationToken token)
+        {
+            if (string.IsNullOrEmpty(downloadUrl))
+            {
+                // 自动更新场景下，downloadUrl为null，直接用主下载目录
+                string updatesFolderPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "AutoUpdate");
+                downloadUrl = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
+            }
+            LogHelper.WriteLogToFile($"AutoUpdate | 开始安装版本: {version}");
+            AutoUpdateHelper.InstallNewVersionApp(version, false);
+            App.IsAppExitByUser = true;
+            Application.Current.Dispatcher.Invoke(() => {
+                Application.Current.Shutdown();
+            });
+            return true;
         }
     }
 }

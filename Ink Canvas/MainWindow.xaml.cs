@@ -35,6 +35,14 @@ namespace Ink_Canvas {
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_SHOWWINDOW = 0x0040;
         
         // 新增：设置窗口置顶并兼容无焦点
         private void SetTopmostWithNoActivate(bool topmost)
@@ -45,6 +53,15 @@ namespace Ink_Canvas {
             SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
             // 设置 Topmost
             this.Topmost = topmost;
+            // 使用SetWindowPos确保无焦点置顶
+            if (topmost)
+            {
+                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            }
+            else
+            {
+                SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            }
             // 再加回 WS_EX_NOACTIVATE
             exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
             SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
@@ -248,10 +265,25 @@ namespace Ink_Canvas {
             catch { }
         }
 
+        // 新增：记录上一个模式
+        private InkCanvasEditingMode lastEditingMode = InkCanvasEditingMode.Ink;
+
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e) {
             var inkCanvas1 = sender as InkCanvas;
             if (inkCanvas1 == null) return;
 
+            // 只负责显示/隐藏覆盖层，不再强制切换模式
+            var eraserOverlay = this.FindName("AdvancedEraserOverlay") as Border;
+            if (eraserOverlay != null) {
+                if (inkCanvas1.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                    eraserOverlay.IsHitTestVisible = true;
+                    Trace.WriteLine("Advanced Eraser: Overlay enabled in eraser mode");
+                } else {
+                    eraserOverlay.IsHitTestVisible = false;
+                    DisableAdvancedEraserSystem();
+                    Trace.WriteLine("Advanced Eraser: Overlay disabled in non-eraser mode");
+                }
+            }
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(inkCanvas1);
             if (Settings.Canvas.IsShowCursor) {
@@ -262,31 +294,13 @@ namespace Ink_Canvas {
                 else
                     inkCanvas1.ForceCursor = false;
             } else {
-                // 套索选择模式下始终强制显示光标，即使用户设置不显示光标
                 if (inkCanvas1.EditingMode == InkCanvasEditingMode.Select) {
                     inkCanvas1.ForceCursor = true;
                 } else {
                     inkCanvas1.ForceCursor = false;
                 }
             }
-
             if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) forcePointEraser = !forcePointEraser;
-            
-            // 处理高级橡皮擦覆盖层的启用/禁用
-            var eraserOverlay = this.FindName("AdvancedEraserOverlay") as Border;
-            if (eraserOverlay != null) {
-                if (inkCanvas1.EditingMode == InkCanvasEditingMode.EraseByPoint) {
-                    // 橡皮擦模式下启用覆盖层
-                    eraserOverlay.IsHitTestVisible = true;
-                    Trace.WriteLine("Advanced Eraser: Overlay enabled in eraser mode");
-                } else {
-                    // 其他模式下禁用覆盖层
-                    eraserOverlay.IsHitTestVisible = false;
-                    // 同时禁用高级橡皮擦系统
-                    DisableAdvancedEraserSystem();
-                    Trace.WriteLine("Advanced Eraser: Overlay disabled in non-eraser mode");
-                }
-            }
         }
 
         #endregion Ink Canvas
@@ -297,11 +311,16 @@ namespace Ink_Canvas {
         public static string settingsFileName = "Settings.json";
         private bool isLoaded = false;
         private bool forcePointEraser = false;
+        public static bool EnablePalmEraser = true;
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             loadPenCanvas();
             //加载设置
             LoadSettings(true);
+            // 同步手掌擦开关
+            EnablePalmEraser = Settings.Canvas.EnablePalmEraser;
+            if (ToggleSwitchEnablePalmEraser != null)
+                ToggleSwitchEnablePalmEraser.IsOn = EnablePalmEraser;
             
             // 加载自定义背景颜色
             LoadCustomBackgroundColor();
@@ -381,6 +400,14 @@ namespace Ink_Canvas {
 
             // 初始化插件系统
             InitializePluginSystem();
+
+            // 新增：确保EditingModeChanged事件已绑定
+            var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
+            if (inkCanvas != null)
+            {
+                inkCanvas.EditingModeChanged -= inkCanvas_EditingModeChanged;
+                inkCanvas.EditingModeChanged += inkCanvas_EditingModeChanged;
+            }
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
@@ -535,7 +562,7 @@ namespace Ink_Canvas {
             AvailableLatestLineGroup = null;
             
             // 使用当前选择的更新通道检查更新
-            var (remoteVersion, lineGroup) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
+            var (remoteVersion, lineGroup, apiReleaseNotes) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
             AvailableLatestVersion = remoteVersion;
             AvailableLatestLineGroup = lineGroup;
             
@@ -1311,6 +1338,26 @@ namespace Ink_Canvas {
         {
             // 直接调用PPT放映结束按钮的逻辑
             BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
+        }
+
+        private void HistoryRollbackButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 收起设置面板（与插件面板一致）
+            BorderSettings.Visibility = Visibility.Hidden;
+            BorderSettingsMask.Visibility = Visibility.Hidden;
+            var win = new HistoryRollbackWindow(Settings.Startup.UpdateChannel);
+            win.ShowDialog();
+            // 可选：回滚窗口关闭后恢复设置面板显示
+            BorderSettings.Visibility = Visibility.Visible;
+            BorderSettingsMask.Visibility = Visibility.Visible;
+        }
+
+        private void ToggleSwitchEnablePalmEraser_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            EnablePalmEraser = ToggleSwitchEnablePalmEraser.IsOn;
+            Settings.Canvas.EnablePalmEraser = EnablePalmEraser;
+            SaveSettingsToFile();
         }
     }
 }
