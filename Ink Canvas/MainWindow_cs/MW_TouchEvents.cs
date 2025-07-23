@@ -219,6 +219,11 @@ namespace Ink_Canvas {
             }
         }
 
+        // 手掌擦相关变量
+        private bool isPalmEraserActive = false;
+        private InkCanvasEditingMode palmEraserLastEditingMode = InkCanvasEditingMode.Ink;
+        private bool palmEraserLastIsHighlighter = false;
+
         private void inkCanvas_PreviewTouchDown(object sender, TouchEventArgs e) {
             // 橡皮状态下不做任何切换，直接return，保证橡皮可持续
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
@@ -231,6 +236,19 @@ namespace Ink_Canvas {
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
             dec.Add(e.TouchDevice.Id);
+            // Palm Eraser 逻辑
+            if (Settings.Canvas.EnablePalmEraser && dec.Count >= 2 && !isPalmEraserActive) {
+                var bounds = e.GetTouchPoint(inkCanvas).Bounds;
+                double palmThreshold = 40; // 触摸面积阈值，可根据实际调整
+                if (bounds.Width >= palmThreshold || bounds.Height >= palmThreshold) {
+                    // 记录当前编辑模式和高光状态
+                    palmEraserLastEditingMode = inkCanvas.EditingMode;
+                    palmEraserLastIsHighlighter = drawingAttributes.IsHighlighter;
+                    // 切换为橡皮擦
+                    EraserIcon_Click(null, null);
+                    isPalmEraserActive = true;
+                }
+            }
             //设备1个的时候，记录中心点
             if (dec.Count == 1) {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
@@ -258,13 +276,30 @@ namespace Ink_Canvas {
 
         private void inkCanvas_PreviewTouchUp(object sender, TouchEventArgs e) {
             // 橡皮状态下不做任何切换，直接return，保证橡皮可持续
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && !isPalmEraserActive) {
                 return;
             }
             inkCanvas.ReleaseAllTouchCaptures();
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 
+            // Palm Eraser 逻辑：所有点抬起后恢复原编辑模式
+            dec.Remove(e.TouchDevice.Id);
+            if (isPalmEraserActive && dec.Count == 0) {
+                // 恢复高光状态
+                drawingAttributes.IsHighlighter = palmEraserLastIsHighlighter;
+                // 恢复编辑模式
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
+                    if (palmEraserLastEditingMode == InkCanvasEditingMode.Ink) {
+                        PenIcon_Click(null, null);
+                    } else if (palmEraserLastEditingMode == InkCanvasEditingMode.Select) {
+                        SymbolIconSelect_MouseUp(null, null);
+                    } else {
+                        inkCanvas.EditingMode = palmEraserLastEditingMode;
+                    }
+                }
+                isPalmEraserActive = false;
+            }
             // 新增：几何绘制模式下，触摸抬手时自动落笔
             if (drawingShapeMode != 0) {
                 var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
@@ -281,7 +316,6 @@ namespace Ink_Canvas {
                     if (lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint) {
                         inkCanvas.EditingMode = lastInkCanvasEditingMode;
                     }
-            dec.Remove(e.TouchDevice.Id);
             inkCanvas.Opacity = 1;
             
             if (dec.Count == 0)

@@ -2189,5 +2189,11 @@ namespace Ink_Canvas {
             Settings.Automation.IsAutoEnterAnnotationAfterKillHite = ToggleSwitchAutoEnterAnnotationAfterKillHite.IsOn;
             SaveSettingsToFile();
         }
+
+        private void ToggleSwitchEnablePalmEraser_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Canvas.EnablePalmEraser = ToggleSwitchEnablePalmEraser.IsOn;
+            SaveSettingsToFile();
+        }
     }
 }
