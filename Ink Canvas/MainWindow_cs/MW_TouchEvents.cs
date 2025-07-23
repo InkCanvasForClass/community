@@ -223,6 +223,7 @@ namespace Ink_Canvas {
         private bool isPalmEraserActive = false;
         private InkCanvasEditingMode palmEraserLastEditingMode = InkCanvasEditingMode.Ink;
         private bool palmEraserLastIsHighlighter = false;
+        private bool palmEraserWasEnabledBeforeMultiTouch = false;
 
         private void inkCanvas_PreviewTouchDown(object sender, TouchEventArgs e) {
             // 橡皮状态下不做任何切换，直接return，保证橡皮可持续
@@ -447,6 +448,12 @@ namespace Ink_Canvas {
                 }
                 inkCanvas.Children.Clear();
                 isInMultiTouchMode = false;
+                // 关闭多指书写时，恢复手掌擦开关
+                if (palmEraserWasEnabledBeforeMultiTouch) {
+                    Settings.Canvas.EnablePalmEraser = true;
+                    if (ToggleSwitchEnablePalmEraser != null)
+                        ToggleSwitchEnablePalmEraser.IsOn = true;
+                }
             }
         }
 
@@ -466,6 +473,11 @@ namespace Ink_Canvas {
                 }
                 inkCanvas.Children.Clear();
                 isInMultiTouchMode = true;
+                // 启用多指书写时，自动禁用手掌擦
+                palmEraserWasEnabledBeforeMultiTouch = Settings.Canvas.EnablePalmEraser;
+                Settings.Canvas.EnablePalmEraser = false;
+                if (ToggleSwitchEnablePalmEraser != null)
+                    ToggleSwitchEnablePalmEraser.IsOn = false;
             }
         }
     }
