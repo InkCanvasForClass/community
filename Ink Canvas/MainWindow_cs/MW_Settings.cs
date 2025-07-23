@@ -1599,7 +1599,7 @@ namespace Ink_Canvas {
             Settings.PowerPointSettings.IsNotifyHiddenPage = false;
             Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode = false;
             Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl = false;
-            Settings.PowerPointSettings.IsSupportWPS = true;
+            Settings.PowerPointSettings.IsSupportWPS = false;
 
             Settings.Canvas.InkWidth = 2.5;
             Settings.Canvas.IsShowCursor = false;
