@@ -689,7 +689,6 @@ namespace Ink_Canvas {
         private void BoardLassoIcon_Click(object sender, RoutedEventArgs e) {
             forceEraser = false;
             forcePointEraser = false;
-            isLastTouchEraser = false;
             drawingShapeMode = 0;
             inkCanvas.EditingMode = InkCanvasEditingMode.Select;
             SetCursorBasedOnEditingMode(inkCanvas);

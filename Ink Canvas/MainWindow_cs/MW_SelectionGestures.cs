@@ -322,13 +322,9 @@ namespace Ink_Canvas {
         }
 
         private void GridInkCanvasSelectionCover_ManipulationDelta(object sender, ManipulationDeltaEventArgs e) {
-            // 手掌擦时禁止移动/缩放
-            if (isLastTouchEraser || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
-                return;
-            // 三指及以上禁止缩放
-            bool disableScale = dec.Count >= 3;
             try {
                 if (dec.Count >= 1) {
+                    bool disableScale = dec.Count >= 3;
                     var md = e.DeltaManipulation;
                     var trans = md.Translation; // 获得位移矢量
                     var rotate = md.Rotation; // 获得旋转角度
@@ -426,7 +422,6 @@ namespace Ink_Canvas {
             ExitMultiTouchModeIfNeeded();
             forceEraser = false;
             forcePointEraser = false;
-            isLastTouchEraser = false;
             drawingShapeMode = 0;
             inkCanvas.EditingMode = InkCanvasEditingMode.Select;
             SetCursorBasedOnEditingMode(inkCanvas);
@@ -436,7 +431,6 @@ namespace Ink_Canvas {
             ExitMultiTouchModeIfNeeded();
             forceEraser = false;
             forcePointEraser = false;
-            isLastTouchEraser = false;
             drawingShapeMode = 0;
             inkCanvas.EditingMode = InkCanvasEditingMode.Select;
             inkCanvas.IsManipulationEnabled = true;

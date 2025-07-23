@@ -1449,7 +1449,6 @@ namespace Ink_Canvas {
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
             forceEraser = false;
             forcePointEraser = true;
-            isLastTouchEraser = false;
             drawingShapeMode = 0;
 
             // 切换到橡皮擦模式时，确保保存当前图片信息
@@ -1489,7 +1488,6 @@ namespace Ink_Canvas {
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
             forceEraser = false;
             forcePointEraser = true;
-            isLastTouchEraser = false;
             drawingShapeMode = 0;
 
             // 启用新的高级橡皮擦系统
