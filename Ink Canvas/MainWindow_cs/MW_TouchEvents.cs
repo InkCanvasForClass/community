@@ -336,7 +336,7 @@ namespace Ink_Canvas {
 
         private void Main_Grid_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e) {
             if (e.Manipulators.Count() != 0) return;
-            if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint) {
+            if (drawingShapeMode == 0 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint) {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
             }
         }
