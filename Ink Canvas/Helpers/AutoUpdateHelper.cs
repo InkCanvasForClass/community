@@ -565,7 +565,13 @@ namespace Ink_Canvas.Helpers
                                     {
                                         var req = new HttpRequestMessage(HttpMethod.Get, fileUrl);
                                         req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(block.Start, block.End);
-                                        using (var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, cts.Token))
+
+                                        // 新增：分块下载超时机制
+                                        var downloadCts = CancellationTokenSource.CreateLinkedTokenSource(cts.Token);
+                                        var lastReadTime = DateTime.UtcNow;
+                                        bool dataReceived = false;
+
+                                        using (var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, downloadCts.Token))
                                         {
                                             resp.EnsureSuccessStatusCode();
                                             string tempPath = destinationPath + $".part{block.Index}";
@@ -574,10 +580,25 @@ namespace Ink_Canvas.Helpers
                                                 var stream = await resp.Content.ReadAsStreamAsync();
                                                 byte[] buffer = new byte[8192];
                                                 int read;
-                                                while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, cts.Token)) > 0)
+                                                while (true)
                                                 {
-                                                    await fs.WriteAsync(buffer, 0, read, cts.Token);
+                                                    var readTask = stream.ReadAsync(buffer, 0, buffer.Length, downloadCts.Token);
+                                                    var timeoutTask = Task.Delay(15000, downloadCts.Token); // 15秒超时
+                                                    var completed = await Task.WhenAny(readTask, timeoutTask);
+                                                    if (completed == timeoutTask)
+                                                    {
+                                                        // 超时未收到数据，取消本线程，重新入队
+                                                        LogHelper.WriteLogToFile($"AutoUpdate | 分块{block.Index} 15秒无数据，线程超时重试", LogHelper.LogType.Warning);
+                                                        progressCallback?.Invoke(0, $"分块{block.Index} 15秒无数据，线程超时重试");
+                                                        downloadCts.Cancel();
+                                                        break;
+                                                    }
+                                                    read = await readTask;
+                                                    if (read <= 0) break;
+                                                    await fs.WriteAsync(buffer, 0, read, downloadCts.Token);
                                                     blockDownloaded[block.Index] += read;
+                                                    lastReadTime = DateTime.UtcNow;
+                                                    dataReceived = true;
                                                     // 合并所有块进度
                                                     long totalDownloaded = blockDownloaded.Sum();
                                                     double percent = (double)totalDownloaded / totalSize * 100;
@@ -585,10 +606,15 @@ namespace Ink_Canvas.Helpers
                                                 }
                                             }
                                         }
+                                        // 如果因超时break且未完成，success为false，重新入队
+                                        if (!dataReceived)
+                                        {
+                                            throw new IOException("分块下载超时无数据");
+                                        }
                                     }
                                     success = true;
                                 }
-                                catch (Exception ex) when (ex is HttpRequestException || ex is IOException)
+                                catch (Exception ex) when (ex is HttpRequestException || ex is IOException || ex is TaskCanceledException)
                                 {
                                     LogHelper.WriteLogToFile($"AutoUpdate | 分块{block.Index}下载失败，第{retry + 1}次: {ex.Message}", LogHelper.LogType.Warning);
                                     progressCallback?.Invoke(0, $"分块{block.Index}下载失败，第{retry + 1}次: {ex.Message}");
