@@ -319,6 +319,43 @@ namespace Ink_Canvas {
             loadPenCanvas();
             //加载设置
             LoadSettings(true);
+            // 检查保存路径是否可用，不可用则修正
+            try
+            {
+                string savePath = Settings.Automation.AutoSavedStrokesLocation;
+                bool needFix = false;
+                if (string.IsNullOrWhiteSpace(savePath) || !System.IO.Directory.Exists(savePath))
+                {
+                    needFix = true;
+                }
+                else
+                {
+                    // 检查是否可写
+                    try
+                    {
+                        string testFile = System.IO.Path.Combine(savePath, "test.tmp");
+                        System.IO.File.WriteAllText(testFile, "test");
+                        System.IO.File.Delete(testFile);
+                    }
+                    catch
+                    {
+                        needFix = true;
+                    }
+                }
+                if (needFix)
+                {
+                    string newPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "saves");
+                    Settings.Automation.AutoSavedStrokesLocation = newPath;
+                    if (!System.IO.Directory.Exists(newPath))
+                        System.IO.Directory.CreateDirectory(newPath);
+                    SaveSettingsToFile();
+                    LogHelper.WriteLogToFile($"自动修正保存路径为: {newPath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检测或修正保存路径时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
             
             // 加载自定义背景颜色
             LoadCustomBackgroundColor();
