@@ -238,7 +238,7 @@ namespace Ink_Canvas
         [JsonProperty("isEnableFingerGestureSlideShowControl")]
         public bool IsEnableFingerGestureSlideShowControl { get; set; } = true;
         [JsonProperty("isSupportWPS")]
-        public bool IsSupportWPS { get; set; } = true;
+        public bool IsSupportWPS { get; set; } = false;
         [JsonProperty("enableWppProcessKill")]
         public bool EnableWppProcessKill { get; set; } = true;
         [JsonProperty("isAlwaysGoToFirstPageOnReenter")]
