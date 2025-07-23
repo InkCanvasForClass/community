@@ -792,7 +792,6 @@ namespace Ink_Canvas.Helpers
                 
                 string updateBatPath = Path.Combine(Path.GetTempPath(), "ICCUpdate_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
                 batchContent.AppendLine($"echo @echo off > \"{updateBatPath}\"");
-                
                 batchContent.AppendLine($"echo set PROC_ID={currentProcessId} >> \"{updateBatPath}\"");
                 batchContent.AppendLine($"echo :CHECK_PROCESS >> \"{updateBatPath}\"");
                 batchContent.AppendLine($"echo tasklist /fi \"PID eq %PROC_ID%\" ^| find \"%PROC_ID%\" ^> nul >> \"{updateBatPath}\"");
@@ -833,8 +832,9 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
+                    batchContent.AppendLine($"echo taskkill /F /IM \"InkCanvasForClass.exe\" >nul 2>nul >> \"{updateBatPath}\"");                    
                     batchContent.AppendLine($"echo :: 检查应用程序是否已经在运行 >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo tasklist /FI \"IMAGENAME eq Ink Canvas.exe\" | find /i \"Ink Canvas.exe\" > nul >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo tasklist /FI \"IMAGENAME eq InkCanvasForClass.exe\" | find /i \"InkCanvasForClass.exe\" > nul >> \"{updateBatPath}\"");
                     batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
                     batchContent.AppendLine($"echo     echo 启动应用程序... >> \"{updateBatPath}\"");
                     batchContent.AppendLine($"echo     start \"\" \"{appPath}\" >> \"{updateBatPath}\"");
