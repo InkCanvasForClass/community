@@ -64,7 +64,7 @@ namespace Ink_Canvas {
             TouchDownPointsList[e.TouchDevice.Id] = InkCanvasEditingMode.None;
             inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
             if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint) {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
             }
         }
 
