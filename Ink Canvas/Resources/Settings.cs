@@ -77,8 +77,6 @@ namespace Ink_Canvas
         public OptionalOperation HyperbolaAsymptoteOption { get; set; } = OptionalOperation.Ask;
         [JsonProperty("isCompressPicturesUploaded")]
         public bool IsCompressPicturesUploaded { get; set; } = false;
-        [JsonProperty("enablePalmEraser")]
-        public bool EnablePalmEraser { get; set; } = true;
     }
 
     public enum OptionalOperation

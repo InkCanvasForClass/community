@@ -634,68 +634,52 @@ namespace Ink_Canvas {
                 
                 // 绑定事件处理
                 overlay.MouseDown += (sender, e) => {
-                    if (!MainWindow.EnablePalmEraser) return;
-                    var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
-                        lastEditingMode = inkCanvas.EditingMode;
                         overlay.CaptureMouse();
-                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
                         StartAdvancedEraserOperation(sender);
                     }
                 };
                 
                 overlay.MouseUp += (sender, e) => {
-                    if (!MainWindow.EnablePalmEraser) return;
-                    var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
-                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None) {
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                         overlay.ReleaseMouseCapture();
                         EndAdvancedEraserOperation(sender);
-                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink; // 抬手后自动回到画笔
                     }
                 };
                 
                 overlay.MouseMove += (sender, e) => {
-                    if (!MainWindow.EnablePalmEraser) return;
-                    var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
-                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None) {
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                         var position = e.GetPosition((UIElement)this.FindName("inkCanvas"));
                         Trace.WriteLine($"Advanced Eraser: Mouse move event triggered at ({position.X:F1}, {position.Y:F1})");
                         UpdateAdvancedEraserPosition(sender, position);
+                    } else {
+                        Trace.WriteLine($"Advanced Eraser: Mouse move ignored - not in eraser mode, current mode: {inkCanvas.EditingMode}");
                     }
                 };
                 
                 // 触控笔事件
                 overlay.StylusDown += (sender, e) => {
-                    if (!MainWindow.EnablePalmEraser) return;
-                    var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                         e.Handled = true;
                         if (e.StylusDevice.TabletDevice.Type == TabletDeviceType.Stylus) {
                             overlay.CaptureStylus();
                         }
-                        lastEditingMode = inkCanvas.EditingMode;
-                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
                         StartAdvancedEraserOperation(sender);
                     }
                 };
                 
                 overlay.StylusUp += (sender, e) => {
-                    if (!MainWindow.EnablePalmEraser) return;
-                    var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
-                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None) {
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                         e.Handled = true;
                         if (e.StylusDevice.TabletDevice.Type == TabletDeviceType.Stylus) {
                             overlay.ReleaseStylusCapture();
                         }
                         EndAdvancedEraserOperation(sender);
-                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink; // 抬手后自动回到画笔
                     }
                 };
                 
                 overlay.StylusMove += (sender, e) => {
-                    if (!MainWindow.EnablePalmEraser) return;
-                    var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
-                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None) {
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                         e.Handled = true;
                         var position = e.GetPosition((UIElement)this.FindName("inkCanvas"));
                         UpdateAdvancedEraserPosition(sender, position);
