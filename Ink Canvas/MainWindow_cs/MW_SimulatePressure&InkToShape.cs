@@ -622,9 +622,10 @@ namespace Ink_Canvas {
             Point start = stroke.StylusPoints.First().ToPoint();
             Point end = stroke.StylusPoints.Last().ToPoint();
             double lineLength = GetDistance(start, end);
-            
-            // 线条必须足够长才考虑拉直，使用设置中的阈值
-            if (lineLength < Settings.Canvas.AutoStraightenLineThreshold)
+            // 分辨率自适应阈值
+            double adaptiveThreshold = Settings.Canvas.AutoStraightenLineThreshold * GetResolutionScale();
+            // 线条必须足够长才考虑拉直，使用自适应阈值
+            if (lineLength < adaptiveThreshold)
                 return false;
                 
             // 获取用户设置的灵敏度值，确保使用正确的设置
@@ -691,16 +692,14 @@ namespace Ink_Canvas {
         
         // New method: Determines if a stroke should be straightened into a line
         private bool ShouldStraightenLine(Stroke stroke) {
-            // Basic implementation: check if points roughly follow a straight line
             Point start = stroke.StylusPoints.First().ToPoint();
             Point end = stroke.StylusPoints.Last().ToPoint();
-            
-            // Calculate max deviation from the straight line between start and end
             double maxDeviation = 0;
             double lineLength = GetDistance(start, end);
-            
-            // 如果线条太短，不进行拉直处理，使用设置中的阈值
-            if (lineLength < Settings.Canvas.AutoStraightenLineThreshold) {
+            // 分辨率自适应阈值
+            double adaptiveThreshold = Settings.Canvas.AutoStraightenLineThreshold * GetResolutionScale();
+            // 如果线条太短，不进行拉直处理，使用自适应阈值
+            if (lineLength < adaptiveThreshold) {
                 // 显示调试信息 - 线条长度不足
                 // MessageBox.Show($"线条太短: {lineLength} < {Settings.Canvas.AutoStraightenLineThreshold}", "调试信息");
                 return false;
@@ -1171,6 +1170,20 @@ namespace Ink_Canvas {
 
         public StylusPoint GetCenterPoint(StylusPoint point1, StylusPoint point2) {
             return new StylusPoint((point1.X + point2.X) / 2, (point1.Y + point2.Y) / 2);
+        }
+
+        // 分辨率自适应：以1080P为基准，返回当前分辨率下的阈值倍数
+        private double GetResolutionScale()
+        {
+            // 以1920x1080为基准
+            double baseWidth = 1920.0;
+            double baseHeight = 1080.0;
+            double screenWidth = SystemParameters.PrimaryScreenWidth;
+            double screenHeight = SystemParameters.PrimaryScreenHeight;
+            // 取宽高平均缩放，防止极端比例
+            double scaleW = screenWidth / baseWidth;
+            double scaleH = screenHeight / baseHeight;
+            return (scaleW + scaleH) / 2.0;
         }
     }
 }
