@@ -554,6 +554,11 @@ namespace Ink_Canvas {
                 Settings.Canvas = new Canvas();
             }
 
+            // Palm Eraser
+            if (Settings.Canvas != null) {
+                ToggleSwitchEnablePalmEraser.IsOn = Settings.Canvas.EnablePalmEraser;
+            }
+
             // Advanced
             if (Settings.Advanced != null) {
                 TouchMultiplierSlider.Value = Settings.Advanced.TouchMultiplier;

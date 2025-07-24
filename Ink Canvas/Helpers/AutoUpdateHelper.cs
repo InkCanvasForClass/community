@@ -57,6 +57,11 @@ namespace Ink_Canvas.Helpers
                         VersionUrl = "https://kkgithub.com/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://kkgithub.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
                         LogUrl = "https://kkgithub.com/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
+                    },
+                    new UpdateLineGroup
+                    {
+                        GroupName = "智教联盟",
+                        DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community/InkCanvasForClass.CE.{0}.zip",
                     }
                 }
             },
@@ -82,6 +87,11 @@ namespace Ink_Canvas.Helpers
                         VersionUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
                         DownloadUrlFormat = "https://kkgithub.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
                         LogUrl = "https://kkgithub.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                    },
+                    new UpdateLineGroup
+                    {
+                        GroupName = "智教联盟",
+                        DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
                     }
                 }
             }
@@ -159,6 +169,12 @@ namespace Ink_Canvas.Helpers
             
             foreach (var group in groups)
             {
+                // 跳过“智教联盟”线路组，不参与延迟检测和排序
+                if (group.GroupName == "智教联盟")
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过智教联盟线路组延迟检测");
+                    continue;
+                }
                 LogHelper.WriteLogToFile($"AutoUpdate | 检测线路组: {group.GroupName} ({group.VersionUrl})");
                 var delay = await GetUrlDelay(group.VersionUrl);
                 if (delay >= 0)
@@ -177,6 +193,14 @@ namespace Ink_Canvas.Helpers
                 .OrderBy(x => x.delay)
                 .Select(x => x.group)
                 .ToList();
+            
+            // 将“智教联盟”线路组插入到最前面（如果存在）
+            var zhiJiaoGroup = groups.FirstOrDefault(g => g.GroupName == "智教联盟");
+            if (zhiJiaoGroup != null)
+            {
+                orderedGroups.Insert(0, zhiJiaoGroup);
+                LogHelper.WriteLogToFile($"AutoUpdate | 智教联盟线路组已插入到首位");
+            }
             
             if (orderedGroups.Count > 0)
             {
@@ -458,6 +482,43 @@ namespace Ink_Canvas.Helpers
             return await DownloadSetupFileWithFallback(version, new List<UpdateLineGroup> { group });
         }
 
+        // 获取智教联盟真实下载地址
+        private static async Task<string> GetZhijiaoRealDownloadUrl(string url)
+        {
+            try
+            {
+                using (var handler = new HttpClientHandler { AllowAutoRedirect = false })
+                using (var client = new HttpClient(handler))
+                {
+                    client.Timeout = RequestTimeout;
+                    var resp = await client.GetAsync(url);
+                    // 优先取Location头
+                    if (resp.StatusCode == System.Net.HttpStatusCode.Found || resp.StatusCode == System.Net.HttpStatusCode.Redirect || resp.StatusCode == System.Net.HttpStatusCode.MovedPermanently)
+                    {
+                        if (resp.Headers.Location != null)
+                        {
+                            var realUrl = resp.Headers.Location.ToString();
+                            if (realUrl.Contains(" ")) realUrl = realUrl.Replace(" ", "%20");
+                            return realUrl;
+                        }
+                    }
+                    // 有些服务器直接返回真实地址在内容里
+                    var content = await resp.Content.ReadAsStringAsync();
+                    if (Uri.IsWellFormedUriString(content.Trim(), UriKind.Absolute))
+                    {
+                        var realUrl = content.Trim();
+                        if (realUrl.Contains(" ")) realUrl = realUrl.Replace(" ", "%20");
+                        return realUrl;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 获取智教联盟真实下载地址失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            return null;
+        }
+
         // 使用多线路组下载新版（支持自动切换）
         public static async Task<bool> DownloadSetupFileWithFallback(string version, List<UpdateLineGroup> groups, Action<double, string> progressCallback = null)
         {
@@ -484,10 +545,32 @@ namespace Ink_Canvas.Helpers
 
                 SaveDownloadStatus(false);
 
+                // 优先尝试“智教联盟”线路组
+                var zhiJiaoGroup = groups.FirstOrDefault(g => g.GroupName == "智教联盟");
+                if (zhiJiaoGroup != null)
+                {
+                    groups = new List<UpdateLineGroup> { zhiJiaoGroup }.Concat(groups.Where(g => g.GroupName != "智教联盟")).ToList();
+                    LogHelper.WriteLogToFile($"AutoUpdate | 下载时优先尝试智教联盟线路组");
+                }
+
                 // 依次尝试每个线路组
                 foreach (var group in groups)
                 {
                     string url = string.Format(group.DownloadUrlFormat, version);
+                    // 智教联盟需要先获取真实下载地址
+                    if (group.GroupName == "智教联盟")
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 获取智教联盟真实下载地址: {url}");
+                        var realUrl = await GetZhijiaoRealDownloadUrl(url);
+                        if (string.IsNullOrEmpty(realUrl))
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 智教联盟真实下载地址获取失败，跳过", LogHelper.LogType.Warning);
+                            progressCallback?.Invoke(0, "智教联盟真实下载地址获取失败，跳过");
+                            continue;
+                        }
+                        url = realUrl;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 智教联盟真实下载地址: {url}");
+                    }
                     LogHelper.WriteLogToFile($"AutoUpdate | 尝试从线路组 {group.GroupName} 下载: {url}");
                     
                     bool downloadSuccess = await DownloadFile(url, zipFilePath, progressCallback);
@@ -529,9 +612,93 @@ namespace Ink_Canvas.Helpers
             LogHelper.WriteLogToFile($"AutoUpdate | 正在尝试多线程下载: {fileUrl}");
             int maxRetry = 3;
             int[] threadOptions = new int[] { 32, 4 };
+
+            // 检查服务器是否支持Range分块下载
+            bool supportRange = false;
+            long totalSize = -1;
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                    var req = new HttpRequestMessage(HttpMethod.Head, fileUrl);
+                    req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(0, 0);
+                    var resp = await client.SendAsync(req);
+                    if (resp.StatusCode == System.Net.HttpStatusCode.PartialContent)
+                    {
+                        supportRange = true;
+                        if (resp.Content.Headers.ContentRange != null && resp.Content.Headers.ContentRange.Length.HasValue)
+                        {
+                            totalSize = resp.Content.Headers.ContentRange.Length.Value;
+                        }
+                        else if (resp.Content.Headers.ContentLength.HasValue)
+                        {
+                            totalSize = resp.Content.Headers.ContentLength.Value;
+                        }
+                    }
+                    else if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                    {
+                        supportRange = false;
+                        if (resp.Content.Headers.ContentLength.HasValue)
+                        {
+                            totalSize = resp.Content.Headers.ContentLength.Value;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 检查Range支持时异常: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
+            if (!supportRange)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 服务器不支持分块下载，自动降级为单线程下载");
+                progressCallback?.Invoke(0, "服务器不支持分块下载，自动降级为单线程下载");
+                try
+                {
+                    using (var client = new HttpClient())
+                    {
+                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+                        using (var resp = await client.GetAsync(fileUrl, HttpCompletionOption.ResponseHeadersRead))
+                        {
+                            resp.EnsureSuccessStatusCode();
+                            using (var fs = new FileStream(destinationPath, FileMode.Create, FileAccess.Write, FileShare.None))
+                            {
+                                var stream = await resp.Content.ReadAsStreamAsync();
+                                byte[] buffer = new byte[8192];
+                                int read;
+                                long downloaded = 0;
+                                while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                {
+                                    await fs.WriteAsync(buffer, 0, read);
+                                    downloaded += read;
+                                    if (totalSize > 0)
+                                    {
+                                        double percent = (double)downloaded / totalSize * 100;
+                                        progressCallback?.Invoke(percent, $"单线程下载中: {percent:F1}%");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    progressCallback?.Invoke(100, "单线程下载完成");
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 单线程下载失败: {ex.Message}", LogHelper.LogType.Error);
+                    progressCallback?.Invoke(0, $"单线程下载失败: {ex.Message}");
+                    return false;
+                }
+            }
+
             foreach (int threadCount in threadOptions)
             {
-                long totalSize = await GetContentLength(fileUrl);
+                if (totalSize <= 0)
+                {
+                    totalSize = await GetContentLength(fileUrl);
+                }
                 if (totalSize <= 0)
                 {
                     progressCallback?.Invoke(0, "无法获取文件大小，取消下载");
@@ -563,6 +730,7 @@ namespace Ink_Canvas.Helpers
                                 {
                                     using (var client = new HttpClient())
                                     {
+                                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                                         var req = new HttpRequestMessage(HttpMethod.Get, fileUrl);
                                         req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(block.Start, block.End);
 
@@ -573,6 +741,7 @@ namespace Ink_Canvas.Helpers
 
                                         using (var resp = await client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, downloadCts.Token))
                                         {
+                                            LogHelper.WriteLogToFile($"AutoUpdate | 分块{block.Index} 响应状态: {resp.StatusCode}");
                                             resp.EnsureSuccessStatusCode();
                                             string tempPath = destinationPath + $".part{block.Index}";
                                             using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -792,7 +961,6 @@ namespace Ink_Canvas.Helpers
                 
                 string updateBatPath = Path.Combine(Path.GetTempPath(), "ICCUpdate_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
                 batchContent.AppendLine($"echo @echo off > \"{updateBatPath}\"");
-                
                 batchContent.AppendLine($"echo set PROC_ID={currentProcessId} >> \"{updateBatPath}\"");
                 batchContent.AppendLine($"echo :CHECK_PROCESS >> \"{updateBatPath}\"");
                 batchContent.AppendLine($"echo tasklist /fi \"PID eq %PROC_ID%\" ^| find \"%PROC_ID%\" ^> nul >> \"{updateBatPath}\"");
@@ -833,8 +1001,9 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
+                    batchContent.AppendLine($"echo taskkill /F /IM \"InkCanvasForClass.exe\" >nul 2>nul >> \"{updateBatPath}\"");                    
                     batchContent.AppendLine($"echo :: 检查应用程序是否已经在运行 >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo tasklist /FI \"IMAGENAME eq Ink Canvas.exe\" | find /i \"Ink Canvas.exe\" > nul >> \"{updateBatPath}\"");
+                    batchContent.AppendLine($"echo tasklist /FI \"IMAGENAME eq InkCanvasForClass.exe\" | find /i \"InkCanvasForClass.exe\" > nul >> \"{updateBatPath}\"");
                     batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
                     batchContent.AppendLine($"echo     echo 启动应用程序... >> \"{updateBatPath}\"");
                     batchContent.AppendLine($"echo     start \"\" \"{appPath}\" >> \"{updateBatPath}\"");

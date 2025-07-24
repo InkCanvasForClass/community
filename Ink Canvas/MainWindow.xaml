@@ -854,12 +854,13 @@
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                           StrokeThickness="1" Margin="0,4,0,4" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="启用手掌擦" VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnablePalmEraser" IsOn="True"
-                                                         FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                        <TextBlock Foreground="#fafafa" Text="启用手掌擦" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnablePalmEraser"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchEnablePalmEraser_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 关闭后，手掌将无法触发橡皮擦功能" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <TextBlock Text="# 开启后，两个及以上触点且触摸面积较大时自动切换为橡皮擦，抬手后恢复原编辑模式。" TextWrapping="Wrap" Foreground="#a1a1aa" />    
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <GroupBox Name="GroupBoxInkRecognition">
@@ -945,7 +946,7 @@
                                         <TextBlock Foreground="#fafafa" Text="长度阈值" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <Slider Name="AutoStraightenLineThresholdSlider" Width="150" Minimum="30" Maximum="300" 
-                                                Value="30" TickFrequency="30" IsSnapToTickEnabled="True"
+                                                Value="80" TickFrequency="30" IsSnapToTickEnabled="True"
                                                 ValueChanged="AutoStraightenLineThresholdSlider_ValueChanged" />
                                         <TextBlock Foreground="#fafafa" Text="{Binding ElementName=AutoStraightenLineThresholdSlider, Path=Value, StringFormat={}{0:0}}" 
                                                    VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />

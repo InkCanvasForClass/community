@@ -1599,7 +1599,7 @@ namespace Ink_Canvas {
             Settings.PowerPointSettings.IsNotifyHiddenPage = false;
             Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode = false;
             Settings.PowerPointSettings.IsEnableFingerGestureSlideShowControl = false;
-            Settings.PowerPointSettings.IsSupportWPS = true;
+            Settings.PowerPointSettings.IsSupportWPS = false;
 
             Settings.Canvas.InkWidth = 2.5;
             Settings.Canvas.IsShowCursor = false;
@@ -1615,7 +1615,7 @@ namespace Ink_Canvas {
             Settings.Canvas.EnablePressureTouchMode = false;
             Settings.Canvas.DisablePressure = false;
             Settings.Canvas.AutoStraightenLine = true;
-            Settings.Canvas.AutoStraightenLineThreshold = 30;
+            Settings.Canvas.AutoStraightenLineThreshold = 80;
             Settings.Canvas.LineEndpointSnapping = true;
             Settings.Canvas.LineEndpointSnappingThreshold = 15;
             Settings.Canvas.UsingWhiteboard = false;
@@ -2187,6 +2187,12 @@ namespace Ink_Canvas {
         private void ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             Settings.Automation.IsAutoEnterAnnotationAfterKillHite = ToggleSwitchAutoEnterAnnotationAfterKillHite.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnablePalmEraser_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Canvas.EnablePalmEraser = ToggleSwitchEnablePalmEraser.IsOn;
             SaveSettingsToFile();
         }
     }

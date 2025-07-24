@@ -113,7 +113,6 @@ namespace Ink_Canvas {
             // 否则只切换到批注模式，不弹出子面板
             forceEraser = false;
             forcePointEraser = false;
-            isLastTouchEraser = false;
             drawingShapeMode = 0;
             penType = 0;
             drawingAttributes.IsHighlighter = false;
@@ -379,25 +378,10 @@ namespace Ink_Canvas {
                 SetCursorBasedOnEditingMode(inkCanvas);
             }
 
-            // 如果处于手掌擦状态，继续使用相同的橡皮形状
-            if (isLastTouchEraser && currentPalmEraserShape != null) {
-                inkCanvas.EraserShape = currentPalmEraserShape;
-                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-                return;
-            }
-            if (isSingleFingerDragMode) return;
-
             // 处理几何绘制模式
             if (drawingShapeMode != 0) {
-                if (isLastTouchEraser) return;
-                //EraserContainer.Background = null;
-                //ImageEraser.Visibility = Visibility.Visible;
-                // 修复触屏状态下几何绘制功能不可用的问题
-                // 在几何绘制模式下，即使isWaitUntilNextTouchDown为true，也应该处理触摸移动事件
-                // 只有当多点触控时才需要等待下一次触摸
                 if (isWaitUntilNextTouchDown && dec.Count > 1) return;
                 if (dec.Count > 1) {
-                    isWaitUntilNextTouchDown = true;
                     try {
                         inkCanvas.Strokes.Remove(lastTempStroke);
                         inkCanvas.Strokes.Remove(lastTempStrokeCollection);
@@ -1653,7 +1637,6 @@ namespace Ink_Canvas {
         private void EnterShapeDrawingMode(int mode) {
             forceEraser = true;
             forcePointEraser = false;
-            isLastTouchEraser = false;
             drawingShapeMode = mode;
             inkCanvas.EditingMode = InkCanvasEditingMode.None;
             SetCursorBasedOnEditingMode(inkCanvas);

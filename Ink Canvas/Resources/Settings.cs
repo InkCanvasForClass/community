@@ -59,7 +59,7 @@ namespace Ink_Canvas
         [JsonProperty("autoStraightenLine")]
         public bool AutoStraightenLine { get; set; } = true; // 是否启用直线自动拉直
         [JsonProperty("autoStraightenLineThreshold")]
-        public int AutoStraightenLineThreshold { get; set; } = 30; // 直线自动拉直的长度阈值（像素）
+        public int AutoStraightenLineThreshold { get; set; } = 80; // 直线自动拉直的长度阈值（像素）
         [JsonProperty("highPrecisionLineStraighten")]
         public bool HighPrecisionLineStraighten { get; set; } = true; // 是否启用高精度直线拉直
         [JsonProperty("lineEndpointSnapping")]
@@ -238,7 +238,7 @@ namespace Ink_Canvas
         [JsonProperty("isEnableFingerGestureSlideShowControl")]
         public bool IsEnableFingerGestureSlideShowControl { get; set; } = true;
         [JsonProperty("isSupportWPS")]
-        public bool IsSupportWPS { get; set; } = true;
+        public bool IsSupportWPS { get; set; } = false;
         [JsonProperty("enableWppProcessKill")]
         public bool EnableWppProcessKill { get; set; } = true;
         [JsonProperty("isAlwaysGoToFirstPageOnReenter")]
