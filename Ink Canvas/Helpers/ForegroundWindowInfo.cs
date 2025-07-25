@@ -93,5 +93,15 @@ namespace Ink_Canvas.Helpers
                 return "Unknown";
             }
         }
+
+        public static double GetTaskbarHeight(System.Windows.Forms.Screen screen, double dpiScaleY)
+        {
+            // 获取工作区和屏幕高度的差值
+            var workingArea = screen.WorkingArea;
+            var bounds = screen.Bounds;
+            int taskbarHeight = bounds.Height - workingArea.Height;
+            // 考虑 DPI 缩放
+            return taskbarHeight / dpiScaleY;
+        }
     }
 }
