@@ -1476,30 +1476,8 @@ namespace Ink_Canvas {
 
                 if (!allSaved)
                 {
-                    // 弹窗提示用户（只弹一次）
-                    if (!hasShownWpsForceCloseWarning)
-                    {
-                        hasShownWpsForceCloseWarning = true;
-                        bool userContinue = false;
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            var result = MessageBox.Show(
-                                "检测到有未保存的WPS文档，强制关闭可能导致数据丢失。是否继续？",
-                                "警告", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                            userContinue = (result == MessageBoxResult.Yes);
-                        });
-                        if (!userContinue)
-                        {
-                            LogHelper.WriteLogToFile("用户取消了强制关闭WPS进程", LogHelper.LogType.Trace);
-                            StopWppProcessCheckTimer();
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        // 已弹过，直接跳过或默认继续
-                        LogHelper.WriteLogToFile("WPS强制关闭提示已弹出，自动继续。", LogHelper.LogType.Trace);
-                    }
+                    // 直接跳过弹窗，自动继续
+                    LogHelper.WriteLogToFile("检测到有未保存的WPS文档，但已取消弹窗提示，自动继续。", LogHelper.LogType.Trace);
                 }
 
                 // 立即结束WPP进程
@@ -1543,7 +1521,6 @@ namespace Ink_Canvas {
                 }
                 finally
                 {
-                    hasShownWpsForceCloseWarning = false; // 复位，便于下次检测
                     StopWppProcessCheckTimer();
                 }
             }
