@@ -2,8 +2,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
-using System.Drawing;
 
 namespace Ink_Canvas.Helpers
 {
@@ -94,24 +92,6 @@ namespace Ink_Canvas.Helpers
                 // Process with the given ID not found
                 return "Unknown";
             }
-        }
-
-        public static int GetTaskbarHeight(Screen screen, double dpiScaleY)
-        {
-            // 优先用工作区和屏幕区的差值法，兼容多屏
-            int height = 0;
-            if (screen.Bounds.Height > screen.WorkingArea.Height)
-            {
-                // 任务栏在上下
-                height = screen.Bounds.Height - screen.WorkingArea.Height;
-            }
-            else if (screen.Bounds.Width > screen.WorkingArea.Width)
-            {
-                // 任务栏在左右
-                height = screen.Bounds.Width - screen.WorkingArea.Width;
-            }
-            // 考虑DPI缩放
-            return (int)(height / dpiScaleY);
         }
     }
 }
