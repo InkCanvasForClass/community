@@ -2,8 +2,6 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
-using System.Drawing;
 
 namespace Ink_Canvas.Helpers
 {
@@ -96,22 +94,14 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public static int GetTaskbarHeight(Screen screen, double dpiScaleY)
+        public static double GetTaskbarHeight(System.Windows.Forms.Screen screen, double dpiScaleY)
         {
-            // 优先用工作区和屏幕区的差值法，兼容多屏
-            int height = 0;
-            if (screen.Bounds.Height > screen.WorkingArea.Height)
-            {
-                // 任务栏在上下
-                height = screen.Bounds.Height - screen.WorkingArea.Height;
-            }
-            else if (screen.Bounds.Width > screen.WorkingArea.Width)
-            {
-                // 任务栏在左右
-                height = screen.Bounds.Width - screen.WorkingArea.Width;
-            }
-            // 考虑DPI缩放
-            return (int)(height / dpiScaleY);
+            // 获取工作区和屏幕高度的差值
+            var workingArea = screen.WorkingArea;
+            var bounds = screen.Bounds;
+            int taskbarHeight = bounds.Height - workingArea.Height;
+            // 考虑 DPI 缩放
+            return taskbarHeight / dpiScaleY;
         }
     }
 }

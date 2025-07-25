@@ -81,6 +81,9 @@ namespace Ink_Canvas {
         // 在类中添加字段
         private bool wasFloatingBarFoldedWhenEnterSlideShow = false;
 
+        // 新增：用于控制WPS强制关闭提示只弹一次
+        private static bool hasShownWpsForceCloseWarning = false;
+
         private void BtnCheckPPT_Click(object sender, RoutedEventArgs e) {
             try {
                 pptApplication =
@@ -1473,21 +1476,8 @@ namespace Ink_Canvas {
 
                 if (!allSaved)
                 {
-                    // 弹窗提示用户
-                    bool userContinue = false;
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        var result = MessageBox.Show(
-                            "检测到有未保存的WPS文档，强制关闭可能导致数据丢失。是否继续？",
-                            "警告", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-                        userContinue = (result == MessageBoxResult.Yes);
-                    });
-                    if (!userContinue)
-                    {
-                        LogHelper.WriteLogToFile("用户取消了强制关闭WPS进程", LogHelper.LogType.Trace);
-                        StopWppProcessCheckTimer();
-                        return;
-                    }
+                    // 直接跳过弹窗，自动继续
+                    LogHelper.WriteLogToFile("检测到有未保存的WPS文档，但已取消弹窗提示，自动继续。", LogHelper.LogType.Trace);
                 }
 
                 // 立即结束WPP进程
@@ -1579,6 +1569,7 @@ namespace Ink_Canvas {
             public bool IsMaximized { get; set; }
             public ForegroundWindowInfo.RECT Rect { get; set; }
             public uint ProcessId { get; set; }
+            public string ProcessName { get; set; } // 新增
         }
 
         /// <summary>
@@ -1656,6 +1647,15 @@ namespace Ink_Canvas {
             GetWindowThreadProcessId(hWnd, out processId);
             windowInfo.ProcessId = processId;
 
+            // 新增：获取进程名
+            windowInfo.ProcessName = "";
+            try
+            {
+                var proc = System.Diagnostics.Process.GetProcessById((int)processId);
+                windowInfo.ProcessName = proc.ProcessName.ToLower();
+            }
+            catch { }
+
             return windowInfo;
         }
 
@@ -1667,58 +1667,30 @@ namespace Ink_Canvas {
             if (string.IsNullOrEmpty(windowInfo.Title) && string.IsNullOrEmpty(windowInfo.ClassName))
                 return false;
 
-            // 检查窗口标题
             var title = windowInfo.Title.ToLower();
             var className = windowInfo.ClassName.ToLower();
+            var processName = windowInfo.ProcessName ?? "";
 
-            // WPS相关关键词（扩展版）
-            var wpsKeywords = new[]
-            {
-                "wps", "演示文稿", "presentation", "powerpoint", "ppt", "pptx",
-                "kingsoft", "金山", "office", "幻灯片", "slide", "presentation",
-                "wpp", "wps演示", "wps presentation", "wps office", "kingsoft office"
-            };
+            // WPS相关关键词
+            var wpsKeywords = new[] { "wps", "wpp", "kingsoft", "金山", "wps演示", "wps presentation", "wps office", "kingsoft office" };
+            // 微软Office相关进程名
+            var msOfficeProcess = new[] { "powerpnt", "excel", "word", "onenote", "outlook", "microsoftoffice", "office" };
 
-            // 检查标题是否包含WPS相关关键词
+            // 只要进程名是微软Office，直接排除
+            if (msOfficeProcess.Any(keyword => processName.Contains(keyword)))
+                return false;
+
+            // 只要进程名是WPS/WPP/Kingsoft，直接通过
+            if (wpsKeywords.Any(keyword => processName.Contains(keyword)))
+                return true;
+
+            // 标题或类名包含WPS相关关键词
             bool hasWpsTitle = wpsKeywords.Any(keyword => title.Contains(keyword));
-            
-            // 检查类名是否包含WPS相关关键词
             bool hasWpsClass = wpsKeywords.Any(keyword => className.Contains(keyword));
+            bool isWpsClass = className.Contains("wps") || className.Contains("kingsoft") || className.Contains("wpp");
+            bool hasValidSize = (windowInfo.Rect.Right - windowInfo.Rect.Left) > 0 && (windowInfo.Rect.Bottom - windowInfo.Rect.Top) > 0;
 
-            // 检查是否为WPS特有的窗口类名
-            bool isWpsClass = className.Contains("wps") || 
-                             className.Contains("kingsoft") || 
-                             className.Contains("presentation") ||
-                             className.Contains("powerpoint") ||
-                             className.Contains("wpp") ||
-                             className.Contains("office");
-
-            // 检查窗口是否有有效尺寸（排除0尺寸窗口）
-            bool hasValidSize = (windowInfo.Rect.Right - windowInfo.Rect.Left) > 0 && 
-                               (windowInfo.Rect.Bottom - windowInfo.Rect.Top) > 0;
-
-            // 检查窗口是否可见且不是最小化状态
-            bool isActiveWindow = windowInfo.IsVisible && !windowInfo.IsMinimized;
-
-            // 检查是否为前台窗口
-            bool isForegroundWindow = windowInfo.Handle == GetForegroundWindow();
-
-            // 综合判断是否为WPS窗口
-            bool isWpsWindow = (hasWpsTitle || hasWpsClass || isWpsClass) && hasValidSize;
-
-            // 如果是前台窗口且包含相关关键词，更可能是WPS窗口
-            if (isForegroundWindow && (hasWpsTitle || hasWpsClass))
-            {
-                isWpsWindow = true;
-            }
-
-            if (isWpsWindow)
-            {
-                var windowType = isForegroundWindow ? "前台" : (isActiveWindow ? "活跃" : "后台");
-                LogHelper.WriteLogToFile($"确认WPS窗口: 标题='{windowInfo.Title}', 类名='{windowInfo.ClassName}', 类型={windowType}, 尺寸={windowInfo.Rect.Right - windowInfo.Rect.Left}x{windowInfo.Rect.Bottom - windowInfo.Rect.Top}", LogHelper.LogType.Trace);
-            }
-
-            return isWpsWindow;
+            return (hasWpsTitle || hasWpsClass || isWpsClass) && hasValidSize;
         }
 
         /// <summary>
@@ -1954,9 +1926,15 @@ namespace Ink_Canvas {
                     try
                     {
                         var pname = process.ProcessName.ToLower();
+                        // 只允许WPS/WPP相关进程，排除PowerPoint及微软Office
                         if ((pname.Contains("wps") || pname.Contains("wpp") || pname.Contains("presentation"))
-                            // 排除PowerPoint官方进程
-                            && !pname.Contains("powerpnt"))
+                            && !pname.Contains("powerpnt")
+                            && !pname.Contains("office")
+                            && !pname.Contains("onenote")
+                            && !pname.Contains("excel")
+                            && !pname.Contains("word")
+                            && !pname.Contains("outlook")
+                            && !pname.Contains("microsoft"))
                         {
                             wpsProcesses.Add(process);
                             LogHelper.WriteLogToFile($"发现WPS进程: {process.ProcessName} (PID: {process.Id})", LogHelper.LogType.Trace);

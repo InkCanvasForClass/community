@@ -19,6 +19,7 @@ using System.Reflection;
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
 using System.Collections.Generic;
+using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -28,44 +29,7 @@ namespace Ink_Canvas {
         private System.Windows.Controls.Canvas currentCanvas = null;
         private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup = null;
 
-        // Win32 API声明和常量（用于无焦点窗口）
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_NOACTIVATE = 0x08000000;
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOACTIVATE = 0x0010;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-        
-        // 新增：设置窗口置顶并兼容无焦点
-        private void SetTopmostWithNoActivate(bool topmost)
-        {
-            var hwnd = new WindowInteropHelper(this).Handle;
-            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            // 先移除 WS_EX_NOACTIVATE
-            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
-            // 设置 Topmost
-            this.Topmost = topmost;
-            // 使用SetWindowPos确保无焦点置顶
-            if (topmost)
-            {
-                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-            }
-            else
-            {
-                SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
-            }
-            // 再加回 WS_EX_NOACTIVATE
-            exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
-        }
+
 
         #region Window Initialization
 
@@ -204,14 +168,12 @@ namespace Ink_Canvas {
                 BlackBoardRightSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
                 e.Handled = true;
             };
+            // 初始化无焦点模式开关
+            ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
+            ApplyNoFocusMode();
         }
 
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            base.OnSourceInitialized(e);
-            // 设置窗口为无焦点且置顶（不会抢占焦点且始终在最前）
-            SetTopmostWithNoActivate(true);
-        }
+
 
         #endregion
 
@@ -435,6 +397,9 @@ namespace Ink_Canvas {
 
             // 初始化插件系统
             InitializePluginSystem();
+            // 确保开关和设置同步
+            ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
+            ApplyNoFocusMode();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
@@ -1377,6 +1342,36 @@ namespace Ink_Canvas {
             // 可选：回滚窗口关闭后恢复设置面板显示
             BorderSettings.Visibility = Visibility.Visible;
             BorderSettingsMask.Visibility = Visibility.Visible;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+        [DllImport("user32.dll")]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_NOACTIVATE = 0x08000000;
+
+        private void ApplyNoFocusMode()
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            if (Settings.Advanced.IsNoFocusMode)
+            {
+                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+            }
+            else
+            {
+                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
+            }
+        }
+
+        private void ToggleSwitchNoFocusMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            var toggle = sender as ToggleSwitch;
+            Settings.Advanced.IsNoFocusMode = toggle != null && toggle.IsOn;
+            SaveSettingsToFile();
+            ApplyNoFocusMode();
         }
     }
 }

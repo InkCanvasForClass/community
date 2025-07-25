@@ -845,9 +845,31 @@ namespace Ink_Canvas.Helpers
                     }
                 }
                 progressCallback?.Invoke(100, $"多线程下载完成({threadCount}线程)");
+
+                FileInfo fileInfo = new FileInfo(destinationPath);
+                if (fileInfo.Length != totalSize)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 文件大小校验失败，本地：{fileInfo.Length}，服务器：{totalSize}", LogHelper.LogType.Error);
+                    File.Delete(destinationPath);
+                    progressCallback?.Invoke(0, "文件大小校验失败，已删除损坏文件");
+                    return false;
+                }
+                if (destinationPath.EndsWith(".zip", StringComparison.OrdinalIgnoreCase))
+                {
+                    try
+                    {
+                        System.IO.Compression.ZipFile.OpenRead(destinationPath).Dispose();
+                    }
+                    catch
+                    {
+                        LogHelper.WriteLogToFile("AutoUpdate | ZIP文件解压测试失败，文件可能已损坏", LogHelper.LogType.Error);
+                        File.Delete(destinationPath);
+                        progressCallback?.Invoke(0, "ZIP文件解压测试失败，已删除损坏文件");
+                        return false;
+                    }
+                }
                 return true;
             }
-            // 理论上不会到这里
             return false;
         }
 
