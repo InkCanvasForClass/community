@@ -19,6 +19,7 @@ using System.Reflection;
 using Brushes = System.Windows.Media.Brushes;
 using Point = System.Windows.Point;
 using System.Collections.Generic;
+using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -167,6 +168,9 @@ namespace Ink_Canvas {
                 BlackBoardRightSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
                 e.Handled = true;
             };
+            // 初始化无焦点模式开关
+            ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
+            ApplyNoFocusMode();
         }
 
 
@@ -393,6 +397,9 @@ namespace Ink_Canvas {
 
             // 初始化插件系统
             InitializePluginSystem();
+            // 确保开关和设置同步
+            ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
+            ApplyNoFocusMode();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
@@ -1335,6 +1342,36 @@ namespace Ink_Canvas {
             // 可选：回滚窗口关闭后恢复设置面板显示
             BorderSettings.Visibility = Visibility.Visible;
             BorderSettingsMask.Visibility = Visibility.Visible;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+        [DllImport("user32.dll")]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_NOACTIVATE = 0x08000000;
+
+        private void ApplyNoFocusMode()
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+            if (Settings.Advanced.IsNoFocusMode)
+            {
+                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+            }
+            else
+            {
+                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
+            }
+        }
+
+        private void ToggleSwitchNoFocusMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            var toggle = sender as ToggleSwitch;
+            Settings.Advanced.IsNoFocusMode = toggle != null && toggle.IsOn;
+            SaveSettingsToFile();
+            ApplyNoFocusMode();
         }
     }
 }

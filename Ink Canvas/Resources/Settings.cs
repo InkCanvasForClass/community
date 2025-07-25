@@ -437,6 +437,9 @@ namespace Ink_Canvas
         
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;
+
+        [JsonProperty("isNoFocusMode")]
+        public bool IsNoFocusMode { get; set; } = true;
     }
 
     public class InkToShape
