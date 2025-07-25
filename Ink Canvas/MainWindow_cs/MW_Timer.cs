@@ -105,8 +105,8 @@ namespace Ink_Canvas {
             timerDisplayDate.Interval = 1000 * 60 * 60 * 1;
             timerDisplayDate.Start();
             timerKillProcess.Start();
-            nowTimeVM.nowDate = DateTime.Now.ToShortDateString().ToString();
-            nowTimeVM.nowTime = DateTime.Now.ToShortTimeString().ToString();
+            nowTimeVM.nowDate = DateTime.Now.ToString("yyyy/M/d");
+            nowTimeVM.nowTime = DateTime.Now.ToString("HH:mm");
         }
 
         private async Task TimerDisplayTime_ElapsedAsync()
@@ -115,12 +115,12 @@ namespace Ink_Canvas {
             // 只更新时间，日期由原有逻辑定时更新即可
             Dispatcher.Invoke(() =>
             {
-                nowTimeVM.nowTime = now.ToShortTimeString();
+                nowTimeVM.nowTime = now.ToString("HH:mm");
             });
         }
 
         private void TimerDisplayDate_Elapsed(object sender, ElapsedEventArgs e) {
-            nowTimeVM.nowDate = DateTime.Now.ToShortDateString().ToString();
+            nowTimeVM.nowDate = DateTime.Now.ToString("yyyy/M/d");
         }
 
         private void TimerKillProcess_Elapsed(object sender, ElapsedEventArgs e) {
