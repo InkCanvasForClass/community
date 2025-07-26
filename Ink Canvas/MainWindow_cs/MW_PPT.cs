@@ -1270,10 +1270,27 @@ namespace Ink_Canvas {
                 LogHelper.WriteLogToFile($"结束PPT放映操作异常: {ex.ToString()}", LogHelper.LogType.Error);
             }
             await Application.Current.Dispatcher.InvokeAsync(() => {
+                // 隐藏侧边栏退出按钮
                 if (BtnExitPptFromSidebarLeft != null)
                     BtnExitPptFromSidebarLeft.Visibility = Visibility.Collapsed;
                 if (BtnExitPptFromSidebarRight != null)
                     BtnExitPptFromSidebarRight.Visibility = Visibility.Collapsed;
+
+                // 确保所有放映模式按钮都被隐藏，防止PptApplication_SlideShowEnd事件未触发的情况
+                try {
+                    BtnPPTSlideShow.Visibility = Visibility.Visible;
+                    BtnPPTSlideShowEnd.Visibility = Visibility.Collapsed;
+                    StackPanelPPTControls.Visibility = Visibility.Collapsed;
+                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+
+                    LogHelper.WriteLogToFile("手动隐藏所有放映模式按钮", LogHelper.LogType.Trace);
+                }
+                catch (Exception ex) {
+                    LogHelper.WriteLogToFile($"手动隐藏放映模式按钮失败: {ex.ToString()}", LogHelper.LogType.Error);
+                }
             });
         }
 
