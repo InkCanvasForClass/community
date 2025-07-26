@@ -36,6 +36,49 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "2-2-3-trimethylpentane",
+      "name": "2,2,3-三甲基戊烷",
+      "avatar_url": "https://avatars.githubusercontent.com/u/141403762?v=4",
+      "profile": "https://github.com/2-2-3-trimethylpentane",
+      "contributions": [
+        "blog",
+        "doc",
+        "design"
+      ]
+    },
+    {
+      "login": "Alan-CRL",
+      "name": "Alan-CRL",
+      "avatar_url": "https://avatars.githubusercontent.com/u/92425617?v=4",
+      "profile": "https://github.com/Alan-CRL",
+      "contributions": [
+        "code",
+        "infra",
+        "doc",
+        "financial"
+      ]
+    },
+    {
+      "login": "MKStoler1024",
+      "name": "MKStoler1024",
+      "avatar_url": "https://avatars.githubusercontent.com/u/158786854?v=4",
+      "profile": "https://github.com/MKStoler1024",
+      "contributions": [
+        "doc",
+        "code",
+        "design"
+      ]
+    },
+    {
+      "login": "awesome-iwb",
+      "name": "Awesome Iwb",
+      "avatar_url": "https://avatars.githubusercontent.com/u/184760810?v=4",
+      "profile": "https://github.com/awesome-iwb",
+      "contributions": [
+        "doc"
+      ]
     }
   ]
 }
