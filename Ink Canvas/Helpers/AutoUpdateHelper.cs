@@ -432,7 +432,7 @@ namespace Ink_Canvas.Helpers
 
         // 主要的更新检测方法（优先检测延迟，失败时自动切换线路组）
         // 仅检测新版本时用GitHub API，实际下载时只用线路组
-        public static async Task<(string remoteVersion, UpdateLineGroup lineGroup, string releaseNotes)> CheckForUpdates(UpdateChannel channel = UpdateChannel.Release, bool alwaysGetRemote = false)
+        public static async Task<(string remoteVersion, UpdateLineGroup lineGroup, string releaseNotes)> CheckForUpdates(UpdateChannel channel = UpdateChannel.Release, bool alwaysGetRemote = false, bool isVersionFix = false)
         {
             try
             {
@@ -455,16 +455,23 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 通过GitHub Releases API发现新版本: {apiVersion}");
                         
-                        // 检查是否应该根据用户优先级推送更新
-                        DateTime releaseTime = apiReleaseTime ?? DateTime.Now;
-                        bool shouldPush = DeviceIdentifier.ShouldPushUpdate(apiVersion, releaseTime);
-                        if (!shouldPush)
+                        // 检查是否应该根据用户优先级推送更新（版本修复功能不受限制）
+                        if (!isVersionFix)
                         {
-                            var priority = DeviceIdentifier.GetUpdatePriority();
-                            var daysSinceRelease = (DateTime.Now - releaseTime).TotalDays;
-                            LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级({priority})，暂不推送更新 {apiVersion}，发布时间: {releaseTime:yyyy-MM-dd HH:mm:ss}，已过 {daysSinceRelease:F1} 天");
-                            var group = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
-                            return (null, group, apiReleaseNotes); // 返回null表示不推送
+                            DateTime releaseTime = apiReleaseTime ?? DateTime.Now;
+                            bool shouldPush = DeviceIdentifier.ShouldPushUpdate(apiVersion, releaseTime, true); // 明确标记为自动更新
+                            if (!shouldPush)
+                            {
+                                var priority = DeviceIdentifier.GetUpdatePriority();
+                                var daysSinceRelease = (DateTime.Now - releaseTime).TotalDays;
+                                LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级({priority})，暂不推送更新 {apiVersion}，发布时间: {releaseTime:yyyy-MM-dd HH:mm:ss}，已过 {daysSinceRelease:F1} 天");
+                                var group = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
+                                return (null, group, apiReleaseNotes); // 返回null表示不推送
+                            }
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 版本修复模式，跳过分级策略检查");
                         }
                         
                         LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级，推送更新 {apiVersion}");
@@ -500,13 +507,20 @@ namespace Ink_Canvas.Helpers
                         {
                             LogHelper.WriteLogToFile($"AutoUpdate | 发现新版本或强制获取: {remoteVersion}");
                             
-                            // 检查是否应该根据用户优先级推送更新
-                            bool shouldPush = DeviceIdentifier.ShouldPushUpdate(remoteVersion, DateTime.Now);
-                            if (!shouldPush)
+                            // 检查是否应该根据用户优先级推送更新（版本修复功能不受限制）
+                            if (!isVersionFix)
                             {
-                                var priority = DeviceIdentifier.GetUpdatePriority();
-                                LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级({priority})，暂不推送更新 {remoteVersion}");
-                                return (null, group, null); // 返回null表示不推送
+                                bool shouldPush = DeviceIdentifier.ShouldPushUpdate(remoteVersion, DateTime.Now, true); // 明确标记为自动更新
+                                if (!shouldPush)
+                                {
+                                    var priority = DeviceIdentifier.GetUpdatePriority();
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级({priority})，暂不推送更新 {remoteVersion}");
+                                    return (null, group, null); // 返回null表示不推送
+                                }
+                            }
+                            else
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 版本修复模式，跳过分级策略检查");
                             }
                             
                             LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级，推送更新 {remoteVersion}");
@@ -1374,8 +1388,8 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | 开始修复版本，通道: {channel}");
                 
-                // 获取远程版本号（自动选择最快线路组，始终下载远程版本）
-                var (remoteVersion, group, _) = await CheckForUpdates(channel, true);
+                // 获取远程版本号（自动选择最快线路组，始终下载远程版本，版本修复模式）
+                var (remoteVersion, group, _) = await CheckForUpdates(channel, true, true);
                 if (string.IsNullOrEmpty(remoteVersion) || group == null)
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 修复版本时获取远程版本失败", LogHelper.LogType.Error);
