@@ -47,6 +47,17 @@
         "doc",
         "design"
       ]
+    },
+    {
+      "login": "Alan-CRL",
+      "name": "Alan-CRL",
+      "avatar_url": "https://avatars.githubusercontent.com/u/92425617?v=4",
+      "profile": "https://github.com/Alan-CRL",
+      "contributions": [
+        "code",
+        "infra",
+        "doc"
+      ]
     }
   ]
 }
