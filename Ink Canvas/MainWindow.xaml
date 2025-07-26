@@ -2594,6 +2594,38 @@
                                         <TextBlock x:Name="AppVersionTextBlock" FontSize="18" FontWeight="Bold"
                                                    Text="1.X.X.X" />
                                     </ui:SimpleStackPanel>
+                                    
+                                    <!-- 设备信息 -->
+                                    <Border BorderBrush="#a1a1aa" BorderThickness="1" CornerRadius="8"
+                                            Background="#18181b" Padding="12">
+                                        <ui:SimpleStackPanel Spacing="8">
+                                            <TextBlock Text="设备信息" FontWeight="Bold" Foreground="#fafafa" FontSize="14" />
+                                            <ui:SimpleStackPanel Orientation="Horizontal">
+                                                <TextBlock Text="设备ID：" Foreground="#a1a1aa" FontSize="12" />
+                                                <TextBlock x:Name="DeviceIdTextBlock" Text="正在获取..." Foreground="#fafafa" FontSize="12" />
+                                            </ui:SimpleStackPanel>
+                                            <ui:SimpleStackPanel Orientation="Horizontal">
+                                                <TextBlock Text="使用频率：" Foreground="#a1a1aa" FontSize="12" />
+                                                <TextBlock x:Name="UsageFrequencyTextBlock" Text="正在获取..." Foreground="#fafafa" FontSize="12" />
+                                            </ui:SimpleStackPanel>
+                                            <ui:SimpleStackPanel Orientation="Horizontal">
+                                                <TextBlock Text="更新优先级：" Foreground="#a1a1aa" FontSize="12" />
+                                                <TextBlock x:Name="UpdatePriorityTextBlock" Text="正在获取..." Foreground="#fafafa" FontSize="12" />
+                                            </ui:SimpleStackPanel>
+                                            <ui:SimpleStackPanel Orientation="Horizontal">
+                                                <TextBlock Text="启动次数：" Foreground="#a1a1aa" FontSize="12" />
+                                                <TextBlock x:Name="LaunchCountTextBlock" Text="正在获取..." Foreground="#fafafa" FontSize="12" />
+                                            </ui:SimpleStackPanel>
+                                            <ui:SimpleStackPanel Orientation="Horizontal">
+                                                <TextBlock Text="总使用时长：" Foreground="#a1a1aa" FontSize="12" />
+                                                <TextBlock x:Name="TotalUsageTextBlock" Text="正在获取..." Foreground="#fafafa" FontSize="12" />
+                                            </ui:SimpleStackPanel>
+                                            <Button x:Name="RefreshDeviceInfoButton" Content="刷新设备信息" 
+                                                    Width="120" Height="30" Margin="0,8,0,0"
+                                                    Click="RefreshDeviceInfo_Click" />
+                                        </ui:SimpleStackPanel>
+                                    </Border>
+                                    
                                     <TextBlock
                                         Text="# 使用和分发本软件前，请您应当且务必知晓相关开源协议，且您应当知晓本软件基于 https://github.com/WXRIW/Ink-Canvas 修改而成。"
                                         TextWrapping="Wrap" Foreground="#a1a1aa" />

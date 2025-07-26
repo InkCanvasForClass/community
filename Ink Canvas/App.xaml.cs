@@ -432,6 +432,12 @@ namespace Ink_Canvas
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version.ToString()));
 
+            // 记录应用启动（设备标识符）
+            DeviceIdentifier.RecordAppLaunch();
+            LogHelper.WriteLogToFile($"App | 设备ID: {DeviceIdentifier.GetDeviceId()}");
+            LogHelper.WriteLogToFile($"App | 使用频率: {DeviceIdentifier.GetUsageFrequency()}");
+            LogHelper.WriteLogToFile($"App | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
+
             bool ret;
             mutex = new System.Threading.Mutex(true, "InkCanvasForClass", out ret);
 
@@ -709,6 +715,17 @@ namespace Ink_Canvas
                 // 新增：记录应用退出状态
                 string exitType = IsAppExitByUser ? "用户主动退出" : "应用程序退出";
                 WriteCrashLog($"{exitType}，退出代码: {e.ApplicationExitCode}");
+                
+                // 记录应用退出（设备标识符）
+                try
+                {
+                    DeviceIdentifier.RecordAppExit();
+                    LogHelper.WriteLogToFile($"App | 应用运行时长: {(DateTime.Now - appStartTime).TotalMinutes:F1}分钟");
+                }
+                catch (Exception deviceEx)
+                {
+                    LogHelper.WriteLogToFile($"记录设备标识符退出信息失败: {deviceEx.Message}", LogHelper.LogType.Error);
+                }
                 
                 if (IsAppExitByUser)
                 {
