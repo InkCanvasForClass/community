@@ -70,6 +70,15 @@
         "code",
         "design"
       ]
+    },
+    {
+      "login": "awesome-iwb",
+      "name": "Awesome Iwb",
+      "avatar_url": "https://avatars.githubusercontent.com/u/184760810?v=4",
+      "profile": "https://github.com/awesome-iwb",
+      "contributions": [
+        "doc"
+      ]
     }
   ]
 }
