@@ -1298,7 +1298,7 @@ namespace Ink_Canvas {
         private void ToggleSwitchAdvancedBezierSmoothing_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             Settings.Canvas.UseAdvancedBezierSmoothing = ToggleSwitchAdvancedBezierSmoothing.IsOn;
-            
+
             // 启用高级贝塞尔平滑时自动禁用原来的FitToCurve
             if (ToggleSwitchAdvancedBezierSmoothing.IsOn)
             {
@@ -1306,9 +1306,61 @@ namespace Ink_Canvas {
                 Settings.Canvas.FitToCurve = false;
                 drawingAttributes.FitToCurve = false;
             }
-            
+
+            // 更新墨迹平滑管理器配置
+            _inkSmoothingManager?.UpdateConfig();
+
             SaveSettingsToFile();
         }
+
+        // 注释掉这些方法，因为对应的UI控件还没有在XAML中定义
+        /*
+        private void ToggleSwitchAsyncInkSmoothing_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Canvas.UseAsyncInkSmoothing = ToggleSwitchAsyncInkSmoothing.IsOn;
+            _inkSmoothingManager?.UpdateConfig();
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchHardwareAcceleration_Toggled(object sender, RoutedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Canvas.UseHardwareAcceleration = ToggleSwitchHardwareAcceleration.IsOn;
+            _inkSmoothingManager?.UpdateConfig();
+            SaveSettingsToFile();
+        }
+
+        private void ComboBoxInkSmoothingQuality_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (!isLoaded) return;
+            Settings.Canvas.InkSmoothingQuality = ComboBoxInkSmoothingQuality.SelectedIndex;
+            _inkSmoothingManager?.UpdateConfig();
+            SaveSettingsToFile();
+        }
+
+        private void SliderMaxConcurrentTasks_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e) {
+            if (!isLoaded) return;
+            Settings.Canvas.MaxConcurrentSmoothingTasks = (int)SliderMaxConcurrentTasks.Value;
+            _inkSmoothingManager?.UpdateConfig();
+            SaveSettingsToFile();
+        }
+
+        private void ButtonApplyRecommendedSettings_Click(object sender, RoutedEventArgs e) {
+            // 应用推荐的性能设置
+            Helpers.InkSmoothingManager.ApplyRecommendedSettings();
+            LoadSettings(false);
+            _inkSmoothingManager?.UpdateConfig();
+            SaveSettingsToFile();
+
+            ShowNotification("已应用推荐的性能设置");
+        }
+
+        private void ButtonShowPerformanceStats_Click(object sender, RoutedEventArgs e) {
+            if (_inkSmoothingManager != null)
+            {
+                var stats = _inkSmoothingManager.GetPerformanceStats();
+                ShowNotification($"性能统计: {stats}");
+            }
+        }
+        */
         
         private void ToggleSwitchAutoSaveStrokesInPowerPoint_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;

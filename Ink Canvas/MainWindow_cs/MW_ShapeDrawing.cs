@@ -1579,17 +1579,16 @@ namespace Ink_Canvas {
             {
                 try
                 {
-                    var advancedSmoothing = new Helpers.AdvancedBezierSmoothing
-                    {
-                    };
-
                     // 对临时笔画应用平滑
-                    if (lastTempStroke != null)
+                    if (lastTempStroke != null && _inkSmoothingManager != null)
                     {
-                        var smoothedStroke = advancedSmoothing.SmoothStroke(lastTempStroke);
-                        inkCanvas.Strokes.Remove(lastTempStroke);
-                        lastTempStroke = smoothedStroke;
-                        inkCanvas.Strokes.Add(smoothedStroke);
+                        var smoothedStroke = _inkSmoothingManager.SmoothStroke(lastTempStroke);
+                        if (smoothedStroke != lastTempStroke)
+                        {
+                            inkCanvas.Strokes.Remove(lastTempStroke);
+                            lastTempStroke = smoothedStroke;
+                            inkCanvas.Strokes.Add(smoothedStroke);
+                        }
                     }
                 }
                 catch (Exception ex)

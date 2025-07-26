@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
@@ -587,18 +588,27 @@ namespace Ink_Canvas {
                     // 检查原始笔画是否仍然存在于画布中
                     if (inkCanvas.Strokes.Contains(e.Stroke))
                     {
-                        var advancedSmoothing = new Helpers.AdvancedBezierSmoothing
+                        // 使用新的异步墨迹平滑管理器
+                        if (Settings.Canvas.UseAsyncInkSmoothing && _inkSmoothingManager != null)
                         {
-                        };
+                            // 异步处理
+                            _ = ProcessStrokeAsync(e.Stroke);
+                        }
+                        else
+                        {
+                            // 同步处理（向后兼容）
+                            var smoothedStroke = _inkSmoothingManager?.SmoothStroke(e.Stroke) ?? e.Stroke;
 
-                        var smoothedStroke = advancedSmoothing.SmoothStroke(e.Stroke);
-                        
-                        // 替换原始笔画
-                        SetNewBackupOfStroke();
-                        _currentCommitType = CommitReason.ShapeRecognition;
-                        inkCanvas.Strokes.Remove(e.Stroke);
-                        inkCanvas.Strokes.Add(smoothedStroke);
-                        _currentCommitType = CommitReason.UserInput;
+                            if (smoothedStroke != e.Stroke)
+                            {
+                                // 替换原始笔画
+                                SetNewBackupOfStroke();
+                                _currentCommitType = CommitReason.ShapeRecognition;
+                                inkCanvas.Strokes.Remove(e.Stroke);
+                                inkCanvas.Strokes.Add(smoothedStroke);
+                                _currentCommitType = CommitReason.UserInput;
+                            }
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -610,6 +620,32 @@ namespace Ink_Canvas {
             else if (Settings.Canvas.FitToCurve == true && !wasStraightened) 
             {
                 drawingAttributes.FitToCurve = true;
+            }
+        }
+
+        /// <summary>
+        /// 异步处理笔画平滑
+        /// </summary>
+        private async Task ProcessStrokeAsync(Stroke originalStroke)
+        {
+            try
+            {
+                await _inkSmoothingManager.SmoothStrokeAsync(originalStroke, (original, smoothed) =>
+                {
+                    // 在UI线程上执行笔画替换
+                    if (inkCanvas.Strokes.Contains(original) && smoothed != original)
+                    {
+                        SetNewBackupOfStroke();
+                        _currentCommitType = CommitReason.ShapeRecognition;
+                        inkCanvas.Strokes.Remove(original);
+                        inkCanvas.Strokes.Add(smoothed);
+                        _currentCommitType = CommitReason.UserInput;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"异步墨迹平滑失败: {ex.Message}");
             }
         }
 

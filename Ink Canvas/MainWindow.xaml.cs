@@ -110,6 +110,9 @@ namespace Ink_Canvas {
             CheckColorTheme(true);
             CheckPenTypeUIState();
 
+            // 初始化墨迹平滑管理器
+            _inkSmoothingManager = new Helpers.InkSmoothingManager(Dispatcher);
+
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
             inkCanvas.StylusDown += inkCanvas_StylusDown;
@@ -182,6 +185,7 @@ namespace Ink_Canvas {
         private System.Windows.Media.Color Ink_DefaultColor = Colors.Red;
 
         private DrawingAttributes drawingAttributes;
+        private Helpers.InkSmoothingManager _inkSmoothingManager;
 
         private void loadPenCanvas() {
             try {

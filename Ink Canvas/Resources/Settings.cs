@@ -50,6 +50,14 @@ namespace Ink_Canvas
         public bool FitToCurve { get; set; } = false; // 默认关闭原来的贝塞尔平滑
         [JsonProperty("useAdvancedBezierSmoothing")]
         public bool UseAdvancedBezierSmoothing { get; set; } = true; // 默认启用高级贝塞尔曲线平滑
+        [JsonProperty("useAsyncInkSmoothing")]
+        public bool UseAsyncInkSmoothing { get; set; } = true; // 默认启用异步墨迹平滑
+        [JsonProperty("useHardwareAcceleration")]
+        public bool UseHardwareAcceleration { get; set; } = true; // 默认启用硬件加速
+        [JsonProperty("inkSmoothingQuality")]
+        public int InkSmoothingQuality { get; set; } = 1; // 0-低质量高性能, 1-平衡, 2-高质量低性能
+        [JsonProperty("maxConcurrentSmoothingTasks")]
+        public int MaxConcurrentSmoothingTasks { get; set; } = 0; // 0表示自动检测CPU核心数
         [JsonProperty("clearCanvasAndClearTimeMachine")]
         public bool ClearCanvasAndClearTimeMachine { get; set; } = false;
         [JsonProperty("enablePressureTouchMode")]
