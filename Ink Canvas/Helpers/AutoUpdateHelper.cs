@@ -646,7 +646,7 @@ namespace Ink_Canvas.Helpers
             LogHelper.WriteLogToFile($"AutoUpdate | 正在尝试多线程下载: {fileUrl}");
             int maxRetry = 3;
             // 降低并发数，减少网络压力
-            int[] threadOptions = new int[] { 8, 4, 1 };
+            int[] threadOptions = new int[] { 32, 16, 8, 4, 1 };
 
             // 检查服务器是否支持Range分块下载
             bool supportRange = false;
