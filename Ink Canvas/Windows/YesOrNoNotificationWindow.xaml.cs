@@ -48,7 +48,7 @@ namespace Ink_Canvas
         }
 
         private void Window_Closed(object sender, EventArgs e) {
-            _windowClose.Invoke();
+            _windowClose?.Invoke();
         }
     }
 }
