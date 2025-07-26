@@ -1747,10 +1747,11 @@ namespace Ink_Canvas.Helpers
         /// 根据优先级决定是否应该推送更新（仅适用于自动更新，版本修复功能不受影响）
         /// </summary>
         /// <param name="updateVersion">更新版本号</param>
-        /// <param name="releaseTime">发布时间</param>
+        /// <param name="releaseTime">新版本发布时间</param>
         /// <param name="isAutoUpdate">是否为自动更新检查（默认true，false表示版本修复）</param>
+        /// <param name="currentVersionReleaseTime">当前版本发布时间</param>
         /// <returns>是否应该推送更新</returns>
-        public static bool ShouldPushUpdate(string updateVersion, DateTime releaseTime, bool isAutoUpdate = true)
+        public static bool ShouldPushUpdate(string updateVersion, DateTime releaseTime, bool isAutoUpdate = true, DateTime? currentVersionReleaseTime = null)
         {
             try
             {
@@ -1769,17 +1770,27 @@ namespace Ink_Canvas.Helpers
                 var frequency = GetUsageFrequency();
                 var stats = LoadUsageStats();
 
-                // 计算发布时间到现在的天数
-                var daysSinceRelease = (DateTime.Now - releaseTime).TotalDays;
+                // 计算版本间的时间差
+                double daysBetweenVersions;
+                if (currentVersionReleaseTime.HasValue)
+                {
+                    // 使用当前版本发布时间与新版本发布时间的差异
+                    daysBetweenVersions = (releaseTime - currentVersionReleaseTime.Value).TotalDays;
+                }
+                else
+                {
+                    // 如果没有当前版本发布时间，回退到使用新版本发布时间到现在的天数
+                    daysBetweenVersions = (DateTime.Now - releaseTime).TotalDays;
+                }
 
                 // 计算最近活跃度（最后一次使用距今的天数）
                 var daysSinceLastUse = (DateTime.Now - stats.LastLaunchTime).TotalDays;
 
                 // 综合判断逻辑（仅适用于自动更新）
-                var shouldPush = ShouldPushUpdateComprehensive(priority, frequency, daysSinceRelease, daysSinceLastUse, stats, updateType);
+                var shouldPush = ShouldPushUpdateComprehensive(priority, frequency, daysBetweenVersions, daysSinceLastUse, stats, updateType);
 
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 自动更新推送判断 - 版本: {updateVersion}, 类型: {updateType}, " +
-                                       $"优先级: {priority}, 频率: {frequency}, 发布天数: {daysSinceRelease:F1}, " +
+                                       $"优先级: {priority}, 频率: {frequency}, 版本间隔: {daysBetweenVersions:F1}天, " +
                                        $"最后使用: {daysSinceLastUse:F1}天前, 结果: {shouldPush}");
 
                 return shouldPush;
@@ -1844,8 +1855,15 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 综合时间和使用频率的自动更新推送判断逻辑（不影响版本修复）
         /// </summary>
+        /// <param name="priority">用户更新优先级</param>
+        /// <param name="frequency">用户使用频率</param>
+        /// <param name="daysBetweenVersions">当前版本与新版本之间的天数差异</param>
+        /// <param name="daysSinceLastUse">距离最后使用的天数</param>
+        /// <param name="stats">使用统计数据</param>
+        /// <param name="updateType">更新类型</param>
+        /// <returns>是否应该推送更新</returns>
         private static bool ShouldPushUpdateComprehensive(UpdatePriority priority, UsageFrequency frequency,
-            double daysSinceRelease, double daysSinceLastUse, UsageStats stats, UpdateType updateType)
+            double daysBetweenVersions, double daysSinceLastUse, UsageStats stats, UpdateType updateType)
         {
             // 考虑用户的总体使用模式
             var isHeavyUser = stats.TotalUsageMinutes > 3000; // 超过50小时的重度用户
@@ -1860,12 +1878,12 @@ namespace Ink_Canvas.Helpers
                 // 热修复和重要更新优先推送
                 if (updateType == UpdateType.Hotfix)
                 {
-                    return daysSinceRelease >= 1; // 热修复1天后推送
+                    return daysBetweenVersions >= 1; // 热修复版本间隔1天后推送
                 }
 
                 // 但如果是重度用户，仍然要适当推送
                 var baseDelay = isHeavyUser ? 7 : 14;
-                return daysSinceRelease >= (baseDelay / urgencyMultiplier);
+                return daysBetweenVersions >= (baseDelay / urgencyMultiplier);
             }
 
             // 如果用户最近很活跃（3天内使用过）
@@ -1880,19 +1898,19 @@ namespace Ink_Canvas.Helpers
                 // 结合使用频率和优先级判断
                 if (frequency == UsageFrequency.High || isHeavyUser)
                 {
-                    return daysSinceRelease >= Math.Max(0, 1 / urgencyMultiplier); // 高频用户优先推送
+                    return daysBetweenVersions >= Math.Max(0, 1 / urgencyMultiplier); // 高频用户优先推送
                 }
 
                 switch (priority)
                 {
                     case UpdatePriority.High:
-                        return daysSinceRelease >= Math.Max(0, 1 / urgencyMultiplier);
+                        return daysBetweenVersions >= Math.Max(0, 1 / urgencyMultiplier);
 
                     case UpdatePriority.Medium:
-                        return daysSinceRelease >= Math.Max(1, 2 / urgencyMultiplier);
+                        return daysBetweenVersions >= Math.Max(1, 2 / urgencyMultiplier);
 
                     case UpdatePriority.Low:
-                        return daysSinceRelease >= Math.Max(2, 3 / urgencyMultiplier);
+                        return daysBetweenVersions >= Math.Max(2, 3 / urgencyMultiplier);
                 }
             }
 
@@ -1902,25 +1920,25 @@ namespace Ink_Canvas.Helpers
                 // 热修复优先推送
                 if (updateType == UpdateType.Hotfix)
                 {
-                    return daysSinceRelease >= 1;
+                    return daysBetweenVersions >= 1;
                 }
 
                 // 频繁用户优先推送
                 if (isFrequentUser && frequency == UsageFrequency.High)
                 {
-                    return daysSinceRelease >= Math.Max(1, 2 / urgencyMultiplier);
+                    return daysBetweenVersions >= Math.Max(1, 2 / urgencyMultiplier);
                 }
 
                 switch (priority)
                 {
                     case UpdatePriority.High:
-                        return daysSinceRelease >= Math.Max(1, 2 / urgencyMultiplier);
+                        return daysBetweenVersions >= Math.Max(1, 2 / urgencyMultiplier);
 
                     case UpdatePriority.Medium:
-                        return daysSinceRelease >= Math.Max(2, 4 / urgencyMultiplier);
+                        return daysBetweenVersions >= Math.Max(2, 4 / urgencyMultiplier);
 
                     case UpdatePriority.Low:
-                        return daysSinceRelease >= Math.Max(4, 7 / urgencyMultiplier);
+                        return daysBetweenVersions >= Math.Max(4, 7 / urgencyMultiplier);
                 }
             }
 
@@ -1931,16 +1949,16 @@ namespace Ink_Canvas.Helpers
             switch (priority)
             {
                 case UpdatePriority.High:
-                    return daysSinceRelease >= Math.Max(2, 3 * delayMultiplier / urgencyMultiplier);
+                    return daysBetweenVersions >= Math.Max(2, 3 * delayMultiplier / urgencyMultiplier);
 
                 case UpdatePriority.Medium:
-                    return daysSinceRelease >= Math.Max(4, 7 * delayMultiplier / urgencyMultiplier);
+                    return daysBetweenVersions >= Math.Max(4, 7 * delayMultiplier / urgencyMultiplier);
 
                 case UpdatePriority.Low:
-                    return daysSinceRelease >= Math.Max(7, 14 * delayMultiplier / urgencyMultiplier);
+                    return daysBetweenVersions >= Math.Max(7, 14 * delayMultiplier / urgencyMultiplier);
 
                 default:
-                    return daysSinceRelease >= 7;
+                    return daysBetweenVersions >= 7;
             }
         }
 

@@ -20,7 +20,7 @@ namespace Ink_Canvas.Helpers
     {
         // 定义超时时间为10秒
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(10);
-        private static string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
+        private static readonly string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
         private static string statusFilePath = null;
 
         // 线路组结构体（包含版本、下载、日志地址）
@@ -395,6 +395,47 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        // 通过GitHub API获取指定版本的Release信息
+        private static async Task<(string version, string downloadUrl, string releaseNotes, DateTime? releaseTime)> GetGithubReleaseByVersion(string targetVersion, UpdateChannel channel)
+        {
+            try
+            {
+                string apiUrl = channel == UpdateChannel.Beta
+                    ? "https://api.github.com/repos/InkCanvasForClass/community-beta/releases"
+                    : "https://api.github.com/repos/InkCanvasForClass/community/releases";
+                using (var client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    var response = await client.GetStringAsync(apiUrl);
+                    var releases = JArray.Parse(response);
+
+                    foreach (var release in releases)
+                    {
+                        string version = release["tag_name"]?.ToString();
+                        if (version == targetVersion || version == $"v{targetVersion}" || version == $"V{targetVersion}")
+                        {
+                            string releaseNotes = release["body"]?.ToString();
+                            string downloadUrl = release["assets"]?.First?["browser_download_url"]?.ToString();
+
+                            // 解析发布时间
+                            DateTime? releaseTime = null;
+                            if (release["published_at"] != null && DateTime.TryParse(release["published_at"].ToString(), out DateTime parsedTime))
+                            {
+                                releaseTime = parsedTime;
+                            }
+
+                            return (version, downloadUrl, releaseNotes, releaseTime);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | GitHub Releases API 获取版本 {targetVersion} 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+            return (null, null, null, null);
+        }
+
         // 通过GitHub API获取最新Release信息
         private static async Task<(string version, string downloadUrl, string releaseNotes, DateTime? releaseTime)> GetLatestGithubRelease(UpdateChannel channel)
         {
@@ -454,17 +495,23 @@ namespace Ink_Canvas.Helpers
                     if (remote > local || alwaysGetRemote)
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 通过GitHub Releases API发现新版本: {apiVersion}");
-                        
+
                         // 检查是否应该根据用户优先级推送更新（版本修复功能不受限制）
                         if (!isVersionFix)
                         {
                             DateTime releaseTime = apiReleaseTime ?? DateTime.Now;
-                            bool shouldPush = DeviceIdentifier.ShouldPushUpdate(apiVersion, releaseTime, true); // 明确标记为自动更新
+
+                            // 尝试获取当前版本的发布时间
+                            DateTime? currentVersionReleaseTime = await GetVersionReleaseTime(localVersion, channel);
+
+                            bool shouldPush = DeviceIdentifier.ShouldPushUpdate(apiVersion, releaseTime, true, currentVersionReleaseTime); // 明确标记为自动更新
                             if (!shouldPush)
                             {
                                 var priority = DeviceIdentifier.GetUpdatePriority();
-                                var daysSinceRelease = (DateTime.Now - releaseTime).TotalDays;
-                                LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级({priority})，暂不推送更新 {apiVersion}，发布时间: {releaseTime:yyyy-MM-dd HH:mm:ss}，已过 {daysSinceRelease:F1} 天");
+                                var daysBetweenVersions = currentVersionReleaseTime.HasValue
+                                    ? (releaseTime - currentVersionReleaseTime.Value).TotalDays
+                                    : (DateTime.Now - releaseTime).TotalDays;
+                                LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级({priority})，暂不推送更新 {apiVersion}，版本间隔: {daysBetweenVersions:F1} 天");
                                 var group = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
                                 return (null, group, apiReleaseNotes); // 返回null表示不推送
                             }
@@ -506,11 +553,14 @@ namespace Ink_Canvas.Helpers
                         if (remote > local || alwaysGetRemote)
                         {
                             LogHelper.WriteLogToFile($"AutoUpdate | 发现新版本或强制获取: {remoteVersion}");
-                            
+
                             // 检查是否应该根据用户优先级推送更新（版本修复功能不受限制）
                             if (!isVersionFix)
                             {
-                                bool shouldPush = DeviceIdentifier.ShouldPushUpdate(remoteVersion, DateTime.Now, true); // 明确标记为自动更新
+                                // 尝试获取当前版本的发布时间
+                                DateTime? currentVersionReleaseTime = await GetVersionReleaseTime(localVersion, channel);
+
+                                bool shouldPush = DeviceIdentifier.ShouldPushUpdate(remoteVersion, DateTime.Now, true, currentVersionReleaseTime); // 明确标记为自动更新
                                 if (!shouldPush)
                                 {
                                     var priority = DeviceIdentifier.GetUpdatePriority();
@@ -1498,6 +1548,26 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | Windows 7 TLS连接测试异常: {ex.Message}", LogHelper.LogType.Error);
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// 获取指定版本的发布时间
+        /// </summary>
+        /// <param name="version">版本号</param>
+        /// <param name="channel">更新通道</param>
+        /// <returns>版本发布时间，如果获取失败则返回null</returns>
+        public static async Task<DateTime?> GetVersionReleaseTime(string version, UpdateChannel channel = UpdateChannel.Release)
+        {
+            try
+            {
+                var (_, _, _, releaseTime) = await GetGithubReleaseByVersion(version, channel);
+                return releaseTime;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 获取版本 {version} 发布时间失败: {ex.Message}", LogHelper.LogType.Warning);
+                return null;
             }
         }
 
