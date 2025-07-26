@@ -481,12 +481,80 @@ namespace Ink_Canvas.Helpers
             [JsonProperty("lastModified")]
             public DateTime LastModified { get; set; }
 
+            // 每周统计数据
+            [JsonProperty("weeklyLaunchCount")]
+            public int WeeklyLaunchCount { get; set; }
+
+            [JsonProperty("weeklyUsageMinutes")]
+            public long WeeklyUsageMinutes { get; set; }
+
+            [JsonProperty("weekStartDate")]
+            public DateTime WeekStartDate { get; set; }
+
+            [JsonProperty("lastWeekLaunchCount")]
+            public int LastWeekLaunchCount { get; set; }
+
+            [JsonProperty("lastWeekUsageMinutes")]
+            public long LastWeekUsageMinutes { get; set; }
+
+            /// <summary>
+            /// 检查并重置每周统计数据
+            /// </summary>
+            public void CheckAndResetWeeklyStats()
+            {
+                var now = DateTime.Now;
+                var currentWeekStart = GetWeekStartDate(now);
+
+                // 如果是新的一周，重置统计
+                if (WeekStartDate == DateTime.MinValue || currentWeekStart > WeekStartDate)
+                {
+                    // 保存上周数据
+                    LastWeekLaunchCount = WeeklyLaunchCount;
+                    LastWeekUsageMinutes = WeeklyUsageMinutes;
+
+                    // 重置本周数据
+                    WeeklyLaunchCount = 0;
+                    WeeklyUsageMinutes = 0;
+                    WeekStartDate = currentWeekStart;
+
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 每周统计重置 - 上周启动: {LastWeekLaunchCount}次, 上周使用: {LastWeekUsageMinutes}分钟");
+                }
+            }
+
+            /// <summary>
+            /// 获取指定日期所在周的开始日期（周一）
+            /// </summary>
+            public DateTime GetWeekStartDate(DateTime date)
+            {
+                var dayOfWeek = (int)date.DayOfWeek;
+                var daysToSubtract = dayOfWeek == 0 ? 6 : dayOfWeek - 1; // 周日=0，需要减6天到周一
+                return date.Date.AddDays(-daysToSubtract);
+            }
+
+            /// <summary>
+            /// 记录本周的启动
+            /// </summary>
+            public void RecordWeeklyLaunch()
+            {
+                CheckAndResetWeeklyStats();
+                WeeklyLaunchCount++;
+            }
+
+            /// <summary>
+            /// 记录本周的使用时长
+            /// </summary>
+            public void RecordWeeklyUsage(long minutes)
+            {
+                CheckAndResetWeeklyStats();
+                WeeklyUsageMinutes += minutes;
+            }
+
             /// <summary>
             /// 计算数据哈希值用于完整性验证
             /// </summary>
             public void UpdateDataHash()
             {
-                var dataString = $"{DeviceId}|{LaunchCount}|{TotalUsageMinutes}|{LastLaunchTime:yyyyMMddHHmmss}|{DataIntegrityKey}";
+                var dataString = $"{DeviceId}|{LaunchCount}|{TotalUsageMinutes}|{LastLaunchTime:yyyyMMddHHmmss}|{WeeklyLaunchCount}|{WeeklyUsageMinutes}|{DataIntegrityKey}";
                 using (var sha256 = SHA256.Create())
                 {
                     var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(dataString));
@@ -502,7 +570,7 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    var dataString = $"{DeviceId}|{LaunchCount}|{TotalUsageMinutes}|{LastLaunchTime:yyyyMMddHHmmss}|{DataIntegrityKey}";
+                    var dataString = $"{DeviceId}|{LaunchCount}|{TotalUsageMinutes}|{LastLaunchTime:yyyyMMddHHmmss}|{WeeklyLaunchCount}|{WeeklyUsageMinutes}|{DataIntegrityKey}";
                     using (var sha256 = SHA256.Create())
                     {
                         var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(dataString));
@@ -518,23 +586,23 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 更新优先级枚举
+        /// 更新推送优先级枚举
         /// </summary>
         public enum UpdatePriority
         {
-            High = 1,    // 高频用户，优先推送
-            Medium = 2,  // 中频用户，正常推送
-            Low = 3      // 低频用户，延迟推送
+            High = 1,    // 高优先级：立即推送更新
+            Medium = 2,  // 中优先级：延迟1-3天推送
+            Low = 3      // 低优先级：延迟3-14天推送
         }
 
         /// <summary>
-        /// 使用频率枚举
+        /// 用户使用频率分类枚举
         /// </summary>
         public enum UsageFrequency
         {
-            High = 1,    // 高频用户：每周使用超过5次或总时长超过10小时
-            Medium = 2,  // 中频用户：每周使用2-5次或总时长2-10小时
-            Low = 3      // 低频用户：每周使用少于2次或总时长少于2小时
+            High = 1,    // 高频用户：综合评分≥80分（活跃度高、使用时长长、启动频繁）
+            Medium = 2,  // 中频用户：综合评分40-79分（中等活跃度和使用强度）
+            Low = 3      // 低频用户：综合评分<40分（活跃度低、使用时长短、启动较少）
         }
 
         /// <summary>
@@ -551,6 +619,9 @@ namespace Ink_Canvas.Helpers
                     stats.LaunchCount++;
                     stats.DeviceId = DeviceId;
 
+                    // 记录每周启动次数
+                    stats.RecordWeeklyLaunch();
+
                     // 计算使用频率
                     CalculateUsageFrequency(stats);
 
@@ -559,7 +630,7 @@ namespace Ink_Canvas.Helpers
 
                     SaveUsageStats(stats);
 
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 记录应用启动 - 设备ID: {DeviceId}, 启动次数: {stats.LaunchCount}");
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 记录应用启动 - 设备ID: {DeviceId}, 总启动: {stats.LaunchCount}次, 本周启动: {stats.WeeklyLaunchCount}次");
                 }
             }
             catch (Exception ex)
@@ -580,10 +651,15 @@ namespace Ink_Canvas.Helpers
                     var stats = LoadUsageStats();
 
                     // 计算本次会话时长
+                    long sessionMinutes = 0;
                     if (stats.LastLaunchTime != DateTime.MinValue)
                     {
                         var sessionDuration = DateTime.Now - stats.LastLaunchTime;
-                        stats.TotalUsageMinutes += (long)sessionDuration.TotalMinutes;
+                        sessionMinutes = (long)sessionDuration.TotalMinutes;
+                        stats.TotalUsageMinutes += sessionMinutes;
+
+                        // 记录每周使用时长
+                        stats.RecordWeeklyUsage(sessionMinutes);
 
                         // 更新平均会话时长
                         if (stats.LaunchCount > 0)
@@ -600,7 +676,7 @@ namespace Ink_Canvas.Helpers
 
                     SaveUsageStats(stats);
 
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 记录应用退出 - 总使用时长: {stats.TotalUsageMinutes}分钟, 平均会话: {stats.AverageSessionMinutes:F1}分钟");
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 记录应用退出 - 本次会话: {sessionMinutes}分钟, 总时长: {stats.TotalUsageMinutes}分钟, 本周时长: {stats.WeeklyUsageMinutes}分钟");
                 }
             }
             catch (Exception ex)
@@ -610,100 +686,101 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 计算使用频率和更新优先级（综合考虑时间和使用模式）
+        /// 计算使用频率和更新优先级（基于真实的每周统计数据）
+        /// 通过多维度评分系统确定用户类型：高频(≥80分)、中频(40-79分)、低频(<40分)
         /// </summary>
         private static void CalculateUsageFrequency(UsageStats stats)
         {
             try
             {
+                // 确保每周统计数据是最新的
+                stats.CheckAndResetWeeklyStats();
+
                 // 计算最近活跃度
                 var daysSinceLastUse = (DateTime.Now - stats.LastLaunchTime).TotalDays;
 
-                // 计算平均使用强度
-                var avgMinutesPerLaunch = stats.LaunchCount > 0 ? (double)stats.TotalUsageMinutes / stats.LaunchCount : 0;
+                // 使用真实的每周数据
+                var currentWeekLaunches = stats.WeeklyLaunchCount;
+                var currentWeekMinutes = stats.WeeklyUsageMinutes;
 
-                // 估算最近使用情况（基于历史模式）
-                var estimatedRecentLaunches = EstimateRecentActivity(stats, daysSinceLastUse);
-                var estimatedRecentMinutes = estimatedRecentLaunches * avgMinutesPerLaunch;
+                // 如果本周数据不足，参考上周数据
+                var weeklyLaunches = currentWeekLaunches > 0 ? currentWeekLaunches : stats.LastWeekLaunchCount;
+                var weeklyMinutes = currentWeekMinutes > 0 ? currentWeekMinutes : stats.LastWeekUsageMinutes;
 
-                // 综合评分系统
-                var frequencyScore = CalculateFrequencyScore(stats, daysSinceLastUse, estimatedRecentLaunches, estimatedRecentMinutes);
+                // 综合评分系统（0-100分）
+                var frequencyScore = CalculateFrequencyScoreWithWeeklyData(stats, daysSinceLastUse, weeklyLaunches, weeklyMinutes);
 
-                // 根据综合评分确定频率和优先级
+                // 根据综合评分确定频率分类和更新优先级
                 if (frequencyScore >= 80)
                 {
-                    stats.UsageFrequency = UsageFrequency.High;
+                    stats.UsageFrequency = UsageFrequency.High;      // 高频用户：立即推送更新
                     stats.UpdatePriority = UpdatePriority.High;
                 }
                 else if (frequencyScore >= 40)
                 {
-                    stats.UsageFrequency = UsageFrequency.Medium;
+                    stats.UsageFrequency = UsageFrequency.Medium;    // 中频用户：延迟1-3天推送
                     stats.UpdatePriority = UpdatePriority.Medium;
                 }
                 else
                 {
-                    stats.UsageFrequency = UsageFrequency.Low;
+                    stats.UsageFrequency = UsageFrequency.Low;       // 低频用户：延迟3-14天推送
                     stats.UpdatePriority = UpdatePriority.Low;
                 }
 
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 使用频率计算 - 评分: {frequencyScore}, 频率: {stats.UsageFrequency}, " +
-                                       $"优先级: {stats.UpdatePriority}, 最后使用: {daysSinceLastUse:F1}天前");
+                                       $"优先级: {stats.UpdatePriority}, 本周启动: {currentWeekLaunches}次, 本周时长: {currentWeekMinutes}分钟");
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 计算使用频率失败: {ex.Message}", LogHelper.LogType.Error);
-                // 默认设置为中等优先级
+                // 默认设置为中等频率和优先级
                 stats.UsageFrequency = UsageFrequency.Medium;
                 stats.UpdatePriority = UpdatePriority.Medium;
             }
         }
 
         /// <summary>
-        /// 估算最近活跃度
+        /// 基于每周真实数据计算综合频率评分（0-100分）
+        /// 评分标准：≥80分=高频用户，40-79分=中频用户，<40分=低频用户
         /// </summary>
-        private static int EstimateRecentActivity(UsageStats stats, double daysSinceLastUse)
-        {
-            if (daysSinceLastUse > 30) return 0; // 超过30天未使用
-            if (daysSinceLastUse > 14) return Math.Min(1, stats.LaunchCount / 50); // 14-30天，很少活动
-            if (daysSinceLastUse > 7) return Math.Min(3, stats.LaunchCount / 20); // 7-14天，少量活动
-            if (daysSinceLastUse > 3) return Math.Min(7, stats.LaunchCount / 10); // 3-7天，中等活动
-            return Math.Min(15, stats.LaunchCount / 5); // 3天内，高活动
-        }
-
-        /// <summary>
-        /// 计算综合频率评分（0-100分）
-        /// </summary>
-        private static int CalculateFrequencyScore(UsageStats stats, double daysSinceLastUse,
-            int estimatedRecentLaunches, double estimatedRecentMinutes)
+        /// <param name="stats">使用统计数据</param>
+        /// <param name="daysSinceLastUse">距离最后使用的天数</param>
+        /// <param name="weeklyLaunches">每周启动次数</param>
+        /// <param name="weeklyMinutes">每周使用时长</param>
+        /// <returns>综合评分（0-100分）</returns>
+        private static int CalculateFrequencyScoreWithWeeklyData(UsageStats stats, double daysSinceLastUse,
+            long weeklyLaunches, long weeklyMinutes)
         {
             var score = 0;
 
-            // 最近活跃度评分（40分）
-            if (daysSinceLastUse <= 1) score += 40;
-            else if (daysSinceLastUse <= 3) score += 35;
-            else if (daysSinceLastUse <= 7) score += 25;
-            else if (daysSinceLastUse <= 14) score += 15;
-            else if (daysSinceLastUse <= 30) score += 5;
+            // 最近活跃度评分（40分）- 反映用户当前的活跃程度
+            if (daysSinceLastUse <= 1) score += 40;        // 1天内使用：非常活跃
+            else if (daysSinceLastUse <= 3) score += 35;   // 3天内使用：很活跃
+            else if (daysSinceLastUse <= 7) score += 25;   // 1周内使用：较活跃
+            else if (daysSinceLastUse <= 14) score += 15;  // 2周内使用：一般活跃
+            else if (daysSinceLastUse <= 30) score += 5;   // 1月内使用：不太活跃
 
-            // 使用频率评分（30分）
-            if (estimatedRecentLaunches >= 10) score += 30;
-            else if (estimatedRecentLaunches >= 5) score += 20;
-            else if (estimatedRecentLaunches >= 2) score += 10;
-            else if (estimatedRecentLaunches >= 1) score += 5;
+            // 每周使用频率评分（30分）- 基于真实的每周启动次数
+            if (weeklyLaunches >= 10) score += 30;         // 10次以上：高频使用
+            else if (weeklyLaunches >= 5) score += 20;     // 5-9次：中高频使用
+            else if (weeklyLaunches >= 3) score += 15;     // 3-4次：中频使用
+            else if (weeklyLaunches >= 1) score += 10;     // 1-2次：低频使用
 
-            // 使用时长评分（20分）
-            if (estimatedRecentMinutes >= 600) score += 20; // 10小时以上
-            else if (estimatedRecentMinutes >= 300) score += 15; // 5小时以上
-            else if (estimatedRecentMinutes >= 120) score += 10; // 2小时以上
-            else if (estimatedRecentMinutes >= 60) score += 5; // 1小时以上
+            // 每周使用时长评分（20分）- 基于真实的每周使用时长
+            if (weeklyMinutes >= 600) score += 20;         // 10小时以上：重度使用
+            else if (weeklyMinutes >= 300) score += 15;    // 5-10小时：中重度使用
+            else if (weeklyMinutes >= 120) score += 10;    // 2-5小时：中度使用
+            else if (weeklyMinutes >= 60) score += 5;      // 1-2小时：轻度使用
 
-            // 历史使用深度评分（10分）
-            if (stats.TotalUsageMinutes >= 3000) score += 10; // 重度用户
-            else if (stats.TotalUsageMinutes >= 1200) score += 7; // 中度用户
-            else if (stats.TotalUsageMinutes >= 300) score += 4; // 轻度用户
+            // 历史使用深度评分（10分）- 反映用户的长期使用习惯
+            if (stats.TotalUsageMinutes >= 3000) score += 10;    // 50小时以上：资深用户
+            else if (stats.TotalUsageMinutes >= 1200) score += 7; // 20-50小时：中等用户
+            else if (stats.TotalUsageMinutes >= 300) score += 4;  // 5-20小时：新手用户
 
             return Math.Min(100, score);
         }
+
+
 
         /// <summary>
         /// 获取当前更新优先级
@@ -1108,6 +1185,13 @@ namespace Ink_Canvas.Helpers
                         var dataHash = key.GetValue("DataHash") as string;
                         var lastUpdate = key.GetValue("LastUpdate") as string;
 
+                        // 每周统计数据
+                        var weeklyLaunchCount = key.GetValue("WeeklyLaunchCount");
+                        var weeklyUsageMinutes = key.GetValue("WeeklyUsageMinutes");
+                        var weekStartDate = key.GetValue("WeekStartDate") as string;
+                        var lastWeekLaunchCount = key.GetValue("LastWeekLaunchCount");
+                        var lastWeekUsageMinutes = key.GetValue("LastWeekUsageMinutes");
+
                         if (!string.IsNullOrEmpty(deviceId) && launchCount != null)
                         {
                             var stats = new UsageStats
@@ -1120,7 +1204,14 @@ namespace Ink_Canvas.Helpers
                                 UsageFrequency = frequency != null ? (UsageFrequency)Convert.ToInt32(frequency) : UsageFrequency.Medium,
                                 DataHash = dataHash,
                                 AverageSessionMinutes = 0,
-                                LastUpdateCheck = DateTime.MinValue
+                                LastUpdateCheck = DateTime.MinValue,
+
+                                // 每周统计数据
+                                WeeklyLaunchCount = weeklyLaunchCount != null ? Convert.ToInt32(weeklyLaunchCount) : 0,
+                                WeeklyUsageMinutes = weeklyUsageMinutes != null ? Convert.ToInt64(weeklyUsageMinutes) : 0,
+                                WeekStartDate = DateTime.TryParse(weekStartDate, out var wsd) ? wsd : DateTime.MinValue,
+                                LastWeekLaunchCount = lastWeekLaunchCount != null ? Convert.ToInt32(lastWeekLaunchCount) : 0,
+                                LastWeekUsageMinutes = lastWeekUsageMinutes != null ? Convert.ToInt64(lastWeekUsageMinutes) : 0
                             };
 
                             // 重新计算平均会话时长
@@ -1176,6 +1267,13 @@ namespace Ink_Canvas.Helpers
                         var dataHash = key.GetValue("DH") as string;
                         var lastUpdateBinary = key.GetValue("LU");
 
+                        // 每周统计数据
+                        var weeklyLaunchCount = key.GetValue("WLC");
+                        var weeklyUsageMinutes = key.GetValue("WUM");
+                        var weekStartDateBinary = key.GetValue("WSD");
+                        var lastWeekLaunchCount = key.GetValue("LWLC");
+                        var lastWeekUsageMinutes = key.GetValue("LWUM");
+
                         if (launchCount != null && totalMinutes != null)
                         {
                             var stats = new UsageStats
@@ -1188,7 +1286,14 @@ namespace Ink_Canvas.Helpers
                                 UsageFrequency = frequency != null ? (UsageFrequency)Convert.ToInt32(frequency) : UsageFrequency.Medium,
                                 DataHash = dataHash,
                                 AverageSessionMinutes = 0,
-                                LastUpdateCheck = DateTime.MinValue
+                                LastUpdateCheck = DateTime.MinValue,
+
+                                // 每周统计数据
+                                WeeklyLaunchCount = weeklyLaunchCount != null ? Convert.ToInt32(weeklyLaunchCount) : 0,
+                                WeeklyUsageMinutes = weeklyUsageMinutes != null ? Convert.ToInt64(weeklyUsageMinutes) : 0,
+                                WeekStartDate = weekStartDateBinary != null ? DateTime.FromBinary(Convert.ToInt64(weekStartDateBinary)) : DateTime.MinValue,
+                                LastWeekLaunchCount = lastWeekLaunchCount != null ? Convert.ToInt32(lastWeekLaunchCount) : 0,
+                                LastWeekUsageMinutes = lastWeekUsageMinutes != null ? Convert.ToInt64(lastWeekUsageMinutes) : 0
                             };
 
                             // 重新计算平均会话时长
@@ -1399,7 +1504,14 @@ namespace Ink_Canvas.Helpers
                         key.SetValue("DataHash", stats.DataHash ?? "");
                         key.SetValue("LastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
 
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 使用统计已保存到主注册表 - 启动次数: {stats.LaunchCount}, 使用时长: {stats.TotalUsageMinutes}分钟");
+                        // 每周统计数据
+                        key.SetValue("WeeklyLaunchCount", stats.WeeklyLaunchCount);
+                        key.SetValue("WeeklyUsageMinutes", stats.WeeklyUsageMinutes);
+                        key.SetValue("WeekStartDate", stats.WeekStartDate.ToString("yyyy-MM-dd"));
+                        key.SetValue("LastWeekLaunchCount", stats.LastWeekLaunchCount);
+                        key.SetValue("LastWeekUsageMinutes", stats.LastWeekUsageMinutes);
+
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 使用统计已保存到主注册表 - 总启动: {stats.LaunchCount}次, 本周启动: {stats.WeeklyLaunchCount}次, 总时长: {stats.TotalUsageMinutes}分钟, 本周时长: {stats.WeeklyUsageMinutes}分钟");
                     }
                     else
                     {
@@ -1444,6 +1556,13 @@ namespace Ink_Canvas.Helpers
                             key.SetValue("UF", (int)stats.UsageFrequency); // UsageFrequency
                             key.SetValue("DH", stats.DataHash ?? ""); // DataHash
                             key.SetValue("LU", DateTime.Now.ToBinary()); // LastUpdate
+
+                            // 每周统计数据
+                            key.SetValue("WLC", stats.WeeklyLaunchCount); // WeeklyLaunchCount
+                            key.SetValue("WUM", stats.WeeklyUsageMinutes); // WeeklyUsageMinutes
+                            key.SetValue("WSD", stats.WeekStartDate.ToBinary()); // WeekStartDate
+                            key.SetValue("LWLC", stats.LastWeekLaunchCount); // LastWeekLaunchCount
+                            key.SetValue("LWUM", stats.LastWeekUsageMinutes); // LastWeekUsageMinutes
 
                             successCount++;
                             LogHelper.WriteLogToFile($"DeviceIdentifier | 成功保存到备用注册表位置: {path}");
@@ -2078,8 +2197,13 @@ namespace Ink_Canvas.Helpers
                 if (stats != null)
                 {
                     summary.AppendLine($"数据完整性: {(stats.VerifyDataIntegrity() ? "✓" : "✗")}");
-                    summary.AppendLine($"启动次数: {stats.LaunchCount}");
-                    summary.AppendLine($"总使用时长: {stats.TotalUsageMinutes}分钟");
+                    summary.AppendLine($"总启动次数: {stats.LaunchCount}");
+                    summary.AppendLine($"总使用时长: {stats.TotalUsageMinutes}分钟 ({stats.TotalUsageMinutes / 60.0:F1}小时)");
+                    summary.AppendLine($"本周启动次数: {stats.WeeklyLaunchCount}");
+                    summary.AppendLine($"本周使用时长: {stats.WeeklyUsageMinutes}分钟 ({stats.WeeklyUsageMinutes / 60.0:F1}小时)");
+                    summary.AppendLine($"上周启动次数: {stats.LastWeekLaunchCount}");
+                    summary.AppendLine($"上周使用时长: {stats.LastWeekUsageMinutes}分钟 ({stats.LastWeekUsageMinutes / 60.0:F1}小时)");
+                    summary.AppendLine($"本周开始日期: {(stats.WeekStartDate != DateTime.MinValue ? stats.WeekStartDate.ToString("yyyy-MM-dd") : "未设置")}");
                     summary.AppendLine($"使用频率: {stats.UsageFrequency}");
                     summary.AppendLine($"更新优先级: {stats.UpdatePriority}");
                     summary.AppendLine($"最后修改: {stats.LastModified:yyyy-MM-dd HH:mm:ss}");
@@ -2200,6 +2324,131 @@ namespace Ink_Canvas.Helpers
         public static string GetDataProtectionSummary()
         {
             return GetUsageDataProtectionSummary();
+        }
+
+        /// <summary>
+        /// 测试每周重置功能
+        /// </summary>
+        public static string TestWeeklyReset()
+        {
+            var results = new StringBuilder();
+            results.AppendLine("每周重置功能测试:");
+
+            try
+            {
+                lock (fileLock)
+                {
+                    var stats = LoadUsageStats();
+                    if (stats == null)
+                    {
+                        results.AppendLine("无法加载使用统计数据");
+                        return results.ToString();
+                    }
+
+                    results.AppendLine($"\n当前状态:");
+                    results.AppendLine($"  本周开始日期: {(stats.WeekStartDate != DateTime.MinValue ? stats.WeekStartDate.ToString("yyyy-MM-dd") : "未设置")}");
+                    results.AppendLine($"  本周启动次数: {stats.WeeklyLaunchCount}");
+                    results.AppendLine($"  本周使用时长: {stats.WeeklyUsageMinutes}分钟");
+                    results.AppendLine($"  上周启动次数: {stats.LastWeekLaunchCount}");
+                    results.AppendLine($"  上周使用时长: {stats.LastWeekUsageMinutes}分钟");
+
+                    // 模拟跨周情况
+                    results.AppendLine($"\n模拟跨周测试:");
+                    var originalWeekStart = stats.WeekStartDate;
+                    var originalWeeklyLaunches = stats.WeeklyLaunchCount;
+                    var originalWeeklyMinutes = stats.WeeklyUsageMinutes;
+
+                    // 手动设置为上周
+                    stats.WeekStartDate = DateTime.Now.AddDays(-7).Date;
+                    stats.WeeklyLaunchCount = 5;
+                    stats.WeeklyUsageMinutes = 120;
+
+                    results.AppendLine($"  设置为上周数据 - 启动: {stats.WeeklyLaunchCount}次, 时长: {stats.WeeklyUsageMinutes}分钟");
+
+                    // 触发重置检查
+                    stats.CheckAndResetWeeklyStats();
+
+                    results.AppendLine($"\n重置后状态:");
+                    results.AppendLine($"  本周开始日期: {stats.WeekStartDate:yyyy-MM-dd}");
+                    results.AppendLine($"  本周启动次数: {stats.WeeklyLaunchCount}");
+                    results.AppendLine($"  本周使用时长: {stats.WeeklyUsageMinutes}分钟");
+                    results.AppendLine($"  上周启动次数: {stats.LastWeekLaunchCount}");
+                    results.AppendLine($"  上周使用时长: {stats.LastWeekUsageMinutes}分钟");
+
+                    // 验证重置是否正确
+                    var currentWeekStart = stats.GetWeekStartDate(DateTime.Now);
+                    if (stats.WeekStartDate == currentWeekStart &&
+                        stats.WeeklyLaunchCount == 0 &&
+                        stats.WeeklyUsageMinutes == 0 &&
+                        stats.LastWeekLaunchCount == 5 &&
+                        stats.LastWeekUsageMinutes == 120)
+                    {
+                        results.AppendLine($"\n✓ 每周重置功能工作正常");
+                    }
+                    else
+                    {
+                        results.AppendLine($"\n✗ 每周重置功能异常");
+                    }
+
+                    // 恢复原始数据
+                    stats.WeekStartDate = originalWeekStart;
+                    stats.WeeklyLaunchCount = originalWeeklyLaunches;
+                    stats.WeeklyUsageMinutes = originalWeeklyMinutes;
+                    stats.UpdateDataHash();
+                    SaveUsageStats(stats);
+
+                    results.AppendLine($"\n已恢复原始数据");
+
+                    return results.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                results.AppendLine($"\n测试失败: {ex.Message}");
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 每周重置测试失败: {ex.Message}", LogHelper.LogType.Error);
+                return results.ToString();
+            }
+        }
+
+        /// <summary>
+        /// 手动触发每周重置（用于测试）
+        /// </summary>
+        public static string ManualWeeklyReset()
+        {
+            try
+            {
+                lock (fileLock)
+                {
+                    var stats = LoadUsageStats();
+                    if (stats == null)
+                    {
+                        return "无法加载使用统计数据";
+                    }
+
+                    var beforeReset = $"重置前 - 本周启动: {stats.WeeklyLaunchCount}次, 本周时长: {stats.WeeklyUsageMinutes}分钟";
+
+                    // 强制重置
+                    stats.LastWeekLaunchCount = stats.WeeklyLaunchCount;
+                    stats.LastWeekUsageMinutes = stats.WeeklyUsageMinutes;
+                    stats.WeeklyLaunchCount = 0;
+                    stats.WeeklyUsageMinutes = 0;
+                    stats.WeekStartDate = stats.GetWeekStartDate(DateTime.Now);
+
+                    stats.UpdateDataHash();
+                    SaveUsageStats(stats);
+
+                    var afterReset = $"重置后 - 本周启动: {stats.WeeklyLaunchCount}次, 本周时长: {stats.WeeklyUsageMinutes}分钟, 上周启动: {stats.LastWeekLaunchCount}次, 上周时长: {stats.LastWeekUsageMinutes}分钟";
+
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 手动每周重置完成");
+                    return $"每周重置完成:\n{beforeReset}\n{afterReset}";
+                }
+            }
+            catch (Exception ex)
+            {
+                var errorMsg = $"手动每周重置失败: {ex.Message}";
+                LogHelper.WriteLogToFile($"DeviceIdentifier | {errorMsg}", LogHelper.LogType.Error);
+                return errorMsg;
+            }
         }
 
         /// <summary>
