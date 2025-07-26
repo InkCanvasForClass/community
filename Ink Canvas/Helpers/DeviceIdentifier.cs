@@ -2483,9 +2483,5 @@ namespace Ink_Canvas.Helpers
                 return errorMsg;
             }
         }
-
-
-
-
     }
 } 
