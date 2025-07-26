@@ -36,6 +36,17 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "2-2-3-trimethylpentane",
+      "name": "2,2,3-三甲基戊烷",
+      "avatar_url": "https://avatars.githubusercontent.com/u/141403762?v=4",
+      "profile": "https://github.com/2-2-3-trimethylpentane",
+      "contributions": [
+        "blog",
+        "doc",
+        "design"
+      ]
     }
   ]
 }
