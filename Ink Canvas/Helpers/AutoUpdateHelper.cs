@@ -709,7 +709,7 @@ namespace Ink_Canvas.Helpers
                 }
                 
                 // 根据文件大小动态调整分块大小，避免分块过小
-                int minBlockSize = 1024 * 1024; // 最小1MB
+                int minBlockSize = 32 * 1024; // 最小32KB
                 int blockSize = Math.Max(minBlockSize, (int)Math.Ceiling((double)totalSize / threadCount));
                 int blockCount = (int)Math.Ceiling((double)totalSize / blockSize);
                 
