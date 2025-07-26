@@ -62,6 +62,11 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community/InkCanvasForClass.CE.{0}.zip",
+                    },
+                    new UpdateLineGroup
+                    {
+                        GroupName = "inkeys",
+                        DownloadUrlFormat = "https://iccce.inkeys.top/Release/InkCanvasForClass.CE.{0}.zip",
                     }
                 }
             },
@@ -92,6 +97,11 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
+                    },
+                    new UpdateLineGroup
+                    {
+                        GroupName = "inkeys",
+                        DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
                     }
                 }
             }
@@ -169,10 +179,10 @@ namespace Ink_Canvas.Helpers
             
             foreach (var group in groups)
             {
-                // 跳过“智教联盟”线路组，不参与延迟检测和排序
-                if (group.GroupName == "智教联盟")
+                // 跳过"智教联盟"和"inkeys"线路组，不参与延迟检测和排序
+                if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过智教联盟线路组延迟检测");
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过{group.GroupName}线路组延迟检测");
                     continue;
                 }
                 LogHelper.WriteLogToFile($"AutoUpdate | 检测线路组: {group.GroupName} ({group.VersionUrl})");
@@ -194,12 +204,20 @@ namespace Ink_Canvas.Helpers
                 .Select(x => x.group)
                 .ToList();
             
-            // 将“智教联盟”线路组插入到最前面（如果存在）
+            // 将"智教联盟"线路组插入到最前面（如果存在）
             var zhiJiaoGroup = groups.FirstOrDefault(g => g.GroupName == "智教联盟");
             if (zhiJiaoGroup != null)
             {
                 orderedGroups.Insert(0, zhiJiaoGroup);
                 LogHelper.WriteLogToFile($"AutoUpdate | 智教联盟线路组已插入到首位");
+            }
+            
+            // 将"inkeys"线路组插入到第二位（如果存在）
+            var inkeysGroup = groups.FirstOrDefault(g => g.GroupName == "inkeys");
+            if (inkeysGroup != null)
+            {
+                orderedGroups.Insert(1, inkeysGroup);
+                LogHelper.WriteLogToFile($"AutoUpdate | inkeys线路组已插入到第二位");
             }
             
             if (orderedGroups.Count > 0)
@@ -547,10 +565,21 @@ namespace Ink_Canvas.Helpers
 
                 // 优先尝试“智教联盟”线路组
                 var zhiJiaoGroup = groups.FirstOrDefault(g => g.GroupName == "智教联盟");
-                if (zhiJiaoGroup != null)
+                var inkeysGroup = groups.FirstOrDefault(g => g.GroupName == "inkeys");
+                if (zhiJiaoGroup != null || inkeysGroup != null)
                 {
-                    groups = new List<UpdateLineGroup> { zhiJiaoGroup }.Concat(groups.Where(g => g.GroupName != "智教联盟")).ToList();
-                    LogHelper.WriteLogToFile($"AutoUpdate | 下载时优先尝试智教联盟线路组");
+                    var priorityGroups = new List<UpdateLineGroup>();
+                    if (zhiJiaoGroup != null)
+                    {
+                        priorityGroups.Add(zhiJiaoGroup);
+                        LogHelper.WriteLogToFile($"AutoUpdate | 下载时优先尝试智教联盟线路组");
+                    }
+                    if (inkeysGroup != null)
+                    {
+                        priorityGroups.Add(inkeysGroup);
+                        LogHelper.WriteLogToFile($"AutoUpdate | 下载时优先尝试inkeys线路组");
+                    }
+                    groups = priorityGroups.Concat(groups.Where(g => g.GroupName != "智教联盟" && g.GroupName != "inkeys")).ToList();
                 }
 
                 // 依次尝试每个线路组
@@ -570,6 +599,11 @@ namespace Ink_Canvas.Helpers
                         }
                         url = realUrl;
                         LogHelper.WriteLogToFile($"AutoUpdate | 智教联盟真实下载地址: {url}");
+                    }
+                    // inkeys线路组直接使用下载地址，无需特殊处理
+                    else if (group.GroupName == "inkeys")
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 使用inkeys线路组下载地址: {url}");
                     }
                     LogHelper.WriteLogToFile($"AutoUpdate | 尝试从线路组 {group.GroupName} 下载: {url}");
                     
