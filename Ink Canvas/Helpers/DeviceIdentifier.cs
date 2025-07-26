@@ -1744,15 +1744,27 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 根据优先级决定是否应该推送更新（综合时间和使用频率判断）
+        /// 根据优先级决定是否应该推送更新（仅适用于自动更新，不影响版本修复功能）
         /// </summary>
         /// <param name="updateVersion">更新版本号</param>
         /// <param name="releaseTime">发布时间</param>
+        /// <param name="isAutoUpdate">是否为自动更新检查（默认true）</param>
         /// <returns>是否应该推送更新</returns>
-        public static bool ShouldPushUpdate(string updateVersion, DateTime releaseTime)
+        public static bool ShouldPushUpdate(string updateVersion, DateTime releaseTime, bool isAutoUpdate = true)
         {
             try
             {
+                // 判断更新类型（基于版本号）
+                var updateType = DetermineUpdateType(updateVersion);
+
+                // 如果不是自动更新（即手动检查或版本修复），则应用不同的策略
+                if (!isAutoUpdate)
+                {
+                    // 手动更新检查或版本修复：立即允许，不受分级策略影响
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 手动更新检查 - 版本: {updateVersion}, 类型: {updateType}, 结果: 允许");
+                    return true;
+                }
+
                 var priority = GetUpdatePriority();
                 var frequency = GetUsageFrequency();
                 var stats = LoadUsageStats();
@@ -1763,13 +1775,10 @@ namespace Ink_Canvas.Helpers
                 // 计算最近活跃度（最后一次使用距今的天数）
                 var daysSinceLastUse = (DateTime.Now - stats.LastLaunchTime).TotalDays;
 
-                // 判断更新类型（基于版本号）
-                var updateType = DetermineUpdateType(updateVersion);
-
-                // 综合判断逻辑
+                // 综合判断逻辑（仅适用于自动更新）
                 var shouldPush = ShouldPushUpdateComprehensive(priority, frequency, daysSinceRelease, daysSinceLastUse, stats, updateType);
 
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 更新推送判断 - 版本: {updateVersion}, 类型: {updateType}, " +
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 自动更新推送判断 - 版本: {updateVersion}, 类型: {updateType}, " +
                                        $"优先级: {priority}, 频率: {frequency}, 发布天数: {daysSinceRelease:F1}, " +
                                        $"最后使用: {daysSinceLastUse:F1}天前, 结果: {shouldPush}");
 
@@ -1833,7 +1842,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 综合时间和使用频率的更新推送判断逻辑
+        /// 综合时间和使用频率的自动更新推送判断逻辑（不影响手动更新和版本修复）
         /// </summary>
         private static bool ShouldPushUpdateComprehensive(UpdatePriority priority, UsageFrequency frequency,
             double daysSinceRelease, double daysSinceLastUse, UsageStats stats, UpdateType updateType)
@@ -1936,7 +1945,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 根据更新类型获取紧急程度倍数
+        /// 根据更新类型获取紧急程度倍数（仅用于自动更新分级）
         /// </summary>
         private static double GetUpdateUrgencyMultiplier(UpdateType updateType)
         {
@@ -1954,6 +1963,48 @@ namespace Ink_Canvas.Helpers
                     return 1.0;   // 未知类型正常推送
                 default:
                     return 1.0;
+            }
+        }
+
+        /// <summary>
+        /// 检查是否应该进行版本修复（不受分级策略影响）
+        /// </summary>
+        /// <param name="currentVersion">当前版本</param>
+        /// <param name="availableVersion">可用版本</param>
+        /// <returns>是否需要版本修复</returns>
+        public static bool ShouldPerformVersionFix(string currentVersion, string availableVersion)
+        {
+            try
+            {
+                // 版本修复功能不受使用频率分级策略影响，始终允许
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 版本修复检查 - 当前版本: {currentVersion}, 可用版本: {availableVersion}, 结果: 允许");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 版本修复检查失败: {ex.Message}", LogHelper.LogType.Error);
+                return true; // 出错时默认允许
+            }
+        }
+
+        /// <summary>
+        /// 检查是否应该进行手动更新检查（不受分级策略影响）
+        /// </summary>
+        /// <param name="updateVersion">更新版本号</param>
+        /// <returns>是否应该允许手动更新</returns>
+        public static bool ShouldAllowManualUpdate(string updateVersion)
+        {
+            try
+            {
+                // 手动更新检查不受使用频率分级策略影响，始终允许
+                var updateType = DetermineUpdateType(updateVersion);
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 手动更新检查 - 版本: {updateVersion}, 类型: {updateType}, 结果: 允许");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 手动更新检查失败: {ex.Message}", LogHelper.LogType.Error);
+                return true; // 出错时默认允许
             }
         }
 
@@ -2012,31 +2063,46 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         /// <param name="updateVersion">更新版本号</param>
         /// <param name="releaseTime">发布时间</param>
+        /// <param name="isAutoUpdate">是否为自动更新（默认true）</param>
         /// <returns>推送判断详情</returns>
-        public static string SimulateUpdatePushDecision(string updateVersion, DateTime releaseTime)
+        public static string SimulateUpdatePushDecision(string updateVersion, DateTime releaseTime, bool isAutoUpdate = true)
         {
             try
             {
-                var priority = GetUpdatePriority();
-                var frequency = GetUsageFrequency();
-                var stats = LoadUsageStats();
-                var daysSinceRelease = (DateTime.Now - releaseTime).TotalDays;
-                var daysSinceLastUse = (DateTime.Now - stats.LastLaunchTime).TotalDays;
                 var updateType = DetermineUpdateType(updateVersion);
-                var urgencyMultiplier = GetUpdateUrgencyMultiplier(updateType);
-                var shouldPush = ShouldPushUpdate(updateVersion, releaseTime);
+                var shouldPush = ShouldPushUpdate(updateVersion, releaseTime, isAutoUpdate);
 
-                return $"更新推送判断详情:\n" +
-                       $"版本号: {updateVersion}\n" +
-                       $"更新类型: {updateType}\n" +
-                       $"发布时间: {releaseTime:yyyy-MM-dd HH:mm}\n" +
-                       $"发布天数: {daysSinceRelease:F1}天\n" +
-                       $"最后使用: {daysSinceLastUse:F1}天前\n" +
-                       $"使用频率: {frequency}\n" +
-                       $"更新优先级: {priority}\n" +
-                       $"紧急程度倍数: {urgencyMultiplier:F1}x\n" +
-                       $"用户类型: {GetUserTypeDescription(stats)}\n" +
-                       $"推送决定: {(shouldPush ? "是" : "否")}";
+                var result = $"更新推送判断详情:\n" +
+                           $"版本号: {updateVersion}\n" +
+                           $"更新类型: {updateType}\n" +
+                           $"发布时间: {releaseTime:yyyy-MM-dd HH:mm}\n" +
+                           $"更新方式: {(isAutoUpdate ? "自动更新" : "手动更新/版本修复")}\n";
+
+                if (isAutoUpdate)
+                {
+                    // 只有自动更新才显示分级策略相关信息
+                    var priority = GetUpdatePriority();
+                    var frequency = GetUsageFrequency();
+                    var stats = LoadUsageStats();
+                    var daysSinceRelease = (DateTime.Now - releaseTime).TotalDays;
+                    var daysSinceLastUse = (DateTime.Now - stats.LastLaunchTime).TotalDays;
+                    var urgencyMultiplier = GetUpdateUrgencyMultiplier(updateType);
+
+                    result += $"发布天数: {daysSinceRelease:F1}天\n" +
+                             $"最后使用: {daysSinceLastUse:F1}天前\n" +
+                             $"使用频率: {frequency}\n" +
+                             $"更新优先级: {priority}\n" +
+                             $"紧急程度倍数: {urgencyMultiplier:F1}x\n" +
+                             $"用户类型: {GetUserTypeDescription(stats)}\n";
+                }
+                else
+                {
+                    result += "分级策略: 不适用（手动更新/版本修复始终允许）\n";
+                }
+
+                result += $"推送决定: {(shouldPush ? "是" : "否")}";
+
+                return result;
             }
             catch (Exception ex)
             {
