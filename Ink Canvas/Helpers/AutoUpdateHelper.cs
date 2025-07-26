@@ -396,7 +396,7 @@ namespace Ink_Canvas.Helpers
         }
 
         // 通过GitHub API获取最新Release信息
-        private static async Task<(string version, string downloadUrl, string releaseNotes)> GetLatestGithubRelease(UpdateChannel channel)
+        private static async Task<(string version, string downloadUrl, string releaseNotes, DateTime? releaseTime)> GetLatestGithubRelease(UpdateChannel channel)
         {
             try
             {
@@ -411,15 +411,23 @@ namespace Ink_Canvas.Helpers
                     string version = json["tag_name"]?.ToString();
                     string releaseNotes = json["body"]?.ToString();
                     string downloadUrl = json["assets"]?.First?["browser_download_url"]?.ToString();
+                    
+                    // 解析发布时间
+                    DateTime? releaseTime = null;
+                    if (json["published_at"] != null && DateTime.TryParse(json["published_at"].ToString(), out DateTime parsedTime))
+                    {
+                        releaseTime = parsedTime;
+                    }
+                    
                     if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(downloadUrl))
-                        return (version, downloadUrl, releaseNotes);
+                        return (version, downloadUrl, releaseNotes, releaseTime);
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | GitHub Releases API 获取失败: {ex.Message}", LogHelper.LogType.Warning);
             }
-            return (null, null, null);
+            return (null, null, null, null);
         }
 
         // 主要的更新检测方法（优先检测延迟，失败时自动切换线路组）
@@ -428,11 +436,17 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                // 记录更新检查时间
+                DeviceIdentifier.RecordUpdateCheck();
+                
                 string localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
                 LogHelper.WriteLogToFile($"AutoUpdate | 本地版本: {localVersion}");
+                LogHelper.WriteLogToFile($"AutoUpdate | 设备ID: {DeviceIdentifier.GetDeviceId()}");
+                LogHelper.WriteLogToFile($"AutoUpdate | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 优先通过GitHub Releases API检测...");
+                
                 // 1. 优先通过GitHub Releases API获取
-                var (apiVersion, _, apiReleaseNotes) = await GetLatestGithubRelease(channel);
+                var (apiVersion, _, apiReleaseNotes, apiReleaseTime) = await GetLatestGithubRelease(channel);
                 if (!string.IsNullOrEmpty(apiVersion))
                 {
                     Version local = new Version(localVersion);
@@ -440,15 +454,29 @@ namespace Ink_Canvas.Helpers
                     if (remote > local || alwaysGetRemote)
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 通过GitHub Releases API发现新版本: {apiVersion}");
+                        
+                        // 检查是否应该根据用户优先级推送更新
+                        DateTime releaseTime = apiReleaseTime ?? DateTime.Now;
+                        bool shouldPush = DeviceIdentifier.ShouldPushUpdate(apiVersion, releaseTime);
+                        if (!shouldPush)
+                        {
+                            var priority = DeviceIdentifier.GetUpdatePriority();
+                            var daysSinceRelease = (DateTime.Now - releaseTime).TotalDays;
+                            LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级({priority})，暂不推送更新 {apiVersion}，发布时间: {releaseTime:yyyy-MM-dd HH:mm:ss}，已过 {daysSinceRelease:F1} 天");
+                            var group = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
+                            return (null, group, apiReleaseNotes); // 返回null表示不推送
+                        }
+                        
+                        LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级，推送更新 {apiVersion}");
                         // 只返回版本号和日志，不返回直链
-                        var group = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
-                        return (apiVersion, group, apiReleaseNotes);
+                        var availableGroup = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
+                        return (apiVersion, availableGroup, apiReleaseNotes);
                     }
                     else
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 当前版本已是最新 (GitHub Releases API)");
-                        var group = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
-                        return (null, group, apiReleaseNotes);
+                        var availableGroup = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
+                        return (null, availableGroup, apiReleaseNotes);
                     }
                 }
                 // 2. 回退到原有txt方案
@@ -471,6 +499,17 @@ namespace Ink_Canvas.Helpers
                         if (remote > local || alwaysGetRemote)
                         {
                             LogHelper.WriteLogToFile($"AutoUpdate | 发现新版本或强制获取: {remoteVersion}");
+                            
+                            // 检查是否应该根据用户优先级推送更新
+                            bool shouldPush = DeviceIdentifier.ShouldPushUpdate(remoteVersion, DateTime.Now);
+                            if (!shouldPush)
+                            {
+                                var priority = DeviceIdentifier.GetUpdatePriority();
+                                LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级({priority})，暂不推送更新 {remoteVersion}");
+                                return (null, group, null); // 返回null表示不推送
+                            }
+                            
+                            LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级，推送更新 {remoteVersion}");
                             return (remoteVersion, group, null);
                         }
                         else

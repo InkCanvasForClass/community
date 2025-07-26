@@ -854,6 +854,8 @@ namespace Ink_Canvas {
         {
             // 切换到关于页面
             ShowSettingsSection("about");
+            // 刷新设备信息
+            RefreshDeviceInfo();
         }
 
         // 新增：个性化设置
@@ -879,6 +881,99 @@ namespace Ink_Canvas {
             // 设置蒙版为不可点击，并清除背景
             BorderSettingsMask.IsHitTestVisible = false;
             BorderSettingsMask.Background = null; // 确保清除蒙层背景
+        }
+
+        /// <summary>
+        /// 刷新设备信息按钮点击事件
+        /// </summary>
+        private void RefreshDeviceInfo_Click(object sender, RoutedEventArgs e)
+        {
+            RefreshDeviceInfo();
+        }
+
+        /// <summary>
+        /// 刷新设备信息显示
+        /// </summary>
+        private void RefreshDeviceInfo()
+        {
+            try
+            {
+                // 获取设备ID
+                string deviceId = DeviceIdentifier.GetDeviceId();
+                DeviceIdTextBlock.Text = deviceId;
+
+                // 获取使用频率
+                var usageFrequency = DeviceIdentifier.GetUsageFrequency();
+                string frequencyText;
+                switch (usageFrequency)
+                {
+                    case DeviceIdentifier.UsageFrequency.High:
+                        frequencyText = "高频用户";
+                        break;
+                    case DeviceIdentifier.UsageFrequency.Medium:
+                        frequencyText = "中频用户";
+                        break;
+                    case DeviceIdentifier.UsageFrequency.Low:
+                        frequencyText = "低频用户";
+                        break;
+                    default:
+                        frequencyText = "未知";
+                        break;
+                }
+                UsageFrequencyTextBlock.Text = frequencyText;
+
+                // 获取更新优先级
+                var updatePriority = DeviceIdentifier.GetUpdatePriority();
+                string priorityText;
+                switch (updatePriority)
+                {
+                    case DeviceIdentifier.UpdatePriority.High:
+                        priorityText = "高优先级（优先推送更新）";
+                        break;
+                    case DeviceIdentifier.UpdatePriority.Medium:
+                        priorityText = "中优先级（正常推送更新）";
+                        break;
+                    case DeviceIdentifier.UpdatePriority.Low:
+                        priorityText = "低优先级（延迟推送更新）";
+                        break;
+                    default:
+                        priorityText = "未知";
+                        break;
+                }
+                UpdatePriorityTextBlock.Text = priorityText;
+
+                // 获取使用统计
+                var (launchCount, totalMinutes, avgSession, _) = DeviceIdentifier.GetUsageStats();
+                LaunchCountTextBlock.Text = launchCount.ToString();
+                
+                string totalUsageText;
+                if (totalMinutes < 60)
+                {
+                    totalUsageText = $"{totalMinutes}分钟";
+                }
+                else if (totalMinutes < 1440)
+                {
+                    totalUsageText = $"{totalMinutes / 60}小时{totalMinutes % 60}分钟";
+                }
+                else
+                {
+                    totalUsageText = $"{totalMinutes / 1440}天{(totalMinutes % 1440) / 60}小时";
+                }
+                TotalUsageTextBlock.Text = totalUsageText;
+
+                LogHelper.WriteLogToFile($"MainWindow | 设备信息已刷新 - ID: {deviceId}, 频率: {frequencyText}, 优先级: {priorityText}");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"MainWindow | 刷新设备信息失败: {ex.Message}", LogHelper.LogType.Error);
+                
+                // 显示错误信息
+                DeviceIdTextBlock.Text = "获取失败";
+                UsageFrequencyTextBlock.Text = "获取失败";
+                UpdatePriorityTextBlock.Text = "获取失败";
+                LaunchCountTextBlock.Text = "获取失败";
+                TotalUsageTextBlock.Text = "获取失败";
+            }
         }
 
         // 新增：折叠侧边栏
