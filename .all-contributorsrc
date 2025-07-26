@@ -58,6 +58,17 @@
         "infra",
         "doc"
       ]
+    },
+    {
+      "login": "MKStoler1024",
+      "name": "MKStoler1024",
+      "avatar_url": "https://avatars.githubusercontent.com/u/158786854?v=4",
+      "profile": "https://github.com/MKStoler1024",
+      "contributions": [
+        "doc",
+        "code",
+        "design"
+      ]
     }
   ]
 }
