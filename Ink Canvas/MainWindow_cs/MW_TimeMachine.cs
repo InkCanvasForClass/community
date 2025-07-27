@@ -130,7 +130,7 @@ namespace Ink_Canvas {
                                 canvas.Strokes.Remove(currentStroke);
                 }
             } else if (item.CommitType == TimeMachineHistoryType.ElementInsert) {
-                if (!item.StrokeHasBeenCleared) {
+                if (item.StrokeHasBeenCleared) {
                     // Undo: 移除元素
                     if (item.InsertedElement != null && inkCanvas.Children.Contains(item.InsertedElement))
                         inkCanvas.Children.Remove(item.InsertedElement);

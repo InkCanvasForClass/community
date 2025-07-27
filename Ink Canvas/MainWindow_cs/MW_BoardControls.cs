@@ -29,6 +29,15 @@ namespace Ink_Canvas {
                 TimeMachineHistories[0] = timeMachineHistory;
                 timeMachine.ClearStrokeHistory();
             } else {
+                // 新增：提交所有图片元素到时间机器历史记录
+                foreach (var child in inkCanvas.Children)
+                {
+                    if (child is Image img)
+                    {
+                        timeMachine.CommitElementInsertHistory(img);
+                    }
+                }
+                
                 var timeMachineHistory = timeMachine.ExportTimeMachineHistory();
                 TimeMachineHistories[CurrentWhiteboardIndex] = timeMachineHistory;
                 timeMachine.ClearStrokeHistory();
@@ -71,6 +80,14 @@ namespace Ink_Canvas {
                     foreach (var item in TimeMachineHistories[0]) ApplyHistoryToCanvas(item);
                 } else {
                     timeMachine.ImportTimeMachineHistory(TimeMachineHistories[CurrentWhiteboardIndex]);
+                    // 新增：通过时间机器历史恢复图片
+                    foreach (var item in TimeMachineHistories[CurrentWhiteboardIndex])
+                    {
+                        if (item.CommitType == TimeMachineHistoryType.ElementInsert)
+                        {
+                            inkCanvas.Children.Add(item.InsertedElement);
+                        }
+                    }
                     foreach (var item in TimeMachineHistories[CurrentWhiteboardIndex]) ApplyHistoryToCanvas(item);
                     // 恢复当前页图片信息
                     inkCanvas.Children.Clear();
