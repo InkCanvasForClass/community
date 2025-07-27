@@ -88,7 +88,7 @@ namespace Ink_Canvas
         [JsonProperty("enablePalmEraser")]
         public bool EnablePalmEraser { get; set; } = true;
         [JsonProperty("clearCanvasAlsoClearImages")]
-        public bool ClearCanvasAlsoClearImages { get; set; } = false;
+        public bool ClearCanvasAlsoClearImages { get; set; } = true;
     }
 
     public enum OptionalOperation
