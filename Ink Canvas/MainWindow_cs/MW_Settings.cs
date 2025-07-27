@@ -2221,6 +2221,13 @@ namespace Ink_Canvas {
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchClearCanvasAlsoClearImages_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Canvas.ClearCanvasAlsoClearImages = ToggleSwitchClearCanvasAlsoClearImages.IsOn;
+            SaveSettingsToFile();
+        }
+
         private void ToggleSwitchCompressPicturesUploaded_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;

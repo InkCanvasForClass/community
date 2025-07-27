@@ -716,12 +716,44 @@ namespace Ink_Canvas {
         private void BoardSymbolIconDelete_MouseUp(object sender, RoutedEventArgs e) {
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
+
+            // 根据设置决定是否清空图片
+            if (Settings.Canvas.ClearCanvasAlsoClearImages) {
+                // 如果设置为清空图片，则直接清空所有子元素
+                System.Diagnostics.Debug.WriteLine("BoardSymbolIconDelete: Clearing all children including images");
+                inkCanvas.Children.Clear();
+            } else {
+                // 保存非笔画元素（如图片）
+                System.Diagnostics.Debug.WriteLine("BoardSymbolIconDelete: Preserving non-stroke elements (images)");
+                var preservedElements = PreserveNonStrokeElements();
+                System.Diagnostics.Debug.WriteLine($"BoardSymbolIconDelete: Preserved elements count: {preservedElements.Count}");
+                inkCanvas.Children.Clear();
+                // 恢复非笔画元素
+                RestoreNonStrokeElements(preservedElements);
+                System.Diagnostics.Debug.WriteLine($"BoardSymbolIconDelete: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
+            }
         }
         private void BoardSymbolIconDeleteInkAndHistories_MouseUp(object sender, RoutedEventArgs e)
         {
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine == false) timeMachine.ClearStrokeHistory();
+
+            // 根据设置决定是否清空图片
+            if (Settings.Canvas.ClearCanvasAlsoClearImages) {
+                // 如果设置为清空图片，则直接清空所有子元素
+                System.Diagnostics.Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Clearing all children including images");
+                inkCanvas.Children.Clear();
+            } else {
+                // 保存非笔画元素（如图片）
+                System.Diagnostics.Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Preserving non-stroke elements (images)");
+                var preservedElements = PreserveNonStrokeElements();
+                System.Diagnostics.Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: Preserved elements count: {preservedElements.Count}");
+                inkCanvas.Children.Clear();
+                // 恢复非笔画元素
+                RestoreNonStrokeElements(preservedElements);
+                System.Diagnostics.Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
+            }
         }
 
         private void BoardLaunchEasiCamera_MouseUp(object sender, MouseButtonEventArgs e) {

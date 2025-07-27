@@ -466,6 +466,7 @@ namespace Ink_Canvas {
 
                 ToggleSwitchClearCanvasAndClearTimeMachine.IsOn =
                     Settings.Canvas.ClearCanvasAndClearTimeMachine == true;
+                ToggleSwitchClearCanvasAlsoClearImages.IsOn = Settings.Canvas.ClearCanvasAlsoClearImages;
 
                 switch (Settings.Canvas.EraserShapeType) {
                     case 0: {
