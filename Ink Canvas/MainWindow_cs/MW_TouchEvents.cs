@@ -21,6 +21,46 @@ namespace Ink_Canvas {
         private Point centerPoint = new Point(0, 0);
         private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
 
+        /// <summary>
+        /// 保存画布上的非笔画元素（如图片、媒体元素等）
+        /// </summary>
+        private List<UIElement> PreserveNonStrokeElements()
+        {
+            var preservedElements = new List<UIElement>();
+
+            // 遍历inkCanvas的所有子元素
+            for (int i = inkCanvas.Children.Count - 1; i >= 0; i--)
+            {
+                var child = inkCanvas.Children[i];
+
+                // 保存图片、媒体元素等非笔画相关的UI元素
+                if (child is Image || child is MediaElement ||
+                    (child is Border border && border.Name != "AdvancedEraserOverlay"))
+                {
+                    preservedElements.Add(child);
+                }
+            }
+
+            return preservedElements;
+        }
+
+        /// <summary>
+        /// 恢复之前保存的非笔画元素到画布
+        /// </summary>
+        private void RestoreNonStrokeElements(List<UIElement> preservedElements)
+        {
+            if (preservedElements == null) return;
+
+            foreach (var element in preservedElements)
+            {
+                // 确保元素没有父容器再添加到inkCanvas
+                if (element is FrameworkElement fe && fe.Parent == null)
+                {
+                    inkCanvas.Children.Add(element);
+                }
+            }
+        }
+
         private void BorderMultiTouchMode_MouseUp(object sender, MouseButtonEventArgs e) {
             if (isInMultiTouchMode) {
                 inkCanvas.StylusDown -= MainWindow_StylusDown;
@@ -31,12 +71,16 @@ namespace Ink_Canvas {
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint) {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
+                // 保存非笔画元素（如图片）
+                var preservedElements = PreserveNonStrokeElements();
                 inkCanvas.Children.Clear();
+                // 恢复非笔画元素
+                RestoreNonStrokeElements(preservedElements);
                 isInMultiTouchMode = false;
-                
+
             }
             else {
-                
+
                 inkCanvas.StylusDown += MainWindow_StylusDown;
                 inkCanvas.StylusMove += MainWindow_StylusMove;
                 inkCanvas.StylusUp += MainWindow_StylusUp;
@@ -45,7 +89,11 @@ namespace Ink_Canvas {
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint) {
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 }
+                // 保存非笔画元素（如图片）
+                var preservedElements = PreserveNonStrokeElements();
                 inkCanvas.Children.Clear();
+                // 恢复非笔画元素
+                RestoreNonStrokeElements(preservedElements);
                 isInMultiTouchMode = true;
             }
         }
@@ -118,7 +166,12 @@ namespace Ink_Canvas {
                 VisualCanvasList.Remove(e.StylusDevice.Id);
                 TouchDownPointsList.Remove(e.StylusDevice.Id);
                 if (StrokeVisualList.Count == 0 || VisualCanvasList.Count == 0 || TouchDownPointsList.Count == 0) {
-                    inkCanvas.Children.Clear();
+                    // 只清除手写笔预览相关的Canvas，不清除所有子元素
+                    foreach (var canvas in VisualCanvasList.Values.ToList()) {
+                        if (inkCanvas.Children.Contains(canvas)) {
+                            inkCanvas.Children.Remove(canvas);
+                        }
+                    }
                     StrokeVisualList.Clear();
                     VisualCanvasList.Clear();
                     TouchDownPointsList.Clear();
@@ -446,7 +499,11 @@ namespace Ink_Canvas {
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
+                // 保存非笔画元素（如图片）
+                var preservedElements = PreserveNonStrokeElements();
                 inkCanvas.Children.Clear();
+                // 恢复非笔画元素
+                RestoreNonStrokeElements(preservedElements);
                 isInMultiTouchMode = false;
                 // 关闭多指书写时，恢复手掌擦开关
                 if (palmEraserWasEnabledBeforeMultiTouch) {
@@ -471,7 +528,11 @@ namespace Ink_Canvas {
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 }
+                // 保存非笔画元素（如图片）
+                var preservedElements = PreserveNonStrokeElements();
                 inkCanvas.Children.Clear();
+                // 恢复非笔画元素
+                RestoreNonStrokeElements(preservedElements);
                 isInMultiTouchMode = true;
                 // 启用多指书写时，自动禁用手掌擦
                 palmEraserWasEnabledBeforeMultiTouch = Settings.Canvas.EnablePalmEraser;

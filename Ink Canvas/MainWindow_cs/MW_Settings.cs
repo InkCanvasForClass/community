@@ -1507,18 +1507,22 @@ namespace Ink_Canvas {
                     InkCanvasEditingMode currentEditingMode = inkCanvas.EditingMode;
                     int currentDrawingShapeMode = drawingShapeMode;
                     bool currentForceEraser = forceEraser;
-                    
+
                     inkCanvas.StylusDown -= MainWindow_StylusDown;
                     inkCanvas.StylusMove -= MainWindow_StylusMove;
                     inkCanvas.StylusUp -= MainWindow_StylusUp;
                     inkCanvas.TouchDown -= MainWindow_TouchDown;
                     inkCanvas.TouchDown += Main_Grid_TouchDown;
-                    
+
                     // 先设为None再设回原来的模式，避免可能的事件冲突
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    // 保存非笔画元素（如图片）
+                    var preservedElements = PreserveNonStrokeElements();
                     inkCanvas.Children.Clear();
+                    // 恢复非笔画元素
+                    RestoreNonStrokeElements(preservedElements);
                     isInMultiTouchMode = false;
-                    
+
                     // 恢复到之前的编辑状态
                     inkCanvas.EditingMode = currentEditingMode;
                     drawingShapeMode = currentDrawingShapeMode;
@@ -2247,5 +2251,7 @@ namespace Ink_Canvas {
             Settings.Canvas.EnablePalmEraser = ToggleSwitchEnablePalmEraser.IsOn;
             SaveSettingsToFile();
         }
+
+
     }
 }

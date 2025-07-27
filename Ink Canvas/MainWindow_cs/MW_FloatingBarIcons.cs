@@ -1726,7 +1726,11 @@ namespace Ink_Canvas {
             }
 
             ClearStrokes(false);
+            // 保存非笔画元素（如图片）
+            var preservedElements = PreserveNonStrokeElements();
             inkCanvas.Children.Clear();
+            // 恢复非笔画元素
+            RestoreNonStrokeElements(preservedElements);
 
             CancelSingleFingerDragMode();
 
@@ -2021,5 +2025,7 @@ namespace Ink_Canvas {
                 }
             }
         }
+
+
     }
 }
