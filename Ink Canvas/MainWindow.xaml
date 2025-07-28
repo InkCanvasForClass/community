@@ -5793,7 +5793,6 @@
                                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="10" Text="/ 999" Name="PPTBtnPageTotal" />
                             </ui:SimpleStackPanel>
-
                         </Grid>
                     </Border>
                     <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"
