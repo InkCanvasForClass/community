@@ -113,15 +113,15 @@
   <ItemGroup>
     <Reference Include="IACore">
       <HintPath>.\IACore.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="IALoader">
       <HintPath>.\IALoader.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="IAWinFX">
       <HintPath>.\IAWinFX.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="netstandard" />
@@ -189,6 +189,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\TimerDownNotice.wav" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\IACore\IACore.dll" />
+    <EmbeddedResource Include="Resources\IACore\IALoader.dll" />
+    <EmbeddedResource Include="Resources\IACore\IAWinFX.dll" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Cursors\Cursor.cur" />
