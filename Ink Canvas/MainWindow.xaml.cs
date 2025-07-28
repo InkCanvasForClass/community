@@ -336,11 +336,20 @@ namespace Ink_Canvas {
             
             // 加载自定义背景颜色
             LoadCustomBackgroundColor();
-            
+
             // 注册设置面板滚动事件
             if (SettingsPanelScrollViewer != null)
             {
                 SettingsPanelScrollViewer.ScrollChanged += SettingsPanelScrollViewer_ScrollChanged;
+            }
+
+            // 初始化PPT管理器
+            InitializePPTManagers();
+
+            // 如果启用PPT支持，开始监控
+            if (Settings.PowerPointSettings.PowerPointSupport)
+            {
+                StartPPTMonitoring();
             }
             
             // HasNewUpdateWindow hasNewUpdateWindow = new HasNewUpdateWindow();
@@ -500,8 +509,11 @@ namespace Ink_Canvas {
         private void Window_Closed(object sender, EventArgs e) {
             SystemEvents.DisplaySettingsChanged -= SystemEventsOnDisplaySettingsChanged;
 
+            // 释放PPT管理器资源
+            DisposePPTManagers();
+
             LogHelper.WriteLogToFile("Ink Canvas closed", LogHelper.LogType.Event);
-            
+
             // 检查是否有待安装的更新
             CheckPendingUpdates();
         }

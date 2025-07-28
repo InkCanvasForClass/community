@@ -57,18 +57,21 @@ namespace Ink_Canvas {
                     List<StrokeCollection> allPageStrokes = new List<StrokeCollection>();
                     
                     // 检查PPT放映模式下的多页面墨迹
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && pptApplication != null)
+                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && _pptManager?.IsConnected == true)
                     {
                         hasMultiplePages = true;
                         // 收集PPT放映模式下的所有页面墨迹
-                        for (int i = 1; i <= pptApplication.SlideShowWindows[1].Presentation.Slides.Count; i++)
+                        var totalSlides = _pptManager.SlidesCount;
+                        var currentSlide = _pptManager.GetCurrentSlideNumber();
+
+                        for (int i = 1; i <= totalSlides; i++)
                         {
-                            if (memoryStreams[i] != null && memoryStreams[i].Length > 8)
+                            var slideStrokes = _pptInkManager?.LoadSlideStrokes(i);
+                            if (slideStrokes != null && slideStrokes.Count > 0)
                             {
-                                memoryStreams[i].Position = 0;
-                                allPageStrokes.Add(new StrokeCollection(memoryStreams[i]));
+                                allPageStrokes.Add(slideStrokes);
                             }
-                            else if (i == previousSlideID && inkCanvas.Strokes.Count > 0)
+                            else if (i == currentSlide && inkCanvas.Strokes.Count > 0)
                             {
                                 // 当前页面的墨迹
                                 allPageStrokes.Add(inkCanvas.Strokes.Clone());
@@ -485,10 +488,8 @@ namespace Ink_Canvas {
                 timeMachine.ClearStrokeHistory();
                 
                 // 重置PPT墨迹存储
-                if (memoryStreams == null) {
-                    memoryStreams = new MemoryStream[50];
-                }
-                
+                _pptInkManager?.ClearAllStrokes();
+
                 // 读取所有页面的墨迹文件
                 var files = Directory.GetFiles(tempDir, "page_*.icstk");
                 foreach (var file in files) {
@@ -497,23 +498,19 @@ namespace Ink_Canvas {
                         using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read)) {
                             var strokes = new StrokeCollection(fs);
                             if (strokes.Count > 0) {
-                                var ms = new MemoryStream();
-                                strokes.Save(ms);
-                                ms.Position = 0;
-                                memoryStreams[pageNumber] = ms;
+                                _pptInkManager?.SaveCurrentSlideStrokes(pageNumber, strokes);
                             }
                         }
                     }
                 }
-                
+
                 // 恢复当前页面的墨迹
-                if (pptApplication.SlideShowWindows.Count > 0) {
-                    int currentSlide = pptApplication.SlideShowWindows[1].View.CurrentShowPosition;
-                    if (memoryStreams[currentSlide] != null && memoryStreams[currentSlide].Length > 0) {
-                        memoryStreams[currentSlide].Position = 0;
-                        inkCanvas.Strokes.Add(new StrokeCollection(memoryStreams[currentSlide]));
+                if (_pptManager?.IsInSlideShow == true) {
+                    int currentSlide = _pptManager.GetCurrentSlideNumber();
+                    var currentStrokes = _pptInkManager?.LoadSlideStrokes(currentSlide);
+                    if (currentStrokes != null && currentStrokes.Count > 0) {
+                        inkCanvas.Strokes.Add(currentStrokes);
                     }
-                    previousSlideID = currentSlide;
                 }
                 
                 LogHelper.WriteLogToFile($"成功恢复PPT墨迹，共{files.Length}页");

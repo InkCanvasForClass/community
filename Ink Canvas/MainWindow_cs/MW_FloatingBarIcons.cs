@@ -672,7 +672,11 @@ namespace Ink_Canvas {
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) {
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                        SaveScreenShot(true, $"{pptName}/{previousSlideID}_{DateTime.Now:HH-mm-ss}");
+                    {
+                        var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                        var presentationName = _pptManager?.GetPresentationName() ?? "";
+                        SaveScreenShot(true, $"{presentationName}/{currentSlide}_{DateTime.Now:HH-mm-ss}");
+                    }
                     else
                         SaveScreenShot(true);
                 }
@@ -1287,7 +1291,11 @@ namespace Ink_Canvas {
             if (inkCanvas.Strokes.Count > 0 &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) {
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                    SaveScreenShot(true, $"{pptName}/{previousSlideID}_{DateTime.Now:HH-mm-ss}");
+                {
+                    var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                    var presentationName = _pptManager?.GetPresentationName() ?? "";
+                    SaveScreenShot(true, $"{presentationName}/{currentSlide}_{DateTime.Now:HH-mm-ss}");
+                }
                 else SaveScreenShot(true);
             }
 

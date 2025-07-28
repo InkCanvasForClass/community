@@ -278,10 +278,10 @@ namespace Ink_Canvas {
                 
                 if (Settings.PowerPointSettings.PowerPointSupport) {
                     ToggleSwitchSupportPowerPoint.IsOn = true;
-                    timerCheckPPT.Start();
+                    // PPT监控将在Window_Loaded中启动
                 } else {
                     ToggleSwitchSupportPowerPoint.IsOn = false;
-                    timerCheckPPT.Stop();
+                    // PPT监控将保持停止状态
                 }
 
                 ToggleSwitchShowCanvasAtNewSlideShow.IsOn = Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow;

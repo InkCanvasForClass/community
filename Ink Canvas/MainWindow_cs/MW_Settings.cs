@@ -95,10 +95,19 @@ namespace Ink_Canvas {
             Settings.PowerPointSettings.PowerPointSupport = ToggleSwitchSupportPowerPoint.IsOn;
             SaveSettingsToFile();
 
+            // 使用新的PPT管理器
             if (Settings.PowerPointSettings.PowerPointSupport)
-                timerCheckPPT.Start();
+            {
+                if (_pptManager == null)
+                {
+                    InitializePPTManagers();
+                }
+                StartPPTMonitoring();
+            }
             else
-                timerCheckPPT.Stop();
+            {
+                StopPPTMonitoring();
+            }
         }
 
         private void ToggleSwitchShowCanvasAtNewSlideShow_Toggled(object sender, RoutedEventArgs e) {
@@ -419,7 +428,12 @@ namespace Ink_Canvas {
             if (!isLoaded) return;
             Settings.PowerPointSettings.ShowPPTButton = ToggleSwitchShowPPTButton.IsOn;
             SaveSettingsToFile();
-            UpdatePPTBtnDisplaySettingsStatus();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.ShowPPTButton = Settings.PowerPointSettings.ShowPPTButton;
+                _pptUIManager.UpdateNavigationPanelsVisibility();
+            }
             UpdatePPTBtnPreview();
         }
 
@@ -436,7 +450,12 @@ namespace Ink_Canvas {
             c[0] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnDisplaySettingsStatus();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
+                _pptUIManager.UpdateNavigationPanelsVisibility();
+            }
             UpdatePPTBtnPreview();
         }
 
@@ -448,7 +467,12 @@ namespace Ink_Canvas {
             c[1] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnDisplaySettingsStatus();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
+                _pptUIManager.UpdateNavigationPanelsVisibility();
+            }
             UpdatePPTBtnPreview();
         }
 
@@ -460,7 +484,12 @@ namespace Ink_Canvas {
             c[2] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnDisplaySettingsStatus();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
+                _pptUIManager.UpdateNavigationPanelsVisibility();
+            }
             UpdatePPTBtnPreview();
         }
 
@@ -472,7 +501,12 @@ namespace Ink_Canvas {
             c[3] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTButtonsDisplayOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnDisplaySettingsStatus();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
+                _pptUIManager.UpdateNavigationPanelsVisibility();
+            }
             UpdatePPTBtnPreview();
         }
 
@@ -484,7 +518,12 @@ namespace Ink_Canvas {
             c[0] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTSButtonsOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnStyleSettingsStatus();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
             UpdatePPTBtnPreview();
         }
 
@@ -496,7 +535,12 @@ namespace Ink_Canvas {
             c[1] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTSButtonsOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnStyleSettingsStatus();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
             UpdatePPTBtnPreview();
         }
 
@@ -508,7 +552,12 @@ namespace Ink_Canvas {
             c[2] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTSButtonsOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnStyleSettingsStatus();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
             UpdatePPTBtnPreview();
         }
 
@@ -520,7 +569,12 @@ namespace Ink_Canvas {
             c[0] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTBButtonsOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnStyleSettingsStatus();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                _pptUIManager.PPTBButtonsOption = Settings.PowerPointSettings.PPTBButtonsOption;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
             UpdatePPTBtnPreview();
         }
 
@@ -532,7 +586,7 @@ namespace Ink_Canvas {
             c[1] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTBButtonsOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnStyleSettingsStatus();
+            UpdatePPTUIManagerSettings();
             UpdatePPTBtnPreview();
         }
 
@@ -544,7 +598,7 @@ namespace Ink_Canvas {
             c[2] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
             Settings.PowerPointSettings.PPTBButtonsOption = int.Parse(new string(c));
             SaveSettingsToFile();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnStyleSettingsStatus();
+            UpdatePPTUIManagerSettings();
             UpdatePPTBtnPreview();
         }
 
@@ -552,7 +606,7 @@ namespace Ink_Canvas {
             if (!isLoaded) return;
             Settings.PowerPointSettings.PPTLSButtonPosition = (int)PPTButtonLeftPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnDisplaySettingsStatus();
+            UpdatePPTUIManagerSettings();
             SliderDelayAction.DebounceAction(2000, null, SaveSettingsToFile);
             UpdatePPTBtnPreview();
         }
@@ -686,9 +740,26 @@ namespace Ink_Canvas {
             if (!isLoaded) return;
             Settings.PowerPointSettings.PPTRSButtonPosition = (int)PPTButtonRightPositionValueSlider.Value;
             UpdatePPTBtnSlidersStatus();
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) UpdatePPTBtnDisplaySettingsStatus();
+            UpdatePPTUIManagerSettings();
             SliderDelayAction.DebounceAction(2000,null, SaveSettingsToFile);
             UpdatePPTBtnPreview();
+        }
+
+        /// <summary>
+        /// 更新PPT UI管理器设置的通用方法
+        /// </summary>
+        private void UpdatePPTUIManagerSettings()
+        {
+            if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                _pptUIManager.PPTButtonsDisplayOption = Settings.PowerPointSettings.PPTButtonsDisplayOption;
+                _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
+                _pptUIManager.PPTBButtonsOption = Settings.PowerPointSettings.PPTBButtonsOption;
+                _pptUIManager.PPTLSButtonPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
+                _pptUIManager.PPTRSButtonPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
+                _pptUIManager.UpdateNavigationPanelsVisibility();
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
         }
 
         private void UpdatePPTBtnPreview() {
