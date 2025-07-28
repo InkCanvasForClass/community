@@ -775,6 +775,12 @@
                                                          Toggled="ToggleSwitchClearCanvasAndClearTimeMachine_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="清空画布时同时清空图片" VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchClearCanvasAlsoClearImages"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchClearCanvasAlsoClearImages_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="插入图片时自动压缩（大于1920x1080）" VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchCompressPicturesUploaded"
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
@@ -5787,7 +5793,6 @@
                                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
                                            FontSize="10" Text="/ 999" Name="PPTBtnPageTotal" />
                             </ui:SimpleStackPanel>
-
                         </Grid>
                     </Border>
                     <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"

@@ -404,6 +404,9 @@ namespace Ink_Canvas {
             // 确保开关和设置同步
             ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
             ApplyNoFocusMode();
+
+            // 初始化UIElement选择系统
+            InitializeUIElementSelection();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
@@ -946,23 +949,12 @@ namespace Ink_Canvas {
                 }
                 UpdatePriorityTextBlock.Text = priorityText;
 
-                // 获取使用统计
-                var (launchCount, totalMinutes, avgSession, _) = DeviceIdentifier.GetUsageStats();
+                // 获取使用统计（秒级精度）
+                var (launchCount, totalSeconds, avgSessionSeconds, _) = DeviceIdentifier.GetUsageStats();
                 LaunchCountTextBlock.Text = launchCount.ToString();
-                
-                string totalUsageText;
-                if (totalMinutes < 60)
-                {
-                    totalUsageText = $"{totalMinutes}分钟";
-                }
-                else if (totalMinutes < 1440)
-                {
-                    totalUsageText = $"{totalMinutes / 60}小时{totalMinutes % 60}分钟";
-                }
-                else
-                {
-                    totalUsageText = $"{totalMinutes / 1440}天{(totalMinutes % 1440) / 60}小时";
-                }
+
+                // 使用新的格式化方法显示秒级精度的使用时长
+                string totalUsageText = DeviceIdentifier.FormatDuration(totalSeconds);
                 TotalUsageTextBlock.Text = totalUsageText;
 
                 LogHelper.WriteLogToFile($"MainWindow | 设备信息已刷新 - ID: {deviceId}, 频率: {frequencyText}, 优先级: {priorityText}");

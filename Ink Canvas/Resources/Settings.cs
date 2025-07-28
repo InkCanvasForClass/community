@@ -87,6 +87,8 @@ namespace Ink_Canvas
         public bool IsCompressPicturesUploaded { get; set; } = false;
         [JsonProperty("enablePalmEraser")]
         public bool EnablePalmEraser { get; set; } = true;
+        [JsonProperty("clearCanvasAlsoClearImages")]
+        public bool ClearCanvasAlsoClearImages { get; set; } = true;
     }
 
     public enum OptionalOperation
