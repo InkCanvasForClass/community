@@ -1,10 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
 {
@@ -21,7 +27,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         /// <summary>
         /// 是否处于固定模式
         /// </summary>
-        private bool _isFixMode = false;
+        private bool _isFixMode;
         
         /// <summary>
         /// 应用项按钮列表
@@ -51,11 +57,11 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             LoadLauncherItems();
             
             // 添加鼠标按下事件（用于拖动窗口）
-            this.MouseDown += (s, e) =>
+            MouseDown += (s, e) =>
             {
                 if (e.ChangedButton == MouseButton.Left && e.ButtonState == MouseButtonState.Pressed)
                 {
-                    this.DragMove();
+                    DragMove();
                 }
             };
             
@@ -145,18 +151,18 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     string appPath = item.Path;
                     string appName = item.Name;
                     
-                    LogHelper.WriteLogToFile($"点击启动应用: {appName}, 路径: {appPath}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"点击启动应用: {appName}, 路径: {appPath}");
                     
                     // 首先标记窗口正在关闭
                     IsClosing = true;
                     
                     // 创建一个应用启动任务
-                    var launchTask = new System.Threading.Tasks.Task(() =>
+                    var launchTask = new Task(() =>
                     {
                         try
                         {
                             // 等待一段时间，确保窗口关闭流程已经开始
-                            System.Threading.Thread.Sleep(200);
+                            Thread.Sleep(200);
                             
                             // 使用UI线程启动应用
                             Application.Current.Dispatcher.Invoke(() => 
@@ -164,18 +170,18 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                                 try
                                 {
                                     // 检查应用路径是否存在
-                                    if (System.IO.File.Exists(appPath) || !appPath.Contains(":\\"))
+                                    if (File.Exists(appPath) || !appPath.Contains(":\\"))
                                     {
                                         // 创建进程启动信息
-                                        var psi = new System.Diagnostics.ProcessStartInfo
+                                        var psi = new ProcessStartInfo
                                     {
                                         FileName = appPath,
                                             UseShellExecute = true,
                                     };
                                         
                                         // 启动应用程序
-                                        var process = System.Diagnostics.Process.Start(psi);
-                                        LogHelper.WriteLogToFile($"应用程序 {appName} 已启动", LogHelper.LogType.Info);
+                                        var process = Process.Start(psi);
+                                        LogHelper.WriteLogToFile($"应用程序 {appName} 已启动");
                                     }
                                     else
                                     {
@@ -205,7 +211,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                             
                             // 启动应用程序任务
                             launchTask.Start();
-                        }), System.Windows.Threading.DispatcherPriority.Background);
+                        }), DispatcherPriority.Background);
                     }
                     catch (Exception ex)
                     {
@@ -406,7 +412,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                         {
                             LogHelper.WriteLogToFile($"延迟关闭窗口时出错: {ex.Message}", LogHelper.LogType.Error);
                         }
-                    }), System.Windows.Threading.DispatcherPriority.Background);
+                    }), DispatcherPriority.Background);
                 }
             }
             catch (Exception ex)
@@ -418,12 +424,12 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         /// <summary>
         /// 窗口是否正在关闭
         /// </summary>
-        private bool IsClosing { get; set; } = false;
+        private bool IsClosing { get; set; }
         
         /// <summary>
         /// 重写OnClosing方法，标记窗口正在关闭
         /// </summary>
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        protected override void OnClosing(CancelEventArgs e)
         {
             IsClosing = true;
             base.OnClosing(e);

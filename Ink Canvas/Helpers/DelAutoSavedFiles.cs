@@ -26,14 +26,14 @@ namespace Ink_Canvas.Helpers {
                             }
                         }
                     } catch (Exception ex) {
-                        LogHelper.WriteLogToFile("DelAutoSavedFiles | 处理文件时出错: " + ex.ToString(), LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile("DelAutoSavedFiles | 处理文件时出错: " + ex, LogHelper.LogType.Error);
                     }
                 }
 
                 try { // 递归删除空文件夹
                     DeleteEmptyFolders(directoryPath);
                 } catch (Exception ex) {
-                    LogHelper.WriteLogToFile("DelAutoSavedFiles | 处理文件时出错: " + ex.ToString(), LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile("DelAutoSavedFiles | 处理文件时出错: " + ex, LogHelper.LogType.Error);
                 }
             }
         }

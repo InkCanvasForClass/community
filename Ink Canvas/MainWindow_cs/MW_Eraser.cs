@@ -12,18 +12,18 @@ namespace Ink_Canvas {
     public partial class MainWindow : Window {
 
         // 新橡皮擦系统的核心变量
-        public bool isUsingAdvancedEraser = false;
-        private IncrementalStrokeHitTester advancedHitTester = null;
+        public bool isUsingAdvancedEraser;
+        private IncrementalStrokeHitTester advancedHitTester;
 
         // 橡皮擦配置
         public double currentEraserSize = 64;
-        public bool isCurrentEraserCircle = false;
-        public bool isUsingStrokeEraser = false;
+        public bool isCurrentEraserCircle;
+        public bool isUsingStrokeEraser;
 
         // 视觉反馈相关
-        private Matrix eraserTransformMatrix = new Matrix();
-        private Point lastEraserPosition = new Point();
-        private bool isEraserVisible = false;
+        private Matrix eraserTransformMatrix;
+        private Point lastEraserPosition;
+        private bool isEraserVisible;
 
         // 性能优化相关
         private DateTime lastEraserUpdate = DateTime.Now;
@@ -35,7 +35,7 @@ namespace Ink_Canvas {
         // 橡皮擦视觉反馈控件
         private DrawingVisual eraserVisual = new DrawingVisual();
         private VisualCanvas eraserOverlayCanvas = null;
-        private Border eraserVisualBorder = null; // 用于显示橡皮擦视觉反馈的Border
+        private Border eraserVisualBorder; // 用于显示橡皮擦视觉反馈的Border
 
         // 兼容性属性：模拟原有的EraserOverlay_DrawingVisual
         private VisualCanvas EraserOverlay_DrawingVisual => eraserOverlayCanvas;
@@ -102,7 +102,7 @@ namespace Ink_Canvas {
             UpdateEraserSize();
 
             // 获取inkCanvas引用
-            var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
+            var inkCanvas = FindName("inkCanvas") as InkCanvas;
             if (inkCanvas == null) return;
 
             // 根据橡皮擦形状创建碰撞检测器
@@ -117,13 +117,14 @@ namespace Ink_Canvas {
         /// <summary>
         /// 创建橡皮擦形状
         /// </summary>
-        private StylusShape CreateEraserShape() {
+        private StylusShape CreateEraserShape()
+        {
             if (isCurrentEraserCircle) {
                 return new EllipseStylusShape(currentEraserSize, currentEraserSize);
-            } else {
-                // 矩形橡皮擦，使用与原来相同的逻辑
-                return new RectangleStylusShape(currentEraserSize, currentEraserSize / 0.6);
             }
+
+            // 矩形橡皮擦，使用与原来相同的逻辑
+            return new RectangleStylusShape(currentEraserSize, currentEraserSize / 0.6);
         }
 
         /// <summary>
@@ -231,7 +232,7 @@ namespace Ink_Canvas {
         /// </summary>
         private void OnAdvancedEraserStrokeHit(object sender, StrokeHitEventArgs args) {
             try {
-                var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
+                var inkCanvas = FindName("inkCanvas") as InkCanvas;
                 if (inkCanvas == null) return;
 
                 var eraseResult = args.GetPointEraseResults();
@@ -296,7 +297,7 @@ namespace Ink_Canvas {
         /// </summary>
         private void ProcessStrokeEraserAtPosition(Point position) {
             try {
-                var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
+                var inkCanvas = FindName("inkCanvas") as InkCanvas;
                 if (inkCanvas == null) return;
 
                 var hitStrokes = inkCanvas.Strokes.HitTest(position)
@@ -343,7 +344,7 @@ namespace Ink_Canvas {
                     Panel.SetZIndex(eraserVisualBorder, 1001);
                     
                     // 将Border添加到InkCanvasGridForInkReplay中
-                    var inkCanvasGrid = this.FindName("InkCanvasGridForInkReplay") as Grid;
+                    var inkCanvasGrid = FindName("InkCanvasGridForInkReplay") as Grid;
                     if (inkCanvasGrid != null) {
                         inkCanvasGrid.Children.Add(eraserVisualBorder);
                         Trace.WriteLine("Advanced Eraser: Visual feedback border added to grid");
@@ -401,7 +402,7 @@ namespace Ink_Canvas {
                 string resourceKey = isCurrentEraserCircle ? "EraserCircleDrawingGroup" : "EraserDrawingGroup";
                 
                 // 尝试从资源字典中获取DrawingGroup
-                var drawingGroup = this.TryFindResource(resourceKey) as DrawingGroup;
+                var drawingGroup = TryFindResource(resourceKey) as DrawingGroup;
                 if (drawingGroup == null) {
                     // 如果找不到资源，创建默认的橡皮擦图像
                     return CreateDefaultEraserImage();
@@ -525,7 +526,7 @@ namespace Ink_Canvas {
         /// 获取当前橡皮擦状态信息（用于调试）
         /// </summary>
         public string GetEraserStatusInfo() {
-            return $"Advanced Eraser Status:\n" +
+            return "Advanced Eraser Status:\n" +
                    $"- Active: {isUsingAdvancedEraser}\n" +
                    $"- Size: {currentEraserSize:F1}\n" +
                    $"- Shape: {(isCurrentEraserCircle ? "Circle" : "Rectangle")}\n" +
@@ -551,7 +552,7 @@ namespace Ink_Canvas {
             
             // 清理视觉反馈Border
             if (eraserVisualBorder != null) {
-                var inkCanvasGrid = this.FindName("InkCanvasGridForInkReplay") as Grid;
+                var inkCanvasGrid = FindName("InkCanvasGridForInkReplay") as Grid;
                 if (inkCanvasGrid != null) {
                     inkCanvasGrid.Children.Remove(eraserVisualBorder);
                 }
@@ -564,7 +565,7 @@ namespace Ink_Canvas {
         /// </summary>
         public void ApplyAdvancedEraserShape() {
             try {
-                var inkCanvas = this.FindName("inkCanvas") as InkCanvas;
+                var inkCanvas = FindName("inkCanvas") as InkCanvas;
                 if (inkCanvas == null) return;
 
                 // 更新橡皮擦尺寸和形状
@@ -595,7 +596,7 @@ namespace Ink_Canvas {
         public void EnableAdvancedEraserSystem() {
             try {
                 // 获取橡皮擦覆盖层
-                var eraserOverlay = this.FindName("AdvancedEraserOverlay") as Border;
+                var eraserOverlay = FindName("AdvancedEraserOverlay") as Border;
                 if (eraserOverlay != null) {
                     // 启用覆盖层的交互
                     eraserOverlay.IsHitTestVisible = true;
@@ -607,7 +608,7 @@ namespace Ink_Canvas {
                     }
                     
                     // 设置覆盖层的大小以覆盖整个InkCanvas
-                    var inkCanvasControl = this.FindName("inkCanvas") as InkCanvas;
+                    var inkCanvasControl = FindName("inkCanvas") as InkCanvas;
                     if (inkCanvasControl != null) {
                         eraserOverlay.Width = inkCanvasControl.ActualWidth;
                         eraserOverlay.Height = inkCanvasControl.ActualHeight;
@@ -649,7 +650,7 @@ namespace Ink_Canvas {
                 
                 overlay.MouseMove += (sender, e) => {
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
-                        var position = e.GetPosition((UIElement)this.FindName("inkCanvas"));
+                        var position = e.GetPosition((UIElement)FindName("inkCanvas"));
                         Trace.WriteLine($"Advanced Eraser: Mouse move event triggered at ({position.X:F1}, {position.Y:F1})");
                         UpdateAdvancedEraserPosition(sender, position);
                     } else {
@@ -681,7 +682,7 @@ namespace Ink_Canvas {
                 overlay.StylusMove += (sender, e) => {
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                         e.Handled = true;
-                        var position = e.GetPosition((UIElement)this.FindName("inkCanvas"));
+                        var position = e.GetPosition((UIElement)FindName("inkCanvas"));
                         UpdateAdvancedEraserPosition(sender, position);
                         Trace.WriteLine($"Advanced Eraser: Stylus move at ({position.X:F1}, {position.Y:F1})");
                     }
@@ -702,7 +703,7 @@ namespace Ink_Canvas {
                 ResetEraserState();
                 
                 // 获取橡皮擦覆盖层并禁用
-                var eraserOverlay = this.FindName("AdvancedEraserOverlay") as Border;
+                var eraserOverlay = FindName("AdvancedEraserOverlay") as Border;
                 if (eraserOverlay != null) {
                     eraserOverlay.IsHitTestVisible = false;
                 }

@@ -1,6 +1,7 @@
-﻿using Ink_Canvas.Helpers;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas
 {
@@ -28,10 +29,10 @@ namespace Ink_Canvas
         private void BtnFullscreen_MouseUp(object sender, MouseButtonEventArgs e) {
             if (WindowState == WindowState.Normal) {
                 WindowState = WindowState.Maximized;
-                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.BackToWindow;
+                SymbolIconFullscreen.Symbol = Symbol.BackToWindow;
             } else {
                 WindowState = WindowState.Normal;
-                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.FullScreen;
+                SymbolIconFullscreen.Symbol = Symbol.FullScreen;
             }
         }
 

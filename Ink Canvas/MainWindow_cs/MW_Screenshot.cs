@@ -1,7 +1,9 @@
 using System;
+using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
+using System.Windows.Forms;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -13,7 +15,7 @@ namespace Ink_Canvas {
             CaptureAndSaveScreenshot(savePath, isHideNotification);
             
             if (Settings.Automation.IsAutoSaveStrokesAtScreenshot) 
-                SaveInkCanvasStrokes(false, false);
+                SaveInkCanvasStrokes(false);
         }
 
         private void SaveScreenShotToDesktop() {
@@ -24,16 +26,16 @@ namespace Ink_Canvas {
             CaptureAndSaveScreenshot(desktopPath, false);
             
             if (Settings.Automation.IsAutoSaveStrokesAtScreenshot) 
-                SaveInkCanvasStrokes(false, false);
+                SaveInkCanvasStrokes(false);
         }
 
         // 提取公共的截图和保存逻辑
         private void CaptureAndSaveScreenshot(string savePath, bool isHideNotification) {
-            var rc = System.Windows.Forms.SystemInformation.VirtualScreen;
+            var rc = SystemInformation.VirtualScreen;
             
-            using (var bitmap = new System.Drawing.Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb))
-            using (var memoryGraphics = System.Drawing.Graphics.FromImage(bitmap)) {
-                memoryGraphics.CopyFromScreen(rc.X, rc.Y, 0, 0, rc.Size, System.Drawing.CopyPixelOperation.SourceCopy);
+            using (var bitmap = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb))
+            using (var memoryGraphics = Graphics.FromImage(bitmap)) {
+                memoryGraphics.CopyFromScreen(rc.X, rc.Y, 0, 0, rc.Size, CopyPixelOperation.SourceCopy);
                 
                 // 确保目录存在
                 var directory = Path.GetDirectoryName(savePath);

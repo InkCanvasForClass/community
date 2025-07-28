@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
 {
@@ -75,13 +78,13 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         /// <summary>
         /// 图标缓存
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         private ImageSource _iconCache;
         
         /// <summary>
         /// 获取应用程序图标
         /// </summary>
-        [Newtonsoft.Json.JsonIgnore]
+        [JsonIgnore]
         public ImageSource Icon
         {
             get
@@ -241,28 +244,28 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 }
                 
                 // 检查文件是否存在
-                if (!System.IO.File.Exists(Path) && !Path.Contains(":\\"))
+                if (!File.Exists(Path) && !Path.Contains(":\\"))
                 {
                     // 可能是系统命令，如explorer.exe
-                    System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo
+                    ProcessStartInfo psi = new ProcessStartInfo
                     {
                         FileName = Path,
                         UseShellExecute = true
                     };
-                    System.Diagnostics.Process.Start(psi);
+                    Process.Start(psi);
                 }
                 else
                 {
                     // 使用Process.Start启动应用程序
-                    System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo
+                    ProcessStartInfo psi = new ProcessStartInfo
                     {
                         FileName = Path,
                         UseShellExecute = true
                     };
-                    System.Diagnostics.Process.Start(psi);
+                    Process.Start(psi);
                 }
                 
-                LogHelper.WriteLogToFile($"已启动应用程序: {Path}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"已启动应用程序: {Path}");
             }
             catch (Exception ex)
             {
@@ -315,15 +318,15 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             }
         }
         
-        [System.Runtime.InteropServices.DllImport("Shell32.dll", EntryPoint = "ExtractIconEx")]
+        [DllImport("Shell32.dll", EntryPoint = "ExtractIconEx")]
         private static extern int ExtractIconEx(
-            [System.Runtime.InteropServices.MarshalAs(System.Runtime.InteropServices.UnmanagedType.LPStr)] string lpszFile,
+            [MarshalAs(UnmanagedType.LPStr)] string lpszFile,
             int nIconIndex,
             out IntPtr phiconLarge,
             out IntPtr phiconSmall,
             int nIcons);
         
-        [System.Runtime.InteropServices.DllImport("User32.dll")]
+        [DllImport("User32.dll")]
         private static extern int DestroyIcon(IntPtr hIcon);
     }
 } 

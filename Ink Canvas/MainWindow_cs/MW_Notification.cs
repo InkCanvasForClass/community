@@ -1,12 +1,12 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
-        private int lastNotificationShowTime = 0;
+        private int lastNotificationShowTime;
         private int notificationShowTime = 2500;
 
         public static void ShowNewMessage(string notice, bool isShowImmediately = true) {
@@ -21,13 +21,13 @@ namespace Ink_Canvas {
                 TextBlockNotice.Text = notice;
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(GridNotifications);
 
-                new Thread(new ThreadStart(() => {
+                new Thread(() => {
                     Thread.Sleep(notificationShowTime + 300);
                     if (Environment.TickCount - lastNotificationShowTime >= notificationShowTime)
                         Application.Current.Dispatcher.Invoke(() => {
                             AnimationsHelper.HideWithSlideAndFade(GridNotifications);
                         });
-                })).Start();
+                }).Start();
             }
             catch { }
         }

@@ -32,7 +32,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         ///     创建显示笔迹的类
         /// </summary>
-        public StrokeVisual() : this(new DrawingAttributes()
+        public StrokeVisual() : this(new DrawingAttributes
         {
             Color = Colors.Red,
             //FitToCurve = true,

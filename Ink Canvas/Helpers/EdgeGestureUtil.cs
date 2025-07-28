@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace Ink_Canvas.Helpers
 {
@@ -70,7 +71,7 @@ namespace Ink_Canvas.Helpers
             [FieldOffset(8)]
             private DateTime date;
             [FieldOffset(8)]
-            private System.Runtime.InteropServices.ComTypes.FILETIME filetime;
+            private FILETIME filetime;
 
             [FieldOffset(8)]
             private Blob blobVal;
@@ -115,7 +116,7 @@ namespace Ink_Canvas.Helpers
                         case VarEnum.VT_BLOB:
                             return GetBlob();
                     }
-                    throw new NotImplementedException("PropVariant " + ve.ToString());
+                    throw new NotImplementedException("PropVariant " + ve);
                 }
             }
         }
@@ -144,17 +145,17 @@ namespace Ink_Canvas.Helpers
 
         #region "Interfaces"
 
-        [ComImport(), Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        [ComImport, Guid("886D8EEB-8CF2-4446-8D02-CDBA1DBDCF99"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         public interface IPropertyStore
         {
             [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-            void GetCount([Out(), In()] ref uint cProps);
+            void GetCount([Out, In] ref uint cProps);
             [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-            void GetAt([In()] uint iProp, ref PropertyKey pkey);
+            void GetAt([In] uint iProp, ref PropertyKey pkey);
             [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-            void GetValue([In()] ref PropertyKey key, ref PropVariant pv);
+            void GetValue([In] ref PropertyKey key, ref PropVariant pv);
             [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
-            void SetValue([In()] ref PropertyKey key, [In()] ref PropVariant pv);
+            void SetValue([In] ref PropertyKey key, [In] ref PropVariant pv);
             [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]
             void Commit();
             [MethodImpl(MethodImplOptions.InternalCall, MethodCodeType = MethodCodeType.Runtime)]

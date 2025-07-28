@@ -1,6 +1,6 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using Ink_Canvas.Helpers;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas {
@@ -21,7 +22,7 @@ namespace Ink_Canvas {
             bool wasStraightened = false;
             
             // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
-            if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = false;
+            if (Settings.Canvas.FitToCurve) drawingAttributes.FitToCurve = false;
 
             try {
                 inkCanvas.Opacity = 1;
@@ -134,13 +135,13 @@ namespace Ink_Canvas {
                         // 先完成所有直线判定，再考虑端点吸附
                         // 读取实际的灵敏度设置值
                         double sensitivity = Settings.InkToShape.LineStraightenSensitivity;
-                        System.Diagnostics.Debug.WriteLine($"当前灵敏度值: {sensitivity}");
+                        Debug.WriteLine($"当前灵敏度值: {sensitivity}");
                         
                         // 判断是否应该拉直线条
                         bool shouldStraighten = ShouldStraightenLine(e.Stroke);
                         
                         // 输出一些调试信息，帮助理解灵敏度设置的效果
-                        System.Diagnostics.Debug.WriteLine($"LineStraightenSensitivity: {Settings.InkToShape.LineStraightenSensitivity}, ShouldStraighten: {shouldStraighten}");
+                        Debug.WriteLine($"LineStraightenSensitivity: {Settings.InkToShape.LineStraightenSensitivity}, ShouldStraighten: {shouldStraighten}");
                         
                         // 只有当确定要拉直线条时，才检查端点吸附
                         if (shouldStraighten && Settings.Canvas.LineEndpointSnapping) {
@@ -208,7 +209,7 @@ namespace Ink_Canvas {
                             }
 
                             if (result.InkDrawingNode.GetShapeName() == "Circle" &&
-                                Settings.InkToShape.IsInkToShapeRounded == true) {
+                                Settings.InkToShape.IsInkToShapeRounded) {
                                 var shape = result.InkDrawingNode.GetShape();
                                 if (shape.Width > 75) {
                                     foreach (var circle in circles)
@@ -264,7 +265,7 @@ namespace Ink_Canvas {
                                 }
                             }
                             else if (result.InkDrawingNode.GetShapeName().Contains("Ellipse") &&
-                                     Settings.InkToShape.IsInkToShapeRounded == true) {
+                                     Settings.InkToShape.IsInkToShapeRounded) {
                                 var shape = result.InkDrawingNode.GetShape();
                                 //var shape1 = result.InkDrawingNode.GetShape();
                                 //shape1.Fill = Brushes.Gray;
@@ -334,14 +335,14 @@ namespace Ink_Canvas {
                                                 inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes);
                                                 newStrokes = new StrokeCollection();
 
-                                                var _pointList = GenerateEllipseGeometry(iniP, endP, false, true);
+                                                var _pointList = GenerateEllipseGeometry(iniP, endP, false);
                                                 var _point = new StylusPointCollection(_pointList);
                                                 var _stroke = new Stroke(_point) {
                                                     DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                                                 };
                                                 var _dashedLineStroke =
                                                     GenerateDashedLineEllipseStrokeCollection(iniP, endP, true, false);
-                                                var strokes = new StrokeCollection() {
+                                                var strokes = new StrokeCollection {
                                                     _stroke,
                                                     _dashedLineStroke
                                                 };
@@ -398,7 +399,7 @@ namespace Ink_Canvas {
                                 }
                             }
                             else if (result.InkDrawingNode.GetShapeName().Contains("Triangle") &&
-                                     Settings.InkToShape.IsInkToShapeTriangle == true) {
+                                     Settings.InkToShape.IsInkToShapeTriangle) {
                                 var shape = result.InkDrawingNode.GetShape();
                                 var p = result.InkDrawingNode.HotPoints;
                                 if ((Math.Max(Math.Max(p[0].X, p[1].X), p[2].X) -
@@ -437,7 +438,7 @@ namespace Ink_Canvas {
                                       result.InkDrawingNode.GetShapeName().Contains("Parallelogram") ||
                                       result.InkDrawingNode.GetShapeName().Contains("Square") ||
                                       result.InkDrawingNode.GetShapeName().Contains("Trapezoid")) &&
-                                     Settings.InkToShape.IsInkToShapeRectangle == true) {
+                                     Settings.InkToShape.IsInkToShapeRectangle) {
                                 var shape = result.InkDrawingNode.GetShape();
                                 var p = result.InkDrawingNode.HotPoints;
                                 if ((Math.Max(Math.Max(Math.Max(p[0].X, p[1].X), p[2].X), p[3].X) -
@@ -514,7 +515,7 @@ namespace Ink_Canvas {
                                     var speed = GetPointSpeed(e.Stroke.StylusPoints[Math.Max(i - 1, 0)].ToPoint(),
                                         e.Stroke.StylusPoints[i].ToPoint(),
                                         e.Stroke.StylusPoints[Math.Min(i + 1, n)].ToPoint());
-                                    s += speed.ToString() + "\t";
+                                    s += speed + "\t";
                                     var point = new StylusPoint();
                                     if (speed >= 0.25)
                                         point.PressureFactor = (float)(0.5 - 0.3 * (Math.Min(speed, 1.5) - 0.3) / 1.2);
@@ -614,10 +615,10 @@ namespace Ink_Canvas {
                 catch (Exception ex)
                 {
                     // 如果高级平滑失败，回退到原始笔画
-                    System.Diagnostics.Debug.WriteLine($"高级贝塞尔曲线平滑失败: {ex.Message}");
+                    Debug.WriteLine($"高级贝塞尔曲线平滑失败: {ex.Message}");
                 }
             }
-            else if (Settings.Canvas.FitToCurve == true && !wasStraightened) 
+            else if (Settings.Canvas.FitToCurve && !wasStraightened) 
             {
                 drawingAttributes.FitToCurve = true;
             }
@@ -645,7 +646,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"异步墨迹平滑失败: {ex.Message}");
+                Debug.WriteLine($"异步墨迹平滑失败: {ex.Message}");
             }
         }
 
@@ -668,7 +669,7 @@ namespace Ink_Canvas {
             double sensitivity = Settings.InkToShape.LineStraightenSensitivity;
             
             // 输出当前灵敏度值（调试用）
-            System.Diagnostics.Debug.WriteLine($"IsPotentialStraightLine - sensitivity: {sensitivity}, length: {lineLength}");
+            Debug.WriteLine($"IsPotentialStraightLine - sensitivity: {sensitivity}, length: {lineLength}");
             
             // 根据灵敏度调整快速检查阈值
             double quickThreshold;
@@ -682,7 +683,7 @@ namespace Ink_Canvas {
                 quickThreshold = Math.Min(sensitivity * 1.5, 0.20);
             }
             
-            System.Diagnostics.Debug.WriteLine($"使用快速检查阈值: {quickThreshold}");
+            Debug.WriteLine($"使用快速检查阈值: {quickThreshold}");
                 
             // 快速检查：计算几个关键点与直线的距离
             if (stroke.StylusPoints.Count >= 10) {
@@ -703,7 +704,7 @@ namespace Ink_Canvas {
                 double quickRelativeThreshold = lineLength * quickThreshold;
                 
                 // 记录检测到的偏差（调试用）
-                System.Diagnostics.Debug.WriteLine($"Deviations: q={quarterDeviation}, m={midDeviation}, tq={threeQuarterDeviation}, threshold={quickRelativeThreshold}");
+                Debug.WriteLine($"Deviations: q={quarterDeviation}, m={midDeviation}, tq={threeQuarterDeviation}, threshold={quickRelativeThreshold}");
                 
                 // 如果灵敏度超过1.5，则即使有一个点满足条件也认为可能是直线
                 if (sensitivity > 1.5) {
@@ -745,7 +746,7 @@ namespace Ink_Canvas {
             double sensitivity = Settings.InkToShape.LineStraightenSensitivity;
             
             // 输出详细的调试信息
-            System.Diagnostics.Debug.WriteLine($"ShouldStraightenLine - sensitivity: {sensitivity}, length: {lineLength}");
+            Debug.WriteLine($"ShouldStraightenLine - sensitivity: {sensitivity}, length: {lineLength}");
             
             // 临时：显示调试消息框
             // MessageBox.Show($"灵敏度值: {sensitivity}", "调试信息");
@@ -758,7 +759,7 @@ namespace Ink_Canvas {
             bool useHighPrecision = Settings.Canvas.HighPrecisionLineStraighten;
             
             if (useHighPrecision) {
-                System.Diagnostics.Debug.WriteLine("使用高精度直线拉直模式");
+                Debug.WriteLine("使用高精度直线拉直模式");
                 
                 // 高精度模式：每隔10像素取一个计数点
                 double strokeLength = 0;
@@ -844,7 +845,7 @@ namespace Ink_Canvas {
             double avgDeviation = totalDeviation / pointCount;
             
             // 更详细的调试信息
-            System.Diagnostics.Debug.WriteLine($"Max deviation: {maxDeviation}, Avg: {avgDeviation}, Threshold: {sensitivity * lineLength}, Points: {pointCount}");
+            Debug.WriteLine($"Max deviation: {maxDeviation}, Avg: {avgDeviation}, Threshold: {sensitivity * lineLength}, Points: {pointCount}");
             
             // 支持更广泛的灵敏度范围 (0.05-2.0)
             
@@ -855,129 +856,128 @@ namespace Ink_Canvas {
                 
                 // 只判断平均偏差和相对偏差
                 if (maxDeviation / lineLength < adjustedSensitivity && avgDeviation < lineLength * 0.1 * adjustedSensitivity) {
-                    System.Diagnostics.Debug.WriteLine("接受拉直 (高灵敏度模式)");
+                    Debug.WriteLine("接受拉直 (高灵敏度模式)");
                     return true;
                 }
                 
-                System.Diagnostics.Debug.WriteLine("拒绝拉直 (高灵敏度模式)");
+                Debug.WriteLine("拒绝拉直 (高灵敏度模式)");
                 return false;
             }
             // 否则使用常规判断标准
-            else {
-                // 检查点分布的一致性 - 如果有些点偏离很大而其他点很接近直线，表明线条有明显弯曲
-                double deviationVariance = 0;
+
+            // 检查点分布的一致性 - 如果有些点偏离很大而其他点很接近直线，表明线条有明显弯曲
+            double deviationVariance = 0;
                 
-                // 使用相同的高精度/原始模式来计算方差
-                if (useHighPrecision) {
-                    // 高精度模式：重新采样计算方差
-                    double strokeLength = 0;
-                    double sampleInterval = 10.0; // 10像素间隔
+            // 使用相同的高精度/原始模式来计算方差
+            if (useHighPrecision) {
+                // 高精度模式：重新采样计算方差
+                double strokeLength = 0;
+                double sampleInterval = 10.0; // 10像素间隔
                     
-                    // 计算笔画的总长度，用于后续采样
-                    for (int i = 1; i < stroke.StylusPoints.Count; i++) {
-                        Point p1 = stroke.StylusPoints[i-1].ToPoint();
-                        Point p2 = stroke.StylusPoints[i].ToPoint();
-                        strokeLength += GetDistance(p1, p2);
-                    }
+                // 计算笔画的总长度，用于后续采样
+                for (int i = 1; i < stroke.StylusPoints.Count; i++) {
+                    Point p1 = stroke.StylusPoints[i-1].ToPoint();
+                    Point p2 = stroke.StylusPoints[i].ToPoint();
+                    strokeLength += GetDistance(p1, p2);
+                }
                     
-                    // 如果笔画太短，直接使用所有点
-                    if (strokeLength < sampleInterval * 5) {
-                        foreach (StylusPoint sp in stroke.StylusPoints) {
-                            Point p = sp.ToPoint();
-                            double deviation = DistanceFromLineToPoint(start, end, p);
-                            deviationVariance += Math.Pow(deviation - avgDeviation, 2);
-                        }
-                    } else {
-                        // 使用等距采样点
-                        double currentLength = 0;
-                        double nextSampleAt = 0;
-                        Point lastPoint = start;
-                        
-                        // 起点方差
-                        double deviation = DistanceFromLineToPoint(start, end, lastPoint);
-                        deviationVariance += Math.Pow(deviation - avgDeviation, 2);
-                        
-                        // 采样中间点
-                        for (int i = 1; i < stroke.StylusPoints.Count; i++) {
-                            Point currentPoint = stroke.StylusPoints[i].ToPoint();
-                            double segmentLength = GetDistance(lastPoint, currentPoint);
-                            
-                            // 如果这段线段跨越了下一个采样点
-                            while (currentLength + segmentLength >= nextSampleAt) {
-                                // 计算采样点在线段上的位置
-                                double t = (nextSampleAt - currentLength) / segmentLength;
-                                Point samplePoint = new Point(
-                                    lastPoint.X + t * (currentPoint.X - lastPoint.X),
-                                    lastPoint.Y + t * (currentPoint.Y - lastPoint.Y)
-                                );
-                                
-                                // 计算采样点的方差
-                                deviation = DistanceFromLineToPoint(start, end, samplePoint);
-                                deviationVariance += Math.Pow(deviation - avgDeviation, 2);
-                                
-                                // 设置下一个采样点位置
-                                nextSampleAt += sampleInterval;
-                                
-                                // 防止无限循环
-                                if (nextSampleAt > strokeLength) break;
-                            }
-                            
-                            currentLength += segmentLength;
-                            lastPoint = currentPoint;
-                        }
-                        
-                        // 终点方差
-                        deviation = DistanceFromLineToPoint(start, end, end);
-                        deviationVariance += Math.Pow(deviation - avgDeviation, 2);
-                    }
-                } else {
-                    // 原始模式：使用所有点计算方差
+                // 如果笔画太短，直接使用所有点
+                if (strokeLength < sampleInterval * 5) {
                     foreach (StylusPoint sp in stroke.StylusPoints) {
                         Point p = sp.ToPoint();
                         double deviation = DistanceFromLineToPoint(start, end, p);
                         deviationVariance += Math.Pow(deviation - avgDeviation, 2);
                     }
-                }
-                
-                deviationVariance /= pointCount;
-                
-                // 输出更多调试信息
-                System.Diagnostics.Debug.WriteLine($"Deviation variance: {deviationVariance}, Threshold: {sensitivity * lineLength * 0.05}");
-                
-                // 如果最大偏差超过线长的阈值比例，或者偏差方差较大（表示不均匀弯曲），则不拉直
-                // 灵敏度越大，容许的偏差越大，更容易将线条识别为直线
-                if ((maxDeviation / lineLength) > sensitivity) {
-                    System.Diagnostics.Debug.WriteLine("拒绝拉直：最大偏差过大");
-                    return false;
-                }
-                
-                // 如果偏差方差大，说明线条弯曲不均匀
-                // 灵敏度越大，容许的偏差方差越大
-                if (deviationVariance > (sensitivity * lineLength * 0.05)) {
-                    System.Diagnostics.Debug.WriteLine("拒绝拉直：偏差方差过大");
-                    return false;
-                }
-                
-                // 检查中点偏离情况 - 针对弧形线条特别有效
-                if (stroke.StylusPoints.Count > 10) {
-                    int midIndex = stroke.StylusPoints.Count / 2;
-                    Point midPoint = stroke.StylusPoints[midIndex].ToPoint();
-                    double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
-                    
-                    // 输出中点偏差信息
-                    System.Diagnostics.Debug.WriteLine($"Mid deviation: {midDeviation}, Threshold: {lineLength * sensitivity * 0.8}");
-                    
-                    // 如果中点偏离过大，不拉直
-                    // 使用灵敏度作为判断基准，灵敏度越大，容许的中点偏离越大
-                    if (midDeviation > (lineLength * sensitivity * 0.8)) {
-                        System.Diagnostics.Debug.WriteLine("拒绝拉直：中点偏差过大");
-                        return false;
+                } else {
+                    // 使用等距采样点
+                    double currentLength = 0;
+                    double nextSampleAt = 0;
+                    Point lastPoint = start;
+                        
+                    // 起点方差
+                    double deviation = DistanceFromLineToPoint(start, end, lastPoint);
+                    deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                        
+                    // 采样中间点
+                    for (int i = 1; i < stroke.StylusPoints.Count; i++) {
+                        Point currentPoint = stroke.StylusPoints[i].ToPoint();
+                        double segmentLength = GetDistance(lastPoint, currentPoint);
+                            
+                        // 如果这段线段跨越了下一个采样点
+                        while (currentLength + segmentLength >= nextSampleAt) {
+                            // 计算采样点在线段上的位置
+                            double t = (nextSampleAt - currentLength) / segmentLength;
+                            Point samplePoint = new Point(
+                                lastPoint.X + t * (currentPoint.X - lastPoint.X),
+                                lastPoint.Y + t * (currentPoint.Y - lastPoint.Y)
+                            );
+                                
+                            // 计算采样点的方差
+                            deviation = DistanceFromLineToPoint(start, end, samplePoint);
+                            deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                                
+                            // 设置下一个采样点位置
+                            nextSampleAt += sampleInterval;
+                                
+                            // 防止无限循环
+                            if (nextSampleAt > strokeLength) break;
+                        }
+                            
+                        currentLength += segmentLength;
+                        lastPoint = currentPoint;
                     }
+                        
+                    // 终点方差
+                    deviation = DistanceFromLineToPoint(start, end, end);
+                    deviationVariance += Math.Pow(deviation - avgDeviation, 2);
                 }
-                
-                System.Diagnostics.Debug.WriteLine("接受拉直");
-                return true;
+            } else {
+                // 原始模式：使用所有点计算方差
+                foreach (StylusPoint sp in stroke.StylusPoints) {
+                    Point p = sp.ToPoint();
+                    double deviation = DistanceFromLineToPoint(start, end, p);
+                    deviationVariance += Math.Pow(deviation - avgDeviation, 2);
+                }
             }
+                
+            deviationVariance /= pointCount;
+                
+            // 输出更多调试信息
+            Debug.WriteLine($"Deviation variance: {deviationVariance}, Threshold: {sensitivity * lineLength * 0.05}");
+                
+            // 如果最大偏差超过线长的阈值比例，或者偏差方差较大（表示不均匀弯曲），则不拉直
+            // 灵敏度越大，容许的偏差越大，更容易将线条识别为直线
+            if ((maxDeviation / lineLength) > sensitivity) {
+                Debug.WriteLine("拒绝拉直：最大偏差过大");
+                return false;
+            }
+                
+            // 如果偏差方差大，说明线条弯曲不均匀
+            // 灵敏度越大，容许的偏差方差越大
+            if (deviationVariance > (sensitivity * lineLength * 0.05)) {
+                Debug.WriteLine("拒绝拉直：偏差方差过大");
+                return false;
+            }
+                
+            // 检查中点偏离情况 - 针对弧形线条特别有效
+            if (stroke.StylusPoints.Count > 10) {
+                int midIndex = stroke.StylusPoints.Count / 2;
+                Point midPoint = stroke.StylusPoints[midIndex].ToPoint();
+                double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
+                    
+                // 输出中点偏差信息
+                Debug.WriteLine($"Mid deviation: {midDeviation}, Threshold: {lineLength * sensitivity * 0.8}");
+                    
+                // 如果中点偏离过大，不拉直
+                // 使用灵敏度作为判断基准，灵敏度越大，容许的中点偏离越大
+                if (midDeviation > (lineLength * sensitivity * 0.8)) {
+                    Debug.WriteLine("拒绝拉直：中点偏差过大");
+                    return false;
+                }
+            }
+                
+            Debug.WriteLine("接受拉直");
+            return true;
         }
         
         // New method: Creates a straight line stroke between two points
@@ -987,7 +987,7 @@ namespace Ink_Canvas {
             // 根据是否启用压感触屏模式决定如何设置压感
             // 如果未启用压感触屏模式，则使用均匀粗细
             if (!Settings.Canvas.EnablePressureTouchMode || Settings.Canvas.DisablePressure || 
-                Settings.InkToShape.IsInkToShapeNoFakePressureRectangle == true || penType == 1) {
+                Settings.InkToShape.IsInkToShapeNoFakePressureRectangle || penType == 1) {
                 // 使用均匀粗细（所有点压感值都是0.5f）
                 points.Add(new StylusPoint(start.X, start.Y, 0.5f));
                 
@@ -1083,7 +1083,7 @@ namespace Ink_Canvas {
             
             // Return snapped points if any snapping occurred
             if (startSnapped || endSnapped) {
-                return new Point[] { snappedStart, snappedEnd };
+                return new[] { snappedStart, snappedEnd };
             }
             
             return null;
@@ -1140,7 +1140,7 @@ namespace Ink_Canvas {
         }
 
         public StylusPointCollection GenerateFakePressureTriangle(StylusPointCollection points) {
-            if (Settings.InkToShape.IsInkToShapeNoFakePressureTriangle == true || penType == 1) {
+            if (Settings.InkToShape.IsInkToShapeNoFakePressureTriangle || penType == 1) {
                 var newPoint = new StylusPointCollection();
                 newPoint.Add(new StylusPoint(points[0].X, points[0].Y));
                 var cPoint = GetCenterPoint(points[0], points[1]);
@@ -1174,30 +1174,30 @@ namespace Ink_Canvas {
             }
         }
 
-        public StylusPointCollection GenerateFakePressureRectangle(StylusPointCollection points) {
-            if (Settings.InkToShape.IsInkToShapeNoFakePressureRectangle == true || penType == 1) {
+        public StylusPointCollection GenerateFakePressureRectangle(StylusPointCollection points)
+        {
+            if (Settings.InkToShape.IsInkToShapeNoFakePressureRectangle || penType == 1) {
                 return points;
             }
-            else {
-                var newPoint = new StylusPointCollection();
-                newPoint.Add(new StylusPoint(points[0].X, points[0].Y, (float)0.4));
-                var cPoint = GetCenterPoint(points[0], points[1]);
-                newPoint.Add(new StylusPoint(cPoint.X, cPoint.Y, (float)0.8));
-                newPoint.Add(new StylusPoint(points[1].X, points[1].Y, (float)0.4));
-                newPoint.Add(new StylusPoint(points[1].X, points[1].Y, (float)0.4));
-                cPoint = GetCenterPoint(points[1], points[2]);
-                newPoint.Add(new StylusPoint(cPoint.X, cPoint.Y, (float)0.8));
-                newPoint.Add(new StylusPoint(points[2].X, points[2].Y, (float)0.4));
-                newPoint.Add(new StylusPoint(points[2].X, points[2].Y, (float)0.4));
-                cPoint = GetCenterPoint(points[2], points[3]);
-                newPoint.Add(new StylusPoint(cPoint.X, cPoint.Y, (float)0.8));
-                newPoint.Add(new StylusPoint(points[3].X, points[3].Y, (float)0.4));
-                newPoint.Add(new StylusPoint(points[3].X, points[3].Y, (float)0.4));
-                cPoint = GetCenterPoint(points[3], points[0]);
-                newPoint.Add(new StylusPoint(cPoint.X, cPoint.Y, (float)0.8));
-                newPoint.Add(new StylusPoint(points[0].X, points[0].Y, (float)0.4));
-                return newPoint;
-            }
+
+            var newPoint = new StylusPointCollection();
+            newPoint.Add(new StylusPoint(points[0].X, points[0].Y, (float)0.4));
+            var cPoint = GetCenterPoint(points[0], points[1]);
+            newPoint.Add(new StylusPoint(cPoint.X, cPoint.Y, (float)0.8));
+            newPoint.Add(new StylusPoint(points[1].X, points[1].Y, (float)0.4));
+            newPoint.Add(new StylusPoint(points[1].X, points[1].Y, (float)0.4));
+            cPoint = GetCenterPoint(points[1], points[2]);
+            newPoint.Add(new StylusPoint(cPoint.X, cPoint.Y, (float)0.8));
+            newPoint.Add(new StylusPoint(points[2].X, points[2].Y, (float)0.4));
+            newPoint.Add(new StylusPoint(points[2].X, points[2].Y, (float)0.4));
+            cPoint = GetCenterPoint(points[2], points[3]);
+            newPoint.Add(new StylusPoint(cPoint.X, cPoint.Y, (float)0.8));
+            newPoint.Add(new StylusPoint(points[3].X, points[3].Y, (float)0.4));
+            newPoint.Add(new StylusPoint(points[3].X, points[3].Y, (float)0.4));
+            cPoint = GetCenterPoint(points[3], points[0]);
+            newPoint.Add(new StylusPoint(cPoint.X, cPoint.Y, (float)0.8));
+            newPoint.Add(new StylusPoint(points[0].X, points[0].Y, (float)0.4));
+            return newPoint;
         }
 
         public Point GetCenterPoint(Point point1, Point point2) {

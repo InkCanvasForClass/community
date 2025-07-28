@@ -264,8 +264,8 @@ namespace Ink_Canvas.Helpers
             /// </summary>
             public int Width
             {
-                get { return unchecked((int) (Right - Left)); }
-                set { Right = unchecked((int) (Left + value)); }
+                get { return unchecked(Right - Left); }
+                set { Right = unchecked(Left + value); }
             }
 
             /// <summary>
@@ -273,8 +273,8 @@ namespace Ink_Canvas.Helpers
             /// </summary>
             public int Height
             {
-                get { return unchecked((int) (Bottom - Top)); }
-                set { Bottom = unchecked((int) (Top + value)); }
+                get { return unchecked(Bottom - Top); }
+                set { Bottom = unchecked(Top + value); }
             }
 
             public bool Equals(Rectangle other)
@@ -296,10 +296,10 @@ namespace Ink_Canvas.Helpers
             {
                 unchecked
                 {
-                    var hashCode = (int) Left;
-                    hashCode = (hashCode * 397) ^ (int) Top;
-                    hashCode = (hashCode * 397) ^ (int) Right;
-                    hashCode = (hashCode * 397) ^ (int) Bottom;
+                    var hashCode = Left;
+                    hashCode = (hashCode * 397) ^ Top;
+                    hashCode = (hashCode * 397) ^ Right;
+                    hashCode = (hashCode * 397) ^ Bottom;
                     return hashCode;
                 }
             }

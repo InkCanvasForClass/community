@@ -1,12 +1,12 @@
-﻿using Ink_Canvas.Helpers;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Diagnostics;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -32,7 +32,7 @@ namespace Ink_Canvas {
         private Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>> DrawingAttributesHistory =
             new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
 
-        private Dictionary<Guid, List<Stroke>> DrawingAttributesHistoryFlag = new Dictionary<Guid, List<Stroke>>() {
+        private Dictionary<Guid, List<Stroke>> DrawingAttributesHistoryFlag = new Dictionary<Guid, List<Stroke>> {
             { DrawingAttributeIds.Color, new List<Stroke>() },
             { DrawingAttributeIds.DrawingFlags, new List<Stroke>() },
             { DrawingAttributeIds.IsHighlighter, new List<Stroke>() },
@@ -145,7 +145,7 @@ namespace Ink_Canvas {
         }
 
         private StrokeCollection ApplyHistoriesToNewStrokeCollection(TimeMachineHistory[] items) {
-            InkCanvas fakeInkCanv = new InkCanvas() {
+            InkCanvas fakeInkCanv = new InkCanvas {
                 Width = inkCanvas.ActualWidth,
                 Height = inkCanvas.ActualHeight,
                 EditingMode = InkCanvasEditingMode.None,
@@ -202,24 +202,23 @@ namespace Ink_Canvas {
                 return;
             }
 
-            if (e.Added.Count != 0) {
+            if (e.Added.Count != 0)
+            {
                 if (_currentCommitType == CommitReason.ShapeRecognition) {
                     timeMachine.CommitStrokeShapeHistory(ReplacedStroke, e.Added);
                     ReplacedStroke = null;
                     return;
-                } else {
-                    timeMachine.CommitStrokeUserInputHistory(e.Added);
-                    return;
                 }
+
+                timeMachine.CommitStrokeUserInputHistory(e.Added);
+                return;
             }
 
             if (e.Removed.Count != 0) {
                 if (_currentCommitType == CommitReason.ShapeRecognition) {
                     ReplacedStroke = e.Removed;
-                    return;
                 } else if (!IsEraseByPoint || _currentCommitType == CommitReason.ClearingCanvas) {
                     timeMachine.CommitStrokeEraseHistory(e.Removed);
-                    return;
                 }
             }
         }

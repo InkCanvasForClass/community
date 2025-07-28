@@ -1,6 +1,7 @@
-﻿using Ink_Canvas.Helpers;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -26,7 +27,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void Window_Closing(object sender, CancelEventArgs e)
         {
             if (originText != TextBoxNames.Text)
             {

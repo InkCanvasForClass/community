@@ -8,6 +8,9 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Ink_Canvas.Windows;
+using Newtonsoft.Json;
+using Timer = System.Timers.Timer;
 
 namespace Ink_Canvas.Helpers.Plugins
 {
@@ -51,12 +54,12 @@ namespace Ink_Canvas.Helpers.Plugins
         /// <summary>
         /// 配置是否已更改但未保存
         /// </summary>
-        private bool _configDirty = false;
+        private bool _configDirty;
         
         /// <summary>
         /// 配置自动保存计时器
         /// </summary>
-        private System.Timers.Timer _autoSaveTimer;
+        private Timer _autoSaveTimer;
         
         /// <summary>
         /// 加载的程序集缓存
@@ -80,7 +83,7 @@ namespace Ink_Canvas.Helpers.Plugins
             LoadConfig();
             
             // 初始化自动保存计时器（3秒）
-            _autoSaveTimer = new System.Timers.Timer(3000);
+            _autoSaveTimer = new Timer(3000);
             _autoSaveTimer.Elapsed += (s, e) => 
             {
                 if (_configDirty)
@@ -108,22 +111,22 @@ namespace Ink_Canvas.Helpers.Plugins
         {
             try
             {
-                LogHelper.WriteLogToFile("开始初始化插件系统", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("开始初始化插件系统");
                 
                 // 加载配置
                 LoadConfig();
-                LogHelper.WriteLogToFile($"已从配置文件加载 {PluginStates.Count} 个插件状态记录", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"已从配置文件加载 {PluginStates.Count} 个插件状态记录");
                 
                 // 加载内置插件
-                LogHelper.WriteLogToFile("正在加载内置插件...", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("正在加载内置插件...");
                 LoadBuiltInPlugins();
                 
                 // 加载外部插件
-                LogHelper.WriteLogToFile("正在加载外部插件...", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("正在加载外部插件...");
                 LoadExternalPlugins();
                 
                 // 启用已配置为启用的插件
-                LogHelper.WriteLogToFile("正在应用配置的插件状态...", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("正在应用配置的插件状态...");
                 EnableConfiguredPlugins();
                 
                 // 设置定期检查热重载
@@ -132,7 +135,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 保存初始化后的配置（可能有新插件）
                 SaveConfig();
                 
-                LogHelper.WriteLogToFile($"插件系统初始化完成，共加载 {Plugins.Count} 个插件", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"插件系统初始化完成，共加载 {Plugins.Count} 个插件");
             }
             catch (Exception ex)
             {
@@ -166,7 +169,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         {
                             plugin.Initialize();
                             Plugins.Add(plugin);
-                            LogHelper.WriteLogToFile($"已加载内置插件: {plugin.Name} v{plugin.Version}", LogHelper.LogType.Info);
+                            LogHelper.WriteLogToFile($"已加载内置插件: {plugin.Name} v{plugin.Version}");
                         }
                     }
                     catch (Exception ex)
@@ -200,7 +203,7 @@ namespace Ink_Canvas.Helpers.Plugins
                     .Concat(Directory.GetFiles(PluginsDirectory, "*.dll", SearchOption.TopDirectoryOnly))
                     .ToArray();
                 
-                LogHelper.WriteLogToFile($"发现 {pluginFiles.Length} 个外部插件文件", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"发现 {pluginFiles.Length} 个外部插件文件");
                 
                 foreach (var pluginFile in pluginFiles)
                 {
@@ -258,8 +261,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         plugin.Initialize();
                         Plugins.Add(plugin);
                         
-                        LogHelper.WriteLogToFile($"已加载外部插件: {plugin.Name} v{plugin.Version} 来自 {Path.GetFileName(pluginPath)}", 
-                            LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"已加载外部插件: {plugin.Name} v{plugin.Version} 来自 {Path.GetFileName(pluginPath)}");
                         
                         return plugin;
                     }
@@ -297,8 +299,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 添加到插件列表
                 Plugins.Add(pluginAdapter);
                 
-                LogHelper.WriteLogToFile($"已创建 ICCPP 插件适配器: {pluginAdapter.Name} 来自 {Path.GetFileName(pluginPath)}", 
-                    LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"已创建 ICCPP 插件适配器: {pluginAdapter.Name} 来自 {Path.GetFileName(pluginPath)}");
                 
                 return pluginAdapter;
             }
@@ -371,13 +372,13 @@ namespace Ink_Canvas.Helpers.Plugins
                             {
                                 plugin.Enable();
                                 enabledCount++;
-                                LogHelper.WriteLogToFile($"根据配置启用插件: {plugin.Name}", LogHelper.LogType.Info);
+                                LogHelper.WriteLogToFile($"根据配置启用插件: {plugin.Name}");
                             }
                             else
                             {
                                 plugin.Disable();
                                 disabledCount++;
-                                LogHelper.WriteLogToFile($"根据配置禁用插件: {plugin.Name}", LogHelper.LogType.Info);
+                                LogHelper.WriteLogToFile($"根据配置禁用插件: {plugin.Name}");
                             }
                         }
                         else
@@ -406,7 +407,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         {
                             plugin.Disable();
                             disabledCount++;
-                            LogHelper.WriteLogToFile($"插件不在配置中，默认禁用: {plugin.Name}", LogHelper.LogType.Info);
+                            LogHelper.WriteLogToFile($"插件不在配置中，默认禁用: {plugin.Name}");
                         }
                     }
                 }
@@ -423,7 +424,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 TriggerAutoSave();
             }
             
-            LogHelper.WriteLogToFile($"已应用插件配置: 启用 {enabledCount} 个，禁用 {disabledCount} 个，错误 {errorCount} 个", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"已应用插件配置: 启用 {enabledCount} 个，禁用 {disabledCount} 个，错误 {errorCount} 个");
         }
         
         /// <summary>
@@ -443,11 +444,11 @@ namespace Ink_Canvas.Helpers.Plugins
                         PluginStates[pluginTypeName] = isEnabled;
                         _configDirty = true;
                         
-                        LogHelper.WriteLogToFile($"插件状态变更: {plugin.Name} = {(isEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"插件状态变更: {plugin.Name} = {(isEnabled ? "启用" : "禁用")}");
                         
                         // 立即同步保存配置（不再使用延迟自动保存）
                         SaveConfig();
-                        LogHelper.WriteLogToFile($"插件 {plugin.Name} 状态已立即保存到配置文件", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"插件 {plugin.Name} 状态已立即保存到配置文件");
                     }
                 }
             }
@@ -534,14 +535,14 @@ namespace Ink_Canvas.Helpers.Plugins
                     return;
                 }
                 
-                LogHelper.WriteLogToFile($"开始热重载插件: {plugin.Name} ({Path.GetFileName(pluginPath)})", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"开始热重载插件: {plugin.Name} ({Path.GetFileName(pluginPath)})");
                 
                 // 保存插件的当前状态
                 bool wasEnabled = plugin.IsEnabled;
                 string pluginTypeName = plugin.GetType().FullName;
                 
                 // 卸载插件
-                UnloadPlugin(plugin, false);
+                UnloadPlugin(plugin);
                 
                 // 从加载缓存中移除
                 if (_loadedAssemblies.ContainsKey(pluginPath))
@@ -575,7 +576,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         SaveConfig();
                     }
                     
-                    LogHelper.WriteLogToFile($"插件 {newPlugin.Name} v{newPlugin.Version} 热重载成功", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"插件 {newPlugin.Name} v{newPlugin.Version} 热重载成功");
                     
                     // 通知UI刷新
                     NotifyUIRefresh();
@@ -626,7 +627,7 @@ namespace Ink_Canvas.Helpers.Plugins
                     }
                 }
                 
-                LogHelper.WriteLogToFile($"已卸载插件: {pluginName}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"已卸载插件: {pluginName}");
             }
             catch (Exception ex)
             {
@@ -677,7 +678,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 保存配置
                 SaveConfig();
                 
-                LogHelper.WriteLogToFile($"已删除插件: {pluginName}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"已删除插件: {pluginName}");
                 return true;
             }
             catch (Exception ex)
@@ -701,7 +702,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 if (currentState == enable)
                 {
                     // 已经是目标状态，无需操作
-                    LogHelper.WriteLogToFile($"插件 {plugin.Name} 已经是 {(enable ? "启用" : "禁用")} 状态，无需切换", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"插件 {plugin.Name} 已经是 {(enable ? "启用" : "禁用")} 状态，无需切换");
                     return;
                 }
                 
@@ -709,7 +710,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 string pluginName = plugin.Name;
                 string pluginTypeName = plugin.GetType().FullName;
                 
-                LogHelper.WriteLogToFile($"开始切换插件 {pluginName} 状态为: {(enable ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"开始切换插件 {pluginName} 状态为: {(enable ? "启用" : "禁用")}");
                 
                 // 首先更新配置状态
                 PluginStates[pluginTypeName] = enable;
@@ -731,13 +732,13 @@ namespace Ink_Canvas.Helpers.Plugins
                     if (enable)
                     {
                         plugin.Enable();
-                        LogHelper.WriteLogToFile($"插件 {pluginName} 已启用", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"插件 {pluginName} 已启用");
                     }
                     else
                     {
                         // 禁用前先记录是否为内置插件
                         bool isBuiltIn = plugin.IsBuiltIn;
-                        LogHelper.WriteLogToFile($"尝试禁用{(isBuiltIn ? "内置" : "外部")}插件 {pluginName}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"尝试禁用{(isBuiltIn ? "内置" : "外部")}插件 {pluginName}");
                         
                         // 禁用插件
                         plugin.Disable();
@@ -762,13 +763,13 @@ namespace Ink_Canvas.Helpers.Plugins
                                     if (enabledProperty != null)
                                     {
                                         enabledProperty.SetValue(pb4, false);
-                                        LogHelper.WriteLogToFile($"已通过反射强制设置插件 {pluginName} 为禁用状态", LogHelper.LogType.Info);
+                                        LogHelper.WriteLogToFile($"已通过反射强制设置插件 {pluginName} 为禁用状态");
                                     }
                                 }
                             }
                         }
                         
-                        LogHelper.WriteLogToFile($"插件 {pluginName} 已禁用", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"插件 {pluginName} 已禁用");
                     }
                 }
                 catch (Exception ex)
@@ -785,7 +786,7 @@ namespace Ink_Canvas.Helpers.Plugins
                     // 对于内置插件，执行专门的处理
                     if (pluginInstance.IsBuiltIn)
                     {
-                        LogHelper.WriteLogToFile($"处理内置插件 {pluginName} 状态变更", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"处理内置插件 {pluginName} 状态变更");
                         
                         // 对于内置插件，我们需要确保状态正确应用
                         bool finalState = pluginInstance.IsEnabled;
@@ -811,7 +812,7 @@ namespace Ink_Canvas.Helpers.Plugins
                                     if (enabledProperty != null)
                                     {
                                         enabledProperty.SetValue(pluginInstance, expectedState);
-                                        LogHelper.WriteLogToFile($"已通过反射强制设置内置插件 {pluginName} 状态为 {(expectedState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                                        LogHelper.WriteLogToFile($"已通过反射强制设置内置插件 {pluginName} 状态为 {(expectedState ? "启用" : "禁用")}");
                                     }
                                 }
                             }
@@ -827,7 +828,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         {
                             if (!string.IsNullOrEmpty(pluginInstance.PluginPath) && File.Exists(pluginInstance.PluginPath))
                             {
-                                LogHelper.WriteLogToFile($"开始重载外部插件 {pluginName}", LogHelper.LogType.Info);
+                                LogHelper.WriteLogToFile($"开始重载外部插件 {pluginName}");
                                 
                                 // 使用调度器确保在UI线程执行热重载
                                 if (Application.Current != null && Application.Current.Dispatcher != null)
@@ -835,14 +836,14 @@ namespace Ink_Canvas.Helpers.Plugins
                                     Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                                     {
                                         ReloadPlugin(pluginInstance);
-                                        LogHelper.WriteLogToFile($"插件 {pluginName} 已重载以应用{(enable ? "启用" : "禁用")}状态", LogHelper.LogType.Info);
+                                        LogHelper.WriteLogToFile($"插件 {pluginName} 已重载以应用{(enable ? "启用" : "禁用")}状态");
                                     }));
                                 }
                                 else
                                 {
                                     // 当前不在UI线程，直接重载
                                     ReloadPlugin(pluginInstance);
-                                    LogHelper.WriteLogToFile($"插件 {pluginName} 已重载以应用{(enable ? "启用" : "禁用")}状态", LogHelper.LogType.Info);
+                                    LogHelper.WriteLogToFile($"插件 {pluginName} 已重载以应用{(enable ? "启用" : "禁用")}状态");
                                 }
                             }
                             else
@@ -865,7 +866,7 @@ namespace Ink_Canvas.Helpers.Plugins
                     NotifyUIRefresh();
                 }
                 
-                LogHelper.WriteLogToFile($"插件 {pluginName} 状态切换完成", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"插件 {pluginName} 状态切换完成");
             }
             catch (Exception ex)
             {
@@ -889,12 +890,12 @@ namespace Ink_Canvas.Helpers.Plugins
                     if (enable)
                     {
                         plugin.Enable();
-                        LogHelper.WriteLogToFile($"实时应用: 已启用插件 {plugin.Name}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"实时应用: 已启用插件 {plugin.Name}");
                     }
                     else
                     {
                         plugin.Disable();
-                        LogHelper.WriteLogToFile($"实时应用: 已禁用插件 {plugin.Name}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"实时应用: 已禁用插件 {plugin.Name}");
                     }
                     
                     // 同步状态到插件自身的配置
@@ -904,7 +905,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         {
                             // 保存插件设置（与启用状态无关）
                             pluginSettings.SavePluginSettings();
-                            LogHelper.WriteLogToFile($"实时应用: 已保存插件 {plugin.Name} 设置", LogHelper.LogType.Info);
+                            LogHelper.WriteLogToFile($"实时应用: 已保存插件 {plugin.Name} 设置");
                         }
                         catch (Exception ex)
                         {
@@ -940,7 +941,7 @@ namespace Ink_Canvas.Helpers.Plugins
                                     
                                     // 执行热重载
                                     ReloadPlugin(externalPlugin);
-                                    LogHelper.WriteLogToFile($"插件 {plugin.Name} 已成功热重载以应用实时状态", LogHelper.LogType.Info);
+                                    LogHelper.WriteLogToFile($"插件 {plugin.Name} 已成功热重载以应用实时状态");
                                 }
                                 catch (Exception ex)
                                 {
@@ -964,7 +965,7 @@ namespace Ink_Canvas.Helpers.Plugins
                     }
                 }
                 
-                LogHelper.WriteLogToFile($"插件 {plugin.Name} 实时状态已应用: {(enable ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"插件 {plugin.Name} 实时状态已应用: {(enable ? "启用" : "禁用")}");
             }
             catch (Exception ex)
             {
@@ -986,7 +987,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         // 通知任何可能打开的插件设置窗口刷新
                         foreach (Window window in Application.Current.Windows)
                         {
-                            if (window is Windows.PluginSettingsWindow pluginWindow)
+                            if (window is PluginSettingsWindow pluginWindow)
                             {
                                 pluginWindow.RefreshPluginList();
                                 break;
@@ -1009,7 +1010,7 @@ namespace Ink_Canvas.Helpers.Plugins
             const int maxRetries = 3; // 最大重试次数
             const int retryDelayMs = 300; // 重试延迟时间(毫秒)
             
-            LogHelper.WriteLogToFile($"开始从配置文件加载插件状态: {PluginConfigFile}", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"开始从配置文件加载插件状态: {PluginConfigFile}");
             
             // 确保至少有一个默认配置
             Dictionary<string, bool> defaultConfig = new Dictionary<string, bool>();
@@ -1033,14 +1034,13 @@ namespace Ink_Canvas.Helpers.Plugins
                                 json = reader.ReadToEnd();
                             }
                             
-                            var loadedStates = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool>>(json);
+                            var loadedStates = JsonConvert.DeserializeObject<Dictionary<string, bool>>(json);
                             
                             if (loadedStates != null && loadedStates.Count > 0)
                             {
                                 PluginStates = loadedStates;
                                 _configDirty = false; // 重置脏标记
-                                LogHelper.WriteLogToFile($"成功从配置文件加载了 {PluginStates.Count} 个插件状态", LogHelper.LogType.Info);
-                                return; // 成功加载，提前退出
+                                LogHelper.WriteLogToFile($"成功从配置文件加载了 {PluginStates.Count} 个插件状态");
                             }
                             else
                             {
@@ -1051,13 +1051,13 @@ namespace Ink_Canvas.Helpers.Plugins
                                     try
                                     {
                                         string backupJson = File.ReadAllText(PluginConfigBackupFile);
-                                        var backupStates = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool>>(backupJson);
+                                        var backupStates = JsonConvert.DeserializeObject<Dictionary<string, bool>>(backupJson);
                                         
                                         if (backupStates != null && backupStates.Count > 0)
                                         {
                                             PluginStates = backupStates;
                                             _configDirty = true; // 从备份加载，需要重新保存主配置
-                                            LogHelper.WriteLogToFile($"已从备份恢复 {PluginStates.Count} 个插件状态", LogHelper.LogType.Info);
+                                            LogHelper.WriteLogToFile($"已从备份恢复 {PluginStates.Count} 个插件状态");
                                             return; // 成功从备份加载，提前退出
                                         }
                                     }
@@ -1082,13 +1082,13 @@ namespace Ink_Canvas.Helpers.Plugins
                                 try
                                 {
                                     string backupJson = File.ReadAllText(PluginConfigBackupFile);
-                                    var backupStates = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, bool>>(backupJson);
+                                    var backupStates = JsonConvert.DeserializeObject<Dictionary<string, bool>>(backupJson);
                                     
                                     if (backupStates != null && backupStates.Count > 0)
                                     {
                                         PluginStates = backupStates;
                                         _configDirty = true; // 从备份加载，需要重新保存主配置
-                                        LogHelper.WriteLogToFile($"已从备份恢复 {PluginStates.Count} 个插件状态", LogHelper.LogType.Info);
+                                        LogHelper.WriteLogToFile($"已从备份恢复 {PluginStates.Count} 个插件状态");
                                         return; // 成功从备份加载，提前退出
                                     }
                                 }
@@ -1111,7 +1111,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         if (attempt < maxRetries)
                         {
                             LogHelper.WriteLogToFile($"加载配置失败 (尝试 {attempt}/{maxRetries}): {ex.Message}，将在 {retryDelayMs}ms 后重试", LogHelper.LogType.Warning);
-                            System.Threading.Thread.Sleep(retryDelayMs);
+                            Thread.Sleep(retryDelayMs);
                         }
                         else
                         {
@@ -1178,10 +1178,10 @@ namespace Ink_Canvas.Helpers.Plugins
             
             try
             {
-                LogHelper.WriteLogToFile($"开始保存插件配置到: {PluginConfigFile}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"开始保存插件配置到: {PluginConfigFile}");
                 
                 // 生成JSON数据
-                string json = Newtonsoft.Json.JsonConvert.SerializeObject(PluginStates, Newtonsoft.Json.Formatting.Indented);
+                string json = JsonConvert.SerializeObject(PluginStates, Formatting.Indented);
                 string tempFile = PluginConfigFile + ".temp"; // 临时文件路径
                 
                 // 确保目录存在
@@ -1189,7 +1189,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 if (!Directory.Exists(configDir))
                 {
                     Directory.CreateDirectory(configDir);
-                    LogHelper.WriteLogToFile($"创建配置目录: {configDir}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"创建配置目录: {configDir}");
                 }
                 
                 // 先备份当前配置
@@ -1217,7 +1217,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         {
                             // 重置脏标记
                             _configDirty = false;
-                            LogHelper.WriteLogToFile($"插件配置已成功保存到磁盘: {PluginConfigFile}, 共 {PluginStates.Count} 个插件状态", LogHelper.LogType.Info);
+                            LogHelper.WriteLogToFile($"插件配置已成功保存到磁盘: {PluginConfigFile}, 共 {PluginStates.Count} 个插件状态");
                             return;
                         }
                     }
@@ -1226,7 +1226,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         if (attempt < maxRetries)
                         {
                             LogHelper.WriteLogToFile($"保存配置失败 (尝试 {attempt}/{maxRetries}): {ex.Message}，将在 {retryDelayMs}ms 后重试", LogHelper.LogType.Warning);
-                            System.Threading.Thread.Sleep(retryDelayMs);
+                            Thread.Sleep(retryDelayMs);
                         }
                         else
                         {
@@ -1255,7 +1255,7 @@ namespace Ink_Canvas.Helpers.Plugins
                                 
                                 // 重置脏标记
                                 _configDirty = false;
-                                LogHelper.WriteLogToFile($"使用临时文件方式成功保存配置: {PluginConfigFile}", LogHelper.LogType.Info);
+                                LogHelper.WriteLogToFile($"使用临时文件方式成功保存配置: {PluginConfigFile}");
                                 return;
                             }
                             catch (Exception fallbackEx)
@@ -1302,7 +1302,7 @@ namespace Ink_Canvas.Helpers.Plugins
         {
             try
             {
-                LogHelper.WriteLogToFile("开始从配置文件重新加载插件状态", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("开始从配置文件重新加载插件状态");
                 
                 // 保存当前配置状态，以便在加载失败时回滚
                 Dictionary<string, bool> previousStates = new Dictionary<string, bool>(PluginStates);
@@ -1318,7 +1318,7 @@ namespace Ink_Canvas.Helpers.Plugins
                     return;
                 }
                 
-                LogHelper.WriteLogToFile($"已加载 {PluginStates.Count} 个插件状态，开始应用...", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"已加载 {PluginStates.Count} 个插件状态，开始应用...");
                 
                 // 对比配置，查找变更的插件
                 foreach (var plugin in Plugins.ToList()) // 创建副本进行遍历，避免集合修改异常
@@ -1333,7 +1333,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         // 如果状态需要变更
                         if (currentlyEnabled != shouldBeEnabled)
                         {
-                            LogHelper.WriteLogToFile($"应用插件 {plugin.Name} 的配置状态: {(shouldBeEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                            LogHelper.WriteLogToFile($"应用插件 {plugin.Name} 的配置状态: {(shouldBeEnabled ? "启用" : "禁用")}");
                             
                             if (shouldBeEnabled)
                             {
@@ -1352,7 +1352,7 @@ namespace Ink_Canvas.Helpers.Plugins
                                 {
                                     // 记录禁用信息，特别是内置插件
                                     bool isBuiltIn = plugin.IsBuiltIn;
-                                    LogHelper.WriteLogToFile($"尝试禁用{(isBuiltIn ? "内置" : "外部")}插件 {plugin.Name}", LogHelper.LogType.Info);
+                                    LogHelper.WriteLogToFile($"尝试禁用{(isBuiltIn ? "内置" : "外部")}插件 {plugin.Name}");
                                     
                                     // 禁用插件
                                     plugin.Disable();
@@ -1368,7 +1368,7 @@ namespace Ink_Canvas.Helpers.Plugins
                                             if (enabledProperty != null)
                                             {
                                                 enabledProperty.SetValue(builtInPluginBase, false);
-                                                LogHelper.WriteLogToFile($"已通过反射强制禁用内置插件 {plugin.Name}", LogHelper.LogType.Info);
+                                                LogHelper.WriteLogToFile($"已通过反射强制禁用内置插件 {plugin.Name}");
                                             }
                                         }
                                     }
@@ -1397,7 +1397,7 @@ namespace Ink_Canvas.Helpers.Plugins
                     {
                         // 插件不在配置中，将其添加为禁用状态
                         PluginStates[pluginTypeName] = false;
-                        LogHelper.WriteLogToFile($"插件 {plugin.Name} 不在配置中，默认设置为禁用状态", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"插件 {plugin.Name} 不在配置中，默认设置为禁用状态");
                         
                         // 如果当前是启用状态，则禁用它
                         if (plugin is PluginBase pluginBase && pluginBase.IsEnabled)
@@ -1405,7 +1405,7 @@ namespace Ink_Canvas.Helpers.Plugins
                             try
                             {
                                 bool isBuiltIn = plugin.IsBuiltIn;
-                                LogHelper.WriteLogToFile($"尝试禁用未配置的{(isBuiltIn ? "内置" : "外部")}插件 {plugin.Name}", LogHelper.LogType.Info);
+                                LogHelper.WriteLogToFile($"尝试禁用未配置的{(isBuiltIn ? "内置" : "外部")}插件 {plugin.Name}");
                                 
                                 plugin.Disable();
                                 
@@ -1418,7 +1418,7 @@ namespace Ink_Canvas.Helpers.Plugins
                                     if (enabledProperty != null)
                                     {
                                         enabledProperty.SetValue(pluginBase, false);
-                                        LogHelper.WriteLogToFile($"已通过反射强制禁用未配置的内置插件 {plugin.Name}", LogHelper.LogType.Info);
+                                        LogHelper.WriteLogToFile($"已通过反射强制禁用未配置的内置插件 {plugin.Name}");
                                     }
                                 }
                             }
@@ -1440,7 +1440,7 @@ namespace Ink_Canvas.Helpers.Plugins
                         // 通知任何可能打开的插件设置窗口刷新
                         foreach (Window window in Application.Current.Windows)
                         {
-                            if (window is Windows.PluginSettingsWindow pluginWindow)
+                            if (window is PluginSettingsWindow pluginWindow)
                             {
                                 pluginWindow.RefreshPluginList();
                             }
@@ -1448,7 +1448,7 @@ namespace Ink_Canvas.Helpers.Plugins
                     });
                 }
                 
-                LogHelper.WriteLogToFile("插件状态已从配置文件重新加载完成", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("插件状态已从配置文件重新加载完成");
             }
             catch (Exception ex)
             {

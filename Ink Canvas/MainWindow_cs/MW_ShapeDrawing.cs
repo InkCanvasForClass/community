@@ -1,5 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -9,6 +8,8 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
 using MessageBox = System.Windows.MessageBox;
 using Point = System.Windows.Point;
 
@@ -55,8 +56,8 @@ namespace Ink_Canvas {
 
         #endregion Floating Bar Control
 
-        private int drawingShapeMode = 0;
-        private bool isLongPressSelected = false; // 用于存是否是"选中"状态，便于后期抬笔后不做切换到笔的处理
+        private int drawingShapeMode;
+        private bool isLongPressSelected; // 用于存是否是"选中"状态，便于后期抬笔后不做切换到笔的处理
 
         #region Buttons
 
@@ -66,12 +67,12 @@ namespace Ink_Canvas {
             ToggleSwitchDrawShapeBorderAutoHide.IsOn = !ToggleSwitchDrawShapeBorderAutoHide.IsOn;
 
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-                ((iNKORE.UI.WPF.Modern.Controls.SymbolIcon)sender).Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pin;
+                ((SymbolIcon)sender).Symbol = Symbol.Pin;
             else
-                ((iNKORE.UI.WPF.Modern.Controls.SymbolIcon)sender).Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.UnPin;
+                ((SymbolIcon)sender).Symbol = Symbol.UnPin;
         }
 
-        private object lastMouseDownSender = null;
+        private object lastMouseDownSender;
         private DateTime lastMouseDownTime = DateTime.MinValue;
 
         private async void Image_MouseDown(object sender, MouseButtonEventArgs e) {
@@ -402,23 +403,22 @@ namespace Ink_Canvas {
                 inkCanvas.EditingMode == InkCanvasEditingMode.Select ||
                 inkCanvas.EditingMode == InkCanvasEditingMode.Ink) {
                 // 允许正常橡皮、套索、批注
-                return;
             }
         }
 
-        private int drawMultiStepShapeCurrentStep = 0; //多笔完成的图形 当前所处在的笔画
+        private int drawMultiStepShapeCurrentStep; //多笔完成的图形 当前所处在的笔画
 
         private StrokeCollection drawMultiStepShapeSpecialStrokeCollection = new StrokeCollection(); //多笔完成的图形 当前所处在的笔画
 
         //double drawMultiStepShapeSpecialParameter1 = 0.0; //多笔完成的图形 特殊参数 通常用于表示a
         //double drawMultiStepShapeSpecialParameter2 = 0.0; //多笔完成的图形 特殊参数 通常用于表示b
-        private double drawMultiStepShapeSpecialParameter3 = 0.0; //多笔完成的图形 特殊参数 通常用于表示k
+        private double drawMultiStepShapeSpecialParameter3; //多笔完成的图形 特殊参数 通常用于表示k
 
         #region 形状绘制主函数
 
         private void MouseTouchMove(Point endP) {
             // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
-            if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = false;
+            if (Settings.Canvas.FitToCurve) drawingAttributes.FitToCurve = false;
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
             List<Point> pointList;
@@ -1041,7 +1041,7 @@ namespace Ink_Canvas {
                     strokes.Add(stroke.Clone());
                     //底部椭圆
                     pointList = GenerateEllipseGeometry(new Point(newIniP.X, endP.Y - topB / 2),
-                        new Point(endP.X, endP.Y + topB / 2), false, true);
+                        new Point(endP.X, endP.Y + topB / 2), false);
                     point = new StylusPointCollection(pointList);
                     stroke = new Stroke(point) {
                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
@@ -1090,7 +1090,7 @@ namespace Ink_Canvas {
                     var bottomB = bottomA / 2.646;
                     //底部椭圆
                     pointList = GenerateEllipseGeometry(new Point(newIniP.X, endP.Y - bottomB / 2),
-                        new Point(endP.X, endP.Y + bottomB / 2), false, true);
+                        new Point(endP.X, endP.Y + bottomB / 2), false);
                     point = new StylusPointCollection(pointList);
                     stroke = new Stroke(point) {
                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
@@ -1221,13 +1221,13 @@ namespace Ink_Canvas {
         #endregion
 
         private bool isFirstTouchCuboid = true;
-        private Point CuboidFrontRectIniP = new Point();
-        private Point CuboidFrontRectEndP = new Point();
+        private Point CuboidFrontRectIniP;
+        private Point CuboidFrontRectEndP;
 
-        private Stroke lastTempStroke = null;
+        private Stroke lastTempStroke;
         private StrokeCollection lastTempStrokeCollection = new StrokeCollection();
 
-        private bool isWaitUntilNextTouchDown = false;
+        private bool isWaitUntilNextTouchDown;
 
         private List<Point> GenerateEllipseGeometry(Point st, Point ed, bool isDrawTop = true,
             bool isDrawBottom = true) {
@@ -1377,7 +1377,7 @@ namespace Ink_Canvas {
             return strokes;
         }
 
-        private bool isMouseDown = false;
+        private bool isMouseDown;
 
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e) {
             inkCanvas.CaptureMouse();
@@ -1547,7 +1547,7 @@ namespace Ink_Canvas {
                 StrokeCollection collection = null;
                 if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0)
                     collection = lastTempStrokeCollection;
-                else if (lastTempStroke != null) collection = new StrokeCollection() { lastTempStroke };
+                else if (lastTempStroke != null) collection = new StrokeCollection { lastTempStroke };
                 if (collection != null) timeMachine.CommitStrokeUserInputHistory(collection);
             }
 
@@ -1593,10 +1593,10 @@ namespace Ink_Canvas {
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"形状绘制高级贝塞尔曲线平滑失败: {ex.Message}");
+                    Debug.WriteLine($"形状绘制高级贝塞尔曲线平滑失败: {ex.Message}");
                 }
             }
-            else if (Settings.Canvas.FitToCurve == true) 
+            else if (Settings.Canvas.FitToCurve) 
             {
                 drawingAttributes.FitToCurve = true;
             }

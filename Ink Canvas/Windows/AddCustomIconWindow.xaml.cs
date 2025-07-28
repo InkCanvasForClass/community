@@ -67,7 +67,7 @@ namespace Ink_Canvas
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         private void SaveButton_Click(object sender, RoutedEventArgs e)
@@ -109,7 +109,7 @@ namespace Ink_Canvas
                 MainWindow.SaveSettingsToFile();
                 
                 IsSuccess = true;
-                this.Close();
+                Close();
             }
             catch (Exception ex)
             {

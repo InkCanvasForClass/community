@@ -1,25 +1,31 @@
-﻿using Ink_Canvas.Helpers;
-using Microsoft.Office.Interop.PowerPoint;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern;
+using Microsoft.Office.Core;
+using Microsoft.Office.Interop.PowerPoint;
 using Application = System.Windows.Application;
 using File = System.IO.File;
 using MessageBox = System.Windows.MessageBox;
-using iNKORE.UI.WPF.Modern;
-using Microsoft.Office.Core;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using Point = System.Drawing.Point;
+using Timer = System.Timers.Timer;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -30,7 +36,7 @@ namespace Ink_Canvas {
         private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        private static extern int GetWindowText(IntPtr hWnd, System.Text.StringBuilder lpString, int nMaxCount);
+        private static extern int GetWindowText(IntPtr hWnd, StringBuilder lpString, int nMaxCount);
 
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId, out uint lpdwThreadId);
@@ -60,7 +66,7 @@ namespace Ink_Canvas {
         private static extern bool GetWindowRect(IntPtr hWnd, out ForegroundWindowInfo.RECT lpRect);
 
         [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
+        private static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
 
         private const int GWL_STYLE = -16;
         private const int WS_VISIBLE = 0x10000000;
@@ -72,14 +78,14 @@ namespace Ink_Canvas {
 
         private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
 
-        public static Microsoft.Office.Interop.PowerPoint.Application pptApplication = null;
-        public static Presentation presentation = null;
-        public static Slides slides = null;
-        public static Slide slide = null;
-        public static int slidescount = 0;
+        public static Microsoft.Office.Interop.PowerPoint.Application pptApplication;
+        public static Presentation presentation;
+        public static Slides slides;
+        public static Slide slide;
+        public static int slidescount;
 
         // 在类中添加字段
-        private bool wasFloatingBarFoldedWhenEnterSlideShow = false;
+        private bool wasFloatingBarFoldedWhenEnterSlideShow;
 
         // 新增：用于控制WPS强制关闭提示只弹一次
         private static bool hasShownWpsForceCloseWarning = false;
@@ -115,7 +121,7 @@ namespace Ink_Canvas {
                             }
                         }
                         catch (Exception ex) {
-                            LogHelper.WriteLogToFile($"获取当前幻灯片失败: {ex.ToString()}", LogHelper.LogType.Error);
+                            LogHelper.WriteLogToFile($"获取当前幻灯片失败: {ex}", LogHelper.LogType.Error);
                         }
                     }
                 }
@@ -125,7 +131,7 @@ namespace Ink_Canvas {
                 StackPanelPPTControls.Visibility = Visibility.Visible;
             }
             catch (Exception ex) {
-                LogHelper.WriteLogToFile($"检查PPT应用程序失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"检查PPT应用程序失败: {ex}", LogHelper.LogType.Error);
                 //BtnCheckPPT.Visibility = Visibility.Visible;
                 StackPanelPPTControls.Visibility = Visibility.Collapsed;
                 LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
@@ -145,16 +151,16 @@ namespace Ink_Canvas {
 
         private static bool isWPSSupportOn => Settings.PowerPointSettings.IsSupportWPS;
 
-        public static bool IsShowingRestoreHiddenSlidesWindow = false;
-        private static bool IsShowingAutoplaySlidesWindow = false;
+        public static bool IsShowingRestoreHiddenSlidesWindow;
+        private static bool IsShowingAutoplaySlidesWindow;
 
         // WPP 相关变量
-        private static Process wppProcess = null;
-        private static bool hasWppProcessID = false;
-        private static System.Timers.Timer wppProcessCheckTimer = null;
+        private static Process wppProcess;
+        private static bool hasWppProcessID;
+        private static Timer wppProcessCheckTimer;
         private static DateTime wppProcessRecordTime = DateTime.MinValue; // 记录进程时间
-        private static int wppProcessCheckCount = 0; // 检查次数计数器
-        private static WpsWindowInfo lastForegroundWpsWindow = null; // 记录上次检测到的前台WPS窗口
+        private static int wppProcessCheckCount; // 检查次数计数器
+        private static WpsWindowInfo lastForegroundWpsWindow; // 记录上次检测到的前台WPS窗口
         private static DateTime lastWindowCheckTime = DateTime.MinValue; // 记录上次窗口检查时间
 
 
@@ -191,7 +197,7 @@ namespace Ink_Canvas {
                             }
                         }
                         catch (Exception ex) {
-                            LogHelper.WriteLogToFile($"获取当前幻灯片失败: {ex.ToString()}", LogHelper.LogType.Error);
+                            LogHelper.WriteLogToFile($"获取当前幻灯片失败: {ex}", LogHelper.LogType.Error);
                         }
                     }
 
@@ -215,14 +221,14 @@ namespace Ink_Canvas {
                         PptApplication_SlideShowBegin(pptApplication.SlideShowWindows[1]);
                     }
                     catch (Exception ex) {
-                        LogHelper.WriteLogToFile($"启动幻灯片放映失败: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"启动幻灯片放映失败: {ex}", LogHelper.LogType.Error);
                     }
                 }
             }
             catch (Exception ex)
             {
                 // 忽略常见的COM对象失效错误
-                if (ex is System.Runtime.InteropServices.COMException comEx)
+                if (ex is COMException comEx)
                 {
                     uint hr = (uint)comEx.HResult;
                     // 0x800401E3: 操作无法使用
@@ -237,7 +243,7 @@ namespace Ink_Canvas {
                         return;
                     }
                 }
-                LogHelper.WriteLogToFile($"检查PPT状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"检查PPT状态失败: {ex}", LogHelper.LogType.Error);
                 Application.Current.Dispatcher.Invoke(() => { BtnPPTSlideShow.Visibility = Visibility.Collapsed; });
                 timerCheckPPT.Start();
             }
@@ -262,7 +268,7 @@ namespace Ink_Canvas {
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"跳转到首页失败: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"跳转到首页失败: {ex}", LogHelper.LogType.Error);
                     }
                 }), DispatcherPriority.Normal);
             }
@@ -295,16 +301,16 @@ namespace Ink_Canvas {
                                         presentation.Windows[1].View.GotoSlide(page);
                                 }
                                 catch (Exception ex) {
-                                    LogHelper.WriteLogToFile($"跳转到指定页面失败: {ex.ToString()}", LogHelper.LogType.Error);
+                                    LogHelper.WriteLogToFile($"跳转到指定页面失败: {ex}", LogHelper.LogType.Error);
                                 }
                             }).ShowDialog();
                         }
                         catch (Exception ex) {
-                            LogHelper.WriteLogToFile($"读取上次播放位置失败: {ex.ToString()}", LogHelper.LogType.Error);
+                            LogHelper.WriteLogToFile($"读取上次播放位置失败: {ex}", LogHelper.LogType.Error);
                         }
                     }
                     catch (Exception ex) {
-                        LogHelper.WriteLogToFile($"处理上次播放页跳转失败: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"处理上次播放页跳转失败: {ex}", LogHelper.LogType.Error);
                     }
                 }), DispatcherPriority.Normal);
 
@@ -316,7 +322,7 @@ namespace Ink_Canvas {
                     if (slides != null)
                     {
                         foreach (Slide slide in slides)
-                            if (slide.SlideShowTransition.Hidden == Microsoft.Office.Core.MsoTriState.msoTrue) {
+                            if (slide.SlideShowTransition.Hidden == MsoTriState.msoTrue) {
                                 isHaveHiddenSlide = true;
                                 break;
                             }
@@ -332,13 +338,13 @@ namespace Ink_Canvas {
                                         {
                                             foreach (Slide slide in slides)
                                                 if (slide.SlideShowTransition.Hidden ==
-                                                    Microsoft.Office.Core.MsoTriState.msoTrue)
+                                                    MsoTriState.msoTrue)
                                                     slide.SlideShowTransition.Hidden =
-                                                        Microsoft.Office.Core.MsoTriState.msoFalse;
+                                                        MsoTriState.msoFalse;
                                         }
                                     }
                                     catch (Exception ex) {
-                                        LogHelper.WriteLogToFile($"取消隐藏幻灯片失败: {ex.ToString()}", LogHelper.LogType.Error);
+                                        LogHelper.WriteLogToFile($"取消隐藏幻灯片失败: {ex}", LogHelper.LogType.Error);
                                     }
                                     finally {
                                         IsShowingRestoreHiddenSlidesWindow = false;
@@ -351,7 +357,7 @@ namespace Ink_Canvas {
                     }), DispatcherPriority.Normal);
                 }
                 catch (Exception ex) {
-                    LogHelper.WriteLogToFile($"检查隐藏幻灯片失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"检查隐藏幻灯片失败: {ex}", LogHelper.LogType.Error);
                 }
             }
 
@@ -386,7 +392,7 @@ namespace Ink_Canvas {
                                             }
                                         }
                                         catch (Exception ex) {
-                                            LogHelper.WriteLogToFile($"设置手动播放模式失败: {ex.ToString()}", LogHelper.LogType.Error);
+                                            LogHelper.WriteLogToFile($"设置手动播放模式失败: {ex}", LogHelper.LogType.Error);
                                         }
                                         finally {
                                             IsShowingAutoplaySlidesWindow = false;
@@ -402,12 +408,12 @@ namespace Ink_Canvas {
                             }
                         }
                         catch (Exception ex) {
-                            LogHelper.WriteLogToFile($"设置演示文稿播放模式失败: {ex.ToString()}", LogHelper.LogType.Error);
+                            LogHelper.WriteLogToFile($"设置演示文稿播放模式失败: {ex}", LogHelper.LogType.Error);
                         }
                     }
                 }
                 catch (Exception ex) {
-                    LogHelper.WriteLogToFile($"检查自动播放设置失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"检查自动播放设置失败: {ex}", LogHelper.LogType.Error);
                 }
             }
         }
@@ -433,8 +439,8 @@ namespace Ink_Canvas {
             }
         }
 
-        private bool isPresentationHaveBlackSpace = false;
-        private string pptName = null;
+        private bool isPresentationHaveBlackSpace;
+        private string pptName;
 
         private void UpdatePPTBtnStyleSettingsStatus() {
             try {
@@ -600,7 +606,7 @@ namespace Ink_Canvas {
                 else RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
             }
             catch (Exception ex) {
-                LogHelper.WriteLogToFile($"更新PPT按钮显示状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"更新PPT按钮显示状态失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
@@ -630,7 +636,7 @@ namespace Ink_Canvas {
                         }
                         catch (Exception ex)
                         {
-                            LogHelper.WriteLogToFile($"放映开始时跳转首页失败: {ex.ToString()}", LogHelper.LogType.Error);
+                            LogHelper.WriteLogToFile($"放映开始时跳转首页失败: {ex}", LogHelper.LogType.Error);
                         }
                     }
 
@@ -644,9 +650,8 @@ namespace Ink_Canvas {
                                 //Light
                                 BtnExit.Foreground = Brushes.White;
                                 ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
-                            } else {
-                                //Dark
                             }
+                            //Dark
                         }
                     } else if (screenRatio == -256 / 135) { }
 
@@ -658,7 +663,7 @@ namespace Ink_Canvas {
 
                     pptName = Wn.Presentation.Name;
                     LogHelper.NewLog("Name: " + Wn.Presentation.Name);
-                    LogHelper.NewLog("Slides Count: " + slidescount.ToString());
+                    LogHelper.NewLog("Slides Count: " + slidescount);
 
                     //检查是否有已有墨迹，并加载
                     if (Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint)
@@ -685,7 +690,7 @@ namespace Ink_Canvas {
                                     }
                                     catch (Exception ex) {
                                         LogHelper.WriteLogToFile(
-                                            $"Failed to load strokes on Slide {i}\n{ex.ToString()}",
+                                            $"Failed to load strokes on Slide {i}\n{ex}",
                                             LogHelper.LogType.Error);
                                     }
                                 }
@@ -743,16 +748,16 @@ namespace Ink_Canvas {
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"加载当前页墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"加载当前页墨迹失败: {ex}", LogHelper.LogType.Error);
                     }
 
                     if (!isFloatingBarFolded) {
-                        new Thread(new ThreadStart(() => {
+                        new Thread(() => {
                             Thread.Sleep(100);
                             Application.Current.Dispatcher.Invoke(() => {
                                 ViewboxFloatingBarMarginAnimation(60);
                             });
-                        })).Start();
+                        }).Start();
                     }
                 });
                 await Application.Current.Dispatcher.InvokeAsync(() => {
@@ -763,12 +768,12 @@ namespace Ink_Canvas {
                 });
             }
             catch (Exception ex) {
-                LogHelper.WriteLogToFile("PowerPoint Application Slide Show Begin Error: " + ex.ToString(), LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile("PowerPoint Application Slide Show Begin Error: " + ex, LogHelper.LogType.Error);
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
             }
         }
 
-        private bool isEnteredSlideShowEndEvent = false; //防止重复调用本函数导致墨迹保存失效
+        private bool isEnteredSlideShowEndEvent; //防止重复调用本函数导致墨迹保存失效
 
         private async void PptApplication_SlideShowEnd(Presentation Pres) {
             try {
@@ -834,11 +839,11 @@ namespace Ink_Canvas {
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"记录WPS进程失败: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"记录WPS进程失败: {ex}", LogHelper.LogType.Error);
                     }
                 } 
 
-                LogHelper.WriteLogToFile(string.Format("PowerPoint Slide Show End"), LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile("PowerPoint Slide Show End", LogHelper.LogType.Event);
                 if (isEnteredSlideShowEndEvent) {
                     LogHelper.WriteLogToFile("Detected previous entrance, returning");
                     return;
@@ -878,7 +883,7 @@ namespace Ink_Canvas {
                             }
                             catch (Exception ex) {
                                 LogHelper.WriteLogToFile(
-                                    $"Failed to save strokes for Slide {i}\n{ex.ToString()}",
+                                    $"Failed to save strokes for Slide {i}\n{ex}",
                                     LogHelper.LogType.Error);
                                 if (File.Exists(folderPath + @"\" + i.ToString("0000") + ".icstk"))
                                     File.Delete(folderPath + @"\" + i.ToString("0000") + ".icstk");
@@ -893,10 +898,9 @@ namespace Ink_Canvas {
                             //Light
                             BtnExit.Foreground = Brushes.Black;
                             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
-                        } else {
-                            //Dark
                         }
 
+                        //Dark
                         BtnPPTSlideShow.Visibility = Visibility.Visible;
                         BtnPPTSlideShowEnd.Visibility = Visibility.Collapsed;
                         StackPanelPPTControls.Visibility = Visibility.Collapsed;
@@ -941,11 +945,11 @@ namespace Ink_Canvas {
             }
         }
 
-        private int previousSlideID = 0;
+        private int previousSlideID;
         private MemoryStream[] memoryStreams = new MemoryStream[50];
 
         private DateTime inkLockUntil = DateTime.MinValue;
-        private int lockedSlideIndex = 0;
+        private int lockedSlideIndex;
         private const int InkLockMilliseconds = 500;
 
         private void PptApplication_SlideShowNextSlide(SlideShowWindow Wn) {
@@ -980,11 +984,11 @@ namespace Ink_Canvas {
                 });
             }
             catch (Exception ex) {
-                LogHelper.WriteLogToFile($"幻灯片切换事件处理失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"幻灯片切换事件处理失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
-        private bool _isPptClickingBtnTurned = false;
+        private bool _isPptClickingBtnTurned;
 
        private void BtnPPTSlidesUp_Click(object sender, RoutedEventArgs e) {
             Application.Current.Dispatcher.Invoke(() => {
@@ -1023,7 +1027,7 @@ namespace Ink_Canvas {
                     }
                 }
                 catch (Exception ex) {
-                    LogHelper.WriteLogToFile($"PPT上一页操作异常: {ex.ToString()}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"PPT上一页操作异常: {ex}", LogHelper.LogType.Error);
                     StackPanelPPTControls.Visibility = Visibility.Collapsed;
                     LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
@@ -1070,7 +1074,7 @@ namespace Ink_Canvas {
                     }
                 }
                 catch (Exception ex) {
-                    LogHelper.WriteLogToFile($"PPT下一页操作异常: {ex.ToString()}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"PPT下一页操作异常: {ex}", LogHelper.LogType.Error);
                     StackPanelPPTControls.Visibility = Visibility.Collapsed;
                     LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
@@ -1177,7 +1181,7 @@ namespace Ink_Canvas {
                     }
                 }
                 catch (Exception ex) {
-                    LogHelper.WriteLogToFile($"设置PPT导航可见性失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"设置PPT导航可见性失败: {ex}", LogHelper.LogType.Error);
                 }
 
                 // 控制居中
@@ -1188,17 +1192,17 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"PPT翻页控件操作失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"PPT翻页控件操作失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
         private void BtnPPTSlideShow_Click(object sender, RoutedEventArgs e) {
-            new Thread(new ThreadStart(() => {
+            new Thread(() => {
                 try {
                     presentation.SlideShowSettings.Run();
                 }
                 catch { }
-            })).Start();
+            }).Start();
         }
 
         private async void BtnPPTSlideShowEnd_Click(object sender, RoutedEventArgs e) {
@@ -1240,11 +1244,11 @@ namespace Ink_Canvas {
                         }
                     }
                     catch (Exception ex) {
-                        LogHelper.WriteLogToFile($"保存当前页面墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"保存当前页面墨迹失败: {ex}", LogHelper.LogType.Error);
                     }
                 });
                 
-                new Thread(new ThreadStart(() => {
+                new Thread(() => {
                     try {
                         // 安全访问SlideShowWindows[1]
                         if (pptApplication.SlideShowWindows.Count >= 1)
@@ -1257,9 +1261,9 @@ namespace Ink_Canvas {
                         }
                     }
                     catch (Exception ex) {
-                        LogHelper.WriteLogToFile($"退出PPT放映失败: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"退出PPT放映失败: {ex}", LogHelper.LogType.Error);
                     }
-                })).Start();
+                }).Start();
 
                 HideSubPanels("cursor");
                 await Task.Delay(150);
@@ -1267,7 +1271,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"结束PPT放映操作异常: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"结束PPT放映操作异常: {ex}", LogHelper.LogType.Error);
             }
             await Application.Current.Dispatcher.InvokeAsync(() => {
                 // 隐藏侧边栏退出按钮
@@ -1289,7 +1293,7 @@ namespace Ink_Canvas {
                     LogHelper.WriteLogToFile("手动隐藏所有放映模式按钮", LogHelper.LogType.Trace);
                 }
                 catch (Exception ex) {
-                    LogHelper.WriteLogToFile($"手动隐藏放映模式按钮失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"手动隐藏放映模式按钮失败: {ex}", LogHelper.LogType.Error);
                 }
             });
         }
@@ -1411,13 +1415,13 @@ namespace Ink_Canvas {
                 wppProcessCheckTimer.Dispose();
             }
 
-            wppProcessCheckTimer = new System.Timers.Timer(500); // 改为500ms检查一次，提高响应速度
+            wppProcessCheckTimer = new Timer(500); // 改为500ms检查一次，提高响应速度
             wppProcessCheckTimer.Elapsed += WppProcessCheckTimer_Elapsed;
             wppProcessCheckTimer.Start();
             LogHelper.WriteLogToFile("启动 WPP 进程检测定时器（前台窗口监控模式）", LogHelper.LogType.Trace);
         }
 
-        private void WppProcessCheckTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void WppProcessCheckTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             // 新增：WPS联动未启用时不查杀wpp进程
             if (!Settings.PowerPointSettings.IsSupportWPS)
@@ -1487,7 +1491,7 @@ namespace Ink_Canvas {
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"检查WPS文档保存状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"检查WPS文档保存状态失败: {ex}", LogHelper.LogType.Error);
                     allSaved = false; // 出错时默认不安全
                 }
 
@@ -1515,7 +1519,7 @@ namespace Ink_Canvas {
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"结束WPP进程失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"结束WPP进程失败: {ex}", LogHelper.LogType.Error);
                     
                     // 如果常规方法失败，尝试强制结束
                     try
@@ -1533,7 +1537,7 @@ namespace Ink_Canvas {
                     }
                     catch (Exception forceKillEx)
                     {
-                        LogHelper.WriteLogToFile($"强制结束WPP进程也失败: {forceKillEx.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"强制结束WPP进程也失败: {forceKillEx}", LogHelper.LogType.Error);
                     }
                 }
                 finally
@@ -1543,7 +1547,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"WPP 进程检测失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"WPP 进程检测失败: {ex}", LogHelper.LogType.Error);
                 StopWppProcessCheckTimer();
             }
         }
@@ -1568,7 +1572,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"检查WPP窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"检查WPP窗口失败: {ex}", LogHelper.LogType.Error);
             }
             return false; // 出错时，默认允许Kill
         }
@@ -1619,14 +1623,14 @@ namespace Ink_Canvas {
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"枚举窗口时出错: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"枚举窗口时出错: {ex}", LogHelper.LogType.Error);
                     }
                     return true;
                 }, IntPtr.Zero);
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"获取WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"获取WPS窗口失败: {ex}", LogHelper.LogType.Error);
             }
             
             return wpsWindows;
@@ -1646,12 +1650,12 @@ namespace Ink_Canvas {
             };
 
             // 获取窗口标题
-            var windowTitle = new System.Text.StringBuilder(256);
+            var windowTitle = new StringBuilder(256);
             GetWindowText(hWnd, windowTitle, 256);
             windowInfo.Title = windowTitle.ToString().Trim();
 
             // 获取窗口类名
-            var className = new System.Text.StringBuilder(256);
+            var className = new StringBuilder(256);
             GetClassName(hWnd, className, 256);
             windowInfo.ClassName = className.ToString().Trim();
 
@@ -1668,7 +1672,7 @@ namespace Ink_Canvas {
             windowInfo.ProcessName = "";
             try
             {
-                var proc = System.Diagnostics.Process.GetProcessById((int)processId);
+                var proc = Process.GetProcessById((int)processId);
                 windowInfo.ProcessName = proc.ProcessName.ToLower();
             }
             catch { }
@@ -1730,7 +1734,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"获取前台WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"获取前台WPS窗口失败: {ex}", LogHelper.LogType.Error);
             }
             return null;
         }
@@ -1805,7 +1809,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"检查前台WPS窗口状态失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"检查前台WPS窗口状态失败: {ex}", LogHelper.LogType.Error);
                 return false;
             }
         }
@@ -1837,9 +1841,9 @@ namespace Ink_Canvas {
                 }
 
                 // 按窗口位置排序，优先选择屏幕中央的窗口
-                var screenCenter = new System.Drawing.Point(
-                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width / 2,
-                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height / 2
+                var screenCenter = new Point(
+                    Screen.PrimaryScreen.Bounds.Width / 2,
+                    Screen.PrimaryScreen.Bounds.Height / 2
                 );
 
                 var sortedWindows = allWpsWindows
@@ -1854,7 +1858,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"获取顶级WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"获取顶级WPS窗口失败: {ex}", LogHelper.LogType.Error);
             }
             
             return topLevelWindows;
@@ -1915,7 +1919,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                    LogHelper.WriteLogToFile($"第{attempt}次尝试检查活跃WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"第{attempt}次尝试检查活跃WPS窗口失败: {ex}", LogHelper.LogType.Error);
                     
                     // 如果还有重试机会，等待一小段时间再重试
                     if (attempt < maxRetries)
@@ -1959,13 +1963,13 @@ namespace Ink_Canvas {
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"检查进程{process.ProcessName}失败: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"检查进程{process.ProcessName}失败: {ex}", LogHelper.LogType.Error);
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"获取WPS进程失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"获取WPS进程失败: {ex}", LogHelper.LogType.Error);
             }
             return wpsProcesses;
         }
@@ -1995,7 +1999,7 @@ namespace Ink_Canvas {
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"调试窗口时出错: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"调试窗口时出错: {ex}", LogHelper.LogType.Error);
                     }
                     return true;
                 }, IntPtr.Zero);
@@ -2004,7 +2008,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"调试窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"调试窗口失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
@@ -2015,7 +2019,7 @@ namespace Ink_Canvas {
                 var wpsWindowCount = 0;
                 var currentProcessId = wppProcess?.Id ?? 0;
 
-                EnumWindows((IntPtr hWnd, IntPtr lParam) =>
+                EnumWindows((hWnd, lParam) =>
                 {
                     try
                     {
@@ -2025,7 +2029,7 @@ namespace Ink_Canvas {
                         // 检查是否是WPP进程的窗口
                         if (windowProcessId == currentProcessId)
                         {
-                            var windowTitle = new System.Text.StringBuilder(256);
+                            var windowTitle = new StringBuilder(256);
                             GetWindowText(hWnd, windowTitle, 256);
                             var title = windowTitle.ToString().Trim();
                             
@@ -2040,7 +2044,7 @@ namespace Ink_Canvas {
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"枚举窗口时出错: {ex.ToString()}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"枚举窗口时出错: {ex}", LogHelper.LogType.Error);
                     }
                     
                     return true; // 继续枚举
@@ -2056,7 +2060,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"通过枚举检查WPS窗口失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"通过枚举检查WPS窗口失败: {ex}", LogHelper.LogType.Error);
                 return false;
             }
         }
@@ -2092,15 +2096,15 @@ namespace Ink_Canvas {
                     return "unknown";
                 
                 // 使用文件路径的哈希值作为唯一标识符
-                using (var md5 = System.Security.Cryptography.MD5.Create())
+                using (var md5 = MD5.Create())
                 {
-                    byte[] hashBytes = md5.ComputeHash(System.Text.Encoding.UTF8.GetBytes(filePath));
+                    byte[] hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(filePath));
                     return BitConverter.ToString(hashBytes).Replace("-", "").Substring(0, 8);
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"计算文件哈希值失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"计算文件哈希值失败: {ex}", LogHelper.LogType.Error);
                 return "error";
             }
         }
@@ -2130,7 +2134,7 @@ namespace Ink_Canvas {
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"保存当前页面墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"保存当前页面墨迹失败: {ex}", LogHelper.LogType.Error);
             }
         }
 

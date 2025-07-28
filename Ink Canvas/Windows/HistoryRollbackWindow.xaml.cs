@@ -1,14 +1,14 @@
-using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.ComponentModel;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Linq; // Added for OrderByDescending
-using System.ComponentModel;
-using System.Threading;
+using Ink_Canvas.Helpers;
+// Added for OrderByDescending
 
 namespace Ink_Canvas
 {
@@ -22,7 +22,7 @@ namespace Ink_Canvas
         }
 
         private List<VersionItem> versionList = new List<VersionItem>();
-        private VersionItem selectedItem = null;
+        private VersionItem selectedItem;
         private UpdateChannel channel = UpdateChannel.Release;
         private CancellationTokenSource downloadCts = null;
 
@@ -60,7 +60,7 @@ namespace Ink_Canvas
             else
             {
                 ReleaseNotesViewer.Markdown = "未获取到历史版本信息。";
-                LogHelper.WriteLogToFile($"HistoryRollback | 未获取到历史版本信息", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile("HistoryRollback | 未获取到历史版本信息", LogHelper.LogType.Warning);
             }
         }
 
@@ -122,8 +122,8 @@ namespace Ink_Canvas
                 DownloadProgressBar.Value = 100;
                 DownloadProgressText.Text = "下载完成，准备安装...";
                 await Task.Delay(800);
-                this.DialogResult = true;
-                this.Close();
+                DialogResult = true;
+                Close();
             }
             else
             {

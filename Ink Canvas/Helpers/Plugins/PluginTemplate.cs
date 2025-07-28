@@ -53,7 +53,7 @@ namespace Ink_Canvas.Helpers.Plugins
             // TODO: 在这里进行插件初始化工作
             
             // 示例：记录初始化信息
-            LogHelper.WriteLogToFile($"插件 {Name} 开始初始化", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"插件 {Name} 开始初始化");
             
             // 示例：加载配置
             LoadConfig();
@@ -61,7 +61,7 @@ namespace Ink_Canvas.Helpers.Plugins
             // 示例：注册自定义事件
             // MainWindow.Instance.SomeEvent += OnSomeEvent;
             
-            LogHelper.WriteLogToFile($"插件 {Name} 初始化完成", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"插件 {Name} 初始化完成");
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Ink_Canvas.Helpers.Plugins
             
             // TODO: 在这里启用插件功能
             
-            LogHelper.WriteLogToFile($"插件 {Name} 已启用", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"插件 {Name} 已启用");
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace Ink_Canvas.Helpers.Plugins
             
             // TODO: 在这里禁用插件功能
             
-            LogHelper.WriteLogToFile($"插件 {Name} 已禁用", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"插件 {Name} 已禁用");
         }
 
         /// <summary>
@@ -270,7 +270,7 @@ namespace Ink_Canvas.Helpers.Plugins
             panel.Children.Add(button);
 
             // 设置控件内容
-            this.Content = panel;
+            Content = panel;
         }
     }
 } 

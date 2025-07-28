@@ -1,4 +1,3 @@
-using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -7,6 +6,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using iNKORE.UI.WPF.Modern.Controls;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas {
@@ -26,7 +26,7 @@ namespace Ink_Canvas {
             lastBorderMouseDownObject = sender;
         }
 
-        private bool isStrokeSelectionCloneOn = false;
+        private bool isStrokeSelectionCloneOn;
 
         private void BorderStrokeSelectionClone_MouseUp(object sender, MouseButtonEventArgs e) {
             if (lastBorderMouseDownObject != sender) return;
@@ -229,7 +229,7 @@ namespace Ink_Canvas {
 
         #endregion
 
-        private bool isGridInkCanvasSelectionCoverMouseDown = false;
+        private bool isGridInkCanvasSelectionCoverMouseDown;
         private StrokeCollection StrokesSelectionClone = new StrokeCollection();
 
         private void GridInkCanvasSelectionCover_MouseDown(object sender, MouseButtonEventArgs e) {
@@ -267,7 +267,7 @@ namespace Ink_Canvas {
 
         private double BorderStrokeSelectionControlWidth = 490.0;
         private double BorderStrokeSelectionControlHeight = 80.0;
-        private bool isProgramChangeStrokeSelection = false;
+        private bool isProgramChangeStrokeSelection;
 
         private void inkCanvas_SelectionChanged(object sender, EventArgs e) {
             if (isProgramChangeStrokeSelection) return;
@@ -459,10 +459,10 @@ namespace Ink_Canvas {
 
         #region UIElement Selection and Resize
 
-        private UIElement selectedUIElement = null;
-        private System.Windows.Controls.Canvas resizeHandlesCanvas = null;
+        private UIElement selectedUIElement;
+        private System.Windows.Controls.Canvas resizeHandlesCanvas;
         private readonly List<Rectangle> resizeHandles = new List<Rectangle>();
-        private bool isResizing = false;
+        private bool isResizing;
         private ResizeDirection currentResizeDirection = ResizeDirection.None;
         private Point resizeStartPoint;
         private Rect originalElementBounds;
@@ -817,7 +817,7 @@ namespace Ink_Canvas {
                 if (element != null)
                 {
                     // 切换到选择模式并选择这个元素
-                    inkCanvas.Select(new UIElement[] { element });
+                    inkCanvas.Select(new[] { element });
                     SelectUIElement(element);
                     e.Handled = true;
                 }

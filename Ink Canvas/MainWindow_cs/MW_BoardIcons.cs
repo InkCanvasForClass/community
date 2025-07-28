@@ -1,11 +1,12 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -138,7 +139,7 @@ namespace Ink_Canvas {
             };
             
             // 确保面板显示在顶层
-            System.Windows.Controls.Panel.SetZIndex(BackgroundPalette, 1000);
+            Panel.SetZIndex(BackgroundPalette, 1000);
 
             // 创建面板内容
             var stackPanel = new StackPanel();
@@ -169,9 +170,9 @@ namespace Ink_Canvas {
             titleCanvas.Children.Add(titleText);
 
             // 关闭按钮
-            var closeImage = new System.Windows.Controls.Image
+            var closeImage = new Image
             {
-                Source = new System.Windows.Media.Imaging.BitmapImage(new Uri("/Resources/new-icons/close-white.png", UriKind.Relative)),
+                Source = new BitmapImage(new Uri("/Resources/new-icons/close-white.png", UriKind.Relative)),
                 Height = 16,
                 Width = 16
             };
@@ -370,7 +371,7 @@ namespace Ink_Canvas {
              // R滑块和文本框
              var rPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 0, 10, 5) };
              var rLabel = new TextBlock { Text = "R:", Width = 20, VerticalAlignment = VerticalAlignment.Center };
-             var rSlider = new System.Windows.Controls.Slider 
+             var rSlider = new Slider 
              { 
                  Minimum = 0, 
                  Maximum = 255, 
@@ -390,7 +391,7 @@ namespace Ink_Canvas {
              // G滑块和文本框
              var gPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 0, 10, 5) };
              var gLabel = new TextBlock { Text = "G:", Width = 20, VerticalAlignment = VerticalAlignment.Center };
-             var gSlider = new System.Windows.Controls.Slider 
+             var gSlider = new Slider 
              { 
                  Minimum = 0, 
                  Maximum = 255, 
@@ -410,7 +411,7 @@ namespace Ink_Canvas {
              // B滑块和文本框
              var bPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 0, 10, 5) };
              var bLabel = new TextBlock { Text = "B:", Width = 20, VerticalAlignment = VerticalAlignment.Center };
-             var bSlider = new System.Windows.Controls.Slider 
+             var bSlider = new Slider 
              { 
                  Minimum = 0, 
                  Maximum = 255, 
@@ -575,7 +576,7 @@ namespace Ink_Canvas {
          /// <summary>
          /// 更新颜色预览框的颜色
          /// </summary>
-         private void UpdateColorPreview(Border colorPreview, System.Windows.Controls.Slider rSlider, System.Windows.Controls.Slider gSlider, System.Windows.Controls.Slider bSlider)
+         private void UpdateColorPreview(Border colorPreview, Slider rSlider, Slider gSlider, Slider bSlider)
          {
              Color previewColor = Color.FromRgb(
                  (byte)rSlider.Value,
@@ -720,17 +721,17 @@ namespace Ink_Canvas {
             // 根据设置决定是否清空图片
             if (Settings.Canvas.ClearCanvasAlsoClearImages) {
                 // 如果设置为清空图片，则直接清空所有子元素
-                System.Diagnostics.Debug.WriteLine("BoardSymbolIconDelete: Clearing all children including images");
+                Debug.WriteLine("BoardSymbolIconDelete: Clearing all children including images");
                 inkCanvas.Children.Clear();
             } else {
                 // 保存非笔画元素（如图片）
-                System.Diagnostics.Debug.WriteLine("BoardSymbolIconDelete: Preserving non-stroke elements (images)");
+                Debug.WriteLine("BoardSymbolIconDelete: Preserving non-stroke elements (images)");
                 var preservedElements = PreserveNonStrokeElements();
-                System.Diagnostics.Debug.WriteLine($"BoardSymbolIconDelete: Preserved elements count: {preservedElements.Count}");
+                Debug.WriteLine($"BoardSymbolIconDelete: Preserved elements count: {preservedElements.Count}");
                 inkCanvas.Children.Clear();
                 // 恢复非笔画元素
                 RestoreNonStrokeElements(preservedElements);
-                System.Diagnostics.Debug.WriteLine($"BoardSymbolIconDelete: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
+                Debug.WriteLine($"BoardSymbolIconDelete: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
             }
         }
         private void BoardSymbolIconDeleteInkAndHistories_MouseUp(object sender, RoutedEventArgs e)
@@ -742,17 +743,17 @@ namespace Ink_Canvas {
             // 根据设置决定是否清空图片
             if (Settings.Canvas.ClearCanvasAlsoClearImages) {
                 // 如果设置为清空图片，则直接清空所有子元素
-                System.Diagnostics.Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Clearing all children including images");
+                Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Clearing all children including images");
                 inkCanvas.Children.Clear();
             } else {
                 // 保存非笔画元素（如图片）
-                System.Diagnostics.Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Preserving non-stroke elements (images)");
+                Debug.WriteLine("BoardSymbolIconDeleteInkAndHistories: Preserving non-stroke elements (images)");
                 var preservedElements = PreserveNonStrokeElements();
-                System.Diagnostics.Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: Preserved elements count: {preservedElements.Count}");
+                Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: Preserved elements count: {preservedElements.Count}");
                 inkCanvas.Children.Clear();
                 // 恢复非笔画元素
                 RestoreNonStrokeElements(preservedElements);
-                System.Diagnostics.Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
+                Debug.WriteLine($"BoardSymbolIconDeleteInkAndHistories: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
             }
         }
 
@@ -777,9 +778,9 @@ namespace Ink_Canvas {
                 if (stackPanel.Children.Count > 1 && stackPanel.Children[1] is StackPanel contentPanel)
                 {
                     // 查找RGB滑块
-                    System.Windows.Controls.Slider rSlider = null;
-                    System.Windows.Controls.Slider gSlider = null;
-                    System.Windows.Controls.Slider bSlider = null;
+                    Slider rSlider = null;
+                    Slider gSlider = null;
+                    Slider bSlider = null;
                     
                     // 遍历面板查找RGB滑块
                     foreach (var child in contentPanel.Children)
@@ -788,7 +789,7 @@ namespace Ink_Canvas {
                         {
                             foreach (var panelChild in panel.Children)
                             {
-                                if (panelChild is System.Windows.Controls.Slider slider)
+                                if (panelChild is Slider slider)
                                 {
                                     if (panel.Children.Count > 0 && panel.Children[0] is TextBlock label)
                                     {

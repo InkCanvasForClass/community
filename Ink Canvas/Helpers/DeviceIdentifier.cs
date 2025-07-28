@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Collections.Generic;
-using System.Linq;
-using Newtonsoft.Json;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers
 {
@@ -35,7 +36,7 @@ namespace Ink_Canvas.Helpers
         // 数据完整性验证密钥
         private static readonly string DataIntegrityKey = "ICC_DEVICE_INTEGRITY_2024";
 
-        private static readonly string DeviceId = null;
+        private static readonly string DeviceId;
         private static readonly object fileLock = new object();
 
         static DeviceIdentifier()
@@ -132,7 +133,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     // 尝试加载System.Management程序集
-                    var assembly = System.Reflection.Assembly.Load("System.Management");
+                    var assembly = Assembly.Load("System.Management");
                     if (assembly != null)
                     {
                         // CPU信息
@@ -239,7 +240,7 @@ namespace Ink_Canvas.Helpers
                 {
                     hardwareInfo.Append(Environment.MachineName);
                     hardwareInfo.Append(Environment.UserName);
-                    hardwareInfo.Append(Environment.OSVersion.ToString());
+                    hardwareInfo.Append(Environment.OSVersion);
                 }
 
                 // 生成哈希
@@ -438,7 +439,7 @@ namespace Ink_Canvas.Helpers
                     key?.SetValue("DeviceId", deviceId);
                     key?.SetValue("LastUpdate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                 }
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 设备ID已保存到注册表");
+                LogHelper.WriteLogToFile("DeviceIdentifier | 设备ID已保存到注册表");
             }
             catch (Exception ex)
             {
@@ -675,7 +676,8 @@ namespace Ink_Canvas.Helpers
             {
                 return $"{totalSeconds}秒";
             }
-            else if (totalSeconds < 3600)
+
+            if (totalSeconds < 3600)
             {
                 var minutes = totalSeconds / 60;
                 var seconds = totalSeconds % 60;
@@ -1015,13 +1017,13 @@ namespace Ink_Canvas.Helpers
                     }
                 }
 
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 所有数据源都不可用，检查是否有部分可恢复数据", LogHelper.LogType.Warning);
+                LogHelper.WriteLogToFile("DeviceIdentifier | 所有数据源都不可用，检查是否有部分可恢复数据", LogHelper.LogType.Warning);
 
                 // 如果没有完全可信的数据，尝试从部分损坏的数据中恢复
                 var partiallyRecoveredData = AttemptPartialDataRecovery(allDataSources);
                 if (partiallyRecoveredData != null)
                 {
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 从部分损坏数据中恢复使用统计");
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 从部分损坏数据中恢复使用统计");
 
                     // 执行数据迁移（如果需要）
                     partiallyRecoveredData.MigrateToSecondsPrecision();
@@ -1099,19 +1101,15 @@ namespace Ink_Canvas.Helpers
                                 LogHelper.WriteLogToFile($"DeviceIdentifier | 数据完整性验证通过: {filePath}");
                                 return stats;
                             }
-                            else
-                            {
-                                LogHelper.WriteLogToFile($"DeviceIdentifier | 数据完整性验证失败，可能被篡改: {filePath}", LogHelper.LogType.Warning);
-                                return null; // 数据被篡改，不使用
-                            }
+
+                            LogHelper.WriteLogToFile($"DeviceIdentifier | 数据完整性验证失败，可能被篡改: {filePath}", LogHelper.LogType.Warning);
+                            return null; // 数据被篡改，不使用
                         }
-                        else
-                        {
-                            // 旧版本数据，没有哈希值，更新哈希后返回
-                            LogHelper.WriteLogToFile($"DeviceIdentifier | 检测到旧版本数据，正在更新完整性哈希: {filePath}");
-                            stats.UpdateDataHash();
-                            return stats;
-                        }
+
+                        // 旧版本数据，没有哈希值，更新哈希后返回
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 检测到旧版本数据，正在更新完整性哈希: {filePath}");
+                        stats.UpdateDataHash();
+                        return stats;
                     }
                 }
             }
@@ -1276,7 +1274,7 @@ namespace Ink_Canvas.Helpers
             {
                 if (dataSources.Count == 0)
                 {
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 没有可用数据源进行部分恢复");
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 没有可用数据源进行部分恢复");
                     return null;
                 }
 
@@ -1626,11 +1624,8 @@ namespace Ink_Canvas.Helpers
                                         LogHelper.WriteLogToFile($"DeviceIdentifier | 从注册表位置恢复数据并验证完整性通过: {path}");
                                         return stats;
                                     }
-                                    else
-                                    {
-                                        LogHelper.WriteLogToFile($"DeviceIdentifier | 注册表位置数据完整性验证失败: {path}", LogHelper.LogType.Warning);
-                                        continue; // 尝试下一个位置
-                                    }
+
+                                    LogHelper.WriteLogToFile($"DeviceIdentifier | 注册表位置数据完整性验证失败: {path}", LogHelper.LogType.Warning);
                                 }
                                 else
                                 {
@@ -1720,7 +1715,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 开始保存使用统计到主注册表位置");
+                LogHelper.WriteLogToFile("DeviceIdentifier | 开始保存使用统计到主注册表位置");
 
                 using (var key = Registry.CurrentUser.CreateSubKey(@"Software\ICC\DeviceInfo"))
                 {
@@ -1760,7 +1755,7 @@ namespace Ink_Canvas.Helpers
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 创建主注册表键失败", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile("DeviceIdentifier | 创建主注册表键失败", LogHelper.LogType.Error);
                     }
                 }
             }
@@ -1876,7 +1871,7 @@ namespace Ink_Canvas.Helpers
             {
                 lock (fileLock)
                 {
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 开始使用频率数据保护检查");
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 开始使用频率数据保护检查");
 
                     var issues = new List<string>();
                     var repaired = new List<string>();
@@ -2323,7 +2318,7 @@ namespace Ink_Canvas.Helpers
             {
                 lock (fileLock)
                 {
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 开始数据完整性检查");
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 开始数据完整性检查");
 
                     var issues = new List<string>();
                     var repaired = new List<string>();
@@ -2549,7 +2544,7 @@ namespace Ink_Canvas.Helpers
             {
                 lock (fileLock)
                 {
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 开始强制重建使用频率数据备份");
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 开始强制重建使用频率数据备份");
 
                     var stats = LoadUsageStats();
                     if (stats == null)
@@ -2567,7 +2562,7 @@ namespace Ink_Canvas.Helpers
                             UsageFrequency = UsageFrequency.Medium
                         };
                         stats.UpdateDataHash();
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 创建新的基础使用数据");
+                        LogHelper.WriteLogToFile("DeviceIdentifier | 创建新的基础使用数据");
                     }
 
                     // 强制保存到所有位置
@@ -2608,7 +2603,7 @@ namespace Ink_Canvas.Helpers
             {
                 lock (fileLock)
                 {
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 开始强制完整数据保存");
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 开始强制完整数据保存");
 
                     // 保存设备ID到所有位置
                     SaveDeviceIdToAllLocations(DeviceId);
@@ -2624,14 +2619,12 @@ namespace Ink_Canvas.Helpers
                         var verificationResult = VerifyRegistryData();
                         LogHelper.WriteLogToFile($"DeviceIdentifier | 注册表数据验证结果: {verificationResult}");
 
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 强制完整数据保存完成");
+                        LogHelper.WriteLogToFile("DeviceIdentifier | 强制完整数据保存完成");
                         return true;
                     }
-                    else
-                    {
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 强制完整数据保存失败: 无法加载使用统计", LogHelper.LogType.Error);
-                        return false;
-                    }
+
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 强制完整数据保存失败: 无法加载使用统计", LogHelper.LogType.Error);
+                    return false;
                 }
             }
             catch (Exception ex)
@@ -2663,7 +2656,7 @@ namespace Ink_Canvas.Helpers
                             var totalMinutes = key.GetValue("TotalUsageMinutes");
                             var lastUpdate = key.GetValue("LastUpdate") as string;
 
-                            results.AppendLine($"✓ 主注册表位置存在");
+                            results.AppendLine("✓ 主注册表位置存在");
                             results.AppendLine($"  设备ID: {deviceId ?? "未找到"}");
                             results.AppendLine($"  启动次数: {launchCount ?? "未找到"}");
                             results.AppendLine($"  使用时长: {totalMinutes ?? "未找到"}分钟");
@@ -2732,7 +2725,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 开始保存并验证注册表数据");
+                LogHelper.WriteLogToFile("DeviceIdentifier | 开始保存并验证注册表数据");
 
                 // 强制保存数据
                 var saveSuccess = ForceCompleteDataSave();
@@ -2742,7 +2735,7 @@ namespace Ink_Canvas.Helpers
 
                 var result = $"保存操作: {(saveSuccess ? "成功" : "失败")}\n\n{verificationResult}";
 
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 保存并验证注册表数据完成");
+                LogHelper.WriteLogToFile("DeviceIdentifier | 保存并验证注册表数据完成");
                 return result;
             }
             catch (Exception ex)

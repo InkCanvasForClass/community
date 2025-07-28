@@ -1,11 +1,15 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Interop;
 using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using Application = System.Windows.Application;
+using ContextMenu = System.Windows.Controls.ContextMenu;
+using MenuItem = System.Windows.Controls.MenuItem;
 
 namespace Ink_Canvas
 {
@@ -21,7 +25,7 @@ namespace Ink_Canvas
                 (TextBlock)((SimpleStackPanel)((MenuItem)s.Items[s.Items.Count - 5]).Header).Children[0];
             var ResetFloatingBarPositionTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 4];
             var HideICCMainWindowTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 9];
-            var mainWin = (MainWindow)Application.Current.MainWindow;
+            var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded) {
                 // 判斷是否在收納模式中
                 if (mainWin.isFloatingBarFolded) {
@@ -46,18 +50,18 @@ namespace Ink_Canvas
         }
 
         private void CloseAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e) {
-            var mainWin = (MainWindow)Application.Current.MainWindow;
+            var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded) {
-                App.IsAppExitByUser = true;
-                Application.Current.Shutdown();
+                IsAppExitByUser = true;
+                Current.Shutdown();
                 // mainWin.BtnExit_Click(null,null);
             }
         }
 
         private void RestartAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e) {
-            var mainWin = (MainWindow)Application.Current.MainWindow;
+            var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded) {
-                App.IsAppExitByUser = true;
+                IsAppExitByUser = true;
                 
                 try {
                     // 启动新实例
@@ -73,22 +77,22 @@ namespace Ink_Canvas
                 }
                 
                 // 退出当前实例
-                Application.Current.Shutdown();
+                Current.Shutdown();
             }
         }
 
         private void ForceFullScreenTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e) {
-            var mainWin = (MainWindow)Application.Current.MainWindow;
+            var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded) {
                 Ink_Canvas.MainWindow.MoveWindow(new WindowInteropHelper(mainWin).Handle, 0, 0,
-                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width, System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
-                Ink_Canvas.MainWindow.ShowNewMessage($"已强制全屏化：{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height}（缩放比例为{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width / SystemParameters.PrimaryScreenWidth}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height / SystemParameters.PrimaryScreenHeight}）");
+                    Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, true);
+                Ink_Canvas.MainWindow.ShowNewMessage($"已强制全屏化：{Screen.PrimaryScreen.Bounds.Width}x{Screen.PrimaryScreen.Bounds.Height}（缩放比例为{Screen.PrimaryScreen.Bounds.Width / SystemParameters.PrimaryScreenWidth}x{Screen.PrimaryScreen.Bounds.Height / SystemParameters.PrimaryScreenHeight}）");
             }
         }
 
         private void FoldFloatingBarTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
-            var mainWin = (MainWindow)Application.Current.MainWindow;
+            var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded)
                 if (mainWin.isFloatingBarFolded) mainWin.UnFoldFloatingBar_MouseUp(new object(),null); 
                     else mainWin.FoldFloatingBar_MouseUp(new object(),null);
@@ -96,7 +100,7 @@ namespace Ink_Canvas
 
         private void ResetFloatingBarPositionTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
-            var mainWin = (MainWindow)Application.Current.MainWindow;
+            var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded) {
                 var isInPPTPresentationMode = false;
                 Dispatcher.Invoke(() => {
@@ -111,10 +115,10 @@ namespace Ink_Canvas
 
         private void HideICCMainWindowTrayIconMenuItem_Checked(object sender, RoutedEventArgs e) {
             var mi = (MenuItem)sender;
-            var mainWin = (MainWindow)Application.Current.MainWindow;
+            var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded) {
                 mainWin.Hide();
-                var s = ((TaskbarIcon)Application.Current.Resources["TaskbarTrayIcon"]).ContextMenu;
+                var s = ((TaskbarIcon)Current.Resources["TaskbarTrayIcon"]).ContextMenu;
                 var ResetFloatingBarPositionTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 4];
                 var FoldFloatingBarTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 5];
                 var ForceFullScreenTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 6];
@@ -132,10 +136,10 @@ namespace Ink_Canvas
 
         private void HideICCMainWindowTrayIconMenuItem_UnChecked(object sender, RoutedEventArgs e) {
             var mi = (MenuItem)sender;
-            var mainWin = (MainWindow)Application.Current.MainWindow;
+            var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded) {
                 mainWin.Show();
-                var s = ((TaskbarIcon)Application.Current.Resources["TaskbarTrayIcon"]).ContextMenu;
+                var s = ((TaskbarIcon)Current.Resources["TaskbarTrayIcon"]).ContextMenu;
                 var ResetFloatingBarPositionTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 4];
                 var FoldFloatingBarTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 5];
                 var ForceFullScreenTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 6];

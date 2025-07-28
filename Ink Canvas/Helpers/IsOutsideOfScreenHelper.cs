@@ -1,6 +1,9 @@
-﻿using System.Linq;
-using System.Windows.Interop;
+﻿using System.Drawing;
+using System.Linq;
 using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Interop;
+using Point = System.Windows.Point;
 
 namespace Ink_Canvas.Helpers {
     internal class IsOutsideOfScreenHelper {
@@ -13,16 +16,16 @@ namespace Ink_Canvas.Helpers {
             var hWnd = hwndSource.Handle;
             var targetBounds = GetPixelBoundsToScreen(target);
 
-            var screens = System.Windows.Forms.Screen.AllScreens;
+            var screens = Screen.AllScreens;
             return !screens.Any(x => x.Bounds.IntersectsWith(targetBounds));
 
-            System.Drawing.Rectangle GetPixelBoundsToScreen(FrameworkElement visual) {
+            Rectangle GetPixelBoundsToScreen(FrameworkElement visual) {
                 var pixelBoundsToScreen = Rect.Empty;
                 pixelBoundsToScreen.Union(visual.PointToScreen(new Point(0, 0)));
                 pixelBoundsToScreen.Union(visual.PointToScreen(new Point(visual.ActualWidth, 0)));
                 pixelBoundsToScreen.Union(visual.PointToScreen(new Point(0, visual.ActualHeight)));
                 pixelBoundsToScreen.Union(visual.PointToScreen(new Point(visual.ActualWidth, visual.ActualHeight)));
-                return new System.Drawing.Rectangle(
+                return new Rectangle(
                     (int)pixelBoundsToScreen.X, (int)pixelBoundsToScreen.Y,
                     (int)pixelBoundsToScreen.Width, (int)pixelBoundsToScreen.Height);
             }

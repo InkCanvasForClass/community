@@ -1,5 +1,3 @@
-using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -7,6 +5,8 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn
 {
@@ -59,7 +59,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
         /// <summary>
         /// 标记是否已添加到浮动栏
         /// </summary>
-        private bool _isAddedToFloatingBar = false;
+        private bool _isAddedToFloatingBar;
         
         #endregion
 
@@ -81,7 +81,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 // 加载配置
                 LoadConfig();
                 
-                LogHelper.WriteLogToFile("超级启动台插件已初始化", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("超级启动台插件已初始化");
             }
             catch (Exception ex)
             {
@@ -100,7 +100,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 if (_launcherButton == null)
                 {
                     _launcherButton = new LauncherButton(this);
-                    LogHelper.WriteLogToFile("超级启动台按钮已创建", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("超级启动台按钮已创建");
                 }
                 
                 // 添加启动台按钮到浮动栏
@@ -112,7 +112,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 // 保存插件配置
                 SavePluginSettings();
                 
-                LogHelper.WriteLogToFile("超级启动台插件已启用", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("超级启动台插件已启用");
             }
             catch (Exception ex)
             {
@@ -143,7 +143,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 // 保存插件配置
                 SavePluginSettings();
                 
-                LogHelper.WriteLogToFile("超级启动台插件已禁用", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("超级启动台插件已禁用");
             }
             catch (Exception ex)
             {
@@ -193,7 +193,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 // 保存配置
                 SaveConfig();
                 
-                LogHelper.WriteLogToFile($"超级启动台插件设置已保存", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("超级启动台插件设置已保存");
             }
             catch (Exception ex)
             {
@@ -250,7 +250,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 string json = JsonConvert.SerializeObject(Config, Formatting.Indented);
                 File.WriteAllText(_configPath, json);
                 
-                LogHelper.WriteLogToFile("超级启动台配置已保存", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("超级启动台配置已保存");
             }
             catch (Exception ex)
             {
@@ -332,12 +332,12 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 if (Config.ButtonPosition == LauncherButtonPosition.Left)
                 {
                     floatingBar.Children.Insert(0, buttonElement);
-                    LogHelper.WriteLogToFile("启动台按钮已添加到浮动栏左侧", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("启动台按钮已添加到浮动栏左侧");
                 }
                 else
                 {
                     floatingBar.Children.Add(buttonElement);
-                    LogHelper.WriteLogToFile("启动台按钮已添加到浮动栏右侧", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("启动台按钮已添加到浮动栏右侧");
                 }
                 
                 _isAddedToFloatingBar = true;
@@ -424,7 +424,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 if (floatingBar.Children.Contains(buttonElement))
                 {
                     floatingBar.Children.Remove(buttonElement);
-                    LogHelper.WriteLogToFile("启动台按钮已从浮动栏移除", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("启动台按钮已从浮动栏移除");
                 }
                 
                 _isAddedToFloatingBar = false;
@@ -448,7 +448,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 {
                     RemoveLauncherButtonFromFloatingBar();
                     AddLauncherButtonToFloatingBar();
-                    LogHelper.WriteLogToFile($"启动台按钮位置已更新为: {Config.ButtonPosition}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"启动台按钮位置已更新为: {Config.ButtonPosition}");
                 }
             }
             catch (Exception ex)

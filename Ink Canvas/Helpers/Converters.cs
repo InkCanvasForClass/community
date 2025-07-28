@@ -9,125 +9,107 @@ namespace Ink_Canvas.Converter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if ((bool)value == true)
+            if ((bool)value)
             {
                 return Visibility.Visible;
             }
-            else
-            {
-                return Visibility.Collapsed;
-            }
+
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if ((bool)value == true)
+            if ((bool)value)
             {
                 return Visibility.Visible;
             }
-            else
-            {
-                return Visibility.Collapsed;
-            }
+
+            return Visibility.Collapsed;
         }
     }
     public class VisibilityConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             Visibility visibility = (Visibility)value;
             if (visibility == Visibility.Visible)
             {
                 return Visibility.Collapsed;
             }
-            else
-            {
-                return Visibility.Visible;
-            }
+
+            return Visibility.Visible;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             Visibility visibility = (Visibility)value;
             if (visibility == Visibility.Visible)
             {
                 return Visibility.Collapsed;
             }
-            else
-            {
-                return Visibility.Visible;
-            }
+
+            return Visibility.Visible;
         }
     }
 
     public class IntNumberToString : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if ((double)value == 0)
             {
                 return "无限制";
             }
-            else
-            {
-                return ((double)value).ToString() + "人";
-            }
+
+            return ((double)value) + "人";
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if ((double)value == 0)
             {
                 return "无限制";
             }
-            else
-            {
-                return ((double)value).ToString() + "人";
-            }
+
+            return ((double)value) + "人";
         }
     }
 
     public class IntNumberToString2 : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if ((double)value == 0)
             {
                 return "自动截图";
             }
-            else
-            {
-                return ((double)value).ToString() + "条";
-            }
+
+            return ((double)value) + "条";
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             if ((double)value == 0)
             {
                 return "自动截图";
             }
-            else
-            {
-                return ((double)value).ToString() + "条";
-            }
+
+            return ((double)value) + "条";
         }
     }
 
     public class IsEnabledToOpacityConverter : IValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
             bool isChecked = (bool)value;
-            if (isChecked == true)
+            if (isChecked)
             {
                 return 1d;
             }
-            else
-            {
-                return 0.35;
-            }
+
+            return 0.35;
         }
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture) { throw new NotImplementedException(); }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) { throw new NotImplementedException(); }
     }
 }

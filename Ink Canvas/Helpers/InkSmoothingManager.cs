@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Ink;
+using System.Windows.Media;
 using System.Windows.Threading;
 
 namespace Ink_Canvas.Helpers
@@ -17,7 +18,7 @@ namespace Ink_Canvas.Helpers
         private readonly InkSmoothingPerformanceMonitor _performanceMonitor;
         private readonly InkSmoothingConfig _config;
         private readonly Dispatcher _uiDispatcher;
-        private bool _disposed = false;
+        private bool _disposed;
 
         public InkSmoothingManager(Dispatcher uiDispatcher)
         {
@@ -81,7 +82,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"墨迹平滑失败: {ex.Message}");
+                Debug.WriteLine($"墨迹平滑失败: {ex.Message}");
                 result = originalStroke;
             }
             finally
@@ -122,7 +123,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"同步墨迹平滑失败: {ex.Message}");
+                Debug.WriteLine($"同步墨迹平滑失败: {ex.Message}");
                 result = originalStroke;
             }
             finally
@@ -174,7 +175,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                return System.Windows.Media.RenderCapability.Tier >= 0x00020000;
+                return RenderCapability.Tier >= 0x00020000;
             }
             catch
             {

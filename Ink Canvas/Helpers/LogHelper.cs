@@ -14,7 +14,7 @@ namespace Ink_Canvas.Helpers
 
         public static void NewLog(string str)
         {
-            WriteLogToFile(str, LogType.Info);
+            WriteLogToFile(str);
         }
 
         public static void NewLog(Exception ex)

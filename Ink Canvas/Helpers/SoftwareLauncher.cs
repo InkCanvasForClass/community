@@ -1,7 +1,8 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.Win32;
 
 namespace Ink_Canvas.Helpers
 {
@@ -27,10 +28,7 @@ namespace Ink_Canvas.Helpers
                     //MessageBox.Show("启动失败: " + ex.Message);
                 }
             }
-            else
-            {
-                //Console.WriteLine(softwareName + " 未找到可执行文件路径。");
-            }
+            //Console.WriteLine(softwareName + " 未找到可执行文件路径。");
         }
 
         private static string FindEasiCameraExecutablePath(string softwareName)
@@ -51,7 +49,7 @@ namespace Ink_Canvas.Helpers
                         {
                             if (!string.IsNullOrEmpty(installLocation))
                             {
-                                executablePath = System.IO.Path.Combine(installLocation, "sweclauncher.exe");
+                                executablePath = Path.Combine(installLocation, "sweclauncher.exe");
                             }
                             else if (!string.IsNullOrEmpty(uninstallString))
                             {
@@ -59,7 +57,7 @@ namespace Ink_Canvas.Helpers
                                 if (lastSlashIndex >= 0)
                                 {
                                     string folderPath = uninstallString.Substring(0, lastSlashIndex);
-                                    executablePath = System.IO.Path.Combine(folderPath, "sweclauncher", "sweclauncher.exe");
+                                    executablePath = Path.Combine(folderPath, "sweclauncher", "sweclauncher.exe");
                                 }
                             }
                             break;

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
-using System.Windows; // Added for UIElement
+
+// Added for UIElement
 
 namespace Ink_Canvas.Helpers
 {
@@ -133,7 +135,7 @@ namespace Ink_Canvas.Helpers
     public class TimeMachineHistory
     {
         public TimeMachineHistoryType CommitType;
-        public bool StrokeHasBeenCleared = false;
+        public bool StrokeHasBeenCleared;
         public StrokeCollection CurrentStroke;
         public StrokeCollection ReplacedStroke;
         //这里说一下 Tuple的 Value1 是初始值 ; Value 2 是改变值
