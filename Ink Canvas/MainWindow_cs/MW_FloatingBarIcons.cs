@@ -1654,14 +1654,10 @@ namespace Ink_Canvas {
         }
 
         public void BtnRestart_Click(object sender, RoutedEventArgs e) {
-            try {
-                Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
-                App.IsAppExitByUser = true;
-                CloseIsFromButton = true;
-                Application.Current.Shutdown();
-            } catch (Exception ex) {
-                LogHelper.NewLog($"重启程序时出错: {ex.Message}");
-            }
+            Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
+            App.IsAppExitByUser = true;
+            CloseIsFromButton = true;
+            Application.Current.Shutdown();
         }
 
         private void SettingsOverlayClick(object sender, MouseButtonEventArgs e) {
