@@ -174,9 +174,14 @@ namespace Ink_Canvas.Helpers
             }
             catch (COMException ex)
             {
-                // 忽略常见的COM连接错误
                 var hr = (uint)ex.HResult;
-                if (hr != 0x800401E3 && hr != 0x80004005 && hr != 0x800706B5 && hr != 0x8001010E)
+                // 忽略常见的PowerPoint连接错误：
+                // 0x800401E3: 操作无法使用
+                // 0x80004005: 未指定错误
+                // 0x800706B5: RPC服务器不可用
+                // 0x8001010E: 应用程序调用一个已为另一线程整理的接口
+                // 0x800401F3: 无效的类字符串（PowerPoint未安装或COM组件未注册）
+                if (hr != 0x800401E3 && hr != 0x80004005 && hr != 0x800706B5 && hr != 0x8001010E && hr != 0x800401F3)
                 {
                     LogHelper.WriteLogToFile($"连接PowerPoint失败: {ex}", LogHelper.LogType.Warning);
                 }
@@ -212,7 +217,13 @@ namespace Ink_Canvas.Helpers
             catch (COMException ex)
             {
                 var hr = (uint)ex.HResult;
-                if (hr != 0x800401E3 && hr != 0x80004005 && hr != 0x800706B5 && hr != 0x8001010E)
+                // 忽略常见的WPS连接错误：
+                // 0x800401E3: 操作无法使用
+                // 0x80004005: 未指定错误
+                // 0x800706B5: RPC服务器不可用
+                // 0x8001010E: 应用程序调用一个已为另一线程整理的接口
+                // 0x800401F3: 无效的类字符串（WPS未安装或COM组件未注册）
+                if (hr != 0x800401E3 && hr != 0x80004005 && hr != 0x800706B5 && hr != 0x8001010E && hr != 0x800401F3)
                 {
                     LogHelper.WriteLogToFile($"连接WPS失败: {ex}", LogHelper.LogType.Warning);
                 }
