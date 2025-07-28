@@ -456,7 +456,7 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile($"App | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
 
             bool ret;
-            mutex = new Mutex(true, "InkCanvasForClass", out ret);
+            mutex = new Mutex(true, "InkCanvasForClass CE", out ret);
 
             if (!ret && !e.Args.Contains("-m")) //-m multiple
             {
