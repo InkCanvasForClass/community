@@ -918,6 +918,9 @@ namespace Ink_Canvas {
 
                         ClearStrokes(true);
 
+                        // 清空备份历史记录，防止退出白板时恢复已结束PPT的墨迹
+                        TimeMachineHistories[0] = null;
+
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
                             BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
 
