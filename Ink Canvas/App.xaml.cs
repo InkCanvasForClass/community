@@ -423,7 +423,7 @@ namespace Ink_Canvas
                 try
                 {
                     string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                    Process.Start(exePath);
+                    Process.Start(exePath, "-m");
                 }
                 catch { }
                 Environment.Exit(1);
@@ -644,7 +644,7 @@ namespace Ink_Canvas
                         try
                         {
                             string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                            Process.Start(exePath);
+                            Process.Start(exePath, "-m");
                         }
                         catch { }
                         Environment.Exit(1);
@@ -704,7 +704,7 @@ namespace Ink_Canvas
                             Environment.Exit(1);
                         }
                         string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                        Process.Start(exePath);
+                        Process.Start(exePath, "-m");
                     }
                     // CrashActionType.NoAction 时不重启，直接退出
                 }
