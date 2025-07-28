@@ -1,15 +1,18 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Threading.Tasks;
-using System.IO;
-using System.Threading;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using MdXaml;
 
 namespace Ink_Canvas
 {
@@ -98,7 +101,7 @@ namespace Ink_Canvas
             UseImmersiveDarkMode(new WindowInteropHelper(this).Handle, true);
             
             // 窗口加载完成后再次确保按钮可见
-            this.Loaded += HasNewUpdateWindow_Loaded;
+            Loaded += HasNewUpdateWindow_Loaded;
         }
 
         private void HasNewUpdateWindow_Loaded(object sender, RoutedEventArgs e)
@@ -231,35 +234,35 @@ namespace Ink_Canvas
                 bool needsAdjustment = false;
                 
                 // 如果窗口高度超过最大允许高度，调整窗口高度
-                if (this.Height > maxHeight)
+                if (Height > maxHeight)
                 {
-                    this.Height = maxHeight;
+                    Height = maxHeight;
                     needsAdjustment = true;
-                    LogHelper.WriteLogToFile($"AutoUpdate | Adjusted window height to: {this.Height}");
+                    LogHelper.WriteLogToFile($"AutoUpdate | Adjusted window height to: {Height}");
                 }
                 
                 // 如果窗口宽度超过最大允许宽度，调整窗口宽度
-                if (this.Width > maxWidth)
+                if (Width > maxWidth)
                 {
-                    this.Width = maxWidth;
+                    Width = maxWidth;
                     needsAdjustment = true;
-                    LogHelper.WriteLogToFile($"AutoUpdate | Adjusted window width to: {this.Width}");
+                    LogHelper.WriteLogToFile($"AutoUpdate | Adjusted window width to: {Width}");
                 }
                 
                 // 如果屏幕分辨率较低，调整更多UI元素
                 if (screenHeight < 768 || screenWidth < 1024 || needsAdjustment)
                 {
                     // 查找相关控件并调整大小
-                    var markdownViewer = this.FindName("markdownContent") as MdXaml.MarkdownScrollViewer;
-                    var updateNowButton = this.FindName("UpdateNowButton") as Button;
-                    var updateLaterButton = this.FindName("UpdateLaterButton") as Button;
-                    var skipVersionButton = this.FindName("SkipVersionButton") as Button;
+                    var markdownViewer = FindName("markdownContent") as MarkdownScrollViewer;
+                    var updateNowButton = FindName("UpdateNowButton") as Button;
+                    var updateLaterButton = FindName("UpdateLaterButton") as Button;
+                    var skipVersionButton = FindName("SkipVersionButton") as Button;
                     
                     // 查找包含ScrollViewer的边框控件，减小其高度
-                    var contentBorders = this.FindVisualChildren<Border>().ToList();
+                    var contentBorders = FindVisualChildren<Border>().ToList();
                     foreach (var border in contentBorders)
                     {
-                        if (border.Child is ScrollViewer || border.Child is iNKORE.UI.WPF.Modern.Controls.ScrollViewerEx)
+                        if (border.Child is ScrollViewer || border.Child is ScrollViewerEx)
                         {
                             // 减小内容显示区域的高度
                             if (border.Height > 180)
@@ -267,7 +270,7 @@ namespace Ink_Canvas
                                 border.Height = 160;
                                 LogHelper.WriteLogToFile("AutoUpdate | Reduced content area height");
                             }
-                            else if (border.Child is iNKORE.UI.WPF.Modern.Controls.ScrollViewerEx scrollViewer && scrollViewer.Height > 160)
+                            else if (border.Child is ScrollViewerEx scrollViewer && scrollViewer.Height > 160)
                             {
                                 scrollViewer.Height = 160;
                                 LogHelper.WriteLogToFile("AutoUpdate | Reduced scroll viewer height");
@@ -289,12 +292,12 @@ namespace Ink_Canvas
                 }
                 
                 // 确保窗口在屏幕范围内
-                if (this.Left < 0) this.Left = 0;
-                if (this.Top < 0) this.Top = 0;
-                if (this.Left + this.Width > screenWidth) this.Left = screenWidth - this.Width;
-                if (this.Top + this.Height > screenHeight) this.Top = screenHeight - this.Height;
+                if (Left < 0) Left = 0;
+                if (Top < 0) Top = 0;
+                if (Left + Width > screenWidth) Left = screenWidth - Width;
+                if (Top + Height > screenHeight) Top = screenHeight - Height;
                 
-                LogHelper.WriteLogToFile($"AutoUpdate | Final window size: {this.Width}x{this.Height}");
+                LogHelper.WriteLogToFile($"AutoUpdate | Final window size: {Width}x{Height}");
             }
             catch (Exception ex)
             {
@@ -332,7 +335,7 @@ namespace Ink_Canvas
             if (string.IsNullOrEmpty(downloadUrl))
             {
                 // 自动更新场景下，downloadUrl为null，直接用主下载目录
-                string updatesFolderPath = Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location), "AutoUpdate");
+                string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
                 downloadUrl = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
             }
             LogHelper.WriteLogToFile($"AutoUpdate | 开始安装版本: {version}");

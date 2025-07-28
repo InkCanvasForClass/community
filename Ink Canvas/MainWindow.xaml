@@ -3149,6 +3149,52 @@
                     </ui:SimpleStackPanel>
                 </Viewbox>
             </Border>
+
+            <!-- 图片选择工具栏 -->
+            <Border Name="BorderImageSelectionControl"
+                    HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,900,0,0"
+                    CornerRadius="5" Height="80"
+                    Background="{DynamicResource FloatBarBackground}"
+                    Visibility="Collapsed"
+                    BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
+                <Viewbox Margin="0,-2.5">
+                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="10" Height="60">
+                        <Border Name="BorderImageRotateLeft" Margin="0,2,-9,2" Background="Transparent"
+                                CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
+                                Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageRotateLeft_MouseUp">
+                            <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Image Source="/Resources/Icons-Fluent/ic_fluent_flip_horizontal_24_regular.png"
+                                       RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
+                                <TextBlock Text="左转" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
+                                           HorizontalAlignment="Center" />
+                            </ui:SimpleStackPanel>
+                        </Border>
+                        <Border Name="BorderImageRotateRight" Margin="0,2,-9,2" Background="Transparent"
+                                CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
+                                Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageRotateRight_MouseUp">
+                            <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Image Source="/Resources/Icons-Fluent/ic_fluent_flip_vertical_24_regular.png"
+                                       RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
+                                <TextBlock Text="右转" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
+                                           HorizontalAlignment="Center" />
+                            </ui:SimpleStackPanel>
+                        </Border>
+                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
+                                Background="{DynamicResource FloatBarForeground}" />
+                        <Border Name="BorderImageDelete" Margin="-8,0,0,0"
+                                CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
+                                Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageDelete_MouseUp">
+                            <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                                <Image Source="/Resources/Icons-Fluent/ic_fluent_delete_24_regular.png"
+                                       RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
+                                <TextBlock Margin="0,5,0,0" Text="删除" FontSize="10"
+                                           Foreground="{DynamicResource FloatBarForeground}"
+                                           HorizontalAlignment="Center" />
+                            </ui:SimpleStackPanel>
+                        </Border>
+                    </ui:SimpleStackPanel>
+                </Viewbox>
+            </Border>
         </Grid>
 
         <Grid Visibility="Collapsed">

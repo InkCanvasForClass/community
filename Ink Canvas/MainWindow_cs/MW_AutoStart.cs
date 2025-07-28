@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows;
 using IWshRuntimeLibrary;
+using Application = System.Windows.Forms.Application;
+using File = System.IO.File;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -10,7 +12,7 @@ namespace Ink_Canvas {
                 var shortcut = (IWshShortcut)shell.CreateShortcut(
                     Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + exeName + ".lnk");
                 //设置快捷方式的目标所在的位置(源程序完整路径)
-                shortcut.TargetPath = System.Windows.Forms.Application.ExecutablePath;
+                shortcut.TargetPath = Application.ExecutablePath;
                 //应用程序的工作目录
                 //当用户没有指定一个具体的目录时，快捷方式的目标应用程序将使用该属性所指定的目录来装载或保存文件。
                 shortcut.WorkingDirectory = Environment.CurrentDirectory;
@@ -30,8 +32,8 @@ namespace Ink_Canvas {
 
         public static bool StartAutomaticallyDel(string exeName) {
             try {
-                System.IO.File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + exeName +
-                                      ".lnk");
+                File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + exeName +
+                            ".lnk");
                 return true;
             }
             catch (Exception) { }

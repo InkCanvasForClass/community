@@ -278,10 +278,7 @@ namespace Ink_Canvas.Helpers
                                     window.Width = logicalSize.X;
                                     window.Height = logicalSize.Y;
                                 }
-                                else
-                                {
-                                    //这个hwnd是前面从Window来的，如果现在他不是Window...... 你信么
-                                }
+                                //这个hwnd是前面从Window来的，如果现在他不是Window...... 你信么
                             }
 
                             //将修改后的结构体拷贝回去

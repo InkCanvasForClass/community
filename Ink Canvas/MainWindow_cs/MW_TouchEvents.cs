@@ -1,4 +1,3 @@
-using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,16 +7,16 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using Ink_Canvas.Helpers;
 using Point = System.Windows.Point;
-using System.Diagnostics;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
         #region Multi-Touch
 
-        private bool isInMultiTouchMode = false;
+        private bool isInMultiTouchMode;
         private List<int> dec = new List<int>();
-        private bool isSingleFingerDragMode = false;
+        private bool isSingleFingerDragMode;
         private Point centerPoint = new Point(0, 0);
         private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
 
@@ -273,10 +272,10 @@ namespace Ink_Canvas {
         }
 
         // 手掌擦相关变量
-        private bool isPalmEraserActive = false;
+        private bool isPalmEraserActive;
         private InkCanvasEditingMode palmEraserLastEditingMode = InkCanvasEditingMode.Ink;
-        private bool palmEraserLastIsHighlighter = false;
-        private bool palmEraserWasEnabledBeforeMultiTouch = false;
+        private bool palmEraserLastIsHighlighter;
+        private bool palmEraserWasEnabledBeforeMultiTouch;
 
         private void inkCanvas_PreviewTouchDown(object sender, TouchEventArgs e) {
             // 橡皮状态下不做任何切换，直接return，保证橡皮可持续
@@ -358,7 +357,7 @@ namespace Ink_Canvas {
             if (drawingShapeMode != 0) {
                 var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
                 {
-                    RoutedEvent = UIElement.MouseLeftButtonUpEvent,
+                    RoutedEvent = MouseLeftButtonUpEvent,
                     Source = inkCanvas
                 };
                 inkCanvas_MouseUp(inkCanvas, mouseArgs);

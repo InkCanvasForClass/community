@@ -1,13 +1,16 @@
-﻿using Ink_Canvas.Helpers;
-using Microsoft.VisualBasic;
-using iNKORE.UI.WPF.Modern.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.VisualBasic;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas {
@@ -35,7 +38,7 @@ namespace Ink_Canvas {
                 {
                     // 默认背景（无背景）
                     BackgroundImage.ImageSource = null;
-                    MainBorder.Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(240, 243, 249));
+                    MainBorder.Background = new SolidColorBrush(Color.FromRgb(240, 243, 249));
                 }
                 else if (selectedIndex <= settings.RandSettings.CustomPickNameBackgrounds.Count)
                 {
@@ -43,7 +46,7 @@ namespace Ink_Canvas {
                     var customBackground = settings.RandSettings.CustomPickNameBackgrounds[selectedIndex - 1];
                     if (File.Exists(customBackground.FilePath))
                     {
-                        var bitmap = new System.Windows.Media.Imaging.BitmapImage();
+                        var bitmap = new BitmapImage();
                         bitmap.BeginInit();
                         bitmap.UriSource = new Uri(customBackground.FilePath);
                         bitmap.EndInit();
@@ -69,16 +72,16 @@ namespace Ink_Canvas {
             // 加载背景
             LoadBackground(settings);
 
-            new Thread(new ThreadStart(() => {
+            new Thread(() => {
                 Thread.Sleep(100);
                 Application.Current.Dispatcher.Invoke(() => {
                     BorderBtnRand_MouseUp(BorderBtnRand, null);
                 });
-            })).Start();
+            }).Start();
         }
 
         public static int randSeed = 0;
-        public bool isAutoClose = false;
+        public bool isAutoClose;
         public bool isNotRepeatName = false;
 
         public int TotalCount = 1;
@@ -118,7 +121,7 @@ namespace Ink_Canvas {
             LabelOutput2.Visibility = Visibility.Collapsed;
             LabelOutput3.Visibility = Visibility.Collapsed;
 
-            new Thread(new ThreadStart(() => {
+            new Thread(() => {
                 for (int i = 0; i < RandWaitingTimes; i++) {
                     int rand = random.Next(1, PeopleCount + 1);
                     while (rands.Contains(rand)) {
@@ -152,55 +155,55 @@ namespace Ink_Canvas {
                             outputString += Names[rand - 1] + Environment.NewLine;
                         } else {
                             outputs.Add(rand.ToString());
-                            outputString += rand.ToString() + Environment.NewLine;
+                            outputString += rand + Environment.NewLine;
                         }
                     }
                     if (TotalCount <= 5) {
-                        LabelOutput.Content = outputString.ToString().Trim();
+                        LabelOutput.Content = outputString.Trim();
                     } else if (TotalCount <= 10) {
                         LabelOutput2.Visibility = Visibility.Visible;
                         outputString = "";
                         for (int i = 0; i < (outputs.Count + 1) / 2; i++) {
-                            outputString += outputs[i].ToString() + Environment.NewLine;
+                            outputString += outputs[i] + Environment.NewLine;
                         }
-                        LabelOutput.Content = outputString.ToString().Trim();
+                        LabelOutput.Content = outputString.Trim();
                         outputString = "";
                         for (int i = (outputs.Count + 1) / 2; i < outputs.Count; i++) {
-                            outputString += outputs[i].ToString() + Environment.NewLine;
+                            outputString += outputs[i] + Environment.NewLine;
                         }
-                        LabelOutput2.Content = outputString.ToString().Trim();
+                        LabelOutput2.Content = outputString.Trim();
                     } else {
                         LabelOutput2.Visibility = Visibility.Visible;
                         LabelOutput3.Visibility = Visibility.Visible;
                         outputString = "";
                         for (int i = 0; i < (outputs.Count + 1) / 3; i++) {
-                            outputString += outputs[i].ToString() + Environment.NewLine;
+                            outputString += outputs[i] + Environment.NewLine;
                         }
-                        LabelOutput.Content = outputString.ToString().Trim();
+                        LabelOutput.Content = outputString.Trim();
                         outputString = "";
                         for (int i = (outputs.Count + 1) / 3; i < (outputs.Count + 1) * 2 / 3; i++) {
-                            outputString += outputs[i].ToString() + Environment.NewLine;
+                            outputString += outputs[i] + Environment.NewLine;
                         }
-                        LabelOutput2.Content = outputString.ToString().Trim();
+                        LabelOutput2.Content = outputString.Trim();
                         outputString = "";
                         for (int i = (outputs.Count + 1) * 2 / 3; i < outputs.Count; i++) {
-                            outputString += outputs[i].ToString() + Environment.NewLine;
+                            outputString += outputs[i] + Environment.NewLine;
                         }
-                        LabelOutput3.Content = outputString.ToString().Trim();
+                        LabelOutput3.Content = outputString.Trim();
                     }
 
                     if (isAutoClose) {
-                        new Thread(new ThreadStart(() => {
+                        new Thread(() => {
                             Thread.Sleep(RandDoneAutoCloseWaitTime);
                             Application.Current.Dispatcher.Invoke(() => {
                                 PeopleControlPane.Opacity = 1;
                                 PeopleControlPane.IsHitTestVisible = true;
                                 Close();
                             });
-                        })).Start();
+                        }).Start();
                     }
                 });
-            })).Start();
+            }).Start();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
@@ -261,7 +264,7 @@ namespace Ink_Canvas {
 
             try
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                Process.Start(new ProcessStartInfo
                 {
                     FileName = "classisland://plugins/IslandCaller/Run",
                     UseShellExecute = true

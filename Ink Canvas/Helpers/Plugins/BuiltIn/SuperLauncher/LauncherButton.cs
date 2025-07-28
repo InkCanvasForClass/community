@@ -36,7 +36,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             try
             {
                 _plugin = plugin;
-                LogHelper.WriteLogToFile("开始创建启动台按钮", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("开始创建启动台按钮");
                 
                 // 创建SimpleStackPanel
                 _panel = new SimpleStackPanel
@@ -49,7 +49,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     Background = Brushes.Transparent
                 };
                 
-                LogHelper.WriteLogToFile("创建SimpleStackPanel完成", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("创建SimpleStackPanel完成");
                 
                 // 添加图标
                 var image = CreateIconImage();
@@ -77,7 +77,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 // 设置工具提示
                 _panel.ToolTip = "启动台";
                 
-                LogHelper.WriteLogToFile("启动台按钮创建完成", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("启动台按钮创建完成");
             }
             catch (Exception ex)
             {
@@ -112,8 +112,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     // 保存配置
                     _plugin.SaveConfig();
                     
-                    LogHelper.WriteLogToFile($"通过右键菜单切换启动台按钮位置为: {_plugin.Config.ButtonPosition}", 
-                        LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"通过右键菜单切换启动台按钮位置为: {_plugin.Config.ButtonPosition}");
                 };
                 menu.Items.Add(positionMenuItem);
                 
@@ -133,7 +132,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                             if (method != null)
                             {
                                 method.Invoke(mainWindow, null);
-                                LogHelper.WriteLogToFile("已打开插件设置窗口", LogHelper.LogType.Info);
+                                LogHelper.WriteLogToFile("已打开插件设置窗口");
                             }
                         }
                         catch (Exception ex)
@@ -218,7 +217,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             {
                 // 提供反馈
                 _panel.Background = new SolidColorBrush(Color.FromArgb(40, 0, 0, 0));
-                LogHelper.WriteLogToFile("启动台按钮鼠标按下", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("启动台按钮鼠标按下");
             }
             catch (Exception ex)
             {
@@ -241,7 +240,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 
                 // 恢复背景
                 _panel.Background = Brushes.Transparent;
-                LogHelper.WriteLogToFile("启动台按钮鼠标抬起，准备显示启动台窗口", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("启动台按钮鼠标抬起，准备显示启动台窗口");
                 
                 // 获取按钮在屏幕上的位置
                 Point buttonPosition = _panel.PointToScreen(new Point(_panel.ActualWidth / 2, 0));

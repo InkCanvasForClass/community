@@ -1,23 +1,27 @@
-using Ink_Canvas.Helpers;
 using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Threading;
-using System.Windows.Interop;
 using System.Windows.Media.Imaging;
+using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
-using System.Threading;
 using Application = System.Windows.Application;
+using Button = System.Windows.Controls.Button;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using Point = System.Windows.Point;
-using System.Diagnostics;
-using System.Xml.Linq;
 using Image = System.Windows.Controls.Image;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using Panel = System.Windows.Controls.Panel;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -113,7 +117,7 @@ namespace Ink_Canvas {
                 || BorderFloatingBarMainControls.Visibility != Visibility.Visible) {
                 EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
             }
-            else if (isVisible == true) {
+            else if (isVisible) {
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                     EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
                 else EnableTwoFingerGestureBorder.Visibility = Visibility.Visible;
@@ -127,9 +131,9 @@ namespace Ink_Canvas {
 
         #region 浮動工具欄的拖動實現
 
-        private bool isDragDropInEffect = false;
-        private Point pos = new Point();
-        private Point downPos = new Point();
+        private bool isDragDropInEffect;
+        private Point pos;
+        private Point downPos;
         private Point pointDesktop = new Point(-1, -1); //用于记录上次在桌面时的坐标
         private Point pointPPT = new Point(-1, -1); //用于记录上次在PPT中的坐标
 
@@ -295,7 +299,7 @@ namespace Ink_Canvas {
                     To = BorderSettings.RenderTransform.Value.OffsetX - 440,
                     Duration = TimeSpan.FromSeconds(0.6)
                 };
-                slideAnimation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+                slideAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut };
                 Storyboard.SetTargetProperty(slideAnimation,
                     new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
 
@@ -310,7 +314,7 @@ namespace Ink_Canvas {
                 BorderSettings.RenderTransform = new TranslateTransform();
 
                 isOpeningOrHidingSettingsPane = true;
-                sb.Begin((FrameworkElement)BorderSettings);
+                sb.Begin(BorderSettings);
             }
 
             AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
@@ -420,7 +424,7 @@ namespace Ink_Canvas {
                         await Task.Delay(50);
                         ViewboxFloatingBarMarginAnimation(60);
                     }
-                    else if (Topmost == true) //非黑板
+                    else if (Topmost) //非黑板
                     {
                         await Task.Delay(50);
                         ViewboxFloatingBarMarginAnimation(100, true);
@@ -469,7 +473,7 @@ namespace Ink_Canvas {
         #region 白板按鈕和退出白板模式按鈕
 
         //private bool Not_Enter_Blackboard_fir_Mouse_Click = true;
-        private bool isDisplayingOrHidingBlackboard = false;
+        private bool isDisplayingOrHidingBlackboard;
 
         private void ImageBlackboard_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -504,10 +508,10 @@ namespace Ink_Canvas {
                     Not_Enter_Blackboard_fir_Mouse_Click = false;
                 }
                 */
-                new Thread(new ThreadStart(() => {
+                new Thread(() => {
                     Thread.Sleep(100);
                     Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
-                })).Start();
+                }).Start();
                 
                 HideSubPanels();
 
@@ -531,7 +535,7 @@ namespace Ink_Canvas {
                     if (isInMultiTouchMode) ToggleSwitchEnableMultiTouchMode.IsOn = false;
                 }
 
-                if (Settings.Appearance.EnableTimeDisplayInWhiteboardMode == true)
+                if (Settings.Appearance.EnableTimeDisplayInWhiteboardMode)
                 {
                     WaterMarkTime.Visibility = Visibility.Visible;
                     WaterMarkDate.Visibility = Visibility.Visible;
@@ -540,7 +544,7 @@ namespace Ink_Canvas {
                     WaterMarkDate.Visibility = Visibility.Collapsed;
                 }
 
-                if (Settings.Appearance.EnableChickenSoupInWhiteboardMode == true)
+                if (Settings.Appearance.EnableChickenSoupInWhiteboardMode)
                 {
                     BlackBoardWaterMark.Visibility = Visibility.Visible;
                 } else {
@@ -597,15 +601,15 @@ namespace Ink_Canvas {
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) SaveScreenShot(true);
 
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Collapsed)
-                    new Thread(new ThreadStart(() => {
+                    new Thread(() => {
                         Thread.Sleep(300);
                         Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(100, true); });
-                    })).Start();
+                    }).Start();
                 else
-                    new Thread(new ThreadStart(() => {
+                    new Thread(() => {
                         Thread.Sleep(300);
                         Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
-                    })).Start();
+                    }).Start();
 
                 if (System.Windows.Controls.Canvas.GetLeft(FloatingbarSelectionBG)!=28) PenIcon_Click(null, null);
 
@@ -628,10 +632,10 @@ namespace Ink_Canvas {
             BtnExit.Foreground = Brushes.White;
             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
 
-            new Thread(new ThreadStart(() => {
+            new Thread(() => {
                 Thread.Sleep(200);
                 Application.Current.Dispatcher.Invoke(() => { isDisplayingOrHidingBlackboard = false; });
-            })).Start();
+            }).Start();
 
             SwitchToDefaultPen(null, null);
             CheckColorTheme(true);
@@ -715,7 +719,7 @@ namespace Ink_Canvas {
         }
 
         private void SymbolIconSettings_Click(object sender, RoutedEventArgs e) {
-            if (isOpeningOrHidingSettingsPane != false) return;
+            if (isOpeningOrHidingSettingsPane) return;
             HideSubPanels();
             BtnSettings_Click(null, null);
         }
@@ -827,7 +831,7 @@ namespace Ink_Canvas {
             // 检查是否启用了直接调用ClassIsland点名功能
             if (Settings.RandSettings.DirectCallCiRand) {
                 try {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo {
+                    Process.Start(new ProcessStartInfo {
                         FileName = "classisland://plugins/IslandCaller/Run",
                         UseShellExecute = true
                     });
@@ -961,9 +965,9 @@ namespace Ink_Canvas {
             }).Start();
         }
 
-        private bool isStopInkReplay = false;
-        private bool isPauseInkReplay = false;
-        private bool isRestartInkReplay = false;
+        private bool isStopInkReplay;
+        private bool isPauseInkReplay;
+        private bool isRestartInkReplay;
         private double inkReplaySpeed = 1;
 
         private void InkCanvasForInkReplay_MouseDown(object sender, MouseButtonEventArgs e) {
@@ -1078,7 +1082,7 @@ namespace Ink_Canvas {
             }
         }
 
-        private bool isViewboxFloatingBarMarginAnimationRunning = false;
+        private bool isViewboxFloatingBarMarginAnimationRunning;
 
         public async void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false) {
@@ -1098,7 +1102,7 @@ namespace Ink_Canvas {
                 }
 
                 var windowHandle = new WindowInteropHelper(this).Handle;
-                var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
+                var screen = Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
                 // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
@@ -1110,21 +1114,21 @@ namespace Ink_Canvas {
                     if (toolbarHeight == 0)
                     {
                         pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
-                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定边距: {MarginFromEdge}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定边距: {MarginFromEdge}");
                     }
                     else
                     {
                         pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
                     }
                 }
-                else if (PosXCaculatedWithTaskbarHeight == true)
+                else if (PosXCaculatedWithTaskbarHeight)
                 {
                     // 如果任务栏高度为0(隐藏状态),则使用固定高度
                     if (toolbarHeight == 0)
                     {
                         pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY - 
                                3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}");
                     }
                     else
                     {
@@ -1184,7 +1188,7 @@ namespace Ink_Canvas {
                 }
 
                 var windowHandle = new WindowInteropHelper(this).Handle;
-                var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
+                var screen = Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
                 // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
@@ -1195,7 +1199,7 @@ namespace Ink_Canvas {
                 {
                     pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY - 
                            3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                    LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}");
                 }
                 else
                 {
@@ -1237,7 +1241,7 @@ namespace Ink_Canvas {
                 }
 
                 var windowHandle = new WindowInteropHelper(this).Handle;
-                var screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
+                var screen = Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
                 // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
@@ -1321,7 +1325,14 @@ namespace Ink_Canvas {
 
             if (currentMode != 0) {
                 SaveStrokes();
-                RestoreStrokes(true);
+                // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
+                    RestoreStrokes(true);
+                } else {
+                    // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
+                    TimeMachineHistories[0] = null;
+                    timeMachine.ClearStrokeHistory();
+                }
             }
 
             if (BtnSwitchTheme.Content.ToString() == "浅色")
@@ -1565,7 +1576,7 @@ namespace Ink_Canvas {
         }
 
         private void DrawShapePromptToPen() {
-            if (isLongPressSelected == true) {
+            if (isLongPressSelected) {
                 // 如果是长按选中的状态，只隐藏面板，不切换到笔模式
                 HideSubPanels("shape");
             }
@@ -1629,7 +1640,7 @@ namespace Ink_Canvas {
 
         #region Right Side Panel
 
-        public static bool CloseIsFromButton = false;
+        public static bool CloseIsFromButton;
 
         public void BtnExit_Click(object sender, RoutedEventArgs e) {
             App.IsAppExitByUser = true;
@@ -1639,14 +1650,18 @@ namespace Ink_Canvas {
         }
 
         public void BtnRestart_Click(object sender, RoutedEventArgs e) {
-            Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
-            App.IsAppExitByUser = true;
-            CloseIsFromButton = true;
-            Application.Current.Shutdown();
+            try {
+                Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
+                App.IsAppExitByUser = true;
+                CloseIsFromButton = true;
+                Application.Current.Shutdown();
+            } catch (Exception ex) {
+                LogHelper.NewLog($"重启程序时出错: {ex.Message}");
+            }
         }
 
         private void SettingsOverlayClick(object sender, MouseButtonEventArgs e) {
-            if (isOpeningOrHidingSettingsPane == true) return;
+            if (isOpeningOrHidingSettingsPane) return;
             
             // 获取点击的位置
             Point clickPoint = e.GetPosition(BorderSettingsMask);
@@ -1666,7 +1681,7 @@ namespace Ink_Canvas {
             }
         }
 
-        private bool isOpeningOrHidingSettingsPane = false;
+        private bool isOpeningOrHidingSettingsPane;
 
         private void BtnSettings_Click(object sender, RoutedEventArgs e) {
             if (BorderSettings.Visibility == Visibility.Visible) {
@@ -1685,7 +1700,7 @@ namespace Ink_Canvas {
                     To = 0,
                     Duration = TimeSpan.FromSeconds(0.6)
                 };
-                slideAnimation.EasingFunction = new CubicEase() { EasingMode = EasingMode.EaseOut };
+                slideAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut };
                 Storyboard.SetTargetProperty(slideAnimation,
                     new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
 
@@ -1697,13 +1712,13 @@ namespace Ink_Canvas {
                 BorderSettings.RenderTransform = new TranslateTransform();
 
                 isOpeningOrHidingSettingsPane = true;
-                sb.Begin((FrameworkElement)BorderSettings);
+                sb.Begin(BorderSettings);
             }
         }
 
         private void BtnThickness_Click(object sender, RoutedEventArgs e) { }
 
-        private bool forceEraser = false;
+        private bool forceEraser;
 
 
         private void BtnClear_Click(object sender, RoutedEventArgs e) {
@@ -1737,7 +1752,7 @@ namespace Ink_Canvas {
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
         }
 
-        private bool lastIsInMultiTouchMode = false;
+        private bool lastIsInMultiTouchMode;
 
         private void CancelSingleFingerDragMode() {
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
@@ -1755,7 +1770,7 @@ namespace Ink_Canvas {
                 StackPanelControl.Visibility = Visibility.Visible;
         }
 
-        private int currentMode = 0;
+        private int currentMode;
 
         private void BtnSwitch_Click(object sender, RoutedEventArgs e) {
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent) {
@@ -1766,9 +1781,22 @@ namespace Ink_Canvas {
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
 
+                    // 取消任何UI元素的选择
+                    DeselectUIElement();
+
                     SaveStrokes(true);
                     ClearStrokes(true);
-                    RestoreStrokes();
+
+                    // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
+                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
+                        LogHelper.WriteLogToFile("退出白板：当前在PPT放映模式，恢复备份墨迹", LogHelper.LogType.Trace);
+                        RestoreStrokes();
+                    } else {
+                        // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
+                        LogHelper.WriteLogToFile("退出白板：当前不在PPT放映模式，清空备份以避免显示已结束PPT的墨迹", LogHelper.LogType.Trace);
+                        TimeMachineHistories[0] = null;
+                        timeMachine.ClearStrokeHistory();
+                    }
 
                     // 退出白板时清空图片
                     inkCanvas.Children.Clear();
@@ -1804,9 +1832,20 @@ namespace Ink_Canvas {
                         AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                         AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
 
+                        // 取消任何UI元素的选择
+                        DeselectUIElement();
+
                         SaveStrokes();
                         ClearStrokes(true);
-                        RestoreStrokes(true);
+
+                        // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
+                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
+                            RestoreStrokes(true);
+                        } else {
+                            // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
+                            TimeMachineHistories[0] = null;
+                            timeMachine.ClearStrokeHistory();
+                        }
 
                         // 退出白板时清空图片
                         inkCanvas.Children.Clear();
@@ -1838,9 +1877,20 @@ namespace Ink_Canvas {
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardCenterSide);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardRightSide);
 
+                        // 取消任何UI元素的选择
+                        DeselectUIElement();
+
                         SaveStrokes(true);
                         ClearStrokes(true);
-                        RestoreStrokes();
+
+                        // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
+                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
+                            RestoreStrokes();
+                        } else {
+                            // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
+                            TimeMachineHistories[0] = null;
+                            timeMachine.ClearStrokeHistory();
+                        }
 
                         BtnSwitch.Content = "屏幕";
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
@@ -1995,7 +2045,7 @@ namespace Ink_Canvas {
 
         private async void InsertImage_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            var dialog = new Microsoft.Win32.OpenFileDialog
+            var dialog = new OpenFileDialog
             {
                 Filter = "图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif"
             };

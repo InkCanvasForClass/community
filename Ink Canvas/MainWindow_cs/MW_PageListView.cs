@@ -28,7 +28,7 @@ namespace Ink_Canvas
                 {
                     var st = ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index]);
                     st.Clip(new Rect(0, 0, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight));
-                    var pitem = new PageListViewItem()
+                    var pitem = new PageListViewItem
                     {
                         Index = index,
                         Strokes = st,
@@ -40,7 +40,7 @@ namespace Ink_Canvas
                 foreach (int index in Enumerable.Range(1, WhiteboardTotalCount)) {
                     var st = ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index]);
                     st.Clip(new Rect(0,0, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight));
-                    var pitem = new PageListViewItem()
+                    var pitem = new PageListViewItem
                     {
                         Index = index,
                         Strokes = st,
@@ -51,7 +51,7 @@ namespace Ink_Canvas
 
             var _st = inkCanvas.Strokes.Clone();
             _st.Clip(new Rect(0, 0, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight));
-            var _pitem = new PageListViewItem()
+            var _pitem = new PageListViewItem
             {
                 Index = CurrentWhiteboardIndex,
                 Strokes = _st,
@@ -78,11 +78,19 @@ namespace Ink_Canvas
             var index = BlackBoardLeftSidePageListView.SelectedIndex;
             if (item != null)
             {
-                SaveStrokes();
-                ClearStrokes(true);
-                CurrentWhiteboardIndex= index+1;
-                RestoreStrokes();
-                UpdateIndexInfoDisplay();
+                // 只有当选择的页面与当前页面不同时才进行切换
+                if (index + 1 != CurrentWhiteboardIndex)
+                {
+                    // 取消任何UI元素的选择（只在真正切换页面时）
+                    DeselectUIElement();
+
+                    SaveStrokes();
+                    ClearStrokes(true);
+                    CurrentWhiteboardIndex = index + 1;
+                    RestoreStrokes();
+                    UpdateIndexInfoDisplay();
+                }
+                // 无论是否切换页面，都更新选择索引
                 BlackBoardLeftSidePageListView.SelectedIndex = index;
             }
         }
@@ -95,11 +103,19 @@ namespace Ink_Canvas
             var index = BlackBoardRightSidePageListView.SelectedIndex;
             if (item != null)
             {
-                SaveStrokes();
-                ClearStrokes(true);
-                CurrentWhiteboardIndex = index + 1;
-                RestoreStrokes();
-                UpdateIndexInfoDisplay();
+                // 只有当选择的页面与当前页面不同时才进行切换
+                if (index + 1 != CurrentWhiteboardIndex)
+                {
+                    // 取消任何UI元素的选择（只在真正切换页面时）
+                    DeselectUIElement();
+
+                    SaveStrokes();
+                    ClearStrokes(true);
+                    CurrentWhiteboardIndex = index + 1;
+                    RestoreStrokes();
+                    UpdateIndexInfoDisplay();
+                }
+                // 无论是否切换页面，都更新选择索引
                 BlackBoardRightSidePageListView.SelectedIndex = index;
             }
         }

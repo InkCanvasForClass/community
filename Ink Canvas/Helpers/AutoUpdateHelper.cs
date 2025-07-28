@@ -1,16 +1,21 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using System.Reflection;
-using System.Windows;
-using System.Collections.ObjectModel;
+using System.IO.Compression;
 using System.Linq;
-using System.Windows.Controls;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Reflection;
 using System.Text;
-using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -21,7 +26,7 @@ namespace Ink_Canvas.Helpers
         // 定义超时时间为10秒
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(10);
         private static readonly string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
-        private static string statusFilePath = null;
+        private static string statusFilePath;
 
         // 线路组结构体（包含版本、下载、日志地址）
         public class UpdateLineGroup
@@ -209,7 +214,7 @@ namespace Ink_Canvas.Helpers
             if (zhiJiaoGroup != null)
             {
                 orderedGroups.Insert(0, zhiJiaoGroup);
-                LogHelper.WriteLogToFile($"AutoUpdate | 智教联盟线路组已插入到首位");
+                LogHelper.WriteLogToFile("AutoUpdate | 智教联盟线路组已插入到首位");
             }
             
             // 将"inkeys"线路组插入到第二位（如果存在）
@@ -217,7 +222,7 @@ namespace Ink_Canvas.Helpers
             if (inkeysGroup != null)
             {
                 orderedGroups.Insert(1, inkeysGroup);
-                LogHelper.WriteLogToFile($"AutoUpdate | inkeys线路组已插入到第二位");
+                LogHelper.WriteLogToFile("AutoUpdate | inkeys线路组已插入到第二位");
             }
             
             if (orderedGroups.Count > 0)
@@ -278,7 +283,7 @@ namespace Ink_Canvas.Helpers
                             // 如果内容包含HTML（可能是GitHub页面而不是原始内容），尝试提取版本号
                             if (content.Contains("<html") || content.Contains("<!DOCTYPE"))
                             {
-                                LogHelper.WriteLogToFile($"AutoUpdate | 收到HTML内容而不是原始版本号 - 尝试提取版本");
+                                LogHelper.WriteLogToFile("AutoUpdate | 收到HTML内容而不是原始版本号 - 尝试提取版本");
                                 int startPos = content.IndexOf("<table");
                                 if (startPos > 0)
                                 {
@@ -286,7 +291,7 @@ namespace Ink_Canvas.Helpers
                                     if (endPos > startPos)
                                     {
                                         string tableContent = content.Substring(startPos, endPos - startPos);
-                                        var match = System.Text.RegularExpressions.Regex.Match(tableContent, @"(\d+\.\d+\.\d+(\.\d+)?)");
+                                        var match = Regex.Match(tableContent, @"(\d+\.\d+\.\d+(\.\d+)?)");
                                         if (match.Success)
                                         {
                                             content = match.Groups[1].Value;
@@ -294,7 +299,7 @@ namespace Ink_Canvas.Helpers
                                         }
                                         else
                                         {
-                                            LogHelper.WriteLogToFile($"AutoUpdate | 无法从HTML内容提取版本");
+                                            LogHelper.WriteLogToFile("AutoUpdate | 无法从HTML内容提取版本");
                                             return null;
                                         }
                                     }
@@ -321,77 +326,75 @@ namespace Ink_Canvas.Helpers
                     return null;
                 }
             }
-            else
-            {
-                // 其他Windows版本使用标准配置
-                using (HttpClient client = new HttpClient())
-                {
-                    try
-                    {
-                        client.Timeout = RequestTimeout;
-                        LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
-                        
-                        var downloadTask = client.GetAsync(fileUrl);
-                        var timeoutTask = Task.Delay(RequestTimeout);
-                        
-                        var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
-                        if (completedTask == timeoutTask)
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
-                            return null;
-                        }
-                        
-                        HttpResponseMessage response = await downloadTask;
-                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
-                        response.EnsureSuccessStatusCode();
 
-                        string content = await response.Content.ReadAsStringAsync();
-                        content = content.Trim();
+            // 其他Windows版本使用标准配置
+            using (HttpClient client = new HttpClient())
+            {
+                try
+                {
+                    client.Timeout = RequestTimeout;
+                    LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
                         
-                        // 如果内容包含HTML（可能是GitHub页面而不是原始内容），尝试提取版本号
-                        if (content.Contains("<html") || content.Contains("<!DOCTYPE"))
+                    var downloadTask = client.GetAsync(fileUrl);
+                    var timeoutTask = Task.Delay(RequestTimeout);
+                        
+                    var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
+                    if (completedTask == timeoutTask)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
+                        return null;
+                    }
+                        
+                    HttpResponseMessage response = await downloadTask;
+                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                    response.EnsureSuccessStatusCode();
+
+                    string content = await response.Content.ReadAsStringAsync();
+                    content = content.Trim();
+                        
+                    // 如果内容包含HTML（可能是GitHub页面而不是原始内容），尝试提取版本号
+                    if (content.Contains("<html") || content.Contains("<!DOCTYPE"))
+                    {
+                        LogHelper.WriteLogToFile("AutoUpdate | 收到HTML内容而不是原始版本号 - 尝试提取版本");
+                        int startPos = content.IndexOf("<table");
+                        if (startPos > 0)
                         {
-                            LogHelper.WriteLogToFile($"AutoUpdate | 收到HTML内容而不是原始版本号 - 尝试提取版本");
-                            int startPos = content.IndexOf("<table");
-                            if (startPos > 0)
+                            int endPos = content.IndexOf("</table>", startPos);
+                            if (endPos > startPos)
                             {
-                                int endPos = content.IndexOf("</table>", startPos);
-                                if (endPos > startPos)
+                                string tableContent = content.Substring(startPos, endPos - startPos);
+                                var match = Regex.Match(tableContent, @"(\d+\.\d+\.\d+(\.\d+)?)");
+                                if (match.Success)
                                 {
-                                    string tableContent = content.Substring(startPos, endPos - startPos);
-                                    var match = System.Text.RegularExpressions.Regex.Match(tableContent, @"(\d+\.\d+\.\d+(\.\d+)?)");
-                                    if (match.Success)
-                                    {
-                                        content = match.Groups[1].Value;
-                                        LogHelper.WriteLogToFile($"AutoUpdate | 从HTML提取版本: {content}");
-                                    }
-                                    else
-                                    {
-                                        LogHelper.WriteLogToFile($"AutoUpdate | 无法从HTML内容提取版本");
-                                        return null;
-                                    }
+                                    content = match.Groups[1].Value;
+                                    LogHelper.WriteLogToFile($"AutoUpdate | 从HTML提取版本: {content}");
+                                }
+                                else
+                                {
+                                    LogHelper.WriteLogToFile("AutoUpdate | 无法从HTML内容提取版本");
+                                    return null;
                                 }
                             }
                         }
+                    }
                         
-                        LogHelper.WriteLogToFile($"AutoUpdate | 响应内容: {content}");
-                        return content;
-                    }
-                    catch (HttpRequestException ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                    catch (TaskCanceledException ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
-                    }
-
-                    return null;
+                    LogHelper.WriteLogToFile($"AutoUpdate | 响应内容: {content}");
+                    return content;
                 }
+                catch (HttpRequestException ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                }
+                catch (TaskCanceledException ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
+                }
+
+                return null;
             }
         }
 
@@ -484,7 +487,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | 本地版本: {localVersion}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 设备ID: {DeviceIdentifier.GetDeviceId()}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
-                LogHelper.WriteLogToFile($"AutoUpdate | 优先通过GitHub Releases API检测...");
+                LogHelper.WriteLogToFile("AutoUpdate | 优先通过GitHub Releases API检测...");
                 
                 // 1. 优先通过GitHub Releases API获取
                 var (apiVersion, _, apiReleaseNotes, apiReleaseTime) = await GetLatestGithubRelease(channel);
@@ -518,7 +521,7 @@ namespace Ink_Canvas.Helpers
                         }
                         else
                         {
-                            LogHelper.WriteLogToFile($"AutoUpdate | 版本修复模式，跳过分级策略检查");
+                            LogHelper.WriteLogToFile("AutoUpdate | 版本修复模式，跳过分级策略检查");
                         }
                         
                         LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级，推送更新 {apiVersion}");
@@ -528,13 +531,13 @@ namespace Ink_Canvas.Helpers
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 当前版本已是最新 (GitHub Releases API)");
+                        LogHelper.WriteLogToFile("AutoUpdate | 当前版本已是最新 (GitHub Releases API)");
                         var availableGroup = (await GetAvailableLineGroupsOrdered(channel)).FirstOrDefault();
                         return (null, availableGroup, apiReleaseNotes);
                     }
                 }
                 // 2. 回退到原有txt方案
-                LogHelper.WriteLogToFile($"AutoUpdate | GitHub Releases API获取失败，回退到txt方案...");
+                LogHelper.WriteLogToFile("AutoUpdate | GitHub Releases API获取失败，回退到txt方案...");
                 var availableGroups = await GetAvailableLineGroupsOrdered(channel);
                 if (availableGroups.Count == 0)
                 {
@@ -570,22 +573,18 @@ namespace Ink_Canvas.Helpers
                             }
                             else
                             {
-                                LogHelper.WriteLogToFile($"AutoUpdate | 版本修复模式，跳过分级策略检查");
+                                LogHelper.WriteLogToFile("AutoUpdate | 版本修复模式，跳过分级策略检查");
                             }
                             
                             LogHelper.WriteLogToFile($"AutoUpdate | 根据用户优先级，推送更新 {remoteVersion}");
                             return (remoteVersion, group, null);
                         }
-                        else
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | 当前版本已是最新");
-                            return (null, group, null);
-                        }
+
+                        LogHelper.WriteLogToFile("AutoUpdate | 当前版本已是最新");
+                        return (null, group, null);
                     }
-                    else
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 获取版本失败，尝试下一个线路组", LogHelper.LogType.Warning);
-                    }
+
+                    LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 获取版本失败，尝试下一个线路组", LogHelper.LogType.Warning);
                 }
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组均无法获取版本信息", LogHelper.LogType.Error);
                 return (null, null, null);
@@ -614,7 +613,7 @@ namespace Ink_Canvas.Helpers
                     client.Timeout = RequestTimeout;
                     var resp = await client.GetAsync(url);
                     // 优先取Location头
-                    if (resp.StatusCode == System.Net.HttpStatusCode.Found || resp.StatusCode == System.Net.HttpStatusCode.Redirect || resp.StatusCode == System.Net.HttpStatusCode.MovedPermanently)
+                    if (resp.StatusCode == HttpStatusCode.Found || resp.StatusCode == HttpStatusCode.Redirect || resp.StatusCode == HttpStatusCode.MovedPermanently)
                     {
                         if (resp.Headers.Location != null)
                         {
@@ -675,12 +674,12 @@ namespace Ink_Canvas.Helpers
                     if (zhiJiaoGroup != null)
                     {
                         priorityGroups.Add(zhiJiaoGroup);
-                        LogHelper.WriteLogToFile($"AutoUpdate | 下载时优先尝试智教联盟线路组");
+                        LogHelper.WriteLogToFile("AutoUpdate | 下载时优先尝试智教联盟线路组");
                     }
                     if (inkeysGroup != null)
                     {
                         priorityGroups.Add(inkeysGroup);
-                        LogHelper.WriteLogToFile($"AutoUpdate | 下载时优先尝试inkeys线路组");
+                        LogHelper.WriteLogToFile("AutoUpdate | 下载时优先尝试inkeys线路组");
                     }
                     groups = priorityGroups.Concat(groups.Where(g => g.GroupName != "智教联盟" && g.GroupName != "inkeys")).ToList();
                 }
@@ -696,7 +695,7 @@ namespace Ink_Canvas.Helpers
                         var realUrl = await GetZhijiaoRealDownloadUrl(url);
                         if (string.IsNullOrEmpty(realUrl))
                         {
-                            LogHelper.WriteLogToFile($"AutoUpdate | 智教联盟真实下载地址获取失败，跳过", LogHelper.LogType.Warning);
+                            LogHelper.WriteLogToFile("AutoUpdate | 智教联盟真实下载地址获取失败，跳过", LogHelper.LogType.Warning);
                             progressCallback?.Invoke(0, "智教联盟真实下载地址获取失败，跳过");
                             continue;
                         }
@@ -719,10 +718,8 @@ namespace Ink_Canvas.Helpers
                         progressCallback?.Invoke(100, "下载完成");
                         return true;
                     }
-                    else
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 下载失败，尝试下一个线路组", LogHelper.LogType.Warning);
-                    }
+
+                    LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 下载失败，尝试下一个线路组", LogHelper.LogType.Warning);
                 }
                 
                 LogHelper.WriteLogToFile("AutoUpdate | 所有线路组下载均失败", LogHelper.LogType.Error);
@@ -749,7 +746,7 @@ namespace Ink_Canvas.Helpers
             LogHelper.WriteLogToFile($"AutoUpdate | 正在尝试多线程下载: {fileUrl}");
             int maxRetry = 3;
             // 降低并发数，减少网络压力
-            int[] threadOptions = new int[] { 32, 16, 8, 4, 1 };
+            int[] threadOptions = { 32, 16, 8, 4, 1 };
 
             // 检查服务器是否支持Range分块下载
             bool supportRange = false;
@@ -760,9 +757,9 @@ namespace Ink_Canvas.Helpers
                 {
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                     var req = new HttpRequestMessage(HttpMethod.Head, fileUrl);
-                    req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(0, 0);
+                    req.Headers.Range = new RangeHeaderValue(0, 0);
                     var resp = await client.SendAsync(req);
-                    if (resp.StatusCode == System.Net.HttpStatusCode.PartialContent)
+                    if (resp.StatusCode == HttpStatusCode.PartialContent)
                     {
                         supportRange = true;
                         if (resp.Content.Headers.ContentRange != null && resp.Content.Headers.ContentRange.Length.HasValue)
@@ -774,7 +771,7 @@ namespace Ink_Canvas.Helpers
                             totalSize = resp.Content.Headers.ContentLength.Value;
                         }
                     }
-                    else if (resp.StatusCode == System.Net.HttpStatusCode.OK)
+                    else if (resp.StatusCode == HttpStatusCode.OK)
                     {
                         supportRange = false;
                         if (resp.Content.Headers.ContentLength.HasValue)
@@ -791,7 +788,7 @@ namespace Ink_Canvas.Helpers
 
             if (!supportRange)
             {
-                LogHelper.WriteLogToFile($"AutoUpdate | 服务器不支持分块下载，自动降级为单线程下载");
+                LogHelper.WriteLogToFile("AutoUpdate | 服务器不支持分块下载，自动降级为单线程下载");
                 progressCallback?.Invoke(0, "服务器不支持分块下载，自动降级为单线程下载");
                 return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback);
             }
@@ -818,8 +815,8 @@ namespace Ink_Canvas.Helpers
                 
                 LogHelper.WriteLogToFile($"AutoUpdate | 文件大小: {totalSize}, 分块数: {blockCount}, 分块大小: {blockSize}");
                 
-                var blockQueue = new System.Collections.Concurrent.ConcurrentQueue<BlockTask>();
-                var finishedBlocks = new System.Collections.Concurrent.ConcurrentDictionary<int, bool>();
+                var blockQueue = new ConcurrentQueue<BlockTask>();
+                var finishedBlocks = new ConcurrentDictionary<int, bool>();
                 long[] blockDownloaded = new long[blockCount];
                 
                 for (int i = 0; i < blockCount; i++)
@@ -849,7 +846,7 @@ namespace Ink_Canvas.Helpers
                                     {
                                         client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
                                         var req = new HttpRequestMessage(HttpMethod.Get, fileUrl);
-                                        req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(block.Start, block.End);
+                                        req.Headers.Range = new RangeHeaderValue(block.Start, block.End);
 
                                         // 增加连接超时设置
                                         client.Timeout = TimeSpan.FromSeconds(30);
@@ -967,16 +964,14 @@ namespace Ink_Canvas.Helpers
                     if (threadCount == threadOptions.Last())
                     {
                         // 已经是最后一次尝试，降级为单线程
-                        LogHelper.WriteLogToFile($"AutoUpdate | 所有多线程尝试失败，降级为单线程下载");
+                        LogHelper.WriteLogToFile("AutoUpdate | 所有多线程尝试失败，降级为单线程下载");
                         progressCallback?.Invoke(0, "所有多线程尝试失败，降级为单线程下载");
                         return await DownloadSingleThread(fileUrl, destinationPath, totalSize, progressCallback);
                     }
-                    else
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | {threadCount}线程下载失败，尝试降级为{threadOptions[Array.IndexOf(threadOptions, threadCount) + 1]}线程");
-                        progressCallback?.Invoke(0, $"{threadCount}线程下载失败，尝试降级为{threadOptions[Array.IndexOf(threadOptions, threadCount) + 1]}线程");
-                        continue;
-                    }
+
+                    LogHelper.WriteLogToFile($"AutoUpdate | {threadCount}线程下载失败，尝试降级为{threadOptions[Array.IndexOf(threadOptions, threadCount) + 1]}线程");
+                    progressCallback?.Invoke(0, $"{threadCount}线程下载失败，尝试降级为{threadOptions[Array.IndexOf(threadOptions, threadCount) + 1]}线程");
+                    continue;
                 }
                 
                 // 合并所有块
@@ -1018,7 +1013,7 @@ namespace Ink_Canvas.Helpers
                     {
                         try
                         {
-                            System.IO.Compression.ZipFile.OpenRead(destinationPath).Dispose();
+                            ZipFile.OpenRead(destinationPath).Dispose();
                         }
                         catch
                         {
@@ -1086,7 +1081,7 @@ namespace Ink_Canvas.Helpers
                 }
                 
                 progressCallback?.Invoke(100, "单线程下载完成");
-                LogHelper.WriteLogToFile($"AutoUpdate | 单线程下载完成");
+                LogHelper.WriteLogToFile("AutoUpdate | 单线程下载完成");
                 return true;
             }
             catch (Exception ex)
@@ -1149,7 +1144,7 @@ namespace Ink_Canvas.Helpers
                         if (!Directory.Exists(backupDir))
                         {
                             Directory.CreateDirectory(backupDir);
-                            LogHelper.WriteLogToFile($"创建备份目录: {backupDir}", LogHelper.LogType.Info);
+                            LogHelper.WriteLogToFile($"创建备份目录: {backupDir}");
                         }
                         
                         string backupFileName = $"Settings_BeforeUpdate_v{version}_{DateTime.Now:yyyyMMdd_HHmmss}.json";
@@ -1158,11 +1153,11 @@ namespace Ink_Canvas.Helpers
                         string settingsJson = JsonConvert.SerializeObject(MainWindow.Settings, Formatting.Indented);
                         File.WriteAllText(backupPath, settingsJson);
                         
-                        LogHelper.WriteLogToFile($"更新前自动备份设置成功: {backupPath}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"更新前自动备份设置成功: {backupPath}");
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile("更新前自动备份功能已禁用，跳过备份", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("更新前自动备份功能已禁用，跳过备份");
                     }
                 }
                 catch (Exception ex)
@@ -1182,7 +1177,7 @@ namespace Ink_Canvas.Helpers
                 FileInfo fileInfo = new FileInfo(zipFilePath);
                 if (fileInfo.Length == 0)
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | ZIP文件为空，无法继续", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile("AutoUpdate | ZIP文件为空，无法继续", LogHelper.LogType.Error);
                     return;
                 }
                 LogHelper.WriteLogToFile($"AutoUpdate | ZIP文件大小: {fileInfo.Length} 字节");
@@ -1203,7 +1198,7 @@ namespace Ink_Canvas.Helpers
                 
                 batchContent.AppendLine("echo Set objShell = CreateObject(\"WScript.Shell\") > \"%temp%\\hideme.vbs\"");
                 batchContent.AppendLine("echo objShell.Run \"cmd /c \"\"\" ^& WScript.Arguments(0) ^& \"\"\"\", 0, True >> \"%temp%\\hideme.vbs\"");
-                batchContent.AppendLine($"echo Wscript.Sleep 100 >> \"%temp%\\hideme.vbs\"");
+                batchContent.AppendLine("echo Wscript.Sleep 100 >> \"%temp%\\hideme.vbs\"");
                 
                 string updateBatPath = Path.Combine(Path.GetTempPath(), "ICCUpdate_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
                 batchContent.AppendLine($"echo @echo off > \"{updateBatPath}\"");
@@ -1283,7 +1278,7 @@ namespace Ink_Canvas.Helpers
                 batchContent.AppendLine("exit");
                 
                 File.WriteAllText(batchFilePath, batchContent.ToString());
-                LogHelper.WriteLogToFile($"AutoUpdate | 创建更新批处理文件完成");
+                LogHelper.WriteLogToFile("AutoUpdate | 创建更新批处理文件完成");
                 
                 Process.Start(new ProcessStartInfo
                 {
@@ -1293,7 +1288,7 @@ namespace Ink_Canvas.Helpers
                     WindowStyle = ProcessWindowStyle.Hidden
                 });
                 
-                LogHelper.WriteLogToFile($"AutoUpdate | 启动更新批处理进程（隐藏窗口）");
+                LogHelper.WriteLogToFile("AutoUpdate | 启动更新批处理进程（隐藏窗口）");
             }
             catch (Exception ex)
             {
@@ -1356,43 +1351,41 @@ namespace Ink_Canvas.Helpers
                     return null;
                 }
             }
-            else
+
+            // 其他Windows版本使用标准配置
+            using (HttpClient client = new HttpClient())
             {
-                // 其他Windows版本使用标准配置
-                using (HttpClient client = new HttpClient())
+                try
                 {
-                    try
+                    client.Timeout = RequestTimeout;
+                    LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
+                    var downloadTask = client.GetAsync(fileUrl);
+                    var timeoutTask = Task.Delay(RequestTimeout);
+                    var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
+                    if (completedTask == timeoutTask)
                     {
-                        client.Timeout = RequestTimeout;
-                        LogHelper.WriteLogToFile($"AutoUpdate | 发送HTTP请求到: {fileUrl}");
-                        var downloadTask = client.GetAsync(fileUrl);
-                        var timeoutTask = Task.Delay(RequestTimeout);
-                        var completedTask = await Task.WhenAny(downloadTask, timeoutTask);
-                        if (completedTask == timeoutTask)
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
-                            return null;
-                        }
-                        HttpResponseMessage response = await downloadTask;
-                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
-                        response.EnsureSuccessStatusCode();
-                        string content = await response.Content.ReadAsStringAsync();
-                        return content;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时 ({RequestTimeout.TotalSeconds}秒)", LogHelper.LogType.Error);
+                        return null;
                     }
-                    catch (HttpRequestException ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                    catch (TaskCanceledException ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                    return null;
+                    HttpResponseMessage response = await downloadTask;
+                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP响应状态: {response.StatusCode}");
+                    response.EnsureSuccessStatusCode();
+                    string content = await response.Content.ReadAsStringAsync();
+                    return content;
                 }
+                catch (HttpRequestException ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | HTTP请求错误: {ex.Message}", LogHelper.LogType.Error);
+                }
+                catch (TaskCanceledException ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 请求超时: {ex.Message}", LogHelper.LogType.Error);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 错误: {ex.Message}", LogHelper.LogType.Error);
+                }
+                return null;
             }
         }
 
@@ -1513,7 +1506,7 @@ namespace Ink_Canvas.Helpers
                 
                 if (!isWindows7)
                 {
-                    LogHelper.WriteLogToFile("AutoUpdate | 当前系统不是Windows 7，跳过TLS连接测试", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("AutoUpdate | 当前系统不是Windows 7，跳过TLS连接测试");
                     return true; // 非Windows 7系统直接返回成功
                 }
                 
@@ -1536,11 +1529,9 @@ namespace Ink_Canvas.Helpers
                             LogHelper.WriteLogToFile("AutoUpdate | Windows 7 TLS连接测试成功");
                             return true;
                         }
-                        else
-                        {
-                            LogHelper.WriteLogToFile($"AutoUpdate | Windows 7 TLS连接测试失败，状态码: {response.StatusCode}", LogHelper.LogType.Error);
-                            return false;
-                        }
+
+                        LogHelper.WriteLogToFile($"AutoUpdate | Windows 7 TLS连接测试失败，状态码: {response.StatusCode}", LogHelper.LogType.Error);
+                        return false;
                     }
                 }
             }
@@ -1632,11 +1623,8 @@ namespace Ink_Canvas.Helpers
             if (StartTime <= EndTime)
             { // 单日时间段
                 return currentTime >= StartTime && currentTime <= EndTime;
-            }
-            else
-            { // 跨越两天的时间段
-                return currentTime >= StartTime || currentTime <= EndTime;
-            }
+            }  // 跨越两天的时间段
+            return currentTime >= StartTime || currentTime <= EndTime;
         }
     }
 }

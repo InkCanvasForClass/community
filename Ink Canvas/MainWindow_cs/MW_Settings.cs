@@ -1,19 +1,26 @@
-using Ink_Canvas.Helpers;
-using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
-using File = System.IO.File;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Interop;
 using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using Newtonsoft.Json;
 using OSVersionExtension;
-using Microsoft.Win32;
-using System.IO;
+using Application = System.Windows.Application;
+using CheckBox = System.Windows.Controls.CheckBox;
+using ComboBox = System.Windows.Controls.ComboBox;
+using File = System.IO.File;
+using MessageBox = System.Windows.MessageBox;
+using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
+using OperatingSystem = OSVersionExtension.OperatingSystem;
+using RadioButton = System.Windows.Controls.RadioButton;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -312,7 +319,7 @@ namespace Ink_Canvas {
             {
                 ComboBoxItem item = new ComboBoxItem();
                 item.Content = customIcon.Name;
-                item.FontFamily = new System.Windows.Media.FontFamily("Microsoft YaHei UI");
+                item.FontFamily = new FontFamily("Microsoft YaHei UI");
                 ComboBoxFloatingBarImg.Items.Add(item);
             }
         }
@@ -834,7 +841,7 @@ namespace Ink_Canvas {
             Settings.InkToShape.LineStraightenSensitivity = e.NewValue;
             
             // 输出调试信息，观察值变化
-            System.Diagnostics.Debug.WriteLine($"LineStraightenSensitivity changed: {oldValue} -> {e.NewValue}");
+            Debug.WriteLine($"LineStraightenSensitivity changed: {oldValue} -> {e.NewValue}");
             
             // 立即保存设置到文件，确保设置不会丢失
             SaveSettingsToFile();
@@ -844,7 +851,7 @@ namespace Ink_Canvas {
             if (!isLoaded) return;
             
             Settings.Canvas.HighPrecisionLineStraighten = ToggleSwitchHighPrecisionLineStraighten.IsOn;
-            System.Diagnostics.Debug.WriteLine($"HighPrecisionLineStraighten changed: {Settings.Canvas.HighPrecisionLineStraighten}");
+            Debug.WriteLine($"HighPrecisionLineStraighten changed: {Settings.Canvas.HighPrecisionLineStraighten}");
             SaveSettingsToFile();
         }
 
@@ -1399,7 +1406,7 @@ namespace Ink_Canvas {
         }
 
         private void AutoSavedStrokesLocationButton_Click(object sender, RoutedEventArgs e) {
-            var folderBrowser = new System.Windows.Forms.FolderBrowserDialog();
+            var folderBrowser = new FolderBrowserDialog();
             folderBrowser.ShowDialog();
             if (folderBrowser.SelectedPath.Length > 0) AutoSavedStrokesLocation.Text = folderBrowser.SelectedPath;
             SaveSettingsToFile();
@@ -1821,7 +1828,7 @@ namespace Ink_Canvas {
         private void ToggleSwitchIsEnableEdgeGestureUtil_Toggled(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
             Settings.Advanced.IsEnableEdgeGestureUtil = ToggleSwitchIsEnableEdgeGestureUtil.IsOn;
-            if (OSVersion.GetOperatingSystem() >= OSVersionExtension.OperatingSystem.Windows10) EdgeGestureUtil.DisableEdgeGestures(new WindowInteropHelper(this).Handle, ToggleSwitchIsEnableEdgeGestureUtil.IsOn);
+            if (OSVersion.GetOperatingSystem() >= OperatingSystem.Windows10) EdgeGestureUtil.DisableEdgeGestures(new WindowInteropHelper(this).Handle, ToggleSwitchIsEnableEdgeGestureUtil.IsOn);
             SaveSettingsToFile();
         }
 
@@ -1913,7 +1920,7 @@ namespace Ink_Canvas {
                 string backupDir = Path.Combine(App.RootPath, "Backups");
                 if (!Directory.Exists(backupDir)) {
                     Directory.CreateDirectory(backupDir);
-                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}");
                 }
                 
                 // 创建备份文件名（使用当前日期时间）
@@ -1924,7 +1931,7 @@ namespace Ink_Canvas {
                 string settingsJson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
                 File.WriteAllText(backupPath, settingsJson);
                 
-                LogHelper.WriteLogToFile($"成功创建设置备份: {backupPath}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"成功创建设置备份: {backupPath}");
                 MessageBox.Show($"设置已成功备份到:\n{backupPath}", "备份成功", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex) {
@@ -1941,7 +1948,7 @@ namespace Ink_Canvas {
                 string backupDir = Path.Combine(App.RootPath, "Backups");
                 if (!Directory.Exists(backupDir)) {
                     Directory.CreateDirectory(backupDir);
-                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"创建备份目录: {backupDir}");
                     MessageBox.Show("没有找到备份文件，请先创建备份", "还原失败", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -1978,7 +1985,7 @@ namespace Ink_Canvas {
                             // 重新加载设置到UI
                             LoadSettings();
                             
-                            LogHelper.WriteLogToFile($"成功从备份还原设置: {dlg.FileName}", LogHelper.LogType.Info);
+                            LogHelper.WriteLogToFile($"成功从备份还原设置: {dlg.FileName}");
                             MessageBox.Show("设置已成功还原，部分设置可能需要重启软件后生效。", "还原成功", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
                     }
@@ -2073,7 +2080,7 @@ namespace Ink_Canvas {
 
         private async void UpdateChannelSelector_Checked(object sender, RoutedEventArgs e) {
             if (!isLoaded) return;
-            var radioButton = sender as System.Windows.Controls.RadioButton;
+            var radioButton = sender as RadioButton;
             if (radioButton != null) {
                 string channel = radioButton.Tag.ToString();
                 UpdateChannel newChannel = channel == "Beta" ? UpdateChannel.Beta : UpdateChannel.Release;
@@ -2172,7 +2179,7 @@ namespace Ink_Canvas {
                 {
                     ComboBoxItem item = new ComboBoxItem();
                     item.Content = background.Name;
-                    item.FontFamily = new System.Windows.Media.FontFamily("Microsoft YaHei UI");
+                    item.FontFamily = new FontFamily("Microsoft YaHei UI");
                     ComboBoxPickNameBackground.Items.Add(item);
                 }
             }

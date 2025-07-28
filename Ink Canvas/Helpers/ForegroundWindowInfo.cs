@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
 
 namespace Ink_Canvas.Helpers
 {
@@ -94,7 +95,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public static double GetTaskbarHeight(System.Windows.Forms.Screen screen, double dpiScaleY)
+        public static double GetTaskbarHeight(Screen screen, double dpiScaleY)
         {
             // 获取工作区和屏幕高度的差值
             var workingArea = screen.WorkingArea;

@@ -1,19 +1,26 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Text;
+using System.Threading;
+using System.Windows;
+using System.Windows.Forms;
+using System.Windows.Input;
+using System.Windows.Threading;
 using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
-using System;
-using System.Diagnostics;
-using System.Threading;
 using Microsoft.Win32;
-using System.Security;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Windows;
+using Newtonsoft.Json;
+using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using System.Net;
+using Timer = System.Threading.Timer;
 
 namespace Ink_Canvas
 {
@@ -22,17 +29,17 @@ namespace Ink_Canvas
     /// </summary>
     public partial class App : Application
     {
-        System.Threading.Mutex mutex;
+        Mutex mutex;
 
-        public static string[] StartArgs = null;
+        public static string[] StartArgs;
         public static string RootPath = Environment.GetEnvironmentVariable("APPDATA") + "\\Ink Canvas\\";
 
         // 新增：保存看门狗进程对象
-        private static Process watchdogProcess = null;
+        private static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
-        public static bool IsAppExitByUser = false;
+        public static bool IsAppExitByUser;
         // 新增：退出信号文件路径
-        private static string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + System.Diagnostics.Process.GetCurrentProcess().Id + ".flag");
+        private static string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + Process.GetCurrentProcess().Id + ".flag");
         // 新增：崩溃日志文件路径
         private static string crashLogFile = Path.Combine(Environment.GetEnvironmentVariable("APPDATA"), "Ink Canvas", "crash_logs");
         // 新增：进程ID
@@ -42,7 +49,7 @@ namespace Ink_Canvas
         // 新增：最后一次错误信息
         private static string lastErrorMessage = string.Empty;
         // 新增：是否已初始化崩溃监听器
-        private static bool crashListenersInitialized = false;
+        private static bool crashListenersInitialized;
 
         public App()
         {
@@ -61,8 +68,8 @@ namespace Ink_Canvas
             // 启动时优先同步设置，确保CrashAction为最新
             SyncCrashActionFromSettings();
 
-            this.Startup += new StartupEventHandler(App_Startup);
-            this.DispatcherUnhandledException += App_DispatcherUnhandledException;
+            Startup += App_Startup;
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
             StartHeartbeatMonitor();
 
             // 新增：初始化全局异常和进程结束处理
@@ -73,7 +80,7 @@ namespace Ink_Canvas
             {
                 StartWatchdogIfNeeded();
             }
-            this.Exit += App_Exit; // 注册退出事件
+            Exit += App_Exit; // 注册退出事件
         }
 
         // 新增：配置TLS协议以支持Windows 7
@@ -87,7 +94,7 @@ namespace Ink_Canvas
                 
                 if (isWindows7)
                 {
-                    LogHelper.WriteLogToFile("检测到Windows 7系统，配置TLS协议支持", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("检测到Windows 7系统，配置TLS协议支持");
                     
                     // 启用所有TLS版本以支持Windows 7
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
@@ -97,12 +104,12 @@ namespace Ink_Canvas
                     ServicePointManager.Expect100Continue = false;
                     ServicePointManager.UseNagleAlgorithm = false;
                     
-                    LogHelper.WriteLogToFile("TLS协议配置完成，已启用TLS 1.2/1.1/1.0支持", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("TLS协议配置完成，已启用TLS 1.2/1.1/1.0支持");
                 }
                 else
                 {
                     // 对于更新的Windows版本，不进行任何TLS配置，使用系统默认设置
-                    LogHelper.WriteLogToFile($"检测到Windows版本: {osVersion.VersionString}，使用系统默认TLS配置", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"检测到Windows版本: {osVersion.VersionString}，使用系统默认TLS配置");
                 }
             }
             catch (Exception ex)
@@ -151,7 +158,7 @@ namespace Ink_Canvas
                 }
                 
                 crashListenersInitialized = true;
-                LogHelper.WriteLogToFile("已初始化崩溃监听器", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("已初始化崩溃监听器");
             }
             catch (Exception ex)
             {
@@ -204,7 +211,7 @@ namespace Ink_Canvas
                 var startMethod = watcherType.GetMethod("Start");
                 startMethod.Invoke(watcher, null);
                 
-                LogHelper.WriteLogToFile("已成功启动WMI进程监控", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("已成功启动WMI进程监控");
             }
             catch (Exception ex)
             {
@@ -346,7 +353,7 @@ namespace Ink_Canvas
                 string logFileName = Path.Combine(crashLogFile, $"crash_{DateTime.Now:yyyyMMdd}.log");
                 
                 // 收集系统状态信息
-                string memoryUsage = (Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024)).ToString() + " MB";
+                string memoryUsage = (Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024)) + " MB";
                 string cpuTime = Process.GetCurrentProcess().TotalProcessorTime.ToString();
                 string processUptime = (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString();
                 
@@ -377,7 +384,7 @@ namespace Ink_Canvas
                 if (File.Exists(settingsPath))
                 {
                     var json = File.ReadAllText(settingsPath);
-                    dynamic obj = Newtonsoft.Json.JsonConvert.DeserializeObject(json);
+                    dynamic obj = JsonConvert.DeserializeObject(json);
                     int crashAction = 0;
                     try { crashAction = (int)(obj["startup"]["crashAction"] ?? 0); } catch { }
                     CrashAction = (CrashActionType)crashAction;
@@ -391,9 +398,9 @@ namespace Ink_Canvas
             catch { }
         }
 
-        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            Ink_Canvas.MainWindow.ShowNewMessage("抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。", true);
+            Ink_Canvas.MainWindow.ShowNewMessage("抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。");
             LogHelper.NewLog(e.Exception.ToString());
             
             // 新增：记录到崩溃日志
@@ -415,8 +422,8 @@ namespace Ink_Canvas
                 }
                 try
                 {
-                    string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-                    System.Diagnostics.Process.Start(exePath);
+                    string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                    Process.Start(exePath, "-m");
                 }
                 catch { }
                 Environment.Exit(1);
@@ -430,7 +437,17 @@ namespace Ink_Canvas
         {
             /*if (!StoreHelper.IsStoreApp) */RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
-            LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version.ToString()));
+            LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
+
+            // 在应用启动时自动释放IACore相关DLL
+            try
+            {
+                Helpers.IACoreDllExtractor.ExtractIACoreDlls();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"释放IACore DLL时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
 
             // 记录应用启动（设备标识符）
             DeviceIdentifier.RecordAppLaunch();
@@ -439,7 +456,7 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile($"App | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
 
             bool ret;
-            mutex = new System.Threading.Mutex(true, "InkCanvasForClass", out ret);
+            mutex = new Mutex(true, "InkCanvasForClass", out ret);
 
             if (!ret && !e.Args.Contains("-m")) //-m multiple
             {
@@ -490,7 +507,7 @@ namespace Ink_Canvas
 
                     try
                     {
-                        using (Microsoft.Win32.RegistryKey baseKey = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(regPath))
+                        using (RegistryKey baseKey = Registry.CurrentUser.OpenSubKey(regPath))
                         {
                             if (baseKey == null)
                             {
@@ -498,12 +515,12 @@ namespace Ink_Canvas
                                 // 尝试创建路径
                                 try 
                                 {
-                                    using (Microsoft.Win32.RegistryKey createKey = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regPath, true))
+                                    using (RegistryKey createKey = Registry.CurrentUser.CreateSubKey(regPath, true))
                                     {
                                         if (createKey != null)
                                         {
-                                            createKey.SetValue("DisableProtectedView", 1, Microsoft.Win32.RegistryValueKind.DWord);
-                                            LogHelper.WriteLogToFile($"创建并设置注册表路径: {regPath}", LogHelper.LogType.Info);
+                                            createKey.SetValue("DisableProtectedView", 1, RegistryValueKind.DWord);
+                                            LogHelper.WriteLogToFile($"创建并设置注册表路径: {regPath}");
                                         }
                                     }
                                 }
@@ -528,11 +545,11 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile($"创建备份文件: {backupFile}");
                             
                             // 使用UTF8编码写入注册表文件
-                            using (StreamWriter sw = new StreamWriter(backupFile, false, System.Text.Encoding.UTF8))
+                            using (StreamWriter sw = new StreamWriter(backupFile, false, Encoding.UTF8))
                             {
                                 sw.WriteLine("Windows Registry Editor Version 5.00\n");
                                 sw.WriteLine();
-                                sw.WriteLine($"[{Microsoft.Win32.Registry.CurrentUser.Name}\\{regPath}]");
+                                sw.WriteLine($"[{Registry.CurrentUser.Name}\\{regPath}]");
                                 
                                 foreach (string valueName in baseKey.GetValueNames())
                                 {
@@ -542,13 +559,13 @@ namespace Ink_Canvas
                                 }
                             }
 
-                            using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(regPath, true))
+                            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(regPath, true))
                             {
                                 // 仅在值不存在或不等于1时更新
                                 object currentValue = key.GetValue("DisableProtectedView");
                                 if (currentValue == null || (int)currentValue != 1)
                                 {
-                                    key.SetValue("DisableProtectedView", 1, Microsoft.Win32.RegistryValueKind.DWord);
+                                    key.SetValue("DisableProtectedView", 1, RegistryValueKind.DWord);
                                     LogHelper.WriteLogToFile($"Office {version} 注册表值已设置: DisableProtectedView = 1");
                                 }
                                 else
@@ -561,7 +578,6 @@ namespace Ink_Canvas
                     catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"处理Office版本 {version} 时出错: {ex.Message}", LogHelper.LogType.Error);
-                        continue;
                     }
                 }
 
@@ -581,21 +597,21 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"未知错误: {ex.GetType().FullName} - {ex.Message}", LogHelper.LogType.Error);
-                LogHelper.WriteLogToFile(ex.StackTrace, LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile(ex.StackTrace);
             }
         }
 
-        private void ScrollViewer_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             try
             {
-                if (System.Windows.Forms.SystemInformation.MouseWheelScrollLines == -1)
+                if (SystemInformation.MouseWheelScrollLines == -1)
                     e.Handled = false;
                 else
                     try
                     {
                         ScrollViewerEx SenderScrollViewer = (ScrollViewerEx)sender;
-                        SenderScrollViewer.ScrollToVerticalOffset(SenderScrollViewer.VerticalOffset - e.Delta * 10 * System.Windows.Forms.SystemInformation.MouseWheelScrollLines / (double)120);
+                        SenderScrollViewer.ScrollToVerticalOffset(SenderScrollViewer.VerticalOffset - e.Delta * 10 * SystemInformation.MouseWheelScrollLines / (double)120);
                         e.Handled = true;
                     }
                     catch {  }
@@ -638,7 +654,7 @@ namespace Ink_Canvas
                         try
                         {
                             string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                            Process.Start(exePath);
+                            Process.Start(exePath, "-m");
                         }
                         catch { }
                         Environment.Exit(1);
@@ -698,7 +714,7 @@ namespace Ink_Canvas
                             Environment.Exit(1);
                         }
                         string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                        Process.Start(exePath);
+                        Process.Start(exePath, "-m");
                     }
                     // CrashActionType.NoAction 时不重启，直接退出
                 }
@@ -758,60 +774,60 @@ namespace Ink_Canvas
             {
                 // 检查多个可能的注册表路径
                 // 1. 检查传统的Office版本
-                using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office"))
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office"))
                 {
                     if (key != null && key.GetSubKeyNames().Any(name => name.Contains(".0")))
                     {
-                        LogHelper.WriteLogToFile("检测到传统Office安装", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("检测到传统Office安装");
                         return true;
                     }
                 }
                 
                 // 2. 检查64位注册表中的Office
-                using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Microsoft\\Office"))
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Microsoft\\Office"))
                 {
                     if (key != null && key.GetSubKeyNames().Any(name => name.Contains(".0")))
                     {
-                        LogHelper.WriteLogToFile("检测到64位注册表中的Office安装", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("检测到64位注册表中的Office安装");
                         return true;
                     }
                 }
                 
                 // 3. 检查Office 365/Click-to-Run安装
-                using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\ClickToRun"))
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\ClickToRun"))
                 {
                     if (key != null)
                     {
-                        LogHelper.WriteLogToFile("检测到Office 365 Click-to-Run", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("检测到Office 365 Click-to-Run");
                         return true;
                     }
                 }
                 
                 // 4. 检查Office 365部署配置
-                using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\15.0\\ClickToRun"))
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\15.0\\ClickToRun"))
                 {
                     if (key != null)
                     {
-                        LogHelper.WriteLogToFile("检测到Office 365 (15.0)", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("检测到Office 365 (15.0)");
                         return true;
                     }
                 }
                 
-                using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\16.0\\ClickToRun"))
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\16.0\\ClickToRun"))
                 {
                     if (key != null)
                     {
-                        LogHelper.WriteLogToFile("检测到Office 365 (16.0)", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("检测到Office 365 (16.0)");
                         return true;
                     }
                 }
 
                 // 5. 检查Office 365零售订阅信息
-                using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\ClickToRun\\Configuration"))
+                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\ClickToRun\\Configuration"))
                 {
                     if (key != null)
                     {
-                        LogHelper.WriteLogToFile("检测到Office 365配置", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("检测到Office 365配置");
                         return true;
                     }
                 }
@@ -833,7 +849,7 @@ namespace Ink_Canvas
         {
             const string message = "需要管理员权限才能完成此操作\n请以管理员身份重新启动应用程序";
             LogHelper.WriteLogToFile(message, LogHelper.LogType.Error);
-            System.Windows.MessageBox.Show(message, "权限错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(message, "权限错误", MessageBoxButton.OK, MessageBoxImage.Error);
         }
 
         /// <summary>
@@ -1058,11 +1074,11 @@ namespace Ink_Canvas
                                 LogHelper.WriteLogToFile($"创建Office 365 {app}备份文件: {backupFile}");
                                 
                                 // 使用UTF8编码写入注册表文件
-                                using (StreamWriter sw = new StreamWriter(backupFile, false, System.Text.Encoding.UTF8))
+                                using (StreamWriter sw = new StreamWriter(backupFile, false, Encoding.UTF8))
                                 {
                                     sw.WriteLine("Windows Registry Editor Version 5.00\n");
                                     sw.WriteLine();
-                                    sw.WriteLine($"[{Microsoft.Win32.Registry.CurrentUser.Name}\\{regPath}]");
+                                    sw.WriteLine($"[{Registry.CurrentUser.Name}\\{regPath}]");
                                     
                                     foreach (string valueName in baseKey.GetValueNames())
                                     {
@@ -1114,11 +1130,11 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile($"创建信任中心备份文件: {backupFile}");
                             
                             // 使用UTF8编码写入注册表文件
-                            using (StreamWriter sw = new StreamWriter(backupFile, false, System.Text.Encoding.UTF8))
+                            using (StreamWriter sw = new StreamWriter(backupFile, false, Encoding.UTF8))
                             {
                                 sw.WriteLine("Windows Registry Editor Version 5.00\n");
                                 sw.WriteLine();
-                                sw.WriteLine($"[{Microsoft.Win32.Registry.CurrentUser.Name}\\{trustCenterPath}]");
+                                sw.WriteLine($"[{Registry.CurrentUser.Name}\\{trustCenterPath}]");
                                 
                                 foreach (string valueName in baseKey.GetValueNames())
                                 {
@@ -1158,11 +1174,11 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile($"创建策略备份文件: {backupFile}");
                             
                             // 使用UTF8编码写入注册表文件
-                            using (StreamWriter sw = new StreamWriter(backupFile, false, System.Text.Encoding.UTF8))
+                            using (StreamWriter sw = new StreamWriter(backupFile, false, Encoding.UTF8))
                             {
                                 sw.WriteLine("Windows Registry Editor Version 5.00\n");
                                 sw.WriteLine();
-                                sw.WriteLine($"[{Microsoft.Win32.Registry.CurrentUser.Name}\\{policyPath}]");
+                                sw.WriteLine($"[{Registry.CurrentUser.Name}\\{policyPath}]");
                                 
                                 foreach (string valueName in baseKey.GetValueNames())
                                 {

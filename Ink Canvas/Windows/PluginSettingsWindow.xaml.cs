@@ -1,13 +1,18 @@
-using Ink_Canvas.Helpers.Plugins;
-using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 using Ink_Canvas.Helpers;
-using System.Linq;
+using Ink_Canvas.Helpers.Plugins;
+using Ink_Canvas.Helpers.Plugins.BuiltIn;
+using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
+using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
+using MessageBox = System.Windows.MessageBox;
 
 namespace Ink_Canvas.Windows
 {
@@ -36,7 +41,7 @@ namespace Ink_Canvas.Windows
             }
             
             OnPropertyChanged(nameof(SelectedPlugin));
-            LogHelper.WriteLogToFile("插件列表已刷新", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile("插件列表已刷新");
         }
 
         private IPlugin _selectedPlugin;
@@ -90,20 +95,20 @@ namespace Ink_Canvas.Windows
             LoadPlugins();
             
             // 注册窗口关闭事件
-            this.Closing += PluginSettingsWindow_Closing;
+            Closing += PluginSettingsWindow_Closing;
         }
         
         /// <summary>
         /// 窗口关闭事件处理
         /// </summary>
-        private void PluginSettingsWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        private void PluginSettingsWindow_Closing(object sender, CancelEventArgs e)
         {
             try
             {
                 // 保存插件配置
-                LogHelper.WriteLogToFile("插件管理窗口关闭，保存插件配置...", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("插件管理窗口关闭，保存插件配置...");
                 PluginManager.Instance.SaveConfig();
-                LogHelper.WriteLogToFile("插件配置已保存", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("插件配置已保存");
             }
             catch (Exception ex)
             {
@@ -118,7 +123,7 @@ namespace Ink_Canvas.Windows
         {
             Plugins.Clear();
             
-            LogHelper.WriteLogToFile($"开始加载插件列表到UI，插件总数: {PluginManager.Instance.Plugins.Count}", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"开始加载插件列表到UI，插件总数: {PluginManager.Instance.Plugins.Count}");
             
             // 添加所有已加载的插件
             foreach (var plugin in PluginManager.Instance.Plugins)
@@ -132,8 +137,7 @@ namespace Ink_Canvas.Windows
                 }
                 
                 // 记录插件详细信息
-                LogHelper.WriteLogToFile($"正在加载插件到UI: 类型={plugin.GetType().FullName}, 名称={plugin.Name ?? "未命名"}, 状态={isEnabled}", 
-                    LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"正在加载插件到UI: 类型={plugin.GetType().FullName}, 名称={plugin.Name ?? "未命名"}, 状态={isEnabled}");
                 
                 // 创建视图模型并添加到集合
                 var viewModel = new PluginViewModel(plugin)
@@ -142,17 +146,17 @@ namespace Ink_Canvas.Windows
                 };
                 Plugins.Add(viewModel);
                 
-                LogHelper.WriteLogToFile($"已加载插件到UI列表: {plugin.Name}，状态: {(isEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"已加载插件到UI列表: {plugin.Name}，状态: {(isEnabled ? "启用" : "禁用")}");
             }
             
             // 绑定到ListView
-            LogHelper.WriteLogToFile($"绑定 {Plugins.Count} 个插件到ListView", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"绑定 {Plugins.Count} 个插件到ListView");
             PluginListView.ItemsSource = Plugins;
             
             // 如果有插件，选择第一个
             if (Plugins.Count > 0)
             {
-                LogHelper.WriteLogToFile($"选择第一个插件: {Plugins[0].Name}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"选择第一个插件: {Plugins[0].Name}");
                 PluginListView.SelectedIndex = 0;
             }
             else
@@ -389,7 +393,7 @@ namespace Ink_Canvas.Windows
                         File.Copy(pluginPath, targetPath, true);
                     }
 
-                    LogHelper.WriteLogToFile($"插件 {SelectedPlugin.Name} 已成功导出到: {targetPath}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"插件 {SelectedPlugin.Name} 已成功导出到: {targetPath}");
                     MessageBox.Show($"插件 {SelectedPlugin.Name} 已成功导出！", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -407,7 +411,7 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                if (sender is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch toggleSwitch && 
+                if (sender is ToggleSwitch toggleSwitch && 
                     toggleSwitch.Tag is IPlugin plugin)
                 {
                     // 记录当前开关状态
@@ -418,14 +422,14 @@ namespace Ink_Canvas.Windows
                     string pluginName = plugin.Name;
                     bool wasBuiltIn = plugin.IsBuiltIn;
                     
-                    LogHelper.WriteLogToFile($"UI开关切换: {pluginName}, 目标状态: {(targetState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"UI开关切换: {pluginName}, 目标状态: {(targetState ? "启用" : "禁用")}");
                     
                     // 切换插件状态
                     PluginManager.Instance.TogglePlugin(plugin, targetState);
                     
                     // 立即同步保存配置到文件（确保状态被立即持久化）
                     PluginManager.Instance.SaveConfig();
-                    LogHelper.WriteLogToFile($"插件状态已立即保存到配置文件", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("插件状态已立即保存到配置文件");
                     
                     // 延迟一下再检查状态，确保变更已应用
                     Dispatcher.BeginInvoke(new Action(() =>
@@ -451,7 +455,7 @@ namespace Ink_Canvas.Windows
                             
                             // 检查实际状态
                             bool actualState = currentPlugin is PluginBase pb && pb.IsEnabled;
-                            LogHelper.WriteLogToFile($"插件 {pluginName} 实际状态: {(actualState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                            LogHelper.WriteLogToFile($"插件 {pluginName} 实际状态: {(actualState ? "启用" : "禁用")}");
                             
                             // 更新视图模型
                             PluginViewModel viewModel = null;
@@ -469,14 +473,14 @@ namespace Ink_Canvas.Windows
                                 // 确保视图模型状态与实际状态一致
                                 if (viewModel.IsEnabled != actualState)
                                 {
-                                    LogHelper.WriteLogToFile($"同步视图模型状态: {(actualState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                                    LogHelper.WriteLogToFile($"同步视图模型状态: {(actualState ? "启用" : "禁用")}");
                                     viewModel.IsEnabled = actualState;
                                 }
                                 
                                 // 确保UI开关状态与实际状态一致
                                 if (toggleSwitch.IsOn != actualState)
                                 {
-                                    LogHelper.WriteLogToFile($"同步UI开关状态: {(actualState ? "启用" : "禁用")}", LogHelper.LogType.Info);
+                                    LogHelper.WriteLogToFile($"同步UI开关状态: {(actualState ? "启用" : "禁用")}");
                                     toggleSwitch.IsOn = actualState;
                                 }
                             }
@@ -491,21 +495,21 @@ namespace Ink_Canvas.Windows
                             if (wasBuiltIn)
                             {
                                 // 特殊插件刷新逻辑，如果是超级启动台插件，立即刷新UI
-                                if (currentPlugin is Helpers.Plugins.BuiltIn.SuperLauncherPlugin && 
-                                    PluginSettingsContainer.Content is Helpers.Plugins.BuiltIn.SuperLauncher.LauncherSettingsControl)
+                                if (currentPlugin is SuperLauncherPlugin && 
+                                    PluginSettingsContainer.Content is LauncherSettingsControl)
                                 {
                                     // 重新获取设置界面
                                     PluginSettingsContainer.Content = currentPlugin.GetSettingsView();
                                 }
                             }
                             
-                            LogHelper.WriteLogToFile($"插件 {pluginName} UI状态同步完成", LogHelper.LogType.Info);
+                            LogHelper.WriteLogToFile($"插件 {pluginName} UI状态同步完成");
                         }
                         catch (Exception ex)
                         {
                             LogHelper.WriteLogToFile($"同步UI状态时出错: {ex.Message}", LogHelper.LogType.Error);
                         }
-                    }), System.Windows.Threading.DispatcherPriority.Background);
+                    }), DispatcherPriority.Background);
                 }
             }
             catch (Exception ex)
@@ -567,7 +571,7 @@ namespace Ink_Canvas.Windows
                             {
                                 // 应用界面的状态到插件
                                 PluginManager.Instance.TogglePlugin(actualPlugin, uiState);
-                                LogHelper.WriteLogToFile($"手动保存：同步插件 {actualPlugin.Name} 状态 {pluginState} -> {uiState}", LogHelper.LogType.Info);
+                                LogHelper.WriteLogToFile($"手动保存：同步插件 {actualPlugin.Name} 状态 {pluginState} -> {uiState}");
                                 syncCount++;
                             }
                             
@@ -575,7 +579,7 @@ namespace Ink_Canvas.Windows
                             if (PluginManager.Instance.PluginStates.TryGetValue(pluginTypeName, out bool configState) && configState != uiState)
                             {
                                 PluginManager.Instance.PluginStates[pluginTypeName] = uiState;
-                                LogHelper.WriteLogToFile($"手动保存：更新配置中插件 {actualPlugin.Name} 状态 {configState} -> {uiState}", LogHelper.LogType.Info);
+                                LogHelper.WriteLogToFile($"手动保存：更新配置中插件 {actualPlugin.Name} 状态 {configState} -> {uiState}");
                                 syncCount++;
                             }
                         }
@@ -591,7 +595,7 @@ namespace Ink_Canvas.Windows
                 PluginManager.Instance.SaveConfig();
                 
                 // 记录日志
-                LogHelper.WriteLogToFile($"用户手动保存插件状态配置，同步了 {syncCount} 个状态变更", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"用户手动保存插件状态配置，同步了 {syncCount} 个状态变更");
                 
                 // 刷新插件列表，确保UI与最新状态同步
                 RefreshPluginList();
@@ -642,7 +646,7 @@ namespace Ink_Canvas.Windows
             get 
             {
                 string name = Plugin?.Name ?? "未命名插件";
-                LogHelper.WriteLogToFile($"获取插件名称: {name}，类型: {Plugin?.GetType().FullName ?? "未知"}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"获取插件名称: {name}，类型: {Plugin?.GetType().FullName ?? "未知"}");
                 return name;
             }
         }
@@ -672,7 +676,7 @@ namespace Ink_Canvas.Windows
             _isEnabled = plugin is PluginBase pluginBase && pluginBase.IsEnabled;
             
             // 记录日志
-            LogHelper.WriteLogToFile($"创建插件视图模型: {plugin?.GetType().FullName ?? "未知"}, 名称: {plugin?.Name ?? "未命名"}", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"创建插件视图模型: {plugin?.GetType().FullName ?? "未知"}, 名称: {plugin?.Name ?? "未命名"}");
             
             // 注册插件状态变更事件
             if (plugin is PluginBase pb)
@@ -694,9 +698,9 @@ namespace Ink_Canvas.Windows
                 // 确保配置立即保存
                 if (sender is IPlugin plugin)
                 {
-                    LogHelper.WriteLogToFile($"视图模型捕获到插件 {plugin.Name} 状态变更: {(isEnabled ? "启用" : "禁用")}", LogHelper.LogType.Info);
-                    Helpers.Plugins.PluginManager.Instance.SaveConfig();
-                    LogHelper.WriteLogToFile($"视图模型已触发配置保存", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"视图模型捕获到插件 {plugin.Name} 状态变更: {(isEnabled ? "启用" : "禁用")}");
+                    PluginManager.Instance.SaveConfig();
+                    LogHelper.WriteLogToFile("视图模型已触发配置保存");
                 }
             }));
         }

@@ -11,7 +11,7 @@ namespace Ink_Canvas.Helpers.Plugins
         /// <summary>
         /// 插件状态（私有字段）
         /// </summary>
-        private bool _isEnabled = false;
+        private bool _isEnabled;
         
         /// <summary>
         /// 插件状态（公共属性）
@@ -80,7 +80,7 @@ namespace Ink_Canvas.Helpers.Plugins
             try
             {
                 string name = Name;
-                LogHelper.WriteLogToFile($"初始化插件: ID={Id}, 名称={name ?? "未命名"}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"初始化插件: ID={Id}, 名称={name ?? "未命名"}");
                 
                 if (string.IsNullOrEmpty(name))
                 {
@@ -92,7 +92,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 LogHelper.WriteLogToFile($"获取插件名称时出错: {ex.Message}", LogHelper.LogType.Error);
             }
             
-            LogHelper.WriteLogToFile($"插件 {Name} 已初始化", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"插件 {Name} 已初始化");
         }
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Ink_Canvas.Helpers.Plugins
             if (!IsEnabled)
             {
                 IsEnabled = true;
-                LogHelper.WriteLogToFile($"插件 {Name} 已启用", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"插件 {Name} 已启用");
             }
         }
 
@@ -115,7 +115,7 @@ namespace Ink_Canvas.Helpers.Plugins
             if (IsEnabled)
             {
                 IsEnabled = false;
-                LogHelper.WriteLogToFile($"插件 {Name} 已禁用", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"插件 {Name} 已禁用");
             }
         }
 
@@ -134,7 +134,7 @@ namespace Ink_Canvas.Helpers.Plugins
         /// </summary>
         public virtual void Cleanup()
         {
-            LogHelper.WriteLogToFile($"插件 {Name} 已卸载", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"插件 {Name} 已卸载");
         }
         
         /// <summary>

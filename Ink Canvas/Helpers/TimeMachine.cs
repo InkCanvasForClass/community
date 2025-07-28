@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
-using System.Windows; // Added for UIElement
+
+// Added for UIElement
 
 namespace Ink_Canvas.Helpers
 {
@@ -133,7 +135,7 @@ namespace Ink_Canvas.Helpers
     public class TimeMachineHistory
     {
         public TimeMachineHistoryType CommitType;
-        public bool StrokeHasBeenCleared = false;
+        public bool StrokeHasBeenCleared;
         public StrokeCollection CurrentStroke;
         public StrokeCollection ReplacedStroke;
         //这里说一下 Tuple的 Value1 是初始值 ; Value 2 是改变值
@@ -190,6 +192,19 @@ namespace Ink_Canvas.Helpers
                 _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);
             }
             _currentStrokeHistory.Add(new TimeMachineHistory(element, TimeMachineHistoryType.ElementInsert));
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
+        }
+
+        public void CommitElementRemoveHistory(UIElement element)
+        {
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+            {
+                _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);
+            }
+            var history = new TimeMachineHistory(element, TimeMachineHistoryType.ElementInsert);
+            history.StrokeHasBeenCleared = true; // 标记为已清除
+            _currentStrokeHistory.Add(history);
             _currentIndex = _currentStrokeHistory.Count - 1;
             NotifyUndoRedoState();
         }

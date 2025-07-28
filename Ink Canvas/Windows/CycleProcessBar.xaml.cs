@@ -197,7 +197,7 @@ namespace Ink_Canvas.ProcessBars
             //达到100%则闭合整个
             if (angel == 360)
             {
-                myCycleProcessBar.Data = Geometry.Parse(myCycleProcessBar.Data.ToString() + " z");
+                myCycleProcessBar.Data = Geometry.Parse(myCycleProcessBar.Data + " z");
             }
         }
     }

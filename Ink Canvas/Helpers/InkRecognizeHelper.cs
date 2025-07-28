@@ -15,7 +15,7 @@ namespace Ink_Canvas.Helpers
 
             var analyzer = new InkAnalyzer();
             analyzer.AddStrokes(strokes);
-            analyzer.SetStrokesType(strokes, System.Windows.Ink.StrokeType.Drawing);
+            analyzer.SetStrokesType(strokes, StrokeType.Drawing);
 
             AnalysisAlternate analysisAlternate = null;
             int strokesCount = strokes.Count;

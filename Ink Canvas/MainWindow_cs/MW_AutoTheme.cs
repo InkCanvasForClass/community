@@ -1,8 +1,8 @@
-﻿using Microsoft.Win32;
-using iNKORE.UI.WPF.Modern;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Media;
+using iNKORE.UI.WPF.Modern;
+using Microsoft.Win32;
 using Application = System.Windows.Application;
 
 namespace Ink_Canvas {
@@ -11,19 +11,19 @@ namespace Ink_Canvas {
 
         private void SetTheme(string theme) {
             if (theme == "Light") {
-                var rd1 = new ResourceDictionary()
+                var rd1 = new ResourceDictionary
                     { Source = new Uri("Resources/Styles/Light.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
 
-                var rd2 = new ResourceDictionary()
+                var rd2 = new ResourceDictionary
                     { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd2);
 
-                var rd3 = new ResourceDictionary()
+                var rd3 = new ResourceDictionary
                     { Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd3);
 
-                var rd4 = new ResourceDictionary()
+                var rd4 = new ResourceDictionary
                     { Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd4);
 
@@ -32,18 +32,18 @@ namespace Ink_Canvas {
                 FloatBarForegroundColor = (Color)Application.Current.FindResource("FloatBarForegroundColor");
             }
             else if (theme == "Dark") {
-                var rd1 = new ResourceDictionary() { Source = new Uri("Resources/Styles/Dark.xaml", UriKind.Relative) };
+                var rd1 = new ResourceDictionary { Source = new Uri("Resources/Styles/Dark.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
 
-                var rd2 = new ResourceDictionary()
+                var rd2 = new ResourceDictionary
                     { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd2);
 
-                var rd3 = new ResourceDictionary()
+                var rd3 = new ResourceDictionary
                     { Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd3);
 
-                var rd4 = new ResourceDictionary()
+                var rd4 = new ResourceDictionary
                     { Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd4);
 

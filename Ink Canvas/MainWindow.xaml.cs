@@ -1,33 +1,44 @@
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern;
 using System;
-using System.IO;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Ink;
-using System.Windows.Media;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
-using File = System.IO.File;
-using MessageBox = System.Windows.MessageBox;
+using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Windows.Interop;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Win32;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Forms;
+using System.Windows.Ink;
 using System.Windows.Input;
-using System.Reflection;
-using Brushes = System.Windows.Media.Brushes;
-using Point = System.Windows.Point;
-using System.Collections.Generic;
+using System.Windows.Interop;
+using System.Windows.Media;
+using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers.Plugins;
+using Ink_Canvas.Windows;
+using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
+using Application = System.Windows.Application;
+using File = System.IO.File;
+using MessageBox = System.Windows.MessageBox;
+using Brushes = System.Windows.Media.Brushes;
+using Button = System.Windows.Controls.Button;
+using Cursor = System.Windows.Input.Cursor;
+using Cursors = System.Windows.Input.Cursors;
+using DpiChangedEventArgs = System.Windows.DpiChangedEventArgs;
+using GroupBox = System.Windows.Controls.GroupBox;
+using Point = System.Windows.Point;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
         // 新增：每一页一个Canvas对象
         private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();
-        private int currentPageIndex = 0;
-        private System.Windows.Controls.Canvas currentCanvas = null;
-        private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup = null;
+        private int currentPageIndex;
+        private System.Windows.Controls.Canvas currentCanvas;
+        private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup;
 
 
 
@@ -58,7 +69,7 @@ namespace Ink_Canvas {
 
             ViewBoxStackPanelMain.Visibility = Visibility.Collapsed;
             ViewBoxStackPanelShapes.Visibility = Visibility.Collapsed;
-            var workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+            var workingArea = Screen.PrimaryScreen.WorkingArea;
             ViewboxFloatingBar.Margin = new Thickness(
                 (workingArea.Width - 284) / 2,
                 workingArea.Bottom - 60 - workingArea.Top,
@@ -81,7 +92,7 @@ namespace Ink_Canvas {
                             File.Delete("Log.txt");
                             LogHelper.WriteLogToFile(
                                 "The Log.txt file has been successfully deleted. Original file size: " + fileSizeInKB +
-                                " KB", LogHelper.LogType.Info);
+                                " KB");
                         }
                         catch (Exception ex) {
                             LogHelper.WriteLogToFile(
@@ -99,7 +110,7 @@ namespace Ink_Canvas {
             timeMachine.OnUndoStateChanged += TimeMachine_OnUndoStateChanged;
             inkCanvas.Strokes.StrokesChanged += StrokesOnStrokesChanged;
 
-            Microsoft.Win32.SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
             try {
                 if (File.Exists("SpecialVersion.ini")) SpecialVersionResetToSuggestion_Click();
             }
@@ -111,7 +122,7 @@ namespace Ink_Canvas {
             CheckPenTypeUIState();
 
             // 初始化墨迹平滑管理器
-            _inkSmoothingManager = new Helpers.InkSmoothingManager(Dispatcher);
+            _inkSmoothingManager = new InkSmoothingManager(Dispatcher);
 
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
@@ -182,10 +193,10 @@ namespace Ink_Canvas {
 
         #region Ink Canvas Functions
 
-        private System.Windows.Media.Color Ink_DefaultColor = Colors.Red;
+        private Color Ink_DefaultColor = Colors.Red;
 
         private DrawingAttributes drawingAttributes;
-        private Helpers.InkSmoothingManager _inkSmoothingManager;
+        private InkSmoothingManager _inkSmoothingManager;
 
         private void loadPenCanvas() {
             try {
@@ -256,7 +267,7 @@ namespace Ink_Canvas {
             if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) forcePointEraser = !forcePointEraser;
             
             // 处理高级橡皮擦覆盖层的启用/禁用
-            var eraserOverlay = this.FindName("AdvancedEraserOverlay") as Border;
+            var eraserOverlay = FindName("AdvancedEraserOverlay") as Border;
             if (eraserOverlay != null) {
                 if (inkCanvas1.EditingMode == InkCanvasEditingMode.EraseByPoint) {
                     // 橡皮擦模式下启用覆盖层
@@ -278,8 +289,8 @@ namespace Ink_Canvas {
 
         public static Settings Settings = new Settings();
         public static string settingsFileName = "Settings.json";
-        private bool isLoaded = false;
-        private bool forcePointEraser = false;
+        private bool isLoaded;
+        private bool forcePointEraser;
 
         private void Window_Loaded(object sender, RoutedEventArgs e) {
             loadPenCanvas();
@@ -290,7 +301,7 @@ namespace Ink_Canvas {
             {
                 string savePath = Settings.Automation.AutoSavedStrokesLocation;
                 bool needFix = false;
-                if (string.IsNullOrWhiteSpace(savePath) || !System.IO.Directory.Exists(savePath))
+                if (string.IsNullOrWhiteSpace(savePath) || !Directory.Exists(savePath))
                 {
                     needFix = true;
                 }
@@ -299,9 +310,9 @@ namespace Ink_Canvas {
                     // 检查是否可写
                     try
                     {
-                        string testFile = System.IO.Path.Combine(savePath, "test.tmp");
-                        System.IO.File.WriteAllText(testFile, "test");
-                        System.IO.File.Delete(testFile);
+                        string testFile = Path.Combine(savePath, "test.tmp");
+                        File.WriteAllText(testFile, "test");
+                        File.Delete(testFile);
                     }
                     catch
                     {
@@ -310,10 +321,10 @@ namespace Ink_Canvas {
                 }
                 if (needFix)
                 {
-                    string newPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "saves");
+                    string newPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "saves");
                     Settings.Automation.AutoSavedStrokesLocation = newPath;
-                    if (!System.IO.Directory.Exists(newPath))
-                        System.IO.Directory.CreateDirectory(newPath);
+                    if (!Directory.Exists(newPath))
+                        Directory.CreateDirectory(newPath);
                     SaveSettingsToFile();
                     LogHelper.WriteLogToFile($"自动修正保存路径为: {newPath}");
                 }
@@ -347,10 +358,10 @@ namespace Ink_Canvas {
             BlackBoardRightSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
 
             BtnLeftWhiteBoardSwitchPreviousGeometry.Brush =
-                new SolidColorBrush(System.Windows.Media.Color.FromArgb(127, 24, 24, 27));
+                new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
             BtnLeftWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
             BtnRightWhiteBoardSwitchPreviousGeometry.Brush =
-                new SolidColorBrush(System.Windows.Media.Color.FromArgb(127, 24, 24, 27));
+                new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
             BtnRightWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
 
             // 应用颜色主题，这将考虑自定义背景色
@@ -396,7 +407,7 @@ namespace Ink_Canvas {
                     
                     // 确保背景颜色正确设置为黑板颜色
                     CheckColorTheme(true);
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }), DispatcherPriority.Loaded);
             }
 
             // 初始化插件系统
@@ -411,7 +422,7 @@ namespace Ink_Canvas {
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
             if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
-            ShowNotification($"检测到显示器信息变化，变为{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height}）");
+            ShowNotification($"检测到显示器信息变化，变为{Screen.PrimaryScreen.Bounds.Width}x{Screen.PrimaryScreen.Bounds.Height}）");
             new Thread(() => {
                 var isFloatingBarOutsideScreen = false;
                 var isInPPTPresentationMode = false;
@@ -455,7 +466,7 @@ namespace Ink_Canvas {
             }
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) {
+        private void Window_Closing(object sender, CancelEventArgs e) {
             LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
             if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp) {
                 e.Cancel = true;
@@ -477,11 +488,11 @@ namespace Ink_Canvas {
         private void MainWindow_OnSizeChanged(object sender, SizeChangedEventArgs e) {
             if (Settings.Advanced.IsEnableForceFullScreen) {
                 if (isLoaded) ShowNotification(
-                    $"检测到窗口大小变化，已自动恢复到全屏：{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height}（缩放比例为{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width / SystemParameters.PrimaryScreenWidth}x{System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height / SystemParameters.PrimaryScreenHeight}）");
+                    $"检测到窗口大小变化，已自动恢复到全屏：{Screen.PrimaryScreen.Bounds.Width}x{Screen.PrimaryScreen.Bounds.Height}（缩放比例为{Screen.PrimaryScreen.Bounds.Width / SystemParameters.PrimaryScreenWidth}x{Screen.PrimaryScreen.Bounds.Height / SystemParameters.PrimaryScreenHeight}）");
                 WindowState = WindowState.Maximized;
                 MoveWindow(new WindowInteropHelper(this).Handle, 0, 0,
-                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
-                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
+                    Screen.PrimaryScreen.Bounds.Width,
+                    Screen.PrimaryScreen.Bounds.Height, true);
             }
         }
 
@@ -1004,7 +1015,7 @@ namespace Ink_Canvas {
             BorderSettings.Visibility = Visibility.Visible;
             // 设置蒙版为可点击，并添加半透明背景
             BorderSettingsMask.IsHitTestVisible = true;
-            BorderSettingsMask.Background = new SolidColorBrush(System.Windows.Media.Color.FromArgb(1, 0, 0, 0));
+            BorderSettingsMask.Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
             
             // 获取SettingsPanelScrollViewer中的所有GroupBox
             var stackPanel = SettingsPanelScrollViewer.Content as StackPanel;
@@ -1020,7 +1031,7 @@ namespace Ink_Canvas {
             }
             
             // 确保UI完全更新
-            await Dispatcher.InvokeAsync(() => {}, System.Windows.Threading.DispatcherPriority.Render);
+            await Dispatcher.InvokeAsync(() => {}, DispatcherPriority.Render);
             
             // 根据传入的sectionTag滚动到相应的设置部分
             GroupBox targetGroupBox = null;
@@ -1153,7 +1164,7 @@ namespace Ink_Canvas {
                         // 重新启用滚动事件处理
                         SettingsPanelScrollViewer.ScrollChanged += SettingsPanelScrollViewer_ScrollChanged;
                     }
-                }, System.Windows.Threading.DispatcherPriority.Render);
+                }, DispatcherPriority.Render);
             }
             catch (Exception)
             {
@@ -1163,7 +1174,7 @@ namespace Ink_Canvas {
         }
         
         // 滚动条变化事件处理
-        private void SettingsPanelScrollViewer_ScrollChanged(object sender, System.Windows.Controls.ScrollChangedEventArgs e)
+        private void SettingsPanelScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
             // 可以在这里添加滚动事件的处理逻辑，如果需要的话
         }
@@ -1308,8 +1319,8 @@ namespace Ink_Canvas {
             try
             {
                 // 初始化插件管理器
-                Helpers.Plugins.PluginManager.Instance.Initialize();
-                LogHelper.WriteLogToFile("插件系统已初始化", LogHelper.LogType.Info);
+                PluginManager.Instance.Initialize();
+                LogHelper.WriteLogToFile("插件系统已初始化");
             }
             catch (Exception ex)
             {
@@ -1333,7 +1344,7 @@ namespace Ink_Canvas {
                 BorderSettingsMask.Visibility = Visibility.Hidden;
                 
                 // 创建并显示插件设置窗口
-                Windows.PluginSettingsWindow pluginSettingsWindow = new Windows.PluginSettingsWindow();
+                PluginSettingsWindow pluginSettingsWindow = new PluginSettingsWindow();
                 
                 // 设置窗口关闭事件，用于在插件管理窗口关闭后恢复设置面板
                 pluginSettingsWindow.Closed += (s, args) =>
@@ -1393,7 +1404,7 @@ namespace Ink_Canvas {
             // 只切换可见性
             for (int i = 0; i < whiteboardPages.Count; i++)
             {
-                whiteboardPages[i].Visibility = (i == index) ? System.Windows.Visibility.Visible : System.Windows.Visibility.Collapsed;
+                whiteboardPages[i].Visibility = (i == index) ? Visibility.Visible : Visibility.Collapsed;
             }
             currentCanvas = whiteboardPages[index];
             currentPageIndex = index;
@@ -1464,5 +1475,33 @@ namespace Ink_Canvas {
             SaveSettingsToFile();
             ApplyNoFocusMode();
         }
+
+        #region Image Toolbar Event Handlers
+
+        private void BorderImageRotateLeft_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (selectedUIElement is Image image)
+            {
+                RotateImage(image, -90);
+            }
+        }
+
+        private void BorderImageRotateRight_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (selectedUIElement is Image image)
+            {
+                RotateImage(image, 90);
+            }
+        }
+
+        private void BorderImageDelete_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (selectedUIElement is Image image)
+            {
+                DeleteImage(image);
+            }
+        }
+
+        #endregion
     }
 }

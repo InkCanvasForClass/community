@@ -1,15 +1,14 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
-using System.Windows.Media.Imaging;
-using System.Windows.Media;
-using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -59,8 +58,8 @@ namespace Ink_Canvas {
             isLongPressSelected = false;
         }
 
-        private bool isUselightThemeColor = false, isDesktopUselightThemeColor = false;
-        private int penType = 0; // 0是签字笔，1是荧光笔
+        private bool isUselightThemeColor, isDesktopUselightThemeColor;
+        private int penType; // 0是签字笔，1是荧光笔
         private int lastDesktopInkColor = 1, lastBoardInkColor = 5;
         private int highlighterColor = 102;
 
@@ -388,7 +387,7 @@ namespace Ink_Canvas {
         }
 
         private void CheckLastColor(int inkColor, bool isHighlighter = false) {
-            if (isHighlighter == true) {
+            if (isHighlighter) {
                 highlighterColor = inkColor;
             }
             else {

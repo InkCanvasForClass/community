@@ -1,17 +1,17 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Timers;
-using System.Windows;
 using System.IO;
-using System.Reflection;
-using System.Threading.Tasks;
-using System.Windows.Controls;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using System.Timers;
+using System.Windows;
+using System.Windows.Controls;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas {
     public class TimeViewModel : INotifyPropertyChanged {
@@ -49,9 +49,9 @@ namespace Ink_Canvas {
         private Timer timerCheckPPT = new Timer();
         private Timer timerKillProcess = new Timer();
         private Timer timerCheckAutoFold = new Timer();
-        private string AvailableLatestVersion = null;
+        private string AvailableLatestVersion;
         private Timer timerCheckAutoUpdateWithSilence = new Timer();
-        private bool isHidingSubPanelsWhenInking = false; // 避免书写时触发二次关闭二级菜单导致动画不连续
+        private bool isHidingSubPanelsWhenInking; // 避免书写时触发二次关闭二级菜单导致动画不连续
 
         private Timer timerDisplayTime = new Timer();
         private Timer timerDisplayDate = new Timer();
@@ -232,8 +232,8 @@ namespace Ink_Canvas {
         }
 
 
-        private bool foldFloatingBarByUser = false, // 保持收纳操作不受自动收纳的控制
-            unfoldFloatingBarByUser = false; // 允许用户在希沃软件内进行展开操作
+        private bool foldFloatingBarByUser, // 保持收纳操作不受自动收纳的控制
+            unfoldFloatingBarByUser; // 允许用户在希沃软件内进行展开操作
 
         private void timerCheckAutoFold_Elapsed(object sender, ElapsedEventArgs e) {
             if (isFloatingBarChangingHideMode) return;

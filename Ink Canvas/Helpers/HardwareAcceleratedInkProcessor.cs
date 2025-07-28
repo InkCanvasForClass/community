@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas.Helpers
@@ -19,7 +17,7 @@ namespace Ink_Canvas.Helpers
         private readonly RenderTargetBitmap _renderTarget;
         private readonly DrawingVisual _drawingVisual;
         private readonly DrawingContext _drawingContext;
-        private bool _isInitialized = false;
+        private bool _isInitialized;
 
         public HardwareAcceleratedInkProcessor(int width = 1920, int height = 1080)
         {

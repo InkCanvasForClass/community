@@ -1,4 +1,3 @@
-using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -7,6 +6,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using iNKORE.UI.WPF.Modern.Controls;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas {
@@ -26,7 +26,7 @@ namespace Ink_Canvas {
             lastBorderMouseDownObject = sender;
         }
 
-        private bool isStrokeSelectionCloneOn = false;
+        private bool isStrokeSelectionCloneOn;
 
         private void BorderStrokeSelectionClone_MouseUp(object sender, MouseButtonEventArgs e) {
             if (lastBorderMouseDownObject != sender) return;
@@ -229,7 +229,7 @@ namespace Ink_Canvas {
 
         #endregion
 
-        private bool isGridInkCanvasSelectionCoverMouseDown = false;
+        private bool isGridInkCanvasSelectionCoverMouseDown;
         private StrokeCollection StrokesSelectionClone = new StrokeCollection();
 
         private void GridInkCanvasSelectionCover_MouseDown(object sender, MouseButtonEventArgs e) {
@@ -267,7 +267,7 @@ namespace Ink_Canvas {
 
         private double BorderStrokeSelectionControlWidth = 490.0;
         private double BorderStrokeSelectionControlHeight = 80.0;
-        private bool isProgramChangeStrokeSelection = false;
+        private bool isProgramChangeStrokeSelection;
 
         private void inkCanvas_SelectionChanged(object sender, EventArgs e) {
             if (isProgramChangeStrokeSelection) return;
@@ -459,13 +459,18 @@ namespace Ink_Canvas {
 
         #region UIElement Selection and Resize
 
-        private UIElement selectedUIElement = null;
-        private System.Windows.Controls.Canvas resizeHandlesCanvas = null;
+        private UIElement selectedUIElement;
+        private System.Windows.Controls.Canvas resizeHandlesCanvas;
         private readonly List<Rectangle> resizeHandles = new List<Rectangle>();
-        private bool isResizing = false;
+        private bool isResizing;
         private ResizeDirection currentResizeDirection = ResizeDirection.None;
         private Point resizeStartPoint;
         private Rect originalElementBounds;
+
+        // 图片工具栏相关
+        private Border borderImageSelectionControl;
+        private double BorderImageSelectionControlWidth = 200.0;
+        private double BorderImageSelectionControlHeight = 80.0;
 
         private enum ResizeDirection
         {
@@ -499,6 +504,12 @@ namespace Ink_Canvas {
                     mainGrid.Children.Add(resizeHandlesCanvas);
                     Panel.SetZIndex(resizeHandlesCanvas, 1000); // 确保在最上层
                 }
+            }
+
+            // 初始化图片工具栏引用
+            if (borderImageSelectionControl == null)
+            {
+                borderImageSelectionControl = FindName("BorderImageSelectionControl") as Border;
             }
 
             // 创建8个拖拽手柄
@@ -585,8 +596,16 @@ namespace Ink_Canvas {
                     InitializeUIElementSelection();
                 }
 
-                // 显示拖拽手柄
-                ShowResizeHandles();
+                // 根据元素类型显示不同的工具栏
+                if (element is Image)
+                {
+                    ShowImageToolbar();
+                }
+                else
+                {
+                    // 对于其他UI元素，显示拖拽手柄
+                    ShowResizeHandles();
+                }
             }
         }
 
@@ -594,6 +613,7 @@ namespace Ink_Canvas {
         {
             selectedUIElement = null;
             HideResizeHandles();
+            HideImageToolbar();
         }
 
         private void ShowResizeHandles()
@@ -611,6 +631,42 @@ namespace Ink_Canvas {
             {
                 resizeHandlesCanvas.Visibility = Visibility.Collapsed;
             }
+        }
+
+        private void ShowImageToolbar()
+        {
+            if (selectedUIElement == null || borderImageSelectionControl == null) return;
+
+            var bounds = GetUIElementBounds(selectedUIElement);
+            UpdateImageToolbarPosition(bounds);
+            borderImageSelectionControl.Visibility = Visibility.Visible;
+        }
+
+        private void HideImageToolbar()
+        {
+            if (borderImageSelectionControl != null)
+            {
+                borderImageSelectionControl.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void UpdateImageToolbarPosition(Rect bounds)
+        {
+            if (borderImageSelectionControl == null) return;
+
+            // 计算工具栏位置，类似于墨迹选择工具栏的逻辑
+            var toolbarX = bounds.X + bounds.Width / 2 - BorderImageSelectionControlWidth / 2;
+            var toolbarY = bounds.Y + bounds.Height + 10; // 在图片下方10像素处
+
+            // 确保工具栏不会超出画布边界
+            if (toolbarX < 0) toolbarX = 0;
+            if (toolbarX + BorderImageSelectionControlWidth > inkCanvas.ActualWidth)
+                toolbarX = inkCanvas.ActualWidth - BorderImageSelectionControlWidth;
+
+            if (toolbarY + BorderImageSelectionControlHeight > inkCanvas.ActualHeight)
+                toolbarY = bounds.Y - BorderImageSelectionControlHeight - 10; // 如果下方空间不够，显示在上方
+
+            borderImageSelectionControl.Margin = new Thickness(toolbarX, toolbarY, 0, 0);
         }
 
         private Rect GetUIElementBounds(UIElement element)
@@ -817,12 +873,14 @@ namespace Ink_Canvas {
                 if (element != null)
                 {
                     // 切换到选择模式并选择这个元素
-                    inkCanvas.Select(new UIElement[] { element });
+                    inkCanvas.Select(new[] { element });
                     SelectUIElement(element);
                     e.Handled = true;
                 }
             }
         }
+
+
 
         #endregion
     }

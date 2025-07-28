@@ -1,9 +1,10 @@
-using Microsoft.Win32;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using Ink_Canvas.Windows;
+using Microsoft.Win32;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
 {
@@ -77,7 +78,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     // 保存配置
                     _plugin.SaveConfig();
                     
-                    LogHelper.WriteLogToFile($"启动台按钮位置已更改为: {_plugin.Config.ButtonPosition}", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile($"启动台按钮位置已更改为: {_plugin.Config.ButtonPosition}");
                 }
                 catch (Exception ex)
                 {
@@ -283,9 +284,9 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     pathTextBox.Text = dialog.FileName;
                     
                     // 如果选择的是.exe文件，自动获取文件名填入名称字段
-                    if (System.IO.Path.GetExtension(dialog.FileName).ToLower() == ".exe")
+                    if (Path.GetExtension(dialog.FileName).ToLower() == ".exe")
                     {
-                        string fileName = System.IO.Path.GetFileNameWithoutExtension(dialog.FileName);
+                        string fileName = Path.GetFileNameWithoutExtension(dialog.FileName);
                         // 只有在名称字段为空或者是新建项目时才自动填入
                         if (string.IsNullOrWhiteSpace(nameTextBox.Text) || isNew)
                         {

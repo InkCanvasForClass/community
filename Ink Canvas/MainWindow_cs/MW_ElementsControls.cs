@@ -5,7 +5,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Input;
 using Microsoft.Win32;
 
 namespace Ink_Canvas
@@ -171,6 +170,91 @@ namespace Ink_Canvas
                 return mediaElement;
             });
         }
+        #endregion
+
+        #region Image Operations
+
+        /// <summary>
+        /// 旋转图片
+        /// </summary>
+        /// <param name="image">要旋转的图片</param>
+        /// <param name="angle">旋转角度（正数为顺时针，负数为逆时针）</param>
+        private void RotateImage(Image image, double angle)
+        {
+            if (image == null) return;
+
+            try
+            {
+                // 获取当前的变换
+                var transformGroup = image.RenderTransform as TransformGroup ?? new TransformGroup();
+
+                // 查找现有的旋转变换
+                RotateTransform rotateTransform = null;
+                foreach (Transform transform in transformGroup.Children)
+                {
+                    if (transform is RotateTransform rt)
+                    {
+                        rotateTransform = rt;
+                        break;
+                    }
+                }
+
+                // 如果没有旋转变换，创建一个新的
+                if (rotateTransform == null)
+                {
+                    rotateTransform = new RotateTransform();
+                    transformGroup.Children.Add(rotateTransform);
+                }
+
+                // 设置旋转中心为图片中心
+                rotateTransform.CenterX = image.ActualWidth / 2;
+                rotateTransform.CenterY = image.ActualHeight / 2;
+
+                // 累加旋转角度
+                rotateTransform.Angle = (rotateTransform.Angle + angle) % 360;
+
+                // 应用变换
+                image.RenderTransform = transformGroup;
+
+                // 提交到时间机器以支持撤销
+                // 注意：旋转操作目前不支持撤销，因为需要更复杂的历史记录机制
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不中断程序
+                System.Diagnostics.Debug.WriteLine($"旋转图片时发生错误: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 删除图片
+        /// </summary>
+        /// <param name="image">要删除的图片</param>
+        private void DeleteImage(Image image)
+        {
+            if (image == null) return;
+
+            try
+            {
+                // 从画布中移除图片
+                if (inkCanvas.Children.Contains(image))
+                {
+                    inkCanvas.Children.Remove(image);
+
+                    // 取消选择
+                    DeselectUIElement();
+
+                    // 提交到时间机器以支持撤销
+                    timeMachine.CommitElementRemoveHistory(image);
+                }
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不中断程序
+                System.Diagnostics.Debug.WriteLine($"删除图片时发生错误: {ex.Message}");
+            }
+        }
+
         #endregion
     }
 }

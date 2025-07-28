@@ -1,12 +1,12 @@
-﻿using Ink_Canvas.Helpers;
+﻿using System;
 using System.Collections.Generic;
-using System;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Diagnostics;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -32,7 +32,7 @@ namespace Ink_Canvas {
         private Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>> DrawingAttributesHistory =
             new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
 
-        private Dictionary<Guid, List<Stroke>> DrawingAttributesHistoryFlag = new Dictionary<Guid, List<Stroke>>() {
+        private Dictionary<Guid, List<Stroke>> DrawingAttributesHistoryFlag = new Dictionary<Guid, List<Stroke>> {
             { DrawingAttributeIds.Color, new List<Stroke>() },
             { DrawingAttributeIds.DrawingFlags, new List<Stroke>() },
             { DrawingAttributeIds.IsHighlighter, new List<Stroke>() },
@@ -130,14 +130,17 @@ namespace Ink_Canvas {
                                 canvas.Strokes.Remove(currentStroke);
                 }
             } else if (item.CommitType == TimeMachineHistoryType.ElementInsert) {
+                // 使用传入的canvas参数，而不是总是使用inkCanvas
+                var targetCanvas = canvas ?? inkCanvas;
+
                 if (item.StrokeHasBeenCleared) {
                     // Undo: 移除元素
-                    if (item.InsertedElement != null && inkCanvas.Children.Contains(item.InsertedElement))
-                        inkCanvas.Children.Remove(item.InsertedElement);
+                    if (item.InsertedElement != null && targetCanvas.Children.Contains(item.InsertedElement))
+                        targetCanvas.Children.Remove(item.InsertedElement);
                 } else {
                     // Redo: 添加元素
-                    if (item.InsertedElement != null && !inkCanvas.Children.Contains(item.InsertedElement))
-                        inkCanvas.Children.Add(item.InsertedElement);
+                    if (item.InsertedElement != null && !targetCanvas.Children.Contains(item.InsertedElement))
+                        targetCanvas.Children.Add(item.InsertedElement);
                 }
             }
 
@@ -145,7 +148,7 @@ namespace Ink_Canvas {
         }
 
         private StrokeCollection ApplyHistoriesToNewStrokeCollection(TimeMachineHistory[] items) {
-            InkCanvas fakeInkCanv = new InkCanvas() {
+            InkCanvas fakeInkCanv = new InkCanvas {
                 Width = inkCanvas.ActualWidth,
                 Height = inkCanvas.ActualHeight,
                 EditingMode = InkCanvasEditingMode.None,
@@ -153,11 +156,32 @@ namespace Ink_Canvas {
 
             if (items != null && items.Length > 0) {
                 foreach (var timeMachineHistory in items) {
-                    ApplyHistoryToCanvas(timeMachineHistory, fakeInkCanv);
+                    // 只处理笔画历史，不处理图片元素历史
+                    // 因为页面预览只需要显示笔画，图片元素会影响主画布
+                    if (timeMachineHistory.CommitType != TimeMachineHistoryType.ElementInsert) {
+                        ApplyHistoryToCanvas(timeMachineHistory, fakeInkCanv);
+                    }
                 }
             }
 
             return fakeInkCanv.Strokes;
+        }
+
+        // 新增：获取页面的所有图片元素
+        private List<UIElement> GetPageImageElements(TimeMachineHistory[] items) {
+            var imageElements = new List<UIElement>();
+
+            if (items != null && items.Length > 0) {
+                foreach (var timeMachineHistory in items) {
+                    if (timeMachineHistory.CommitType == TimeMachineHistoryType.ElementInsert &&
+                        timeMachineHistory.InsertedElement != null &&
+                        !timeMachineHistory.StrokeHasBeenCleared) {
+                        imageElements.Add(timeMachineHistory.InsertedElement);
+                    }
+                }
+            }
+
+            return imageElements;
         }
 
         private void TimeMachine_OnUndoStateChanged(bool status) {
@@ -202,24 +226,23 @@ namespace Ink_Canvas {
                 return;
             }
 
-            if (e.Added.Count != 0) {
+            if (e.Added.Count != 0)
+            {
                 if (_currentCommitType == CommitReason.ShapeRecognition) {
                     timeMachine.CommitStrokeShapeHistory(ReplacedStroke, e.Added);
                     ReplacedStroke = null;
                     return;
-                } else {
-                    timeMachine.CommitStrokeUserInputHistory(e.Added);
-                    return;
                 }
+
+                timeMachine.CommitStrokeUserInputHistory(e.Added);
+                return;
             }
 
             if (e.Removed.Count != 0) {
                 if (_currentCommitType == CommitReason.ShapeRecognition) {
                     ReplacedStroke = e.Removed;
-                    return;
                 } else if (!IsEraseByPoint || _currentCommitType == CommitReason.ClearingCanvas) {
                     timeMachine.CommitStrokeEraseHistory(e.Removed);
-                    return;
                 }
             }
         }

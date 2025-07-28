@@ -1,8 +1,4 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
-using Ink_Canvas.Helpers;
-using Newtonsoft.Json;
-using OSVersionExtension;
-using System;
+﻿using System;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -10,11 +6,15 @@ using System.Windows.Ink;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using Newtonsoft.Json;
+using OSVersionExtension;
 using File = System.IO.File;
 using OperatingSystem = OSVersionExtension.OperatingSystem;
 
 namespace Ink_Canvas {
-    public partial class MainWindow : System.Windows.Window {
+    public partial class MainWindow : Window {
         private void LoadSettings(bool isStartup = false) {
             AppVersionTextBlock.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             try {
@@ -92,7 +92,7 @@ namespace Ink_Canvas {
 
                 // 初始化更新通道选择
                 foreach (var radioButton in UpdateChannelSelector.Items) {
-                    if (radioButton is System.Windows.Controls.RadioButton rb) {
+                    if (radioButton is RadioButton rb) {
                         if (rb.Tag.ToString() == Settings.Startup.UpdateChannel.ToString()) {
                             rb.IsChecked = true;
                             break;
@@ -465,7 +465,7 @@ namespace Ink_Canvas {
                 BoardComboBoxEraserSize.SelectedIndex = Settings.Canvas.EraserSize;
 
                 ToggleSwitchClearCanvasAndClearTimeMachine.IsOn =
-                    Settings.Canvas.ClearCanvasAndClearTimeMachine == true;
+                    Settings.Canvas.ClearCanvasAndClearTimeMachine;
                 ToggleSwitchClearCanvasAlsoClearImages.IsOn = Settings.Canvas.ClearCanvasAlsoClearImages;
 
                 switch (Settings.Canvas.EraserShapeType) {

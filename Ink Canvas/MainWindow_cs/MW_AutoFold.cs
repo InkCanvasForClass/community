@@ -1,6 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,11 +6,13 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
-        public bool isFloatingBarFolded = false;
-        private bool isFloatingBarChangingHideMode = false;
+        public bool isFloatingBarFolded;
+        private bool isFloatingBarChangingHideMode;
 
         private void CloseWhiteboardImmediately() {
             if (isDisplayingOrHidingBlackboard) return;
@@ -28,10 +28,10 @@ namespace Ink_Canvas {
             BtnSwitch_Click(BtnSwitch, null);
             BtnExit.Foreground = Brushes.White;
             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
-            new Thread(new ThreadStart(() => {
+            new Thread(() => {
                 Thread.Sleep(200);
                 Application.Current.Dispatcher.Invoke(() => { isDisplayingOrHidingBlackboard = false; });
-            })).Start();
+            }).Start();
         }
 
         public async void FoldFloatingBar_MouseUp(object sender, MouseButtonEventArgs e) {
@@ -98,7 +98,7 @@ namespace Ink_Canvas {
         }
 
         private async void LeftUnFoldButtonDisplayQuickPanel_MouseUp(object sender, MouseButtonEventArgs e) {
-            if (Settings.Appearance.IsShowQuickPanel == true) {
+            if (Settings.Appearance.IsShowQuickPanel) {
                 HideRightQuickPanel();
                 LeftUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
                 await Dispatcher.InvokeAsync(() => {
@@ -122,7 +122,7 @@ namespace Ink_Canvas {
         }
 
         private async void RightUnFoldButtonDisplayQuickPanel_MouseUp(object sender, MouseButtonEventArgs e) {
-            if (Settings.Appearance.IsShowQuickPanel == true) {
+            if (Settings.Appearance.IsShowQuickPanel) {
                 HideLeftQuickPanel();
                 RightUnFoldButtonQuickPanel.Visibility = Visibility.Visible;
                 await Dispatcher.InvokeAsync(() => {
@@ -249,13 +249,13 @@ namespace Ink_Canvas {
                 if (MarginFromEdge == -10) LeftSidePanel.Visibility = Visibility.Visible;
 
                 var LeftSidePanelmarginAnimation = new ThicknessAnimation {
-                    Duration = isNoAnimation == true ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
+                    Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
                     From = LeftSidePanel.Margin,
                     To = new Thickness(MarginFromEdge, 0, 0, -150)
                 };
                 LeftSidePanelmarginAnimation.EasingFunction = new CubicEase();
                 var RightSidePanelmarginAnimation = new ThicknessAnimation {
-                    Duration = isNoAnimation == true ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
+                    Duration = isNoAnimation ? TimeSpan.FromSeconds(0) : TimeSpan.FromSeconds(0.175),
                     From = RightSidePanel.Margin,
                     To = new Thickness(0, 0, MarginFromEdge, -150)
                 };

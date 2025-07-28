@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
-using System.IO;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas
 {
@@ -35,19 +36,19 @@ namespace Ink_Canvas
         [JsonProperty("inkAlpha")]
         public double InkAlpha { get; set; } = 255;
         [JsonProperty("isShowCursor")]
-        public bool IsShowCursor { get; set; } = false;
+        public bool IsShowCursor { get; set; }
         [JsonProperty("inkStyle")]
-        public int InkStyle { get; set; } = 0;
+        public int InkStyle { get; set; }
         [JsonProperty("eraserSize")]
         public int EraserSize { get; set; } = 2;
         [JsonProperty("eraserType")] 
-        public int EraserType { get; set; } = 0; // 0 - 图标切换模式      1 - 面积擦     2 - 线条擦
+        public int EraserType { get; set; } // 0 - 图标切换模式      1 - 面积擦     2 - 线条擦
         [JsonProperty("eraserShapeType")]
-        public int EraserShapeType { get; set; } = 0; // 0 - 圆形擦  1 - 黑板擦
+        public int EraserShapeType { get; set; } // 0 - 圆形擦  1 - 黑板擦
         [JsonProperty("hideStrokeWhenSelecting")]
         public bool HideStrokeWhenSelecting { get; set; } = true;
         [JsonProperty("fitToCurve")]
-        public bool FitToCurve { get; set; } = false; // 默认关闭原来的贝塞尔平滑
+        public bool FitToCurve { get; set; } // 默认关闭原来的贝塞尔平滑
         [JsonProperty("useAdvancedBezierSmoothing")]
         public bool UseAdvancedBezierSmoothing { get; set; } = true; // 默认启用高级贝塞尔曲线平滑
         [JsonProperty("useAsyncInkSmoothing")]
@@ -57,13 +58,13 @@ namespace Ink_Canvas
         [JsonProperty("inkSmoothingQuality")]
         public int InkSmoothingQuality { get; set; } = 1; // 0-低质量高性能, 1-平衡, 2-高质量低性能
         [JsonProperty("maxConcurrentSmoothingTasks")]
-        public int MaxConcurrentSmoothingTasks { get; set; } = 0; // 0表示自动检测CPU核心数
+        public int MaxConcurrentSmoothingTasks { get; set; } // 0表示自动检测CPU核心数
         [JsonProperty("clearCanvasAndClearTimeMachine")]
-        public bool ClearCanvasAndClearTimeMachine { get; set; } = false;
+        public bool ClearCanvasAndClearTimeMachine { get; set; }
         [JsonProperty("enablePressureTouchMode")]
-        public bool EnablePressureTouchMode { get; set; } = false; // 是否启用压感触屏模式
+        public bool EnablePressureTouchMode { get; set; } // 是否启用压感触屏模式
         [JsonProperty("disablePressure")]
-        public bool DisablePressure { get; set; } = false; // 是否屏蔽压感
+        public bool DisablePressure { get; set; } // 是否屏蔽压感
         [JsonProperty("autoStraightenLine")]
         public bool AutoStraightenLine { get; set; } = true; // 是否启用直线自动拉直
         [JsonProperty("autoStraightenLineThreshold")]
@@ -76,7 +77,7 @@ namespace Ink_Canvas
         public int LineEndpointSnappingThreshold { get; set; } = 15; // 直线端点吸附的距离阈值（像素）
 
         [JsonProperty("usingWhiteboard")]
-        public bool UsingWhiteboard { get; set; } = false;
+        public bool UsingWhiteboard { get; set; }
 
         [JsonProperty("customBackgroundColor")]
         public string CustomBackgroundColor { get; set; } = "#162924";
@@ -84,7 +85,7 @@ namespace Ink_Canvas
         [JsonProperty("hyperbolaAsymptoteOption")]
         public OptionalOperation HyperbolaAsymptoteOption { get; set; } = OptionalOperation.Ask;
         [JsonProperty("isCompressPicturesUploaded")]
-        public bool IsCompressPicturesUploaded { get; set; } = false;
+        public bool IsCompressPicturesUploaded { get; set; }
         [JsonProperty("enablePalmEraser")]
         public bool EnablePalmEraser { get; set; } = true;
         [JsonProperty("clearCanvasAlsoClearImages")]
@@ -113,9 +114,9 @@ namespace Ink_Canvas
         [JsonProperty("AutoSwitchTwoFingerGesture")]
         public bool AutoSwitchTwoFingerGesture { get; set; } = true;
         [JsonProperty("isEnableTwoFingerRotation")]
-        public bool IsEnableTwoFingerRotation { get; set; } = false;
+        public bool IsEnableTwoFingerRotation { get; set; }
         [JsonProperty("isEnableTwoFingerRotationOnSelection")]
-        public bool IsEnableTwoFingerRotationOnSelection { get; set; } = false;
+        public bool IsEnableTwoFingerRotationOnSelection { get; set; }
     }
 
     // 更新通道枚举
@@ -130,7 +131,7 @@ namespace Ink_Canvas
         [JsonProperty("isAutoUpdate")]
         public bool IsAutoUpdate { get; set; } = true;
         [JsonProperty("isAutoUpdateWithSilence")]
-        public bool IsAutoUpdateWithSilence { get; set; } = false;
+        public bool IsAutoUpdateWithSilence { get; set; }
         [JsonProperty("isAutoUpdateWithSilenceStartTime")]
         public string AutoUpdateWithSilenceStartTime { get; set; } = "06:00";
         [JsonProperty("isAutoUpdateWithSilenceEndTime")]
@@ -140,11 +141,11 @@ namespace Ink_Canvas
         [JsonProperty("skippedVersion")]
         public string SkippedVersion { get; set; } = "";
         [JsonProperty("isEnableNibMode")]
-        public bool IsEnableNibMode { get; set; } = false;
+        public bool IsEnableNibMode { get; set; }
         [JsonProperty("isFoldAtStartup")]
-        public bool IsFoldAtStartup { get; set; } = false;
+        public bool IsFoldAtStartup { get; set; }
         [JsonProperty("crashAction")]
-        public int CrashAction { get; set; } = 0;
+        public int CrashAction { get; set; }
     }
 
     public class Appearance
@@ -152,13 +153,13 @@ namespace Ink_Canvas
         [JsonProperty("isEnableDisPlayNibModeToggler")]
         public bool IsEnableDisPlayNibModeToggler { get; set; } = true;
         [JsonProperty("isColorfulViewboxFloatingBar")]
-        public bool IsColorfulViewboxFloatingBar { get; set; } = false;
+        public bool IsColorfulViewboxFloatingBar { get; set; }
         // [JsonProperty("enableViewboxFloatingBarScaleTransform")]
         // public bool EnableViewboxFloatingBarScaleTransform { get; set; } = false;
         [JsonProperty("viewboxFloatingBarScaleTransformValue")]
         public double ViewboxFloatingBarScaleTransformValue { get; set; } = 1.0;
         [JsonProperty("floatingBarImg")] 
-        public int FloatingBarImg { get; set; } = 0;
+        public int FloatingBarImg { get; set; }
         [JsonProperty("customFloatingBarImgs")]
         public List<CustomFloatingBarIcon> CustomFloatingBarImgs { get; set; } = new List<CustomFloatingBarIcon>();
         [JsonProperty("viewboxFloatingBarOpacityValue")]
@@ -168,7 +169,7 @@ namespace Ink_Canvas
         [JsonProperty("viewboxFloatingBarOpacityInPPTValue")]
         public double ViewboxFloatingBarOpacityInPPTValue { get; set; } = 0.5;
         [JsonProperty("enableViewboxBlackBoardScaleTransform")]
-        public bool EnableViewboxBlackBoardScaleTransform { get; set; } = false;
+        public bool EnableViewboxBlackBoardScaleTransform { get; set; }
         [JsonProperty("isTransparentButtonBackground")]
         public bool IsTransparentButtonBackground { get; set; } = true;
         [JsonProperty("isShowExitButton")]
@@ -180,11 +181,11 @@ namespace Ink_Canvas
         [JsonProperty("enableChickenSoupInWhiteboardMode")]
         public bool EnableChickenSoupInWhiteboardMode { get; set; } = true;
         [JsonProperty("isShowHideControlButton")]
-        public bool IsShowHideControlButton { get; set; } = false;
+        public bool IsShowHideControlButton { get; set; }
         [JsonProperty("unFoldButtonImageType")]
-        public int UnFoldButtonImageType { get; set; } = 0;
+        public int UnFoldButtonImageType { get; set; }
         [JsonProperty("isShowLRSwitchButton")]
-        public bool IsShowLRSwitchButton { get; set; } = false;
+        public bool IsShowLRSwitchButton { get; set; }
         [JsonProperty("isShowQuickPanel")]
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
@@ -192,7 +193,7 @@ namespace Ink_Canvas
         [JsonProperty("isShowModeFingerToggleSwitch")]
         public bool IsShowModeFingerToggleSwitch { get; set; } = true;
         [JsonProperty("theme")]
-        public int Theme { get; set; } = 0;            
+        public int Theme { get; set; }            
     }
 
     public class PowerPointSettings
@@ -208,11 +209,11 @@ namespace Ink_Canvas
 
         // 0居中，+就是往上，-就是往下
         [JsonProperty("pptLSButtonPosition")]
-        public int PPTLSButtonPosition { get; set; } = 0;
+        public int PPTLSButtonPosition { get; set; }
 
         // 0居中，+就是往上，-就是往下
         [JsonProperty("pptRSButtonPosition")]
-        public int PPTRSButtonPosition { get; set; } = 0;
+        public int PPTRSButtonPosition { get; set; }
 
         [JsonProperty("pptSButtonsOption")]
         public int PPTSButtonsOption { get; set; } = 221;
@@ -232,27 +233,27 @@ namespace Ink_Canvas
         [JsonProperty("isNoClearStrokeOnSelectWhenInPowerPoint")]
         public bool IsNoClearStrokeOnSelectWhenInPowerPoint { get; set; } = true;
         [JsonProperty("isShowStrokeOnSelectInPowerPoint")]
-        public bool IsShowStrokeOnSelectInPowerPoint { get; set; } = false;
+        public bool IsShowStrokeOnSelectInPowerPoint { get; set; }
         [JsonProperty("isAutoSaveStrokesInPowerPoint")]
         public bool IsAutoSaveStrokesInPowerPoint { get; set; } = true;
         [JsonProperty("isAutoSaveScreenShotInPowerPoint")]
-        public bool IsAutoSaveScreenShotInPowerPoint { get; set; } = false;
+        public bool IsAutoSaveScreenShotInPowerPoint { get; set; }
         [JsonProperty("isNotifyPreviousPage")]
-        public bool IsNotifyPreviousPage { get; set; } = false;
+        public bool IsNotifyPreviousPage { get; set; }
         [JsonProperty("isNotifyHiddenPage")]
         public bool IsNotifyHiddenPage { get; set; } = true;
         [JsonProperty("isNotifyAutoPlayPresentation")]
         public bool IsNotifyAutoPlayPresentation { get; set; } = true;
         [JsonProperty("isEnableTwoFingerGestureInPresentationMode")]
-        public bool IsEnableTwoFingerGestureInPresentationMode { get; set; } = false;
+        public bool IsEnableTwoFingerGestureInPresentationMode { get; set; }
         [JsonProperty("isEnableFingerGestureSlideShowControl")]
         public bool IsEnableFingerGestureSlideShowControl { get; set; } = true;
         [JsonProperty("isSupportWPS")]
-        public bool IsSupportWPS { get; set; } = false;
+        public bool IsSupportWPS { get; set; }
         [JsonProperty("enableWppProcessKill")]
         public bool EnableWppProcessKill { get; set; } = true;
         [JsonProperty("isAlwaysGoToFirstPageOnReenter")]
-        public bool IsAlwaysGoToFirstPageOnReenter { get; set; } = false;
+        public bool IsAlwaysGoToFirstPageOnReenter { get; set; }
     }
 
     public class Automation
@@ -277,131 +278,131 @@ namespace Ink_Canvas
             || IsAutoFoldInMaxHubWhiteboard;
 
         [JsonProperty("isAutoEnterAnnotationModeWhenExitFoldMode")]
-        public bool IsAutoEnterAnnotationModeWhenExitFoldMode { get; set; } = false;
+        public bool IsAutoEnterAnnotationModeWhenExitFoldMode { get; set; }
 
         [JsonProperty("isAutoFoldInEasiNote")]
-        public bool IsAutoFoldInEasiNote { get; set; } = false;
+        public bool IsAutoFoldInEasiNote { get; set; }
 
         [JsonProperty("isAutoFoldInEasiNoteIgnoreDesktopAnno")]
-        public bool IsAutoFoldInEasiNoteIgnoreDesktopAnno { get; set; } = false;
+        public bool IsAutoFoldInEasiNoteIgnoreDesktopAnno { get; set; }
 
         [JsonProperty("isAutoFoldInEasiCamera")]
-        public bool IsAutoFoldInEasiCamera { get; set; } = false;
+        public bool IsAutoFoldInEasiCamera { get; set; }
 
         [JsonProperty("isAutoFoldInEasiNote3")]
-        public bool IsAutoFoldInEasiNote3 { get; set; } = false;
+        public bool IsAutoFoldInEasiNote3 { get; set; }
         [JsonProperty("isAutoFoldInEasiNote3C")]
-        public bool IsAutoFoldInEasiNote3C { get; set; } = false;
+        public bool IsAutoFoldInEasiNote3C { get; set; }
 
         [JsonProperty("isAutoFoldInEasiNote5C")]
-        public bool IsAutoFoldInEasiNote5C { get; set; } = false;
+        public bool IsAutoFoldInEasiNote5C { get; set; }
 
         [JsonProperty("isAutoFoldInSeewoPincoTeacher")]
-        public bool IsAutoFoldInSeewoPincoTeacher { get; set; } = false;
+        public bool IsAutoFoldInSeewoPincoTeacher { get; set; }
 
         [JsonProperty("isAutoFoldInHiteTouchPro")]
-        public bool IsAutoFoldInHiteTouchPro { get; set; } = false;
+        public bool IsAutoFoldInHiteTouchPro { get; set; }
         [JsonProperty("isAutoFoldInHiteLightBoard")]
-        public bool IsAutoFoldInHiteLightBoard { get; set; } = false;
+        public bool IsAutoFoldInHiteLightBoard { get; set; }
 
         [JsonProperty("isAutoFoldInHiteCamera")]
-        public bool IsAutoFoldInHiteCamera { get; set; } = false;
+        public bool IsAutoFoldInHiteCamera { get; set; }
 
         [JsonProperty("isAutoFoldInWxBoardMain")]
-        public bool IsAutoFoldInWxBoardMain { get; set; } = false;
+        public bool IsAutoFoldInWxBoardMain { get; set; }
         /*
         [JsonProperty("isAutoFoldInZySmartBoard")]
         public bool IsAutoFoldInZySmartBoard { get; set; } = false;
         */
         [JsonProperty("isAutoFoldInOldZyBoard")]
-        public bool IsAutoFoldInOldZyBoard { get; set; } = false;
+        public bool IsAutoFoldInOldZyBoard { get; set; }
 
         [JsonProperty("isAutoFoldInMSWhiteboard")]
-        public bool IsAutoFoldInMSWhiteboard { get; set; } = false;
+        public bool IsAutoFoldInMSWhiteboard { get; set; }
 
         [JsonProperty("isAutoFoldInAdmoxWhiteboard")]
-        public bool IsAutoFoldInAdmoxWhiteboard { get; set; } = false;
+        public bool IsAutoFoldInAdmoxWhiteboard { get; set; }
 
         [JsonProperty("isAutoFoldInAdmoxBooth")]
-        public bool IsAutoFoldInAdmoxBooth { get; set; } = false;
+        public bool IsAutoFoldInAdmoxBooth { get; set; }
 
         [JsonProperty("isAutoFoldInQPoint")]
-        public bool IsAutoFoldInQPoint { get; set; } = false;
+        public bool IsAutoFoldInQPoint { get; set; }
 
         [JsonProperty("isAutoFoldInYiYunVisualPresenter")]
-        public bool IsAutoFoldInYiYunVisualPresenter { get; set; } = false;
+        public bool IsAutoFoldInYiYunVisualPresenter { get; set; }
 
         [JsonProperty("isAutoFoldInMaxHubWhiteboard")]
-        public bool IsAutoFoldInMaxHubWhiteboard { get; set; } = false;
+        public bool IsAutoFoldInMaxHubWhiteboard { get; set; }
 
         [JsonProperty("isAutoFoldInPPTSlideShow")]
-        public bool IsAutoFoldInPPTSlideShow { get; set; } = false;
+        public bool IsAutoFoldInPPTSlideShow { get; set; }
 
         [JsonProperty("isAutoFoldAfterPPTSlideShow")]
-        public bool IsAutoFoldAfterPPTSlideShow { get; set; } = false;
+        public bool IsAutoFoldAfterPPTSlideShow { get; set; }
 
         [JsonProperty("isAutoKillPptService")]
-        public bool IsAutoKillPptService { get; set; } = false;
+        public bool IsAutoKillPptService { get; set; }
 
         [JsonProperty("isAutoKillEasiNote")]
-        public bool IsAutoKillEasiNote { get; set; } = false;
+        public bool IsAutoKillEasiNote { get; set; }
 
         [JsonProperty("isAutoKillHiteAnnotation")]
-        public bool IsAutoKillHiteAnnotation { get; set; } = false;
+        public bool IsAutoKillHiteAnnotation { get; set; }
 
         [JsonProperty("isAutoKillVComYouJiao")]
-        public bool IsAutoKillVComYouJiao { get; set; } = false;
+        public bool IsAutoKillVComYouJiao { get; set; }
 
         [JsonProperty("isAutoKillSeewoLauncher2DesktopAnnotation")]
-        public bool IsAutoKillSeewoLauncher2DesktopAnnotation { get; set; } = false;
+        public bool IsAutoKillSeewoLauncher2DesktopAnnotation { get; set; }
 
         [JsonProperty("isAutoKillInkCanvas")]
-        public bool IsAutoKillInkCanvas { get; set; } = false;
+        public bool IsAutoKillInkCanvas { get; set; }
 
         [JsonProperty("isAutoKillICA")]
-        public bool IsAutoKillICA { get; set; } = false;
+        public bool IsAutoKillICA { get; set; }
 
         [JsonProperty("isAutoKillIDT")]
-        public bool IsAutoKillIDT { get; set; } = false;
+        public bool IsAutoKillIDT { get; set; }
 
         [JsonProperty("isSaveScreenshotsInDateFolders")]
-        public bool IsSaveScreenshotsInDateFolders { get; set; } = false;
+        public bool IsSaveScreenshotsInDateFolders { get; set; }
 
         [JsonProperty("isAutoSaveStrokesAtScreenshot")]
-        public bool IsAutoSaveStrokesAtScreenshot { get; set; } = false;
+        public bool IsAutoSaveStrokesAtScreenshot { get; set; }
 
         [JsonProperty("isAutoSaveStrokesAtClear")]
-        public bool IsAutoSaveStrokesAtClear { get; set; } = false;
+        public bool IsAutoSaveStrokesAtClear { get; set; }
 
         [JsonProperty("isAutoClearWhenExitingWritingMode")]
-        public bool IsAutoClearWhenExitingWritingMode { get; set; } = false;
+        public bool IsAutoClearWhenExitingWritingMode { get; set; }
 
         [JsonProperty("minimumAutomationStrokeNumber")]
-        public int MinimumAutomationStrokeNumber { get; set; } = 0;
+        public int MinimumAutomationStrokeNumber { get; set; }
 
         [JsonProperty("autoSavedStrokesLocation")]
-        public string AutoSavedStrokesLocation = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "saves");
+        public string AutoSavedStrokesLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "saves");
 
         [JsonProperty("autoDelSavedFiles")]
-        public bool AutoDelSavedFiles = false;
+        public bool AutoDelSavedFiles;
 
         [JsonProperty("autoDelSavedFilesDaysThreshold")]
         public int AutoDelSavedFilesDaysThreshold = 15;
         
         [JsonProperty("isSaveFullPageStrokes")]
-        public bool IsSaveFullPageStrokes = false;
+        public bool IsSaveFullPageStrokes;
 
         [JsonProperty("isAutoEnterAnnotationAfterKillHite")]
-        public bool IsAutoEnterAnnotationAfterKillHite { get; set; } = false;
+        public bool IsAutoEnterAnnotationAfterKillHite { get; set; }
     }
 
     public class Advanced
     {
         [JsonProperty("isSpecialScreen")]
-        public bool IsSpecialScreen { get; set; } = false;
+        public bool IsSpecialScreen { get; set; }
 
         [JsonProperty("isQuadIR")]
-        public bool IsQuadIR { get; set; } = false;
+        public bool IsQuadIR { get; set; }
 
         [JsonProperty("touchMultiplier")]
         public double TouchMultiplier { get; set; } = 0.25;
@@ -413,7 +414,7 @@ namespace Ink_Canvas
         public int FingerModeBoundsWidth { get; set; } = 30;
 
         [JsonProperty("eraserBindTouchMultiplier")]
-        public bool EraserBindTouchMultiplier { get; set; } = false;
+        public bool EraserBindTouchMultiplier { get; set; }
 
         [JsonProperty("isLogEnabled")]
         public bool IsLogEnabled { get; set; } = true;
@@ -422,28 +423,28 @@ namespace Ink_Canvas
         public bool IsSaveLogByDate { get; set; } = true;
 
         [JsonProperty("isEnableFullScreenHelper")]
-        public bool IsEnableFullScreenHelper { get; set; } = false;
+        public bool IsEnableFullScreenHelper { get; set; }
 
         [JsonProperty("isEnableEdgeGestureUtil")]
-        public bool IsEnableEdgeGestureUtil { get; set; } = false;
+        public bool IsEnableEdgeGestureUtil { get; set; }
 
         [JsonProperty("edgeGestureUtilOnlyAffectBlackboardMode")]
-        public bool EdgeGestureUtilOnlyAffectBlackboardMode { get; set; } = false;
+        public bool EdgeGestureUtilOnlyAffectBlackboardMode { get; set; }
 
         [JsonProperty("isEnableForceFullScreen")]
-        public bool IsEnableForceFullScreen { get; set; } = false;
+        public bool IsEnableForceFullScreen { get; set; }
 
         [JsonProperty("isEnableResolutionChangeDetection")]
-        public bool IsEnableResolutionChangeDetection { get; set; } = false;
+        public bool IsEnableResolutionChangeDetection { get; set; }
 
         [JsonProperty("isEnableDPIChangeDetection")]
-        public bool IsEnableDPIChangeDetection { get; set; } = false;
+        public bool IsEnableDPIChangeDetection { get; set; }
 
         [JsonProperty("isSecondConfirmWhenShutdownApp")]
-        public bool IsSecondConfirmWhenShutdownApp { get; set; } = false;
+        public bool IsSecondConfirmWhenShutdownApp { get; set; }
 
         [JsonProperty("isEnableAvoidFullScreenHelper")]
-        public bool IsEnableAvoidFullScreenHelper { get; set; } = false;
+        public bool IsEnableAvoidFullScreenHelper { get; set; }
         
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;
@@ -457,9 +458,9 @@ namespace Ink_Canvas
         [JsonProperty("isInkToShapeEnabled")]
         public bool IsInkToShapeEnabled { get; set; } = true;
         [JsonProperty("isInkToShapeNoFakePressureRectangle")]
-        public bool IsInkToShapeNoFakePressureRectangle { get; set; } = false;
+        public bool IsInkToShapeNoFakePressureRectangle { get; set; }
         [JsonProperty("isInkToShapeNoFakePressureTriangle")]
-        public bool IsInkToShapeNoFakePressureTriangle { get; set; } = false;
+        public bool IsInkToShapeNoFakePressureTriangle { get; set; }
         [JsonProperty("isInkToShapeTriangle")]
         public bool IsInkToShapeTriangle { get; set; } = true;
         [JsonProperty("isInkToShapeRectangle")]
@@ -472,7 +473,7 @@ namespace Ink_Canvas
 
     public class RandSettings {
         [JsonProperty("displayRandWindowNamesInputBtn")]
-        public bool DisplayRandWindowNamesInputBtn { get; set; } = false;
+        public bool DisplayRandWindowNamesInputBtn { get; set; }
         [JsonProperty("randWindowOnceCloseLatency")]
         public double RandWindowOnceCloseLatency { get; set; } = 2.5;
         [JsonProperty("randWindowOnceMaxStudents")]
@@ -480,9 +481,9 @@ namespace Ink_Canvas
         [JsonProperty("showRandomAndSingleDraw")]
         public bool ShowRandomAndSingleDraw { get; set; } = true;
         [JsonProperty("directCallCiRand")]
-        public bool DirectCallCiRand { get; set; } = false;
+        public bool DirectCallCiRand { get; set; }
         [JsonProperty("selectedBackgroundIndex")]
-        public int SelectedBackgroundIndex { get; set; } = 0;
+        public int SelectedBackgroundIndex { get; set; }
         [JsonProperty("customPickNameBackgrounds")]
         public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
     }

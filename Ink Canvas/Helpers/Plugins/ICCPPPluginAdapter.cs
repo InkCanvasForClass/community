@@ -12,7 +12,7 @@ namespace Ink_Canvas.Helpers.Plugins
         private readonly string _pluginPath;
         private readonly string _pluginName;
         private readonly Version _pluginVersion;
-        private bool _isInitialized = false;
+        private bool _isInitialized;
         
         /// <summary>
         /// 创建 ICCPP 插件适配器
@@ -104,7 +104,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 这里可以添加 .iccpp 插件的初始化逻辑
                 // 例如，根据文件格式加载特定资源
                 
-                LogHelper.WriteLogToFile($"ICCPP 插件 {Name} 已初始化", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"ICCPP 插件 {Name} 已初始化");
                 _isInitialized = true;
             }
             catch (Exception ex)
@@ -126,7 +126,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 例如，加载动态库、注册事件等
                 
                 base.Enable(); // 设置启用状态并触发事件
-                LogHelper.WriteLogToFile($"ICCPP 插件 {Name} 已启用", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"ICCPP 插件 {Name} 已启用");
             }
             catch (Exception ex)
             {
@@ -147,7 +147,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 例如，卸载动态库、注销事件等
                 
                 base.Disable(); // 设置禁用状态并触发事件
-                LogHelper.WriteLogToFile($"ICCPP 插件 {Name} 已禁用", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"ICCPP 插件 {Name} 已禁用");
             }
             catch (Exception ex)
             {
@@ -165,7 +165,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 这里可以添加 .iccpp 插件的清理逻辑
                 // 例如，释放资源等
                 
-                LogHelper.WriteLogToFile($"ICCPP 插件 {Name} 已清理资源", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"ICCPP 插件 {Name} 已清理资源");
             }
             catch (Exception ex)
             {

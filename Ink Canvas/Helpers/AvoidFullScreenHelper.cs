@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Interop;
 
 namespace Ink_Canvas.Helpers
@@ -8,7 +9,7 @@ namespace Ink_Canvas.Helpers
     /// <summary>
     /// 防止窗口进入全屏状态的辅助类
     /// </summary>
-    public static partial class AvoidFullScreenHelper
+    public static class AvoidFullScreenHelper
     {
         private static readonly DependencyProperty IsAvoidFullScreenEnabledProperty =
             DependencyProperty.RegisterAttached(
@@ -16,7 +17,7 @@ namespace Ink_Canvas.Helpers
                 typeof(bool), 
                 typeof(AvoidFullScreenHelper));
 
-        private static bool _isBoardMode = false;
+        private static bool _isBoardMode;
         public static void SetBoardMode(bool isBoardMode)
         {
             _isBoardMode = isBoardMode;
@@ -120,10 +121,10 @@ namespace Ink_Canvas.Helpers
         private static Rect GetWorkingArea(Rect windowRect)
         {
             // 获取所有显示器
-            var screens = System.Windows.Forms.Screen.AllScreens;
+            var screens = Screen.AllScreens;
             
             // 确定窗口主要位于哪个显示器上
-            System.Windows.Forms.Screen targetScreen = null;
+            Screen targetScreen = null;
             double maxIntersection = 0;
             
             foreach (var screen in screens)
@@ -144,7 +145,7 @@ namespace Ink_Canvas.Helpers
             
             // 如果没找到，使用主显示器
             if (targetScreen == null)
-                targetScreen = System.Windows.Forms.Screen.PrimaryScreen;
+                targetScreen = Screen.PrimaryScreen;
                 
             return new Rect(
                 targetScreen.WorkingArea.X,

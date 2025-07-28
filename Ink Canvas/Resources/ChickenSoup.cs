@@ -1,7 +1,7 @@
 ﻿namespace Ink_Canvas
 {
     public static class ChickenSoup {
-        public static string[] OSUPlayerYuLu = new string[] {
+        public static string[] OSUPlayerYuLu = {
             "澳洲原神，启动！",
             "一眼丁真，鉴定为玩osu!玩的",
             "喊MimosaM给我炒两菜",
@@ -32,7 +32,7 @@
             "又有人2000了"
         };
 
-        public static string[] MingYanJingJu = new string[] {
+        public static string[] MingYanJingJu = {
             "老骥伏枥，志在千里；烈士暮年，壮心不已",
             "有志者，事竟成",
             "有志者自有千方百计，无志者只感千难万难",
@@ -98,7 +98,7 @@
             "有志不在年高，无志空活百岁",
         };
 
-        public static string[] GaoKaoPhrases = new string[] {
+        public static string[] GaoKaoPhrases = {
             "以梦为马，不负韶华。祝你高考顺利，未来可期！",
             "高考顺利，愿你乘风破浪，前程似锦！",
             "愿你高考顺利，不负韶华，梦想成真！",
