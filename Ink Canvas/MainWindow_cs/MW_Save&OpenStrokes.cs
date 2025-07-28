@@ -22,6 +22,7 @@ namespace Ink_Canvas {
         public double Top { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
+        public string Stretch { get; set; } = "Fill"; // 默认为Fill
     }
     public partial class MainWindow : Window {
         private void SymbolIconSaveStrokes_MouseUp(object sender, MouseButtonEventArgs e) {
@@ -129,7 +130,8 @@ namespace Ink_Canvas {
                                 Left = InkCanvas.GetLeft(img),
                                 Top = InkCanvas.GetTop(img),
                                 Width = img.Width,
-                                Height = img.Height
+                                Height = img.Height,
+                                Stretch = img.Stretch.ToString()
                             });
                         }
                     }
@@ -612,7 +614,8 @@ namespace Ink_Canvas {
                             {
                                 Source = new BitmapImage(new Uri(info.SourcePath)),
                                 Width = info.Width,
-                                Height = info.Height
+                                Height = info.Height,
+                                Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill
                             };
                             InkCanvas.SetLeft(img, info.Left);
                             InkCanvas.SetTop(img, info.Top);

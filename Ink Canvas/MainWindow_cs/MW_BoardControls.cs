@@ -104,7 +104,8 @@ namespace Ink_Canvas {
                                 {
                                     Source = new BitmapImage(new Uri(info.SourcePath)),
                                     Width = info.Width,
-                                    Height = info.Height
+                                    Height = info.Height,
+                                    Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill
                                 };
                                 InkCanvas.SetLeft(img, info.Left);
                                 InkCanvas.SetTop(img, info.Top);
