@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Input;
 using Microsoft.Win32;
 
 namespace Ink_Canvas
@@ -41,6 +42,10 @@ namespace Ink_Canvas
 
                     inkCanvas.Children.Add(image);
 
+                    // 添加鼠标事件处理，使图片可以被选择
+                    image.MouseDown += UIElement_MouseDown;
+                    image.IsManipulationEnabled = true;
+
                     timeMachine.CommitElementInsertHistory(image);
                 }
             }
@@ -72,6 +77,9 @@ namespace Ink_Canvas
                 int height = bitmapImage.PixelHeight;
 
                 Image image = new Image();
+                // 设置拉伸模式为Fill，支持任意比例缩放
+                image.Stretch = Stretch.Fill;
+
                 if (isLoaded && Settings.Canvas.IsCompressPicturesUploaded && (width > 1920 || height > 1080))
                 {
                     double scaleX = 1920.0 / width;
@@ -115,6 +123,10 @@ namespace Ink_Canvas
                     InkCanvas.SetLeft(mediaElement, 0);
                     InkCanvas.SetTop(mediaElement, 0);
                     inkCanvas.Children.Add(mediaElement);
+
+                    // 添加鼠标事件处理，使媒体元素可以被选择
+                    mediaElement.MouseDown += UIElement_MouseDown;
+                    mediaElement.IsManipulationEnabled = true;
 
                     mediaElement.LoadedBehavior = MediaState.Manual;
                     mediaElement.UnloadedBehavior = MediaState.Manual;

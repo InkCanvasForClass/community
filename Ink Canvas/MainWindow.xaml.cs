@@ -404,6 +404,9 @@ namespace Ink_Canvas {
             // 确保开关和设置同步
             ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
             ApplyNoFocusMode();
+
+            // 初始化UIElement选择系统
+            InitializeUIElementSelection();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
