@@ -799,7 +799,7 @@ namespace Ink_Canvas {
                     uint processId;
                     GetWindowThreadProcessId((IntPtr)pptApplication.HWND, out processId);
                             wpsProcess = Process.GetProcessById((int)processId);
-                            LogHelper.WriteLogToFile($"通过路径检测到WPS进程: {processId}", LogHelper.LogType.Trace);
+                            //LogHelper.WriteLogToFile($"通过路径检测到WPS进程: {processId}", LogHelper.LogType.Trace);
                         }
                         
                         // 方法2：通过前台窗口检测
@@ -809,7 +809,7 @@ namespace Ink_Canvas {
                             if (foregroundWpsWindow != null)
                             {
                                 wpsProcess = Process.GetProcessById((int)foregroundWpsWindow.ProcessId);
-                                LogHelper.WriteLogToFile($"通过前台窗口检测到WPS进程: {foregroundWpsWindow.ProcessId}", LogHelper.LogType.Trace);
+                                //LogHelper.WriteLogToFile($"通过前台窗口检测到WPS进程: {foregroundWpsWindow.ProcessId}", LogHelper.LogType.Trace);
                             }
                         }
                         
@@ -820,7 +820,7 @@ namespace Ink_Canvas {
                             if (wpsProcesses.Count > 0)
                             {
                                 wpsProcess = wpsProcesses.First();
-                                LogHelper.WriteLogToFile($"通过进程名检测到WPS进程: {wpsProcess.Id}", LogHelper.LogType.Trace);
+                                //LogHelper.WriteLogToFile($"通过进程名检测到WPS进程: {wpsProcess.Id}", LogHelper.LogType.Trace);
                             }
                         }
                         
@@ -1976,45 +1976,7 @@ namespace Ink_Canvas {
             }
             return wpsProcesses;
         }
-
-        /// <summary>
-        /// 调试方法：输出所有窗口信息
-        /// </summary>
-        private void DebugAllWindows()
-        {
-            try
-            {
-                LogHelper.WriteLogToFile("开始调试所有窗口信息", LogHelper.LogType.Trace);
-                var windowCount = 0;
-                
-                EnumWindows((hWnd, lParam) =>
-                {
-                    try
-                    {
-                        if (!IsWindow(hWnd)) return true;
-                        
-                        var windowInfo = GetWindowInfo(hWnd);
-                        if (!string.IsNullOrEmpty(windowInfo.Title) || !string.IsNullOrEmpty(windowInfo.ClassName))
-                        {
-                            windowCount++;
-                            LogHelper.WriteLogToFile($"窗口{windowCount}: 标题='{windowInfo.Title}', 类名='{windowInfo.ClassName}', 进程ID={windowInfo.ProcessId}, 可见={windowInfo.IsVisible}, 最小化={windowInfo.IsMinimized}", LogHelper.LogType.Trace);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"调试窗口时出错: {ex}", LogHelper.LogType.Error);
-                    }
-                    return true;
-                }, IntPtr.Zero);
-                
-                LogHelper.WriteLogToFile($"调试完成，共发现{windowCount}个有效窗口", LogHelper.LogType.Trace);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"调试窗口失败: {ex}", LogHelper.LogType.Error);
-            }
-        }
-
+        
         private bool CheckForWpsWindowsByEnumeration()
         {
             try
