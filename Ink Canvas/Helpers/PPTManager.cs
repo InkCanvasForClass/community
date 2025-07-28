@@ -908,7 +908,8 @@ namespace Ink_Canvas.Helpers
                 _wpsProcessCheckTimer.Dispose();
             }
 
-            _wpsProcessCheckTimer = new Timer(500);
+            // 优化：增加检查间隔到2秒，减少性能开销
+            _wpsProcessCheckTimer = new Timer(2000);
             _wpsProcessCheckTimer.Elapsed += OnWpsProcessCheckTimerElapsed;
             _wpsProcessCheckTimer.Start();
             LogHelper.WriteLogToFile("启动 WPS 进程检测定时器", LogHelper.LogType.Trace);
@@ -940,50 +941,218 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
-                // 检查前台WPS窗口是否存在
-                bool isForegroundWpsWindowActive = IsForegroundWpsWindowStillActive();
+                // 优化：增加延迟检查，避免误杀
+                if (_wpsProcessCheckCount < 3) // 前6秒不进行查杀检查
+                {
+                    LogHelper.WriteLogToFile($"WPS进程查杀延迟中，等待{6 - _wpsProcessCheckCount * 2}秒", LogHelper.LogType.Trace);
+                    return;
+                }
+
+                // 检查前台WPS窗口是否存在（优化版）
+                bool isForegroundWpsWindowActive = IsForegroundWpsWindowStillActiveOptimized();
 
                 if (isForegroundWpsWindowActive)
                 {
-                    if (_wpsProcessCheckCount % 10 == 0)
+                    if (_wpsProcessCheckCount % 5 == 0) // 每10秒记录一次日志
                     {
-                        LogHelper.WriteLogToFile($"前台WPS窗口仍然存在，继续监控（已检查{_wpsProcessCheckCount}次）", LogHelper.LogType.Trace);
+                        LogHelper.WriteLogToFile($"WPS窗口仍然活跃，继续监控（已检查{_wpsProcessCheckCount}次）", LogHelper.LogType.Trace);
                     }
                     return;
                 }
 
-                // 前台窗口已消失，检查是否需要结束进程
-                LogHelper.WriteLogToFile("检测到前台WPS窗口已消失", LogHelper.LogType.Event);
-
-                // 检查所有WPS文档是否已保存
-                bool allSaved = CheckAllWpsDocumentsSaved();
-
-                if (!allSaved)
+                // 优化：多重验证确保准确性
+                if (!PerformMultipleWpsWindowChecks())
                 {
-                    LogHelper.WriteLogToFile("检测到有未保存的WPS文档，跳过进程结束", LogHelper.LogType.Trace);
+                    LogHelper.WriteLogToFile("多重验证显示WPS窗口仍然存在，跳过查杀", LogHelper.LogType.Trace);
+                    return;
                 }
 
-                // 结束WPS进程
+                // 前台窗口已消失，检查是否需要结束进程
+                LogHelper.WriteLogToFile("多重验证确认WPS窗口已消失，准备结束WPS进程", LogHelper.LogType.Event);
+
+                // 检查文档保存状态
+                if (!CheckAllWpsDocumentsSaved())
+                {
+                    LogHelper.WriteLogToFile("检测到有未保存的WPS文档，跳过进程结束", LogHelper.LogType.Warning);
+                    StopWpsProcessCheckTimer();
+                    return;
+                }
+
+                // 安全结束WPS进程
+                SafeTerminateWpsProcess();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"WPS 进程检测失败: {ex}", LogHelper.LogType.Error);
+                StopWpsProcessCheckTimer();
+            }
+        }
+
+        /// <summary>
+        /// 优化版的前台WPS窗口检测，减少性能开销
+        /// </summary>
+        private bool IsForegroundWpsWindowStillActiveOptimized()
+        {
+            try
+            {
+                // 快速检查：直接检查前台窗口
+                var foregroundWindow = GetForegroundWindow();
+                if (foregroundWindow == IntPtr.Zero) return false;
+
+                // 获取前台窗口的进程ID
+                uint processId;
+                GetWindowThreadProcessId(foregroundWindow, out processId);
+
+                // 如果前台窗口就是我们监控的WPS进程，则认为仍然活跃
+                if (processId == _wpsProcess?.Id)
+                {
+                    return true;
+                }
+
+                // 检查是否为WPS相关窗口
+                var windowInfo = GetWindowInfo(foregroundWindow);
+                return IsWpsWindow(windowInfo);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"优化版WPS窗口检测失败: {ex}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 多重验证WPS窗口状态，确保查杀准确性
+        /// </summary>
+        private bool PerformMultipleWpsWindowChecks()
+        {
+            try
+            {
+                // 第一重验证：等待1秒后再次检查
+                Thread.Sleep(1000);
+                if (IsForegroundWpsWindowStillActiveOptimized())
+                {
+                    LogHelper.WriteLogToFile("第一重验证：WPS窗口仍然存在", LogHelper.LogType.Trace);
+                    return false;
+                }
+
+                // 第二重验证：检查所有WPS进程的窗口
+                var wpsProcesses = GetWpsProcesses();
+                foreach (var process in wpsProcesses)
+                {
+                    if (process.Id == _wpsProcess?.Id) continue; // 跳过当前监控的进程
+
+                    var windows = GetWpsWindowsByProcess(process.Id);
+                    if (windows.Any(w => w.IsVisible && !w.IsMinimized))
+                    {
+                        LogHelper.WriteLogToFile($"第二重验证：发现其他WPS进程{process.Id}有活跃窗口", LogHelper.LogType.Trace);
+                        return false;
+                    }
+                }
+
+                // 第三重验证：检查任务栏中的WPS窗口
+                if (HasWpsWindowInTaskbar())
+                {
+                    LogHelper.WriteLogToFile("第三重验证：任务栏中仍有WPS窗口", LogHelper.LogType.Trace);
+                    return false;
+                }
+
+                LogHelper.WriteLogToFile("多重验证完成：确认WPS窗口已全部消失", LogHelper.LogType.Event);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"多重验证失败: {ex}", LogHelper.LogType.Error);
+                return false; // 出错时保守处理，不进行查杀
+            }
+        }
+
+        /// <summary>
+        /// 检查任务栏中是否有WPS窗口
+        /// </summary>
+        private bool HasWpsWindowInTaskbar()
+        {
+            try
+            {
+                var allWindows = new List<WpsWindowInfo>();
+
+                EnumWindows((hWnd, lParam) =>
+                {
+                    try
+                    {
+                        if (IsWindow(hWnd) && IsWindowVisible(hWnd))
+                        {
+                            var windowInfo = GetWindowInfo(hWnd);
+                            if (IsWpsWindow(windowInfo) && !string.IsNullOrEmpty(windowInfo.Title))
+                            {
+                                allWindows.Add(windowInfo);
+                            }
+                        }
+                    }
+                    catch { }
+                    return true;
+                }, IntPtr.Zero);
+
+                return allWindows.Count > 0;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查任务栏WPS窗口失败: {ex}", LogHelper.LogType.Error);
+                return true; // 出错时保守处理，认为仍有窗口
+            }
+        }
+
+        /// <summary>
+        /// 安全地结束WPS进程
+        /// </summary>
+        private void SafeTerminateWpsProcess()
+        {
+            try
+            {
+                if (_wpsProcess == null || _wpsProcess.HasExited)
+                {
+                    LogHelper.WriteLogToFile("WPS进程已经结束，无需查杀", LogHelper.LogType.Trace);
+                    StopWpsProcessCheckTimer();
+                    return;
+                }
+
+                LogHelper.WriteLogToFile($"开始安全结束WPS进程 (PID: {_wpsProcess.Id})", LogHelper.LogType.Event);
+
+                // 尝试优雅关闭
+                try
+                {
+                    _wpsProcess.CloseMainWindow();
+                    if (_wpsProcess.WaitForExit(3000)) // 等待3秒
+                    {
+                        LogHelper.WriteLogToFile("WPS进程已优雅关闭", LogHelper.LogType.Event);
+                        StopWpsProcessCheckTimer();
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"优雅关闭WPS进程失败: {ex}", LogHelper.LogType.Warning);
+                }
+
+                // 强制结束
                 try
                 {
                     if (!_wpsProcess.HasExited)
                     {
                         _wpsProcess.Kill();
-                        LogHelper.WriteLogToFile("成功结束WPS进程", LogHelper.LogType.Event);
+                        LogHelper.WriteLogToFile("WPS进程已强制结束", LogHelper.LogType.Event);
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"结束WPS进程失败: {ex}", LogHelper.LogType.Error);
-                }
-                finally
-                {
-                    StopWpsProcessCheckTimer();
+                    LogHelper.WriteLogToFile($"强制结束WPS进程失败: {ex}", LogHelper.LogType.Error);
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"WPS 进程检测失败: {ex}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"安全结束WPS进程时发生异常: {ex}", LogHelper.LogType.Error);
+            }
+            finally
+            {
                 StopWpsProcessCheckTimer();
             }
         }
@@ -1193,16 +1362,41 @@ namespace Ink_Canvas.Helpers
                     try
                     {
                         var pname = process.ProcessName.ToLower();
-                        if ((pname.Contains("wps") || pname.Contains("wpp") || pname.Contains("presentation"))
-                            && !pname.Contains("powerpnt")
-                            && !pname.Contains("office")
-                            && !pname.Contains("onenote")
-                            && !pname.Contains("excel")
-                            && !pname.Contains("word")
-                            && !pname.Contains("outlook")
-                            && !pname.Contains("microsoft"))
+
+                        // 精确的WPS进程名匹配，避免误杀
+                        var exactWpsNames = new[] { "wps", "wpp", "et", "wpspdf", "wpsoffice" };
+                        var microsoftOfficeNames = new[] { "powerpnt", "excel", "word", "onenote", "outlook", "winword", "msaccess" };
+
+                        // 排除微软Office进程
+                        if (microsoftOfficeNames.Any(name => pname.Contains(name)))
                         {
-                            wpsProcesses.Add(process);
+                            continue;
+                        }
+
+                        // 精确匹配WPS进程名
+                        bool isWpsProcess = exactWpsNames.Any(name => pname.Equals(name) || pname.StartsWith(name + "."));
+
+                        // 额外验证：检查进程路径
+                        if (isWpsProcess)
+                        {
+                            try
+                            {
+                                var processPath = process.MainModule?.FileName?.ToLower() ?? "";
+                                if (processPath.Contains("kingsoft") || processPath.Contains("wps office"))
+                                {
+                                    wpsProcesses.Add(process);
+                                    LogHelper.WriteLogToFile($"检测到WPS进程: {process.ProcessName} (PID: {process.Id})", LogHelper.LogType.Trace);
+                                }
+                            }
+                            catch
+                            {
+                                // 无法访问进程路径时，基于进程名判断
+                                if (exactWpsNames.Contains(pname))
+                                {
+                                    wpsProcesses.Add(process);
+                                    LogHelper.WriteLogToFile($"基于进程名检测到WPS进程: {process.ProcessName} (PID: {process.Id})", LogHelper.LogType.Trace);
+                                }
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -1215,6 +1409,8 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"获取WPS进程失败: {ex}", LogHelper.LogType.Error);
             }
+
+            LogHelper.WriteLogToFile($"共检测到{wpsProcesses.Count}个WPS进程", LogHelper.LogType.Trace);
             return wpsProcesses;
         }
 
