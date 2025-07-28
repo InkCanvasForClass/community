@@ -29,38 +29,9 @@ namespace Ink_Canvas {
                 TimeMachineHistories[0] = timeMachineHistory;
                 timeMachine.ClearStrokeHistory();
             } else {
-                // 新增：提交所有图片元素到时间机器历史记录
-                foreach (var child in inkCanvas.Children)
-                {
-                    if (child is Image img)
-                    {
-                        timeMachine.CommitElementInsertHistory(img);
-                    }
-                }
-                
                 var timeMachineHistory = timeMachine.ExportTimeMachineHistory();
                 TimeMachineHistories[CurrentWhiteboardIndex] = timeMachineHistory;
                 timeMachine.ClearStrokeHistory();
-                // 保存当前页图片信息
-                var elementInfos = new List<CanvasElementInfo>();
-                foreach (var child in inkCanvas.Children)
-                {
-                    if (child is Image img && img.Source is BitmapImage bmp)
-                    {
-                        elementInfos.Add(new CanvasElementInfo
-                        {
-                            Type = "Image",
-                            SourcePath = bmp.UriSource?.LocalPath ?? "",
-                            Left = InkCanvas.GetLeft(img),
-                            Top = InkCanvas.GetTop(img),
-                            Width = img.Width,
-                            Height = img.Height
-                        });
-                    }
-                }
-                var savePath = Settings.Automation.AutoSavedStrokesLocation;
-                if (!Directory.Exists(savePath)) Directory.CreateDirectory(savePath);
-                File.WriteAllText(System.IO.Path.Combine(savePath, $"elements_page{CurrentWhiteboardIndex}.json"), JsonConvert.SerializeObject(elementInfos, Formatting.Indented));
             }
         }
 
@@ -68,6 +39,8 @@ namespace Ink_Canvas {
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
             inkCanvas.Strokes.Clear();
+            // 清除所有子元素（包括图片）
+            inkCanvas.Children.Clear();
             _currentCommitType = CommitReason.UserInput;
         }
 
@@ -80,39 +53,8 @@ namespace Ink_Canvas {
                     foreach (var item in TimeMachineHistories[0]) ApplyHistoryToCanvas(item);
                 } else {
                     timeMachine.ImportTimeMachineHistory(TimeMachineHistories[CurrentWhiteboardIndex]);
-                    // 新增：通过时间机器历史恢复图片
-                    foreach (var item in TimeMachineHistories[CurrentWhiteboardIndex])
-                    {
-                        if (item.CommitType == TimeMachineHistoryType.ElementInsert)
-                        {
-                            inkCanvas.Children.Add(item.InsertedElement);
-                        }
-                    }
+                    // 通过时间机器历史恢复所有内容（墨迹和图片）
                     foreach (var item in TimeMachineHistories[CurrentWhiteboardIndex]) ApplyHistoryToCanvas(item);
-                    // 恢复当前页图片信息
-                    inkCanvas.Children.Clear();
-                    var savePath = Settings.Automation.AutoSavedStrokesLocation;
-                    var elementsFile = System.IO.Path.Combine(savePath, $"elements_page{CurrentWhiteboardIndex}.json");
-                    if (File.Exists(elementsFile))
-                    {
-                        var elementInfos = JsonConvert.DeserializeObject<List<CanvasElementInfo>>(File.ReadAllText(elementsFile));
-                        foreach (var info in elementInfos)
-                        {
-                            if (info.Type == "Image" && File.Exists(info.SourcePath))
-                            {
-                                var img = new Image
-                                {
-                                    Source = new BitmapImage(new Uri(info.SourcePath)),
-                                    Width = info.Width,
-                                    Height = info.Height,
-                                    Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill
-                                };
-                                InkCanvas.SetLeft(img, info.Left);
-                                InkCanvas.SetTop(img, info.Top);
-                                inkCanvas.Children.Add(img);
-                            }
-                        }
-                    }
                 }
             }
             catch {
