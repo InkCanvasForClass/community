@@ -81,7 +81,7 @@ namespace Ink_Canvas
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    // 取消任何UI元素的选择
+                    // 取消任何UI元素的选择（只在真正切换页面时）
                     DeselectUIElement();
 
                     SaveStrokes();
@@ -90,6 +90,7 @@ namespace Ink_Canvas
                     RestoreStrokes();
                     UpdateIndexInfoDisplay();
                 }
+                // 无论是否切换页面，都更新选择索引
                 BlackBoardLeftSidePageListView.SelectedIndex = index;
             }
         }
@@ -105,7 +106,7 @@ namespace Ink_Canvas
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    // 取消任何UI元素的选择
+                    // 取消任何UI元素的选择（只在真正切换页面时）
                     DeselectUIElement();
 
                     SaveStrokes();
@@ -114,6 +115,7 @@ namespace Ink_Canvas
                     RestoreStrokes();
                     UpdateIndexInfoDisplay();
                 }
+                // 无论是否切换页面，都更新选择索引
                 BlackBoardRightSidePageListView.SelectedIndex = index;
             }
         }

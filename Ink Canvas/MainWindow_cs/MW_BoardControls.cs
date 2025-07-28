@@ -42,20 +42,10 @@ namespace Ink_Canvas {
             // 取消任何UI元素的选择，隐藏拉伸控件
             DeselectUIElement();
 
-            // 记录要清除的图片元素到时间机器历史中
-            var elementsToRemove = new List<UIElement>();
-            foreach (UIElement element in inkCanvas.Children) {
-                elementsToRemove.Add(element);
-            }
-
-            // 为每个图片元素创建清除历史记录
-            foreach (var element in elementsToRemove) {
-                timeMachine.CommitElementRemoveHistory(element);
-            }
-
+            // 只清除笔画，不清除图片元素
+            // 图片元素的清除由调用方决定
             inkCanvas.Strokes.Clear();
-            // 清除所有子元素（包括图片）
-            inkCanvas.Children.Clear();
+
             _currentCommitType = CommitReason.UserInput;
         }
 
@@ -63,11 +53,17 @@ namespace Ink_Canvas {
         private void RestoreStrokes(bool isBackupMain = false) {
             try {
                 var targetIndex = isBackupMain ? 0 : CurrentWhiteboardIndex;
-                if (TimeMachineHistories[targetIndex] == null) return; //防止白板打开后不居中
 
                 // 先清空当前画布的所有内容（墨迹和图片）
+                // 这里必须清除图片，因为页面切换时需要完全重置画布状态
                 inkCanvas.Strokes.Clear();
                 inkCanvas.Children.Clear();
+
+                // 如果历史记录为空，直接返回（新页面或空页面）
+                if (TimeMachineHistories[targetIndex] == null) {
+                    timeMachine.ClearStrokeHistory();
+                    return;
+                }
 
                 if (isBackupMain) {
                     timeMachine.ImportTimeMachineHistory(TimeMachineHistories[0]);
@@ -173,6 +169,9 @@ namespace Ink_Canvas {
 
             // 确保新页面的历史记录为空
             TimeMachineHistories[CurrentWhiteboardIndex] = null;
+
+            // 恢复新页面（这会清空画布，因为历史记录为null）
+            RestoreStrokes();
 
             UpdateIndexInfoDisplay();
 

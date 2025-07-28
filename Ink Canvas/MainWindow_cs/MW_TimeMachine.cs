@@ -130,14 +130,17 @@ namespace Ink_Canvas {
                                 canvas.Strokes.Remove(currentStroke);
                 }
             } else if (item.CommitType == TimeMachineHistoryType.ElementInsert) {
+                // 使用传入的canvas参数，而不是总是使用inkCanvas
+                var targetCanvas = canvas ?? inkCanvas;
+
                 if (item.StrokeHasBeenCleared) {
                     // Undo: 移除元素
-                    if (item.InsertedElement != null && inkCanvas.Children.Contains(item.InsertedElement))
-                        inkCanvas.Children.Remove(item.InsertedElement);
+                    if (item.InsertedElement != null && targetCanvas.Children.Contains(item.InsertedElement))
+                        targetCanvas.Children.Remove(item.InsertedElement);
                 } else {
                     // Redo: 添加元素
-                    if (item.InsertedElement != null && !inkCanvas.Children.Contains(item.InsertedElement))
-                        inkCanvas.Children.Add(item.InsertedElement);
+                    if (item.InsertedElement != null && !targetCanvas.Children.Contains(item.InsertedElement))
+                        targetCanvas.Children.Add(item.InsertedElement);
                 }
             }
 
@@ -153,7 +156,11 @@ namespace Ink_Canvas {
 
             if (items != null && items.Length > 0) {
                 foreach (var timeMachineHistory in items) {
-                    ApplyHistoryToCanvas(timeMachineHistory, fakeInkCanv);
+                    // 只处理笔画历史，不处理图片元素历史
+                    // 因为页面预览只需要显示笔画，图片元素会影响主画布
+                    if (timeMachineHistory.CommitType != TimeMachineHistoryType.ElementInsert) {
+                        ApplyHistoryToCanvas(timeMachineHistory, fakeInkCanv);
+                    }
                 }
             }
 
