@@ -3,7 +3,7 @@
     <RuntimeIdentifiers>win;win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <OutputType>WinExe</OutputType>
     <RootNamespace>Ink_Canvas</RootNamespace>
-    <AssemblyName>InkCanvasForClass</AssemblyName>
+    <AssemblyName>InkCanvasForClass CE</AssemblyName>
     <TargetFramework>net472</TargetFramework>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>

@@ -5,11 +5,11 @@ using System.Windows;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("InkCanvasForClass")]
+[assembly: AssemblyTitle("InkCanvasForClass CE")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("HARKOTEK Studio")]
-[assembly: AssemblyProduct("InkCanvasForClass")]
+[assembly: AssemblyProduct("InkCanvasForClass CE")]
 [assembly: AssemblyCopyright("© Copyright HARKOTEK Studio 2024-now")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
