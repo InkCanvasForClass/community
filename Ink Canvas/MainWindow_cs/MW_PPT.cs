@@ -391,6 +391,8 @@ namespace Ink_Canvas {
                         }
 
                         ClearStrokes(true);
+                        // 清空备份历史记录，防止退出白板时恢复已结束PPT的墨迹
+                        // 注意：这里只清空索引0的备份，不影响白板页面的墨迹（索引1及以上）
                         TimeMachineHistories[0] = null;
 
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)

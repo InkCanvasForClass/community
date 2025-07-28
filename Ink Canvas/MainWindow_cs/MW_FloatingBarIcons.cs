@@ -1333,14 +1333,10 @@ namespace Ink_Canvas {
 
             if (currentMode != 0) {
                 SaveStrokes();
-                // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
-                    RestoreStrokes(true);
-                } else {
-                    // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
-                    TimeMachineHistories[0] = null;
-                    timeMachine.ClearStrokeHistory();
-                }
+                // 总是恢复备份墨迹，不管是否在PPT模式
+                // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
+                RestoreStrokes(true);
+                LogHelper.WriteLogToFile($"退出白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
             }
 
             if (BtnSwitchTheme.Content.ToString() == "浅色")
@@ -1795,16 +1791,10 @@ namespace Ink_Canvas {
                     SaveStrokes(true);
                     ClearStrokes(true);
 
-                    // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
-                        LogHelper.WriteLogToFile("退出白板：当前在PPT放映模式，恢复备份墨迹", LogHelper.LogType.Trace);
-                        RestoreStrokes();
-                    } else {
-                        // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
-                        LogHelper.WriteLogToFile("退出白板：当前不在PPT放映模式，清空备份以避免显示已结束PPT的墨迹", LogHelper.LogType.Trace);
-                        TimeMachineHistories[0] = null;
-                        timeMachine.ClearStrokeHistory();
-                    }
+                    // 总是恢复备份墨迹，不管是否在PPT模式
+                    // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
+                    RestoreStrokes();
+                    LogHelper.WriteLogToFile($"退出白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
 
                     // 退出白板时清空图片
                     inkCanvas.Children.Clear();
@@ -1846,14 +1836,10 @@ namespace Ink_Canvas {
                         SaveStrokes();
                         ClearStrokes(true);
 
-                        // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
-                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
-                            RestoreStrokes(true);
-                        } else {
-                            // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
-                            TimeMachineHistories[0] = null;
-                            timeMachine.ClearStrokeHistory();
-                        }
+                        // 总是恢复备份墨迹，不管是否在PPT模式
+                        // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
+                        RestoreStrokes(true);
+                        LogHelper.WriteLogToFile($"切换到桌面模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
 
                         // 退出白板时清空图片
                         inkCanvas.Children.Clear();
@@ -1891,14 +1877,10 @@ namespace Ink_Canvas {
                         SaveStrokes(true);
                         ClearStrokes(true);
 
-                        // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
-                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
-                            RestoreStrokes();
-                        } else {
-                            // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
-                            TimeMachineHistories[0] = null;
-                            timeMachine.ClearStrokeHistory();
-                        }
+                        // 总是恢复备份墨迹，不管是否在PPT模式
+                        // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
+                        RestoreStrokes();
+                        LogHelper.WriteLogToFile($"进入白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
 
                         BtnSwitch.Content = "屏幕";
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
