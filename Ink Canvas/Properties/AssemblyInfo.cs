@@ -8,7 +8,7 @@ using System.Windows;
 [assembly: AssemblyTitle("InkCanvasForClass CE")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("HARKOTEK Studio")]
+[assembly: AssemblyCompany("CJK_mkp")]
 [assembly: AssemblyProduct("InkCanvasForClass CE")]
 [assembly: AssemblyCopyright("© Copyright HARKOTEK Studio 2024-now")]
 [assembly: AssemblyTrademark("")]
