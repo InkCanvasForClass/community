@@ -38,6 +38,21 @@ namespace Ink_Canvas {
         private void ClearStrokes(bool isErasedByCode) {
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
+
+            // 取消任何UI元素的选择，隐藏拉伸控件
+            DeselectUIElement();
+
+            // 记录要清除的图片元素到时间机器历史中
+            var elementsToRemove = new List<UIElement>();
+            foreach (UIElement element in inkCanvas.Children) {
+                elementsToRemove.Add(element);
+            }
+
+            // 为每个图片元素创建清除历史记录
+            foreach (var element in elementsToRemove) {
+                timeMachine.CommitElementRemoveHistory(element);
+            }
+
             inkCanvas.Strokes.Clear();
             // 清除所有子元素（包括图片）
             inkCanvas.Children.Clear();
@@ -47,7 +62,13 @@ namespace Ink_Canvas {
         // 恢复每页白板图片信息
         private void RestoreStrokes(bool isBackupMain = false) {
             try {
-                if (TimeMachineHistories[CurrentWhiteboardIndex] == null) return; //防止白板打开后不居中
+                var targetIndex = isBackupMain ? 0 : CurrentWhiteboardIndex;
+                if (TimeMachineHistories[targetIndex] == null) return; //防止白板打开后不居中
+
+                // 先清空当前画布的所有内容（墨迹和图片）
+                inkCanvas.Strokes.Clear();
+                inkCanvas.Children.Clear();
+
                 if (isBackupMain) {
                     timeMachine.ImportTimeMachineHistory(TimeMachineHistories[0]);
                     foreach (var item in TimeMachineHistories[0]) ApplyHistoryToCanvas(item);
@@ -95,6 +116,9 @@ namespace Ink_Canvas {
         private void BtnWhiteBoardSwitchPrevious_Click(object sender, EventArgs e) {
             if (CurrentWhiteboardIndex <= 1) return;
 
+            // 取消任何UI元素的选择
+            DeselectUIElement();
+
             SaveStrokes();
 
             ClearStrokes(true);
@@ -116,6 +140,9 @@ namespace Ink_Canvas {
                 return;
             }
 
+            // 取消任何UI元素的选择
+            DeselectUIElement();
+
             SaveStrokes();
 
             ClearStrokes(true);
@@ -130,6 +157,10 @@ namespace Ink_Canvas {
             if (WhiteboardTotalCount >= 99) return;
             if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) SaveScreenShot(true);
+
+            // 取消任何UI元素的选择
+            DeselectUIElement();
+
             SaveStrokes();
             ClearStrokes(true);
 
@@ -139,6 +170,9 @@ namespace Ink_Canvas {
             if (CurrentWhiteboardIndex != WhiteboardTotalCount)
                 for (var i = WhiteboardTotalCount; i > CurrentWhiteboardIndex; i--)
                     TimeMachineHistories[i] = TimeMachineHistories[i - 1];
+
+            // 确保新页面的历史记录为空
+            TimeMachineHistories[CurrentWhiteboardIndex] = null;
 
             UpdateIndexInfoDisplay();
 

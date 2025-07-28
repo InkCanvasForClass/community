@@ -160,6 +160,23 @@ namespace Ink_Canvas {
             return fakeInkCanv.Strokes;
         }
 
+        // 新增：获取页面的所有图片元素
+        private List<UIElement> GetPageImageElements(TimeMachineHistory[] items) {
+            var imageElements = new List<UIElement>();
+
+            if (items != null && items.Length > 0) {
+                foreach (var timeMachineHistory in items) {
+                    if (timeMachineHistory.CommitType == TimeMachineHistoryType.ElementInsert &&
+                        timeMachineHistory.InsertedElement != null &&
+                        !timeMachineHistory.StrokeHasBeenCleared) {
+                        imageElements.Add(timeMachineHistory.InsertedElement);
+                    }
+                }
+            }
+
+            return imageElements;
+        }
+
         private void TimeMachine_OnUndoStateChanged(bool status) {
             var result = status ? Visibility.Visible : Visibility.Collapsed;
             BtnUndo.Visibility = result;

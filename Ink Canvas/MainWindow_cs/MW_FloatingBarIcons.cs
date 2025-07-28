@@ -1770,6 +1770,9 @@ namespace Ink_Canvas {
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
 
+                    // 取消任何UI元素的选择
+                    DeselectUIElement();
+
                     SaveStrokes(true);
                     ClearStrokes(true);
                     RestoreStrokes();
@@ -1808,6 +1811,9 @@ namespace Ink_Canvas {
                         AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                         AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
 
+                        // 取消任何UI元素的选择
+                        DeselectUIElement();
+
                         SaveStrokes();
                         ClearStrokes(true);
                         RestoreStrokes(true);
@@ -1841,6 +1847,9 @@ namespace Ink_Canvas {
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardLeftSide);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardCenterSide);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardRightSide);
+
+                        // 取消任何UI元素的选择
+                        DeselectUIElement();
 
                         SaveStrokes(true);
                         ClearStrokes(true);

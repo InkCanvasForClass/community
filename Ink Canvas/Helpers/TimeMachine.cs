@@ -195,5 +195,18 @@ namespace Ink_Canvas.Helpers
             _currentIndex = _currentStrokeHistory.Count - 1;
             NotifyUndoRedoState();
         }
+
+        public void CommitElementRemoveHistory(UIElement element)
+        {
+            if (_currentIndex + 1 < _currentStrokeHistory.Count)
+            {
+                _currentStrokeHistory.RemoveRange(_currentIndex + 1, (_currentStrokeHistory.Count - 1) - _currentIndex);
+            }
+            var history = new TimeMachineHistory(element, TimeMachineHistoryType.ElementInsert);
+            history.StrokeHasBeenCleared = true; // 标记为已清除
+            _currentStrokeHistory.Add(history);
+            _currentIndex = _currentStrokeHistory.Count - 1;
+            NotifyUndoRedoState();
+        }
     }
 }
