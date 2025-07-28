@@ -1475,5 +1475,33 @@ namespace Ink_Canvas {
             SaveSettingsToFile();
             ApplyNoFocusMode();
         }
+
+        #region Image Toolbar Event Handlers
+
+        private void BorderImageRotateLeft_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (selectedUIElement is Image image)
+            {
+                RotateImage(image, -90);
+            }
+        }
+
+        private void BorderImageRotateRight_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (selectedUIElement is Image image)
+            {
+                RotateImage(image, 90);
+            }
+        }
+
+        private void BorderImageDelete_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (selectedUIElement is Image image)
+            {
+                DeleteImage(image);
+            }
+        }
+
+        #endregion
     }
 }
