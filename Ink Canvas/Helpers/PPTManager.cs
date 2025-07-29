@@ -978,16 +978,8 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
-                // 前台窗口已消失，检查是否需要结束进程
+                // 前台窗口已消失，准备结束WPS进程
                 LogHelper.WriteLogToFile("多重验证确认WPS窗口已消失，准备结束WPS进程", LogHelper.LogType.Event);
-
-                // 检查文档保存状态
-                if (!CheckAllWpsDocumentsSaved())
-                {
-                    LogHelper.WriteLogToFile("检测到有未保存的WPS文档，跳过进程结束", LogHelper.LogType.Warning);
-                    StopWpsProcessCheckTimer();
-                    return;
-                }
 
                 // 安全结束WPS进程
                 SafeTerminateWpsProcess();
@@ -1251,28 +1243,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private bool CheckAllWpsDocumentsSaved()
-        {
-            try
-            {
-                if (PPTApplication?.Presentations != null)
-                {
-                    foreach (Presentation pres in PPTApplication.Presentations)
-                    {
-                        if (pres.Saved == MsoTriState.msoFalse)
-                        {
-                            return false;
-                        }
-                    }
-                }
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"检查WPS文档保存状态失败: {ex}", LogHelper.LogType.Error);
-                return false;
-            }
-        }
+
 
         private void StopWpsProcessCheckTimer()
         {
