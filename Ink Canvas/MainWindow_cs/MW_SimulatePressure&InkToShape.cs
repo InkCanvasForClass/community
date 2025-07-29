@@ -17,6 +17,41 @@ namespace Ink_Canvas {
         private List<Circle> circles = new List<Circle>();
         private const double LINE_STRAIGHTEN_THRESHOLD = 0.20; // 默认灵敏度阈值，与UI默认值对应
 
+        // 矩形参考线系统
+        private List<RectangleGuideLine> rectangleGuideLines = new List<RectangleGuideLine>();
+        private const double RECTANGLE_ENDPOINT_THRESHOLD = 30.0; // 端点相交判断阈值
+        private const double RECTANGLE_ANGLE_THRESHOLD = 15.0; // 角度判断阈值（度）
+
+        // 矩形参考线数据结构
+        private class RectangleGuideLine
+        {
+            public Stroke OriginalStroke { get; set; }
+            public Point StartPoint { get; set; }
+            public Point EndPoint { get; set; }
+            public DateTime CreatedTime { get; set; }
+            public double Angle { get; set; } // 直线角度（弧度）
+            public bool IsHorizontal { get; set; }
+            public bool IsVertical { get; set; }
+
+            public RectangleGuideLine(Stroke stroke, Point start, Point end)
+            {
+                OriginalStroke = stroke;
+                StartPoint = start;
+                EndPoint = end;
+                CreatedTime = DateTime.Now;
+
+                // 计算角度
+                double deltaX = end.X - start.X;
+                double deltaY = end.Y - start.Y;
+                Angle = Math.Atan2(deltaY, deltaX);
+
+                // 判断是否为水平或垂直线
+                double angleDegrees = Math.Abs(Angle * 180.0 / Math.PI);
+                IsHorizontal = angleDegrees < RECTANGLE_ANGLE_THRESHOLD || angleDegrees > (180 - RECTANGLE_ANGLE_THRESHOLD);
+                IsVertical = Math.Abs(angleDegrees - 90) < RECTANGLE_ANGLE_THRESHOLD;
+            }
+        }
+
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e) {
             // 标记是否进行了直线拉直
             bool wasStraightened = false;
@@ -193,6 +228,9 @@ namespace Ink_Canvas {
                             for (var i = 0; i < circles.Count; i++)
                                 if (!inkCanvas.Strokes.Contains(circles[i].Stroke))
                                     circles.RemoveAt(i);
+
+                            // 处理矩形参考线系统
+                            ProcessRectangleGuideLines(e.Stroke);
 
                             var strokeReco = new StrokeCollection();
                             var result = InkRecognizeHelper.RecognizeShape(newStrokes);
@@ -1624,5 +1662,285 @@ namespace Ink_Canvas {
             double scaleH = screenHeight / baseHeight;
             return (scaleW + scaleH) / 2.0;
         }
+
+        #region 矩形参考线系统
+
+        /// <summary>
+        /// 处理矩形参考线系统
+        /// </summary>
+        private void ProcessRectangleGuideLines(Stroke newStroke)
+        {
+            // 只有启用矩形识别时才处理
+            if (!Settings.InkToShape.IsInkToShapeRectangle) return;
+
+            // 检查新笔画是否为直线
+            if (!IsPotentialStraightLine(newStroke)) return;
+
+            Point startPoint = newStroke.StylusPoints[0].ToPoint();
+            Point endPoint = newStroke.StylusPoints[newStroke.StylusPoints.Count - 1].ToPoint();
+
+            // 创建新的参考线
+            var newGuideLine = new RectangleGuideLine(newStroke, startPoint, endPoint);
+
+            // 清理过期的参考线（超过30秒的）
+            CleanupExpiredGuideLines();
+
+            // 添加新参考线
+            rectangleGuideLines.Add(newGuideLine);
+
+            // 检查是否可以构成矩形
+            CheckForRectangleFormation();
+        }
+
+        /// <summary>
+        /// 清理过期的参考线
+        /// </summary>
+        private void CleanupExpiredGuideLines()
+        {
+            var expireTime = DateTime.Now.AddSeconds(-30); // 30秒过期
+            for (int i = rectangleGuideLines.Count - 1; i >= 0; i--)
+            {
+                var guideLine = rectangleGuideLines[i];
+                if (guideLine.CreatedTime < expireTime || !inkCanvas.Strokes.Contains(guideLine.OriginalStroke))
+                {
+                    rectangleGuideLines.RemoveAt(i);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 检查是否可以构成矩形
+        /// </summary>
+        private void CheckForRectangleFormation()
+        {
+            if (rectangleGuideLines.Count < 4) return;
+
+            // 尝试找到四条能构成矩形的直线
+            var rectangleLines = FindRectangleLines();
+            if (rectangleLines != null && rectangleLines.Count == 4)
+            {
+                // 创建矩形并替换原有直线
+                CreateRectangleFromLines(rectangleLines);
+            }
+        }
+
+        /// <summary>
+        /// 寻找能构成矩形的四条直线
+        /// </summary>
+        private List<RectangleGuideLine> FindRectangleLines()
+        {
+            // 按时间排序，优先考虑最近绘制的直线
+            var sortedLines = rectangleGuideLines.OrderByDescending(l => l.CreatedTime).ToList();
+
+            // 尝试不同的四条直线组合
+            for (int i = 0; i < sortedLines.Count - 3; i++)
+            {
+                for (int j = i + 1; j < sortedLines.Count - 2; j++)
+                {
+                    for (int k = j + 1; k < sortedLines.Count - 1; k++)
+                    {
+                        for (int l = k + 1; l < sortedLines.Count; l++)
+                        {
+                            var lines = new List<RectangleGuideLine> { sortedLines[i], sortedLines[j], sortedLines[k], sortedLines[l] };
+                            if (CanFormRectangle(lines))
+                            {
+                                return lines;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 判断四条直线是否能构成矩形
+        /// </summary>
+        private bool CanFormRectangle(List<RectangleGuideLine> lines)
+        {
+            if (lines.Count != 4) return false;
+
+            // 分类水平线和垂直线
+            var horizontalLines = lines.Where(l => l.IsHorizontal).ToList();
+            var verticalLines = lines.Where(l => l.IsVertical).ToList();
+
+            // 必须有2条水平线和2条垂直线
+            if (horizontalLines.Count != 2 || verticalLines.Count != 2) return false;
+
+            // 检查端点相交关系
+            return CheckEndpointConnections(horizontalLines, verticalLines);
+        }
+
+        /// <summary>
+        /// 检查端点相交关系
+        /// </summary>
+        private bool CheckEndpointConnections(List<RectangleGuideLine> horizontalLines, List<RectangleGuideLine> verticalLines)
+        {
+            // 收集所有端点
+            var allEndpoints = new List<Point>();
+            foreach (var line in horizontalLines.Concat(verticalLines))
+            {
+                allEndpoints.Add(line.StartPoint);
+                allEndpoints.Add(line.EndPoint);
+            }
+
+            // 检查是否有4个相交点（允许一定误差）
+            var intersectionPoints = new List<Point>();
+
+            foreach (var hLine in horizontalLines)
+            {
+                foreach (var vLine in verticalLines)
+                {
+                    var intersection = GetLineIntersection(hLine, vLine);
+                    if (intersection.HasValue)
+                    {
+                        // 检查交点是否在两条线段的端点附近
+                        if (IsPointNearLineEndpoints(intersection.Value, hLine) &&
+                            IsPointNearLineEndpoints(intersection.Value, vLine))
+                        {
+                            intersectionPoints.Add(intersection.Value);
+                        }
+                    }
+                }
+            }
+
+            // 需要有4个交点才能构成矩形
+            return intersectionPoints.Count >= 4;
+        }
+
+        /// <summary>
+        /// 计算两条直线的交点
+        /// </summary>
+        private Point? GetLineIntersection(RectangleGuideLine line1, RectangleGuideLine line2)
+        {
+            double x1 = line1.StartPoint.X, y1 = line1.StartPoint.Y;
+            double x2 = line1.EndPoint.X, y2 = line1.EndPoint.Y;
+            double x3 = line2.StartPoint.X, y3 = line2.StartPoint.Y;
+            double x4 = line2.EndPoint.X, y4 = line2.EndPoint.Y;
+
+            double denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+            if (Math.Abs(denom) < 1e-10) return null; // 平行线
+
+            double t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+            double u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
+
+            double intersectionX = x1 + t * (x2 - x1);
+            double intersectionY = y1 + t * (y2 - y1);
+
+            return new Point(intersectionX, intersectionY);
+        }
+
+        /// <summary>
+        /// 检查点是否在直线端点附近
+        /// </summary>
+        private bool IsPointNearLineEndpoints(Point point, RectangleGuideLine line)
+        {
+            double distToStart = GetDistance(point, line.StartPoint);
+            double distToEnd = GetDistance(point, line.EndPoint);
+
+            return distToStart <= RECTANGLE_ENDPOINT_THRESHOLD || distToEnd <= RECTANGLE_ENDPOINT_THRESHOLD;
+        }
+
+        /// <summary>
+        /// 从四条直线创建矩形
+        /// </summary>
+        private void CreateRectangleFromLines(List<RectangleGuideLine> lines)
+        {
+            try
+            {
+                // 计算矩形的四个角点
+                var corners = CalculateRectangleCorners(lines);
+                if (corners == null || corners.Count != 4) return;
+
+                // 创建矩形笔画
+                var pointList = new List<Point>(corners) { corners[0] }; // 闭合矩形
+                var point = new StylusPointCollection(pointList);
+                var rectangleStroke = new Stroke(GenerateFakePressureRectangle(point))
+                {
+                    DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
+                };
+
+                // 移除原有的四条直线
+                SetNewBackupOfStroke();
+                _currentCommitType = CommitReason.ShapeRecognition;
+
+                foreach (var line in lines)
+                {
+                    if (inkCanvas.Strokes.Contains(line.OriginalStroke))
+                    {
+                        inkCanvas.Strokes.Remove(line.OriginalStroke);
+                    }
+                }
+
+                // 添加新的矩形
+                inkCanvas.Strokes.Add(rectangleStroke);
+                _currentCommitType = CommitReason.UserInput;
+
+                // 清理参考线
+                foreach (var line in lines)
+                {
+                    rectangleGuideLines.Remove(line);
+                }
+
+                // 清空新笔画集合，避免重复处理
+                newStrokes = new StrokeCollection();
+
+                Debug.WriteLine("成功创建矩形参考线矩形");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"创建矩形时出错: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 计算矩形的四个角点
+        /// </summary>
+        private List<Point> CalculateRectangleCorners(List<RectangleGuideLine> lines)
+        {
+            var horizontalLines = lines.Where(l => l.IsHorizontal).ToList();
+            var verticalLines = lines.Where(l => l.IsVertical).ToList();
+
+            if (horizontalLines.Count != 2 || verticalLines.Count != 2) return null;
+
+            var corners = new List<Point>();
+
+            // 计算四个交点
+            foreach (var hLine in horizontalLines)
+            {
+                foreach (var vLine in verticalLines)
+                {
+                    var intersection = GetLineIntersection(hLine, vLine);
+                    if (intersection.HasValue)
+                    {
+                        corners.Add(intersection.Value);
+                    }
+                }
+            }
+
+            if (corners.Count != 4) return null;
+
+            // 按顺序排列角点（顺时针或逆时针）
+            return SortRectangleCorners(corners);
+        }
+
+        /// <summary>
+        /// 按顺序排列矩形角点
+        /// </summary>
+        private List<Point> SortRectangleCorners(List<Point> corners)
+        {
+            if (corners.Count != 4) return corners;
+
+            // 计算中心点
+            double centerX = corners.Average(p => p.X);
+            double centerY = corners.Average(p => p.Y);
+            var center = new Point(centerX, centerY);
+
+            // 按角度排序
+            return corners.OrderBy(p => Math.Atan2(p.Y - center.Y, p.X - center.X)).ToList();
+        }
+
+        #endregion
     }
 }
