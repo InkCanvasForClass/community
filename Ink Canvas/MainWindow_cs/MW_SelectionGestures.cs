@@ -6,6 +6,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using Point = System.Windows.Point;
 
@@ -587,6 +588,7 @@ namespace Ink_Canvas {
             }
 
             selectedUIElement = element;
+            LogHelper.WriteLogToFile($"SelectUIElement: 设置选中元素为 {element?.GetType().Name ?? "null"}", LogHelper.LogType.Trace);
 
             if (element != null)
             {
@@ -600,11 +602,13 @@ namespace Ink_Canvas {
                 if (element is Image)
                 {
                     ShowImageToolbar();
+                    LogHelper.WriteLogToFile($"SelectUIElement: 显示图片工具栏", LogHelper.LogType.Trace);
                 }
                 else
                 {
                     // 对于其他UI元素，显示拖拽手柄
                     ShowResizeHandles();
+                    LogHelper.WriteLogToFile($"SelectUIElement: 显示拖拽手柄", LogHelper.LogType.Trace);
                 }
             }
         }
@@ -867,6 +871,8 @@ namespace Ink_Canvas {
 
         private void UIElement_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            LogHelper.WriteLogToFile($"UIElement_MouseDown: 编辑模式={inkCanvas.EditingMode}, 元素类型={sender.GetType().Name}", LogHelper.LogType.Trace);
+
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
             {
                 var element = sender as UIElement;
@@ -875,8 +881,13 @@ namespace Ink_Canvas {
                     // 切换到选择模式并选择这个元素
                     inkCanvas.Select(new[] { element });
                     SelectUIElement(element);
+                    LogHelper.WriteLogToFile($"UIElement_MouseDown: 选择了UI元素 {element.GetType().Name}", LogHelper.LogType.Trace);
                     e.Handled = true;
                 }
+            }
+            else
+            {
+                LogHelper.WriteLogToFile($"UIElement_MouseDown: 编辑模式不是Select，无法选择UI元素", LogHelper.LogType.Trace);
             }
         }
 

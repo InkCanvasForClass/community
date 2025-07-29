@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Ink_Canvas.Helpers;
 using Microsoft.Win32;
 
 namespace Ink_Canvas
@@ -28,17 +29,10 @@ namespace Ink_Canvas
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     image.Name = timestamp;
 
-                    // 新缩放逻辑：最大宽高为画布一半，并居中
-                    double maxWidth = inkCanvas.ActualWidth / 2;
-                    double maxHeight = inkCanvas.ActualHeight / 2;
-                    double scaleX = maxWidth / image.Width;
-                    double scaleY = maxHeight / image.Height;
-                    double scale = Math.Min(1, Math.Min(scaleX, scaleY));
-                    image.Width = image.Width * scale;
-                    image.Height = image.Height * scale;
-                    InkCanvas.SetLeft(image, (inkCanvas.ActualWidth - image.Width) / 2);
-                    InkCanvas.SetTop(image, (inkCanvas.ActualHeight - image.Height) / 2);
+                    CenterAndScaleElement(image);
 
+                    InkCanvas.SetLeft(image, 0);
+                    InkCanvas.SetTop(image, 0);
                     inkCanvas.Children.Add(image);
 
                     // 添加鼠标事件处理，使图片可以被选择
@@ -46,6 +40,7 @@ namespace Ink_Canvas
                     image.IsManipulationEnabled = true;
 
                     timeMachine.CommitElementInsertHistory(image);
+                    LogHelper.WriteLogToFile($"图片插入: {image.Name}, 当前画布UI元素数量: {inkCanvas.Children.Count}", LogHelper.LogType.Trace);
                 }
             }
         }
@@ -119,6 +114,8 @@ namespace Ink_Canvas
 
                 if (mediaElement != null)
                 {
+                    CenterAndScaleElement(mediaElement);
+
                     InkCanvas.SetLeft(mediaElement, 0);
                     InkCanvas.SetTop(mediaElement, 0);
                     inkCanvas.Children.Add(mediaElement);
@@ -256,5 +253,27 @@ namespace Ink_Canvas
         }
 
         #endregion
+
+        private void CenterAndScaleElement(FrameworkElement element)
+        {
+            double maxWidth = SystemParameters.PrimaryScreenWidth / 2;
+            double maxHeight = SystemParameters.PrimaryScreenHeight / 2;
+
+            double scaleX = maxWidth / element.Width;
+            double scaleY = maxHeight / element.Height;
+            double scale = Math.Min(scaleX, scaleY);
+
+            TransformGroup transformGroup = new TransformGroup();
+            transformGroup.Children.Add(new ScaleTransform(scale, scale));
+
+            double canvasWidth = inkCanvas.ActualWidth;
+            double canvasHeight = inkCanvas.ActualHeight;
+            double centerX = (canvasWidth - element.Width * scale) / 2;
+            double centerY = (canvasHeight - element.Height * scale) / 2;
+
+            transformGroup.Children.Add(new TranslateTransform(centerX, centerY));
+
+            element.RenderTransform = transformGroup;
+        }
     }
 }
