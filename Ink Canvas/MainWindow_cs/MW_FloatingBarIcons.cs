@@ -1780,20 +1780,13 @@ namespace Ink_Canvas {
                     AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
-
-                    // 取消任何UI元素的选择
+                    
                     DeselectUIElement();
 
                     SaveStrokes(true);
                     ClearStrokes(true);
-
-                    // 总是恢复备份墨迹，不管是否在PPT模式
-                    // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
                     RestoreStrokes(true);
-                    LogHelper.WriteLogToFile($"退出白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
-
-                    // 注释掉：退出白板时不应该清空图片，因为RestoreStrokes()已经恢复了正确的状态
-                    // inkCanvas.Children.Clear();
+                    
 
                     if (BtnSwitchTheme.Content.ToString() == "浅色") {
                         BtnSwitch.Content = "黑板";
@@ -1831,14 +1824,7 @@ namespace Ink_Canvas {
 
                         SaveStrokes();
                         ClearStrokes(true);
-
-                        // 总是恢复备份墨迹，不管是否在PPT模式
-                        // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
                         RestoreStrokes(true);
-                        LogHelper.WriteLogToFile($"切换到桌面模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
-
-                        // 注释掉：退出白板时不应该清空图片，因为RestoreStrokes()已经恢复了正确的状态
-                        // inkCanvas.Children.Clear();
 
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
                             BtnSwitch.Content = "黑板";
@@ -1876,7 +1862,6 @@ namespace Ink_Canvas {
                         // 总是恢复备份墨迹，不管是否在PPT模式
                         // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
                         RestoreStrokes();
-                        LogHelper.WriteLogToFile($"进入白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
 
                         BtnSwitch.Content = "屏幕";
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
