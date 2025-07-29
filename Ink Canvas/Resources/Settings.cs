@@ -56,7 +56,7 @@ namespace Ink_Canvas
         [JsonProperty("useHardwareAcceleration")]
         public bool UseHardwareAcceleration { get; set; } = true; // 默认启用硬件加速
         [JsonProperty("inkSmoothingQuality")]
-        public int InkSmoothingQuality { get; set; } = 1; // 0-低质量高性能, 1-平衡, 2-高质量低性能
+        public int InkSmoothingQuality { get; set; } = 2; // 0-低质量高性能, 1-平衡, 2-高质量低性能，默认为高质量
         [JsonProperty("maxConcurrentSmoothingTasks")]
         public int MaxConcurrentSmoothingTasks { get; set; } // 0表示自动检测CPU核心数
         [JsonProperty("clearCanvasAndClearTimeMachine")]
