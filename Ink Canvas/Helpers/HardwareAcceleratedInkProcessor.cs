@@ -74,13 +74,13 @@ namespace Ink_Canvas.Helpers
             
             pathFigure.StartPoint = new Point(points[0].X, points[0].Y);
             
-            // 使用贝塞尔曲线段创建平滑路径
-            for (int i = 0; i < points.Count - 1; i += 3)
+            // 使用贝塞尔曲线段创建平滑路径，增加插点密度
+            for (int i = 0; i < points.Count - 1; i += 2)  // 从i+=3改为i+=2，增加插点密度
             {
                 var p1 = i + 1 < points.Count ? new Point(points[i + 1].X, points[i + 1].Y) : pathFigure.StartPoint;
                 var p2 = i + 2 < points.Count ? new Point(points[i + 2].X, points[i + 2].Y) : p1;
                 var p3 = i + 3 < points.Count ? new Point(points[i + 3].X, points[i + 3].Y) : p2;
-                
+
                 var bezierSegment = new BezierSegment(p1, p2, p3, true);
                 pathFigure.Segments.Add(bezierSegment);
             }
@@ -145,7 +145,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 使用GPU加速的并行贝塞尔计算
         /// </summary>
-        public static StylusPoint[] ParallelBezierInterpolation(StylusPoint[] controlPoints, int segments = 16)
+        public static StylusPoint[] ParallelBezierInterpolation(StylusPoint[] controlPoints, int segments = 32)
         {
             if (controlPoints.Length < 4) return controlPoints;
             
@@ -212,13 +212,13 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public class InkSmoothingConfig
     {
-        public InkSmoothingQuality Quality { get; set; } = InkSmoothingQuality.Balanced;
+        public InkSmoothingQuality Quality { get; set; } = InkSmoothingQuality.HighQuality;
         public bool UseHardwareAcceleration { get; set; } = true;
         public bool UseAsyncProcessing { get; set; } = true;
         public int MaxConcurrentTasks { get; set; } = Environment.ProcessorCount;
-        public double SmoothingStrength { get; set; } = 0.6;
-        public double ResampleInterval { get; set; } = 1.2;
-        public int InterpolationSteps { get; set; } = 16;
+        public double SmoothingStrength { get; set; } = 0.8;  // 高质量模式的平滑强度
+        public double ResampleInterval { get; set; } = 0.8;  // 高质量模式的重采样间隔
+        public int InterpolationSteps { get; set; } = 64;    // 高质量模式的插值步数
 
         public static InkSmoothingConfig FromSettings()
         {
@@ -239,17 +239,17 @@ namespace Ink_Canvas.Helpers
                 case InkSmoothingQuality.HighPerformance:
                     SmoothingStrength = 0.4;
                     ResampleInterval = 2.0;
-                    InterpolationSteps = 8;
+                    InterpolationSteps = 16;  
                     break;
                 case InkSmoothingQuality.Balanced:
                     SmoothingStrength = 0.6;
                     ResampleInterval = 1.2;
-                    InterpolationSteps = 16;
+                    InterpolationSteps = 32;  
                     break;
                 case InkSmoothingQuality.HighQuality:
                     SmoothingStrength = 0.8;
                     ResampleInterval = 0.8;
-                    InterpolationSteps = 32;
+                    InterpolationSteps = 64;  
                     break;
             }
         }

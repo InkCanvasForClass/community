@@ -28,7 +28,7 @@ namespace Ink_Canvas.Helpers
 
         public double SmoothingStrength { get; set; } = 0.3; // 大幅降低强度
         public double ResampleInterval { get; set; } = 3.0; // 大幅增加间隔减少点数
-        public int InterpolationSteps { get; set; } = 4; // 极大减少插值步数
+        public int InterpolationSteps { get; set; } = 8; // 从4增加到8，提高插值步数
         public bool UseHardwareAcceleration { get; set; } = true;
         public int MaxConcurrentTasks { get; set; } = Environment.ProcessorCount;
 
@@ -354,7 +354,7 @@ namespace Ink_Canvas.Helpers
     {
         public double SmoothingStrength { get; set; } = 0.3;
         public double ResampleInterval { get; set; } = 3.0;
-        public int InterpolationSteps { get; set; } = 4;
+        public int InterpolationSteps { get; set; } = 8; 
 
         public Stroke SmoothStroke(Stroke stroke)
         {
@@ -457,7 +457,7 @@ namespace Ink_Canvas.Helpers
             return result;
         }
 
-        private List<StylusPoint> SlidingBezierFit(List<StylusPoint> points, int window = 4, int steps = 24)
+        private List<StylusPoint> SlidingBezierFit(List<StylusPoint> points, int window = 4, int steps = 48) // 从24增加到48
         {
             var result = new List<StylusPoint>();
             if (points.Count < window) return points;

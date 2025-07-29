@@ -88,8 +88,9 @@ namespace Ink_Canvas {
         }
 
         private void InitTimers() {
-            timerCheckPPT.Elapsed += TimerCheckPPT_Elapsed;
-            timerCheckPPT.Interval = 500;
+            // PPT检查现在由PPTManager处理，不再需要定时器
+            // timerCheckPPT.Elapsed += TimerCheckPPT_Elapsed;
+            // timerCheckPPT.Interval = 500;
             timerKillProcess.Elapsed += TimerKillProcess_Elapsed;
             timerKillProcess.Interval = 2000;
             timerCheckAutoFold.Elapsed += timerCheckAutoFold_Elapsed;

@@ -194,15 +194,17 @@ namespace Ink_Canvas.Helpers
             var processorCount = Environment.ProcessorCount;
             var isHardwareAccelerated = IsHardwareAccelerationSupported();
             
-            if (processorCount >= 8 && isHardwareAccelerated)
+            if (processorCount >= 4 && isHardwareAccelerated)
             {
+                // 降低高质量模式的门槛，4核以上且支持硬件加速就使用高质量
                 config.Quality = InkSmoothingQuality.HighQuality;
                 config.UseHardwareAcceleration = true;
                 config.UseAsyncProcessing = true;
                 config.MaxConcurrentTasks = Math.Min(processorCount, 8);
             }
-            else if (processorCount >= 4)
+            else if (processorCount >= 2)
             {
+                // 2核以上使用平衡模式
                 config.Quality = InkSmoothingQuality.Balanced;
                 config.UseHardwareAcceleration = isHardwareAccelerated;
                 config.UseAsyncProcessing = true;
@@ -210,6 +212,7 @@ namespace Ink_Canvas.Helpers
             }
             else
             {
+                // 单核或性能较低的设备使用高性能模式
                 config.Quality = InkSmoothingQuality.HighPerformance;
                 config.UseHardwareAcceleration = false;
                 config.UseAsyncProcessing = false;

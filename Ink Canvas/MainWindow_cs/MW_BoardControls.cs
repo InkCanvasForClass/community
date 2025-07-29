@@ -24,14 +24,74 @@ namespace Ink_Canvas {
 
         // 保存每页白板图片信息
         private void SaveStrokes(bool isBackupMain = false) {
+            // 确保画布上的所有UI元素都被保存到时间机器历史记录中
+            var currentHistory = timeMachine.ExportTimeMachineHistory();
+            var elementsInHistory = new HashSet<UIElement>();
+
+            // 收集已经在历史记录中的元素
+            if (currentHistory != null) {
+                foreach (var h in currentHistory) {
+                    if (h.CommitType == TimeMachineHistoryType.ElementInsert &&
+                        h.InsertedElement != null &&
+                        !h.StrokeHasBeenCleared) {
+                        elementsInHistory.Add(h.InsertedElement);
+                    }
+                }
+            }
+
+            // 检查画布上的所有UI元素，确保它们都在历史记录中
+            var missingElements = 0;
+            foreach (UIElement child in inkCanvas.Children) {
+                if (child is Image || child is MediaElement) {
+                    if (!elementsInHistory.Contains(child)) {
+                        timeMachine.CommitElementInsertHistory(child);
+                        missingElements++;
+                    }
+                }
+            }
+            
+
+            // 确保画布上的所有墨迹都被保存
+            if (inkCanvas.Strokes.Count > 0) {
+                // 检查是否有墨迹没有在时间机器历史记录中
+                var strokesInHistory = new HashSet<Stroke>();
+                if (currentHistory != null) {
+                    foreach (var h in currentHistory) {
+                        if (h.CommitType == TimeMachineHistoryType.UserInput &&
+                            h.CurrentStroke != null &&
+                            !h.StrokeHasBeenCleared) {
+                            foreach (Stroke stroke in h.CurrentStroke) {
+                                strokesInHistory.Add(stroke);
+                            }
+                        }
+                    }
+                }
+
+                // 收集没有在历史记录中的墨迹
+                var missingStrokes = new StrokeCollection();
+                foreach (Stroke stroke in inkCanvas.Strokes) {
+                    if (!strokesInHistory.Contains(stroke)) {
+                        missingStrokes.Add(stroke);
+                    }
+                }
+
+                if (missingStrokes.Count > 0) {
+                    timeMachine.CommitStrokeUserInputHistory(missingStrokes);
+                }
+            }
+
             if (isBackupMain) {
                 var timeMachineHistory = timeMachine.ExportTimeMachineHistory();
                 TimeMachineHistories[0] = timeMachineHistory;
                 timeMachine.ClearStrokeHistory();
+
+
             } else {
                 var timeMachineHistory = timeMachine.ExportTimeMachineHistory();
                 TimeMachineHistories[CurrentWhiteboardIndex] = timeMachineHistory;
                 timeMachine.ClearStrokeHistory();
+
+
             }
         }
 
@@ -54,9 +114,11 @@ namespace Ink_Canvas {
             try {
                 var targetIndex = isBackupMain ? 0 : CurrentWhiteboardIndex;
 
-                // 先清空当前画布的所有内容（墨迹和图片）
-                // 这里必须清除图片，因为页面切换时需要完全重置画布状态
+                // 先清空当前画布的墨迹
                 inkCanvas.Strokes.Clear();
+
+                // 清空当前画布的所有内容（墨迹和图片）
+                // 这里必须清除图片，因为页面切换时需要完全重置画布状态
                 inkCanvas.Children.Clear();
 
                 // 如果历史记录为空，直接返回（新页面或空页面）
@@ -72,6 +134,11 @@ namespace Ink_Canvas {
                     timeMachine.ImportTimeMachineHistory(TimeMachineHistories[CurrentWhiteboardIndex]);
                     // 通过时间机器历史恢复所有内容（墨迹和图片）
                     foreach (var item in TimeMachineHistories[CurrentWhiteboardIndex]) ApplyHistoryToCanvas(item);
+                }
+
+                // 确保选中状态被清除，因为我们切换了页面
+                if (selectedUIElement != null) {
+                    DeselectUIElement();
                 }
             }
             catch {

@@ -423,7 +423,7 @@ namespace Ink_Canvas
                 try
                 {
                     string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                    Process.Start(exePath, "-m");
+                    Process.Start(exePath);
                 }
                 catch { }
                 Environment.Exit(1);
@@ -438,16 +438,7 @@ namespace Ink_Canvas
             /*if (!StoreHelper.IsStoreApp) */RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
-
-            // 在应用启动时自动释放IACore相关DLL
-            try
-            {
-                Helpers.IACoreDllExtractor.ExtractIACoreDlls();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"释放IACore DLL时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
+            
 
             // 记录应用启动（设备标识符）
             DeviceIdentifier.RecordAppLaunch();
@@ -456,7 +447,7 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile($"App | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
 
             bool ret;
-            mutex = new Mutex(true, "InkCanvasForClass", out ret);
+            mutex = new Mutex(true, "InkCanvasForClass CE", out ret);
 
             if (!ret && !e.Args.Contains("-m")) //-m multiple
             {
@@ -654,7 +645,7 @@ namespace Ink_Canvas
                         try
                         {
                             string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                            Process.Start(exePath, "-m");
+                            Process.Start(exePath);
                         }
                         catch { }
                         Environment.Exit(1);
@@ -714,7 +705,7 @@ namespace Ink_Canvas
                             Environment.Exit(1);
                         }
                         string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                        Process.Start(exePath, "-m");
+                        Process.Start(exePath);
                     }
                     // CrashActionType.NoAction 时不重启，直接退出
                 }

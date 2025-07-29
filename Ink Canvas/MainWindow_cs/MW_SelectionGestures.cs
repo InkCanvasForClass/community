@@ -6,6 +6,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using Point = System.Windows.Point;
 

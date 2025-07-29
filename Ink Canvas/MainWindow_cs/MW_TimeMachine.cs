@@ -139,8 +139,28 @@ namespace Ink_Canvas {
                         targetCanvas.Children.Remove(item.InsertedElement);
                 } else {
                     // Redo: 添加元素
-                    if (item.InsertedElement != null && !targetCanvas.Children.Contains(item.InsertedElement))
+                    if (item.InsertedElement != null && !targetCanvas.Children.Contains(item.InsertedElement)) {
                         targetCanvas.Children.Add(item.InsertedElement);
+
+                        // 重新绑定事件处理器（仅对主画布）
+                        if (targetCanvas == inkCanvas) {
+                            if (item.InsertedElement is Image img) {
+                                img.MouseDown -= UIElement_MouseDown;
+                                img.MouseDown += UIElement_MouseDown;
+                                img.IsManipulationEnabled = true;
+
+                                // 重新应用CenterAndScaleElement变换
+                                CenterAndScaleElement(img);
+                            } else if (item.InsertedElement is MediaElement media) {
+                                media.MouseDown -= UIElement_MouseDown;
+                                media.MouseDown += UIElement_MouseDown;
+                                media.IsManipulationEnabled = true;
+
+                                // 重新应用CenterAndScaleElement变换
+                                CenterAndScaleElement(media);
+                            }
+                        }
+                    }
                 }
             }
 

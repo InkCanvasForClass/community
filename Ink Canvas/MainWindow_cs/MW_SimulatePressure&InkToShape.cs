@@ -653,9 +653,9 @@ namespace Ink_Canvas {
         // New method: Checks if a stroke is potentially a straight line
         private bool IsPotentialStraightLine(Stroke stroke) {
             // 确保有足够的点来进行线条分析
-            if (stroke.StylusPoints.Count < 5) 
+            if (stroke.StylusPoints.Count < 5)
                 return false;
-                
+
             Point start = stroke.StylusPoints.First().ToPoint();
             Point end = stroke.StylusPoints.Last().ToPoint();
             double lineLength = GetDistance(start, end);
@@ -663,6 +663,14 @@ namespace Ink_Canvas {
             double adaptiveThreshold = Settings.Canvas.AutoStraightenLineThreshold * GetResolutionScale();
             // 线条必须足够长才考虑拉直，使用自适应阈值
             if (lineLength < adaptiveThreshold)
+                return false;
+
+            // 新增：检查墨迹复杂度，避免将复杂图形拉直
+            if (IsComplexShape(stroke))
+                return false;
+
+            // 新增：检查是否为明显的曲线
+            if (IsObviousCurve(stroke))
                 return false;
                 
             // 获取用户设置的灵敏度值，确保使用正确的设置
@@ -726,7 +734,284 @@ namespace Ink_Canvas {
             
             return true;
         }
-        
+
+        /// <summary>
+        /// 检查墨迹是否为复杂形状（如一团墨迹、涂鸦等）
+        /// </summary>
+        private bool IsComplexShape(Stroke stroke)
+        {
+            if (stroke.StylusPoints.Count < 10) return false;
+
+            Point start = stroke.StylusPoints.First().ToPoint();
+            Point end = stroke.StylusPoints.Last().ToPoint();
+            double lineLength = GetDistance(start, end);
+
+            // 计算墨迹的实际路径长度
+            double actualLength = 0;
+            for (int i = 1; i < stroke.StylusPoints.Count; i++)
+            {
+                Point p1 = stroke.StylusPoints[i - 1].ToPoint();
+                Point p2 = stroke.StylusPoints[i].ToPoint();
+                actualLength += GetDistance(p1, p2);
+            }
+
+            // 如果实际路径长度远大于直线距离，说明是复杂形状
+            double complexityRatio = actualLength / Math.Max(lineLength, 1);
+            if (complexityRatio > 2.5) // 实际路径是直线距离的2.5倍以上
+            {
+                Debug.WriteLine($"检测到复杂形状：复杂度比率 = {complexityRatio:F2}");
+                return true;
+            }
+
+            // 检查方向变化次数
+            int directionChanges = CountDirectionChanges(stroke);
+            int maxAllowedChanges = Math.Max(3, stroke.StylusPoints.Count / 20); // 动态阈值
+            if (directionChanges > maxAllowedChanges)
+            {
+                Debug.WriteLine($"检测到复杂形状：方向变化次数 = {directionChanges}，阈值 = {maxAllowedChanges}");
+                return true;
+            }
+
+            // 检查是否有明显的回环或重叠
+            if (HasSignificantLoops(stroke))
+            {
+                Debug.WriteLine("检测到复杂形状：存在明显回环");
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 检查是否为明显的曲线（如圆弧、抛物线等）
+        /// </summary>
+        private bool IsObviousCurve(Stroke stroke)
+        {
+            if (stroke.StylusPoints.Count < 10) return false;
+
+            Point start = stroke.StylusPoints.First().ToPoint();
+            Point end = stroke.StylusPoints.Last().ToPoint();
+            double lineLength = GetDistance(start, end);
+
+            // 检查曲率一致性
+            if (HasConsistentCurvature(stroke))
+            {
+                Debug.WriteLine("检测到明显曲线：曲率一致");
+                return true;
+            }
+
+            // 检查中点偏移（对圆弧特别有效）
+            int midIndex = stroke.StylusPoints.Count / 2;
+            Point midPoint = stroke.StylusPoints[midIndex].ToPoint();
+            double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
+
+            // 如果中点偏移超过线长的15%，且偏移方向一致，可能是圆弧
+            if (midDeviation > lineLength * 0.15)
+            {
+                // 检查偏移方向的一致性
+                if (IsConsistentArcDirection(stroke))
+                {
+                    Debug.WriteLine($"检测到明显曲线：中点偏移 = {midDeviation:F2}，线长 = {lineLength:F2}");
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 计算方向变化次数
+        /// </summary>
+        private int CountDirectionChanges(Stroke stroke)
+        {
+            if (stroke.StylusPoints.Count < 3) return 0;
+
+            int changes = 0;
+            double lastAngle = 0;
+            bool hasLastAngle = false;
+
+            for (int i = 1; i < stroke.StylusPoints.Count - 1; i++)
+            {
+                Point p1 = stroke.StylusPoints[i - 1].ToPoint();
+                Point p2 = stroke.StylusPoints[i].ToPoint();
+                Point p3 = stroke.StylusPoints[i + 1].ToPoint();
+
+                // 计算角度变化
+                double angle1 = Math.Atan2(p2.Y - p1.Y, p2.X - p1.X);
+                double angle2 = Math.Atan2(p3.Y - p2.Y, p3.X - p2.X);
+                double angleDiff = Math.Abs(angle2 - angle1);
+
+                // 处理角度跨越问题
+                if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+
+                // 如果角度变化超过30度，认为是方向变化
+                if (angleDiff > Math.PI / 6) // 30度
+                {
+                    if (hasLastAngle && Math.Abs(angleDiff - lastAngle) > Math.PI / 12) // 15度
+                    {
+                        changes++;
+                    }
+                    lastAngle = angleDiff;
+                    hasLastAngle = true;
+                }
+            }
+
+            return changes;
+        }
+
+        /// <summary>
+        /// 检查是否有明显的回环
+        /// </summary>
+        private bool HasSignificantLoops(Stroke stroke)
+        {
+            if (stroke.StylusPoints.Count < 20) return false;
+
+            // 检查起点和终点是否接近（可能是闭合图形）
+            Point start = stroke.StylusPoints.First().ToPoint();
+            Point end = stroke.StylusPoints.Last().ToPoint();
+            double startEndDistance = GetDistance(start, end);
+
+            // 计算平均点间距
+            double totalDistance = 0;
+            for (int i = 1; i < stroke.StylusPoints.Count; i++)
+            {
+                Point p1 = stroke.StylusPoints[i - 1].ToPoint();
+                Point p2 = stroke.StylusPoints[i].ToPoint();
+                totalDistance += GetDistance(p1, p2);
+            }
+            double avgPointDistance = totalDistance / (stroke.StylusPoints.Count - 1);
+
+            // 如果起点和终点很接近，可能是闭合图形
+            if (startEndDistance < avgPointDistance * 5)
+            {
+                return true;
+            }
+
+            // 检查是否有点重复经过相似区域
+            int overlapCount = 0;
+            double overlapThreshold = avgPointDistance * 3;
+
+            for (int i = 0; i < stroke.StylusPoints.Count - 10; i += 5)
+            {
+                Point p1 = stroke.StylusPoints[i].ToPoint();
+                for (int j = i + 10; j < stroke.StylusPoints.Count; j += 5)
+                {
+                    Point p2 = stroke.StylusPoints[j].ToPoint();
+                    if (GetDistance(p1, p2) < overlapThreshold)
+                    {
+                        overlapCount++;
+                        if (overlapCount > 3) return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 检查曲率是否一致（用于识别圆弧等规则曲线）
+        /// </summary>
+        private bool HasConsistentCurvature(Stroke stroke)
+        {
+            if (stroke.StylusPoints.Count < 15) return false;
+
+            List<double> curvatures = new List<double>();
+
+            // 计算每个点的曲率
+            for (int i = 2; i < stroke.StylusPoints.Count - 2; i++)
+            {
+                Point p1 = stroke.StylusPoints[i - 2].ToPoint();
+                Point p2 = stroke.StylusPoints[i].ToPoint();
+                Point p3 = stroke.StylusPoints[i + 2].ToPoint();
+
+                double curvature = CalculateCurvature(p1, p2, p3);
+                if (!double.IsNaN(curvature) && !double.IsInfinity(curvature))
+                {
+                    curvatures.Add(Math.Abs(curvature));
+                }
+            }
+
+            if (curvatures.Count < 5) return false;
+
+            // 计算曲率的标准差
+            double avgCurvature = curvatures.Average();
+            double variance = curvatures.Select(c => Math.Pow(c - avgCurvature, 2)).Average();
+            double stdDev = Math.Sqrt(variance);
+
+            // 如果曲率变化很小且平均曲率不为零，可能是规则曲线
+            return avgCurvature > 0.001 && stdDev / avgCurvature < 0.5;
+        }
+
+        /// <summary>
+        /// 检查圆弧方向是否一致
+        /// </summary>
+        private bool IsConsistentArcDirection(Stroke stroke)
+        {
+            if (stroke.StylusPoints.Count < 10) return false;
+
+            Point start = stroke.StylusPoints.First().ToPoint();
+            Point end = stroke.StylusPoints.Last().ToPoint();
+
+            int positiveDeviations = 0;
+            int negativeDeviations = 0;
+
+            // 检查多个点相对于直线的偏移方向
+            for (int i = 1; i < stroke.StylusPoints.Count - 1; i += Math.Max(1, stroke.StylusPoints.Count / 10))
+            {
+                Point p = stroke.StylusPoints[i].ToPoint();
+                double signedDistance = SignedDistanceFromLineToPoint(start, end, p);
+
+                if (Math.Abs(signedDistance) > 5) // 忽略很小的偏移
+                {
+                    if (signedDistance > 0) positiveDeviations++;
+                    else negativeDeviations++;
+                }
+            }
+
+            // 如果大部分点都在直线的同一侧，说明是一致的弧形
+            int totalSignificantDeviations = positiveDeviations + negativeDeviations;
+            if (totalSignificantDeviations < 3) return false;
+
+            double consistency = Math.Max(positiveDeviations, negativeDeviations) / (double)totalSignificantDeviations;
+            return consistency > 0.8; // 80%的点在同一侧
+        }
+
+        /// <summary>
+        /// 计算三点的曲率
+        /// </summary>
+        private double CalculateCurvature(Point p1, Point p2, Point p3)
+        {
+            // 使用三点计算曲率的公式
+            double a = GetDistance(p1, p2);
+            double b = GetDistance(p2, p3);
+            double c = GetDistance(p1, p3);
+
+            if (a == 0 || b == 0 || c == 0) return 0;
+
+            // 使用海伦公式计算面积
+            double s = (a + b + c) / 2;
+            double area = Math.Sqrt(s * (s - a) * (s - b) * (s - c));
+
+            // 曲率 = 4 * 面积 / (a * b * c)
+            return 4 * area / (a * b * c);
+        }
+
+        /// <summary>
+        /// 计算点到直线的有符号距离
+        /// </summary>
+        private double SignedDistanceFromLineToPoint(Point lineStart, Point lineEnd, Point point)
+        {
+            // 使用叉积计算有符号距离
+            double dx = lineEnd.X - lineStart.X;
+            double dy = lineEnd.Y - lineStart.Y;
+            double lineLength = Math.Sqrt(dx * dx + dy * dy);
+
+            if (lineLength == 0) return 0;
+
+            return ((lineEnd.Y - lineStart.Y) * point.X - (lineEnd.X - lineStart.X) * point.Y +
+                    lineEnd.X * lineStart.Y - lineEnd.Y * lineStart.X) / lineLength;
+        }
+
         // New method: Determines if a stroke should be straightened into a line
         private bool ShouldStraightenLine(Stroke stroke) {
             Point start = stroke.StylusPoints.First().ToPoint();
@@ -737,8 +1022,24 @@ namespace Ink_Canvas {
             double adaptiveThreshold = Settings.Canvas.AutoStraightenLineThreshold * GetResolutionScale();
             // 如果线条太短，不进行拉直处理，使用自适应阈值
             if (lineLength < adaptiveThreshold) {
-                // 显示调试信息 - 线条长度不足
-                // MessageBox.Show($"线条太短: {lineLength} < {Settings.Canvas.AutoStraightenLineThreshold}", "调试信息");
+                Debug.WriteLine($"线条太短: {lineLength} < {adaptiveThreshold}");
+                return false;
+            }
+
+            // 新增：再次检查复杂度（双重保险）
+            if (IsComplexShape(stroke))
+            {
+                Debug.WriteLine("拒绝拉直：检测到复杂形状");
+                return false;
+            }
+
+            // 新增：检查线条的直线度评分
+            double straightnessScore = CalculateStraightnessScore(stroke);
+            double minStraightnessThreshold = 0.7; // 最低直线度要求
+
+            if (straightnessScore < minStraightnessThreshold)
+            {
+                Debug.WriteLine($"拒绝拉直：直线度评分过低 {straightnessScore:F3} < {minStraightnessThreshold}");
                 return false;
             }
             
@@ -976,8 +1277,110 @@ namespace Ink_Canvas {
                 }
             }
                 
-            Debug.WriteLine("接受拉直");
+            Debug.WriteLine($"接受拉直：直线度评分 = {straightnessScore:F3}");
             return true;
+        }
+
+        /// <summary>
+        /// 计算墨迹的直线度评分（0-1，1表示完美直线）
+        /// </summary>
+        private double CalculateStraightnessScore(Stroke stroke)
+        {
+            if (stroke.StylusPoints.Count < 3) return 0;
+
+            Point start = stroke.StylusPoints.First().ToPoint();
+            Point end = stroke.StylusPoints.Last().ToPoint();
+            double lineLength = GetDistance(start, end);
+
+            if (lineLength == 0) return 0;
+
+            // 1. 计算偏差评分（基于点到直线的距离）
+            double totalDeviation = 0;
+            double maxDeviation = 0;
+            int pointCount = 0;
+
+            foreach (StylusPoint sp in stroke.StylusPoints)
+            {
+                Point p = sp.ToPoint();
+                double deviation = DistanceFromLineToPoint(start, end, p);
+                totalDeviation += deviation;
+                maxDeviation = Math.Max(maxDeviation, deviation);
+                pointCount++;
+            }
+
+            double avgDeviation = totalDeviation / pointCount;
+
+            // 偏差评分：基于平均偏差和最大偏差
+            double deviationScore = Math.Max(0, 1 - (avgDeviation / (lineLength * 0.05)) - (maxDeviation / (lineLength * 0.1)));
+
+            // 2. 计算方向一致性评分
+            double directionScore = CalculateDirectionConsistency(stroke);
+
+            // 3. 计算路径效率评分（实际路径长度 vs 直线距离）
+            double actualLength = 0;
+            for (int i = 1; i < stroke.StylusPoints.Count; i++)
+            {
+                Point p1 = stroke.StylusPoints[i - 1].ToPoint();
+                Point p2 = stroke.StylusPoints[i].ToPoint();
+                actualLength += GetDistance(p1, p2);
+            }
+            double efficiencyScore = Math.Max(0, Math.Min(1, lineLength / actualLength));
+
+            // 4. 计算端点连接度评分（起点到终点的直接性）
+            double endpointScore = 1.0; // 默认满分，因为我们已经有了起点和终点
+
+            // 综合评分（加权平均）
+            double finalScore = (deviationScore * 0.4 + directionScore * 0.3 + efficiencyScore * 0.2 + endpointScore * 0.1);
+
+            Debug.WriteLine($"直线度评分详情: 偏差={deviationScore:F3}, 方向={directionScore:F3}, 效率={efficiencyScore:F3}, 综合={finalScore:F3}");
+
+            return Math.Max(0, Math.Min(1, finalScore));
+        }
+
+        /// <summary>
+        /// 计算方向一致性评分
+        /// </summary>
+        private double CalculateDirectionConsistency(Stroke stroke)
+        {
+            if (stroke.StylusPoints.Count < 5) return 1.0;
+
+            Point start = stroke.StylusPoints.First().ToPoint();
+            Point end = stroke.StylusPoints.Last().ToPoint();
+
+            // 目标方向
+            double targetAngle = Math.Atan2(end.Y - start.Y, end.X - start.X);
+
+            double totalAngleDifference = 0;
+            int segmentCount = 0;
+
+            // 计算每个线段与目标方向的角度差
+            for (int i = 1; i < stroke.StylusPoints.Count; i++)
+            {
+                Point p1 = stroke.StylusPoints[i - 1].ToPoint();
+                Point p2 = stroke.StylusPoints[i].ToPoint();
+
+                double segmentLength = GetDistance(p1, p2);
+                if (segmentLength < 2) continue; // 忽略太短的线段
+
+                double segmentAngle = Math.Atan2(p2.Y - p1.Y, p2.X - p1.X);
+                double angleDiff = Math.Abs(segmentAngle - targetAngle);
+
+                // 处理角度跨越问题
+                if (angleDiff > Math.PI) angleDiff = 2 * Math.PI - angleDiff;
+
+                totalAngleDifference += angleDiff;
+                segmentCount++;
+            }
+
+            if (segmentCount == 0) return 1.0;
+
+            double avgAngleDifference = totalAngleDifference / segmentCount;
+
+            // 将角度差转换为评分（0-1）
+            // 0度差 = 1分，90度差 = 0分
+            double directionScore = Math.Max(0, 1 - (avgAngleDifference / (Math.PI / 2)));
+
+            return directionScore;
         }
         
         // New method: Creates a straight line stroke between two points

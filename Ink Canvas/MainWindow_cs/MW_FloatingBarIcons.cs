@@ -672,7 +672,11 @@ namespace Ink_Canvas {
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) {
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                        SaveScreenShot(true, $"{pptName}/{previousSlideID}_{DateTime.Now:HH-mm-ss}");
+                    {
+                        var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                        var presentationName = _pptManager?.GetPresentationName() ?? "";
+                        SaveScreenShot(true, $"{presentationName}/{currentSlide}_{DateTime.Now:HH-mm-ss}");
+                    }
                     else
                         SaveScreenShot(true);
                 }
@@ -1287,7 +1291,11 @@ namespace Ink_Canvas {
             if (inkCanvas.Strokes.Count > 0 &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) {
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                    SaveScreenShot(true, $"{pptName}/{previousSlideID}_{DateTime.Now:HH-mm-ss}");
+                {
+                    var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                    var presentationName = _pptManager?.GetPresentationName() ?? "";
+                    SaveScreenShot(true, $"{presentationName}/{currentSlide}_{DateTime.Now:HH-mm-ss}");
+                }
                 else SaveScreenShot(true);
             }
 
@@ -1325,14 +1333,10 @@ namespace Ink_Canvas {
 
             if (currentMode != 0) {
                 SaveStrokes();
-                // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
-                    RestoreStrokes(true);
-                } else {
-                    // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
-                    TimeMachineHistories[0] = null;
-                    timeMachine.ClearStrokeHistory();
-                }
+                // 总是恢复备份墨迹，不管是否在PPT模式
+                // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
+                RestoreStrokes(true);
+                LogHelper.WriteLogToFile($"退出白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
             }
 
             if (BtnSwitchTheme.Content.ToString() == "浅色")
@@ -1650,14 +1654,10 @@ namespace Ink_Canvas {
         }
 
         public void BtnRestart_Click(object sender, RoutedEventArgs e) {
-            try {
-                Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
-                App.IsAppExitByUser = true;
-                CloseIsFromButton = true;
-                Application.Current.Shutdown();
-            } catch (Exception ex) {
-                LogHelper.NewLog($"重启程序时出错: {ex.Message}");
-            }
+            Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
+            App.IsAppExitByUser = true;
+            CloseIsFromButton = true;
+            Application.Current.Shutdown();
         }
 
         private void SettingsOverlayClick(object sender, MouseButtonEventArgs e) {
@@ -1780,26 +1780,13 @@ namespace Ink_Canvas {
                     AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
-
-                    // 取消任何UI元素的选择
+                    
                     DeselectUIElement();
 
                     SaveStrokes(true);
                     ClearStrokes(true);
-
-                    // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
-                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
-                        LogHelper.WriteLogToFile("退出白板：当前在PPT放映模式，恢复备份墨迹", LogHelper.LogType.Trace);
-                        RestoreStrokes();
-                    } else {
-                        // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
-                        LogHelper.WriteLogToFile("退出白板：当前不在PPT放映模式，清空备份以避免显示已结束PPT的墨迹", LogHelper.LogType.Trace);
-                        TimeMachineHistories[0] = null;
-                        timeMachine.ClearStrokeHistory();
-                    }
-
-                    // 退出白板时清空图片
-                    inkCanvas.Children.Clear();
+                    RestoreStrokes(true);
+                    
 
                     if (BtnSwitchTheme.Content.ToString() == "浅色") {
                         BtnSwitch.Content = "黑板";
@@ -1837,18 +1824,7 @@ namespace Ink_Canvas {
 
                         SaveStrokes();
                         ClearStrokes(true);
-
-                        // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
-                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
-                            RestoreStrokes(true);
-                        } else {
-                            // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
-                            TimeMachineHistories[0] = null;
-                            timeMachine.ClearStrokeHistory();
-                        }
-
-                        // 退出白板时清空图片
-                        inkCanvas.Children.Clear();
+                        RestoreStrokes(true);
 
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
                             BtnSwitch.Content = "黑板";
@@ -1883,14 +1859,9 @@ namespace Ink_Canvas {
                         SaveStrokes(true);
                         ClearStrokes(true);
 
-                        // 检查是否在PPT放映模式，如果不在则不恢复可能包含PPT墨迹的备份
-                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) {
-                            RestoreStrokes();
-                        } else {
-                            // 不在PPT模式时，清空备份以避免显示已结束PPT的墨迹
-                            TimeMachineHistories[0] = null;
-                            timeMachine.ClearStrokeHistory();
-                        }
+                        // 总是恢复备份墨迹，不管是否在PPT模式
+                        // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
+                        RestoreStrokes();
 
                         BtnSwitch.Content = "屏幕";
                         if (BtnSwitchTheme.Content.ToString() == "浅色") {
@@ -2058,24 +2029,16 @@ namespace Ink_Canvas {
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     image.Name = timestamp;
 
-                    // 新缩放逻辑：最大宽高为画布一半，并居中
-                    double maxWidth = inkCanvas.ActualWidth / 2;
-                    double maxHeight = inkCanvas.ActualHeight / 2;
-                    double scaleX = maxWidth / image.Width;
-                    double scaleY = maxHeight / image.Height;
-                    double scale = Math.Min(1, Math.Min(scaleX, scaleY));
-                    image.Width = image.Width * scale;
-                    image.Height = image.Height * scale;
-                    InkCanvas.SetLeft(image, (inkCanvas.ActualWidth - image.Width) / 2);
-                    InkCanvas.SetTop(image, (inkCanvas.ActualHeight - image.Height) / 2);
+                    CenterAndScaleElement(image);
 
+                    InkCanvas.SetLeft(image, 0);
+                    InkCanvas.SetTop(image, 0);
                     inkCanvas.Children.Add(image);
 
                     timeMachine.CommitElementInsertHistory(image);
                 }
             }
         }
-
 
     }
 }
