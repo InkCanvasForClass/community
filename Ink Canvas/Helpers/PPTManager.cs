@@ -986,13 +986,7 @@ namespace Ink_Canvas.Helpers
                     StopWpsProcessCheckTimer();
                     return;
                 }
-
-                // 优化：增加延迟检查，避免误杀
-                if (_wpsProcessCheckCount < 3) // 前6秒不进行查杀检查
-                {
-                    LogHelper.WriteLogToFile($"WPS进程查杀延迟中，等待{6 - _wpsProcessCheckCount * 2}秒", LogHelper.LogType.Trace);
-                    return;
-                }
+                
 
                 // 检查前台WPS窗口是否存在（优化版）
                 bool isForegroundWpsWindowActive = IsForegroundWpsWindowStillActiveOptimized();
