@@ -38,7 +38,35 @@ namespace Ink_Canvas.Helpers
         public Slides CurrentSlides { get; private set; }
         public Slide CurrentSlide { get; private set; }
         public int SlidesCount { get; private set; }
-        public bool IsConnected => PPTApplication != null;
+        public bool IsConnected
+        {
+            get
+            {
+                try
+                {
+                    if (PPTApplication == null) return false;
+                    if (!Marshal.IsComObject(PPTApplication)) return false;
+
+                    // 尝试访问一个简单的属性来验证连接是否有效
+                    var _ = PPTApplication.Name;
+                    return true;
+                }
+                catch (COMException comEx)
+                {
+                    var hr = (uint)comEx.HResult;
+                    // 如果COM对象已失效，返回false
+                    if (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706B5)
+                    {
+                        return false;
+                    }
+                    return false;
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+        }
         public bool IsInSlideShow
         {
             get
@@ -137,12 +165,19 @@ namespace Ink_Canvas.Helpers
                         pptApp = TryConnectToWPS();
                     }
 
-                    if (pptApp != null && PPTApplication == null)
+                    if (pptApp != null && !IsConnected)
                     {
+                        // 有可用的PPT/WPS应用程序且当前未连接，建立连接
                         ConnectToPPT(pptApp);
+                    }
+                    else if (pptApp == null && IsConnected)
+                    {
+                        // 没有可用的PPT/WPS应用程序但当前显示已连接，断开连接
+                        DisconnectFromPPT();
                     }
                     else if (pptApp == null && PPTApplication != null)
                     {
+                        // PPT/WPS应用程序不可用但PPTApplication对象仍存在，清理无效连接
                         DisconnectFromPPT();
                     }
                 }
@@ -1235,11 +1270,29 @@ namespace Ink_Canvas.Helpers
                 {
                     try { Marshal.ReleaseComObject(CurrentSlides); } catch { }
                 }
+                if (CurrentPresentation != null && Marshal.IsComObject(CurrentPresentation))
+                {
+                    try { Marshal.ReleaseComObject(CurrentPresentation); } catch { }
+                }
+                if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
+                {
+                    try { Marshal.ReleaseComObject(PPTApplication); } catch { }
+                }
+
                 CurrentSlide = null;
                 CurrentSlides = null;
                 CurrentPresentation = null;
+                PPTApplication = null;
                 SlidesCount = 0;
                 StopWpsProcessCheckTimer();
+
+                // 重新启动连接检查定时器，以便能够检测新的WPS实例
+                _connectionCheckTimer?.Start();
+
+                // 触发连接断开事件
+                PPTConnectionChanged?.Invoke(false);
+
+                LogHelper.WriteLogToFile("WPS进程结束后已清理所有COM对象并重启连接检查", LogHelper.LogType.Event);
             }
         }
 
