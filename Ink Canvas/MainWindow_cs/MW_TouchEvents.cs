@@ -364,13 +364,24 @@ namespace Ink_Canvas {
             }
 
             //手势完成后切回之前的状态
-            if (dec.Count > 1)
-                if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+            // 修复：改进多指手势恢复逻辑，确保从橡皮擦切换到笔时多指手势能正确恢复
+            if (dec.Count > 1) {
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.None) {
                     if (lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint) {
                         inkCanvas.EditingMode = lastInkCanvasEditingMode;
                     }
+                }
+            } else if (dec.Count == 0) {
+                // 当所有触摸点都抬起时，确保正确恢复编辑模式
+                // 这对于从橡皮擦切换到笔后恢复多指手势功能很重要
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.None &&
+                    lastInkCanvasEditingMode != InkCanvasEditingMode.None &&
+                    lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint) {
+                    inkCanvas.EditingMode = lastInkCanvasEditingMode;
+                }
+            }
             inkCanvas.Opacity = 1;
-            
+
             if (dec.Count == 0)
                 if (lastTouchDownStrokeCollection.Count() != inkCanvas.Strokes.Count() &&
                     !(drawingShapeMode == 9 && !isFirstTouchCuboid)) {
@@ -390,6 +401,8 @@ namespace Ink_Canvas {
             if (e.Manipulators.Count() != 0) return;
             if (drawingShapeMode == 0 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint) {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                // 修复：确保多指手势完成后正确更新lastInkCanvasEditingMode
+                lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
             }
         }
 

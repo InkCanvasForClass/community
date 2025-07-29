@@ -106,7 +106,11 @@ namespace Ink_Canvas {
         private void BtnPen_Click(object sender, RoutedEventArgs e) {
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();
-            
+
+            // 修复：从橡皮擦切换到批注模式时，退出多指书写模式
+            // 这解决了从橡皮擦切换为批注时被锁定为多指书写的问题
+            ExitMultiTouchModeIfNeeded();
+
             // 如果当前已是批注模式，再次点击弹出批注子面板
             if (penType == 0 && inkCanvas.EditingMode == InkCanvasEditingMode.Ink && !drawingAttributes.IsHighlighter) {
                 return;
@@ -119,6 +123,11 @@ namespace Ink_Canvas {
             drawingAttributes.IsHighlighter = false;
             drawingAttributes.StylusTip = StylusTip.Ellipse;
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+
+            // 修复：确保从橡皮擦切换到笔时，多指手势功能能正确恢复
+            // 更新lastInkCanvasEditingMode以确保多指手势逻辑正确
+            lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 

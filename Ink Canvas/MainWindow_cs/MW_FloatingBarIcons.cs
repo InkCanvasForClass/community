@@ -1371,6 +1371,10 @@ namespace Ink_Canvas {
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();
 
+            // 修复：从橡皮擦切换到批注模式时，退出多指书写模式
+            // 这解决了从橡皮擦切换为批注时被锁定为多指书写的问题
+            ExitMultiTouchModeIfNeeded();
+
             FloatingbarSelectionBG.Visibility = Visibility.Visible;
             System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 28);
 
