@@ -113,15 +113,15 @@
   <ItemGroup>
     <Reference Include="IACore">
       <HintPath>.\IACore.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="IALoader">
       <HintPath>.\IALoader.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="IAWinFX">
       <HintPath>.\IAWinFX.dll</HintPath>
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="netstandard" />
