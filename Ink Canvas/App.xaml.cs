@@ -438,16 +438,7 @@ namespace Ink_Canvas
             /*if (!StoreHelper.IsStoreApp) */RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
-
-            // 在应用启动时自动释放IACore相关DLL
-            try
-            {
-                Helpers.IACoreDllExtractor.ExtractIACoreDlls();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"释放IACore DLL时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
+            
 
             // 记录应用启动（设备标识符）
             DeviceIdentifier.RecordAppLaunch();
