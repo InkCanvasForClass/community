@@ -40,7 +40,6 @@ namespace Ink_Canvas
                     image.IsManipulationEnabled = true;
 
                     timeMachine.CommitElementInsertHistory(image);
-                    LogHelper.WriteLogToFile($"图片插入: {image.Name}, 当前画布UI元素数量: {inkCanvas.Children.Count}", LogHelper.LogType.Trace);
                 }
             }
         }

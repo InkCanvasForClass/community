@@ -135,29 +135,12 @@ namespace Ink_Canvas {
 
                 if (item.StrokeHasBeenCleared) {
                     // Undo: 移除元素
-                    if (item.InsertedElement != null && targetCanvas.Children.Contains(item.InsertedElement)) {
+                    if (item.InsertedElement != null && targetCanvas.Children.Contains(item.InsertedElement))
                         targetCanvas.Children.Remove(item.InsertedElement);
-                        LogHelper.WriteLogToFile($"ApplyHistoryToCanvas: 移除UI元素 {item.InsertedElement.GetType().Name}", LogHelper.LogType.Trace);
-                    }
                 } else {
                     // Redo: 添加元素
-                    if (item.InsertedElement != null) {
-                        // 确保元素不在画布上，如果在就先移除
-                        if (targetCanvas.Children.Contains(item.InsertedElement)) {
-                            targetCanvas.Children.Remove(item.InsertedElement);
-                            LogHelper.WriteLogToFile($"ApplyHistoryToCanvas: 先移除已存在的UI元素 {item.InsertedElement.GetType().Name}", LogHelper.LogType.Trace);
-                        }
-
-                        // 确保元素没有其他父容器
-                        if (item.InsertedElement is FrameworkElement fe && fe.Parent != null) {
-                            if (fe.Parent is Panel parentPanel) {
-                                parentPanel.Children.Remove(fe);
-                                LogHelper.WriteLogToFile($"ApplyHistoryToCanvas: 从其他父容器移除UI元素 {item.InsertedElement.GetType().Name}", LogHelper.LogType.Trace);
-                            }
-                        }
-
+                    if (item.InsertedElement != null && !targetCanvas.Children.Contains(item.InsertedElement)) {
                         targetCanvas.Children.Add(item.InsertedElement);
-                        LogHelper.WriteLogToFile($"ApplyHistoryToCanvas: 添加UI元素 {item.InsertedElement.GetType().Name}", LogHelper.LogType.Trace);
 
                         // 重新绑定事件处理器（仅对主画布）
                         if (targetCanvas == inkCanvas) {
@@ -168,7 +151,6 @@ namespace Ink_Canvas {
 
                                 // 重新应用CenterAndScaleElement变换
                                 CenterAndScaleElement(img);
-                                LogHelper.WriteLogToFile($"ApplyHistoryToCanvas: 重新配置图片元素 {img.Name}", LogHelper.LogType.Trace);
                             } else if (item.InsertedElement is MediaElement media) {
                                 media.MouseDown -= UIElement_MouseDown;
                                 media.MouseDown += UIElement_MouseDown;
@@ -176,7 +158,6 @@ namespace Ink_Canvas {
 
                                 // 重新应用CenterAndScaleElement变换
                                 CenterAndScaleElement(media);
-                                LogHelper.WriteLogToFile($"ApplyHistoryToCanvas: 重新配置媒体元素 {media.Name}", LogHelper.LogType.Trace);
                             }
                         }
                     }

@@ -46,14 +46,10 @@ namespace Ink_Canvas {
                     if (!elementsInHistory.Contains(child)) {
                         timeMachine.CommitElementInsertHistory(child);
                         missingElements++;
-                        LogHelper.WriteLogToFile($"SaveStrokes: 补充保存遗漏的UI元素 {child.GetType().Name}", LogHelper.LogType.Trace);
                     }
                 }
             }
-
-            if (missingElements > 0) {
-                LogHelper.WriteLogToFile($"SaveStrokes: 总共补充保存了 {missingElements} 个遗漏的UI元素", LogHelper.LogType.Trace);
-            }
+            
 
             // 确保画布上的所有墨迹都被保存
             if (inkCanvas.Strokes.Count > 0) {
@@ -81,7 +77,6 @@ namespace Ink_Canvas {
 
                 if (missingStrokes.Count > 0) {
                     timeMachine.CommitStrokeUserInputHistory(missingStrokes);
-                    LogHelper.WriteLogToFile($"SaveStrokes: 补充保存了 {missingStrokes.Count} 个遗漏的墨迹", LogHelper.LogType.Trace);
                 }
             }
 
@@ -90,25 +85,13 @@ namespace Ink_Canvas {
                 TimeMachineHistories[0] = timeMachineHistory;
                 timeMachine.ClearStrokeHistory();
 
-                // 调试信息
-                var elementCount = timeMachineHistory?.Count(h => h.CommitType == TimeMachineHistoryType.ElementInsert && !h.StrokeHasBeenCleared) ?? 0;
-                var strokeHistoryCount = timeMachineHistory?.Count(h => h.CommitType == TimeMachineHistoryType.UserInput && !h.StrokeHasBeenCleared) ?? 0;
-                var currentCanvasElements = inkCanvas.Children.Count;
-                var currentCanvasStrokes = inkCanvas.Strokes.Count;
-                var selectedElement = selectedUIElement?.GetType().Name ?? "无";
-                LogHelper.WriteLogToFile($"SaveStrokes(备份主页面): 保存了 {elementCount} 个UI元素, {strokeHistoryCount} 个墨迹历史, 当前画布有 {currentCanvasElements} 个元素, {currentCanvasStrokes} 个墨迹, 选中元素: {selectedElement}", LogHelper.LogType.Trace);
+
             } else {
                 var timeMachineHistory = timeMachine.ExportTimeMachineHistory();
                 TimeMachineHistories[CurrentWhiteboardIndex] = timeMachineHistory;
                 timeMachine.ClearStrokeHistory();
 
-                // 调试信息
-                var elementCount = timeMachineHistory?.Count(h => h.CommitType == TimeMachineHistoryType.ElementInsert && !h.StrokeHasBeenCleared) ?? 0;
-                var strokeHistoryCount = timeMachineHistory?.Count(h => h.CommitType == TimeMachineHistoryType.UserInput && !h.StrokeHasBeenCleared) ?? 0;
-                var currentCanvasElements = inkCanvas.Children.Count;
-                var currentCanvasStrokes = inkCanvas.Strokes.Count;
-                var selectedElement = selectedUIElement?.GetType().Name ?? "无";
-                LogHelper.WriteLogToFile($"SaveStrokes(页面{CurrentWhiteboardIndex}): 保存了 {elementCount} 个UI元素, {strokeHistoryCount} 个墨迹历史, 当前画布有 {currentCanvasElements} 个元素, {currentCanvasStrokes} 个墨迹, 选中元素: {selectedElement}", LogHelper.LogType.Trace);
+
             }
         }
 
@@ -134,25 +117,15 @@ namespace Ink_Canvas {
                 // 先清空当前画布的墨迹
                 inkCanvas.Strokes.Clear();
 
-                // 保存当前的UI元素，稍后会被ApplyHistoryToCanvas正确处理
-                var currentElements = new List<UIElement>();
-                for (int i = inkCanvas.Children.Count - 1; i >= 0; i--)
-                {
-                    currentElements.Add(inkCanvas.Children[i]);
-                }
+                // 清空当前画布的所有内容（墨迹和图片）
+                // 这里必须清除图片，因为页面切换时需要完全重置画布状态
                 inkCanvas.Children.Clear();
-                LogHelper.WriteLogToFile($"RestoreStrokes: 清空了 {currentElements.Count} 个当前UI元素", LogHelper.LogType.Trace);
 
                 // 如果历史记录为空，直接返回（新页面或空页面）
                 if (TimeMachineHistories[targetIndex] == null) {
                     timeMachine.ClearStrokeHistory();
-                    LogHelper.WriteLogToFile($"RestoreStrokes({(isBackupMain ? "备份主页面" : $"页面{CurrentWhiteboardIndex}")}): 历史记录为空", LogHelper.LogType.Trace);
                     return;
                 }
-
-                var targetHistory = TimeMachineHistories[targetIndex];
-                var elementCount = targetHistory?.Count(h => h.CommitType == TimeMachineHistoryType.ElementInsert && !h.StrokeHasBeenCleared) ?? 0;
-                LogHelper.WriteLogToFile($"RestoreStrokes({(isBackupMain ? "备份主页面" : $"页面{CurrentWhiteboardIndex}")}): 准备恢复 {elementCount} 个UI元素", LogHelper.LogType.Trace);
 
                 if (isBackupMain) {
                     timeMachine.ImportTimeMachineHistory(TimeMachineHistories[0]);
@@ -163,18 +136,13 @@ namespace Ink_Canvas {
                     foreach (var item in TimeMachineHistories[CurrentWhiteboardIndex]) ApplyHistoryToCanvas(item);
                 }
 
-                // 恢复后检查实际的UI元素数量
-                var actualElementCount = inkCanvas.Children.Count;
-                LogHelper.WriteLogToFile($"RestoreStrokes({(isBackupMain ? "备份主页面" : $"页面{CurrentWhiteboardIndex}")}): 实际恢复了 {actualElementCount} 个UI元素", LogHelper.LogType.Trace);
-
                 // 确保选中状态被清除，因为我们切换了页面
                 if (selectedUIElement != null) {
                     DeselectUIElement();
-                    LogHelper.WriteLogToFile($"RestoreStrokes: 清除了选中状态", LogHelper.LogType.Trace);
                 }
             }
-            catch (Exception ex) {
-                LogHelper.WriteLogToFile($"RestoreStrokes失败: {ex.Message}", LogHelper.LogType.Error);
+            catch {
+                // ignored
             }
         }
 
