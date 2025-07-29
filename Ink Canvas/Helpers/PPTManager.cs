@@ -1113,7 +1113,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 安全地结束WPS进程
+        /// 安全地结束WPS进程 - 通过释放PPTCOM对象
         /// </summary>
         private void SafeTerminateWpsProcess()
         {
@@ -1126,29 +1126,99 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
-                LogHelper.WriteLogToFile($"开始安全结束WPS进程 (PID: {_wpsProcess.Id})", LogHelper.LogType.Event);
+                LogHelper.WriteLogToFile($"开始通过释放PPTCOM对象安全结束WPS进程 (PID: {_wpsProcess.Id})", LogHelper.LogType.Event);
 
-                // 尝试优雅关闭
+                // 第一步：释放 pptActWindow 对象（SlideShowWindow）
+                SlideShowWindow pptActWindow = null;
                 try
                 {
-                    _wpsProcess.CloseMainWindow();
-                    if (_wpsProcess.WaitForExit(3000)) // 等待3秒
+                    if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
                     {
-                        LogHelper.WriteLogToFile("WPS进程已优雅关闭", LogHelper.LogType.Event);
+                        if (PPTApplication.SlideShowWindows?.Count > 0)
+                        {
+                            pptActWindow = PPTApplication.SlideShowWindows[1];
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"获取SlideShowWindow对象时发生异常: {ex}", LogHelper.LogType.Warning);
+                }
+
+                if (pptActWindow != null)
+                {
+                    Marshal.ReleaseComObject(pptActWindow);
+                    pptActWindow = null;
+                    LogHelper.WriteLogToFile("已释放pptActWindow对象", LogHelper.LogType.Trace);
+                }
+
+                // 第二步：释放 pptActDoc 对象（CurrentPresentation）
+                Presentation pptActDoc = CurrentPresentation;
+                if (pptActDoc != null)
+                {
+                    Marshal.ReleaseComObject(pptActDoc);
+                    pptActDoc = null;
+                    CurrentPresentation = null;
+                    LogHelper.WriteLogToFile("已释放pptActDoc对象", LogHelper.LogType.Trace);
+                }
+
+                // 第三步：释放 pptApp 对象（PPTApplication）
+                Microsoft.Office.Interop.PowerPoint.Application pptApp = PPTApplication;
+                if (pptApp != null)
+                {
+                    Marshal.ReleaseComObject(pptApp);
+                    pptApp = null;
+                    PPTApplication = null;
+                    LogHelper.WriteLogToFile("已释放pptApp对象", LogHelper.LogType.Trace);
+                }
+
+                // 第四步：强制垃圾回收及等待终结器执行
+                LogHelper.WriteLogToFile("执行强制垃圾回收", LogHelper.LogType.Trace);
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
+                // 等待一段时间让COM对象完全释放
+                Thread.Sleep(1000);
+
+                // 检查进程是否已经结束
+                try
+                {
+                    _wpsProcess.Refresh();
+                    if (_wpsProcess.HasExited)
+                    {
+                        LogHelper.WriteLogToFile("WPS进程已通过COM对象释放成功结束", LogHelper.LogType.Event);
                         StopWpsProcessCheckTimer();
                         return;
                     }
                 }
                 catch (Exception ex)
                 {
-                    LogHelper.WriteLogToFile($"优雅关闭WPS进程失败: {ex}", LogHelper.LogType.Warning);
+                    LogHelper.WriteLogToFile($"检查WPS进程状态失败: {ex}", LogHelper.LogType.Warning);
                 }
 
-                // 强制结束
+                // 备用方案：如果COM对象释放后进程仍未结束，尝试关闭
+                try
+                {
+                    LogHelper.WriteLogToFile("COM对象释放后进程仍在运行，尝试关闭", LogHelper.LogType.Warning);
+                    _wpsProcess.CloseMainWindow();
+                    if (_wpsProcess.WaitForExit(3000)) // 等待3秒
+                    {
+                        LogHelper.WriteLogToFile("WPS进程已关闭", LogHelper.LogType.Event);
+                        StopWpsProcessCheckTimer();
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"关闭WPS进程失败: {ex}", LogHelper.LogType.Warning);
+                }
+
+                // 最后备用方案：强制结束进程
                 try
                 {
                     if (!_wpsProcess.HasExited)
                     {
+                        LogHelper.WriteLogToFile("所有方法都失败，强制结束WPS进程", LogHelper.LogType.Warning);
                         _wpsProcess.Kill();
                         LogHelper.WriteLogToFile("WPS进程已强制结束", LogHelper.LogType.Event);
                     }
@@ -1164,6 +1234,19 @@ namespace Ink_Canvas.Helpers
             }
             finally
             {
+                // 确保清理状态
+                if (CurrentSlide != null && Marshal.IsComObject(CurrentSlide))
+                {
+                    try { Marshal.ReleaseComObject(CurrentSlide); } catch { }
+                }
+                if (CurrentSlides != null && Marshal.IsComObject(CurrentSlides))
+                {
+                    try { Marshal.ReleaseComObject(CurrentSlides); } catch { }
+                }
+                CurrentSlide = null;
+                CurrentSlides = null;
+                CurrentPresentation = null;
+                SlidesCount = 0;
                 StopWpsProcessCheckTimer();
             }
         }
