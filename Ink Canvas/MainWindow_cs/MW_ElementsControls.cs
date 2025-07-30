@@ -30,9 +30,6 @@ namespace Ink_Canvas
                     image.Name = timestamp;
 
                     CenterAndScaleElement(image);
-
-                    InkCanvas.SetLeft(image, 0);
-                    InkCanvas.SetTop(image, 0);
                     inkCanvas.Children.Add(image);
 
                     // 添加鼠标事件处理，使图片可以被选择
@@ -262,17 +259,25 @@ namespace Ink_Canvas
             double scaleY = maxHeight / element.Height;
             double scale = Math.Min(scaleX, scaleY);
 
-            TransformGroup transformGroup = new TransformGroup();
-            transformGroup.Children.Add(new ScaleTransform(scale, scale));
+            // 直接设置元素的大小，而不使用RenderTransform
+            double newWidth = element.Width * scale;
+            double newHeight = element.Height * scale;
 
+            element.Width = newWidth;
+            element.Height = newHeight;
+
+            // 计算居中位置
             double canvasWidth = inkCanvas.ActualWidth;
             double canvasHeight = inkCanvas.ActualHeight;
-            double centerX = (canvasWidth - element.Width * scale) / 2;
-            double centerY = (canvasHeight - element.Height * scale) / 2;
+            double centerX = (canvasWidth - newWidth) / 2;
+            double centerY = (canvasHeight - newHeight) / 2;
 
-            transformGroup.Children.Add(new TranslateTransform(centerX, centerY));
+            // 直接设置位置，而不使用RenderTransform
+            InkCanvas.SetLeft(element, centerX);
+            InkCanvas.SetTop(element, centerY);
 
-            element.RenderTransform = transformGroup;
+            // 清除任何现有的RenderTransform
+            element.RenderTransform = Transform.Identity;
         }
     }
 }

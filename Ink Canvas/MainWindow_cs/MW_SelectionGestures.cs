@@ -6,6 +6,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using Point = System.Windows.Point;
@@ -473,6 +474,10 @@ namespace Ink_Canvas {
         private double BorderImageSelectionControlWidth = 150.0; // 3个按钮 + 分隔线的实际宽度
         private double BorderImageSelectionControlHeight = 80.0;
 
+        // 元素变化监听相关
+        private DispatcherTimer elementUpdateTimer;
+        private Rect lastElementBounds;
+
         private enum ResizeDirection
         {
             None,
@@ -605,11 +610,17 @@ namespace Ink_Canvas {
                 {
                     ShowImageToolbar();
                 }
+
+                // 监听元素的布局变化，以便实时更新手柄位置
+                StartMonitoringElementChanges(element);
             }
         }
 
         private void DeselectUIElement()
         {
+            // 停止监听之前选中元素的变化
+            StopMonitoringElementChanges();
+
             selectedUIElement = null;
             HideResizeHandles();
             HideImageToolbar();
@@ -670,22 +681,42 @@ namespace Ink_Canvas {
 
         private Rect GetUIElementBounds(UIElement element)
         {
-            var left = InkCanvas.GetLeft(element);
-            var top = InkCanvas.GetTop(element);
-
-            if (double.IsNaN(left)) left = 0;
-            if (double.IsNaN(top)) top = 0;
-
-            var width = 0.0;
-            var height = 0.0;
-
             if (element is FrameworkElement fe)
             {
-                width = fe.ActualWidth > 0 ? fe.ActualWidth : fe.Width;
-                height = fe.ActualHeight > 0 ? fe.ActualHeight : fe.Height;
+                var left = InkCanvas.GetLeft(element);
+                var top = InkCanvas.GetTop(element);
+
+                if (double.IsNaN(left)) left = 0;
+                if (double.IsNaN(top)) top = 0;
+
+                var width = fe.ActualWidth > 0 ? fe.ActualWidth : fe.Width;
+                var height = fe.ActualHeight > 0 ? fe.ActualHeight : fe.Height;
+
+                // 检查是否有RenderTransform
+                if (fe.RenderTransform != null && fe.RenderTransform != Transform.Identity)
+                {
+                    try
+                    {
+                        // 如果有变换，使用变换后的边界
+                        var transform = element.TransformToAncestor(inkCanvas);
+                        var elementBounds = new Rect(0, 0, width, height);
+                        var transformedBounds = transform.TransformBounds(elementBounds);
+                        return transformedBounds;
+                    }
+                    catch
+                    {
+                        // 变换失败时回退到简单计算
+                        return new Rect(left, top, width, height);
+                    }
+                }
+                else
+                {
+                    // 没有变换时直接使用位置和大小
+                    return new Rect(left, top, width, height);
+                }
             }
 
-            return new Rect(left, top, width, height);
+            return new Rect(0, 0, 0, 0);
         }
 
         private void UpdateResizeHandlesPosition(Rect bounds)
@@ -850,15 +881,24 @@ namespace Ink_Canvas {
 
             // 更新手柄位置
             UpdateResizeHandlesPosition(newBounds);
+
+            // 如果是图片，也更新工具栏位置
+            if (selectedUIElement is Image)
+            {
+                UpdateImageToolbarPosition(newBounds);
+            }
         }
 
         private void ApplyUIElementBounds(UIElement element, Rect bounds)
         {
-            InkCanvas.SetLeft(element, bounds.X);
-            InkCanvas.SetTop(element, bounds.Y);
-
             if (element is FrameworkElement fe)
             {
+                // 清除RenderTransform，避免与直接设置Width/Height冲突
+                fe.RenderTransform = Transform.Identity;
+
+                // 直接设置位置和大小
+                InkCanvas.SetLeft(element, bounds.X);
+                InkCanvas.SetTop(element, bounds.Y);
                 fe.Width = bounds.Width;
                 fe.Height = bounds.Height;
             }
@@ -879,7 +919,68 @@ namespace Ink_Canvas {
             }
         }
 
+        private void StartMonitoringElementChanges(UIElement element)
+        {
+            // 停止之前的监听
+            StopMonitoringElementChanges();
 
+            if (element == null) return;
+
+            // 记录初始边界
+            lastElementBounds = GetUIElementBounds(element);
+
+            // 创建定时器，定期检查元素边界变化
+            elementUpdateTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(16) // 约60FPS的更新频率
+            };
+
+            elementUpdateTimer.Tick += (sender, e) =>
+            {
+                if (selectedUIElement == null)
+                {
+                    StopMonitoringElementChanges();
+                    return;
+                }
+
+                var currentBounds = GetUIElementBounds(selectedUIElement);
+
+                // 检查边界是否发生变化
+                if (!AreRectsEqual(lastElementBounds, currentBounds))
+                {
+                    lastElementBounds = currentBounds;
+
+                    // 更新手柄位置
+                    UpdateResizeHandlesPosition(currentBounds);
+
+                    // 如果是图片，也更新工具栏位置
+                    if (selectedUIElement is Image)
+                    {
+                        UpdateImageToolbarPosition(currentBounds);
+                    }
+                }
+            };
+
+            elementUpdateTimer.Start();
+        }
+
+        private void StopMonitoringElementChanges()
+        {
+            if (elementUpdateTimer != null)
+            {
+                elementUpdateTimer.Stop();
+                elementUpdateTimer = null;
+            }
+        }
+
+        private bool AreRectsEqual(Rect rect1, Rect rect2)
+        {
+            const double tolerance = 0.1; // 允许的误差范围
+            return Math.Abs(rect1.X - rect2.X) < tolerance &&
+                   Math.Abs(rect1.Y - rect2.Y) < tolerance &&
+                   Math.Abs(rect1.Width - rect2.Width) < tolerance &&
+                   Math.Abs(rect1.Height - rect2.Height) < tolerance;
+        }
 
         #endregion
     }

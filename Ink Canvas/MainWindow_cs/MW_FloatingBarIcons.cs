@@ -2081,9 +2081,6 @@ namespace Ink_Canvas {
                     image.Name = timestamp;
 
                     CenterAndScaleElement(image);
-
-                    InkCanvas.SetLeft(image, 0);
-                    InkCanvas.SetTop(image, 0);
                     inkCanvas.Children.Add(image);
 
                     // 添加鼠标事件处理，使图片可以被选择
