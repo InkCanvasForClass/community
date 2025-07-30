@@ -470,7 +470,7 @@ namespace Ink_Canvas {
 
         // 图片工具栏相关
         private Border borderImageSelectionControl;
-        private double BorderImageSelectionControlWidth = 200.0;
+        private double BorderImageSelectionControlWidth = 150.0; // 3个按钮 + 分隔线的实际宽度
         private double BorderImageSelectionControlHeight = 80.0;
 
         private enum ResizeDirection
@@ -597,15 +597,13 @@ namespace Ink_Canvas {
                     InitializeUIElementSelection();
                 }
 
-                // 根据元素类型显示不同的工具栏
+                // 显示拖拽手柄（所有UI元素都需要）
+                ShowResizeHandles();
+
+                // 根据元素类型显示特定的工具栏
                 if (element is Image)
                 {
                     ShowImageToolbar();
-                }
-                else
-                {
-                    // 对于其他UI元素，显示拖拽手柄
-                    ShowResizeHandles();
                 }
             }
         }

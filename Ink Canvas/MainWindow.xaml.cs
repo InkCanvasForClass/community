@@ -810,6 +810,29 @@ namespace Ink_Canvas {
         {
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(sender as InkCanvas);
+
+            // 在选择模式下，如果点击的不是UI元素，则取消选择
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+            {
+                var hitTest = e.OriginalSource;
+                // 如果点击的不是图片或其他UI元素，则取消选择
+                if (!(hitTest is Image) && !(hitTest is MediaElement))
+                {
+                    // 检查是否点击在已选择的UI元素上
+                    bool clickedOnSelectedElement = false;
+                    if (selectedUIElement != null)
+                    {
+                        var elementBounds = GetUIElementBounds(selectedUIElement);
+                        var clickPoint = e.GetPosition(inkCanvas);
+                        clickedOnSelectedElement = elementBounds.Contains(clickPoint);
+                    }
+
+                    if (!clickedOnSelectedElement)
+                    {
+                        DeselectUIElement();
+                    }
+                }
+            }
         }
 
         // 手写笔输入

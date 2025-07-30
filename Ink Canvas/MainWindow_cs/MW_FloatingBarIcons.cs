@@ -2086,6 +2086,10 @@ namespace Ink_Canvas {
                     InkCanvas.SetTop(image, 0);
                     inkCanvas.Children.Add(image);
 
+                    // 添加鼠标事件处理，使图片可以被选择
+                    image.MouseDown += UIElement_MouseDown;
+                    image.IsManipulationEnabled = true;
+
                     timeMachine.CommitElementInsertHistory(image);
                 }
             }
