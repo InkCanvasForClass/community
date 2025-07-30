@@ -208,6 +208,7 @@ namespace Ink_Canvas {
             BorderSettings.Visibility = Visibility.Collapsed;
             BoardBorderLeftPageListView.Visibility = Visibility.Collapsed;
             BoardBorderRightPageListView.Visibility = Visibility.Collapsed;
+            BoardImageOptionsPanel.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -279,7 +280,8 @@ namespace Ink_Canvas {
             AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-            
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+
             // 隐藏背景设置面板
             var bgPalette = LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") as Border;
             if (bgPalette != null)
@@ -2065,6 +2067,71 @@ namespace Ink_Canvas {
 
         #endregion
 
+        private void InsertImageOptions_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            // Hide other sub-panels first
+            HideSubPanelsImmediately();
+
+            // Show the image options panel
+            if (BoardImageOptionsPanel.Visibility == Visibility.Collapsed)
+            {
+                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardImageOptionsPanel);
+            }
+            else
+            {
+                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+            }
+        }
+
+        private void CloseImageOptionsPanel_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+        }
+
+        private async void ImageOptionScreenshot_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            // Hide the options panel
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+
+            // Wait a bit for the panel to hide
+            await Task.Delay(100);
+
+            // Capture screenshot and copy to clipboard
+            await CaptureScreenshotToClipboard();
+        }
+
+        private async void ImageOptionSelectFile_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            // Hide the options panel
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+
+            // Open file dialog to select image
+            var dialog = new OpenFileDialog
+            {
+                Filter = "图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif"
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                string filePath = dialog.FileName;
+                Image image = await CreateAndCompressImageAsync(filePath);
+                if (image != null)
+                {
+                    string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                    image.Name = timestamp;
+
+                    CenterAndScaleElement(image);
+                    inkCanvas.Children.Add(image);
+
+                    // 添加鼠标事件处理，使图片可以被选择
+                    image.MouseDown += UIElement_MouseDown;
+                    image.IsManipulationEnabled = true;
+
+                    timeMachine.CommitElementInsertHistory(image);
+                }
+            }
+        }
+
+        // Keep the old method for backward compatibility
         private async void InsertImage_MouseUp(object sender, MouseButtonEventArgs e)
         {
             var dialog = new OpenFileDialog

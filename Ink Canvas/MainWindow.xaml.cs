@@ -127,6 +127,7 @@ namespace Ink_Canvas {
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
             inkCanvas.StylusDown += inkCanvas_StylusDown;
+            inkCanvas.MouseRightButtonUp += InkCanvas_MouseRightButtonUp;
 
             // 初始化第一页Canvas
             var firstCanvas = new System.Windows.Controls.Canvas();
@@ -427,6 +428,9 @@ namespace Ink_Canvas {
 
             // 初始化UIElement选择系统
             InitializeUIElementSelection();
+
+            // 初始化剪贴板监控
+            InitializeClipboardMonitoring();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e) {
@@ -511,6 +515,10 @@ namespace Ink_Canvas {
 
             // 释放PPT管理器资源
             DisposePPTManagers();
+
+            // 清理剪贴板监控
+            CleanupClipboardMonitoring();
+            ClipboardNotification.Stop();
 
             LogHelper.WriteLogToFile("Ink Canvas closed", LogHelper.LogType.Event);
 
