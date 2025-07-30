@@ -700,12 +700,20 @@ namespace Ink_Canvas {
             //    AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardDeleteIcon);
             //}
             //else {
+                // 禁用高级橡皮擦系统
+                DisableAdvancedEraserSystem();
+
                 forceEraser = true;
                 forcePointEraser = false;
 
                 inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
                 drawingShapeMode = 0;
+
+                // 修复：切换到线擦时，确保重置笔的状态
+                penType = 0;
+                drawingAttributes.IsHighlighter = false;
+                drawingAttributes.StylusTip = StylusTip.Ellipse;
 
                 inkCanvas_EditingModeChanged(inkCanvas, null);
                 CancelSingleFingerDragMode();
