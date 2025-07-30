@@ -7,7 +7,10 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media.Imaging;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
+using Application = System.Windows.Application;
 using Clipboard = System.Windows.Clipboard;
+using Size = System.Drawing.Size;
 
 namespace Ink_Canvas {
     public partial class MainWindow : Window {
@@ -95,25 +98,99 @@ namespace Ink_Canvas {
                 // 等待窗口隐藏
                 await Task.Delay(200);
 
-                var rc = SystemInformation.VirtualScreen;
-                using (var bitmap = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb))
-                using (var memoryGraphics = Graphics.FromImage(bitmap)) {
-                    memoryGraphics.CopyFromScreen(rc.X, rc.Y, 0, 0, rc.Size, CopyPixelOperation.SourceCopy);
+                // 启动区域选择截图
+                var selectedArea = await ShowScreenshotSelector();
 
-                    // 将截图复制到剪贴板
-                    CopyBitmapToClipboard(bitmap);
+                // 恢复窗口显示
+                this.Visibility = originalVisibility;
 
-                    // 恢复窗口显示
-                    this.Visibility = originalVisibility;
+                if (selectedArea.HasValue && selectedArea.Value.Width > 0 && selectedArea.Value.Height > 0)
+                {
+                    // 截取选定区域
+                    using (var bitmap = CaptureScreenArea(selectedArea.Value))
+                    {
+                        if (bitmap != null)
+                        {
+                            // 将截图复制到剪贴板
+                            CopyBitmapToClipboard(bitmap);
 
-                    // 等待窗口完全显示后自动粘贴
-                    await Task.Delay(100);
-                    await AutoPasteScreenshot();
+                            // 等待窗口完全显示后自动粘贴
+                            await Task.Delay(100);
+                            await AutoPasteScreenshot();
+                        }
+                    }
+                }
+                else
+                {
+                    ShowNotification("截图已取消");
                 }
             }
             catch (Exception ex) {
                 ShowNotification($"截图失败: {ex.Message}");
                 this.Visibility = Visibility.Visible;
+            }
+        }
+
+        // 显示截图区域选择器
+        private async Task<Rectangle?> ShowScreenshotSelector()
+        {
+            Rectangle? selectedArea = null;
+
+            try
+            {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    var selectorWindow = new ScreenshotSelectorWindow();
+                    if (selectorWindow.ShowDialog() == true)
+                    {
+                        selectedArea = selectorWindow.SelectedArea;
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"显示截图选择器失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            return selectedArea;
+        }
+
+        // 截取指定屏幕区域
+        private Bitmap CaptureScreenArea(Rectangle area)
+        {
+            try
+            {
+                // 确保区域在有效范围内
+                var virtualScreen = SystemInformation.VirtualScreen;
+
+                // 调整区域边界，确保不超出屏幕范围
+                int x = Math.Max(area.X, virtualScreen.X);
+                int y = Math.Max(area.Y, virtualScreen.Y);
+                int right = Math.Min(area.Right, virtualScreen.Right);
+                int bottom = Math.Min(area.Bottom, virtualScreen.Bottom);
+
+                int width = Math.Max(1, right - x);
+                int height = Math.Max(1, bottom - y);
+
+                var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+                using (var graphics = Graphics.FromImage(bitmap))
+                {
+                    // 设置高质量渲染
+                    graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                    graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                    graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+
+                    // 截取屏幕区域
+                    graphics.CopyFromScreen(x, y, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
+                }
+
+                LogHelper.WriteLogToFile($"成功截取区域: X={x}, Y={y}, Width={width}, Height={height}", LogHelper.LogType.Info);
+                return bitmap;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"截取屏幕区域失败: {ex.Message}", LogHelper.LogType.Error);
+                return null;
             }
         }
 
