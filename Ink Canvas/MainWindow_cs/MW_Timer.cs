@@ -87,6 +87,7 @@ namespace Ink_Canvas {
             }
         }
 
+        // 修改InitTimers方法中的初始时间和日期格式
         private void InitTimers() {
             // PPT检查现在由PPTManager处理，不再需要定时器
             // timerCheckPPT.Elapsed += TimerCheckPPT_Elapsed;
@@ -106,22 +107,24 @@ namespace Ink_Canvas {
             timerDisplayDate.Interval = 1000 * 60 * 60 * 1;
             timerDisplayDate.Start();
             timerKillProcess.Start();
-            nowTimeVM.nowDate = DateTime.Now.ToString("yyyy/M/d");
-            nowTimeVM.nowTime = DateTime.Now.ToString("HH:mm");
+            nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
+            nowTimeVM.nowTime = DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
         }
 
+        // 修改TimerDisplayTime_ElapsedAsync方法中的时间格式
         private async Task TimerDisplayTime_ElapsedAsync()
         {
             DateTime now = await GetNetworkTimeAsync();
             // 只更新时间，日期由原有逻辑定时更新即可
             Dispatcher.Invoke(() =>
             {
-                nowTimeVM.nowTime = now.ToString("HH:mm");
+                nowTimeVM.nowTime = now.ToString("tt hh'时'mm'分'ss'秒'");
             });
         }
 
+        // 修改TimerDisplayDate_Elapsed方法中的日期格式
         private void TimerDisplayDate_Elapsed(object sender, ElapsedEventArgs e) {
-            nowTimeVM.nowDate = DateTime.Now.ToString("yyyy/M/d");
+            nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
         }
 
         private void TimerKillProcess_Elapsed(object sender, ElapsedEventArgs e) {
