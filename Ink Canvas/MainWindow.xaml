@@ -5098,16 +5098,10 @@
                                             </Border>
                                         </Grid>
                                     </Border>
-                                    <Border x:Name="BoardUndo" Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            MouseUp="SymbolIconUndo_MouseUp" BorderThickness="0,1,0,1"
-                                            BorderBrush="#a1a1aa"
-                                            IsEnabled="{Binding ElementName=BtnUndo, Path=IsEnabled}"
-                                            Background="#f4f4f5"
-                                            Opacity="0.95">
+                                    <Border x:Name="BoardUndo" Width="60" Height="50" MouseDown="Border_MouseDown" MouseUp="SymbolIconUndo_MouseUp" BorderThickness="0,1,0,1" BorderBrush="#a1a1aa" IsEnabled="{Binding ElementName=BtnUndo, Path=IsEnabled}" Background="#f4f4f5" Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
                                             <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"
-                                                   Opacity="{Binding ElementName=BtnUndo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
+                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20" Opacity="{Binding ElementName=BtnUndo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
                                                 <Image.Source>
                                                     <DrawingImage>
                                                         <DrawingImage.Drawing>
@@ -5119,21 +5113,12 @@
                                                     </DrawingImage>
                                                 </Image.Source>
                                             </Image>
-                                            <TextBlock Text="撤销" Foreground="Black" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12" />
+                                            <TextBlock Text="撤销" Foreground="Black" VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="12" />
                                         </Grid>
                                     </Border>
-                                    <Border x:Name="BoardRedo" Width="60" Height="50" CornerRadius="0,5,5,0"
-                                            MouseDown="Border_MouseDown" MouseUp="SymbolIconRedo_MouseUp"
-                                            BorderThickness="0,1,1,1"
-                                            BorderBrush="#a1a1aa"
-                                            IsEnabled="{Binding ElementName=BtnRedo, Path=IsEnabled}"
-                                            Background="#f4f4f5"
-                                            Opacity="0.95">
+                                    <Border x:Name="BoardRedo" Width="60" Height="50" CornerRadius="0,5,5,0" MouseDown="Border_MouseDown" MouseUp="SymbolIconRedo_MouseUp" BorderThickness="0,1,1,1" BorderBrush="#a1a1aa" IsEnabled="{Binding ElementName=BtnRedo, Path=IsEnabled}" Background="#f4f4f5" Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"
-                                                   Opacity="{Binding ElementName=BtnRedo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
+                                            <Image VerticalAlignment="Top" RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20" Opacity="{Binding ElementName=BtnRedo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
                                                 <Image.Source>
                                                     <DrawingImage>
                                                         <DrawingImage.Drawing>
