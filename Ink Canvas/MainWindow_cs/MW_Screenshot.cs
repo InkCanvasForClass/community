@@ -256,55 +256,65 @@ namespace Ink_Canvas {
         {
             try
             {
-                // 创建遮罩位图
-                using (var maskBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb))
-                using (var maskGraphics = Graphics.FromImage(maskBitmap))
+                // 获取DPI缩放比例
+                var dpiScale = GetDpiScale();
+                var virtualScreen = SystemInformation.VirtualScreen;
+                
+                // 创建结果位图
+                var resultBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+                using (var resultGraphics = Graphics.FromImage(resultBitmap))
                 {
                     // 设置高质量渲染
-                    maskGraphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    maskGraphics.CompositingQuality = CompositingQuality.HighQuality;
+                    resultGraphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    resultGraphics.CompositingQuality = CompositingQuality.HighQuality;
 
                     // 创建路径
                     using (var pathGraphics = new GraphicsPath())
                     {
-                        // 转换WPF坐标到GDI+坐标
+                        // 转换WPF坐标到GDI+坐标，考虑DPI缩放和屏幕偏移
                         var points = new PointF[path.Count];
                         for (int i = 0; i < path.Count; i++)
                         {
-                            points[i] = new PointF(
-                                (float)(path[i].X - area.X),
-                                (float)(path[i].Y - area.Y)
-                            );
+                            // 将WPF坐标转换为实际屏幕坐标，然后相对于截图区域计算偏移
+                            double screenX = (path[i].X * dpiScale) + virtualScreen.Left;
+                            double screenY = (path[i].Y * dpiScale) + virtualScreen.Top;
+                            
+                            // 计算相对于截图区域的坐标
+                            float relativeX = (float)(screenX - area.X);
+                            float relativeY = (float)(screenY - area.Y);
+                            
+                            points[i] = new PointF(relativeX, relativeY);
                         }
 
                         // 添加路径
                         pathGraphics.AddPolygon(points);
 
-                        // 填充路径内部为白色（保留区域）
-                        maskGraphics.FillPath(Brushes.White, pathGraphics);
-                    }
-
-                    // 创建结果位图
-                    var resultBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
-                    using (var resultGraphics = Graphics.FromImage(resultBitmap))
-                    {
-                        // 设置高质量渲染
-                        resultGraphics.SmoothingMode = SmoothingMode.AntiAlias;
-                        resultGraphics.CompositingQuality = CompositingQuality.HighQuality;
-
-                        // 使用遮罩合成图像
+                        // 设置裁剪区域为路径内部
+                        resultGraphics.SetClip(pathGraphics);
+                        
+                        // 在裁剪区域内绘制原始图像
                         resultGraphics.DrawImage(bitmap, 0, 0);
-                        resultGraphics.DrawImage(maskBitmap, 0, 0);
                     }
-
-                    return resultBitmap;
                 }
+
+                return resultBitmap;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"应用形状遮罩失败: {ex.Message}", LogHelper.LogType.Error);
                 return bitmap; // 如果失败，返回原始图像
             }
+        }
+
+        // 获取DPI缩放比例
+        private double GetDpiScale()
+        {
+            var source = PresentationSource.FromVisual(this);
+            if (source?.CompositionTarget != null)
+            {
+                return source.CompositionTarget.TransformToDevice.M11;
+            }
+            return 1.0; // 默认DPI
         }
 
         // 将System.Drawing.Bitmap转换为WPF BitmapSource
