@@ -209,6 +209,7 @@ namespace Ink_Canvas {
             BoardBorderLeftPageListView.Visibility = Visibility.Collapsed;
             BoardBorderRightPageListView.Visibility = Visibility.Collapsed;
             BoardImageOptionsPanel.Visibility = Visibility.Collapsed;
+            ScreenshotOptionsPanel.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -281,6 +282,7 @@ namespace Ink_Canvas {
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+            AnimationsHelper.HideWithSlideAndFade(ScreenshotOptionsPanel);
 
             // 隐藏背景设置面板
             var bgPalette = LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") as Border;
@@ -733,7 +735,55 @@ namespace Ink_Canvas {
         private async void SymbolIconScreenshot_MouseUp(object sender, MouseButtonEventArgs e) {
             HideSubPanelsImmediately();
             await Task.Delay(50);
+            
+            // 显示截图选项面板
+            ShowScreenshotOptionsPanel();
+        }
+        
+        private void ShowScreenshotOptionsPanel() {
+            // 隐藏其他面板
+            HideSubPanelsImmediately();
+            
+            // 显示截图选项面板
+            if (ScreenshotOptionsPanel.Visibility == Visibility.Collapsed) {
+                // 添加调试信息
+                LogHelper.WriteLogToFile("显示截图选项面板", LogHelper.LogType.Info);
+                
+                // 直接设置可见性，不使用动画
+                ScreenshotOptionsPanel.Visibility = Visibility.Visible;
+                
+                // 显示通知确认面板已显示
+                ShowNotification("截图选项面板已显示");
+            } else {
+                LogHelper.WriteLogToFile("隐藏截图选项面板", LogHelper.LogType.Info);
+                ScreenshotOptionsPanel.Visibility = Visibility.Collapsed;
+            }
+        }
+        
+        private void CloseScreenshotOptionsPanel_MouseUp(object sender, MouseButtonEventArgs e) {
+            AnimationsHelper.HideWithSlideAndFade(ScreenshotOptionsPanel);
+        }
+        
+        private async void FullScreenScreenshot_MouseUp(object sender, MouseButtonEventArgs e) {
+            // 隐藏选项面板
+            AnimationsHelper.HideWithSlideAndFade(ScreenshotOptionsPanel);
+            
+            // 等待面板隐藏
+            await Task.Delay(100);
+            
+            // 执行全屏截图
             SaveScreenShotToDesktop();
+        }
+        
+        private async void AreaScreenshot_MouseUp(object sender, MouseButtonEventArgs e) {
+            // 隐藏选项面板
+            AnimationsHelper.HideWithSlideAndFade(ScreenshotOptionsPanel);
+            
+            // 等待面板隐藏
+            await Task.Delay(100);
+            
+            // 执行区域截图
+            await CaptureScreenshotToClipboard();
         }
 
         

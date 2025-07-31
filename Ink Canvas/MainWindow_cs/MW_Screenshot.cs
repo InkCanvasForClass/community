@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
@@ -13,6 +15,19 @@ using Clipboard = System.Windows.Clipboard;
 using Size = System.Drawing.Size;
 
 namespace Ink_Canvas {
+    // 截图结果结构体
+    public struct ScreenshotResult
+    {
+        public System.Drawing.Rectangle Area;
+        public List<System.Windows.Point> Path;
+        
+        public ScreenshotResult(System.Drawing.Rectangle area, List<System.Windows.Point> path = null)
+        {
+            Area = area;
+            Path = path;
+        }
+    }
+    
     public partial class MainWindow : Window {
         private void SaveScreenShot(bool isHideNotification, string fileName = null) {
             var savePath = Settings.Automation.IsSaveScreenshotsInDateFolders
@@ -99,20 +114,28 @@ namespace Ink_Canvas {
                 await Task.Delay(200);
 
                 // 启动区域选择截图
-                var selectedArea = await ShowScreenshotSelector();
+                var screenshotResult = await ShowScreenshotSelector();
 
                 // 恢复窗口显示
                 this.Visibility = originalVisibility;
 
-                if (selectedArea.HasValue && selectedArea.Value.Width > 0 && selectedArea.Value.Height > 0)
+                if (screenshotResult.HasValue && screenshotResult.Value.Area.Width > 0 && screenshotResult.Value.Area.Height > 0)
                 {
                     // 截取选定区域
-                    using (var bitmap = CaptureScreenArea(selectedArea.Value))
+                    using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
                     {
-                        if (bitmap != null)
+                        if (originalBitmap != null)
                         {
+                            Bitmap finalBitmap = originalBitmap;
+                            
+                            // 如果有路径信息，应用形状遮罩
+                            if (screenshotResult.Value.Path != null && screenshotResult.Value.Path.Count > 0)
+                            {
+                                finalBitmap = ApplyShapeMask(originalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
+                            }
+                            
                             // 将截图复制到剪贴板
-                            CopyBitmapToClipboard(bitmap);
+                            CopyBitmapToClipboard(finalBitmap);
 
                             // 等待窗口完全显示后自动粘贴
                             await Task.Delay(100);
@@ -132,9 +155,9 @@ namespace Ink_Canvas {
         }
 
         // 显示截图区域选择器
-        private async Task<Rectangle?> ShowScreenshotSelector()
+        private async Task<ScreenshotResult?> ShowScreenshotSelector()
         {
-            Rectangle? selectedArea = null;
+            ScreenshotResult? result = null;
 
             try
             {
@@ -143,7 +166,10 @@ namespace Ink_Canvas {
                     var selectorWindow = new ScreenshotSelectorWindow();
                     if (selectorWindow.ShowDialog() == true)
                     {
-                        selectedArea = selectorWindow.SelectedArea;
+                        result = new ScreenshotResult(
+                            selectorWindow.SelectedArea.Value,
+                            selectorWindow.SelectedPath
+                        );
                     }
                 });
             }
@@ -152,11 +178,11 @@ namespace Ink_Canvas {
                 LogHelper.WriteLogToFile($"显示截图选择器失败: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            return selectedArea;
+            return result;
         }
 
         // 截取指定屏幕区域
-        private Bitmap CaptureScreenArea(Rectangle area)
+        private Bitmap CaptureScreenArea(System.Drawing.Rectangle area)
         {
             try
             {
@@ -222,6 +248,62 @@ namespace Ink_Canvas {
             }
             catch (Exception ex) {
                 ShowNotification($"复制到剪贴板失败: {ex.Message}");
+            }
+        }
+
+        // 应用形状遮罩到截图
+        private Bitmap ApplyShapeMask(Bitmap bitmap, List<System.Windows.Point> path, System.Drawing.Rectangle area)
+        {
+            try
+            {
+                // 创建遮罩位图
+                using (var maskBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb))
+                using (var maskGraphics = Graphics.FromImage(maskBitmap))
+                {
+                    // 设置高质量渲染
+                    maskGraphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    maskGraphics.CompositingQuality = CompositingQuality.HighQuality;
+
+                    // 创建路径
+                    using (var pathGraphics = new GraphicsPath())
+                    {
+                        // 转换WPF坐标到GDI+坐标
+                        var points = new PointF[path.Count];
+                        for (int i = 0; i < path.Count; i++)
+                        {
+                            points[i] = new PointF(
+                                (float)(path[i].X - area.X),
+                                (float)(path[i].Y - area.Y)
+                            );
+                        }
+
+                        // 添加路径
+                        pathGraphics.AddPolygon(points);
+
+                        // 填充路径内部为白色（保留区域）
+                        maskGraphics.FillPath(Brushes.White, pathGraphics);
+                    }
+
+                    // 创建结果位图
+                    var resultBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+                    using (var resultGraphics = Graphics.FromImage(resultBitmap))
+                    {
+                        // 设置高质量渲染
+                        resultGraphics.SmoothingMode = SmoothingMode.AntiAlias;
+                        resultGraphics.CompositingQuality = CompositingQuality.HighQuality;
+
+                        // 使用遮罩合成图像
+                        resultGraphics.DrawImage(bitmap, 0, 0);
+                        resultGraphics.DrawImage(maskBitmap, 0, 0);
+                    }
+
+                    return resultBitmap;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用形状遮罩失败: {ex.Message}", LogHelper.LogType.Error);
+                return bitmap; // 如果失败，返回原始图像
             }
         }
 

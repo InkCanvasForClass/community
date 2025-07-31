@@ -22,12 +22,19 @@
 
         <!-- 选择区域容器 -->
         <Canvas Name="SelectionCanvas">
-            <!-- 选择区域 -->
+            <!-- 矩形选择模式 -->
             <Rectangle Name="SelectionRectangle"
                        Stroke="Red"
                        StrokeThickness="2"
                        Fill="Transparent"
                        Visibility="Collapsed" />
+
+            <!-- 任意形状选择模式 -->
+            <Path Name="SelectionPath"
+                  Stroke="Red"
+                  StrokeThickness="2"
+                  Fill="Transparent"
+                  Visibility="Collapsed" />
 
             <!-- 尺寸信息显示 -->
             <Border Name="SizeInfoBorder"
@@ -43,6 +50,29 @@
             </Border>
         </Canvas>
 
+        <!-- 模式切换按钮 -->
+        <StackPanel Orientation="Horizontal" 
+                    HorizontalAlignment="Center" 
+                    VerticalAlignment="Top" 
+                    Margin="0,100,0,0">
+            <Button Name="RectangleModeButton" 
+                    Content="矩形模式" 
+                    Margin="5,0" 
+                    Padding="10,5"
+                    Background="#2563eb"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Click="RectangleModeButton_Click" />
+            <Button Name="FreehandModeButton" 
+                    Content="自由绘制" 
+                    Margin="5,0" 
+                    Padding="10,5"
+                    Background="#6b7280"
+                    Foreground="White"
+                    BorderThickness="0"
+                    Click="FreehandModeButton_Click" />
+        </StackPanel>
+
         <!-- 提示文字 -->
         <Border Background="Black"
                 Opacity="0.8"
@@ -50,9 +80,9 @@
                 Padding="15,8"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
-                Margin="0,50,0,0">
+                Margin="0,150,0,0">
             <TextBlock Name="HintText"
-                       Text="拖拽鼠标选择截图区域，按ESC取消"
+                       Text="拖拽鼠标选择矩形区域，或使用自由绘制模式"
                        Foreground="White"
                        FontSize="16" />
         </Border>
