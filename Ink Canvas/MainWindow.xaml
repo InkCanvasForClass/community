@@ -5028,7 +5028,7 @@
                                                             Padding="8,4">
                                                 <ui:SimpleStackPanel Orientation="Horizontal"
                                                                              HorizontalAlignment="Stretch">
-                                                    <TextBlock Text="插入图片" Foreground="White"
+                                                    <TextBlock Text="选择图片" Foreground="White"
                                                                        FontSize="10" FontWeight="Bold"
                                                                        VerticalAlignment="Center" />
                                                     <Image Margin="8,0,0,0"
