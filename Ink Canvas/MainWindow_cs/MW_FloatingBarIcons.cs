@@ -1701,16 +1701,15 @@ namespace Ink_Canvas {
 
         public void BtnExit_Click(object sender, RoutedEventArgs e) {
             App.IsAppExitByUser = true;
-            Application.Current.Shutdown();
-            // CloseIsFromButton = true;
-            // Close();
+            // 不设置 CloseIsFromButton = true，让它也经过确认流程
+            Close();
         }
 
         public void BtnRestart_Click(object sender, RoutedEventArgs e) {
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
             App.IsAppExitByUser = true;
-            CloseIsFromButton = true;
-            Application.Current.Shutdown();
+            // 不设置 CloseIsFromButton = true，让它也经过确认流程
+            Close();
         }
 
         private void SettingsOverlayClick(object sender, MouseButtonEventArgs e) {

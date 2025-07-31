@@ -482,14 +482,39 @@ namespace Ink_Canvas {
         private void Window_Closing(object sender, CancelEventArgs e) {
             LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
             if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp) {
-                e.Cancel = true;
-                if (MessageBox.Show("是否继续关闭 InkCanvasForClass，这将丢失当前未保存的墨迹。", "InkCanvasForClass",
-                        MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
-                    if (MessageBox.Show("真的狠心关闭 InkCanvasForClass吗？", "InkCanvasForClass", MessageBoxButton.OKCancel,
-                            MessageBoxImage.Error) == MessageBoxResult.OK)
-                        if (MessageBox.Show("是否取消关闭 InkCanvasForClass？", "InkCanvasForClass", MessageBoxButton.OKCancel,
-                                MessageBoxImage.Error) != MessageBoxResult.OK)
-                            e.Cancel = false;
+                // 第一个确认对话框
+                var result1 = MessageBox.Show("是否继续关闭 InkCanvasForClass，这将丢失当前未保存的墨迹。", "InkCanvasForClass",
+                    MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                
+                if (result1 == MessageBoxResult.Cancel) {
+                    e.Cancel = true;
+                    LogHelper.WriteLogToFile("Ink Canvas closing cancelled at first confirmation", LogHelper.LogType.Event);
+                    return;
+                }
+                
+                // 第二个确认对话框
+                var result2 = MessageBox.Show("真的狠心关闭 InkCanvasForClass吗？", "InkCanvasForClass", 
+                    MessageBoxButton.OKCancel, MessageBoxImage.Error);
+                
+                if (result2 == MessageBoxResult.Cancel) {
+                    e.Cancel = true;
+                    LogHelper.WriteLogToFile("Ink Canvas closing cancelled at second confirmation", LogHelper.LogType.Event);
+                    return;
+                }
+                
+                // 第三个最终确认对话框
+                var result3 = MessageBox.Show("最后确认：确定要关闭 InkCanvasForClass 吗？", "InkCanvasForClass", 
+                    MessageBoxButton.OKCancel, MessageBoxImage.Question);
+                
+                if (result3 == MessageBoxResult.Cancel) {
+                    e.Cancel = true;
+                    LogHelper.WriteLogToFile("Ink Canvas closing cancelled at final confirmation", LogHelper.LogType.Event);
+                    return;
+                }
+                
+                // 所有确认都通过，允许关闭
+                e.Cancel = false;
+                LogHelper.WriteLogToFile("Ink Canvas closing confirmed by user", LogHelper.LogType.Event);
             }
 
             if (e.Cancel) LogHelper.WriteLogToFile("Ink Canvas closing cancelled", LogHelper.LogType.Event);
