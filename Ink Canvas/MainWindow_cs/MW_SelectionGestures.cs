@@ -166,6 +166,7 @@ namespace Ink_Canvas {
             }
         }
 
+// ... existing code ...
         private void ImageRotate45_MouseUp(object sender, MouseButtonEventArgs e) {
             if (lastBorderMouseDownObject != sender) return;
 
@@ -179,7 +180,7 @@ namespace Ink_Canvas {
             center = m.Transform(center); // 转换为矩阵缩放和旋转的中心点
 
             // Update matrix to reflect translation/rotation
-            m.RotateAt(45, center.X, center.Y); // 旋转
+            m.RotateAt(45, center.X, center.Y); // 顺时针旋转45度
 
             var targetStrokes = inkCanvas.GetSelectedStrokes();
             foreach (var stroke in targetStrokes) stroke.Transform(m, false);
@@ -471,7 +472,7 @@ namespace Ink_Canvas {
 
         // 图片工具栏相关
         private Border borderImageSelectionControl;
-        private double BorderImageSelectionControlWidth = 150.0; // 3个按钮 + 分隔线的实际宽度
+        private double BorderImageSelectionControlWidth = 490.0; // 6个按钮 + 分隔线的实际宽度
         private double BorderImageSelectionControlHeight = 80.0;
 
         // 元素变化监听相关
