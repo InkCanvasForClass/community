@@ -1,10 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using Ink_Canvas.Helpers;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
-using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -23,7 +23,8 @@ namespace Ink_Canvas
         /// </summary>
         private void RefreshBlackBoardSidePageListView()
         {
-            if (blackBoardSidePageListViewObservableCollection.Count == WhiteboardTotalCount) {
+            if (blackBoardSidePageListViewObservableCollection.Count == WhiteboardTotalCount)
+            {
                 foreach (int index in Enumerable.Range(1, WhiteboardTotalCount))
                 {
                     var st = ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index]);
@@ -33,13 +34,16 @@ namespace Ink_Canvas
                         Index = index,
                         Strokes = st,
                     };
-                    blackBoardSidePageListViewObservableCollection[index-1] = pitem;
+                    blackBoardSidePageListViewObservableCollection[index - 1] = pitem;
                 }
-            } else {
+            }
+            else
+            {
                 blackBoardSidePageListViewObservableCollection.Clear();
-                foreach (int index in Enumerable.Range(1, WhiteboardTotalCount)) {
+                foreach (int index in Enumerable.Range(1, WhiteboardTotalCount))
+                {
                     var st = ApplyHistoriesToNewStrokeCollection(TimeMachineHistories[index]);
-                    st.Clip(new Rect(0,0, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight));
+                    st.Clip(new Rect(0, 0, (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight));
                     var pitem = new PageListViewItem
                     {
                         Index = index,
@@ -58,8 +62,8 @@ namespace Ink_Canvas
             };
             blackBoardSidePageListViewObservableCollection[CurrentWhiteboardIndex - 1] = _pitem;
 
-            BlackBoardLeftSidePageListView.SelectedIndex = CurrentWhiteboardIndex -1;
-            BlackBoardRightSidePageListView.SelectedIndex = CurrentWhiteboardIndex -1;
+            BlackBoardLeftSidePageListView.SelectedIndex = CurrentWhiteboardIndex - 1;
+            BlackBoardRightSidePageListView.SelectedIndex = CurrentWhiteboardIndex - 1;
         }
 
         public static void ScrollViewToVerticalTop(FrameworkElement element, ScrollViewer scrollViewer)
@@ -71,7 +75,8 @@ namespace Ink_Canvas
         }
 
 
-        private void BlackBoardLeftSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e) {
+        private void BlackBoardLeftSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
+        {
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
             var item = BlackBoardLeftSidePageListView.SelectedItem;

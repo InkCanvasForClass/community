@@ -1,7 +1,7 @@
-﻿using System.Windows;
-using System.Windows.Input;
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
+using System.Windows;
+using System.Windows.Input;
 
 namespace Ink_Canvas
 {
@@ -26,17 +26,22 @@ namespace Ink_Canvas
             if (e.LeftButton == MouseButtonState.Pressed) DragMove();
         }
 
-        private void BtnFullscreen_MouseUp(object sender, MouseButtonEventArgs e) {
-            if (WindowState == WindowState.Normal) {
+        private void BtnFullscreen_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (WindowState == WindowState.Normal)
+            {
                 WindowState = WindowState.Maximized;
                 SymbolIconFullscreen.Symbol = Symbol.BackToWindow;
-            } else {
+            }
+            else
+            {
                 WindowState = WindowState.Normal;
                 SymbolIconFullscreen.Symbol = Symbol.FullScreen;
             }
         }
 
-        private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e) {
+        private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e)
+        {
             e.Handled = true;
         }
     }

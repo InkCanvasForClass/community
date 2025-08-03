@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using MdXaml;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,9 +13,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using MdXaml;
 
 namespace Ink_Canvas
 {
@@ -72,34 +72,34 @@ namespace Ink_Canvas
         public HasNewUpdateWindow(string currentVersion, string newVersion, string releaseDate, string releaseNotes = null)
         {
             InitializeComponent();
-            
+
             // 设置版本信息
             CurrentVersion = currentVersion;
             NewVersion = newVersion;
             ReleaseDate = releaseDate;
             ReleaseNotes = releaseNotes;
-            
+
             // 更新UI
             updateVersionInfo.Text = $"本次更新： {CurrentVersion} -> {NewVersion}";
             updateDateInfo.Text = $"{ReleaseDate}发布更新";
-            
+
             // 如果有发布说明，设置到Markdown内容中
             if (!string.IsNullOrEmpty(ReleaseNotes))
             {
                 markdownContent.Markdown = ReleaseNotes;
             }
-            
+
             // 自动更新和静默更新设置已移至设置界面，此处不再需要
-            
+
             // 确保按钮可见且可用
             EnsureButtonsVisibility();
-            
+
             // 显示窗口动画
             AnimationsHelper.ShowWithFadeIn(this, 0.25);
-            
+
             // 设置深色模式
             UseImmersiveDarkMode(new WindowInteropHelper(this).Handle, true);
-            
+
             // 窗口加载完成后再次确保按钮可见
             Loaded += HasNewUpdateWindow_Loaded;
         }
@@ -108,7 +108,7 @@ namespace Ink_Canvas
         {
             // 窗口加载完成后再次确保按钮可见
             EnsureButtonsVisibility();
-            
+
             // 调整窗口大小以适应屏幕分辨率
             AdjustWindowSizeForScreenResolution();
         }
@@ -119,18 +119,18 @@ namespace Ink_Canvas
             // 确保立即更新按钮可见
             UpdateNowButton.Visibility = Visibility.Visible;
             UpdateNowButton.IsEnabled = true;
-            
+
             // 确保稍后更新按钮可见
             UpdateLaterButton.Visibility = Visibility.Visible;
             UpdateLaterButton.IsEnabled = true;
-            
+
             // 确保跳过版本按钮可见
             SkipVersionButton.Visibility = Visibility.Visible;
             SkipVersionButton.IsEnabled = true;
-            
+
             // 强制刷新UI
             UpdateLayout();
-            
+
             // 记录日志
             LogHelper.WriteLogToFile("AutoUpdate | Update dialog buttons visibility ensured");
         }
@@ -154,7 +154,8 @@ namespace Ink_Canvas
                 var groups = AutoUpdateHelper.ChannelLineGroups[MainWindow.Settings.Startup.UpdateChannel];
                 downloadSuccess = await AutoUpdateHelper.DownloadSetupFileWithFallback(NewVersion, groups, (percent, text) =>
                 {
-                    Dispatcher.Invoke(() => {
+                    Dispatcher.Invoke(() =>
+                    {
                         DownloadProgressBar.Value = percent;
                         DownloadProgressText.Text = text;
                     });
@@ -176,10 +177,10 @@ namespace Ink_Canvas
                 DownloadProgressBar.Value = 100;
                 DownloadProgressText.Text = "下载完成，准备安装...";
                 await Task.Delay(800);
-            // 设置结果为立即更新
-            Result = UpdateResult.UpdateNow;
-            DialogResult = true;
-            Close();
+                // 设置结果为立即更新
+                Result = UpdateResult.UpdateNow;
+                DialogResult = true;
+                Close();
             }
             else
             {
@@ -193,10 +194,10 @@ namespace Ink_Canvas
         private void UpdateLaterButton_Click(object sender, RoutedEventArgs e)
         {
             LogHelper.WriteLogToFile("AutoUpdate | Update Later button clicked");
-            
+
             // 设置结果为稍后更新
             Result = UpdateResult.UpdateLater;
-            
+
             // 关闭窗口
             DialogResult = true;
             Close();
@@ -205,16 +206,16 @@ namespace Ink_Canvas
         private void SkipVersionButton_Click(object sender, RoutedEventArgs e)
         {
             LogHelper.WriteLogToFile("AutoUpdate | Skip Version button clicked");
-            
+
             // 设置结果为跳过该版本
             Result = UpdateResult.SkipVersion;
-            
+
             // 关闭窗口
             DialogResult = true;
             Close();
         }
-        
-            
+
+
 
         // 根据屏幕分辨率调整窗口大小
         private void AdjustWindowSizeForScreenResolution()
@@ -224,15 +225,15 @@ namespace Ink_Canvas
                 // 获取主屏幕分辨率
                 double screenWidth = SystemParameters.PrimaryScreenWidth;
                 double screenHeight = SystemParameters.PrimaryScreenHeight;
-                
+
                 LogHelper.WriteLogToFile($"AutoUpdate | Screen resolution: {screenWidth}x{screenHeight}");
-                
+
                 // 始终确保窗口不超过屏幕大小的85%
                 double maxHeight = screenHeight * 0.85;
                 double maxWidth = screenWidth * 0.85;
-                
+
                 bool needsAdjustment = false;
-                
+
                 // 如果窗口高度超过最大允许高度，调整窗口高度
                 if (Height > maxHeight)
                 {
@@ -240,7 +241,7 @@ namespace Ink_Canvas
                     needsAdjustment = true;
                     LogHelper.WriteLogToFile($"AutoUpdate | Adjusted window height to: {Height}");
                 }
-                
+
                 // 如果窗口宽度超过最大允许宽度，调整窗口宽度
                 if (Width > maxWidth)
                 {
@@ -248,7 +249,7 @@ namespace Ink_Canvas
                     needsAdjustment = true;
                     LogHelper.WriteLogToFile($"AutoUpdate | Adjusted window width to: {Width}");
                 }
-                
+
                 // 如果屏幕分辨率较低，调整更多UI元素
                 if (screenHeight < 768 || screenWidth < 1024 || needsAdjustment)
                 {
@@ -257,7 +258,7 @@ namespace Ink_Canvas
                     var updateNowButton = FindName("UpdateNowButton") as Button;
                     var updateLaterButton = FindName("UpdateLaterButton") as Button;
                     var skipVersionButton = FindName("SkipVersionButton") as Button;
-                    
+
                     // 查找包含ScrollViewer的边框控件，减小其高度
                     var contentBorders = FindVisualChildren<Border>().ToList();
                     foreach (var border in contentBorders)
@@ -277,7 +278,7 @@ namespace Ink_Canvas
                             }
                         }
                     }
-                    
+
                     // 调整按钮大小
                     if (updateNowButton != null && updateLaterButton != null && skipVersionButton != null)
                     {
@@ -290,13 +291,13 @@ namespace Ink_Canvas
                         LogHelper.WriteLogToFile("AutoUpdate | Reduced button sizes for small screen");
                     }
                 }
-                
+
                 // 确保窗口在屏幕范围内
                 if (Left < 0) Left = 0;
                 if (Top < 0) Top = 0;
                 if (Left + Width > screenWidth) Left = screenWidth - Width;
                 if (Top + Height > screenHeight) Top = screenHeight - Height;
-                
+
                 LogHelper.WriteLogToFile($"AutoUpdate | Final window size: {Width}x{Height}");
             }
             catch (Exception ex)
@@ -304,13 +305,13 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"AutoUpdate | Error adjusting window size: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
         // 递归查找指定类型的所有子控件
         private IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj = null) where T : DependencyObject
         {
             if (depObj == null)
                 depObj = this;
-                
+
             if (depObj != null)
             {
                 for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
@@ -341,7 +342,8 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile($"AutoUpdate | 开始安装版本: {version}");
             AutoUpdateHelper.InstallNewVersionApp(version, false);
             App.IsAppExitByUser = true;
-            Application.Current.Dispatcher.Invoke(() => {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
                 Application.Current.Shutdown();
             });
             return true;

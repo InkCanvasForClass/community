@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Office.Interop.PowerPoint;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Ink;
-using System.Windows.Threading;
-using Microsoft.Office.Interop.PowerPoint;
 
 namespace Ink_Canvas.Helpers
 {
@@ -26,7 +24,7 @@ namespace Ink_Canvas.Helpers
         private string _currentPresentationId = "";
         private readonly object _lockObject = new object();
         private bool _disposed = false;
-        
+
         // 墨迹锁定机制，防止翻页时的墨迹冲突
         private DateTime _inkLockUntil = DateTime.MinValue;
         private int _lockedSlideIndex = -1;
@@ -59,17 +57,17 @@ namespace Ink_Canvas.Helpers
                 {
                     // 生成演示文稿唯一标识符
                     _currentPresentationId = GeneratePresentationId(presentation);
-                    
+
                     // 重新初始化内存流数组
                     var slideCount = presentation.Slides.Count;
                     _memoryStreams = new MemoryStream[slideCount + 2];
-                    
+
                     // 如果启用自动保存，尝试加载已保存的墨迹
                     if (IsAutoSaveEnabled && !string.IsNullOrEmpty(AutoSaveLocation))
                     {
                         LoadSavedStrokes();
                     }
-                    
+
                     LogHelper.WriteLogToFile($"已初始化演示文稿墨迹管理: {presentation.Name}, 幻灯片数量: {slideCount}", LogHelper.LogType.Trace);
                 }
                 catch (Exception ex)
@@ -102,11 +100,11 @@ namespace Ink_Canvas.Helpers
                         var ms = new MemoryStream();
                         strokes.Save(ms);
                         ms.Position = 0;
-                        
+
                         // 释放旧的内存流
                         _memoryStreams[slideIndex]?.Dispose();
                         _memoryStreams[slideIndex] = ms;
-                        
+
                         LogHelper.WriteLogToFile($"已保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
                     }
                 }
@@ -214,11 +212,11 @@ namespace Ink_Canvas.Helpers
                                     var srcBuf = new byte[_memoryStreams[i].Length];
                                     _memoryStreams[i].Position = 0;
                                     var byteLength = _memoryStreams[i].Read(srcBuf, 0, srcBuf.Length);
-                                    
+
                                     var filePath = Path.Combine(folderPath, i.ToString("0000") + ".icstk");
                                     File.WriteAllBytes(filePath, srcBuf);
                                     savedCount++;
-                                    
+
                                     LogHelper.WriteLogToFile($"已保存第{i}页墨迹，大小: {byteLength} bytes", LogHelper.LogType.Trace);
                                 }
                                 else
@@ -308,7 +306,7 @@ namespace Ink_Canvas.Helpers
                         _memoryStreams[i]?.Dispose();
                         _memoryStreams[i] = null;
                     }
-                    
+
                     CurrentStrokes.Clear();
                     LogHelper.WriteLogToFile("已清除所有墨迹", LogHelper.LogType.Trace);
                 }
@@ -360,7 +358,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 if (string.IsNullOrEmpty(filePath)) return "unknown";
-                
+
                 using (var md5 = MD5.Create())
                 {
                     byte[] hashBytes = md5.ComputeHash(Encoding.UTF8.GetBytes(filePath));

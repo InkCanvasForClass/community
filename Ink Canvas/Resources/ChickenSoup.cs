@@ -1,6 +1,7 @@
 ﻿namespace Ink_Canvas
 {
-    public static class ChickenSoup {
+    public static class ChickenSoup
+    {
         public static string[] OSUPlayerYuLu = {
             "澳洲原神，启动！",
             "一眼丁真，鉴定为玩osu!玩的",

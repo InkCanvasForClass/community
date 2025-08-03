@@ -12,11 +12,11 @@ namespace Ink_Canvas.Helpers.Plugins
         /// 插件状态（私有字段）
         /// </summary>
         private bool _isEnabled;
-        
+
         /// <summary>
         /// 插件状态（公共属性）
         /// </summary>
-        public bool IsEnabled 
+        public bool IsEnabled
         {
             get => _isEnabled;
             protected set
@@ -28,12 +28,12 @@ namespace Ink_Canvas.Helpers.Plugins
                 }
             }
         }
-        
+
         /// <summary>
         /// 插件ID
         /// </summary>
         public string Id { get; protected set; }
-        
+
         /// <summary>
         /// 插件路径
         /// </summary>
@@ -75,13 +75,13 @@ namespace Ink_Canvas.Helpers.Plugins
         public virtual void Initialize()
         {
             Id = GetType().FullName;
-            
+
             // 添加日志，记录插件名称
             try
             {
                 string name = Name;
                 LogHelper.WriteLogToFile($"初始化插件: ID={Id}, 名称={name ?? "未命名"}");
-                
+
                 if (string.IsNullOrEmpty(name))
                 {
                     LogHelper.WriteLogToFile($"警告: 插件 {Id} 的名称为空", LogHelper.LogType.Warning);
@@ -91,7 +91,7 @@ namespace Ink_Canvas.Helpers.Plugins
             {
                 LogHelper.WriteLogToFile($"获取插件名称时出错: {ex.Message}", LogHelper.LogType.Error);
             }
-            
+
             LogHelper.WriteLogToFile($"插件 {Name} 已初始化");
         }
 
@@ -136,7 +136,7 @@ namespace Ink_Canvas.Helpers.Plugins
         {
             LogHelper.WriteLogToFile($"插件 {Name} 已卸载");
         }
-        
+
         /// <summary>
         /// 保存插件自身的设置
         /// 注意：此方法仅用于保存插件的特定设置，不应影响插件启用/禁用状态
@@ -148,7 +148,7 @@ namespace Ink_Canvas.Helpers.Plugins
             // 子类可以重写此方法，将自身设置保存到配置文件中
             LogHelper.WriteLogToFile($"插件 {Name} 设置已保存", LogHelper.LogType.Event);
         }
-        
+
         /// <summary>
         /// 触发状态变更事件
         /// </summary>
@@ -158,4 +158,4 @@ namespace Ink_Canvas.Helpers.Plugins
             EnabledStateChanged?.Invoke(this, isEnabled);
         }
     }
-} 
+}

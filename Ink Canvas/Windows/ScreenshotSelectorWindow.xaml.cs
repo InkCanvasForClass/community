@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
-
+using DrawingRectangle = System.Drawing.Rectangle;
 // 为了避免命名冲突，使用别名
 using WpfCanvas = System.Windows.Controls.Canvas;
-using DrawingRectangle = System.Drawing.Rectangle;
-using WpfRectangle = System.Windows.Shapes.Rectangle;
 
 namespace Ink_Canvas
 {
@@ -25,20 +20,20 @@ namespace Ink_Canvas
         private System.Windows.Point _currentPoint;
         private List<System.Windows.Point> _freehandPoints;
         private Polyline _freehandPolyline;
-        
+
         public DrawingRectangle? SelectedArea { get; private set; }
         public List<System.Windows.Point> SelectedPath { get; private set; }
 
         public ScreenshotSelectorWindow()
         {
             InitializeComponent();
-            
+
             // 设置窗口覆盖所有屏幕
             SetupFullScreenOverlay();
-            
+
             // 初始化自由绘制模式
             InitializeFreehandMode();
-            
+
             // 隐藏提示文字的定时器
             var timer = new System.Windows.Threading.DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(5);
@@ -49,7 +44,7 @@ namespace Ink_Canvas
             };
             timer.Start();
         }
-        
+
         private void InitializeFreehandMode()
         {
             _freehandPoints = new List<System.Windows.Point>();
@@ -97,28 +92,28 @@ namespace Ink_Canvas
                 Close();
             }
         }
-        
+
         private void RectangleModeButton_Click(object sender, RoutedEventArgs e)
         {
             _isFreehandMode = false;
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             HintText.Text = "拖拽鼠标选择矩形区域";
-            
+
             // 清除自由绘制的内容
             _freehandPoints.Clear();
             _freehandPolyline.Points.Clear();
             SelectionPath.Visibility = Visibility.Collapsed;
             SelectionRectangle.Visibility = Visibility.Collapsed;
         }
-        
+
         private void FreehandModeButton_Click(object sender, RoutedEventArgs e)
         {
             _isFreehandMode = true;
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             HintText.Text = "按住鼠标左键绘制任意形状，松开完成";
-            
+
             // 清除矩形选择的内容
             SelectionRectangle.Visibility = Visibility.Collapsed;
             _freehandPoints.Clear();
@@ -130,10 +125,10 @@ namespace Ink_Canvas
             _isSelecting = true;
             _startPoint = e.GetPosition(this);
             _currentPoint = _startPoint;
-            
+
             // 隐藏提示文字
             HintText.Visibility = Visibility.Collapsed;
-            
+
             if (_isFreehandMode)
             {
                 // 自由绘制模式
@@ -148,10 +143,10 @@ namespace Ink_Canvas
                 SelectionRectangle.Visibility = Visibility.Visible;
                 SizeInfoBorder.Visibility = Visibility.Visible;
             }
-            
+
             // 捕获鼠标
             CaptureMouse();
-            
+
             if (!_isFreehandMode)
             {
                 UpdateSelection();
@@ -163,7 +158,7 @@ namespace Ink_Canvas
             if (_isSelecting)
             {
                 _currentPoint = e.GetPosition(this);
-                
+
                 if (_isFreehandMode)
                 {
                     // 自由绘制模式：添加点到路径
@@ -193,20 +188,20 @@ namespace Ink_Canvas
                         // 闭合路径
                         _freehandPoints.Add(_startPoint);
                         _freehandPolyline.Points.Add(_startPoint);
-                        
+
                         // 保存选择的路径
                         SelectedPath = new List<System.Windows.Point>(_freehandPoints);
-                        
+
                         // 计算边界矩形用于截图
                         var bounds = CalculatePathBounds(_freehandPoints);
                         var dpiScale = GetDpiScale();
                         var virtualScreen = System.Windows.Forms.SystemInformation.VirtualScreen;
-                        
+
                         int screenX = (int)((bounds.X * dpiScale) + virtualScreen.Left);
                         int screenY = (int)((bounds.Y * dpiScale) + virtualScreen.Top);
                         int screenWidth = (int)(bounds.Width * dpiScale);
                         int screenHeight = (int)(bounds.Height * dpiScale);
-                        
+
                         SelectedArea = new DrawingRectangle(screenX, screenY, screenWidth, screenHeight);
                         DialogResult = true;
                     }
@@ -275,20 +270,20 @@ namespace Ink_Canvas
             double y = Math.Min(_startPoint.Y, _currentPoint.Y);
             double width = Math.Abs(_currentPoint.X - _startPoint.X);
             double height = Math.Abs(_currentPoint.Y - _startPoint.Y);
-            
+
             return new Rect(x, y, width, height);
         }
-        
+
         private Rect CalculatePathBounds(List<System.Windows.Point> points)
         {
             if (points == null || points.Count == 0)
                 return new Rect();
-                
+
             double minX = points[0].X;
             double minY = points[0].Y;
             double maxX = points[0].X;
             double maxY = points[0].Y;
-            
+
             foreach (var point in points)
             {
                 minX = Math.Min(minX, point.X);
@@ -296,7 +291,7 @@ namespace Ink_Canvas
                 maxX = Math.Max(maxX, point.X);
                 maxY = Math.Max(maxY, point.Y);
             }
-            
+
             return new Rect(minX, minY, maxX - minX, maxY - minY);
         }
     }

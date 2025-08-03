@@ -25,7 +25,8 @@ namespace Ink_Canvas.Helpers
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
         [StructLayout(LayoutKind.Sequential)]
-        public struct RECT {
+        public struct RECT
+        {
             public int Left;
             public int Top;
             public int Right;
@@ -35,7 +36,8 @@ namespace Ink_Canvas.Helpers
             public int Height => Bottom - Top;
         }
 
-        public static string WindowTitle() {
+        public static string WindowTitle()
+        {
             IntPtr foregroundWindowHandle = GetForegroundWindow();
 
             const int nChars = 256;
@@ -45,7 +47,8 @@ namespace Ink_Canvas.Helpers
             return windowTitle.ToString();
         }
 
-        public static string WindowClassName() {
+        public static string WindowClassName()
+        {
             IntPtr foregroundWindowHandle = GetForegroundWindow();
 
             const int nChars = 256;
@@ -55,7 +58,8 @@ namespace Ink_Canvas.Helpers
             return className.ToString();
         }
 
-        public static RECT WindowRect() {
+        public static RECT WindowRect()
+        {
             IntPtr foregroundWindowHandle = GetForegroundWindow();
 
             RECT windowRect;
@@ -64,15 +68,19 @@ namespace Ink_Canvas.Helpers
             return windowRect;
         }
 
-        public static string ProcessName() {
+        public static string ProcessName()
+        {
             IntPtr foregroundWindowHandle = GetForegroundWindow();
             uint processId;
             GetWindowThreadProcessId(foregroundWindowHandle, out processId);
 
-            try {
+            try
+            {
                 Process process = Process.GetProcessById((int)processId);
                 return process.ProcessName;
-            } catch (ArgumentException) {
+            }
+            catch (ArgumentException)
+            {
                 // Process with the given ID not found
                 return "Unknown";
             }
@@ -89,7 +97,8 @@ namespace Ink_Canvas.Helpers
                 Process process = Process.GetProcessById((int)processId);
                 return process.MainModule.FileName;
             }
-            catch {
+            catch
+            {
                 // Process with the given ID not found
                 return "Unknown";
             }

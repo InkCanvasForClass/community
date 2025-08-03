@@ -24,11 +24,11 @@ namespace Ink_Canvas.Helpers
             // 创建硬件加速的渲染目标
             _renderTarget = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
             _drawingVisual = new DrawingVisual();
-            
+
             // 启用硬件加速
             RenderOptions.SetBitmapScalingMode(_drawingVisual, BitmapScalingMode.HighQuality);
             RenderOptions.SetEdgeMode(_drawingVisual, EdgeMode.Aliased);
-            
+
             _isInitialized = true;
         }
 
@@ -46,10 +46,10 @@ namespace Ink_Canvas.Helpers
                 {
                     // 使用PathGeometry进行硬件加速的曲线拟合
                     var pathGeometry = CreateSmoothPathGeometry(originalStroke.StylusPoints);
-                    
+
                     // 将PathGeometry转换回StylusPoint集合
                     var smoothedPoints = ConvertPathGeometryToStylusPoints(pathGeometry, originalStroke.StylusPoints);
-                    
+
                     return new Stroke(new StylusPointCollection(smoothedPoints))
                     {
                         DrawingAttributes = originalStroke.DrawingAttributes.Clone()
@@ -69,11 +69,11 @@ namespace Ink_Canvas.Helpers
         {
             var pathGeometry = new PathGeometry();
             var pathFigure = new PathFigure();
-            
+
             if (points.Count < 2) return pathGeometry;
-            
+
             pathFigure.StartPoint = new Point(points[0].X, points[0].Y);
-            
+
             // 使用贝塞尔曲线段创建平滑路径，增加插点密度
             for (int i = 0; i < points.Count - 1; i += 2)  // 从i+=3改为i+=2，增加插点密度
             {
@@ -84,7 +84,7 @@ namespace Ink_Canvas.Helpers
                 var bezierSegment = new BezierSegment(p1, p2, p3, true);
                 pathFigure.Segments.Add(bezierSegment);
             }
-            
+
             pathGeometry.Figures.Add(pathFigure);
             return pathGeometry;
         }
@@ -96,11 +96,11 @@ namespace Ink_Canvas.Helpers
         {
             var result = new List<StylusPoint>();
             var flattened = pathGeometry.GetFlattenedPathGeometry();
-            
+
             foreach (var figure in flattened.Figures)
             {
                 result.Add(new StylusPoint(figure.StartPoint.X, figure.StartPoint.Y, 0.5f));
-                
+
                 foreach (var segment in figure.Segments)
                 {
                     if (segment is LineSegment lineSegment)
@@ -116,10 +116,10 @@ namespace Ink_Canvas.Helpers
                     }
                 }
             }
-            
+
             // 保持原始压感信息
             InterpolatePressure(result, originalPoints);
-            
+
             return result;
         }
 
@@ -129,13 +129,13 @@ namespace Ink_Canvas.Helpers
         private void InterpolatePressure(List<StylusPoint> smoothedPoints, StylusPointCollection originalPoints)
         {
             if (originalPoints.Count == 0 || smoothedPoints.Count == 0) return;
-            
+
             for (int i = 0; i < smoothedPoints.Count; i++)
             {
                 double ratio = (double)i / (smoothedPoints.Count - 1);
                 int originalIndex = (int)(ratio * (originalPoints.Count - 1));
                 originalIndex = Math.Max(0, Math.Min(originalIndex, originalPoints.Count - 1));
-                
+
                 var point = smoothedPoints[i];
                 float pressure = originalPoints[originalIndex].PressureFactor;
                 smoothedPoints[i] = new StylusPoint(point.X, point.Y, Math.Max(pressure, 0.1f));
@@ -148,23 +148,23 @@ namespace Ink_Canvas.Helpers
         public static StylusPoint[] ParallelBezierInterpolation(StylusPoint[] controlPoints, int segments = 32)
         {
             if (controlPoints.Length < 4) return controlPoints;
-            
+
             var result = new StylusPoint[segments * (controlPoints.Length / 4)];
-            
+
             Parallel.For(0, controlPoints.Length / 4, segmentIndex =>
             {
                 var p0 = controlPoints[segmentIndex * 4];
                 var p1 = controlPoints[segmentIndex * 4 + 1];
                 var p2 = controlPoints[segmentIndex * 4 + 2];
                 var p3 = controlPoints[segmentIndex * 4 + 3];
-                
+
                 for (int i = 0; i < segments; i++)
                 {
                     double t = (double)i / (segments - 1);
                     result[segmentIndex * segments + i] = CubicBezierFast(p0, p1, p2, p3, t);
                 }
             });
-            
+
             return result;
         }
 
@@ -178,11 +178,11 @@ namespace Ink_Canvas.Helpers
             double uu = u * u;
             double uuu = uu * u;
             double ttt = tt * t;
-            
+
             double x = uuu * p0.X + 3 * uu * t * p1.X + 3 * u * tt * p2.X + ttt * p3.X;
             double y = uuu * p0.Y + 3 * uu * t * p1.Y + 3 * u * tt * p2.Y + ttt * p3.Y;
             float pressure = (float)(p1.PressureFactor * u + p2.PressureFactor * t);
-            
+
             return new StylusPoint(x, y, Math.Max(pressure, 0.1f));
         }
 
@@ -239,17 +239,17 @@ namespace Ink_Canvas.Helpers
                 case InkSmoothingQuality.HighPerformance:
                     SmoothingStrength = 0.4;
                     ResampleInterval = 2.0;
-                    InterpolationSteps = 16;  
+                    InterpolationSteps = 16;
                     break;
                 case InkSmoothingQuality.Balanced:
                     SmoothingStrength = 0.6;
                     ResampleInterval = 1.2;
-                    InterpolationSteps = 32;  
+                    InterpolationSteps = 32;
                     break;
                 case InkSmoothingQuality.HighQuality:
                     SmoothingStrength = 0.8;
                     ResampleInterval = 0.8;
-                    InterpolationSteps = 64;  
+                    InterpolationSteps = 64;
                     break;
             }
         }

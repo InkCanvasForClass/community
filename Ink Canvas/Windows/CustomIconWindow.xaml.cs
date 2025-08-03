@@ -16,7 +16,7 @@ namespace Ink_Canvas
         {
             InitializeComponent();
             mainWindow = owner;
-            
+
             // 从主窗口的设置获取自定义图标列表
             CustomIcons = new ObservableCollection<CustomFloatingBarIcon>(MainWindow.Settings.Appearance.CustomFloatingBarImgs);
             CustomIconsListView.ItemsSource = CustomIcons;
@@ -28,26 +28,26 @@ namespace Ink_Canvas
             {
                 // 从列表中移除图标
                 CustomIcons.Remove(icon);
-                
+
                 // 更新主窗口的设置
                 MainWindow.Settings.Appearance.CustomFloatingBarImgs.Clear();
                 foreach (var customIcon in CustomIcons)
                 {
                     MainWindow.Settings.Appearance.CustomFloatingBarImgs.Add(customIcon);
                 }
-                
+
                 // 如果当前选中的是被删除的图标，重置为默认图标
-                if (MainWindow.Settings.Appearance.FloatingBarImg >= 8 && 
+                if (MainWindow.Settings.Appearance.FloatingBarImg >= 8 &&
                     MainWindow.Settings.Appearance.FloatingBarImg - 8 >= MainWindow.Settings.Appearance.CustomFloatingBarImgs.Count)
                 {
                     MainWindow.Settings.Appearance.FloatingBarImg = 0;
                     mainWindow.ComboBoxFloatingBarImg.SelectedIndex = 0;
                     mainWindow.UpdateFloatingBarIcon();
                 }
-                
+
                 // 更新ComboBox
                 mainWindow.UpdateCustomIconsInComboBox();
-                
+
                 // 保存设置
                 MainWindow.SaveSettingsToFile();
             }
@@ -58,4 +58,4 @@ namespace Ink_Canvas
             Close();
         }
     }
-} 
+}

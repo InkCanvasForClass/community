@@ -1,13 +1,17 @@
-﻿using System;
+﻿using IWshRuntimeLibrary;
+using System;
 using System.Windows;
-using IWshRuntimeLibrary;
 using Application = System.Windows.Forms.Application;
 using File = System.IO.File;
 
-namespace Ink_Canvas {
-    public partial class MainWindow : Window {
-        public static bool StartAutomaticallyCreate(string exeName) {
-            try {
+namespace Ink_Canvas
+{
+    public partial class MainWindow : Window
+    {
+        public static bool StartAutomaticallyCreate(string exeName)
+        {
+            try
+            {
                 var shell = new WshShell();
                 var shortcut = (IWshShortcut)shell.CreateShortcut(
                     Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + exeName + ".lnk");
@@ -30,8 +34,10 @@ namespace Ink_Canvas {
             return false;
         }
 
-        public static bool StartAutomaticallyDel(string exeName) {
-            try {
+        public static bool StartAutomaticallyDel(string exeName)
+        {
+            try
+            {
                 File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + exeName +
                             ".lnk");
                 return true;

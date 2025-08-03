@@ -49,18 +49,18 @@ namespace Ink_Canvas.Helpers.Plugins
         {
             // 先调用基类方法，这样会设置插件ID和记录日志
             base.Initialize();
-            
+
             // TODO: 在这里进行插件初始化工作
-            
+
             // 示例：记录初始化信息
             LogHelper.WriteLogToFile($"插件 {Name} 开始初始化");
-            
+
             // 示例：加载配置
             LoadConfig();
-            
+
             // 示例：注册自定义事件
             // MainWindow.Instance.SomeEvent += OnSomeEvent;
-            
+
             LogHelper.WriteLogToFile($"插件 {Name} 初始化完成");
         }
 
@@ -72,9 +72,9 @@ namespace Ink_Canvas.Helpers.Plugins
         {
             // 先调用基类方法，这样会设置插件状态和记录日志
             base.Enable();
-            
+
             // TODO: 在这里启用插件功能
-            
+
             LogHelper.WriteLogToFile($"插件 {Name} 已启用");
         }
 
@@ -86,9 +86,9 @@ namespace Ink_Canvas.Helpers.Plugins
         {
             // 先调用基类方法，这样会设置插件状态和记录日志
             base.Disable();
-            
+
             // TODO: 在这里禁用插件功能
-            
+
             LogHelper.WriteLogToFile($"插件 {Name} 已禁用");
         }
 
@@ -99,13 +99,13 @@ namespace Ink_Canvas.Helpers.Plugins
         public override void Cleanup()
         {
             // TODO: 在这里清理插件资源
-            
+
             // 示例：取消注册事件
             // MainWindow.Instance.SomeEvent -= OnSomeEvent;
-            
+
             // 示例：保存配置
             SaveConfig();
-            
+
             // 最后调用基类方法
             base.Cleanup();
         }
@@ -186,7 +186,7 @@ namespace Ink_Canvas.Helpers.Plugins
         public void DoSomething()
         {
             if (!IsEnabled) return;
-            
+
             try
             {
                 // TODO: 实现你的功能
@@ -245,7 +245,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 Text = "设置项:",
                 Margin = new Thickness(0, 5, 0, 5)
             });
-            
+
             panel.Children.Add(new TextBox
             {
                 Margin = new Thickness(0, 0, 0, 10),
@@ -261,16 +261,16 @@ namespace Ink_Canvas.Helpers.Plugins
                 Margin = new Thickness(0, 10, 0, 0),
                 HorizontalAlignment = HorizontalAlignment.Left
             };
-            
-            button.Click += (sender, e) => 
+
+            button.Click += (sender, e) =>
             {
                 MessageBox.Show("设置已保存！", "插件模板", MessageBoxButton.OK, MessageBoxImage.Information);
             };
-            
+
             panel.Children.Add(button);
 
             // 设置控件内容
             Content = panel;
         }
     }
-} 
+}

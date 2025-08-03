@@ -33,12 +33,12 @@ namespace Ink_Canvas.Helpers
         {
             // 检查日志是否启用
             if (MainWindow.Settings != null && MainWindow.Settings.Advanced != null && !MainWindow.Settings.Advanced.IsLogEnabled) return;
-            
+
             string strLogType = logType.ToString();
             try
             {
                 string file;
-                
+
                 // 检查是否启用了日期保存功能
                 if (MainWindow.Settings != null && MainWindow.Settings.Advanced != null && MainWindow.Settings.Advanced.IsSaveLogByDate)
                 {
@@ -48,10 +48,10 @@ namespace Ink_Canvas.Helpers
                     {
                         Directory.CreateDirectory(logsPath);
                     }
-                    
+
                     // 检查Logs文件夹大小，如果超过5MB则清空
                     CheckAndCleanLogsFolder(logsPath);
-                    
+
                     // 使用软件启动时间作为日志文件名
                     file = Path.Combine(logsPath, $"Log_{AppStartTime}.txt");
                 }
@@ -59,12 +59,12 @@ namespace Ink_Canvas.Helpers
                 {
                     file = App.RootPath + LogFile;
                 }
-                
+
                 if (!Directory.Exists(App.RootPath))
                 {
                     Directory.CreateDirectory(App.RootPath);
                 }
-                
+
                 var threadId = Thread.CurrentThread.ManagedThreadId;
                 var callingMethod = new StackTrace(2, true).GetFrame(0);
                 string callerInfo = "<unknown>";
@@ -92,16 +92,16 @@ namespace Ink_Canvas.Helpers
             {
                 long totalSize = 0;
                 DirectoryInfo dirInfo = new DirectoryInfo(logsPath);
-                
+
                 // 如果目录不存在，直接返回
                 if (!dirInfo.Exists) return;
-                
+
                 // 计算文件夹大小
                 foreach (FileInfo file in dirInfo.GetFiles())
                 {
                     totalSize += file.Length;
                 }
-                
+
                 // 如果超过5MB，清空文件夹
                 if (totalSize > MaxLogsFolderSizeBytes)
                 {
@@ -113,7 +113,7 @@ namespace Ink_Canvas.Helpers
                         }
                         catch { }
                     }
-                    
+
                     // 记录清理操作
                     string cleanupMessage = $"Logs folder exceeded size limit ({totalSize / 1024.0 / 1024.0:F2} MB > {MaxLogsFolderSizeBytes / 1024.0 / 1024.0:F2} MB). Folder cleaned.";
                     using (StreamWriter sw = new StreamWriter(Path.Combine(logsPath, $"Log_{AppStartTime}.txt"), true))

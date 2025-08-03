@@ -354,7 +354,7 @@ namespace Ink_Canvas.Helpers
     {
         public double SmoothingStrength { get; set; } = 0.3;
         public double ResampleInterval { get; set; } = 3.0;
-        public int InterpolationSteps { get; set; } = 8; 
+        public int InterpolationSteps { get; set; } = 8;
 
         public Stroke SmoothStroke(Stroke stroke)
         {

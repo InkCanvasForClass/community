@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using System;
 using System.ComponentModel;
 using System.Media;
 using System.Timers;
@@ -7,8 +9,6 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
 using Application = System.Windows.Application;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Timer = System.Timers.Timer;
@@ -364,7 +364,8 @@ namespace Ink_Canvas
                 // Set to center
                 double dpiScaleX = 1, dpiScaleY = 1;
                 PresentationSource source = PresentationSource.FromVisual(this);
-                if (source != null) {
+                if (source != null)
+                {
                     dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
                     dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
                 }

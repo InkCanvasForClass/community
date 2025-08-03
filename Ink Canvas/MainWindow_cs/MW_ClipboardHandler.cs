@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -78,12 +78,12 @@ namespace Ink_Canvas
 
                 // 创建右键菜单
                 var contextMenu = new ContextMenu();
-                
+
                 var pasteMenuItem = new MenuItem
                 {
                     Header = "粘贴图片"
                 };
-                
+
                 pasteMenuItem.Click += async (s, e) => await PasteImageFromClipboard(position);
                 contextMenu.Items.Add(pasteMenuItem);
 

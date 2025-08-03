@@ -13,8 +13,8 @@ namespace Ink_Canvas.Helpers
     {
         private static readonly DependencyProperty IsAvoidFullScreenEnabledProperty =
             DependencyProperty.RegisterAttached(
-                "IsAvoidFullScreenEnabled", 
-                typeof(bool), 
+                "IsAvoidFullScreenEnabled",
+                typeof(bool),
                 typeof(AvoidFullScreenHelper));
 
         private static bool _isBoardMode;
@@ -122,19 +122,19 @@ namespace Ink_Canvas.Helpers
         {
             // 获取所有显示器
             var screens = Screen.AllScreens;
-            
+
             // 确定窗口主要位于哪个显示器上
             Screen targetScreen = null;
             double maxIntersection = 0;
-            
+
             foreach (var screen in screens)
             {
                 var screenRect = new Rect(
-                    screen.WorkingArea.X, 
-                    screen.WorkingArea.Y, 
-                    screen.WorkingArea.Width, 
+                    screen.WorkingArea.X,
+                    screen.WorkingArea.Y,
+                    screen.WorkingArea.Width,
                     screen.WorkingArea.Height);
-                    
+
                 var intersection = Rect.Intersect(windowRect, screenRect);
                 if (intersection.Width * intersection.Height > maxIntersection)
                 {
@@ -142,11 +142,11 @@ namespace Ink_Canvas.Helpers
                     targetScreen = screen;
                 }
             }
-            
+
             // 如果没找到，使用主显示器
             if (targetScreen == null)
                 targetScreen = Screen.PrimaryScreen;
-                
+
             return new Rect(
                 targetScreen.WorkingArea.X,
                 targetScreen.WorkingArea.Y,
@@ -159,21 +159,21 @@ namespace Ink_Canvas.Helpers
             // 调整尺寸以适应工作区域
             if (windowRect.Width > workingArea.Width)
                 windowRect.Width = workingArea.Width;
-                
+
             if (windowRect.Height > workingArea.Height)
                 windowRect.Height = workingArea.Height;
-                
+
             // 调整位置以确保窗口完全在工作区域内
             if (windowRect.Left < workingArea.Left)
                 windowRect.X = workingArea.Left;
             else if (windowRect.Right > workingArea.Right)
                 windowRect.X = workingArea.Right - windowRect.Width;
-                
+
             if (windowRect.Top < workingArea.Top)
                 windowRect.Y = workingArea.Top;
             else if (windowRect.Bottom > workingArea.Bottom)
                 windowRect.Y = workingArea.Bottom - windowRect.Height;
-                
+
             return windowRect;
         }
     }

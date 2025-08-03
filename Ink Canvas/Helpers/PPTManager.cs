@@ -1,18 +1,13 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.PowerPoint;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Timers;
-using System.Windows;
 using System.Windows.Threading;
-using Microsoft.Office.Core;
-using Microsoft.Office.Interop.PowerPoint;
 using Application = System.Windows.Application;
 using Timer = System.Timers.Timer;
 
@@ -514,7 +509,7 @@ namespace Ink_Canvas.Helpers
             {
                 PresentationClose?.Invoke(pres);
                 LogHelper.WriteLogToFile($"演示文稿已关闭: {pres?.Name}", LogHelper.LogType.Event);
-                
+
                 // 重新启动连接检查
                 _connectionCheckTimer?.Start();
             }
@@ -986,7 +981,7 @@ namespace Ink_Canvas.Helpers
                     StopWpsProcessCheckTimer();
                     return;
                 }
-                
+
 
                 // 检查前台WPS窗口是否存在（优化版）
                 bool isForegroundWpsWindowActive = IsForegroundWpsWindowStillActiveOptimized();

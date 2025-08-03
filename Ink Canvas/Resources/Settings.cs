@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
 
 namespace Ink_Canvas
 {
@@ -41,7 +41,7 @@ namespace Ink_Canvas
         public int InkStyle { get; set; }
         [JsonProperty("eraserSize")]
         public int EraserSize { get; set; } = 2;
-        [JsonProperty("eraserType")] 
+        [JsonProperty("eraserType")]
         public int EraserType { get; set; } // 0 - 图标切换模式      1 - 面积擦     2 - 线条擦
         [JsonProperty("eraserShapeType")]
         public int EraserShapeType { get; set; } // 0 - 圆形擦  1 - 黑板擦
@@ -158,7 +158,7 @@ namespace Ink_Canvas
         // public bool EnableViewboxFloatingBarScaleTransform { get; set; } = false;
         [JsonProperty("viewboxFloatingBarScaleTransformValue")]
         public double ViewboxFloatingBarScaleTransformValue { get; set; } = 1.0;
-        [JsonProperty("floatingBarImg")] 
+        [JsonProperty("floatingBarImg")]
         public int FloatingBarImg { get; set; }
         [JsonProperty("customFloatingBarImgs")]
         public List<CustomFloatingBarIcon> CustomFloatingBarImgs { get; set; } = new List<CustomFloatingBarIcon>();
@@ -193,7 +193,7 @@ namespace Ink_Canvas
         [JsonProperty("isShowModeFingerToggleSwitch")]
         public bool IsShowModeFingerToggleSwitch { get; set; } = true;
         [JsonProperty("theme")]
-        public int Theme { get; set; }            
+        public int Theme { get; set; }
     }
 
     public class PowerPointSettings
@@ -259,7 +259,7 @@ namespace Ink_Canvas
     public class Automation
     {
         [JsonIgnore]
-        public bool IsEnableAutoFold => 
+        public bool IsEnableAutoFold =>
             IsAutoFoldInEasiNote
             || IsAutoFoldInEasiCamera
             || IsAutoFoldInEasiNote3C
@@ -388,7 +388,7 @@ namespace Ink_Canvas
 
         [JsonProperty("autoDelSavedFilesDaysThreshold")]
         public int AutoDelSavedFilesDaysThreshold = 15;
-        
+
         [JsonProperty("isSaveFullPageStrokes")]
         public bool IsSaveFullPageStrokes;
 
@@ -418,7 +418,7 @@ namespace Ink_Canvas
 
         [JsonProperty("isLogEnabled")]
         public bool IsLogEnabled { get; set; } = true;
-        
+
         [JsonProperty("isSaveLogByDate")]
         public bool IsSaveLogByDate { get; set; } = true;
 
@@ -445,7 +445,7 @@ namespace Ink_Canvas
 
         [JsonProperty("isEnableAvoidFullScreenHelper")]
         public bool IsEnableAvoidFullScreenHelper { get; set; }
-        
+
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;
 
@@ -471,7 +471,8 @@ namespace Ink_Canvas
         public double LineStraightenSensitivity { get; set; } = 0.20; // 直线检测灵敏度，值越小越严格（0.05-2.0）
     }
 
-    public class RandSettings {
+    public class RandSettings
+    {
         [JsonProperty("displayRandWindowNamesInputBtn")]
         public bool DisplayRandWindowNamesInputBtn { get; set; }
         [JsonProperty("randWindowOnceCloseLatency")]
@@ -487,39 +488,39 @@ namespace Ink_Canvas
         [JsonProperty("customPickNameBackgrounds")]
         public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
     }
-    
+
     public class CustomPickNameBackground
     {
         [JsonProperty("name")]
         public string Name { get; set; }
-        
+
         [JsonProperty("filePath")]
         public string FilePath { get; set; }
-        
+
         public CustomPickNameBackground(string name, string filePath)
         {
             Name = name;
             FilePath = filePath;
         }
-        
+
         // 用于JSON序列化
         public CustomPickNameBackground() { }
     }
-    
+
     public class CustomFloatingBarIcon
     {
         [JsonProperty("name")]
         public string Name { get; set; }
-        
+
         [JsonProperty("filePath")]
         public string FilePath { get; set; }
-        
+
         public CustomFloatingBarIcon(string name, string filePath)
         {
             Name = name;
             FilePath = filePath;
         }
-        
+
         // 用于JSON序列化
         public CustomFloatingBarIcon() { }
     }

@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern;
+using Microsoft.Office.Core;
+using Microsoft.Office.Interop.PowerPoint;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -6,22 +10,17 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Ink;
-using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern;
-using Microsoft.Office.Core;
-using Microsoft.Office.Interop.PowerPoint;
 using Application = System.Windows.Application;
 using File = System.IO.File;
 using MessageBox = System.Windows.MessageBox;
 using MouseButtonEventArgs = System.Windows.Input.MouseButtonEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
-namespace Ink_Canvas {
-    public partial class MainWindow : Window {
+namespace Ink_Canvas
+{
+    public partial class MainWindow : Window
+    {
         #region Win32 API Declarations
         [DllImport("user32.dll")]
         private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
@@ -627,8 +626,10 @@ namespace Ink_Canvas {
         }
         #endregion
 
-        private void BtnCheckPPT_Click(object sender, RoutedEventArgs e) {
-            try {
+        private void BtnCheckPPT_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
                 // 使用新的PPT管理器进行连接检查
                 if (_pptManager == null)
                 {
@@ -655,14 +656,16 @@ namespace Ink_Canvas {
                     });
                 });
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 LogHelper.WriteLogToFile($"手动检查PPT应用程序失败: {ex}", LogHelper.LogType.Error);
                 _pptUIManager?.UpdateConnectionStatus(false);
                 MessageBox.Show("未找到幻灯片");
             }
         }
 
-        private void ToggleSwitchSupportWPS_Toggled(object sender, RoutedEventArgs e) {
+        private void ToggleSwitchSupportWPS_Toggled(object sender, RoutedEventArgs e)
+        {
             if (!isLoaded) return;
 
             Settings.PowerPointSettings.IsSupportWPS = ToggleSwitchSupportWPS.IsOn;
@@ -699,8 +702,10 @@ namespace Ink_Canvas {
 
 
 
-       private void BtnPPTSlidesUp_Click(object sender, RoutedEventArgs e) {
-            Application.Current.Dispatcher.Invoke(() => {
+        private void BtnPPTSlidesUp_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
                 try
                 {
                     _isPptClickingBtnTurned = true;
@@ -732,15 +737,18 @@ namespace Ink_Canvas {
                         _pptUIManager?.UpdateConnectionStatus(false);
                     }
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     LogHelper.WriteLogToFile($"PPT上一页操作异常: {ex}", LogHelper.LogType.Error);
                     _pptUIManager?.UpdateConnectionStatus(false);
                 }
             });
         }
 
-        private void BtnPPTSlidesDown_Click(object sender, RoutedEventArgs e) {
-            Application.Current.Dispatcher.Invoke(() => {
+        private void BtnPPTSlidesDown_Click(object sender, RoutedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
                 try
                 {
                     _isPptClickingBtnTurned = true;
@@ -772,7 +780,8 @@ namespace Ink_Canvas {
                         _pptUIManager?.UpdateConnectionStatus(false);
                     }
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     LogHelper.WriteLogToFile($"PPT下一页操作异常: {ex}", LogHelper.LogType.Error);
                     _pptUIManager?.UpdateConnectionStatus(false);
                 }
@@ -822,7 +831,8 @@ namespace Ink_Canvas {
             }
         }
 
-        private async void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e) {
+        private async void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
+        {
             if (lastBorderMouseDownObject != sender) return;
 
             if (sender == PPTLSPageButton)
@@ -868,7 +878,8 @@ namespace Ink_Canvas {
                 }
 
                 // 控制居中
-                if (!isFloatingBarFolded) {
+                if (!isFloatingBarFolded)
+                {
                     await Task.Delay(100);
                     ViewboxFloatingBarMarginAnimation(60);
                 }
@@ -879,28 +890,34 @@ namespace Ink_Canvas {
             }
         }
 
-        private void BtnPPTSlideShow_Click(object sender, RoutedEventArgs e) {
-            new Thread(() => {
-                try {
+        private void BtnPPTSlideShow_Click(object sender, RoutedEventArgs e)
+        {
+            new Thread(() =>
+            {
+                try
+                {
                     if (_pptManager?.TryStartSlideShow() != true)
                     {
                         LogHelper.WriteLogToFile("启动幻灯片放映失败", LogHelper.LogType.Warning);
                     }
                 }
-                catch (Exception ex) {
+                catch (Exception ex)
+                {
                     LogHelper.WriteLogToFile($"启动幻灯片放映异常: {ex}", LogHelper.LogType.Error);
                 }
             }).Start();
         }
 
-        private async void BtnPPTSlideShowEnd_Click(object sender, RoutedEventArgs e) {
+        private async void BtnPPTSlideShowEnd_Click(object sender, RoutedEventArgs e)
+        {
             try
             {
                 // 保存当前页墨迹
                 var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                 if (currentSlide > 0)
                 {
-                    Application.Current.Dispatcher.Invoke(() => {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
                         _pptInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
                         timeMachine.ClearStrokeHistory();
                     });
@@ -916,7 +933,8 @@ namespace Ink_Canvas {
                     LogHelper.WriteLogToFile("结束幻灯片放映失败", LogHelper.LogType.Warning);
 
                     // 手动更新UI状态，防止事件未触发
-                    await Application.Current.Dispatcher.InvokeAsync(() => {
+                    await Application.Current.Dispatcher.InvokeAsync(() =>
+                    {
                         _pptUIManager?.UpdateSlideShowStatus(false);
                         _pptUIManager?.UpdateSidebarExitButtons(false);
                         LogHelper.WriteLogToFile("手动更新放映结束UI状态", LogHelper.LogType.Trace);
@@ -932,7 +950,8 @@ namespace Ink_Canvas {
                 LogHelper.WriteLogToFile($"结束PPT放映操作异常: {ex}", LogHelper.LogType.Error);
 
                 // 确保UI状态正确
-                await Application.Current.Dispatcher.InvokeAsync(() => {
+                await Application.Current.Dispatcher.InvokeAsync(() =>
+                {
                     _pptUIManager?.UpdateSlideShowStatus(false);
                     _pptUIManager?.UpdateSidebarExitButtons(false);
                 });
@@ -942,11 +961,15 @@ namespace Ink_Canvas {
         private void GridPPTControlPrevious_MouseDown(object sender, MouseButtonEventArgs e)
         {
             lastBorderMouseDownObject = sender;
-            if (sender == PPTLSPreviousButtonBorder) {
+            if (sender == PPTLSPreviousButtonBorder)
+            {
                 PPTLSPreviousButtonFeedbackBorder.Opacity = 0.15;
-            } else if (sender == PPTRSPreviousButtonBorder) {
+            }
+            else if (sender == PPTRSPreviousButtonBorder)
+            {
                 PPTRSPreviousButtonFeedbackBorder.Opacity = 0.15;
-            } else if (sender == PPTLBPreviousButtonBorder)
+            }
+            else if (sender == PPTLBPreviousButtonBorder)
             {
                 PPTLBPreviousButtonFeedbackBorder.Opacity = 0.15;
             }
@@ -958,11 +981,15 @@ namespace Ink_Canvas {
         private void GridPPTControlPrevious_MouseLeave(object sender, MouseEventArgs e)
         {
             lastBorderMouseDownObject = null;
-            if (sender == PPTLSPreviousButtonBorder) {
+            if (sender == PPTLSPreviousButtonBorder)
+            {
                 PPTLSPreviousButtonFeedbackBorder.Opacity = 0;
-            } else if (sender == PPTRSPreviousButtonBorder) {
+            }
+            else if (sender == PPTRSPreviousButtonBorder)
+            {
                 PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
-            } else if (sender == PPTLBPreviousButtonBorder)
+            }
+            else if (sender == PPTLBPreviousButtonBorder)
             {
                 PPTLBPreviousButtonFeedbackBorder.Opacity = 0;
             }
@@ -971,13 +998,18 @@ namespace Ink_Canvas {
                 PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
             }
         }
-        private void GridPPTControlPrevious_MouseUp(object sender, MouseButtonEventArgs e) {
+        private void GridPPTControlPrevious_MouseUp(object sender, MouseButtonEventArgs e)
+        {
             if (lastBorderMouseDownObject != sender) return;
-            if (sender == PPTLSPreviousButtonBorder) {
+            if (sender == PPTLSPreviousButtonBorder)
+            {
                 PPTLSPreviousButtonFeedbackBorder.Opacity = 0;
-            } else if (sender == PPTRSPreviousButtonBorder) {
+            }
+            else if (sender == PPTRSPreviousButtonBorder)
+            {
                 PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
-            } else if (sender == PPTLBPreviousButtonBorder)
+            }
+            else if (sender == PPTLBPreviousButtonBorder)
             {
                 PPTLBPreviousButtonFeedbackBorder.Opacity = 0;
             }
@@ -989,13 +1021,18 @@ namespace Ink_Canvas {
         }
 
 
-        private void GridPPTControlNext_MouseDown(object sender, MouseButtonEventArgs e) {
+        private void GridPPTControlNext_MouseDown(object sender, MouseButtonEventArgs e)
+        {
             lastBorderMouseDownObject = sender;
-            if (sender == PPTLSNextButtonBorder) {
+            if (sender == PPTLSNextButtonBorder)
+            {
                 PPTLSNextButtonFeedbackBorder.Opacity = 0.15;
-            } else if (sender == PPTRSNextButtonBorder) {
+            }
+            else if (sender == PPTRSNextButtonBorder)
+            {
                 PPTRSNextButtonFeedbackBorder.Opacity = 0.15;
-            } else if (sender == PPTLBNextButtonBorder)
+            }
+            else if (sender == PPTLBNextButtonBorder)
             {
                 PPTLBNextButtonFeedbackBorder.Opacity = 0.15;
             }
@@ -1007,11 +1044,15 @@ namespace Ink_Canvas {
         private void GridPPTControlNext_MouseLeave(object sender, MouseEventArgs e)
         {
             lastBorderMouseDownObject = null;
-            if (sender == PPTLSNextButtonBorder) {
+            if (sender == PPTLSNextButtonBorder)
+            {
                 PPTLSNextButtonFeedbackBorder.Opacity = 0;
-            } else if (sender == PPTRSNextButtonBorder) {
+            }
+            else if (sender == PPTRSNextButtonBorder)
+            {
                 PPTRSNextButtonFeedbackBorder.Opacity = 0;
-            } else if (sender == PPTLBNextButtonBorder)
+            }
+            else if (sender == PPTLBNextButtonBorder)
             {
                 PPTLBNextButtonFeedbackBorder.Opacity = 0;
             }
@@ -1020,13 +1061,18 @@ namespace Ink_Canvas {
                 PPTRBNextButtonFeedbackBorder.Opacity = 0;
             }
         }
-        private void GridPPTControlNext_MouseUp(object sender, MouseButtonEventArgs e) {
+        private void GridPPTControlNext_MouseUp(object sender, MouseButtonEventArgs e)
+        {
             if (lastBorderMouseDownObject != sender) return;
-            if (sender == PPTLSNextButtonBorder) {
+            if (sender == PPTLSNextButtonBorder)
+            {
                 PPTLSNextButtonFeedbackBorder.Opacity = 0;
-            } else if (sender == PPTRSNextButtonBorder) {
+            }
+            else if (sender == PPTRSNextButtonBorder)
+            {
                 PPTRSNextButtonFeedbackBorder.Opacity = 0;
-            } else if (sender == PPTLBNextButtonBorder)
+            }
+            else if (sender == PPTLBNextButtonBorder)
             {
                 PPTLBNextButtonFeedbackBorder.Opacity = 0;
             }
@@ -1037,7 +1083,8 @@ namespace Ink_Canvas {
             BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
         }
 
-        private void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e) {
+        private void ImagePPTControlEnd_MouseUp(object sender, MouseButtonEventArgs e)
+        {
             BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }
 

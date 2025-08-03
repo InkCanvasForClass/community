@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
-using System.Windows;
 
 namespace Ink_Canvas.Helpers
 {
@@ -13,7 +12,7 @@ namespace Ink_Canvas.Helpers
     {
         private static readonly string[] RequiredDlls = {
             "IACore.dll",
-            "IALoader.dll", 
+            "IALoader.dll",
             "IAWinFX.dll"
         };
 
@@ -30,7 +29,7 @@ namespace Ink_Canvas.Helpers
                 foreach (string dllName in RequiredDlls)
                 {
                     string targetPath = Path.Combine(appDirectory, dllName);
-                    
+
                     // 检查文件是否已存在且有效
                     if (File.Exists(targetPath) && IsValidDll(targetPath))
                     {
@@ -109,7 +108,7 @@ namespace Ink_Canvas.Helpers
                     return false;
 
                 FileInfo fileInfo = new FileInfo(filePath);
-                
+
                 // 检查文件大小（空文件或过小的文件可能无效）
                 if (fileInfo.Length < 1024) // 小于1KB可能无效
                     return false;
@@ -140,11 +139,11 @@ namespace Ink_Canvas.Helpers
             try
             {
                 string appDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                
+
                 foreach (string dllName in RequiredDlls)
                 {
                     string filePath = Path.Combine(appDirectory, dllName);
-                    
+
                     if (File.Exists(filePath))
                     {
                         try

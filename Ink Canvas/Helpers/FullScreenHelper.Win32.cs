@@ -81,7 +81,7 @@ namespace Ink_Canvas.Helpers
                 public static extern bool GetWindowPlacement(IntPtr hWnd, ref WINDOWPLACEMENT lpwndpl);
 
                 public static IntPtr GetWindowLongPtr(IntPtr hWnd, GetWindowLongFields nIndex) =>
-                    GetWindowLongPtr(hWnd, (int) nIndex);
+                    GetWindowLongPtr(hWnd, (int)nIndex);
 
                 public static IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex)
                 {
@@ -99,7 +99,7 @@ namespace Ink_Canvas.Helpers
                 public static extern IntPtr GetWindowLongPtr_x64(IntPtr hWnd, int nIndex);
 
                 public static IntPtr SetWindowLongPtr(IntPtr hWnd, GetWindowLongFields nIndex, IntPtr dwNewLong) =>
-                    SetWindowLongPtr(hWnd, (int) nIndex, dwNewLong);
+                    SetWindowLongPtr(hWnd, (int)nIndex, dwNewLong);
 
                 public static IntPtr SetWindowLongPtr(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
                 {

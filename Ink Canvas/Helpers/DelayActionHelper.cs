@@ -14,10 +14,13 @@ namespace Ink_Canvas.Helpers
         /// <param name="inv">同步的對象，一般傳入控件，不需要可null</param>
         public void DebounceAction(int timeMs, ISynchronizeInvoke inv, Action action)
         {
-            lock (this) {
-                if (_timerDebounce == null) {
+            lock (this)
+            {
+                if (_timerDebounce == null)
+                {
                     _timerDebounce = new Timer(timeMs) { AutoReset = false };
-                    _timerDebounce.Elapsed += (o, e) => {
+                    _timerDebounce.Elapsed += (o, e) =>
+                    {
                         _timerDebounce.Stop(); _timerDebounce.Close(); _timerDebounce = null;
                         InvokeAction(action, inv);
                     };
