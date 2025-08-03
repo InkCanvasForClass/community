@@ -4968,7 +4968,7 @@
                                                                 <TransformGroup>
                                                                     <ScaleTransform />
                                                                     <SkewTransform />
-                                                                    <RotateTransform />
+                                                                    <RotateTransform Angle="90"/>
                                                                     <TranslateTransform />
                                                                 </TransformGroup>
                                                             </Image.RenderTransform>
