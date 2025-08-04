@@ -321,6 +321,11 @@ namespace Ink_Canvas
             {
                 return;
             }
+            // 修复：几何绘制模式下禁止自动收集墨迹
+            if (drawingShapeMode != 0)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            }
             SetCursorBasedOnEditingMode(inkCanvas);
 
             inkCanvas.CaptureTouch(e.TouchDevice);
