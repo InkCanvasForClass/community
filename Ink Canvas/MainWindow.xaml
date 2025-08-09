@@ -40,96 +40,96 @@
             </ResourceDictionary.MergedDictionaries>
 
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
-        <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <c:IntNumberToString x:Key="IntNumberToString" />
-        <c:IntNumberToString2 x:Key="IntNumberToString2" />
-        <RoutedUICommand x:Key="KeyExit" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Command_Undo" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Command_Redo" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Command_Clear" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Capture" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Hide" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToDrawTool" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToQuitDrawTool" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToSelect" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToEraser" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToBoard" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen1" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen2" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen3" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen4" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen5" Text=" " />
-                  <RoutedUICommand x:Key="HotKey_DrawLine" Text=" " />
-          <RoutedUICommand x:Key="HotKey_Paste" Text=" " />
-          <RoutedUICommand x:Key="NothingWillHappened" Text=" " />
-          
-          <!-- Navigation Button Style -->
-          <Style x:Key="NavButton" TargetType="Button">
-              <Setter Property="Background" Value="Transparent"/>
-              <Setter Property="BorderThickness" Value="0"/>
-              <Setter Property="Template">
-                  <Setter.Value>
-                      <ControlTemplate TargetType="Button">
-                          <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                  BorderBrush="{TemplateBinding BorderBrush}" 
-                                  BorderThickness="{TemplateBinding BorderThickness}"
-                                  CornerRadius="4">
-                              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                          </Border>
-                          <ControlTemplate.Triggers>
-                              <Trigger Property="IsMouseOver" Value="True">
-                                  <Setter Property="Background" Value="#27272a"/>
-                              </Trigger>
-                              <Trigger Property="IsPressed" Value="True">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </Trigger>
-                              <!-- 使用多个DataTrigger替代动态绑定 -->
-                              <DataTrigger Binding="{Binding Tag}" Value="startup">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="canvas">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="gesture">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="inkrecognition">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="crashaction">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="ppt">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="advanced">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="automation">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="randomwindow">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="theme">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="shortcuts">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="about">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="plugins">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                          </ControlTemplate.Triggers>
-                      </ControlTemplate>
-                  </Setter.Value>
-              </Setter>
-          </Style>
+            <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <c:IntNumberToString x:Key="IntNumberToString" />
+            <c:IntNumberToString2 x:Key="IntNumberToString2" />
+            <RoutedUICommand x:Key="KeyExit" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Command_Undo" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Command_Redo" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Command_Clear" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Capture" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Hide" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToDrawTool" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToQuitDrawTool" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToSelect" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToEraser" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToBoard" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen1" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen2" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen3" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen4" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen5" Text=" " />
+            <RoutedUICommand x:Key="HotKey_DrawLine" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Paste" Text=" " />
+            <RoutedUICommand x:Key="NothingWillHappened" Text=" " />
+
+            <!-- Navigation Button Style -->
+            <Style x:Key="NavButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                      BorderBrush="{TemplateBinding BorderBrush}" 
+                                      BorderThickness="{TemplateBinding BorderThickness}"
+                                      CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#27272a"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </Trigger>
+                                <!-- 使用多个DataTrigger替代动态绑定 -->
+                                <DataTrigger Binding="{Binding Tag}" Value="startup">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="canvas">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="gesture">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="inkrecognition">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="crashaction">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="ppt">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="advanced">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="automation">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="randomwindow">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="theme">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="shortcuts">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="about">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="plugins">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
-      </Window.Resources>
+    </Window.Resources>
     <!--输入命令绑定-->
     <Window.InputBindings>
         <KeyBinding Gesture="Escape" Command="{StaticResource KeyExit}" />

@@ -1467,6 +1467,8 @@ namespace Ink_Canvas
 
         #endregion Navigation Sidebar Methods
 
+        #region 插件???
+
         // 添加插件系统初始化方法
         private void InitializePluginSystem()
         {
@@ -1521,6 +1523,7 @@ namespace Ink_Canvas
                 MessageBox.Show($"打开插件管理器时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        #endregion 插件???
 
         // 在MainWindow类中添加：
         private void ApplyCurrentEraserShape()
@@ -1678,7 +1681,7 @@ namespace Ink_Canvas
 
             if (selectedUIElement is Image image)
             {
-                ScaleImage(image, 1.25); // 放大5%
+                ScaleImage(image, 1.25);
             }
         }
 
@@ -1688,7 +1691,7 @@ namespace Ink_Canvas
 
             if (selectedUIElement is Image image)
             {
-                ScaleImage(image, 0.8); // 缩小5%
+                ScaleImage(image, 0.8);
             }
         }
 
