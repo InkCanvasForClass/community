@@ -176,13 +176,20 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(1);
-            CancelSingleFingerDragMode();
             lastMouseDownSender = null;
-            if (isLongPressSelected)
+            
+            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
+            bool wasLongPressed = isLongPressSelected;
+            
+            CancelSingleFingerDragMode();
+            
+            if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawLine.BeginAnimation(OpacityProperty, dA);
+                // 恢复长按状态，保持工具选中
+                isLongPressSelected = true;
             }
             DrawShapePromptToPen();
         }
@@ -191,13 +198,20 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(8);
-            CancelSingleFingerDragMode();
             lastMouseDownSender = null;
-            if (isLongPressSelected)
+            
+            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
+            bool wasLongPressed = isLongPressSelected;
+            
+            CancelSingleFingerDragMode();
+            
+            if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawDashedLine.BeginAnimation(OpacityProperty, dA);
+                // 恢复长按状态，保持工具选中
+                isLongPressSelected = true;
             }
             DrawShapePromptToPen();
         }
@@ -206,13 +220,20 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(18);
-            CancelSingleFingerDragMode();
             lastMouseDownSender = null;
-            if (isLongPressSelected)
+            
+            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
+            bool wasLongPressed = isLongPressSelected;
+            
+            CancelSingleFingerDragMode();
+            
+            if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawDotLine.BeginAnimation(OpacityProperty, dA);
+                // 恢复长按状态，保持工具选中
+                isLongPressSelected = true;
             }
             DrawShapePromptToPen();
         }
@@ -221,13 +242,20 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(2);
-            CancelSingleFingerDragMode();
             lastMouseDownSender = null;
-            if (isLongPressSelected)
+            
+            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
+            bool wasLongPressed = isLongPressSelected;
+            
+            CancelSingleFingerDragMode();
+            
+            if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawArrow.BeginAnimation(OpacityProperty, dA);
+                // 恢复长按状态，保持工具选中
+                isLongPressSelected = true;
             }
             DrawShapePromptToPen();
         }
@@ -236,13 +264,20 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(15);
-            CancelSingleFingerDragMode();
             lastMouseDownSender = null;
-            if (isLongPressSelected)
+            
+            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
+            bool wasLongPressed = isLongPressSelected;
+            
+            CancelSingleFingerDragMode();
+            
+            if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
                 var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
                 ImageDrawParallelLine.BeginAnimation(OpacityProperty, dA);
+                // 恢复长按状态，保持工具选中
+                isLongPressSelected = true;
             }
             DrawShapePromptToPen();
         }
