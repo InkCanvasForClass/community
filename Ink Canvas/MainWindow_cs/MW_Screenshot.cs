@@ -62,6 +62,12 @@ namespace Ink_Canvas
             using (var bitmap = new Bitmap(rc.Width, rc.Height, PixelFormat.Format32bppArgb))
             using (var memoryGraphics = Graphics.FromImage(bitmap))
             {
+                // 设置高质量渲染
+                memoryGraphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
+                memoryGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                memoryGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                memoryGraphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+
                 memoryGraphics.CopyFromScreen(rc.X, rc.Y, 0, 0, rc.Size, CopyPixelOperation.SourceCopy);
 
                 // 确保目录存在
@@ -71,6 +77,7 @@ namespace Ink_Canvas
                     Directory.CreateDirectory(directory);
                 }
 
+                // 使用PNG格式保存，确保透明度信息不丢失
                 bitmap.Save(savePath, ImageFormat.Png);
             }
 
@@ -140,19 +147,32 @@ namespace Ink_Canvas
                         if (originalBitmap != null)
                         {
                             Bitmap finalBitmap = originalBitmap;
+                            bool needDisposeFinalBitmap = false;
 
-                            // 如果有路径信息，应用形状遮罩
-                            if (screenshotResult.Value.Path != null && screenshotResult.Value.Path.Count > 0)
+                            try
                             {
-                                finalBitmap = ApplyShapeMask(originalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
+                                // 如果有路径信息，应用形状遮罩
+                                if (screenshotResult.Value.Path != null && screenshotResult.Value.Path.Count > 0)
+                                {
+                                    finalBitmap = ApplyShapeMask(originalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
+                                    needDisposeFinalBitmap = true; // 标记需要释放新创建的位图
+                                }
+
+                                // 将截图复制到剪贴板
+                                CopyBitmapToClipboard(finalBitmap);
+
+                                // 等待窗口完全显示后自动粘贴
+                                await Task.Delay(100);
+                                await AutoPasteScreenshot();
                             }
-
-                            // 将截图复制到剪贴板
-                            CopyBitmapToClipboard(finalBitmap);
-
-                            // 等待窗口完全显示后自动粘贴
-                            await Task.Delay(100);
-                            await AutoPasteScreenshot();
+                            finally
+                            {
+                                // 如果创建了新的位图，需要释放它
+                                if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
+                                {
+                                    finalBitmap.Dispose();
+                                }
+                            }
                         }
                     }
                 }
@@ -212,6 +232,7 @@ namespace Ink_Canvas
                 int width = Math.Max(1, right - x);
                 int height = Math.Max(1, bottom - y);
 
+                // 创建支持透明度的位图
                 var bitmap = new Bitmap(width, height, PixelFormat.Format32bppArgb);
                 using (var graphics = Graphics.FromImage(bitmap))
                 {
@@ -219,6 +240,7 @@ namespace Ink_Canvas
                     graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
                     graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
                     graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                    graphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
 
                     // 截取屏幕区域
                     graphics.CopyFromScreen(x, y, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
@@ -279,17 +301,30 @@ namespace Ink_Canvas
         {
             try
             {
+                // 验证路径参数
+                if (path == null || path.Count < 3)
+                {
+                    LogHelper.WriteLogToFile("路径点数不足，无法应用形状遮罩", LogHelper.LogType.Warning);
+                    return bitmap;
+                }
+
                 // 获取DPI缩放比例
                 var dpiScale = GetDpiScale();
                 var virtualScreen = SystemInformation.VirtualScreen;
 
-                // 创建结果位图
+                // 创建结果位图，确保支持透明度
                 var resultBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+                
+                // 首先将整个位图设置为透明
                 using (var resultGraphics = Graphics.FromImage(resultBitmap))
                 {
+                    // 清除位图，设置为完全透明
+                    resultGraphics.Clear(System.Drawing.Color.Transparent);
+                    
                     // 设置高质量渲染
                     resultGraphics.SmoothingMode = SmoothingMode.AntiAlias;
                     resultGraphics.CompositingQuality = CompositingQuality.HighQuality;
+                    resultGraphics.CompositingMode = CompositingMode.SourceOver;
 
                     // 创建路径
                     using (var pathGraphics = new GraphicsPath())
@@ -306,26 +341,51 @@ namespace Ink_Canvas
                             float relativeX = (float)(screenX - area.X);
                             float relativeY = (float)(screenY - area.Y);
 
+                            // 确保坐标在有效范围内
+                            relativeX = Math.Max(0, Math.Min(relativeX, bitmap.Width - 1));
+                            relativeY = Math.Max(0, Math.Min(relativeY, bitmap.Height - 1));
+
                             points[i] = new PointF(relativeX, relativeY);
                         }
 
-                        // 添加路径
+                        // 添加路径 - 使用FillMode.Winding确保路径正确填充
+                        pathGraphics.FillMode = FillMode.Winding;
                         pathGraphics.AddPolygon(points);
 
-                        // 设置裁剪区域为路径内部
-                        resultGraphics.SetClip(pathGraphics);
+                        // 验证路径是否有效
+                        if (!pathGraphics.IsVisible(0, 0) && pathGraphics.GetBounds().Width > 0 && pathGraphics.GetBounds().Height > 0)
+                        {
+                            // 设置裁剪区域为路径内部
+                            resultGraphics.SetClip(pathGraphics);
 
-                        // 在裁剪区域内绘制原始图像
-                        resultGraphics.DrawImage(bitmap, 0, 0);
+                            // 在裁剪区域内绘制原始图像
+                            resultGraphics.DrawImage(bitmap, 0, 0);
+                            
+                            // 重置裁剪区域，确保后续操作不受影响
+                            resultGraphics.ResetClip();
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("生成的路径无效，返回原始图像", LogHelper.LogType.Warning);
+                            // 如果路径无效，返回透明图像
+                            return resultBitmap;
+                        }
                     }
                 }
 
+                LogHelper.WriteLogToFile($"成功应用形状遮罩，路径点数: {path.Count}", LogHelper.LogType.Info);
                 return resultBitmap;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"应用形状遮罩失败: {ex.Message}", LogHelper.LogType.Error);
-                return bitmap; // 如果失败，返回原始图像
+                // 返回完全透明的图像而不是原始图像
+                var transparentBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
+                using (var g = Graphics.FromImage(transparentBitmap))
+                {
+                    g.Clear(System.Drawing.Color.Transparent);
+                }
+                return transparentBitmap;
             }
         }
 
@@ -343,19 +403,28 @@ namespace Ink_Canvas
         // 将System.Drawing.Bitmap转换为WPF BitmapSource
         private BitmapSource ConvertBitmapToBitmapSource(Bitmap bitmap)
         {
-            using (var memory = new MemoryStream())
+            try
             {
-                bitmap.Save(memory, ImageFormat.Png);
-                memory.Position = 0;
+                using (var memory = new MemoryStream())
+                {
+                    // 使用PNG格式保存，确保透明度信息不丢失
+                    bitmap.Save(memory, ImageFormat.Png);
+                    memory.Position = 0;
 
-                var bitmapImage = new BitmapImage();
-                bitmapImage.BeginInit();
-                bitmapImage.StreamSource = memory;
-                bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                bitmapImage.EndInit();
-                bitmapImage.Freeze();
+                    var bitmapImage = new BitmapImage();
+                    bitmapImage.BeginInit();
+                    bitmapImage.StreamSource = memory;
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmapImage.EndInit();
+                    bitmapImage.Freeze();
 
-                return bitmapImage;
+                    return bitmapImage;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"转换位图失败: {ex.Message}", LogHelper.LogType.Error);
+                throw;
             }
         }
     }

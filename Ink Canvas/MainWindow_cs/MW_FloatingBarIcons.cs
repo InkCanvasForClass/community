@@ -1502,6 +1502,12 @@ namespace Ink_Canvas
             bool wasInInkMode = inkCanvas.EditingMode == InkCanvasEditingMode.Ink;
             bool wasHighlighter = drawingAttributes.IsHighlighter;
 
+            // 禁止几何绘制模式下切换到Ink
+            if (drawingShapeMode != 0)
+            {
+                return;
+            }
+
             if (Pen_Icon.Background == null || StackPanelCanvasControls.Visibility == Visibility.Collapsed)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
@@ -1756,7 +1762,7 @@ namespace Ink_Canvas
             CursorIcon_Click(null, null);
         }
 
-        private void SelectIcon_MouseUp(object sender, RoutedEvent e)
+        private void SelectIcon_MouseUp(object sender, RoutedEventArgs e)
         {
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();

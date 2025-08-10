@@ -185,15 +185,25 @@ namespace Ink_Canvas
                     // 自由绘制模式：完成路径
                     if (_freehandPoints.Count > 3) // 至少需要3个点形成有效路径
                     {
-                        // 闭合路径
-                        _freehandPoints.Add(_startPoint);
-                        _freehandPolyline.Points.Add(_startPoint);
+                        // 创建路径的副本，避免修改原始列表
+                        var pathPoints = new List<System.Windows.Point>(_freehandPoints);
+                        
+                        // 确保路径闭合（如果最后一个点不是起始点，则添加起始点）
+                        if (pathPoints.Count > 0 && 
+                            (Math.Abs(pathPoints[pathPoints.Count - 1].X - _startPoint.X) > 1 || 
+                             Math.Abs(pathPoints[pathPoints.Count - 1].Y - _startPoint.Y) > 1))
+                        {
+                            pathPoints.Add(_startPoint);
+                        }
 
+                        // 优化路径：移除重复点和过于接近的点，提高路径质量
+                        var optimizedPath = OptimizePath(pathPoints);
+                        
                         // 保存选择的路径
-                        SelectedPath = new List<System.Windows.Point>(_freehandPoints);
+                        SelectedPath = optimizedPath;
 
                         // 计算边界矩形用于截图
-                        var bounds = CalculatePathBounds(_freehandPoints);
+                        var bounds = CalculatePathBounds(optimizedPath);
                         var dpiScale = GetDpiScale();
                         var virtualScreen = System.Windows.Forms.SystemInformation.VirtualScreen;
 
@@ -293,6 +303,56 @@ namespace Ink_Canvas
             }
 
             return new Rect(minX, minY, maxX - minX, maxY - minY);
+        }
+
+        // 优化路径：移除重复点和过于接近的点，提高路径质量
+        private List<System.Windows.Point> OptimizePath(List<System.Windows.Point> originalPath)
+        {
+            if (originalPath == null || originalPath.Count < 3)
+                return originalPath;
+
+            var optimizedPath = new List<System.Windows.Point>();
+            const double minDistance = 2.0; // 最小距离阈值
+
+            // 添加第一个点
+            optimizedPath.Add(originalPath[0]);
+
+            for (int i = 1; i < originalPath.Count - 1; i++)
+            {
+                var currentPoint = originalPath[i];
+                var optimizedPoint = optimizedPath[optimizedPath.Count - 1];
+
+                // 计算与上一个优化点的距离
+                double distance = Math.Sqrt(
+                    Math.Pow(currentPoint.X - optimizedPoint.X, 2) + 
+                    Math.Pow(currentPoint.Y - optimizedPoint.Y, 2));
+
+                // 如果距离足够大，则添加这个点
+                if (distance >= minDistance)
+                {
+                    optimizedPath.Add(currentPoint);
+                }
+            }
+
+            // 添加最后一个点（如果与上一个点距离足够）
+            var lastPoint = originalPath[originalPath.Count - 1];
+            var lastOptimizedPoint = optimizedPath[optimizedPath.Count - 1];
+            double finalDistance = Math.Sqrt(
+                Math.Pow(lastPoint.X - lastOptimizedPoint.X, 2) + 
+                Math.Pow(lastPoint.Y - lastOptimizedPoint.Y, 2));
+
+            if (finalDistance >= minDistance)
+            {
+                optimizedPath.Add(lastPoint);
+            }
+
+            // 确保路径至少有3个点
+            if (optimizedPath.Count < 3)
+            {
+                return originalPath;
+            }
+
+            return optimizedPath;
         }
     }
 }

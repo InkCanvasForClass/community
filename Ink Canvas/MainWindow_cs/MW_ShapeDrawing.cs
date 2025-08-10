@@ -132,6 +132,11 @@ namespace Ink_Canvas
             penType = 0;
             drawingAttributes.IsHighlighter = false;
             drawingAttributes.StylusTip = StylusTip.Ellipse;
+            // 禁止几何绘制模式下切换到Ink
+            if (drawingShapeMode != 0)
+            {
+                return;
+            }
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
 
             // 修复：确保从橡皮擦切换到笔时，多指手势功能能正确恢复
@@ -158,9 +163,15 @@ namespace Ink_Canvas
                 lastIsInMultiTouchMode = true;
             }
 
+            // 修复：几何绘制模式下确保不切换到Ink模式，避免触摸轨迹被收集
+            if (drawingShapeMode != 0)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            }
+
             return Task.FromResult(true);
         }
-
+        
         private async void BtnDrawLine_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -432,9 +443,12 @@ namespace Ink_Canvas
                 SetCursorBasedOnEditingMode(inkCanvas);
             }
 
-            // 处理几何绘制模式
+            // 修复：几何绘制模式下完全禁止触摸轨迹收集
             if (drawingShapeMode != 0)
             {
+                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                
                 if (isWaitUntilNextTouchDown && dec.Count > 1) return;
                 if (dec.Count > 1)
                 {
@@ -1403,7 +1417,7 @@ namespace Ink_Canvas
 
             return pointList;
         }
-
+        
         private StrokeCollection GenerateDashedLineEllipseStrokeCollection(Point st, Point ed, bool isDrawTop = true,
             bool isDrawBottom = true)
         {
@@ -1833,8 +1847,7 @@ namespace Ink_Canvas
                 }
             }
         }
-
-        // 在MainWindow类中添加：
+        
         private void EnterShapeDrawingMode(int mode)
         {
             forceEraser = true;

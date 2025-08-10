@@ -116,6 +116,14 @@ namespace Ink_Canvas
                 HideSubPanels(); // 书写时自动隐藏二级菜单
             }
 
+            // 修复：几何绘制模式下完全禁止触摸轨迹收集
+            if (drawingShapeMode != 0)
+            {
+                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                return;
+            }
+
             // 只保留普通橡皮逻辑
             TouchDownPointsList[e.TouchDevice.Id] = InkCanvasEditingMode.None;
             inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
@@ -127,6 +135,22 @@ namespace Ink_Canvas
 
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e)
         {
+            // 新增：根据是否为笔尾自动切换橡皮擦/画笔模式
+            if (e.StylusDevice.Inverted)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            }
+            else
+            {
+                // 修复：几何绘制模式下完全禁止触摸轨迹收集
+                if (drawingShapeMode != 0)
+                {
+                    // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    return;
+                }
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+            }
             SetCursorBasedOnEditingMode(inkCanvas);
 
             inkCanvas.CaptureStylus();
@@ -285,17 +309,11 @@ namespace Ink_Canvas
                 // 套索选状态下只return，保证套索选可用
                 return;
             }
-            if (drawingShapeMode == 9)
-            {
-                if (isFirstTouchCuboid)
-                {
-                    CuboidFrontRectIniP = e.GetTouchPoint(inkCanvas).Position;
-                }
-                // 允许MouseTouchMove在TouchMove时处理
-                return;
-            }
+            // 修复：几何绘制模式下完全禁止触摸轨迹收集
             if (drawingShapeMode != 0)
             {
+                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 return;
             }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
@@ -321,10 +339,26 @@ namespace Ink_Canvas
             {
                 return;
             }
-            // 修复：几何绘制模式下禁止自动收集墨迹
+            // 修复：几何绘制模式下完全禁止触摸轨迹收集
             if (drawingShapeMode != 0)
             {
+                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                // 几何绘制模式下不记录触摸点，避免触摸轨迹被收集
+                SetCursorBasedOnEditingMode(inkCanvas);
+                inkCanvas.CaptureTouch(e.TouchDevice);
+                ViewboxFloatingBar.IsHitTestVisible = false;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                
+                // 只记录几何绘制的起点，不记录触摸轨迹
+                if (dec.Count == 0)
+                {
+                    var touchPoint = e.GetTouchPoint(inkCanvas);
+                    iniP = touchPoint.Position;
+                    lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
+                }
+                dec.Add(e.TouchDevice.Id);
+                return;
             }
             SetCursorBasedOnEditingMode(inkCanvas);
 
@@ -354,7 +388,7 @@ namespace Ink_Canvas
                 var touchPoint = e.GetTouchPoint(inkCanvas);
                 centerPoint = touchPoint.Position;
 
-                // 新增：几何绘制模式下，记录初始点
+                // 只允许在此处赋值iniP，防止TouchMove等其他地方覆盖，保证几何绘制起点一致
                 if (drawingShapeMode != 0)
                 {
                     iniP = touchPoint.Position;
@@ -370,7 +404,8 @@ namespace Ink_Canvas
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None ||
                     inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
                 lastInkCanvasEditingMode = inkCanvas.EditingMode;
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint)
+                // 修复：几何绘制模式下禁止切回Ink
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint && drawingShapeMode == 0)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 }
@@ -425,25 +460,29 @@ namespace Ink_Canvas
 
             //手势完成后切回之前的状态
             // 修复：改进多指手势恢复逻辑，确保从橡皮擦切换到笔时多指手势能正确恢复
-            if (dec.Count > 1)
+            // 修复：几何绘制模式下不自动切换到Ink模式，避免触摸轨迹被收集
+            if (drawingShapeMode == 0)
             {
-                if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                if (dec.Count > 1)
                 {
-                    if (lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint)
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                    {
+                        if (lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint)
+                        {
+                            inkCanvas.EditingMode = lastInkCanvasEditingMode;
+                        }
+                    }
+                }
+                else if (dec.Count == 0)
+                {
+                    // 当所有触摸点都抬起时，确保正确恢复编辑模式
+                    // 这对于从橡皮擦切换到笔后恢复多指手势功能很重要
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None &&
+                        lastInkCanvasEditingMode != InkCanvasEditingMode.None &&
+                        lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint)
                     {
                         inkCanvas.EditingMode = lastInkCanvasEditingMode;
                     }
-                }
-            }
-            else if (dec.Count == 0)
-            {
-                // 当所有触摸点都抬起时，确保正确恢复编辑模式
-                // 这对于从橡皮擦切换到笔后恢复多指手势功能很重要
-                if (inkCanvas.EditingMode == InkCanvasEditingMode.None &&
-                    lastInkCanvasEditingMode != InkCanvasEditingMode.None &&
-                    lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint)
-                {
-                    inkCanvas.EditingMode = lastInkCanvasEditingMode;
                 }
             }
             inkCanvas.Opacity = 1;
@@ -468,6 +507,7 @@ namespace Ink_Canvas
         private void Main_Grid_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
             if (e.Manipulators.Count() != 0) return;
+            // 修复：几何绘制模式下不自动切换到Ink模式，避免触摸轨迹被收集
             if (drawingShapeMode == 0 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
@@ -590,7 +630,8 @@ namespace Ink_Canvas
                 inkCanvas.StylusUp -= MainWindow_StylusUp;
                 inkCanvas.TouchDown -= MainWindow_TouchDown;
                 inkCanvas.TouchDown += Main_Grid_TouchDown;
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint)
+                // 修复：几何绘制模式下不自动切换到Ink模式，避免触摸轨迹被收集
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint && drawingShapeMode == 0)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
@@ -620,7 +661,8 @@ namespace Ink_Canvas
                 inkCanvas.StylusUp += MainWindow_StylusUp;
                 inkCanvas.TouchDown += MainWindow_TouchDown;
                 inkCanvas.TouchDown -= Main_Grid_TouchDown;
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint)
+                // 修复：几何绘制模式下不自动切换到Ink模式，避免触摸轨迹被收集
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint && drawingShapeMode == 0)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 }
