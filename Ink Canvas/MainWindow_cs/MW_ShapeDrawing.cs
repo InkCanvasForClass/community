@@ -452,20 +452,47 @@ namespace Ink_Canvas
                 if (isWaitUntilNextTouchDown && dec.Count > 1) return;
                 if (dec.Count > 1)
                 {
-                    try
+                    // 修复：双曲线绘制时，多指触摸不应该删除第一笔的辅助线
+                    if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
                     {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        // 第二笔绘制双曲线时，只删除第二笔的临时笔画，保留第一笔的辅助线
+                        try
+                        {
+                            inkCanvas.Strokes.Remove(lastTempStroke);
+                        }
+                        catch { }
+                        return;
                     }
-                    catch
+                    else
                     {
-                        Trace.WriteLine("lastTempStrokeCollection failed.");
+                        // 其他情况正常删除临时笔画
+                        try
+                        {
+                            inkCanvas.Strokes.Remove(lastTempStroke);
+                            inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        }
+                        catch
+                        {
+                            Trace.WriteLine("lastTempStrokeCollection failed.");
+                        }
+                        return;
                     }
-                    return;
                 }
-                // 在几何绘制模式下，确保处理单点触控的移动事件
+                
+                // 修复：双曲线绘制时，第二笔应该基于第一笔的起点，而不是触摸实时位置
                 Point touchPoint = e.GetTouchPoint(inkCanvas).Position;
-                MouseTouchMove(touchPoint);
+                if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
+                {
+                    // 第二笔绘制双曲线时，使用触摸位置作为终点，但保持第一笔的起点
+                    // 这里不需要特殊处理，因为MouseTouchMove函数内部已经正确处理了双曲线的绘制逻辑
+                    MouseTouchMove(touchPoint);
+                }
+                else
+                {
+                    // 其他情况正常处理
+                    MouseTouchMove(touchPoint);
+                }
+                
                 return; // 处理完几何绘制后直接返回，不执行后面的代码
             }
 
@@ -944,9 +971,18 @@ namespace Ink_Canvas
                             GenerateDashedLineStrokeCollection(new Point(2 * iniP.X - endP.X, 2 * iniP.Y - endP.Y),
                                 endP));
                         strokes.Add(GenerateDashedLineStrokeCollection(new Point(2 * iniP.X - endP.X, endP.Y),
-                            new Point(endP.X, 2 * iniP.Y - endP.Y)));
+                                new Point(endP.X, 2 * iniP.Y - endP.Y)));
                         drawMultiStepShapeSpecialParameter3 = k;
                         drawMultiStepShapeSpecialStrokeCollection = strokes;
+                        
+                        // 修复：第一笔绘制的辅助线应该立即显示在画布上
+                        try
+                        {
+                            inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        }
+                        catch { }
+                        lastTempStrokeCollection = strokes;
+                        inkCanvas.Strokes.Add(strokes);
                     }
                     else
                     {
@@ -1032,17 +1068,40 @@ namespace Ink_Canvas
                         }
                     }
 
+                    // 修复：双曲线绘制完成后，需要将第一笔的辅助线和第二笔的双曲线合并
                     try
                     {
+                        // 删除第二笔的临时笔画
                         inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        
+                        // 创建包含辅助线和双曲线的完整笔画集合
+                        var completeStrokes = new StrokeCollection();
+                        
+                        // 添加第一笔的辅助线
+                        if (drawMultiStepShapeSpecialStrokeCollection != null && drawMultiStepShapeSpecialStrokeCollection.Count > 0)
+                        {
+                            foreach (var stroke1 in drawMultiStepShapeSpecialStrokeCollection)
+                            {
+                                completeStrokes.Add(stroke1.Clone());
+                            }
+                        }
+                        
+                        // 添加第二笔的双曲线
+                        foreach (var stroke1 in strokes)
+                        {
+                            completeStrokes.Add(stroke1.Clone());
+                        }
+                        
+                        lastTempStrokeCollection = completeStrokes;
+                        inkCanvas.Strokes.Add(completeStrokes);
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        Trace.WriteLine("lastTempStrokeCollection failed.");
+                        Trace.WriteLine($"双曲线绘制完成处理失败: {ex.Message}");
+                        // 如果合并失败，至少添加双曲线部分
+                        lastTempStrokeCollection = strokes;
+                        inkCanvas.Strokes.Add(strokes);
                     }
-
-                    lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
                     break;
                 case 20:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1811,9 +1870,12 @@ namespace Ink_Canvas
 
         private bool NeedUpdateIniP()
         {
+            // 修复：双曲线绘制时，第二笔不应该更新起点，保持第一笔的起点
             if (drawingShapeMode == 24 || drawingShapeMode == 25)
+            {
                 if (drawMultiStepShapeCurrentStep == 1)
-                    return false;
+                    return false; // 第二笔不更新起点
+            }
             return true;
         }
 

@@ -350,53 +350,83 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.IsHitTestVisible = false;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = false;
                 
-                // 只记录几何绘制的起点，不记录触摸轨迹
-                if (dec.Count == 0)
-                {
-                    var touchPoint = e.GetTouchPoint(inkCanvas);
-                    iniP = touchPoint.Position;
-                    lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
-                }
-                dec.Add(e.TouchDevice.Id);
-                return;
-            }
-            SetCursorBasedOnEditingMode(inkCanvas);
-
-            inkCanvas.CaptureTouch(e.TouchDevice);
-            ViewboxFloatingBar.IsHitTestVisible = false;
-            BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-
-            dec.Add(e.TouchDevice.Id);
-            // Palm Eraser 逻辑
-            if (Settings.Canvas.EnablePalmEraser && dec.Count >= 2 && !isPalmEraserActive)
-            {
-                var bounds = e.GetTouchPoint(inkCanvas).Bounds;
-                double palmThreshold = 40; // 触摸面积阈值，可根据实际调整
-                if (bounds.Width >= palmThreshold || bounds.Height >= palmThreshold)
-                {
-                    // 记录当前编辑模式和高光状态
-                    palmEraserLastEditingMode = inkCanvas.EditingMode;
-                    palmEraserLastIsHighlighter = drawingAttributes.IsHighlighter;
-                    // 切换为橡皮擦
-                    EraserIcon_Click(null, null);
-                    isPalmEraserActive = true;
-                }
-            }
-            //设备1个的时候，记录中心点
-            if (dec.Count == 1)
+            // 修复：几何绘制模式下，只记录几何绘制的起点，不记录触摸轨迹
+            if (dec.Count == 0)
             {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
-                centerPoint = touchPoint.Position;
-
-                // 只允许在此处赋值iniP，防止TouchMove等其他地方覆盖，保证几何绘制起点一致
-                if (drawingShapeMode != 0)
+                // 对于双曲线绘制，第一笔时记录起点，第二笔时不更新起点
+                if (drawingShapeMode == 24 || drawingShapeMode == 25)
                 {
+                    // 双曲线绘制：第一笔记录起点，第二笔保持第一笔的起点
+                    if (drawMultiStepShapeCurrentStep == 0)
+                    {
+                        iniP = touchPoint.Position;
+                    }
+                    // 第二笔时不更新iniP，保持第一笔的起点
+                }
+                else
+                {
+                    // 其他图形正常记录起点
                     iniP = touchPoint.Position;
                 }
-
-                //记录第一根手指点击时的 StrokeCollection
                 lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
             }
+            dec.Add(e.TouchDevice.Id);
+            return;
+        }
+        
+        // 非几何绘制模式下的正常触摸处理
+        SetCursorBasedOnEditingMode(inkCanvas);
+        inkCanvas.CaptureTouch(e.TouchDevice);
+        ViewboxFloatingBar.IsHitTestVisible = false;
+        BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+        dec.Add(e.TouchDevice.Id);
+        
+        // Palm Eraser 逻辑
+        if (Settings.Canvas.EnablePalmEraser && dec.Count >= 2 && !isPalmEraserActive)
+        {
+            var bounds = e.GetTouchPoint(inkCanvas).Bounds;
+            double palmThreshold = 40; // 触摸面积阈值，可根据实际调整
+            if (bounds.Width >= palmThreshold || bounds.Height >= palmThreshold)
+            {
+                // 记录当前编辑模式和高光状态
+                palmEraserLastEditingMode = inkCanvas.EditingMode;
+                palmEraserLastIsHighlighter = drawingAttributes.IsHighlighter;
+                // 切换为橡皮擦
+                EraserIcon_Click(null, null);
+                isPalmEraserActive = true;
+            }
+        }
+        
+        // 设备1个的时候，记录中心点
+        if (dec.Count == 1)
+        {
+            var touchPoint = e.GetTouchPoint(inkCanvas);
+            centerPoint = touchPoint.Position;
+
+            // 修复：只允许在此处赋值iniP，防止TouchMove等其他地方覆盖，保证几何绘制起点一致
+            if (drawingShapeMode != 0)
+            {
+                // 对于双曲线绘制，第一笔时记录起点，第二笔时不更新起点
+                if (drawingShapeMode == 24 || drawingShapeMode == 25)
+                {
+                    // 双曲线绘制：第一笔记录起点，第二笔保持第一笔的起点
+                    if (drawMultiStepShapeCurrentStep == 0)
+                    {
+                        iniP = touchPoint.Position;
+                    }
+                    // 第二笔时不更新iniP，保持第一笔的起点
+                }
+                else
+                {
+                    // 其他图形正常记录起点
+                    iniP = touchPoint.Position;
+                }
+            }
+
+            // 记录第一根手指点击时的 StrokeCollection
+            lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
+        }
             //设备两个及两个以上，将画笔功能关闭
             if (dec.Count > 1 || isSingleFingerDragMode || !Settings.Gesture.IsEnableTwoFingerGesture)
             {
@@ -447,20 +477,43 @@ namespace Ink_Canvas
                 }
                 isPalmEraserActive = false;
             }
-            // 新增：几何绘制模式下，触摸抬手时自动落笔
+            // 修复：几何绘制模式下，触摸抬手时应该正确处理，而不是简单模拟鼠标事件
             if (drawingShapeMode != 0)
             {
-                var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+                // 对于双曲线等需要多步绘制的图形，触摸抬手时应该进入下一步
+                if (drawingShapeMode == 24 || drawingShapeMode == 25)
                 {
-                    RoutedEvent = MouseLeftButtonUpEvent,
-                    Source = inkCanvas
-                };
-                inkCanvas_MouseUp(inkCanvas, mouseArgs);
+                    // 双曲线绘制：触摸抬手时进入下一步，但不自动触发鼠标抬起事件
+                    // 让用户继续绘制第二笔
+                    if (drawMultiStepShapeCurrentStep == 0)
+                    {
+                        // 第一笔完成，进入第二笔
+                        drawMultiStepShapeCurrentStep = 1;
+                    }
+                    else
+                    {
+                        // 第二笔完成，完成绘制
+                        var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+                        {
+                            RoutedEvent = MouseLeftButtonUpEvent,
+                            Source = inkCanvas
+                        };
+                        inkCanvas_MouseUp(inkCanvas, mouseArgs);
+                    }
+                }
+                else
+                {
+                    // 其他单步绘制的图形，触摸抬手时完成绘制
+                    var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
+                    {
+                        RoutedEvent = MouseLeftButtonUpEvent,
+                        Source = inkCanvas
+                    };
+                    inkCanvas_MouseUp(inkCanvas, mouseArgs);
+                }
             }
 
-            //手势完成后切回之前的状态
-            // 修复：改进多指手势恢复逻辑，确保从橡皮擦切换到笔时多指手势能正确恢复
-            // 修复：几何绘制模式下不自动切换到Ink模式，避免触摸轨迹被收集
+            // 手势完成后切回之前的状态
             if (drawingShapeMode == 0)
             {
                 if (dec.Count > 1)
