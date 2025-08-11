@@ -780,7 +780,20 @@ namespace Ink_Canvas
             else if (sender is Border border)
             {
                 lastBorderMouseDownObject = sender;
-                border.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
+                // 对于快捷调色板的颜色球，不改变背景颜色，只添加透明度效果
+                if (border.Name?.StartsWith("QuickColor") == true)
+                {
+                    // 保存原始颜色并添加透明度
+                    var originalColor = border.Background as SolidColorBrush;
+                    if (originalColor != null)
+                    {
+                        border.Background = new SolidColorBrush(Color.FromArgb(180, originalColor.Color.R, originalColor.Color.G, originalColor.Color.B));
+                    }
+                }
+                else
+                {
+                    border.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
+                }
             }
         }
 
@@ -794,7 +807,36 @@ namespace Ink_Canvas
             else if (sender is Border border)
             {
                 lastBorderMouseDownObject = null;
-                border.Background = new SolidColorBrush(Colors.Transparent);
+                // 对于快捷调色板的颜色球，恢复原始颜色
+                if (border.Name?.StartsWith("QuickColor") == true)
+                {
+                    // 根据颜色球名称恢复对应的颜色
+                    switch (border.Name)
+                    {
+                        case "QuickColorWhite":
+                            border.Background = new SolidColorBrush(Colors.White);
+                            break;
+                        case "QuickColorOrange":
+                            border.Background = new SolidColorBrush(Color.FromRgb(255, 165, 0));
+                            break;
+                        case "QuickColorYellow":
+                            border.Background = new SolidColorBrush(Colors.Yellow);
+                            break;
+                        case "QuickColorBlack":
+                            border.Background = new SolidColorBrush(Colors.Black);
+                            break;
+                        case "QuickColorBlue":
+                            border.Background = new SolidColorBrush(Color.FromRgb(0, 102, 255));
+                            break;
+                        case "QuickColorRed":
+                            border.Background = new SolidColorBrush(Colors.Red);
+                            break;
+                    }
+                }
+                else
+                {
+                    border.Background = new SolidColorBrush(Colors.Transparent);
+                }
             }
         }
 
