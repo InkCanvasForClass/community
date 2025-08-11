@@ -1853,6 +1853,14 @@ namespace Ink_Canvas
             Settings.Appearance.ViewboxFloatingBarOpacityValue = 1.0;
             Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = 1.0;
             Settings.Appearance.EnableTrayIcon = true;
+        
+            // 浮动栏按钮显示控制默认值
+            Settings.Appearance.IsShowShapeButton = true;
+            Settings.Appearance.IsShowUndoButton = true;
+            Settings.Appearance.IsShowRedoButton = true;
+            Settings.Appearance.IsShowClearButton = true;
+            Settings.Appearance.IsShowWhiteboardButton = true;
+            Settings.Appearance.IsShowHideButton = true;
 
             Settings.Automation.IsAutoFoldInEasiNote = true;
             Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno = true;
@@ -2325,6 +2333,93 @@ namespace Ink_Canvas
 
             // 保存设置到文件
             SaveSettingsToFile();
+        }
+
+        #endregion
+
+        #region 浮动栏按钮显示控制
+
+        private void ToggleSwitchShowShapeButton_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowShapeButton = ToggleSwitchShowShapeButton.IsOn;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchShowUndoButton_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowUndoButton = ToggleSwitchShowUndoButton.IsOn;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchShowRedoButton_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowRedoButton = ToggleSwitchShowRedoButton.IsOn;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchShowClearButton_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowClearButton = ToggleSwitchShowClearButton.IsOn;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchShowWhiteboardButton_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowWhiteboardButton = ToggleSwitchShowWhiteboardButton.IsOn;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+        
+        private void ToggleSwitchShowHideButton_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowHideButton = ToggleSwitchShowHideButton.IsOn;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void UpdateFloatingBarButtonsVisibility()
+        {
+            // 根据设置更新浮动栏按钮的可见性
+            try
+            {
+                // 形状按钮
+                if (ShapeDrawFloatingBarBtn != null)
+                    ShapeDrawFloatingBarBtn.Visibility = Settings.Appearance.IsShowShapeButton ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 撤销按钮
+                if (SymbolIconUndo != null)
+                    SymbolIconUndo.Visibility = Settings.Appearance.IsShowUndoButton ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 重做按钮
+                if (SymbolIconRedo != null)
+                    SymbolIconRedo.Visibility = Settings.Appearance.IsShowRedoButton ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 清空按钮
+                if (SymbolIconDelete != null)
+                    SymbolIconDelete.Visibility = Settings.Appearance.IsShowClearButton ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 白板按钮
+                if (WhiteboardFloatingBarBtn != null)
+                    WhiteboardFloatingBarBtn.Visibility = Settings.Appearance.IsShowWhiteboardButton ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 隐藏按钮
+                if (Fold_Icon != null)
+                    Fold_Icon.Visibility = Settings.Appearance.IsShowHideButton ? Visibility.Visible : Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新浮动栏按钮可见性时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         #endregion

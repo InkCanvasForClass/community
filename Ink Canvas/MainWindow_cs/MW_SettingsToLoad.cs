@@ -306,6 +306,17 @@ namespace Ink_Canvas
                 ToggleSwitchEnableChickenSoupInWhiteboardMode.IsOn =
                     Settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
+                // 浮动栏按钮显示控制开关初始化
+                ToggleSwitchShowShapeButton.IsOn = Settings.Appearance.IsShowShapeButton;
+                ToggleSwitchShowUndoButton.IsOn = Settings.Appearance.IsShowUndoButton;
+                ToggleSwitchShowRedoButton.IsOn = Settings.Appearance.IsShowRedoButton;
+                ToggleSwitchShowClearButton.IsOn = Settings.Appearance.IsShowClearButton;
+                ToggleSwitchShowWhiteboardButton.IsOn = Settings.Appearance.IsShowWhiteboardButton;
+                ToggleSwitchShowHideButton.IsOn = Settings.Appearance.IsShowHideButton;
+                
+                // 应用浮动栏按钮可见性设置
+                UpdateFloatingBarButtonsVisibility();
+
                 SystemEvents_UserPreferenceChanged(null, null);
             }
             else

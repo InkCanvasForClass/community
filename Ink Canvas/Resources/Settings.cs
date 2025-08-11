@@ -194,6 +194,20 @@ namespace Ink_Canvas
         public bool IsShowModeFingerToggleSwitch { get; set; } = true;
         [JsonProperty("theme")]
         public int Theme { get; set; }
+        
+        // 浮动栏按钮显示控制
+        [JsonProperty("isShowShapeButton")]
+        public bool IsShowShapeButton { get; set; } = true;
+        [JsonProperty("isShowUndoButton")]
+        public bool IsShowUndoButton { get; set; } = true;
+        [JsonProperty("isShowRedoButton")]
+        public bool IsShowRedoButton { get; set; } = true;
+        [JsonProperty("isShowClearButton")]
+        public bool IsShowClearButton { get; set; } = true;
+        [JsonProperty("isShowWhiteboardButton")]
+        public bool IsShowWhiteboardButton { get; set; } = true;
+        [JsonProperty("isShowHideButton")]
+        public bool IsShowHideButton { get; set; } = true;
     }
 
     public class PowerPointSettings
