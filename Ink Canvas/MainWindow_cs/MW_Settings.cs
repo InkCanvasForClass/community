@@ -1861,6 +1861,8 @@ namespace Ink_Canvas
             Settings.Appearance.IsShowClearButton = true;
             Settings.Appearance.IsShowWhiteboardButton = true;
             Settings.Appearance.IsShowHideButton = true;
+            Settings.Appearance.IsShowLassoSelectButton = true;
+            Settings.Appearance.IsShowClearAndMouseButton = true;
             Settings.Appearance.IsShowQuickColorPalette = false;
             Settings.Appearance.EraserDisplayOption = 0; 
 
@@ -2381,6 +2383,22 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
         
+        private void ToggleSwitchShowLassoSelectButton_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowLassoSelectButton = ToggleSwitchShowLassoSelectButton.IsOn;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchShowClearAndMouseButton_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowClearAndMouseButton = ToggleSwitchShowClearAndMouseButton.IsOn;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
         private void ToggleSwitchShowHideButton_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2437,6 +2455,14 @@ namespace Ink_Canvas
                 // 快捷调色盘
                 if (QuickColorPalettePanel != null)
                     QuickColorPalettePanel.Visibility = Settings.Appearance.IsShowQuickColorPalette ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 套索选择按钮
+                if (SymbolIconSelect != null)
+                    SymbolIconSelect.Visibility = Settings.Appearance.IsShowLassoSelectButton ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 清并鼠按钮
+                if (CursorWithDelFloatingBarBtn != null)
+                    CursorWithDelFloatingBarBtn.Visibility = Settings.Appearance.IsShowClearAndMouseButton ? Visibility.Visible : Visibility.Collapsed;
                 
                 // 橡皮按钮显示控制
                 if (Eraser_Icon != null && EraserByStrokes_Icon != null)

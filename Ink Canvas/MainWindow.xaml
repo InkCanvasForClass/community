@@ -1228,6 +1228,22 @@
                                     </ui:SimpleStackPanel>
                                     
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="显示套索选择按钮" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowLassoSelectButton"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchShowLassoSelectButton_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="显示清并鼠按钮" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearAndMouseButton"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchShowClearAndMouseButton_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="显示快捷调色盘" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowQuickColorPalette"
@@ -6276,13 +6292,29 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Canvas>
-                                            <Ellipse Name="QuickColorWhiteIndicator" 
-                                                     Width="6" Height="6" 
-                                                     Fill="Green" 
-                                                     Canvas.Left="5" Canvas.Top="5" 
-                                                     Visibility="Collapsed"/>
-                                        </Canvas>
+                                        <!-- 高光效果容器 -->
+                                        <Grid>
+                                            <!-- 高光效果 -->
+                                            <Ellipse Name="QuickColorWhiteGlow" 
+                                                     Width="22" Height="22" 
+                                                     Fill="Transparent"
+                                                     Stroke="White"
+                                                     StrokeThickness="3"
+                                                     Opacity="1.0"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                            <!-- 外圈阴影效果 -->
+                                            <Ellipse Name="QuickColorWhiteGlowShadow" 
+                                                     Width="24" Height="24" 
+                                                     Fill="Transparent"
+                                                     Stroke="#FFD700"
+                                                     StrokeThickness="1"
+                                                     Opacity="0.8"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                        </Grid>
                                     </Border>
                                     
                                     <!-- 橙色 -->
@@ -6307,13 +6339,29 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Canvas>
-                                            <Ellipse Name="QuickColorOrangeIndicator" 
-                                                     Width="6" Height="6" 
-                                                     Fill="Green" 
-                                                     Canvas.Left="5" Canvas.Top="5" 
-                                                     Visibility="Collapsed"/>
-                                        </Canvas>
+                                        <!-- 高光效果容器 -->
+                                        <Grid>
+                                            <!-- 高光效果 -->
+                                            <Ellipse Name="QuickColorOrangeGlow" 
+                                                     Width="22" Height="22" 
+                                                     Fill="Transparent"
+                                                     Stroke="White"
+                                                     StrokeThickness="3"
+                                                     Opacity="1.0"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                            <!-- 外圈阴影效果 -->
+                                            <Ellipse Name="QuickColorOrangeGlowShadow" 
+                                                     Width="24" Height="24" 
+                                                     Fill="Transparent"
+                                                     Stroke="#FFD700"
+                                                     StrokeThickness="1"
+                                                     Opacity="0.8"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                        </Grid>
                                     </Border>
                                     
                                     <!-- 黄色 -->
@@ -6338,13 +6386,29 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Canvas>
-                                            <Ellipse Name="QuickColorYellowIndicator" 
-                                                     Width="6" Height="6" 
-                                                     Fill="Green" 
-                                                     Canvas.Left="5" Canvas.Top="5" 
-                                                     Visibility="Collapsed"/>
-                                        </Canvas>
+                                        <!-- 高光效果容器 -->
+                                        <Grid>
+                                            <!-- 高光效果 -->
+                                            <Ellipse Name="QuickColorYellowGlow" 
+                                                     Width="22" Height="22" 
+                                                     Fill="Transparent"
+                                                     Stroke="White"
+                                                     StrokeThickness="3"
+                                                     Opacity="1.0"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                            <!-- 外圈阴影效果 -->
+                                            <Ellipse Name="QuickColorYellowGlowShadow" 
+                                                     Width="24" Height="24" 
+                                                     Fill="Transparent"
+                                                     Stroke="#FFD700"
+                                                     StrokeThickness="1"
+                                                     Opacity="0.8"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                        </Grid>
                                     </Border>
                                     
                                     <!-- 黑色 -->
@@ -6369,13 +6433,29 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Canvas>
-                                            <Ellipse Name="QuickColorBlackIndicator" 
-                                                     Width="6" Height="6" 
-                                                     Fill="Green" 
-                                                     Canvas.Left="5" Canvas.Top="5" 
-                                                     Visibility="Collapsed"/>
-                                        </Canvas>
+                                        <!-- 高光效果容器 -->
+                                        <Grid>
+                                            <!-- 高光效果 -->
+                                            <Ellipse Name="QuickColorBlackGlow" 
+                                                     Width="22" Height="22" 
+                                                     Fill="Transparent"
+                                                     Stroke="White"
+                                                     StrokeThickness="3"
+                                                     Opacity="1.0"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                            <!-- 外圈阴影效果 -->
+                                            <Ellipse Name="QuickColorBlackGlowShadow" 
+                                                     Width="24" Height="24" 
+                                                     Fill="Transparent"
+                                                     Stroke="#FFD700"
+                                                     StrokeThickness="1"
+                                                     Opacity="0.8"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                        </Grid>
                                     </Border>
                                     
                                     <!-- 蓝色 -->
@@ -6400,13 +6480,29 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Canvas>
-                                            <Ellipse Name="QuickColorBlueIndicator" 
-                                                     Width="6" Height="6" 
-                                                     Fill="Green" 
-                                                     Canvas.Left="5" Canvas.Top="5" 
-                                                     Visibility="Collapsed"/>
-                                        </Canvas>
+                                        <!-- 高光效果容器 -->
+                                        <Grid>
+                                            <!-- 高光效果 -->
+                                            <Ellipse Name="QuickColorBlueGlow" 
+                                                     Width="22" Height="22" 
+                                                     Fill="Transparent"
+                                                     Stroke="White"
+                                                     StrokeThickness="3"
+                                                     Opacity="1.0"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                            <!-- 外圈阴影效果 -->
+                                            <Ellipse Name="QuickColorBlueGlowShadow" 
+                                                     Width="24" Height="24" 
+                                                     Fill="Transparent"
+                                                     Stroke="#FFD700"
+                                                     StrokeThickness="1"
+                                                     Opacity="0.8"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                        </Grid>
                                     </Border>
                                     
                                     <!-- 红色 -->
@@ -6431,13 +6527,29 @@
                                                 </Style.Triggers>
                                             </Style>
                                         </Border.Style>
-                                        <Canvas>
-                                            <Ellipse Name="QuickColorRedIndicator" 
-                                                     Width="6" Height="6" 
-                                                     Fill="Green" 
-                                                     Canvas.Left="5" Canvas.Top="5" 
-                                                     Visibility="Collapsed"/>
-                                        </Canvas>
+                                        <!-- 高光效果容器 -->
+                                        <Grid>
+                                            <!-- 高光效果 -->
+                                            <Ellipse Name="QuickColorRedGlow" 
+                                                     Width="22" Height="22" 
+                                                     Fill="Transparent"
+                                                     Stroke="White"
+                                                     StrokeThickness="3"
+                                                     Opacity="1.0"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                            <!-- 外圈阴影效果 -->
+                                            <Ellipse Name="QuickColorRedGlowShadow" 
+                                                     Width="24" Height="24" 
+                                                     Fill="Transparent"
+                                                     Stroke="#FFD700"
+                                                     StrokeThickness="1"
+                                                     Opacity="0.8"
+                                                     Visibility="Collapsed"
+                                                     HorizontalAlignment="Center"
+                                                     VerticalAlignment="Center"/>
+                                        </Grid>
                                     </Border>
                                 </ui:SimpleStackPanel>
                                 

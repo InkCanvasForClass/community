@@ -314,6 +314,8 @@ namespace Ink_Canvas
                 ToggleSwitchShowWhiteboardButton.IsOn = Settings.Appearance.IsShowWhiteboardButton;
                 ToggleSwitchShowHideButton.IsOn = Settings.Appearance.IsShowHideButton;
                 ToggleSwitchShowQuickColorPalette.IsOn = Settings.Appearance.IsShowQuickColorPalette;
+                ToggleSwitchShowLassoSelectButton.IsOn = Settings.Appearance.IsShowLassoSelectButton;
+                ToggleSwitchShowClearAndMouseButton.IsOn = Settings.Appearance.IsShowClearAndMouseButton;
                 ComboBoxEraserDisplayOption.SelectedIndex = Settings.Appearance.EraserDisplayOption;
                 
                 // 初始化快捷调色盘指示器

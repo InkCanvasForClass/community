@@ -1892,37 +1892,61 @@ namespace Ink_Canvas
 
         private void UpdateQuickColorPaletteIndicator(Color selectedColor)
         {
-            // 隐藏所有指示器
-            QuickColorWhiteIndicator.Visibility = Visibility.Collapsed;
-            QuickColorOrangeIndicator.Visibility = Visibility.Collapsed;
-            QuickColorYellowIndicator.Visibility = Visibility.Collapsed;
-            QuickColorBlackIndicator.Visibility = Visibility.Collapsed;
-            QuickColorBlueIndicator.Visibility = Visibility.Collapsed;
-            QuickColorRedIndicator.Visibility = Visibility.Collapsed;
+            // 隐藏所有高光效果和外圈阴影
+            QuickColorWhiteGlow.Visibility = Visibility.Collapsed;
+            QuickColorWhiteGlowShadow.Visibility = Visibility.Collapsed;
+            QuickColorOrangeGlow.Visibility = Visibility.Collapsed;
+            QuickColorOrangeGlowShadow.Visibility = Visibility.Collapsed;
+            QuickColorYellowGlow.Visibility = Visibility.Collapsed;
+            QuickColorYellowGlowShadow.Visibility = Visibility.Collapsed;
+            QuickColorBlackGlow.Visibility = Visibility.Collapsed;
+            QuickColorBlackGlowShadow.Visibility = Visibility.Collapsed;
+            QuickColorBlueGlow.Visibility = Visibility.Collapsed;
+            QuickColorBlueGlowShadow.Visibility = Visibility.Collapsed;
+            QuickColorRedGlow.Visibility = Visibility.Collapsed;
+            QuickColorRedGlowShadow.Visibility = Visibility.Collapsed;
 
-            // 显示当前选中颜色的指示器
+            // 显示当前选中颜色的高光效果和外圈阴影
             // 使用更精确的颜色匹配，减少容差范围避免误判
             if (IsColorSimilar(selectedColor, Colors.White, 10) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), 10))
-                QuickColorWhiteIndicator.Visibility = Visibility.Visible;
+            {
+                QuickColorWhiteGlow.Visibility = Visibility.Visible;
+                QuickColorWhiteGlowShadow.Visibility = Visibility.Visible;
+            }
             else if (IsColorSimilar(selectedColor, Colors.Black, 10))
-                QuickColorBlackIndicator.Visibility = Visibility.Visible;
+            {
+                QuickColorBlackGlow.Visibility = Visibility.Visible;
+                QuickColorBlackGlowShadow.Visibility = Visibility.Visible;
+            }
             else if (IsColorSimilar(selectedColor, Colors.Yellow, 15) || 
                      IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), 15) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(250, 204, 21), 15) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), 15))
-                QuickColorYellowIndicator.Visibility = Visibility.Visible;
+            {
+                QuickColorYellowGlow.Visibility = Visibility.Visible;
+                QuickColorYellowGlowShadow.Visibility = Visibility.Visible;
+            }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), 15) || 
                      IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), 15) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), 15))
-                QuickColorOrangeIndicator.Visibility = Visibility.Visible;
+            {
+                QuickColorOrangeGlow.Visibility = Visibility.Visible;
+                QuickColorOrangeGlowShadow.Visibility = Visibility.Visible;
+            }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(0, 102, 255), 15) || 
                      IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), 15) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(59, 130, 246), 15))
-                QuickColorBlueIndicator.Visibility = Visibility.Visible;
+            {
+                QuickColorBlueGlow.Visibility = Visibility.Visible;
+                QuickColorBlueGlowShadow.Visibility = Visibility.Visible;
+            }
             else if (IsColorSimilar(selectedColor, Colors.Red, 15) || 
                      IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), 15) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), 15))
-                QuickColorRedIndicator.Visibility = Visibility.Visible;
+            {
+                QuickColorRedGlow.Visibility = Visibility.Visible;
+                QuickColorRedGlowShadow.Visibility = Visibility.Visible;
+            }
         }
 
         /// <summary>
