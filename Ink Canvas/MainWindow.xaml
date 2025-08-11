@@ -1228,6 +1228,14 @@
                                     </ui:SimpleStackPanel>
                                     
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="显示快捷调色盘" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowQuickColorPalette"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchShowQuickColorPalette_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="橡皮按钮显示" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <ComboBox Name="ComboBoxEraserDisplayOption"
@@ -6239,6 +6247,200 @@
                                     <TextBlock x:Name="PenToolbarTextBlock" Text="批注" Foreground="Black" FontSize="8"
                                                Margin="0,1,0,0" TextAlignment="Center" />
                                 </ui:SimpleStackPanel>
+                                
+                                <!-- 快捷调色盘 -->
+                                <ui:SimpleStackPanel Name="QuickColorPalettePanel" 
+                                                     Visibility="Collapsed"
+                                                     Orientation="Horizontal" 
+                                                     HorizontalAlignment="Center" 
+                                                     Margin="4,0,4,0">
+                                    <!-- 白色 -->
+                                    <Border Name="QuickColorWhite" 
+                                            Width="16" Height="16" 
+                                            Background="White" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="8" 
+                                            Margin="1,0,1,0"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorWhite_Click"
+                                            ToolTip="白色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Canvas>
+                                            <Ellipse Name="QuickColorWhiteIndicator" 
+                                                     Width="6" Height="6" 
+                                                     Fill="Green" 
+                                                     Canvas.Left="5" Canvas.Top="5" 
+                                                     Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                    
+                                    <!-- 橙色 -->
+                                    <Border Name="QuickColorOrange" 
+                                            Width="16" Height="16" 
+                                            Background="#FFA500" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="8" 
+                                            Margin="1,0,1,0"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorOrange_Click"
+                                            ToolTip="橙色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Canvas>
+                                            <Ellipse Name="QuickColorOrangeIndicator" 
+                                                     Width="6" Height="6" 
+                                                     Fill="Green" 
+                                                     Canvas.Left="5" Canvas.Top="5" 
+                                                     Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                    
+                                    <!-- 黄色 -->
+                                    <Border Name="QuickColorYellow" 
+                                            Width="16" Height="16" 
+                                            Background="#FFFF00" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="8" 
+                                            Margin="1,0,1,0"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorYellow_Click"
+                                            ToolTip="黄色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Canvas>
+                                            <Ellipse Name="QuickColorYellowIndicator" 
+                                                     Width="6" Height="6" 
+                                                     Fill="Green" 
+                                                     Canvas.Left="5" Canvas.Top="5" 
+                                                     Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                    
+                                    <!-- 黑色 -->
+                                    <Border Name="QuickColorBlack" 
+                                            Width="16" Height="16" 
+                                            Background="Black" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="8" 
+                                            Margin="1,0,1,0"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorBlack_Click"
+                                            ToolTip="黑色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Canvas>
+                                            <Ellipse Name="QuickColorBlackIndicator" 
+                                                     Width="6" Height="6" 
+                                                     Fill="Green" 
+                                                     Canvas.Left="5" Canvas.Top="5" 
+                                                     Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                    
+                                    <!-- 蓝色 -->
+                                    <Border Name="QuickColorBlue" 
+                                            Width="16" Height="16" 
+                                            Background="#0066FF" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="8" 
+                                            Margin="1,0,1,0"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorBlue_Click"
+                                            ToolTip="蓝色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Canvas>
+                                            <Ellipse Name="QuickColorBlueIndicator" 
+                                                     Width="6" Height="6" 
+                                                     Fill="Green" 
+                                                     Canvas.Left="5" Canvas.Top="5" 
+                                                     Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                    
+                                    <!-- 红色 -->
+                                    <Border Name="QuickColorRed" 
+                                            Width="16" Height="16" 
+                                            Background="#FF0000" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="8" 
+                                            Margin="1,0,1,0"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorRed_Click"
+                                            ToolTip="红色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <Canvas>
+                                            <Ellipse Name="QuickColorRedIndicator" 
+                                                     Width="6" Height="6" 
+                                                     Fill="Green" 
+                                                     Canvas.Left="5" Canvas.Top="5" 
+                                                     Visibility="Collapsed"/>
+                                        </Canvas>
+                                    </Border>
+                                </ui:SimpleStackPanel>
+                                
                                 <ui:SimpleStackPanel Name="SymbolIconDelete"
                                                      MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
                                                      MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"

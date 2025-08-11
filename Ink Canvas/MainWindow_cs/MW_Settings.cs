@@ -1861,6 +1861,7 @@ namespace Ink_Canvas
             Settings.Appearance.IsShowClearButton = true;
             Settings.Appearance.IsShowWhiteboardButton = true;
             Settings.Appearance.IsShowHideButton = true;
+            Settings.Appearance.IsShowQuickColorPalette = false;
             Settings.Appearance.EraserDisplayOption = 0; 
 
             Settings.Automation.IsAutoFoldInEasiNote = true;
@@ -2388,6 +2389,14 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchShowQuickColorPalette_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowQuickColorPalette = ToggleSwitchShowQuickColorPalette.IsOn;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
         private void ComboBoxEraserDisplayOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2424,6 +2433,10 @@ namespace Ink_Canvas
                 // 隐藏按钮
                 if (Fold_Icon != null)
                     Fold_Icon.Visibility = Settings.Appearance.IsShowHideButton ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 快捷调色盘
+                if (QuickColorPalettePanel != null)
+                    QuickColorPalettePanel.Visibility = Settings.Appearance.IsShowQuickColorPalette ? Visibility.Visible : Visibility.Collapsed;
                 
                 // 橡皮按钮显示控制
                 if (Eraser_Icon != null && EraserByStrokes_Icon != null)

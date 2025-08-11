@@ -210,7 +210,10 @@ namespace Ink_Canvas
         public bool IsShowHideButton { get; set; } = true;
         
         [JsonProperty("eraserDisplayOption")]
-        public int EraserDisplayOption { get; set; } = 0; 
+        public int EraserDisplayOption { get; set; } = 0;
+        
+        [JsonProperty("isShowQuickColorPalette")]
+        public bool IsShowQuickColorPalette { get; set; } = false; 
     }
 
     public class PowerPointSettings

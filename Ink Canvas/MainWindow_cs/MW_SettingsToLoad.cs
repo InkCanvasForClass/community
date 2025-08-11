@@ -313,7 +313,11 @@ namespace Ink_Canvas
                 ToggleSwitchShowClearButton.IsOn = Settings.Appearance.IsShowClearButton;
                 ToggleSwitchShowWhiteboardButton.IsOn = Settings.Appearance.IsShowWhiteboardButton;
                 ToggleSwitchShowHideButton.IsOn = Settings.Appearance.IsShowHideButton;
+                ToggleSwitchShowQuickColorPalette.IsOn = Settings.Appearance.IsShowQuickColorPalette;
                 ComboBoxEraserDisplayOption.SelectedIndex = Settings.Appearance.EraserDisplayOption;
+                
+                // 初始化快捷调色盘指示器
+                UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
                 
                 // 应用浮动栏按钮可见性设置
                 UpdateFloatingBarButtonsVisibility();

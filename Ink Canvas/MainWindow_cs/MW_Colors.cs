@@ -415,6 +415,12 @@ namespace Ink_Canvas
                     BoardHighlighterPenViewboxBtnColorOrangeContent.Visibility = Visibility.Visible;
                     break;
             }
+
+            // 更新快捷调色盘选择指示器
+            if (penType == 0) 
+            {
+                UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
+            }
         }
 
         private void CheckLastColor(int inkColor, bool isHighlighter = false)

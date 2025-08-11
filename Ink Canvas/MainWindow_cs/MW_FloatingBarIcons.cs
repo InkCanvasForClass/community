@@ -771,17 +771,31 @@ namespace Ink_Canvas
 
         private void FloatingBarToolBtnMouseDownFeedback_Panel(object sender, MouseButtonEventArgs e)
         {
-            var s = (Panel)sender;
-            lastBorderMouseDownObject = sender;
-            if (s == SymbolIconDelete) s.Background = new SolidColorBrush(Color.FromArgb(28, 127, 29, 29));
-            else s.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
+            if (sender is Panel panel)
+            {
+                lastBorderMouseDownObject = sender;
+                if (panel == SymbolIconDelete) panel.Background = new SolidColorBrush(Color.FromArgb(28, 127, 29, 29));
+                else panel.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
+            }
+            else if (sender is Border border)
+            {
+                lastBorderMouseDownObject = sender;
+                border.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
+            }
         }
 
         private void FloatingBarToolBtnMouseLeaveFeedback_Panel(object sender, MouseEventArgs e)
         {
-            var s = (Panel)sender;
-            lastBorderMouseDownObject = null;
-            s.Background = new SolidColorBrush(Colors.Transparent);
+            if (sender is Panel panel)
+            {
+                lastBorderMouseDownObject = null;
+                panel.Background = new SolidColorBrush(Colors.Transparent);
+            }
+            else if (sender is Border border)
+            {
+                lastBorderMouseDownObject = null;
+                border.Background = new SolidColorBrush(Colors.Transparent);
+            }
         }
 
         private void SymbolIconSettings_Click(object sender, RoutedEventArgs e)
@@ -1760,6 +1774,103 @@ namespace Ink_Canvas
 
             SymbolIconDelete_MouseUp(sender, null);
             CursorIcon_Click(null, null);
+        }
+
+        // 快捷调色盘事件处理方法
+        private void QuickColorWhite_Click(object sender, RoutedEventArgs e)
+        {
+            SetQuickColor(Colors.White);
+        }
+
+        private void QuickColorOrange_Click(object sender, RoutedEventArgs e)
+        {
+            SetQuickColor(Color.FromRgb(255, 165, 0)); // 橙色
+        }
+
+        private void QuickColorYellow_Click(object sender, RoutedEventArgs e)
+        {
+            SetQuickColor(Colors.Yellow);
+        }
+
+        private void QuickColorBlack_Click(object sender, RoutedEventArgs e)
+        {
+            SetQuickColor(Colors.Black);
+        }
+
+        private void QuickColorBlue_Click(object sender, RoutedEventArgs e)
+        {
+            SetQuickColor(Color.FromRgb(0, 102, 255)); // 蓝色
+        }
+
+        private void QuickColorRed_Click(object sender, RoutedEventArgs e)
+        {
+            SetQuickColor(Colors.Red);
+        }
+
+        private void SetQuickColor(Color color)
+        {
+            // 确保当前处于批注模式
+            if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
+            {
+                PenIcon_Click(null, null);
+            }
+
+            // 设置画笔颜色
+            drawingAttributes.Color = color;
+            inkCanvas.DefaultDrawingAttributes.Color = color;
+
+            // 更新颜色状态
+            if (currentMode == 0)
+            {
+                // 桌面模式
+                if (color == Colors.White) lastDesktopInkColor = 5;
+                else if (color == Color.FromRgb(255, 165, 0)) lastDesktopInkColor = 8; // 橙色
+                else if (color == Colors.Yellow) lastDesktopInkColor = 4;
+                else if (color == Colors.Black) lastDesktopInkColor = 0;
+                else if (color == Color.FromRgb(0, 102, 255)) lastDesktopInkColor = 3; // 蓝色
+                else if (color == Colors.Red) lastDesktopInkColor = 1;
+            }
+            else
+            {
+                // 白板模式
+                if (color == Colors.White) lastBoardInkColor = 5;
+                else if (color == Color.FromRgb(255, 165, 0)) lastBoardInkColor = 8; // 橙色
+                else if (color == Colors.Yellow) lastBoardInkColor = 4;
+                else if (color == Colors.Black) lastBoardInkColor = 0;
+                else if (color == Color.FromRgb(0, 102, 255)) lastBoardInkColor = 3; // 蓝色
+                else if (color == Colors.Red) lastBoardInkColor = 1;
+            }
+
+            // 更新快捷调色盘选择指示器
+            UpdateQuickColorPaletteIndicator(color);
+
+            // 更新颜色显示
+            ColorSwitchCheck();
+        }
+
+        private void UpdateQuickColorPaletteIndicator(Color selectedColor)
+        {
+            // 隐藏所有指示器
+            QuickColorWhiteIndicator.Visibility = Visibility.Collapsed;
+            QuickColorOrangeIndicator.Visibility = Visibility.Collapsed;
+            QuickColorYellowIndicator.Visibility = Visibility.Collapsed;
+            QuickColorBlackIndicator.Visibility = Visibility.Collapsed;
+            QuickColorBlueIndicator.Visibility = Visibility.Collapsed;
+            QuickColorRedIndicator.Visibility = Visibility.Collapsed;
+
+            // 显示当前选中颜色的指示器
+            if (selectedColor == Colors.White)
+                QuickColorWhiteIndicator.Visibility = Visibility.Visible;
+            else if (selectedColor == Color.FromRgb(255, 165, 0)) // 橙色
+                QuickColorOrangeIndicator.Visibility = Visibility.Visible;
+            else if (selectedColor == Colors.Yellow)
+                QuickColorYellowIndicator.Visibility = Visibility.Visible;
+            else if (selectedColor == Colors.Black)
+                QuickColorBlackIndicator.Visibility = Visibility.Visible;
+            else if (selectedColor == Color.FromRgb(0, 102, 255)) // 蓝色
+                QuickColorBlueIndicator.Visibility = Visibility.Visible;
+            else if (selectedColor == Colors.Red)
+                QuickColorRedIndicator.Visibility = Visibility.Visible;
         }
 
         private void SelectIcon_MouseUp(object sender, RoutedEventArgs e)
