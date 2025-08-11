@@ -313,6 +313,7 @@ namespace Ink_Canvas
                 ToggleSwitchShowClearButton.IsOn = Settings.Appearance.IsShowClearButton;
                 ToggleSwitchShowWhiteboardButton.IsOn = Settings.Appearance.IsShowWhiteboardButton;
                 ToggleSwitchShowHideButton.IsOn = Settings.Appearance.IsShowHideButton;
+                ComboBoxEraserDisplayOption.SelectedIndex = Settings.Appearance.EraserDisplayOption;
                 
                 // 应用浮动栏按钮可见性设置
                 UpdateFloatingBarButtonsVisibility();

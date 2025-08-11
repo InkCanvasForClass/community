@@ -1227,6 +1227,19 @@
                                                          Toggled="ToggleSwitchShowHideButton_Toggled" />
                                     </ui:SimpleStackPanel>
                                     
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="橡皮按钮显示" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxEraserDisplayOption"
+                                                  FontFamily="Microsoft YaHei UI" SelectedIndex="0"
+                                                  SelectionChanged="ComboBoxEraserDisplayOption_SelectionChanged">
+                                            <ComboBoxItem Content="两个都显示" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="仅显示面积擦" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="仅显示线擦" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="都不显示" FontFamily="Microsoft YaHei UI" />
+                                        </ComboBox>
+                                    </ui:SimpleStackPanel>
+                                    
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                     

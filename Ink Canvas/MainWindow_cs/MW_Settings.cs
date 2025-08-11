@@ -1861,6 +1861,7 @@ namespace Ink_Canvas
             Settings.Appearance.IsShowClearButton = true;
             Settings.Appearance.IsShowWhiteboardButton = true;
             Settings.Appearance.IsShowHideButton = true;
+            Settings.Appearance.EraserDisplayOption = 0; 
 
             Settings.Automation.IsAutoFoldInEasiNote = true;
             Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno = true;
@@ -2387,6 +2388,14 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ComboBoxEraserDisplayOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.EraserDisplayOption = ComboBoxEraserDisplayOption.SelectedIndex;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
         private void UpdateFloatingBarButtonsVisibility()
         {
             // 根据设置更新浮动栏按钮的可见性
@@ -2415,6 +2424,30 @@ namespace Ink_Canvas
                 // 隐藏按钮
                 if (Fold_Icon != null)
                     Fold_Icon.Visibility = Settings.Appearance.IsShowHideButton ? Visibility.Visible : Visibility.Collapsed;
+                
+                // 橡皮按钮显示控制
+                if (Eraser_Icon != null && EraserByStrokes_Icon != null)
+                {
+                    switch (Settings.Appearance.EraserDisplayOption)
+                    {
+                        case 0: // 两个都显示
+                            Eraser_Icon.Visibility = Visibility.Visible;
+                            EraserByStrokes_Icon.Visibility = Visibility.Visible;
+                            break;
+                        case 1: // 仅显示面积擦
+                            Eraser_Icon.Visibility = Visibility.Visible;
+                            EraserByStrokes_Icon.Visibility = Visibility.Collapsed;
+                            break;
+                        case 2: // 仅显示线擦
+                            Eraser_Icon.Visibility = Visibility.Collapsed;
+                            EraserByStrokes_Icon.Visibility = Visibility.Visible;
+                            break;
+                        case 3: // 都不显示
+                            Eraser_Icon.Visibility = Visibility.Collapsed;
+                            EraserByStrokes_Icon.Visibility = Visibility.Collapsed;
+                            break;
+                    }
+                }
             }
             catch (Exception ex)
             {
