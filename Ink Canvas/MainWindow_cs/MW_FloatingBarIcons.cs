@@ -1901,18 +1901,40 @@ namespace Ink_Canvas
             QuickColorRedIndicator.Visibility = Visibility.Collapsed;
 
             // 显示当前选中颜色的指示器
-            if (selectedColor == Colors.White)
+            // 使用更精确的颜色匹配，减少容差范围避免误判
+            if (IsColorSimilar(selectedColor, Colors.White, 10) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), 10))
                 QuickColorWhiteIndicator.Visibility = Visibility.Visible;
-            else if (selectedColor == Color.FromRgb(255, 165, 0)) // 橙色
-                QuickColorOrangeIndicator.Visibility = Visibility.Visible;
-            else if (selectedColor == Colors.Yellow)
-                QuickColorYellowIndicator.Visibility = Visibility.Visible;
-            else if (selectedColor == Colors.Black)
+            else if (IsColorSimilar(selectedColor, Colors.Black, 10))
                 QuickColorBlackIndicator.Visibility = Visibility.Visible;
-            else if (selectedColor == Color.FromRgb(0, 102, 255)) // 蓝色
+            else if (IsColorSimilar(selectedColor, Colors.Yellow, 15) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), 15) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(250, 204, 21), 15) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), 15))
+                QuickColorYellowIndicator.Visibility = Visibility.Visible;
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), 15) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), 15) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), 15))
+                QuickColorOrangeIndicator.Visibility = Visibility.Visible;
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(0, 102, 255), 15) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), 15) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(59, 130, 246), 15))
                 QuickColorBlueIndicator.Visibility = Visibility.Visible;
-            else if (selectedColor == Colors.Red)
+            else if (IsColorSimilar(selectedColor, Colors.Red, 15) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), 15) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), 15))
                 QuickColorRedIndicator.Visibility = Visibility.Visible;
+        }
+
+        /// <summary>
+        /// 检查两个颜色是否相似（允许一定的误差范围）
+        /// </summary>
+        private bool IsColorSimilar(Color color1, Color color2, int tolerance = 15)
+        {
+            int rDiff = Math.Abs(color1.R - color2.R);
+            int gDiff = Math.Abs(color1.G - color2.G);
+            int bDiff = Math.Abs(color1.B - color2.B);
+            
+            return rDiff <= tolerance && gDiff <= tolerance && bDiff <= tolerance;
         }
 
         private void SelectIcon_MouseUp(object sender, RoutedEventArgs e)
