@@ -6298,30 +6298,19 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <!-- 高光效果容器 -->
+                                            <!-- Check图标容器 -->
                                             <Grid>
-                                                <!-- 高光效果 -->
-                                                <Rectangle Name="QuickColorBlackGlow" 
-                                                           Width="17" Height="17" 
-                                                           Fill="Transparent"
-                                                           Stroke="#00FFFF"
-                                                           StrokeThickness="2"
-                                                           RadiusX="4" RadiusY="4"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                <!-- 外圈阴影效果 -->
-                                                <Rectangle Name="QuickColorBlackGlowShadow" 
-                                                           Width="19" Height="19" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FFD700"
-                                                           StrokeThickness="1"
-                                                           RadiusX="5" RadiusY="5"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorBlackCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="White" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                         
@@ -6347,30 +6336,19 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <!-- 高光效果容器 -->
+                                            <!-- Check图标容器 -->
                                             <Grid>
-                                                <!-- 高光效果 -->
-                                                <Rectangle Name="QuickColorWhiteGlow" 
-                                                           Width="17" Height="17" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FF6B35"
-                                                           StrokeThickness="2"
-                                                           RadiusX="4" RadiusY="4"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                <!-- 外圈阴影效果 -->
-                                                <Rectangle Name="QuickColorWhiteGlowShadow" 
-                                                           Width="19" Height="19" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FFD700"
-                                                           StrokeThickness="1"
-                                                           RadiusX="5" RadiusY="5"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorWhiteCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="Black" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                         
@@ -6396,30 +6374,19 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <!-- 高光效果容器 -->
+                                            <!-- Check图标容器 -->
                                             <Grid>
-                                                <!-- 高光效果 -->
-                                                <Rectangle Name="QuickColorRedGlow" 
-                                                           Width="17" Height="17" 
-                                                           Fill="Transparent"
-                                                           Stroke="#00FF00"
-                                                           StrokeThickness="2"
-                                                           RadiusX="4" RadiusY="4"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                <!-- 外圈阴影效果 -->
-                                                <Rectangle Name="QuickColorRedGlowShadow" 
-                                                           Width="19" Height="19" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FFD700"
-                                                           StrokeThickness="1"
-                                                           RadiusX="5" RadiusY="5"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorRedCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="White" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                         
@@ -6445,30 +6412,19 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <!-- 高光效果容器 -->
+                                            <!-- Check图标容器 -->
                                             <Grid>
-                                                <!-- 高光效果 -->
-                                                <Rectangle Name="QuickColorOrangeGlow" 
-                                                           Width="17" Height="17" 
-                                                           Fill="Transparent"
-                                                           Stroke="#00FF00"
-                                                           StrokeThickness="2"
-                                                           RadiusX="4" RadiusY="4"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                <!-- 外圈阴影效果 -->
-                                                <Rectangle Name="QuickColorOrangeGlowShadow" 
-                                                           Width="19" Height="19" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FFD700"
-                                                           StrokeThickness="1"
-                                                           RadiusX="5" RadiusY="5"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorOrangeCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="Black" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                     </ui:SimpleStackPanel>
@@ -6497,30 +6453,19 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <!-- 高光效果容器 -->
+                                            <!-- Check图标容器 -->
                                             <Grid>
-                                                <!-- 高光效果 -->
-                                                <Rectangle Name="QuickColorYellowGlow" 
-                                                           Width="17" Height="17" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FF0000"
-                                                           StrokeThickness="2"
-                                                           RadiusX="4" RadiusY="4"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                <!-- 外圈阴影效果 -->
-                                                <Rectangle Name="QuickColorYellowGlowShadow" 
-                                                           Width="19" Height="19" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FFD700"
-                                                           StrokeThickness="1"
-                                                           RadiusX="5" RadiusY="5"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorYellowCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="Black" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                         
@@ -6546,30 +6491,19 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <!-- 高光效果容器 -->
+                                            <!-- Check图标容器 -->
                                             <Grid>
-                                                <!-- 高光效果 -->
-                                                <Rectangle Name="QuickColorGreenGlow" 
-                                                           Width="17" Height="17" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FF0000"
-                                                           StrokeThickness="2"
-                                                           RadiusX="4" RadiusY="4"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                <!-- 外圈阴影效果 -->
-                                                <Rectangle Name="QuickColorGreenGlowShadow" 
-                                                           Width="19" Height="19" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FFD700"
-                                                           StrokeThickness="1"
-                                                           RadiusX="5" RadiusY="5"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorGreenCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="Black" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                         
@@ -6595,30 +6529,19 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <!-- 高光效果容器 -->
+                                            <!-- Check图标容器 -->
                                             <Grid>
-                                                <!-- 高光效果 -->
-                                                <Rectangle Name="QuickColorBlueGlow" 
-                                                           Width="17" Height="17" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FF00FF"
-                                                           StrokeThickness="2"
-                                                           RadiusX="4" RadiusY="4"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                <!-- 外圈阴影效果 -->
-                                                <Rectangle Name="QuickColorBlueGlowShadow" 
-                                                           Width="19" Height="19" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FFD700"
-                                                           StrokeThickness="1"
-                                                           RadiusX="5" RadiusY="5"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorBlueCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="White" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                         
@@ -6644,30 +6567,19 @@
                                                     </Style.Triggers>
                                                 </Style>
                                             </Border.Style>
-                                            <!-- 高光效果容器 -->
+                                            <!-- Check图标容器 -->
                                             <Grid>
-                                                <!-- 高光效果 -->
-                                                <Rectangle Name="QuickColorPurpleGlow" 
-                                                           Width="17" Height="17" 
-                                                           Fill="Transparent"
-                                                           Stroke="#00FFFF"
-                                                           StrokeThickness="2"
-                                                           RadiusX="4" RadiusY="4"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
-                                                <!-- 外圈阴影效果 -->
-                                                <Rectangle Name="QuickColorPurpleGlowShadow" 
-                                                           Width="19" Height="19" 
-                                                           Fill="Transparent"
-                                                           Stroke="#FFD700"
-                                                           StrokeThickness="1"
-                                                           RadiusX="5" RadiusY="5"
-                                                           Opacity="1.0"
-                                                           Visibility="Collapsed"
-                                                           HorizontalAlignment="Center"
-                                                           VerticalAlignment="Center"/>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorPurpleCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="White" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
                                     </ui:SimpleStackPanel>
