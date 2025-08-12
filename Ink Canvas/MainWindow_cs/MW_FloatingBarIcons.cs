@@ -831,6 +831,12 @@ namespace Ink_Canvas
                         case "QuickColorRed":
                             border.Background = new SolidColorBrush(Colors.Red);
                             break;
+                        case "QuickColorGreen":
+                            border.Background = new SolidColorBrush(Colors.Green);
+                            break;
+                        case "QuickColorPurple":
+                            border.Background = new SolidColorBrush(Color.FromRgb(128, 0, 128));
+                            break;
                     }
                 }
                 else
@@ -1262,7 +1268,18 @@ namespace Ink_Canvas
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
                 // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
-                pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
+                
+                // 计算浮动栏位置，考虑快捷调色盘的显示状态
+                double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                
+                // 如果快捷调色盘显示，确保有足够空间
+                if (QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible)
+                {
+                    // 确保浮动栏有足够宽度容纳快捷调色盘
+                    floatingBarWidth = Math.Max(floatingBarWidth, 820 * ViewboxFloatingBarScaleTransform.ScaleX);
+                }
+                
+                pos.X = (screenWidth - floatingBarWidth) / 2;
 
                 if (PosXCaculatedWithTaskbarHeight == false)
                 {
@@ -1356,7 +1373,18 @@ namespace Ink_Canvas
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
                 // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
-                pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
+                
+                // 计算浮动栏位置，考虑快捷调色盘的显示状态
+                double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                
+                // 如果快捷调色盘显示，确保有足够空间
+                if (QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible)
+                {
+                    // 确保浮动栏有足够宽度容纳快捷调色盘
+                    floatingBarWidth = Math.Max(floatingBarWidth, 820 * ViewboxFloatingBarScaleTransform.ScaleX);
+                }
+                
+                pos.X = (screenWidth - floatingBarWidth) / 2;
 
                 // 如果任务栏高度为0(隐藏状态),则使用固定边距
                 if (toolbarHeight == 0)
@@ -1411,7 +1439,18 @@ namespace Ink_Canvas
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
                 // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
-                pos.X = (screenWidth - ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX) / 2;
+                
+                // 计算浮动栏位置，考虑快捷调色盘的显示状态
+                double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                
+                // 如果快捷调色盘显示，确保有足够空间
+                if (QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible)
+                {
+                    // 确保浮动栏有足够宽度容纳快捷调色盘
+                    floatingBarWidth = Math.Max(floatingBarWidth, 820 * ViewboxFloatingBarScaleTransform.ScaleX);
+                }
+                
+                pos.X = (screenWidth - floatingBarWidth) / 2;
 
                 pos.Y = screenHeight - 55 * ViewboxFloatingBarScaleTransform.ScaleY;
 
@@ -1524,6 +1563,12 @@ namespace Ink_Canvas
 
 
             StackPanelCanvasControls.Visibility = Visibility.Collapsed;
+            
+            // 在鼠标模式下隐藏快捷调色盘
+            if (QuickColorPalettePanel != null)
+            {
+                QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+            }
 
             if (!isFloatingBarFolded)
             {
@@ -1600,6 +1645,12 @@ namespace Ink_Canvas
                 //AnimationsHelper.ShowWithSlideFromLeftAndFade(StackPanelCanvasControls);
                 CheckEnableTwoFingerGestureBtnVisibility(true);
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                
+                // 在批注模式下显示快捷调色盘（如果设置中启用了）
+                if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null)
+                {
+                    QuickColorPalettePanel.Visibility = Visibility.Visible;
+                }
 
                 // 修复：从线擦切换到批注时，重置为默认笔模式（非高光显示）
                 forceEraser = false;
@@ -1849,6 +1900,16 @@ namespace Ink_Canvas
             SetQuickColor(Colors.Red);
         }
 
+        private void QuickColorGreen_Click(object sender, RoutedEventArgs e)
+        {
+            SetQuickColor(Colors.Green);
+        }
+
+        private void QuickColorPurple_Click(object sender, RoutedEventArgs e)
+        {
+            SetQuickColor(Color.FromRgb(128, 0, 128)); 
+        }
+
         private void SetQuickColor(Color color)
         {
             // 确保当前处于批注模式
@@ -1871,6 +1932,8 @@ namespace Ink_Canvas
                 else if (color == Colors.Black) lastDesktopInkColor = 0;
                 else if (color == Color.FromRgb(0, 102, 255)) lastDesktopInkColor = 3; // 蓝色
                 else if (color == Colors.Red) lastDesktopInkColor = 1;
+                else if (color == Colors.Green) lastDesktopInkColor = 2; // 绿色
+                else if (color == Color.FromRgb(128, 0, 128)) lastDesktopInkColor = 6; // 紫色
             }
             else
             {
@@ -1881,6 +1944,8 @@ namespace Ink_Canvas
                 else if (color == Colors.Black) lastBoardInkColor = 0;
                 else if (color == Color.FromRgb(0, 102, 255)) lastBoardInkColor = 3; // 蓝色
                 else if (color == Colors.Red) lastBoardInkColor = 1;
+                else if (color == Colors.Green) lastBoardInkColor = 2; // 绿色
+                else if (color == Color.FromRgb(128, 0, 128)) lastBoardInkColor = 6; // 紫色
             }
 
             // 更新快捷调色盘选择指示器
@@ -1905,6 +1970,10 @@ namespace Ink_Canvas
             QuickColorBlueGlowShadow.Visibility = Visibility.Collapsed;
             QuickColorRedGlow.Visibility = Visibility.Collapsed;
             QuickColorRedGlowShadow.Visibility = Visibility.Collapsed;
+            QuickColorGreenGlow.Visibility = Visibility.Collapsed;
+            QuickColorGreenGlowShadow.Visibility = Visibility.Collapsed;
+            QuickColorPurpleGlow.Visibility = Visibility.Collapsed;
+            QuickColorPurpleGlowShadow.Visibility = Visibility.Collapsed;
 
             // 显示当前选中颜色的高光效果和外圈阴影
             // 使用更精确的颜色匹配，减少容差范围避免误判
@@ -1946,6 +2015,20 @@ namespace Ink_Canvas
             {
                 QuickColorRedGlow.Visibility = Visibility.Visible;
                 QuickColorRedGlowShadow.Visibility = Visibility.Visible;
+            }
+            else if (IsColorSimilar(selectedColor, Colors.Green, 15) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(34, 197, 94), 15) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), 15))
+            {
+                QuickColorGreenGlow.Visibility = Visibility.Visible;
+                QuickColorGreenGlowShadow.Visibility = Visibility.Visible;
+            }
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(128, 0, 128), 15) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), 15) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(168, 85, 247), 15))
+            {
+                QuickColorPurpleGlow.Visibility = Visibility.Visible;
+                QuickColorPurpleGlowShadow.Visibility = Visibility.Visible;
             }
         }
 

@@ -6189,7 +6189,7 @@
 
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="100,5,0,0" Cursor="Arrow"
-                     HorizontalAlignment="Left" Height="58" VerticalAlignment="Top" Width="733"
+                     HorizontalAlignment="Left" Height="58" VerticalAlignment="Top" Width="850"
                      RenderTransformOrigin="0.5,0.5">
                 <Viewbox.LayoutTransform>
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
@@ -6267,290 +6267,410 @@
                                 <!-- 快捷调色盘 -->
                                 <ui:SimpleStackPanel Name="QuickColorPalettePanel" 
                                                      Visibility="Collapsed"
-                                                     Orientation="Horizontal" 
+                                                     Orientation="Vertical" 
                                                      HorizontalAlignment="Center" 
-                                                     Margin="4,0,4,0">
-                                    <!-- 白色 -->
-                                    <Border Name="QuickColorWhite" 
-                                            Width="16" Height="16" 
-                                            Background="White" 
-                                            BorderBrush="#CCCCCC" 
-                                            BorderThickness="1" 
-                                            CornerRadius="8" 
-                                            Margin="1,0,1,0"
-                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                            MouseUp="QuickColorWhite_Click"
-                                            ToolTip="白色">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="BorderThickness" Value="2"/>
-                                                        <Setter Property="BorderBrush" Value="#666666"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <!-- 高光效果容器 -->
-                                        <Grid>
-                                            <!-- 高光效果 -->
-                                            <Ellipse Name="QuickColorWhiteGlow" 
-                                                     Width="22" Height="22" 
-                                                     Fill="Transparent"
-                                                     Stroke="#FF6B35"
-                                                     StrokeThickness="3"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                            <!-- 外圈阴影效果 -->
-                                            <Ellipse Name="QuickColorWhiteGlowShadow" 
-                                                     Width="24" Height="24" 
-                                                     Fill="Transparent"
-                                                     Stroke="#FFD700"
-                                                     StrokeThickness="2"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </Border>
+                                                     Margin="4,0,4,0"
+                                                     Width="60"
+                                                     Height="42"
+                                                     MaxWidth="60"
+                                                     MaxHeight="42">
+                                    <!-- 第一行：黑、白、红、橙 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                        <!-- 黑色 -->
+                                        <Border Name="QuickColorBlack" 
+                                                Width="13" Height="13" 
+                                                Background="Black" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorBlack_Click"
+                                                ToolTip="黑色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- 高光效果容器 -->
+                                            <Grid>
+                                                <!-- 高光效果 -->
+                                                <Rectangle Name="QuickColorBlackGlow" 
+                                                           Width="17" Height="17" 
+                                                           Fill="Transparent"
+                                                           Stroke="#00FFFF"
+                                                           StrokeThickness="2"
+                                                           RadiusX="4" RadiusY="4"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                <!-- 外圈阴影效果 -->
+                                                <Rectangle Name="QuickColorBlackGlowShadow" 
+                                                           Width="19" Height="19" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FFD700"
+                                                           StrokeThickness="1"
+                                                           RadiusX="5" RadiusY="5"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 白色 -->
+                                        <Border Name="QuickColorWhite" 
+                                                Width="13" Height="13" 
+                                                Background="White" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorWhite_Click"
+                                                ToolTip="白色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- 高光效果容器 -->
+                                            <Grid>
+                                                <!-- 高光效果 -->
+                                                <Rectangle Name="QuickColorWhiteGlow" 
+                                                           Width="17" Height="17" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FF6B35"
+                                                           StrokeThickness="2"
+                                                           RadiusX="4" RadiusY="4"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                <!-- 外圈阴影效果 -->
+                                                <Rectangle Name="QuickColorWhiteGlowShadow" 
+                                                           Width="19" Height="19" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FFD700"
+                                                           StrokeThickness="1"
+                                                           RadiusX="5" RadiusY="5"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 红色 -->
+                                        <Border Name="QuickColorRed" 
+                                                Width="13" Height="13" 
+                                                Background="#FF0000" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorRed_Click"
+                                                ToolTip="红色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- 高光效果容器 -->
+                                            <Grid>
+                                                <!-- 高光效果 -->
+                                                <Rectangle Name="QuickColorRedGlow" 
+                                                           Width="17" Height="17" 
+                                                           Fill="Transparent"
+                                                           Stroke="#00FF00"
+                                                           StrokeThickness="2"
+                                                           RadiusX="4" RadiusY="4"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                <!-- 外圈阴影效果 -->
+                                                <Rectangle Name="QuickColorRedGlowShadow" 
+                                                           Width="19" Height="19" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FFD700"
+                                                           StrokeThickness="1"
+                                                           RadiusX="5" RadiusY="5"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 橙色 -->
+                                        <Border Name="QuickColorOrange" 
+                                                Width="13" Height="13" 
+                                                Background="#FFA500" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorOrange_Click"
+                                                ToolTip="橙色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- 高光效果容器 -->
+                                            <Grid>
+                                                <!-- 高光效果 -->
+                                                <Rectangle Name="QuickColorOrangeGlow" 
+                                                           Width="17" Height="17" 
+                                                           Fill="Transparent"
+                                                           Stroke="#00FF00"
+                                                           StrokeThickness="2"
+                                                           RadiusX="4" RadiusY="4"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                <!-- 外圈阴影效果 -->
+                                                <Rectangle Name="QuickColorOrangeGlowShadow" 
+                                                           Width="19" Height="19" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FFD700"
+                                                           StrokeThickness="1"
+                                                           RadiusX="5" RadiusY="5"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </ui:SimpleStackPanel>
                                     
-                                    <!-- 橙色 -->
-                                    <Border Name="QuickColorOrange" 
-                                            Width="16" Height="16" 
-                                            Background="#FFA500" 
-                                            BorderBrush="#CCCCCC" 
-                                            BorderThickness="1" 
-                                            CornerRadius="8" 
-                                            Margin="1,0,1,0"
-                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                            MouseUp="QuickColorOrange_Click"
-                                            ToolTip="橙色">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="BorderThickness" Value="2"/>
-                                                        <Setter Property="BorderBrush" Value="#666666"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <!-- 高光效果容器 -->
-                                        <Grid>
-                                            <!-- 高光效果 -->
-                                            <Ellipse Name="QuickColorOrangeGlow" 
-                                                     Width="22" Height="22" 
-                                                     Fill="Transparent"
-                                                     Stroke="#00FF00"
-                                                     StrokeThickness="3"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                            <!-- 外圈阴影效果 -->
-                                            <Ellipse Name="QuickColorOrangeGlowShadow" 
-                                                     Width="24" Height="24" 
-                                                     Fill="Transparent"
-                                                     Stroke="#FFD700"
-                                                     StrokeThickness="2"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </Border>
-                                    
-                                    <!-- 黄色 -->
-                                    <Border Name="QuickColorYellow" 
-                                            Width="16" Height="16" 
-                                            Background="#FFFF00" 
-                                            BorderBrush="#CCCCCC" 
-                                            BorderThickness="1" 
-                                            CornerRadius="8" 
-                                            Margin="1,0,1,0"
-                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                            MouseUp="QuickColorYellow_Click"
-                                            ToolTip="黄色">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="BorderThickness" Value="2"/>
-                                                        <Setter Property="BorderBrush" Value="#666666"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <!-- 高光效果容器 -->
-                                        <Grid>
-                                            <!-- 高光效果 -->
-                                            <Ellipse Name="QuickColorYellowGlow" 
-                                                     Width="22" Height="22" 
-                                                     Fill="Transparent"
-                                                     Stroke="#FF0000"
-                                                     StrokeThickness="3"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                            <!-- 外圈阴影效果 -->
-                                            <Ellipse Name="QuickColorYellowGlowShadow" 
-                                                     Width="24" Height="24" 
-                                                     Fill="Transparent"
-                                                     Stroke="#FFD700"
-                                                     StrokeThickness="2"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </Border>
-                                    
-                                    <!-- 黑色 -->
-                                    <Border Name="QuickColorBlack" 
-                                            Width="16" Height="16" 
-                                            Background="Black" 
-                                            BorderBrush="#CCCCCC" 
-                                            BorderThickness="1" 
-                                            CornerRadius="8" 
-                                            Margin="1,0,1,0"
-                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                            MouseUp="QuickColorBlack_Click"
-                                            ToolTip="黑色">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="BorderThickness" Value="2"/>
-                                                        <Setter Property="BorderBrush" Value="#666666"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <!-- 高光效果容器 -->
-                                        <Grid>
-                                            <!-- 高光效果 -->
-                                            <Ellipse Name="QuickColorBlackGlow" 
-                                                     Width="22" Height="22" 
-                                                     Fill="Transparent"
-                                                     Stroke="#00FFFF"
-                                                     StrokeThickness="3"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                            <!-- 外圈阴影效果 -->
-                                            <Ellipse Name="QuickColorBlackGlowShadow" 
-                                                     Width="24" Height="24" 
-                                                     Fill="Transparent"
-                                                     Stroke="#FFD700"
-                                                     StrokeThickness="2"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </Border>
-                                    
-                                    <!-- 蓝色 -->
-                                    <Border Name="QuickColorBlue" 
-                                            Width="16" Height="16" 
-                                            Background="#0066FF" 
-                                            BorderBrush="#CCCCCC" 
-                                            BorderThickness="1" 
-                                            CornerRadius="8" 
-                                            Margin="1,0,1,0"
-                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                            MouseUp="QuickColorBlue_Click"
-                                            ToolTip="蓝色">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="BorderThickness" Value="2"/>
-                                                        <Setter Property="BorderBrush" Value="#666666"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <!-- 高光效果容器 -->
-                                        <Grid>
-                                            <!-- 高光效果 -->
-                                            <Ellipse Name="QuickColorBlueGlow" 
-                                                     Width="22" Height="22" 
-                                                     Fill="Transparent"
-                                                     Stroke="#FF00FF"
-                                                     StrokeThickness="3"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                            <!-- 外圈阴影效果 -->
-                                            <Ellipse Name="QuickColorBlueGlowShadow" 
-                                                     Width="24" Height="24" 
-                                                     Fill="Transparent"
-                                                     Stroke="#FFD700"
-                                                     StrokeThickness="2"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </Border>
-                                    
-                                    <!-- 红色 -->
-                                    <Border Name="QuickColorRed" 
-                                            Width="16" Height="16" 
-                                            Background="#FF0000" 
-                                            BorderBrush="#CCCCCC" 
-                                            BorderThickness="1" 
-                                            CornerRadius="8" 
-                                            Margin="1,0,1,0"
-                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                            MouseUp="QuickColorRed_Click"
-                                            ToolTip="红色">
-                                        <Border.Style>
-                                            <Style TargetType="Border">
-                                                <Style.Triggers>
-                                                    <Trigger Property="IsMouseOver" Value="True">
-                                                        <Setter Property="BorderThickness" Value="2"/>
-                                                        <Setter Property="BorderBrush" Value="#666666"/>
-                                                    </Trigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </Border.Style>
-                                        <!-- 高光效果容器 -->
-                                        <Grid>
-                                            <!-- 高光效果 -->
-                                            <Ellipse Name="QuickColorRedGlow" 
-                                                     Width="22" Height="22" 
-                                                     Fill="Transparent"
-                                                     Stroke="#00FF00"
-                                                     StrokeThickness="3"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                            <!-- 外圈阴影效果 -->
-                                            <Ellipse Name="QuickColorRedGlowShadow" 
-                                                     Width="24" Height="24" 
-                                                     Fill="Transparent"
-                                                     Stroke="#FFD700"
-                                                     StrokeThickness="2"
-                                                     Opacity="1.0"
-                                                     Visibility="Collapsed"
-                                                     HorizontalAlignment="Center"
-                                                     VerticalAlignment="Center"/>
-                                        </Grid>
-                                    </Border>
+                                    <!-- 第二行：黄、绿、蓝、紫 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <!-- 黄色 -->
+                                        <Border Name="QuickColorYellow" 
+                                                Width="13" Height="13" 
+                                                Background="#FFFF00" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorYellow_Click"
+                                                ToolTip="黄色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- 高光效果容器 -->
+                                            <Grid>
+                                                <!-- 高光效果 -->
+                                                <Rectangle Name="QuickColorYellowGlow" 
+                                                           Width="17" Height="17" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FF0000"
+                                                           StrokeThickness="2"
+                                                           RadiusX="4" RadiusY="4"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                <!-- 外圈阴影效果 -->
+                                                <Rectangle Name="QuickColorYellowGlowShadow" 
+                                                           Width="19" Height="19" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FFD700"
+                                                           StrokeThickness="1"
+                                                           RadiusX="5" RadiusY="5"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 绿色 -->
+                                        <Border Name="QuickColorGreen" 
+                                                Width="13" Height="13" 
+                                                Background="#00FF00" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorGreen_Click"
+                                                ToolTip="绿色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- 高光效果容器 -->
+                                            <Grid>
+                                                <!-- 高光效果 -->
+                                                <Rectangle Name="QuickColorGreenGlow" 
+                                                           Width="17" Height="17" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FF0000"
+                                                           StrokeThickness="2"
+                                                           RadiusX="4" RadiusY="4"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                <!-- 外圈阴影效果 -->
+                                                <Rectangle Name="QuickColorGreenGlowShadow" 
+                                                           Width="19" Height="19" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FFD700"
+                                                           StrokeThickness="1"
+                                                           RadiusX="5" RadiusY="5"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 蓝色 -->
+                                        <Border Name="QuickColorBlue" 
+                                                Width="13" Height="13" 
+                                                Background="#0066FF" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorBlue_Click"
+                                                ToolTip="蓝色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- 高光效果容器 -->
+                                            <Grid>
+                                                <!-- 高光效果 -->
+                                                <Rectangle Name="QuickColorBlueGlow" 
+                                                           Width="17" Height="17" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FF00FF"
+                                                           StrokeThickness="2"
+                                                           RadiusX="4" RadiusY="4"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                <!-- 外圈阴影效果 -->
+                                                <Rectangle Name="QuickColorBlueGlowShadow" 
+                                                           Width="19" Height="19" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FFD700"
+                                                           StrokeThickness="1"
+                                                           RadiusX="5" RadiusY="5"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 紫色 -->
+                                        <Border Name="QuickColorPurple" 
+                                                Width="13" Height="13" 
+                                                Background="#800080" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorPurple_Click"
+                                                ToolTip="紫色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- 高光效果容器 -->
+                                            <Grid>
+                                                <!-- 高光效果 -->
+                                                <Rectangle Name="QuickColorPurpleGlow" 
+                                                           Width="17" Height="17" 
+                                                           Fill="Transparent"
+                                                           Stroke="#00FFFF"
+                                                           StrokeThickness="2"
+                                                           RadiusX="4" RadiusY="4"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                                <!-- 外圈阴影效果 -->
+                                                <Rectangle Name="QuickColorPurpleGlowShadow" 
+                                                           Width="19" Height="19" 
+                                                           Fill="Transparent"
+                                                           Stroke="#FFD700"
+                                                           StrokeThickness="1"
+                                                           RadiusX="5" RadiusY="5"
+                                                           Opacity="1.0"
+                                                           Visibility="Collapsed"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                                 
                                 <ui:SimpleStackPanel Name="SymbolIconDelete"

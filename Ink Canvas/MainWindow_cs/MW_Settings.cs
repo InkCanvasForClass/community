@@ -2452,9 +2452,30 @@ namespace Ink_Canvas
                 if (Fold_Icon != null)
                     Fold_Icon.Visibility = Settings.Appearance.IsShowHideButton ? Visibility.Visible : Visibility.Collapsed;
                 
-                // 快捷调色盘
+                // 快捷调色盘 
                 if (QuickColorPalettePanel != null)
-                    QuickColorPalettePanel.Visibility = Settings.Appearance.IsShowQuickColorPalette ? Visibility.Visible : Visibility.Collapsed;
+                {
+                    bool shouldShow = Settings.Appearance.IsShowQuickColorPalette && inkCanvas.EditingMode == InkCanvasEditingMode.Ink;
+                    bool wasVisible = QuickColorPalettePanel.Visibility == Visibility.Visible;
+                    
+                    if (shouldShow)
+                    {
+                        QuickColorPalettePanel.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                    }
+                    
+                    // 如果快捷调色盘的可见性发生变化，重新计算浮动栏位置
+                    if (wasVisible != shouldShow && !isFloatingBarFolded)
+                    {
+                        if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                            ViewboxFloatingBarMarginAnimation(60);
+                        else
+                            ViewboxFloatingBarMarginAnimation(100, true);
+                    }
+                }
                 
                 // 套索选择按钮
                 if (SymbolIconSelect != null)

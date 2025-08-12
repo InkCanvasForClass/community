@@ -73,8 +73,14 @@ namespace Ink_Canvas
             ViewBoxStackPanelMain.Visibility = Visibility.Collapsed;
             ViewBoxStackPanelShapes.Visibility = Visibility.Collapsed;
             var workingArea = Screen.PrimaryScreen.WorkingArea;
+            // 考虑快捷调色盘的宽度，确保浮动栏有足够空间
+            double floatingBarWidth = 284; // 基础宽度
+            if (Settings.Appearance.IsShowQuickColorPalette)
+            {
+                floatingBarWidth = Math.Max(floatingBarWidth, 820); // 快捷调色盘显示时的宽度
+            }
             ViewboxFloatingBar.Margin = new Thickness(
-                (workingArea.Width - 284) / 2,
+                (workingArea.Width - floatingBarWidth) / 2,
                 workingArea.Bottom - 60 - workingArea.Top,
                 -2000, -200);
             ViewboxFloatingBarMarginAnimation(100, true);
