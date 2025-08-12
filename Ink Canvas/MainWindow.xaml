@@ -6200,7 +6200,7 @@
 
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="100,5,0,0" Cursor="Arrow"
-                     HorizontalAlignment="Left" Height="58" VerticalAlignment="Top" Width="850"
+                     HorizontalAlignment="Left" Height="58" VerticalAlignment="Top" MinWidth="200" MaxWidth="1200"
                      RenderTransformOrigin="0.5,0.5">
                 <Viewbox.LayoutTransform>
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
@@ -6217,7 +6217,8 @@
                     <Border Margin="2,0,0,0" Padding="2" Visibility="Visible" Height="36"
                             Name="BorderFloatingBarMainControls" Background="#fafafa" CornerRadius="5"
                             BorderThickness="1"
-                            BorderBrush="#9952525b">
+                            BorderBrush="#9952525b"
+                            HorizontalAlignment="Left">
                         <Grid>
                             <Canvas Name="FloatingbarSelectionBGCanvas" Margin="2,0,2,0">
                                 <Border Name="FloatingbarSelectionBG" Visibility="Hidden" Width="28" Height="34"
@@ -6228,7 +6229,7 @@
                                     </Canvas>
                                 </Border>
                             </Canvas>
-                            <ui:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow">
+                            <ui:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow" HorizontalAlignment="Left">
                                 <!--<ui:SimpleStackPanel Name="Cursor_Icon" MouseDown="Border_MouseDown" MouseUp="CursorIcon_Click"-->
                                 <ui:SimpleStackPanel Name="Cursor_Icon"
                                                      MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
@@ -6284,7 +6285,8 @@
                                                      Width="60"
                                                      Height="42"
                                                      MaxWidth="60"
-                                                     MaxHeight="42">
+                                                     MaxHeight="42"
+                                                     MinWidth="60">
                                     <!-- 第一行：黑、白、红、橙 -->
                                     <ui:SimpleStackPanel Orientation="Horizontal" Margin="0,0,0,2">
                                         <!-- 黑色 -->
@@ -6602,17 +6604,20 @@
                                                      Orientation="Horizontal" 
                                                      HorizontalAlignment="Center" 
                                                      Margin="4,0,4,0"
-                                                     Height="21"
-                                                     MaxHeight="21">
+                                                     Height="24"
+                                                     MaxHeight="24"
+                                                     MinWidth="120">
                                     <!-- 单行显示：黑、白、红、橙、黄、绿 -->
                                     <!-- 黑色 -->
                                     <Border Name="QuickColorBlackSingle" 
-                                            Width="13" Height="13" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
                                             Background="Black" 
                                             BorderBrush="#CCCCCC" 
                                             BorderThickness="1" 
                                             CornerRadius="3" 
-                                            Margin="1,0,1,0"
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
                                             MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
                                             MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
                                             MouseUp="QuickColorBlack_Click"
@@ -6634,8 +6639,8 @@
                                                   Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
                                                   Fill="White" 
                                                   Stretch="Uniform" 
-                                                  Width="8" 
-                                                  Height="8"
+                                                  Width="10" 
+                                                  Height="10"
                                                   Opacity="1.0"
                                                   Visibility="Collapsed"
                                                   HorizontalAlignment="Center"
@@ -6645,12 +6650,14 @@
                                     
                                     <!-- 白色 -->
                                     <Border Name="QuickColorWhiteSingle" 
-                                            Width="13" Height="13" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
                                             Background="White" 
                                             BorderBrush="#CCCCCC" 
                                             BorderThickness="1" 
                                             CornerRadius="3" 
-                                            Margin="1,0,1,0"
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
                                             MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
                                             MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
                                             MouseUp="QuickColorWhite_Click"
@@ -6672,8 +6679,8 @@
                                                   Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
                                                   Fill="Black" 
                                                   Stretch="Uniform" 
-                                                  Width="8" 
-                                                  Height="8"
+                                                  Width="10" 
+                                                  Height="10"
                                                   Opacity="1.0"
                                                   Visibility="Collapsed"
                                                   HorizontalAlignment="Center"
@@ -6683,12 +6690,14 @@
                                     
                                     <!-- 红色 -->
                                     <Border Name="QuickColorRedSingle" 
-                                            Width="13" Height="13" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
                                             Background="#FF0000" 
                                             BorderBrush="#CCCCCC" 
                                             BorderThickness="1" 
                                             CornerRadius="3" 
-                                            Margin="1,0,1,0"
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
                                             MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
                                             MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
                                             MouseUp="QuickColorRed_Click"
@@ -6710,8 +6719,8 @@
                                                   Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
                                                   Fill="White" 
                                                   Stretch="Uniform" 
-                                                  Width="8" 
-                                                  Height="8"
+                                                  Width="10" 
+                                                  Height="10"
                                                   Opacity="1.0"
                                                   Visibility="Collapsed"
                                                   HorizontalAlignment="Center"
@@ -6721,12 +6730,14 @@
                                     
                                     <!-- 橙色 -->
                                     <Border Name="QuickColorOrangeSingle" 
-                                            Width="13" Height="13" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
                                             Background="#FFA500" 
                                             BorderBrush="#CCCCCC" 
                                             BorderThickness="1" 
                                             CornerRadius="3" 
-                                            Margin="1,0,1,0"
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
                                             MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
                                             MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
                                             MouseUp="QuickColorOrange_Click"
@@ -6748,8 +6759,8 @@
                                                   Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
                                                   Fill="Black" 
                                                   Stretch="Uniform" 
-                                                  Width="8" 
-                                                  Height="8"
+                                                  Width="10" 
+                                                  Height="10"
                                                   Opacity="1.0"
                                                   Visibility="Collapsed"
                                                   HorizontalAlignment="Center"
@@ -6759,12 +6770,14 @@
                                     
                                     <!-- 黄色 -->
                                     <Border Name="QuickColorYellowSingle" 
-                                            Width="13" Height="13" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
                                             Background="#FFFF00" 
                                             BorderBrush="#CCCCCC" 
                                             BorderThickness="1" 
                                             CornerRadius="3" 
-                                            Margin="1,0,1,0"
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
                                             MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
                                             MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
                                             MouseUp="QuickColorYellow_Click"
@@ -6786,8 +6799,8 @@
                                                   Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
                                                   Fill="Black" 
                                                   Stretch="Uniform" 
-                                                  Width="8" 
-                                                  Height="8"
+                                                  Width="10" 
+                                                  Height="10"
                                                   Opacity="1.0"
                                                   Visibility="Collapsed"
                                                   HorizontalAlignment="Center"
@@ -6797,12 +6810,14 @@
                                     
                                     <!-- 绿色 -->
                                     <Border Name="QuickColorGreenSingle" 
-                                            Width="13" Height="13" 
-                                            Background="#008000" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
+                                            Background="#16A34A" 
                                             BorderBrush="#CCCCCC" 
                                             BorderThickness="1" 
                                             CornerRadius="3" 
-                                            Margin="1,0,1,0"
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
                                             MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
                                             MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
                                             MouseUp="QuickColorGreen_Click"
@@ -6824,8 +6839,8 @@
                                                   Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
                                                   Fill="Black" 
                                                   Stretch="Uniform" 
-                                                  Width="8" 
-                                                  Height="8"
+                                                  Width="10" 
+                                                  Height="10"
                                                   Opacity="1.0"
                                                   Visibility="Collapsed"
                                                   HorizontalAlignment="Center"
