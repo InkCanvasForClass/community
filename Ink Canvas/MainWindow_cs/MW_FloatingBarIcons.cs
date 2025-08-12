@@ -27,7 +27,7 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        #region “手勢”按鈕
+        #region “手勢"按鈕
 
         /// <summary>
         /// 用於浮動工具欄的"手勢"按鈕和白板工具欄的"手勢"按鈕的點擊事件
@@ -814,28 +814,34 @@ namespace Ink_Canvas
                     switch (border.Name)
                     {
                         case "QuickColorWhite":
+                        case "QuickColorWhiteSingle":
                             border.Background = new SolidColorBrush(Colors.White);
                             break;
                         case "QuickColorOrange":
+                        case "QuickColorOrangeSingle":
                             border.Background = new SolidColorBrush(Color.FromRgb(255, 165, 0));
                             break;
                         case "QuickColorYellow":
+                        case "QuickColorYellowSingle":
                             border.Background = new SolidColorBrush(Colors.Yellow);
                             break;
                         case "QuickColorBlack":
+                        case "QuickColorBlackSingle":
                             border.Background = new SolidColorBrush(Colors.Black);
                             break;
                         case "QuickColorBlue":
-                            border.Background = new SolidColorBrush(Color.FromRgb(0, 102, 255));
+                            border.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             break;
                         case "QuickColorRed":
+                        case "QuickColorRedSingle":
                             border.Background = new SolidColorBrush(Colors.Red);
                             break;
                         case "QuickColorGreen":
-                            border.Background = new SolidColorBrush(Colors.Green);
+                        case "QuickColorGreenSingle":
+                            border.Background = new SolidColorBrush(Color.FromRgb(22, 163, 74)); 
                             break;
                         case "QuickColorPurple":
-                            border.Background = new SolidColorBrush(Color.FromRgb(128, 0, 128));
+                            border.Background = new SolidColorBrush(Color.FromRgb(147, 51, 234));
                             break;
                     }
                 }
@@ -1273,10 +1279,20 @@ namespace Ink_Canvas
                 double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
                 
                 // 如果快捷调色盘显示，确保有足够空间
-                if (QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible)
+                if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
+                    (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
                 {
-                    // 确保浮动栏有足够宽度容纳快捷调色盘
-                    floatingBarWidth = Math.Max(floatingBarWidth, 820 * ViewboxFloatingBarScaleTransform.ScaleX);
+                    // 根据显示模式调整宽度
+                    if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
+                    {
+                        // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
+                        floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
+                    }
+                    else
+                    {
+                        // 双行显示模式，宽度较大
+                        floatingBarWidth = Math.Max(floatingBarWidth, 820 * ViewboxFloatingBarScaleTransform.ScaleX);
+                    }
                 }
                 
                 pos.X = (screenWidth - floatingBarWidth) / 2;
@@ -1378,10 +1394,20 @@ namespace Ink_Canvas
                 double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
                 
                 // 如果快捷调色盘显示，确保有足够空间
-                if (QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible)
+                if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
+                    (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
                 {
-                    // 确保浮动栏有足够宽度容纳快捷调色盘
-                    floatingBarWidth = Math.Max(floatingBarWidth, 850 * ViewboxFloatingBarScaleTransform.ScaleX);
+                    // 根据显示模式调整宽度
+                    if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
+                    {
+                        // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
+                        floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
+                    }
+                    else
+                    {
+                        // 双行显示模式，宽度较大
+                        floatingBarWidth = Math.Max(floatingBarWidth, 850 * ViewboxFloatingBarScaleTransform.ScaleX);
+                    }
                 }
                 
                 pos.X = (screenWidth - floatingBarWidth) / 2;
@@ -1444,10 +1470,20 @@ namespace Ink_Canvas
                 double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
                 
                 // 如果快捷调色盘显示，确保有足够空间
-                if (QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible)
+                if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
+                    (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible))
                 {
-                    // 确保浮动栏有足够宽度容纳快捷调色盘
-                    floatingBarWidth = Math.Max(floatingBarWidth, 820 * ViewboxFloatingBarScaleTransform.ScaleX);
+                    // 根据显示模式调整宽度
+                    if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
+                    {
+                        // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
+                        floatingBarWidth = Math.Max(floatingBarWidth, 120 * ViewboxFloatingBarScaleTransform.ScaleX);
+                    }
+                    else
+                    {
+                        // 双行显示模式，宽度较大
+                        floatingBarWidth = Math.Max(floatingBarWidth, 820 * ViewboxFloatingBarScaleTransform.ScaleX);
+                    }
                 }
                 
                 pos.X = (screenWidth - floatingBarWidth) / 2;
@@ -1546,8 +1582,6 @@ namespace Ink_Canvas
             if (currentMode != 0)
             {
                 SaveStrokes();
-                // 总是恢复备份墨迹，不管是否在PPT模式
-                // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
                 RestoreStrokes(true);
                 LogHelper.WriteLogToFile($"退出白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
             }
@@ -1568,6 +1602,10 @@ namespace Ink_Canvas
             if (QuickColorPalettePanel != null)
             {
                 QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+            }
+            if (QuickColorPaletteSingleRowPanel != null)
+            {
+                QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
             }
 
             if (!isFloatingBarFolded)
@@ -1647,9 +1685,21 @@ namespace Ink_Canvas
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 
                 // 在批注模式下显示快捷调色盘（如果设置中启用了）
-                if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null)
+                if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
                 {
-                    QuickColorPalettePanel.Visibility = Visibility.Visible;
+                    // 根据显示模式选择显示哪个面板
+                    if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
+                    {
+                        // 单行显示模式
+                        QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
+                    }
+                    else
+                    {
+                        // 双行显示模式
+                        QuickColorPalettePanel.Visibility = Visibility.Visible;
+                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                    }
                 }
 
                 // 修复：从线擦切换到批注时，重置为默认笔模式（非高光显示）
@@ -1892,7 +1942,7 @@ namespace Ink_Canvas
 
         private void QuickColorBlue_Click(object sender, RoutedEventArgs e)
         {
-            SetQuickColor(Color.FromRgb(0, 102, 255)); // 蓝色
+            SetQuickColor(Color.FromRgb(37, 99, 235)); // 蓝色
         }
 
         private void QuickColorRed_Click(object sender, RoutedEventArgs e)
@@ -1900,14 +1950,14 @@ namespace Ink_Canvas
             SetQuickColor(Colors.Red);
         }
 
-        private void QuickColorGreen_Click(object sender, RoutedEventArgs e)
+                    private void QuickColorGreen_Click(object sender, RoutedEventArgs e)
         {
-            SetQuickColor(Colors.Green);
+            SetQuickColor(Color.FromRgb(22, 163, 74));
         }
 
         private void QuickColorPurple_Click(object sender, RoutedEventArgs e)
         {
-            SetQuickColor(Color.FromRgb(128, 0, 128)); 
+            SetQuickColor(Color.FromRgb(147, 51, 234)); 
         }
 
         private void SetQuickColor(Color color)
@@ -1930,10 +1980,10 @@ namespace Ink_Canvas
                 else if (color == Color.FromRgb(255, 165, 0)) lastDesktopInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastDesktopInkColor = 4;
                 else if (color == Colors.Black) lastDesktopInkColor = 0;
-                else if (color == Color.FromRgb(0, 102, 255)) lastDesktopInkColor = 3; // 蓝色
+                else if (color == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3; // 蓝色
                 else if (color == Colors.Red) lastDesktopInkColor = 1;
-                else if (color == Colors.Green) lastDesktopInkColor = 2; // 绿色
-                else if (color == Color.FromRgb(128, 0, 128)) lastDesktopInkColor = 6; // 紫色
+                else if (color == Colors.Green || color == Color.FromRgb(22, 163, 74)) lastDesktopInkColor = 2; 
+                else if (color == Color.FromRgb(147, 51, 234)) lastDesktopInkColor = 6; // 紫色
             }
             else
             {
@@ -1942,10 +1992,10 @@ namespace Ink_Canvas
                 else if (color == Color.FromRgb(255, 165, 0)) lastBoardInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastBoardInkColor = 4;
                 else if (color == Colors.Black) lastBoardInkColor = 0;
-                else if (color == Color.FromRgb(0, 102, 255)) lastBoardInkColor = 3; // 蓝色
+                else if (color == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3; // 蓝色
                 else if (color == Colors.Red) lastBoardInkColor = 1;
-                else if (color == Colors.Green) lastBoardInkColor = 2; // 绿色
-                else if (color == Color.FromRgb(128, 0, 128)) lastBoardInkColor = 6; // 紫色
+                else if (color == Colors.Green || color == Color.FromRgb(22, 163, 74)) lastBoardInkColor = 2; 
+                else if (color == Color.FromRgb(147, 51, 234)) lastBoardInkColor = 6; // 紫色
             }
 
             // 更新快捷调色盘选择指示器
@@ -1957,7 +2007,7 @@ namespace Ink_Canvas
 
         private void UpdateQuickColorPaletteIndicator(Color selectedColor)
         {
-            // 隐藏所有check图标
+            // 隐藏所有check图标（双行显示）
             QuickColorWhiteCheck.Visibility = Visibility.Collapsed;
             QuickColorOrangeCheck.Visibility = Visibility.Collapsed;
             QuickColorYellowCheck.Visibility = Visibility.Collapsed;
@@ -1966,16 +2016,25 @@ namespace Ink_Canvas
             QuickColorRedCheck.Visibility = Visibility.Collapsed;
             QuickColorGreenCheck.Visibility = Visibility.Collapsed;
             QuickColorPurpleCheck.Visibility = Visibility.Collapsed;
+            
+            // 隐藏所有check图标（单行显示）
+            QuickColorWhiteCheckSingle.Visibility = Visibility.Collapsed;
+            QuickColorOrangeCheckSingle.Visibility = Visibility.Collapsed;
+            QuickColorYellowCheckSingle.Visibility = Visibility.Collapsed;
+            QuickColorBlackCheckSingle.Visibility = Visibility.Collapsed;
+            QuickColorRedCheckSingle.Visibility = Visibility.Collapsed;
+            QuickColorGreenCheckSingle.Visibility = Visibility.Collapsed;
 
             // 显示当前选中颜色的check图标
-            // 使用更精确的颜色匹配，减少容差范围避免误判
             if (IsColorSimilar(selectedColor, Colors.White, 10) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), 10))
             {
                 QuickColorWhiteCheck.Visibility = Visibility.Visible;
+                QuickColorWhiteCheckSingle.Visibility = Visibility.Visible;
             }
             else if (IsColorSimilar(selectedColor, Colors.Black, 10))
             {
                 QuickColorBlackCheck.Visibility = Visibility.Visible;
+                QuickColorBlackCheckSingle.Visibility = Visibility.Visible;
             }
             else if (IsColorSimilar(selectedColor, Colors.Yellow, 15) || 
                      IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), 15) ||
@@ -1983,36 +2042,37 @@ namespace Ink_Canvas
                      IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), 15))
             {
                 QuickColorYellowCheck.Visibility = Visibility.Visible;
+                QuickColorYellowCheckSingle.Visibility = Visibility.Visible;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), 15) || 
                      IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), 15) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), 15))
             {
                 QuickColorOrangeCheck.Visibility = Visibility.Visible;
+                QuickColorOrangeCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(0, 102, 255), 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(59, 130, 246), 15))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), 15))
             {
                 QuickColorBlueCheck.Visibility = Visibility.Visible;
+                // 单行显示模式没有蓝色，所以不设置单行的check
             }
             else if (IsColorSimilar(selectedColor, Colors.Red, 15) || 
                      IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), 15) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), 15))
             {
                 QuickColorRedCheck.Visibility = Visibility.Visible;
+                QuickColorRedCheckSingle.Visibility = Visibility.Visible;
             }
             else if (IsColorSimilar(selectedColor, Colors.Green, 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(34, 197, 94), 15) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), 15))
             {
                 QuickColorGreenCheck.Visibility = Visibility.Visible;
+                QuickColorGreenCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(128, 0, 128), 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(168, 85, 247), 15))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), 15))
             {
                 QuickColorPurpleCheck.Visibility = Visibility.Visible;
+                // 单行显示模式没有紫色，所以不设置单行的check
             }
         }
 

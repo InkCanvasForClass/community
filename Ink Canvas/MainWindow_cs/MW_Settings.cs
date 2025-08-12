@@ -1864,6 +1864,7 @@ namespace Ink_Canvas
             Settings.Appearance.IsShowLassoSelectButton = true;
             Settings.Appearance.IsShowClearAndMouseButton = true;
             Settings.Appearance.IsShowQuickColorPalette = false;
+            Settings.Appearance.QuickColorPaletteDisplayMode = 1; 
             Settings.Appearance.EraserDisplayOption = 0; 
 
             Settings.Automation.IsAutoFoldInEasiNote = true;
@@ -2415,6 +2416,14 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ComboBoxQuickColorPaletteDisplayMode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.QuickColorPaletteDisplayMode = ComboBoxQuickColorPaletteDisplayMode.SelectedIndex;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
         private void ComboBoxEraserDisplayOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2452,19 +2461,32 @@ namespace Ink_Canvas
                 if (Fold_Icon != null)
                     Fold_Icon.Visibility = Settings.Appearance.IsShowHideButton ? Visibility.Visible : Visibility.Collapsed;
                 
-                // 快捷调色盘 
-                if (QuickColorPalettePanel != null)
+                                // 快捷调色盘
+                if (QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
                 {
                     bool shouldShow = Settings.Appearance.IsShowQuickColorPalette && inkCanvas.EditingMode == InkCanvasEditingMode.Ink;
-                    bool wasVisible = QuickColorPalettePanel.Visibility == Visibility.Visible;
+                    bool wasVisible = QuickColorPalettePanel.Visibility == Visibility.Visible || QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible;
                     
                     if (shouldShow)
                     {
-                        QuickColorPalettePanel.Visibility = Visibility.Visible;
+                        // 根据显示模式选择显示哪个面板
+                        if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
+                        {
+                            // 单行显示模式
+                            QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
+                        }
+                        else
+                        {
+                            // 双行显示模式
+                            QuickColorPalettePanel.Visibility = Visibility.Visible;
+                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                        }
                     }
                     else
                     {
                         QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
                     }
                     
                     // 如果快捷调色盘的可见性发生变化，重新计算浮动栏位置
@@ -2473,7 +2495,19 @@ namespace Ink_Canvas
                         if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                             ViewboxFloatingBarMarginAnimation(60);
                         else
-                            ViewboxFloatingBarMarginAnimation(100, true);
+                        {
+                            // 根据显示模式调整动画参数
+                            if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
+                            {
+                                // 单行显示模式，动画参数较小
+                                ViewboxFloatingBarMarginAnimation(60, true);
+                            }
+                            else
+                            {
+                                // 双行显示模式，动画参数较大
+                                ViewboxFloatingBarMarginAnimation(100, true);
+                            }
+                        }
                     }
                 }
                 

@@ -77,7 +77,17 @@ namespace Ink_Canvas
             double floatingBarWidth = 284; // 基础宽度
             if (Settings.Appearance.IsShowQuickColorPalette)
             {
-                floatingBarWidth = Math.Max(floatingBarWidth, 820); // 快捷调色盘显示时的宽度
+                // 根据显示模式调整宽度
+                if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
+                {
+                    // 单行显示模式，自适应宽度，但需要足够空间显示6个颜色
+                    floatingBarWidth = Math.Max(floatingBarWidth, 120);
+                }
+                else
+                {
+                    // 双行显示模式，宽度较大
+                    floatingBarWidth = Math.Max(floatingBarWidth, 820);
+                }
             }
             ViewboxFloatingBar.Margin = new Thickness(
                 (workingArea.Width - floatingBarWidth) / 2,

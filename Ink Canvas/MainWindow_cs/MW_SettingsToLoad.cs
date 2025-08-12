@@ -317,6 +317,7 @@ namespace Ink_Canvas
                 ToggleSwitchShowLassoSelectButton.IsOn = Settings.Appearance.IsShowLassoSelectButton;
                 ToggleSwitchShowClearAndMouseButton.IsOn = Settings.Appearance.IsShowClearAndMouseButton;
                 ComboBoxEraserDisplayOption.SelectedIndex = Settings.Appearance.EraserDisplayOption;
+                ComboBoxQuickColorPaletteDisplayMode.SelectedIndex = Settings.Appearance.QuickColorPaletteDisplayMode;
                 
                 // 初始化快捷调色盘指示器
                 UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);

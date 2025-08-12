@@ -218,6 +218,9 @@ namespace Ink_Canvas
         
         [JsonProperty("isShowQuickColorPalette")]
         public bool IsShowQuickColorPalette { get; set; } = false;
+        
+        [JsonProperty("quickColorPaletteDisplayMode")]
+        public int QuickColorPaletteDisplayMode { get; set; } = 1; 
 
     }
 
