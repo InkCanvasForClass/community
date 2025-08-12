@@ -434,7 +434,7 @@ namespace Ink_Canvas
                     case "select":
                         {
                             LassoSelectIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
-                            LassoSelectIconGeometry.Geometry =
+                            LassoSelectIconGeometry.Geometry = 
                                 Geometry.Parse(XamlGraphicsIconGeometries.SolidLassoSelectIcon);
                             BoardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -443,6 +443,20 @@ namespace Ink_Canvas
 
                             FloatingbarSelectionBG.Visibility = Visibility.Visible;
                             System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 28 * 5);
+                            break;
+                        }
+                    case "cursor":
+                        {
+                            CursorIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            CursorIconGeometry.Geometry = 
+                                Geometry.Parse(XamlGraphicsIconGeometries.LinedCursorIcon);
+                            BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                            BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                            BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                            BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+
+                            FloatingbarSelectionBG.Visibility = Visibility.Visible;
+                            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
                             break;
                         }
                     case "shape":
