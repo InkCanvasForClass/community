@@ -1179,73 +1179,82 @@
                                         </Grid>
                                     </Border>
                                     
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="显示形状按钮" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowShapeButton"
-                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowShapeButton_Toggled" />
+                                    <!-- 第一行：形状按钮和撤销按钮 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示形状按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowShapeButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowShapeButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示撤销按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowUndoButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowUndoButton_Toggled" />
+                                        </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="显示撤销按钮" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowUndoButton"
-                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowUndoButton_Toggled" />
+                                    <!-- 第二行：重做按钮和清空按钮 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示重做按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowRedoButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowRedoButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示清空按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowClearButton_Toggled" />
+                                        </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="显示重做按钮" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowRedoButton"
-                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowRedoButton_Toggled" />
+                                    <!-- 第三行：白板按钮和隐藏按钮 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示白板按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowWhiteboardButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowWhiteboardButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示隐藏按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowHideButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowHideButton_Toggled" />
+                                        </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="显示清空按钮" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearButton"
-                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowClearButton_Toggled" />
+                                    <!-- 第四行：套索选择按钮和清并鼠按钮 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示套索选择按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowLassoSelectButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowLassoSelectButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示清并鼠按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearAndMouseButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowClearAndMouseButton_Toggled" />
+                                        </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="显示白板按钮" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowWhiteboardButton"
-                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowWhiteboardButton_Toggled" />
-                                    </ui:SimpleStackPanel>
-
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="显示隐藏按钮" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowHideButton"
-                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowHideButton_Toggled" />
-                                    </ui:SimpleStackPanel>
-                                    
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="显示套索选择按钮" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowLassoSelectButton"
-                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowLassoSelectButton_Toggled" />
-                                    </ui:SimpleStackPanel>
-                                    
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="显示清并鼠按钮" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearAndMouseButton"
-                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowClearAndMouseButton_Toggled" />
-                                    </ui:SimpleStackPanel>
-                                    
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <!-- 第五行：快捷调色盘（单独一行，因为需要更多空间） -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
                                         <TextBlock Foreground="#fafafa" Text="显示快捷调色盘" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
+                                                   FontSize="14" Margin="0,0,8,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowQuickColorPalette"
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchShowQuickColorPalette_Toggled" />
