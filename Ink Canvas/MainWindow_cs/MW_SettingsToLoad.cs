@@ -550,6 +550,7 @@ namespace Ink_Canvas
                 ToggleSwitchClearCanvasAndClearTimeMachine.IsOn =
                     Settings.Canvas.ClearCanvasAndClearTimeMachine;
                 ToggleSwitchClearCanvasAlsoClearImages.IsOn = Settings.Canvas.ClearCanvasAlsoClearImages;
+                ToggleSwitchShowCircleCenter.IsOn = Settings.Canvas.ShowCircleCenter;
 
                 switch (Settings.Canvas.EraserShapeType)
                 {

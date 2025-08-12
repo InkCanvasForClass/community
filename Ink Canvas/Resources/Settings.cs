@@ -90,6 +90,8 @@ namespace Ink_Canvas
         public bool EnablePalmEraser { get; set; } = true;
         [JsonProperty("clearCanvasAlsoClearImages")]
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
+        [JsonProperty("showCircleCenter")]
+        public bool ShowCircleCenter { get; set; } = false; 
     }
 
     public enum OptionalOperation

@@ -2791,6 +2791,13 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchShowCircleCenter_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Canvas.ShowCircleCenter = ToggleSwitchShowCircleCenter.IsOn;
+            SaveSettingsToFile();
+        }
+
 
     }
 }

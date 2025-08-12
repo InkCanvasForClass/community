@@ -806,7 +806,13 @@
                                     <TextBlock Text="# 请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响用。" TextWrapping="Wrap"
                                                Foreground="#a1a1aa" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                                                            <TextBlock Foreground="#fafafa" Text="使用WPF默认贝塞尔曲线平滑"
+                                    <TextBlock Foreground="#fafafa" Text="绘制圆时显示圆心位置" VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowCircleCenter"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchShowCircleCenter_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <TextBlock Foreground="#fafafa" Text="使用WPF默认贝塞尔曲线平滑"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchFitToCurve"
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"

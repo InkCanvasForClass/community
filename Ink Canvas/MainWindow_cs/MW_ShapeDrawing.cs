@@ -890,6 +890,12 @@ namespace Ink_Canvas
 
                     lastTempStroke = stroke;
                     inkCanvas.Strokes.Add(stroke);
+                    
+                    // 如果启用了圆心标记功能，则绘制圆心
+                    if (Settings.Canvas.ShowCircleCenter)
+                    {
+                        DrawCircleCenter(iniP);
+                    }
                     break;
                 case 16:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -989,6 +995,12 @@ namespace Ink_Canvas
 
                     lastTempStrokeCollection = strokes;
                     inkCanvas.Strokes.Add(strokes);
+                    
+                    // 如果启用了圆心标记功能，则绘制圆心
+                    if (Settings.Canvas.ShowCircleCenter)
+                    {
+                        DrawCircleCenter(iniP);
+                    }
                     break;
                 case 24:
                 case 25:
@@ -1952,6 +1964,47 @@ namespace Ink_Canvas
             drawingShapeMode = mode;
             inkCanvas.EditingMode = InkCanvasEditingMode.None;
             SetCursorBasedOnEditingMode(inkCanvas);
+        }
+
+        /// <summary>
+        /// 绘制圆心标记
+        /// </summary>
+        /// <param name="centerPoint">圆心位置</param>
+        private void DrawCircleCenter(Point centerPoint)
+        {
+            try
+            {
+                // 创建一个点作为圆心标记
+                var centerSize = 0.5; // 圆心标记的大小
+                
+                // 创建一个小圆作为圆心标记
+                var circlePoints = new List<Point>();
+                for (double angle = 0; angle <= 2 * Math.PI; angle += 0.1)
+                {
+                    circlePoints.Add(new Point(
+                        centerPoint.X + centerSize * Math.Cos(angle),
+                        centerPoint.Y + centerSize * Math.Sin(angle)
+                    ));
+                }
+                
+                // 绘制圆心点
+                var point = new StylusPointCollection(circlePoints);
+                var stroke = new Stroke(point)
+                {
+                    DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
+                };
+                
+                // 设置圆心点的样式
+                stroke.DrawingAttributes.Width = 2.0;
+                stroke.DrawingAttributes.Height = 2.0;
+                
+                // 添加到画布
+                inkCanvas.Strokes.Add(stroke);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"绘制圆心标记失败: {ex.Message}");
+            }
         }
     }
 }
