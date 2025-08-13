@@ -2906,15 +2906,6 @@ namespace Ink_Canvas
                 // 设置高光位置
                 FloatingbarSelectionBG.Visibility = Visibility.Visible;
                 System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, position);
-                
-                // 详细的调试信息
-                string debugInfo = $"设置高光位置: {mode} -> {position:F2}, " +
-                                   $"高光宽度: {actualHighlightWidth:F2}, " +
-                                   $"快捷调色盘: {quickColorPaletteMode}, 宽度: {quickColorPaletteWidth:F2}, 总宽度: {quickColorPaletteTotalWidth:F2}, " +
-                                   $"按钮宽度: cursor={cursorWidth:F2}, pen={penWidth:F2}, delete={deleteWidth:F2}, " +
-                                   $"eraser={eraserWidth:F2}, eraserByStrokes={eraserByStrokesWidth:F2}, select={selectWidth:F2}";
-                
-                LogHelper.WriteLogToFile(debugInfo, LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {
