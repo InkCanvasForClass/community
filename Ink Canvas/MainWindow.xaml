@@ -8094,7 +8094,7 @@
                                         <!-- 背景面板将在代码中动态添加 -->
                                     </Grid>
                                     <Border Visibility="Visible" ClipToBounds="True" Name="EraserSizePanel"
-                                            Margin="-203,-128,83,20" CornerRadius="5" Background="#fafafa" Opacity="1"
+                                            Margin="-203,-148,83,40" CornerRadius="5" Background="#fafafa" Opacity="1"
                                             BorderBrush="#2563eb" BorderThickness="1">
                                         <ui:SimpleStackPanel Margin="0">
                                             <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
