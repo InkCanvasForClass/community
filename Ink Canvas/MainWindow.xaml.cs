@@ -225,6 +225,10 @@ namespace Ink_Canvas
             // 初始化窗口置顶开关
             ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
             ApplyAlwaysOnTop();
+            
+            // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
+            this.Activated += Window_Activated;
+            this.Deactivated += Window_Deactivated;
         }
 
 
@@ -619,6 +623,9 @@ namespace Ink_Canvas
             // 清理剪贴板监控
             CleanupClipboardMonitoring();
             ClipboardNotification.Stop();
+
+            // 停止置顶维护定时器
+            StopTopmostMaintenance();
 
             LogHelper.WriteLogToFile("Ink Canvas closed", LogHelper.LogType.Event);
 
@@ -1630,13 +1637,26 @@ namespace Ink_Canvas
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
         [DllImport("user32.dll")]
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+        [DllImport("user32.dll")]
+        private static extern bool BringWindowToTop(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
+        private const int WS_EX_TOPMOST = 0x00000008;
         private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
         private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
         private const uint SWP_NOMOVE = 0x0002;
         private const uint SWP_NOSIZE = 0x0001;
         private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_SHOWWINDOW = 0x0040;
+        private const uint SWP_NOOWNERZORDER = 0x0200;
+
+        // 添加定时器来维护置顶状态
+        private DispatcherTimer topmostMaintenanceTimer;
+        private bool isTopmostMaintenanceEnabled = false;
 
         private void ApplyNoFocusMode()
         {
@@ -1654,14 +1674,139 @@ namespace Ink_Canvas
 
         private void ApplyAlwaysOnTop()
         {
-            var hwnd = new WindowInteropHelper(this).Handle;
-            if (Settings.Advanced.IsAlwaysOnTop)
+            try
             {
-                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (Settings.Advanced.IsAlwaysOnTop)
+                {
+                    // 先设置WPF的Topmost属性
+                    Topmost = true;
+                    
+                    // 使用更强的Win32 API调用来确保置顶
+                    // 1. 设置窗口样式为置顶
+                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                    SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+                    
+                    // 2. 使用SetWindowPos确保窗口在最顶层
+                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, 
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                    
+                    // 3. 如果启用了无焦点模式，需要特殊处理
+                    if (Settings.Advanced.IsNoFocusMode)
+                    {
+                        // 启动置顶维护定时器
+                        StartTopmostMaintenance();
+                    }
+                    else
+                    {
+                        // 停止置顶维护定时器
+                        StopTopmostMaintenance();
+                    }
+                    
+                    // 添加调试日志
+                    LogHelper.WriteLogToFile($"应用窗口置顶: 启用置顶 (无焦点模式: {Settings.Advanced.IsNoFocusMode})", LogHelper.LogType.Trace);
+                }
+                else
+                {
+                    // 取消置顶时
+                    // 1. 先使用Win32 API取消置顶
+                    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, 
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                    
+                    // 2. 移除置顶窗口样式
+                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                    SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
+                    
+                    // 3. 停止置顶维护定时器
+                    StopTopmostMaintenance();
+                    
+                    // 注意：这里不直接设置Topmost，让其他代码根据模式决定
+                    
+                    // 添加调试日志
+                    LogHelper.WriteLogToFile($"应用窗口置顶: 取消置顶", LogHelper.LogType.Trace);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                LogHelper.WriteLogToFile($"应用窗口置顶失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 启动置顶维护定时器
+        /// </summary>
+        private void StartTopmostMaintenance()
+        {
+            if (isTopmostMaintenanceEnabled) return;
+            
+            if (topmostMaintenanceTimer == null)
+            {
+                topmostMaintenanceTimer = new DispatcherTimer();
+                topmostMaintenanceTimer.Interval = TimeSpan.FromMilliseconds(500); // 每500ms检查一次
+                topmostMaintenanceTimer.Tick += TopmostMaintenanceTimer_Tick;
+            }
+            
+            topmostMaintenanceTimer.Start();
+            isTopmostMaintenanceEnabled = true;
+            LogHelper.WriteLogToFile("启动置顶维护定时器", LogHelper.LogType.Trace);
+        }
+
+        /// <summary>
+        /// 停止置顶维护定时器
+        /// </summary>
+        private void StopTopmostMaintenance()
+        {
+            if (topmostMaintenanceTimer != null && isTopmostMaintenanceEnabled)
+            {
+                topmostMaintenanceTimer.Stop();
+                isTopmostMaintenanceEnabled = false;
+                LogHelper.WriteLogToFile("停止置顶维护定时器", LogHelper.LogType.Trace);
+            }
+        }
+
+        /// <summary>
+        /// 置顶维护定时器事件
+        /// </summary>
+        private void TopmostMaintenanceTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!Settings.Advanced.IsAlwaysOnTop || !Settings.Advanced.IsNoFocusMode)
+                {
+                    StopTopmostMaintenance();
+                    return;
+                }
+
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero) return;
+
+                // 检查窗口是否仍然可见且不是最小化状态
+                if (!IsWindow(hwnd) || !IsWindowVisible(hwnd) || IsIconic(hwnd))
+                {
+                    return;
+                }
+
+                // 检查当前窗口是否在最顶层
+                var foregroundWindow = GetForegroundWindow();
+                if (foregroundWindow != hwnd)
+                {
+                    // 如果窗口不在最顶层，重新设置置顶
+                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, 
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                    
+                    // 确保窗口样式正确
+                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                    if ((exStyle & WS_EX_TOPMOST) == 0)
+                    {
+                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+                    }
+                    
+                    LogHelper.WriteLogToFile("置顶维护: 重新设置窗口置顶", LogHelper.LogType.Trace);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"置顶维护定时器出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -1695,6 +1840,12 @@ namespace Ink_Canvas
             Settings.Advanced.IsNoFocusMode = toggle != null && toggle.IsOn;
             SaveSettingsToFile();
             ApplyNoFocusMode();
+            
+            // 如果启用了窗口置顶，需要重新应用置顶设置以处理无焦点模式的变化
+            if (Settings.Advanced.IsAlwaysOnTop)
+            {
+                ApplyAlwaysOnTop();
+            }
         }
 
         private void ToggleSwitchAlwaysOnTop_Toggled(object sender, RoutedEventArgs e)
@@ -1704,6 +1855,35 @@ namespace Ink_Canvas
             Settings.Advanced.IsAlwaysOnTop = toggle != null && toggle.IsOn;
             SaveSettingsToFile();
             ApplyAlwaysOnTop();
+        }
+        
+        private void Window_Activated(object sender, EventArgs e)
+        {
+            // 窗口激活时，如果启用了置顶功能，重新应用置顶设置
+            if (Settings.Advanced.IsAlwaysOnTop)
+            {
+                // 使用Dispatcher.BeginInvoke确保在UI线程上执行
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    ApplyAlwaysOnTop();
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+        }
+        
+        /// <summary>
+        /// 窗口失去焦点时的处理
+        /// </summary>
+        private void Window_Deactivated(object sender, EventArgs e)
+        {
+            // 窗口失去焦点时，如果启用了置顶功能且处于无焦点模式，重新应用置顶设置
+            if (Settings.Advanced.IsAlwaysOnTop && Settings.Advanced.IsNoFocusMode)
+            {
+                // 使用Dispatcher.BeginInvoke确保在UI线程上执行
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    ApplyAlwaysOnTop();
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
         }
 
         #region Image Toolbar Event Handlers
