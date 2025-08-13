@@ -755,6 +755,16 @@ namespace Ink_Canvas
 
         #endregion
 
+        /// <summary>
+        /// 面积擦子面板的清空墨迹按钮事件处理
+        /// </summary>
+        /// <param name="sender">sender</param>
+        /// <param name="e">RoutedEventArgs</param>
+        private void EraserPanelSymbolIconDelete_MouseUp(object sender, RoutedEventArgs e)
+        {
+            SymbolIconDelete_MouseUp(null, null);
+        }
+
         #region 主要的工具按鈕事件
 
         /// <summary>
@@ -2813,11 +2823,7 @@ namespace Ink_Canvas
                 // 获取高光的实际宽度
                 double actualHighlightWidth = FloatingbarSelectionBG.ActualWidth > 0 ? FloatingbarSelectionBG.ActualWidth : highlightWidth;
                 
-                // 计算位置偏移，考虑Canvas和StackPanel的Margin差异
-                // Canvas: Margin="2,0,2,0", StackPanel: Margin="2,0"
-                // 所以Canvas相对于StackPanel的偏移是：Canvas.Left(2) - StackPanel.Left(2) = 0
-                // 但是高光元素本身有Margin="0,-2,0,-2"，需要补偿这个偏移
-                double marginOffset = 0; // Canvas和StackPanel的Margin已经对齐
+                double marginOffset = 0; 
                 
                 // 快捷调色盘的Margin：Margin="4,0,4,0"，所以总宽度需要加上8像素
                 double quickColorPaletteTotalWidth = isQuickColorPaletteVisible ? quickColorPaletteWidth + 8 : 0;
@@ -2893,10 +2899,10 @@ namespace Ink_Canvas
                 
                 // 详细的调试信息
                 string debugInfo = $"设置高光位置: {mode} -> {position:F2}, " +
-                                 $"高光宽度: {actualHighlightWidth:F2}, " +
-                                 $"快捷调色盘: {quickColorPaletteMode}, 宽度: {quickColorPaletteWidth:F2}, 总宽度: {quickColorPaletteTotalWidth:F2}, " +
-                                 $"按钮宽度: cursor={cursorWidth:F2}, pen={penWidth:F2}, delete={deleteWidth:F2}, " +
-                                 $"eraser={eraserWidth:F2}, eraserByStrokes={eraserByStrokesWidth:F2}, select={selectWidth:F2}";
+                                   $"高光宽度: {actualHighlightWidth:F2}, " +
+                                   $"快捷调色盘: {quickColorPaletteMode}, 宽度: {quickColorPaletteWidth:F2}, 总宽度: {quickColorPaletteTotalWidth:F2}, " +
+                                   $"按钮宽度: cursor={cursorWidth:F2}, pen={penWidth:F2}, delete={deleteWidth:F2}, " +
+                                   $"eraser={eraserWidth:F2}, eraserByStrokes={eraserByStrokesWidth:F2}, select={selectWidth:F2}";
                 
                 LogHelper.WriteLogToFile(debugInfo, LogHelper.LogType.Trace);
             }

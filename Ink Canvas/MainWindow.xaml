@@ -8094,7 +8094,7 @@
                                         <!-- 背景面板将在代码中动态添加 -->
                                     </Grid>
                                     <Border Visibility="Visible" ClipToBounds="True" Name="EraserSizePanel"
-                                            Margin="-203,-128,83,37" CornerRadius="5" Background="#fafafa" Opacity="1"
+                                            Margin="-203,-128,83,20" CornerRadius="5" Background="#fafafa" Opacity="1"
                                             BorderBrush="#2563eb" BorderThickness="1">
                                         <ui:SimpleStackPanel Margin="0">
                                             <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
@@ -8187,6 +8187,42 @@
                                                     </Canvas>
                                                 </Border>
                                             </ui:SimpleStackPanel>
+                                            <Button Click="EraserPanelSymbolIconDelete_MouseUp" Foreground="White"
+                                                    HorizontalAlignment="Center" Margin="0,6,0,8">
+                                                <Button.Resources>
+                                                    <SolidColorBrush
+                                                        x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}"
+                                                        Color="#b91c1c" />
+                                                    <SolidColorBrush
+                                                        x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}"
+                                                        Color="#b91c1c" />
+                                                    <SolidColorBrush
+                                                        x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}"
+                                                        Color="#991b1b" />
+                                                </Button.Resources>
+                                                <Button.Content>
+                                                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="3">
+                                                        <Image RenderOptions.BitmapScalingMode="HighQuality"
+                                                               Height="12">
+                                                            <Image.Source>
+                                                                <DrawingImage>
+                                                                    <DrawingImage.Drawing>
+                                                                        <DrawingGroup
+                                                                            ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                            <GeometryDrawing Brush="White"
+                                                                                Geometry="F0 M24,24z M0,0z M10.1573,10.0421C10.7298,10.0421,11.1938,10.5062,11.1938,11.0787L11.1938,16.6067C11.1938,17.1792 10.7298,17.6433 10.1573,17.6433 9.58485,17.6433 9.12079,17.1792 9.12079,16.6067L9.12079,11.0787C9.12079,10.5062,9.58485,10.0421,10.1573,10.0421z M13.8427,10.0421C14.4151,10.0421,14.8792,10.5062,14.8792,11.0787L14.8792,16.6067C14.8792,17.1792 14.4151,17.6433 13.8427,17.6433 13.2702,17.6433 12.8062,17.1792 12.8062,16.6067L12.8062,11.0787C12.8062,10.5062,13.2702,10.0421,13.8427,10.0421z M3.70787,5.43539C3.13541,5.43539 2.67135,5.89946 2.67135,6.47191 2.67135,7.04436 3.13541,7.50843 3.70787,7.50843L4.51405,7.50843 4.51405,19.3708C4.51405,20.1686 4.9025,20.8796 5.39348,21.3706 5.88445,21.8615 6.59548,22.25 7.39326,22.25L16.6067,22.25C17.4045,22.25 18.1155,21.8615 18.6065,21.3706 19.0975,20.8796 19.486,20.1686 19.486,19.3708L19.486,7.50843 20.2921,7.50843C20.8646,7.50843 21.3287,7.04436 21.3287,6.47191 21.3287,5.89946 20.8646,5.43539 20.2921,5.43539L16.7219,5.43539 16.7219,4.62921C16.7219,3.83143 16.3335,3.12041 15.8425,2.62943 15.3515,2.13845 14.6405,1.75 13.8427,1.75L10.1573,1.75C9.35952,1.75 8.6485,2.13845 8.15752,2.62943 7.66654,3.12041 7.27809,3.83143 7.27809,4.62921L7.27809,5.43539 3.70787,5.43539z M6.58708,19.3708C6.58708,19.4944 6.6593,19.7047 6.85933,19.9047 7.05937,20.1047 7.26969,20.177 7.39326,20.177L16.6067,20.177C16.7303,20.177 16.9406,20.1047 17.1407,19.9047 17.3407,19.7047 17.4129,19.4944 17.4129,19.3708L17.4129,7.50843 6.58708,7.50843 6.58708,19.3708z M9.62338,4.09529C9.42334,4.29532,9.35112,4.50565,9.35112,4.62921L9.35112,5.43539 14.6489,5.43539 14.6489,4.62921C14.6489,4.50565 14.5767,4.29532 14.3766,4.09529 14.1766,3.89525 13.9663,3.82303 13.8427,3.82303L10.1573,3.82303C10.0337,3.82303,9.82341,3.89525,9.62338,4.09529z" />
+                                                                        </DrawingGroup>
+                                                                    </DrawingImage.Drawing>
+                                                                </DrawingImage>
+                                                            </Image.Source>
+                                                        </Image>
+                                                        <TextBlock FontSize="10" VerticalAlignment="Center"
+                                                                   Foreground="White" FontWeight="Bold">
+                                                            清空墨迹
+                                                        </TextBlock>
+                                                    </ui:SimpleStackPanel>
+                                                </Button.Content>
+                                            </Button>
                                         </ui:SimpleStackPanel>
                                     </Border>
                                 </Grid>
