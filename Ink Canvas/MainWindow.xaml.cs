@@ -1801,7 +1801,6 @@ namespace Ink_Canvas
                         SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
                     }
                     
-                    LogHelper.WriteLogToFile("置顶维护: 重新设置窗口置顶", LogHelper.LogType.Trace);
                 }
             }
             catch (Exception ex)
