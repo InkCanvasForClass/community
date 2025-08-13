@@ -43,6 +43,7 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                    AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
                     // 显示背景选项面板
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BackgroundPalette);

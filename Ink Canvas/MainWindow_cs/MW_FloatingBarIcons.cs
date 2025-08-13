@@ -303,6 +303,7 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             // 隐藏背景设置面板
             var bgPalette = LogicalTreeHelper.FindLogicalNode(this, "BackgroundPalette") as Border;
@@ -882,6 +883,7 @@ namespace Ink_Canvas
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             new CountdownTimerWindow().Show();
         }
@@ -890,6 +892,7 @@ namespace Ink_Canvas
         {
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             new OperatingGuideWindow().Show();
         }
@@ -904,6 +907,7 @@ namespace Ink_Canvas
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             new RandWindow(Settings).Show();
         }
@@ -978,6 +982,7 @@ namespace Ink_Canvas
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             // 检查是否启用了直接调用ClassIsland点名功能
             if (Settings.RandSettings.DirectCallCiRand)
@@ -1011,6 +1016,7 @@ namespace Ink_Canvas
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+            AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
             CollapseBorderDrawShape();
 
@@ -1245,6 +1251,7 @@ namespace Ink_Canvas
                 AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
                 AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                 AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
             }
             else
             {
@@ -1258,6 +1265,7 @@ namespace Ink_Canvas
                 AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
                 AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                 AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(BorderTools);
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderTools);
             }
@@ -1764,6 +1772,7 @@ namespace Ink_Canvas
                         AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
                         AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                         AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                        AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
                     }
                     else
                     {
@@ -1777,6 +1786,7 @@ namespace Ink_Canvas
                         AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
                         AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                         AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                        AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(PenPalette);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardPenPalette);
                     }

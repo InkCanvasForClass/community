@@ -54,6 +54,7 @@ namespace Ink_Canvas
                 AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
                 AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                 AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(BorderDrawShape);
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderDrawShape);
             }
