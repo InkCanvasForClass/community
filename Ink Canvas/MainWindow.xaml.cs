@@ -222,6 +222,9 @@ namespace Ink_Canvas
             // 初始化无焦点模式开关
             ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
             ApplyNoFocusMode();
+            // 初始化窗口置顶开关
+            ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
+            ApplyAlwaysOnTop();
         }
 
 
@@ -480,6 +483,8 @@ namespace Ink_Canvas
             // 确保开关和设置同步
             ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
             ApplyNoFocusMode();
+            ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
+            ApplyAlwaysOnTop();
 
             // 初始化UIElement选择系统
             InitializeUIElementSelection();
@@ -1623,8 +1628,15 @@ namespace Ink_Canvas
         private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
         [DllImport("user32.dll")]
         private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
+        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOACTIVATE = 0x0010;
 
         private void ApplyNoFocusMode()
         {
@@ -1640,6 +1652,42 @@ namespace Ink_Canvas
             }
         }
 
+        private void ApplyAlwaysOnTop()
+        {
+            var hwnd = new WindowInteropHelper(this).Handle;
+            if (Settings.Advanced.IsAlwaysOnTop)
+            {
+                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+            }
+            else
+            {
+                SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+            }
+        }
+
+        /// <summary>
+        /// 根据窗口置顶设置和当前模式设置窗口的Topmost属性
+        /// </summary>
+        /// <param name="shouldBeTopmost">当前模式是否需要窗口置顶</param>
+        public void SetTopmostBasedOnSettings(bool shouldBeTopmost)
+        {
+            if (Settings.Advanced.IsAlwaysOnTop)
+            {
+                // 如果启用了窗口置顶设置，则始终置顶
+                Topmost = true;
+                ApplyAlwaysOnTop();
+            }
+            else
+            {
+                // 如果未启用窗口置顶设置，则根据当前模式决定
+                Topmost = shouldBeTopmost;
+                if (!shouldBeTopmost)
+                {
+                    ApplyAlwaysOnTop(); // 确保取消置顶
+                }
+            }
+        }
+
         private void ToggleSwitchNoFocusMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -1647,6 +1695,15 @@ namespace Ink_Canvas
             Settings.Advanced.IsNoFocusMode = toggle != null && toggle.IsOn;
             SaveSettingsToFile();
             ApplyNoFocusMode();
+        }
+
+        private void ToggleSwitchAlwaysOnTop_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            var toggle = sender as ToggleSwitch;
+            Settings.Advanced.IsAlwaysOnTop = toggle != null && toggle.IsOn;
+            SaveSettingsToFile();
+            ApplyAlwaysOnTop();
         }
 
         #region Image Toolbar Event Handlers

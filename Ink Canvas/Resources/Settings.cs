@@ -481,6 +481,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isNoFocusMode")]
         public bool IsNoFocusMode { get; set; } = true;
+
+        [JsonProperty("isAlwaysOnTop")]
+        public bool IsAlwaysOnTop { get; set; } = true;
     }
 
     public class InkToShape

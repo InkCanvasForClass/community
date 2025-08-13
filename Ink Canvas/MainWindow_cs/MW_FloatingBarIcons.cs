@@ -383,8 +383,7 @@ namespace Ink_Canvas
                     BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                     BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
 
-                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
-                    System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
+                    HideFloatingBarHighlight();
                 }
 
                 switch (mode)
@@ -399,8 +398,7 @@ namespace Ink_Canvas
                             BoardPenGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
                             BoardPenLabel.Foreground = new SolidColorBrush(Colors.GhostWhite);
 
-                            FloatingbarSelectionBG.Visibility = Visibility.Visible;
-                            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 28);
+                            SetFloatingBarHighlightPosition("pen");
                             break;
                         }
                     case "eraser":
@@ -413,8 +411,7 @@ namespace Ink_Canvas
                             BoardEraserGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
                             BoardEraserLabel.Foreground = new SolidColorBrush(Colors.GhostWhite);
 
-                            FloatingbarSelectionBG.Visibility = Visibility.Visible;
-                            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 28 * 3);
+                            SetFloatingBarHighlightPosition("eraser");
                             break;
                         }
                     case "eraserByStrokes":
@@ -427,8 +424,7 @@ namespace Ink_Canvas
                             BoardEraserGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
                             BoardEraserLabel.Foreground = new SolidColorBrush(Colors.GhostWhite);
 
-                            FloatingbarSelectionBG.Visibility = Visibility.Visible;
-                            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 28 * 4);
+                            SetFloatingBarHighlightPosition("eraserByStrokes");
                             break;
                         }
                     case "select":
@@ -441,8 +437,7 @@ namespace Ink_Canvas
                             BoardSelectGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
                             BoardSelectLabel.Foreground = new SolidColorBrush(Colors.GhostWhite);
 
-                            FloatingbarSelectionBG.Visibility = Visibility.Visible;
-                            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 28 * 5);
+                            SetFloatingBarHighlightPosition("select");
                             break;
                         }
                     case "cursor":
@@ -455,8 +450,7 @@ namespace Ink_Canvas
                             BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                             BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
 
-                            FloatingbarSelectionBG.Visibility = Visibility.Visible;
-                            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
+                            SetFloatingBarHighlightPosition("cursor");
                             break;
                         }
                     case "shape":
@@ -775,8 +769,6 @@ namespace Ink_Canvas
                 ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
             if (sender == SymbolIconSelect && lastBorderMouseDownObject != SymbolIconSelect) return;
 
-            FloatingbarSelectionBG.Visibility = Visibility.Visible;
-            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 140);
             BtnSelect_Click(null, null);
             HideSubPanels("select");
         }
@@ -1537,8 +1529,7 @@ namespace Ink_Canvas
             DisableAdvancedEraserSystem();
 
             // 隱藏高亮
-            FloatingbarSelectionBG.Visibility = Visibility.Hidden;
-            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
+            HideFloatingBarHighlight();
 
             // 切换前自动截图保存墨迹
             if (inkCanvas.Strokes.Count > 0 &&
@@ -1648,8 +1639,7 @@ namespace Ink_Canvas
             // 这解决了从橡皮擦切换为批注时被锁定为多指书写的问题
             ExitMultiTouchModeIfNeeded();
 
-            FloatingbarSelectionBG.Visibility = Visibility.Visible;
-            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 28);
+            SetFloatingBarHighlightPosition("pen");
 
             // 记录当前是否已经是批注模式且是否为高光显示模式
             bool wasInInkMode = inkCanvas.EditingMode == InkCanvasEditingMode.Ink;
@@ -1897,9 +1887,6 @@ namespace Ink_Canvas
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
                 ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
             if (sender == EraserByStrokes_Icon && lastBorderMouseDownObject != EraserByStrokes_Icon) return;
-
-            FloatingbarSelectionBG.Visibility = Visibility.Visible;
-            System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 112);
 
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();
@@ -2709,6 +2696,229 @@ namespace Ink_Canvas
                 }
             }
         }
+
+        #region 动态按钮位置计算和高光显示
+
+        /// <summary>
+        /// 获取浮动栏中指定按钮的位置
+        /// </summary>
+        /// <param name="buttonName">按钮的名称</param>
+        /// <returns>按钮在浮动栏中的相对位置</returns>
+        private double GetFloatingBarButtonPosition(string buttonName)
+        {
+            try
+            {
+                // 获取浮动栏容器
+                var floatingBarPanel = StackPanelFloatingBar;
+                if (floatingBarPanel == null) return 0;
+
+                double currentPosition = 0;
+                
+                // 遍历浮动栏中的所有子元素
+                foreach (var child in floatingBarPanel.Children)
+                {
+                    if (child is UIElement element)
+                    {
+                        // 检查是否是我们要找的按钮
+                        if (IsTargetButton(element, buttonName))
+                        {
+                            return currentPosition;
+                        }
+                        
+                        // 累加当前元素的位置
+                        currentPosition += GetElementWidth(element);
+                    }
+                }
+                
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取按钮位置失败: {ex.Message}", LogHelper.LogType.Error);
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// 检查元素是否是目标按钮
+        /// </summary>
+        private bool IsTargetButton(UIElement element, string buttonName)
+        {
+            if (element is FrameworkElement fe)
+            {
+                return fe.Name == buttonName;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 获取元素的宽度
+        /// </summary>
+        private double GetElementWidth(UIElement element)
+        {
+            if (element is FrameworkElement fe)
+            {
+                // 对于SimpleStackPanel，使用其实际宽度
+                if (fe.GetType().Name == "SimpleStackPanel")
+                {
+                    return fe.ActualWidth > 0 ? fe.ActualWidth : 28; // 默认宽度28
+                }
+                
+                // 对于其他元素，使用其宽度或默认宽度
+                return fe.ActualWidth > 0 ? fe.ActualWidth : 28;
+            }
+            return 28; // 默认宽度
+        }
+
+        /// <summary>
+        /// 设置浮动栏高光显示位置
+        /// </summary>
+        /// <param name="mode">模式名称</param>
+        private void SetFloatingBarHighlightPosition(string mode)
+        {
+            try
+            {
+                if (FloatingbarSelectionBG == null) return;
+
+                double position = 0;
+                double buttonWidth = 28; // 每个按钮的默认宽度
+                double highlightWidth = 28; // 高光的默认宽度
+                
+                // 检查快捷调色盘是否显示及其实际宽度
+                bool isQuickColorPaletteVisible = false;
+                double quickColorPaletteWidth = 0;
+                string quickColorPaletteMode = "none";
+                
+                if (QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible)
+                {
+                    isQuickColorPaletteVisible = true;
+                    quickColorPaletteWidth = QuickColorPalettePanel.ActualWidth > 0 ? QuickColorPalettePanel.ActualWidth : 60;
+                    quickColorPaletteMode = "double";
+                }
+                else if (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible)
+                {
+                    isQuickColorPaletteVisible = true;
+                    quickColorPaletteWidth = QuickColorPaletteSingleRowPanel.ActualWidth > 0 ? QuickColorPaletteSingleRowPanel.ActualWidth : 120;
+                    quickColorPaletteMode = "single";
+                }
+
+                // 获取实际按钮宽度，如果获取不到则使用默认值
+                double cursorWidth = Cursor_Icon?.ActualWidth > 0 ? Cursor_Icon.ActualWidth : buttonWidth;
+                double penWidth = Pen_Icon?.ActualWidth > 0 ? Pen_Icon.ActualWidth : buttonWidth;
+                double deleteWidth = SymbolIconDelete?.ActualWidth > 0 ? SymbolIconDelete.ActualWidth : buttonWidth;
+                double eraserWidth = Eraser_Icon?.ActualWidth > 0 ? Eraser_Icon.ActualWidth : buttonWidth;
+                double eraserByStrokesWidth = EraserByStrokes_Icon?.ActualWidth > 0 ? EraserByStrokes_Icon.ActualWidth : buttonWidth;
+                double selectWidth = SymbolIconSelect?.ActualWidth > 0 ? SymbolIconSelect.ActualWidth : buttonWidth;
+
+                // 获取高光的实际宽度
+                double actualHighlightWidth = FloatingbarSelectionBG.ActualWidth > 0 ? FloatingbarSelectionBG.ActualWidth : highlightWidth;
+                
+                // 计算位置偏移，考虑Canvas和StackPanel的Margin差异
+                // Canvas: Margin="2,0,2,0", StackPanel: Margin="2,0"
+                // 所以Canvas相对于StackPanel的偏移是：Canvas.Left(2) - StackPanel.Left(2) = 0
+                // 但是高光元素本身有Margin="0,-2,0,-2"，需要补偿这个偏移
+                double marginOffset = 0; // Canvas和StackPanel的Margin已经对齐
+                
+                // 快捷调色盘的Margin：Margin="4,0,4,0"，所以总宽度需要加上8像素
+                double quickColorPaletteTotalWidth = isQuickColorPaletteVisible ? quickColorPaletteWidth + 8 : 0;
+                
+                // 根据模式计算位置，确保高光居中对齐按钮
+                switch (mode)
+                {
+                    case "cursor":
+                        // 鼠标按钮位置：marginOffset + (cursorWidth - actualHighlightWidth) / 2
+                        position = marginOffset + (cursorWidth - actualHighlightWidth) / 2;
+                        break;
+                    case "pen":
+                    case "color":
+                        // 批注按钮位置：marginOffset + cursorWidth + (penWidth - actualHighlightWidth) / 2
+                        position = marginOffset + cursorWidth + (penWidth - actualHighlightWidth) / 2;
+                        break;
+                    case "eraser":
+                        if (isQuickColorPaletteVisible)
+                        {
+                            // 有快捷调色盘时：鼠标 + 批注 + 快捷调色盘(包含Margin) + 清空 + (面积擦 - 高光) / 2
+                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + (eraserWidth - actualHighlightWidth) / 2;
+                        }
+                        else
+                        {
+                            // 没有快捷调色盘时：鼠标 + 批注 + 清空 + (面积擦 - 高光) / 2
+                            position = marginOffset + cursorWidth + penWidth + deleteWidth + (eraserWidth - actualHighlightWidth) / 2;
+                        }
+                        break;
+                    case "eraserByStrokes":
+                        if (isQuickColorPaletteVisible)
+                        {
+                            // 有快捷调色盘时：鼠标 + 批注 + 快捷调色盘(包含Margin) + 清空 + 面积擦 + (线擦 - 高光) / 2
+                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + (eraserByStrokesWidth - actualHighlightWidth) / 2;
+                        }
+                        else
+                        {
+                            // 没有快捷调色盘时：鼠标 + 批注 + 清空 + 面积擦 + (线擦 - 高光) / 2
+                            position = marginOffset + cursorWidth + penWidth + deleteWidth + eraserWidth + (eraserByStrokesWidth - actualHighlightWidth) / 2;
+                        }
+                        break;
+                    case "select":
+                        if (isQuickColorPaletteVisible)
+                        {
+                            // 有快捷调色盘时：鼠标 + 批注 + 快捷调色盘(包含Margin) + 清空 + 面积擦 + 线擦 + (套索选 - 高光) / 2
+                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth + (selectWidth - actualHighlightWidth) / 2;
+                        }
+                        else
+                        {
+                            // 没有快捷调色盘时：鼠标 + 批注 + 清空 + 面积擦 + 线擦 + (套索选 - 高光) / 2
+                            position = marginOffset + cursorWidth + penWidth + deleteWidth + eraserWidth + eraserByStrokesWidth + (selectWidth - actualHighlightWidth) / 2;
+                        }
+                        break;
+                    case "shape":
+                        if (isQuickColorPaletteVisible)
+                        {
+                            // 有快捷调色盘时：鼠标 + 批注 + 快捷调色盘(包含Margin) + 清空 + 面积擦 + 线擦 + 套索选 + (几何 - 高光) / 2
+                            position = marginOffset + cursorWidth + penWidth + quickColorPaletteTotalWidth + deleteWidth + eraserWidth + eraserByStrokesWidth + selectWidth + (buttonWidth - actualHighlightWidth) / 2;
+                        }
+                        else
+                        {
+                            // 没有快捷调色盘时：鼠标 + 批注 + 清空 + 面积擦 + 线擦 + 套索选 + (几何 - 高光) / 2
+                            position = marginOffset + cursorWidth + penWidth + deleteWidth + eraserWidth + eraserByStrokesWidth + selectWidth + (buttonWidth - actualHighlightWidth) / 2;
+                        }
+                        break;
+                    default:
+                        position = marginOffset;
+                        break;
+                }
+
+                // 设置高光位置
+                FloatingbarSelectionBG.Visibility = Visibility.Visible;
+                System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, position);
+                
+                // 详细的调试信息
+                string debugInfo = $"设置高光位置: {mode} -> {position:F2}, " +
+                                 $"高光宽度: {actualHighlightWidth:F2}, " +
+                                 $"快捷调色盘: {quickColorPaletteMode}, 宽度: {quickColorPaletteWidth:F2}, 总宽度: {quickColorPaletteTotalWidth:F2}, " +
+                                 $"按钮宽度: cursor={cursorWidth:F2}, pen={penWidth:F2}, delete={deleteWidth:F2}, " +
+                                 $"eraser={eraserWidth:F2}, eraserByStrokes={eraserByStrokesWidth:F2}, select={selectWidth:F2}";
+                
+                LogHelper.WriteLogToFile(debugInfo, LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"设置高光位置失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 隐藏浮动栏高光显示
+        /// </summary>
+        private void HideFloatingBarHighlight()
+        {
+            if (FloatingbarSelectionBG != null)
+            {
+                FloatingbarSelectionBG.Visibility = Visibility.Hidden;
+                System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
+            }
+        }
+
+        #endregion
 
     }
 }
