@@ -77,13 +77,13 @@ namespace Ink_Canvas.Helpers
                     {
                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
                         _mainWindow.BtnPPTSlideShowEnd.Visibility = Visibility.Visible;
-                        
+
                         if (currentSlide > 0 && totalSlides > 0)
                         {
                             _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
                             _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
                         }
-                        
+
                         UpdateNavigationPanelsVisibility();
                         UpdateNavigationButtonStyles();
                     }
@@ -147,25 +147,25 @@ namespace Ink_Canvas.Helpers
                     if (displayOption.Length >= 4)
                     {
                         var options = displayOption.ToCharArray();
-                        
+
                         // 左下角面板
                         if (options[0] == '2')
                             AnimationsHelper.ShowWithFadeIn(_mainWindow.LeftBottomPanelForPPTNavigation);
                         else
                             _mainWindow.LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                        
+
                         // 右下角面板
                         if (options[1] == '2')
                             AnimationsHelper.ShowWithFadeIn(_mainWindow.RightBottomPanelForPPTNavigation);
                         else
                             _mainWindow.RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                        
+
                         // 左侧面板
                         if (options[2] == '2')
                             AnimationsHelper.ShowWithFadeIn(_mainWindow.LeftSidePanelForPPTNavigation);
                         else
                             _mainWindow.LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                        
+
                         // 右侧面板
                         if (options[3] == '2')
                             AnimationsHelper.ShowWithFadeIn(_mainWindow.RightSidePanelForPPTNavigation);
@@ -230,10 +230,10 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     var visibility = show ? Visibility.Visible : Visibility.Collapsed;
-                    
+
                     if (_mainWindow.BtnExitPptFromSidebarLeft != null)
                         _mainWindow.BtnExitPptFromSidebarLeft.Visibility = visibility;
-                    
+
                     if (_mainWindow.BtnExitPptFromSidebarRight != null)
                         _mainWindow.BtnExitPptFromSidebarRight.Visibility = visibility;
                 }
@@ -290,7 +290,7 @@ namespace Ink_Canvas.Helpers
                 if (sideOption.Length < 3) return;
 
                 var options = sideOption.ToCharArray();
-                
+
                 // 页码按钮显示
                 var pageButtonVisibility = options[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
                 _mainWindow.PPTLSPageButton.Visibility = pageButtonVisibility;
@@ -319,7 +319,7 @@ namespace Ink_Canvas.Helpers
                 if (bottomOption.Length < 3) return;
 
                 var options = bottomOption.ToCharArray();
-                
+
                 // 页码按钮显示
                 var pageButtonVisibility = options[0] == '2' ? Visibility.Visible : Visibility.Collapsed;
                 _mainWindow.PPTLBPageButton.Visibility = pageButtonVisibility;
@@ -345,7 +345,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 Color backgroundColor, borderColor, foregroundColor, feedbackColor;
-                
+
                 if (isDarkTheme)
                 {
                     backgroundColor = Color.FromRgb(39, 39, 42);
@@ -364,7 +364,7 @@ namespace Ink_Canvas.Helpers
                 // 应用背景和边框颜色
                 var backgroundBrush = new SolidColorBrush(backgroundColor);
                 var borderBrush = new SolidColorBrush(borderColor);
-                
+
                 leftBorder.Background = backgroundBrush;
                 leftBorder.BorderBrush = borderBrush;
                 rightBorder.Background = backgroundBrush;

@@ -25,7 +25,7 @@ namespace Ink_Canvas.Helpers
             _uiDispatcher = uiDispatcher;
             _config = InkSmoothingConfig.FromSettings();
             _config.ApplyQualitySettings();
-            
+
             _asyncSmoothing = new AsyncAdvancedBezierSmoothing(uiDispatcher)
             {
                 SmoothingStrength = _config.SmoothingStrength,
@@ -34,7 +34,7 @@ namespace Ink_Canvas.Helpers
                 UseHardwareAcceleration = _config.UseHardwareAcceleration,
                 MaxConcurrentTasks = _config.MaxConcurrentTasks
             };
-            
+
             _hardwareProcessor = new HardwareAcceleratedInkProcessor();
             _performanceMonitor = new InkSmoothingPerformanceMonitor();
         }
@@ -42,7 +42,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 平滑笔画（自动选择最佳方法）
         /// </summary>
-        public async Task<Stroke> SmoothStrokeAsync(Stroke originalStroke, 
+        public async Task<Stroke> SmoothStrokeAsync(Stroke originalStroke,
             Action<Stroke, Stroke> onCompleted = null,
             CancellationToken cancellationToken = default)
         {
@@ -142,7 +142,7 @@ namespace Ink_Canvas.Helpers
         {
             var newConfig = InkSmoothingConfig.FromSettings();
             newConfig.ApplyQualitySettings();
-            
+
             _asyncSmoothing.SmoothingStrength = newConfig.SmoothingStrength;
             _asyncSmoothing.ResampleInterval = newConfig.ResampleInterval;
             _asyncSmoothing.InterpolationSteps = newConfig.InterpolationSteps;
@@ -189,11 +189,11 @@ namespace Ink_Canvas.Helpers
         public static InkSmoothingConfig GetRecommendedConfig()
         {
             var config = new InkSmoothingConfig();
-            
+
             // 根据系统性能调整配置
             var processorCount = Environment.ProcessorCount;
             var isHardwareAccelerated = IsHardwareAccelerationSupported();
-            
+
             if (processorCount >= 4 && isHardwareAccelerated)
             {
                 // 降低高质量模式的门槛，4核以上且支持硬件加速就使用高质量
@@ -218,7 +218,7 @@ namespace Ink_Canvas.Helpers
                 config.UseAsyncProcessing = false;
                 config.MaxConcurrentTasks = 1;
             }
-            
+
             config.ApplyQualitySettings();
             return config;
         }

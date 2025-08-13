@@ -1,3 +1,5 @@
+using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,8 +10,6 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Microsoft.Win32;
-using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
 {
@@ -22,13 +22,13 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         /// 左侧
         /// </summary>
         Left,
-        
+
         /// <summary>
         /// 右侧
         /// </summary>
         Right
     }
-    
+
     /// <summary>
     /// 启动台配置
     /// </summary>
@@ -38,13 +38,13 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         /// 启动台按钮位置
         /// </summary>
         public LauncherButtonPosition ButtonPosition { get; set; } = LauncherButtonPosition.Right;
-        
+
         /// <summary>
         /// 启动台应用程序列表
         /// </summary>
         public List<LauncherItem> Items { get; set; } = new List<LauncherItem>();
     }
-    
+
     /// <summary>
     /// 启动台应用项
     /// </summary>
@@ -54,33 +54,33 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         /// 应用程序名称
         /// </summary>
         public string Name { get; set; }
-        
+
         /// <summary>
         /// 应用程序路径
         /// </summary>
         public string Path { get; set; }
-        
+
         /// <summary>
         /// 是否可见
         /// </summary>
         public bool IsVisible { get; set; } = true;
-        
+
         /// <summary>
         /// 在启动台中的位置（0-39）
         /// </summary>
         public int Position { get; set; } = -1;
-        
+
         /// <summary>
         /// 是否已固定位置
         /// </summary>
         public bool IsPositionFixed { get; set; } = false;
-        
+
         /// <summary>
         /// 图标缓存
         /// </summary>
         [JsonIgnore]
         private ImageSource _iconCache;
-        
+
         /// <summary>
         /// 获取应用程序图标
         /// </summary>
@@ -93,7 +93,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 {
                     return _iconCache;
                 }
-                
+
                 try
                 {
                     if (File.Exists(Path))
@@ -106,7 +106,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                                 icon.Handle,
                                 Int32Rect.Empty,
                                 BitmapSizeOptions.FromEmptyOptions());
-                            
+
                             icon.Dispose();
                             return _iconCache;
                         }
@@ -126,7 +126,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                                     string[] parts = iconPath.Split(',');
                                     string iconFile = parts[0].Trim('"');
                                     int iconIndex = parts.Length > 1 ? Convert.ToInt32(parts[1]) : 0;
-                                    
+
                                     if (File.Exists(iconFile))
                                     {
                                         Icon icon = IconExtractor.Extract(iconFile, iconIndex, true);
@@ -136,7 +136,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                                                 icon.Handle,
                                                 Int32Rect.Empty,
                                                 BitmapSizeOptions.FromEmptyOptions());
-                                            
+
                                             icon.Dispose();
                                             return _iconCache;
                                         }
@@ -150,12 +150,12 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 {
                     LogHelper.WriteLogToFile($"获取应用图标时出错: {ex.Message}", LogHelper.LogType.Error);
                 }
-                
+
                 // 返回默认图标
                 return GetDefaultIcon();
             }
         }
-        
+
         /// <summary>
         /// 获取默认图标
         /// </summary>
@@ -179,7 +179,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                                     icon.Handle,
                                     Int32Rect.Empty,
                                     BitmapSizeOptions.FromEmptyOptions());
-                                
+
                                 icon.Dispose();
                                 return _iconCache;
                             }
@@ -190,7 +190,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                         LogHelper.WriteLogToFile($"获取资源管理器图标时出错: {ex.Message}", LogHelper.LogType.Warning);
                         // 如果获取Windows图标失败，回退到默认图标
                     }
-                    
+
                     // 回退到备用图标
                     string explorerIconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Icons-Fluent", "ic_fluent_folder_24_regular.png");
                     if (File.Exists(explorerIconPath))
@@ -201,7 +201,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                         return _iconCache;
                     }
                 }
-                
+
                 // 返回一个简单的默认图标
                 string iconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Icons-png", "icc.png");
                 if (File.Exists(iconPath))
@@ -211,7 +211,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     _iconCache = image;
                     return _iconCache;
                 }
-                
+
                 // 如果还是没有找到，尝试使用应用程序图标
                 string appIconPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "Icons-Fluent", "ic_fluent_apps_24_regular.png");
                 if (File.Exists(appIconPath))
@@ -222,14 +222,14 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     return _iconCache;
                 }
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"获取默认图标时出错: {ex.Message}", LogHelper.LogType.Error);
             }
-            
+
             return null;
         }
-        
+
         /// <summary>
         /// 启动应用程序
         /// </summary>
@@ -242,7 +242,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     LogHelper.WriteLogToFile("无法启动应用程序：路径为空", LogHelper.LogType.Error);
                     return;
                 }
-                
+
                 // 检查文件是否存在
                 if (!File.Exists(Path) && !Path.Contains(":\\"))
                 {
@@ -264,7 +264,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     };
                     Process.Start(psi);
                 }
-                
+
                 LogHelper.WriteLogToFile($"已启动应用程序: {Path}");
             }
             catch (Exception ex)
@@ -274,7 +274,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             }
         }
     }
-    
+
     /// <summary>
     /// 图标提取工具类
     /// </summary>
@@ -294,7 +294,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 IntPtr large;
                 IntPtr small;
                 ExtractIconEx(file, index, out large, out small, 1);
-                
+
                 try
                 {
                     return Icon.FromHandle(largeIcon ? large : small);
@@ -307,7 +307,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 {
                     if (large != IntPtr.Zero)
                         DestroyIcon(large);
-                    
+
                     if (small != IntPtr.Zero)
                         DestroyIcon(small);
                 }
@@ -317,7 +317,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 return null;
             }
         }
-        
+
         [DllImport("Shell32.dll", EntryPoint = "ExtractIconEx")]
         private static extern int ExtractIconEx(
             [MarshalAs(UnmanagedType.LPStr)] string lpszFile,
@@ -325,8 +325,8 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             out IntPtr phiconLarge,
             out IntPtr phiconSmall,
             int nIcons);
-        
+
         [DllImport("User32.dll")]
         private static extern int DestroyIcon(IntPtr hIcon);
     }
-} 
+}

@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Ink_Canvas.Helpers;
-using Microsoft.Win32;
 
 namespace Ink_Canvas
 {
@@ -30,9 +29,6 @@ namespace Ink_Canvas
                     image.Name = timestamp;
 
                     CenterAndScaleElement(image);
-
-                    InkCanvas.SetLeft(image, 0);
-                    InkCanvas.SetTop(image, 0);
                     inkCanvas.Children.Add(image);
 
                     // 添加鼠标事件处理，使图片可以被选择
@@ -223,6 +219,152 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 克隆图片
+        /// </summary>
+        /// <param name="image">要克隆的图片</param>
+        private void CloneImage(Image image)
+        {
+            if (image == null) return;
+
+            try
+            {
+                // 创建图片的副本
+                var clonedImage = new Image
+                {
+                    Source = image.Source,
+                    Width = image.Width,
+                    Height = image.Height,
+                    Stretch = image.Stretch,
+                    RenderTransform = image.RenderTransform?.Clone() as Transform
+                };
+
+                // 设置位置，稍微偏移以避免重叠
+                InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
+                InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
+
+                // 添加鼠标事件处理，使图片可以被选择
+                clonedImage.MouseDown += UIElement_MouseDown;
+                clonedImage.IsManipulationEnabled = true;
+
+                // 添加到画布
+                inkCanvas.Children.Add(clonedImage);
+
+                // 选择新克隆的图片
+                DeselectUIElement();
+                SelectUIElement(clonedImage);
+
+                // 提交到时间机器以支持撤销
+                timeMachine.CommitElementInsertHistory(clonedImage);
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不中断程序
+                System.Diagnostics.Debug.WriteLine($"克隆图片时发生错误: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 克隆图片到新页面
+        /// </summary>
+        /// <param name="image">要克隆的图片</param>
+        private void CloneImageToNewBoard(Image image)
+        {
+            if (image == null) return;
+
+            try
+            {
+                // 创建图片的副本
+                var clonedImage = new Image
+                {
+                    Source = image.Source,
+                    Width = image.Width,
+                    Height = image.Height,
+                    Stretch = image.Stretch,
+                    RenderTransform = image.RenderTransform?.Clone() as Transform
+                };
+
+                // 设置位置，稍微偏移以避免重叠
+                InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
+                InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
+
+                // 添加鼠标事件处理，使图片可以被选择
+                clonedImage.MouseDown += UIElement_MouseDown;
+                clonedImage.IsManipulationEnabled = true;
+
+                // 创建新页面
+                BtnWhiteBoardAdd_Click(null, null);
+
+                // 添加到新页面的画布
+                inkCanvas.Children.Add(clonedImage);
+
+                // 选择新克隆的图片
+                DeselectUIElement();
+                SelectUIElement(clonedImage);
+
+                // 提交到时间机器以支持撤销
+                timeMachine.CommitElementInsertHistory(clonedImage);
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不中断程序
+                System.Diagnostics.Debug.WriteLine($"克隆图片到新页面时发生错误: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 缩放图片
+        /// </summary>
+        /// <param name="image">要缩放的图片</param>
+        /// <param name="scaleFactor">缩放因子（大于1为放大，小于1为缩小）</param>
+        private void ScaleImage(Image image, double scaleFactor)
+        {
+            if (image == null) return;
+
+            try
+            {
+                // 获取当前的变换
+                var transformGroup = image.RenderTransform as TransformGroup ?? new TransformGroup();
+
+                // 查找现有的缩放变换
+                ScaleTransform scaleTransform = null;
+                foreach (Transform transform in transformGroup.Children)
+                {
+                    if (transform is ScaleTransform st)
+                    {
+                        scaleTransform = st;
+                        break;
+                    }
+                }
+
+                // 如果没有缩放变换，创建一个新的
+                if (scaleTransform == null)
+                {
+                    scaleTransform = new ScaleTransform();
+                    transformGroup.Children.Add(scaleTransform);
+                }
+
+                // 设置缩放中心为图片中心
+                scaleTransform.CenterX = image.ActualWidth / 2;
+                scaleTransform.CenterY = image.ActualHeight / 2;
+
+                // 应用缩放因子
+                scaleTransform.ScaleX *= scaleFactor;
+                scaleTransform.ScaleY *= scaleFactor;
+
+                // 应用变换
+                image.RenderTransform = transformGroup;
+
+                // 提交到时间机器以支持撤销
+                // 注意：缩放操作目前不支持撤销，因为需要更复杂的历史记录机制
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不中断程序
+                System.Diagnostics.Debug.WriteLine($"缩放图片时发生错误: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// 删除图片
         /// </summary>
         /// <param name="image">要删除的图片</param>
@@ -262,17 +404,25 @@ namespace Ink_Canvas
             double scaleY = maxHeight / element.Height;
             double scale = Math.Min(scaleX, scaleY);
 
-            TransformGroup transformGroup = new TransformGroup();
-            transformGroup.Children.Add(new ScaleTransform(scale, scale));
+            // 直接设置元素的大小，而不使用RenderTransform
+            double newWidth = element.Width * scale;
+            double newHeight = element.Height * scale;
 
+            element.Width = newWidth;
+            element.Height = newHeight;
+
+            // 计算居中位置
             double canvasWidth = inkCanvas.ActualWidth;
             double canvasHeight = inkCanvas.ActualHeight;
-            double centerX = (canvasWidth - element.Width * scale) / 2;
-            double centerY = (canvasHeight - element.Height * scale) / 2;
+            double centerX = (canvasWidth - newWidth) / 2;
+            double centerY = (canvasHeight - newHeight) / 2;
 
-            transformGroup.Children.Add(new TranslateTransform(centerX, centerY));
+            // 直接设置位置，而不使用RenderTransform
+            InkCanvas.SetLeft(element, centerX);
+            InkCanvas.SetTop(element, centerY);
 
-            element.RenderTransform = transformGroup;
+            // 清除任何现有的RenderTransform
+            element.RenderTransform = Transform.Identity;
         }
     }
 }

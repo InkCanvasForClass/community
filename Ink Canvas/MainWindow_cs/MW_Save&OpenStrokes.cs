@@ -1,18 +1,19 @@
 using Ink_Canvas.Helpers;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
-using File = System.IO.File;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using File = System.IO.File;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
-using System.Collections.Generic;
-using System.Windows.Controls;
-using Newtonsoft.Json;
 
-namespace Ink_Canvas {
+namespace Ink_Canvas
+{
     // 1. 定义元素信息结构
     public class CanvasElementInfo
     {
@@ -24,8 +25,10 @@ namespace Ink_Canvas {
         public double Height { get; set; }
         public string Stretch { get; set; } = "Fill"; // 默认为Fill
     }
-    public partial class MainWindow : Window {
-        private void SymbolIconSaveStrokes_MouseUp(object sender, MouseButtonEventArgs e) {
+    public partial class MainWindow : Window
+    {
+        private void SymbolIconSaveStrokes_MouseUp(object sender, MouseButtonEventArgs e)
+        {
             if (lastBorderMouseDownObject != sender || inkCanvas.Visibility != Visibility.Visible) return;
 
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
@@ -36,8 +39,10 @@ namespace Ink_Canvas {
             SaveInkCanvasStrokes(true, true);
         }
 
-        private void SaveInkCanvasStrokes(bool newNotice = true, bool saveByUser = false) {
-            try {
+        private void SaveInkCanvasStrokes(bool newNotice = true, bool saveByUser = false)
+        {
+            try
+            {
                 var savePath = Settings.Automation.AutoSavedStrokesLocation
                                + (saveByUser ? @"\User Saved - " : @"\Auto Saved - ")
                                + (currentMode == 0 ? "Annotation Strokes" : "BlackBoard Strokes");
@@ -49,13 +54,13 @@ namespace Ink_Canvas {
                 else
                     //savePathWithName = savePath + @"\" + DateTime.Now.ToString("u").Replace(':', '-') + ".icstk";
                     savePathWithName = savePath + @"\" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss-fff") + ".icstk";
-                
+
                 if (Settings.Automation.IsSaveFullPageStrokes)
                 {
                     // 全页面保存模式 - 检查是否存在多页面墨迹
                     bool hasMultiplePages = false;
                     List<StrokeCollection> allPageStrokes = new List<StrokeCollection>();
-                    
+
                     // 检查PPT放映模式下的多页面墨迹
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && _pptManager?.IsConnected == true)
                     {
@@ -101,7 +106,7 @@ namespace Ink_Canvas {
                             }
                         }
                     }
-                    
+
                     if (hasMultiplePages && allPageStrokes.Count > 0)
                     {
                         // 多页面墨迹保存为压缩包
@@ -142,7 +147,8 @@ namespace Ink_Canvas {
                     if (newNotice) ShowNotification("墨迹成功保存至 " + savePathWithName);
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 ShowNotification("墨迹保存失败");
                 LogHelper.WriteLogToFile("墨迹保存失败 | " + ex.ToString(), LogHelper.LogType.Error);
             }
@@ -158,7 +164,7 @@ namespace Ink_Canvas {
                 // 创建临时目录来存放文件
                 string tempDir = Path.Combine(Path.GetTempPath(), $"InkCanvas_MultiPage_{DateTime.Now:yyyyMMdd_HHmmss}");
                 Directory.CreateDirectory(tempDir);
-                
+
                 try
                 {
                     // 保存所有页面的文件到临时目录
@@ -173,7 +179,7 @@ namespace Ink_Canvas {
                             {
                                 strokes.Save(fs);
                             }
-                            
+
                             // 保存页面图像
                             string imageFileName = Path.Combine(tempDir, $"page_{i + 1:D4}.png");
                             using (var fs = new FileStream(imageFileName, FileMode.Create))
@@ -182,7 +188,7 @@ namespace Ink_Canvas {
                             }
                         }
                     }
-                    
+
                     // 保存元数据信息
                     string metadataFile = Path.Combine(tempDir, "metadata.txt");
                     using (var writer = new StreamWriter(metadataFile, false, System.Text.Encoding.UTF8))
@@ -201,20 +207,20 @@ namespace Ink_Canvas {
                             writer.WriteLine($"PPT总页数: {pptApplication.SlideShowWindows[1].Presentation.Slides.Count}");
                             writer.WriteLine($"PPT文件路径: {pptApplication.SlideShowWindows[1].Presentation.FullName}");
                         }
-                        
+
                         for (int i = 0; i < allPageStrokes.Count; i++)
                         {
                             writer.WriteLine($"页面 {i + 1}: {allPageStrokes[i].Count} 条墨迹");
                         }
                     }
-                    
+
                     // 使用.NET Framework内置的压缩功能创建ZIP文件
                     if (File.Exists(zipFileName))
                         File.Delete(zipFileName);
-                    
+
                     // 使用System.IO.Compression.FileSystem来创建ZIP
                     System.IO.Compression.ZipFile.CreateFromDirectory(tempDir, zipFileName);
-                    
+
                     if (newNotice) ShowNotification($"多页面墨迹成功保存至压缩包 {zipFileName}");
                 }
                 finally
@@ -245,17 +251,17 @@ namespace Ink_Canvas {
         {
             // 全页面保存模式 - 保存整个墨迹页面的图像
             var bitmap = new System.Drawing.Bitmap(
-                (int)System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width, 
+                (int)System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
                 (int)System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height);
-            
+
             using (var g = System.Drawing.Graphics.FromImage(bitmap))
             {
                 // 创建黑色或透明背景
-                System.Drawing.Color bgColor = Settings.Canvas.UsingWhiteboard 
-                    ? System.Drawing.Color.White 
+                System.Drawing.Color bgColor = Settings.Canvas.UsingWhiteboard
+                    ? System.Drawing.Color.White
                     : System.Drawing.Color.FromArgb(22, 41, 36); // 黑板背景色
                 g.Clear(bgColor);
-                
+
                 // 将InkCanvas墨迹渲染到Visual
                 var visual = new DrawingVisual();
                 using (var dc = visual.RenderOpen())
@@ -265,41 +271,41 @@ namespace Ink_Canvas {
                     // 绘制矩形并填充为inkCanvas的内容
                     dc.DrawRectangle(visualBrush, null, new Rect(0, 0, inkCanvas.ActualWidth, inkCanvas.ActualHeight));
                 }
-                
+
                 // 创建适合墨迹画布尺寸的渲染位图
                 var rtb = new RenderTargetBitmap(
-                    (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight, 
-                    96, 96, 
+                    (int)inkCanvas.ActualWidth, (int)inkCanvas.ActualHeight,
+                    96, 96,
                     PixelFormats.Pbgra32);
                 rtb.Render(visual);
-                
+
                 // 转换为GDI+ Bitmap并保存
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(rtb));
-                
+
                 using (var ms = new MemoryStream())
                 {
                     encoder.Save(ms);
                     ms.Seek(0, SeekOrigin.Begin);
                     var imgBitmap = new System.Drawing.Bitmap(ms);
-                    
+
                     // 将生成的墨迹图像绘制到屏幕截图上
                     // 居中绘制，确保墨迹位于屏幕中央
                     int x = (bitmap.Width - imgBitmap.Width) / 2;
                     int y = (bitmap.Height - imgBitmap.Height) / 2;
                     g.DrawImage(imgBitmap, x, y);
-                    
+
                     // 保存为PNG
                     string imagePathWithName = Path.ChangeExtension(savePathWithName, "png");
                     bitmap.Save(imagePathWithName, System.Drawing.Imaging.ImageFormat.Png);
-                    
+
                     // 仍然保存墨迹文件以兼容旧版本
                     var fs = new FileStream(savePathWithName, FileMode.Create);
                     inkCanvas.Strokes.Save(fs);
                     fs.Close();
                 }
             }
-            
+
             // 显示提示
             if (newNotice) ShowNotification("墨迹成功全页面保存至 " + Path.ChangeExtension(savePathWithName, "png"));
         }
@@ -316,14 +322,14 @@ namespace Ink_Canvas {
                 tempCanvas.Strokes = strokes;
                 tempCanvas.Width = inkCanvas.ActualWidth;
                 tempCanvas.Height = inkCanvas.ActualHeight;
-                
+
                 // 创建渲染位图
                 var rtb = new RenderTargetBitmap(
-                    (int)tempCanvas.Width, (int)tempCanvas.Height, 
-                    96, 96, 
+                    (int)tempCanvas.Width, (int)tempCanvas.Height,
+                    96, 96,
                     PixelFormats.Pbgra32);
                 rtb.Render(tempCanvas);
-                
+
                 // 保存为PNG
                 var encoder = new PngBitmapEncoder();
                 encoder.Frames.Add(BitmapFrame.Create(rtb));
@@ -336,7 +342,8 @@ namespace Ink_Canvas {
             }
         }
 
-        private void SymbolIconOpenStrokes_MouseUp(object sender, MouseButtonEventArgs e) {
+        private void SymbolIconOpenStrokes_MouseUp(object sender, MouseButtonEventArgs e)
+        {
             if (lastBorderMouseDownObject != sender) return;
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
@@ -348,21 +355,26 @@ namespace Ink_Canvas {
             if (openFileDialog.ShowDialog() != true) return;
             LogHelper.WriteLogToFile($"Strokes Insert: Name: {openFileDialog.FileName}",
                 LogHelper.LogType.Event);
-            
-            try {
+
+            try
+            {
                 string fileExtension = Path.GetExtension(openFileDialog.FileName).ToLower();
-                
-                if (fileExtension == ".zip") {
+
+                if (fileExtension == ".zip")
+                {
                     // 处理ICC压缩包
                     OpenICCZipFile(openFileDialog.FileName);
-                } else {
+                }
+                else
+                {
                     // 处理单个墨迹文件
                     OpenSingleStrokeFile(openFileDialog.FileName);
                 }
 
                 if (inkCanvas.Visibility != Visibility.Visible) SymbolIconCursor_Click(sender, null);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 ShowNotification("墨迹打开失败");
                 LogHelper.WriteLogToFile($"墨迹打开失败: {ex.ToString()}", LogHelper.LogType.Error);
             }
@@ -371,63 +383,76 @@ namespace Ink_Canvas {
         /// <summary>
         /// 打开ICC创建的.zip压缩包
         /// </summary>
-        private void OpenICCZipFile(string zipFilePath) {
-            try {
+        private void OpenICCZipFile(string zipFilePath)
+        {
+            try
+            {
                 // 创建临时目录来解压文件
                 string tempDir = Path.Combine(Path.GetTempPath(), $"InkCanvas_Open_{DateTime.Now:yyyyMMdd_HHmmss}");
                 Directory.CreateDirectory(tempDir);
-                
-                try {
+
+                try
+                {
                     // 解压ZIP文件
                     System.IO.Compression.ZipFile.ExtractToDirectory(zipFilePath, tempDir);
-                    
+
                     // 读取元数据文件
                     string metadataFile = Path.Combine(tempDir, "metadata.txt");
-                    if (!File.Exists(metadataFile)) {
+                    if (!File.Exists(metadataFile))
+                    {
                         throw new Exception("压缩包中未找到元数据文件");
                     }
-                    
+
                     var metadata = ReadMetadataFile(metadataFile);
-                    
+
                     // 根据元数据信息决定恢复模式
                     bool isPPTMode = metadata.ContainsKey("模式") && metadata["模式"].Contains("PPT放映");
                     bool isWhiteboardMode = metadata.ContainsKey("模式") && metadata["模式"].Contains("白板");
-                    
+
                     // 检查当前是否处于PPT模式
                     bool isCurrentlyInPPTMode = BtnPPTSlideShowEnd.Visibility == Visibility.Visible && pptApplication != null;
-                    
+
                     // 检查当前是否处于白板模式
                     bool isCurrentlyInWhiteboardMode = currentMode != 0;
-                    
+
                     // 严格模式隔离：只在对应模式下恢复对应墨迹
-                    if (isPPTMode && isCurrentlyInPPTMode) {
+                    if (isPPTMode && isCurrentlyInPPTMode)
+                    {
                         // 只在PPT放映模式下恢复PPT墨迹
                         RestorePPTStrokesFromZip(tempDir, metadata);
-                    } else if (isWhiteboardMode && isCurrentlyInWhiteboardMode) {
+                    }
+                    else if (isWhiteboardMode && isCurrentlyInWhiteboardMode)
+                    {
                         // 只在白板模式下恢复白板墨迹
                         RestoreWhiteboardStrokesFromZip(tempDir, metadata);
-                    } else {
+                    }
+                    else
+                    {
                         // 模式不匹配时，显示提示信息
                         string savedMode = isPPTMode ? "PPT放映" : (isWhiteboardMode ? "白板" : "未知");
                         string currentMode = isCurrentlyInPPTMode ? "PPT放映" : (isCurrentlyInWhiteboardMode ? "白板" : "桌面");
                         ShowNotification($"墨迹保存模式({savedMode})与当前模式({currentMode})不匹配，无法恢复墨迹");
                         LogHelper.WriteLogToFile($"模式不匹配：保存模式={savedMode}，当前模式={currentMode}", LogHelper.LogType.Warning);
                     }
-                    
+
                     ShowNotification($"成功打开ICC压缩包，共{(metadata.ContainsKey("总页数") ? metadata["总页数"] : "0")}页");
                 }
-                finally {
+                finally
+                {
                     // 清理临时目录
-                    try {
+                    try
+                    {
                         if (Directory.Exists(tempDir))
                             Directory.Delete(tempDir, true);
                     }
-                    catch (Exception ex) {
+                    catch (Exception ex)
+                    {
                         LogHelper.WriteLogToFile($"清理临时目录失败: {ex.ToString()}", LogHelper.LogType.Warning);
                     }
                 }
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 LogHelper.WriteLogToFile($"打开ICC压缩包失败: {ex.ToString()}", LogHelper.LogType.Error);
                 throw;
             }
@@ -436,68 +461,80 @@ namespace Ink_Canvas {
         /// <summary>
         /// 读取元数据文件
         /// </summary>
-        private Dictionary<string, string> ReadMetadataFile(string metadataPath) {
+        private Dictionary<string, string> ReadMetadataFile(string metadataPath)
+        {
             var metadata = new Dictionary<string, string>();
-            
-            using (var reader = new StreamReader(metadataPath, System.Text.Encoding.UTF8)) {
+
+            using (var reader = new StreamReader(metadataPath, System.Text.Encoding.UTF8))
+            {
                 string line;
-                while ((line = reader.ReadLine()) != null) {
-                    if (line.Contains(":")) {
+                while ((line = reader.ReadLine()) != null)
+                {
+                    if (line.Contains(":"))
+                    {
                         var parts = line.Split(new[] { ':' }, 2);
-                        if (parts.Length == 2) {
+                        if (parts.Length == 2)
+                        {
                             metadata[parts[0].Trim()] = parts[1].Trim();
                         }
                     }
                 }
             }
-            
+
             return metadata;
         }
 
         /// <summary>
         /// 从ZIP文件恢复PPT墨迹
         /// </summary>
-        private void RestorePPTStrokesFromZip(string tempDir, Dictionary<string, string> metadata) {
-            try {
+        private void RestorePPTStrokesFromZip(string tempDir, Dictionary<string, string> metadata)
+        {
+            try
+            {
                 // 确保当前处于PPT放映模式
-                if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || pptApplication == null) {
+                if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || pptApplication == null)
+                {
                     throw new InvalidOperationException("当前不在PPT放映模式，无法恢复PPT墨迹");
                 }
-                
+
                 // 检查PPT文件路径是否匹配
                 if (metadata.ContainsKey("PPT文件路径"))
                 {
                     string savedPptPath = metadata["PPT文件路径"];
                     string currentPptPath = pptApplication.SlideShowWindows[1].Presentation.FullName;
-                    
+
                     if (!string.IsNullOrEmpty(savedPptPath) && !string.IsNullOrEmpty(currentPptPath))
                     {
                         // 使用文件路径哈希值进行比较，避免路径格式差异
                         string savedHash = GetFileHash(savedPptPath);
                         string currentHash = GetFileHash(currentPptPath);
-                        
+
                         if (savedHash != currentHash)
                         {
                             throw new InvalidOperationException($"墨迹文件与当前PPT文件不匹配。保存的PPT: {savedPptPath}，当前PPT: {currentPptPath}");
                         }
                     }
                 }
-                
+
                 // 清空当前墨迹
                 ClearStrokes(true);
                 timeMachine.ClearStrokeHistory();
-                
+
                 // 重置PPT墨迹存储
                 _pptInkManager?.ClearAllStrokes();
 
                 // 读取所有页面的墨迹文件
                 var files = Directory.GetFiles(tempDir, "page_*.icstk");
-                foreach (var file in files) {
+                foreach (var file in files)
+                {
                     var fileName = Path.GetFileNameWithoutExtension(file);
-                    if (fileName.StartsWith("page_") && int.TryParse(fileName.Substring(5), out int pageNumber)) {
-                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read)) {
+                    if (fileName.StartsWith("page_") && int.TryParse(fileName.Substring(5), out int pageNumber))
+                    {
+                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                        {
                             var strokes = new StrokeCollection(fs);
-                            if (strokes.Count > 0) {
+                            if (strokes.Count > 0)
+                            {
                                 _pptInkManager?.SaveCurrentSlideStrokes(pageNumber, strokes);
                             }
                         }
@@ -505,17 +542,20 @@ namespace Ink_Canvas {
                 }
 
                 // 恢复当前页面的墨迹
-                if (_pptManager?.IsInSlideShow == true) {
+                if (_pptManager?.IsInSlideShow == true)
+                {
                     int currentSlide = _pptManager.GetCurrentSlideNumber();
                     var currentStrokes = _pptInkManager?.LoadSlideStrokes(currentSlide);
-                    if (currentStrokes != null && currentStrokes.Count > 0) {
+                    if (currentStrokes != null && currentStrokes.Count > 0)
+                    {
                         inkCanvas.Strokes.Add(currentStrokes);
                     }
                 }
-                
+
                 LogHelper.WriteLogToFile($"成功恢复PPT墨迹，共{files.Length}页");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 LogHelper.WriteLogToFile($"恢复PPT墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
                 throw;
             }
@@ -524,40 +564,49 @@ namespace Ink_Canvas {
         /// <summary>
         /// 从ZIP文件恢复白板墨迹
         /// </summary>
-        private void RestoreWhiteboardStrokesFromZip(string tempDir, Dictionary<string, string> metadata) {
-            try {
+        private void RestoreWhiteboardStrokesFromZip(string tempDir, Dictionary<string, string> metadata)
+        {
+            try
+            {
                 // 确保当前处于白板模式
-                if (currentMode == 0) {
+                if (currentMode == 0)
+                {
                     throw new InvalidOperationException("当前不在白板模式，无法恢复白板墨迹");
                 }
-                
+
                 // 清空当前墨迹
                 ClearStrokes(true);
                 timeMachine.ClearStrokeHistory();
-                
+
                 // 读取总页数
                 int totalPages = 1;
-                if (metadata.ContainsKey("总页数") && int.TryParse(metadata["总页数"], out int parsedPages)) {
+                if (metadata.ContainsKey("总页数") && int.TryParse(metadata["总页数"], out int parsedPages))
+                {
                     totalPages = parsedPages;
                 }
-                
+
                 // 重置白板状态
                 WhiteboardTotalCount = totalPages;
                 CurrentWhiteboardIndex = 1;
-                
+
                 // 清空历史记录
-                for (int i = 0; i < TimeMachineHistories.Length; i++) {
+                for (int i = 0; i < TimeMachineHistories.Length; i++)
+                {
                     TimeMachineHistories[i] = null;
                 }
-                
+
                 // 读取所有页面的墨迹文件
                 var files = Directory.GetFiles(tempDir, "page_*.icstk");
-                foreach (var file in files) {
+                foreach (var file in files)
+                {
                     var fileName = Path.GetFileNameWithoutExtension(file);
-                    if (fileName.StartsWith("page_") && int.TryParse(fileName.Substring(5), out int pageNumber)) {
-                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read)) {
+                    if (fileName.StartsWith("page_") && int.TryParse(fileName.Substring(5), out int pageNumber))
+                    {
+                        using (var fs = new FileStream(file, FileMode.Open, FileAccess.Read))
+                        {
                             var strokes = new StrokeCollection(fs);
-                            if (strokes.Count > 0) {
+                            if (strokes.Count > 0)
+                            {
                                 // 创建历史记录
                                 var history = new TimeMachineHistory(strokes, TimeMachineHistoryType.UserInput, false);
                                 TimeMachineHistories[pageNumber] = new TimeMachineHistory[] { history };
@@ -565,18 +614,20 @@ namespace Ink_Canvas {
                         }
                     }
                 }
-                
+
                 // 恢复第一页的墨迹
-                if (TimeMachineHistories[1] != null) {
+                if (TimeMachineHistories[1] != null)
+                {
                     RestoreStrokes();
                 }
-                
+
                 // 更新UI显示
                 UpdateIndexInfoDisplay();
-                
+
                 LogHelper.WriteLogToFile($"成功恢复白板墨迹，共{totalPages}页");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 LogHelper.WriteLogToFile($"恢复白板墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
                 throw;
             }
@@ -585,51 +636,55 @@ namespace Ink_Canvas {
         /// <summary>
         /// 打开单个墨迹文件
         /// </summary>
-        private void OpenSingleStrokeFile(string filePath) {
-                var fileStreamHasNoStroke = false;
-            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read)) {
-                    var strokes = new StrokeCollection(fs);
-                    fileStreamHasNoStroke = strokes.Count == 0;
-                    if (!fileStreamHasNoStroke) {
-                        ClearStrokes(true);
-                        timeMachine.ClearStrokeHistory();
-                        inkCanvas.Strokes.Add(strokes);
-                        LogHelper.NewLog($"Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count.ToString()}");
-                    }
-                }
-
-                // 恢复元素信息
-                var elementsFile = Path.ChangeExtension(filePath, ".elements.json");
-                if (File.Exists(elementsFile))
+        private void OpenSingleStrokeFile(string filePath)
+        {
+            var fileStreamHasNoStroke = false;
+            using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                var strokes = new StrokeCollection(fs);
+                fileStreamHasNoStroke = strokes.Count == 0;
+                if (!fileStreamHasNoStroke)
                 {
-                    var elementInfos = JsonConvert.DeserializeObject<List<CanvasElementInfo>>(File.ReadAllText(elementsFile));
-                    foreach (var info in elementInfos)
+                    ClearStrokes(true);
+                    timeMachine.ClearStrokeHistory();
+                    inkCanvas.Strokes.Add(strokes);
+                    LogHelper.NewLog($"Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count.ToString()}");
+                }
+            }
+
+            // 恢复元素信息
+            var elementsFile = Path.ChangeExtension(filePath, ".elements.json");
+            if (File.Exists(elementsFile))
+            {
+                var elementInfos = JsonConvert.DeserializeObject<List<CanvasElementInfo>>(File.ReadAllText(elementsFile));
+                foreach (var info in elementInfos)
+                {
+                    if (info.Type == "Image" && File.Exists(info.SourcePath))
                     {
-                        if (info.Type == "Image" && File.Exists(info.SourcePath))
+                        var img = new Image
                         {
-                            var img = new Image
-                            {
-                                Source = new BitmapImage(new Uri(info.SourcePath)),
-                                Width = info.Width,
-                                Height = info.Height,
-                                Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill
-                            };
-                            InkCanvas.SetLeft(img, info.Left);
-                            InkCanvas.SetTop(img, info.Top);
-                            inkCanvas.Children.Add(img);
-                        }
+                            Source = new BitmapImage(new Uri(info.SourcePath)),
+                            Width = info.Width,
+                            Height = info.Height,
+                            Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill
+                        };
+                        InkCanvas.SetLeft(img, info.Left);
+                        InkCanvas.SetTop(img, info.Top);
+                        inkCanvas.Children.Add(img);
                     }
                 }
-
-                if (fileStreamHasNoStroke)
-                using (var ms = new MemoryStream(File.ReadAllBytes(filePath))) {
-                        ms.Seek(0, SeekOrigin.Begin);
-                        var strokes = new StrokeCollection(ms);
-                        ClearStrokes(true);
-                        timeMachine.ClearStrokeHistory();
-                        inkCanvas.Strokes.Add(strokes);
-                        LogHelper.NewLog($"Strokes Insert (2): Strokes Count: {strokes.Count.ToString()}");
             }
+
+            if (fileStreamHasNoStroke)
+                using (var ms = new MemoryStream(File.ReadAllBytes(filePath)))
+                {
+                    ms.Seek(0, SeekOrigin.Begin);
+                    var strokes = new StrokeCollection(ms);
+                    ClearStrokes(true);
+                    timeMachine.ClearStrokeHistory();
+                    inkCanvas.Strokes.Add(strokes);
+                    LogHelper.NewLog($"Strokes Insert (2): Strokes Count: {strokes.Count.ToString()}");
+                }
         }
     }
 }

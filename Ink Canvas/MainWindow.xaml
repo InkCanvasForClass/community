@@ -40,95 +40,96 @@
             </ResourceDictionary.MergedDictionaries>
 
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
-        <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-        <c:IntNumberToString x:Key="IntNumberToString" />
-        <c:IntNumberToString2 x:Key="IntNumberToString2" />
-        <RoutedUICommand x:Key="KeyExit" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Command_Undo" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Command_Redo" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Command_Clear" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Capture" Text=" " />
-        <RoutedUICommand x:Key="HotKey_Hide" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToDrawTool" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToQuitDrawTool" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToSelect" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToEraser" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToBoard" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen1" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen2" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen3" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen4" Text=" " />
-        <RoutedUICommand x:Key="HotKey_ChangeToPen5" Text=" " />
-                  <RoutedUICommand x:Key="HotKey_DrawLine" Text=" " />
-          <RoutedUICommand x:Key="NothingWillHappened" Text=" " />
-          
-          <!-- Navigation Button Style -->
-          <Style x:Key="NavButton" TargetType="Button">
-              <Setter Property="Background" Value="Transparent"/>
-              <Setter Property="BorderThickness" Value="0"/>
-              <Setter Property="Template">
-                  <Setter.Value>
-                      <ControlTemplate TargetType="Button">
-                          <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                  BorderBrush="{TemplateBinding BorderBrush}" 
-                                  BorderThickness="{TemplateBinding BorderThickness}"
-                                  CornerRadius="4">
-                              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                          </Border>
-                          <ControlTemplate.Triggers>
-                              <Trigger Property="IsMouseOver" Value="True">
-                                  <Setter Property="Background" Value="#27272a"/>
-                              </Trigger>
-                              <Trigger Property="IsPressed" Value="True">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </Trigger>
-                              <!-- 使用多个DataTrigger替代动态绑定 -->
-                              <DataTrigger Binding="{Binding Tag}" Value="startup">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="canvas">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="gesture">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="inkrecognition">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="crashaction">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="ppt">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="advanced">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="automation">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="randomwindow">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="theme">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="shortcuts">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="about">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                              <DataTrigger Binding="{Binding Tag}" Value="plugins">
-                                  <Setter Property="Background" Value="#3b82f6"/>
-                              </DataTrigger>
-                          </ControlTemplate.Triggers>
-                      </ControlTemplate>
-                  </Setter.Value>
-              </Setter>
-          </Style>
+            <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <c:IntNumberToString x:Key="IntNumberToString" />
+            <c:IntNumberToString2 x:Key="IntNumberToString2" />
+            <RoutedUICommand x:Key="KeyExit" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Command_Undo" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Command_Redo" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Command_Clear" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Capture" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Hide" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToDrawTool" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToQuitDrawTool" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToSelect" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToEraser" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToBoard" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen1" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen2" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen3" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen4" Text=" " />
+            <RoutedUICommand x:Key="HotKey_ChangeToPen5" Text=" " />
+            <RoutedUICommand x:Key="HotKey_DrawLine" Text=" " />
+            <RoutedUICommand x:Key="HotKey_Paste" Text=" " />
+            <RoutedUICommand x:Key="NothingWillHappened" Text=" " />
+
+            <!-- Navigation Button Style -->
+            <Style x:Key="NavButton" TargetType="Button">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" 
+                                      BorderBrush="{TemplateBinding BorderBrush}" 
+                                      BorderThickness="{TemplateBinding BorderThickness}"
+                                      CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#27272a"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </Trigger>
+                                <!-- 使用多个DataTrigger替代动态绑定 -->
+                                <DataTrigger Binding="{Binding Tag}" Value="startup">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="canvas">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="gesture">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="inkrecognition">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="crashaction">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="ppt">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="advanced">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="automation">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="randomwindow">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="theme">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="shortcuts">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="about">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Tag}" Value="plugins">
+                                    <Setter Property="Background" Value="#3b82f6"/>
+                                </DataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
         </ResourceDictionary>
-      </Window.Resources>
+    </Window.Resources>
     <!--输入命令绑定-->
     <Window.InputBindings>
         <KeyBinding Gesture="Escape" Command="{StaticResource KeyExit}" />
@@ -148,6 +149,7 @@
         <KeyBinding Modifiers="Alt" Key="D4" Command="{StaticResource HotKey_ChangeToPen4}" />
         <KeyBinding Modifiers="Alt" Key="D5" Command="{StaticResource HotKey_ChangeToPen5}" />
         <KeyBinding Modifiers="Alt" Key="L" Command="{StaticResource HotKey_DrawLine}" />
+        <KeyBinding Modifiers="Control" Key="V" Command="{StaticResource HotKey_Paste}" />
         <KeyBinding Modifiers="Alt" Key="F4" Command="{StaticResource NothingWillHappened}" />
     </Window.InputBindings>
     <!--命令执行方法绑定-->
@@ -175,6 +177,8 @@
                         Executed="KeyHide" />
         <CommandBinding CanExecute="CommandBinding_CanExecute" Command="{StaticResource HotKey_DrawLine}"
                         Executed="KeyDrawLine" />
+        <CommandBinding CanExecute="CommandBinding_CanExecute" Command="{StaticResource HotKey_Paste}"
+                        Executed="HandleGlobalPaste" />
     </Window.CommandBindings>
 
     <Grid x:Name="Main_Grid">
@@ -625,6 +629,13 @@
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchNoFocusMode_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="窗口置顶" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAlwaysOnTop"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
+                                    </ui:SimpleStackPanel>
                                     <ui:ToggleSwitch OnContent="" OffContent=""
                                                      Name="ToggleSwitchIsAutoUpdate" Header="自动检查更新"
                                                      FontFamily="Microsoft YaHei UI"
@@ -802,7 +813,13 @@
                                     <TextBlock Text="# 请注意，若不保留双曲线渐近线可能会有遇到撤回相关的 BUG 影响用。" TextWrapping="Wrap"
                                                Foreground="#a1a1aa" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                                                            <TextBlock Foreground="#fafafa" Text="使用WPF默认贝塞尔曲线平滑"
+                                    <TextBlock Foreground="#fafafa" Text="绘制圆时显示圆心位置" VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowCircleCenter"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchShowCircleCenter_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <TextBlock Foreground="#fafafa" Text="使用WPF默认贝塞尔曲线平滑"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchFitToCurve"
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
@@ -1151,6 +1168,138 @@
                                     </ui:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
+                                    
+                                    <!-- 浮动栏按钮显示控制 -->
+                                    <Border Background="#101010" Height="50" Margin="-20,0" Padding="20,0">
+                                        <Grid>
+                                            <ui:SimpleStackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
+                                                <Image Height="24" Width="24" Margin="16,0,0,0">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                    <GeometryDrawing Brush="#FFFFFFFF"
+                                                                        Geometry="F0 M24,24z M0,0z M4.41721,4.29873C4.35178,4.29873,4.29873,4.35178,4.29873,4.41721L4.29873,9.15646C4.29873,9.22189,4.35178,9.27494,4.41721,9.27494L9.15646,9.27494C9.22189,9.27494,9.27494,9.22189,9.27494,9.15646L9.27494,4.41721C9.27494,4.35178,9.22189,4.29873,9.15646,4.29873L4.41721,4.29873z M2.64,4.41721C2.64,3.43569,3.43569,2.64,4.41721,2.64L9.15646,2.64C10.138,2.64,10.9337,3.43569,10.9337,4.41721L10.9337,9.15646C10.9337,10.138,10.138,10.9337,9.15646,10.9337L4.41721,10.9337C3.43569,10.9337,2.64,10.138,2.64,9.15646L2.64,4.41721z M14.8435,4.29873C14.7781,4.29873,14.7251,4.35178,14.7251,4.41721L14.7251,9.15646C14.7251,9.22189,14.7781,9.27494,14.8435,9.27494L19.5828,9.27494C19.6482,9.27494,19.7013,9.22189,19.7013,9.15646L19.7013,4.41721C19.7013,4.35178,19.6482,4.29873,19.5828,4.29873L14.8435,4.29873z M13.0663,4.41721C13.0663,3.43569,13.862,2.64,14.8435,2.64L19.5828,2.64C20.5643,2.64,21.36,3.43569,21.36,4.41721L21.36,9.15646C21.36,10.138,20.5643,10.9337,19.5828,10.9337L14.8435,10.9337C13.862,10.9337,13.0663,10.138,13.0663,9.15646L13.0663,4.41721z M14.8435,14.7251C14.7781,14.7251,14.7251,14.7781,14.7251,14.8435L14.7251,19.5828C14.7251,19.6482,14.7781,19.7013,14.8435,19.7013L19.5828,19.7013C19.6482,19.7013,19.7013,19.6482,19.7013,19.5828L19.7013,14.8435C19.7013,14.7781,19.6482,14.7251,19.5828,14.7251L14.8435,14.7251z M13.0663,14.8435C13.0663,13.862,13.862,13.0663,14.8435,13.0663L19.5828,13.0663C20.5643,13.0663,21.36,13.862,21.36,14.8435L21.36,19.5828C21.36,20.5643,20.5643,21.36,19.5828,21.36L14.8435,21.36C13.862,21.36,13.0663,20.5643,13.0663,19.5828L13.0663,14.8435z M4.41721,14.7251C4.35178,14.7251,4.29873,14.7781,4.29873,14.8435L4.29873,19.5828C4.29873,19.6482,4.35178,19.7013,4.41721,19.7013L9.15646,19.7013C9.22189,19.7013,9.27494,19.6482,9.27494,19.5828L9.27494,14.8435C9.27494,14.7781,9.22189,14.7251,9.15646,14.7251L4.41721,14.7251z M2.64,14.8435C2.64,13.862,3.43569,13.0663,4.41721,13.0663L9.15646,13.0663C10.138,13.0663,10.9337,13.862,10.9337,14.8435L10.9337,19.5828C10.9337,20.5643,10.138,21.36,9.15646,21.36L4.41721,21.36C3.43569,21.36,2.64,20.5643,2.64,19.5828L2.64,14.8435z" />
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                            </ui:SimpleStackPanel>
+                                            <TextBlock Margin="12,0,0,0" VerticalAlignment="Center" Text="浮动栏按钮显示"
+                                                       FontWeight="Bold" Foreground="#fafafa"
+                                                       FontSize="20" />
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- 第一行：形状按钮和撤销按钮 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示形状按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowShapeButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowShapeButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示撤销按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowUndoButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowUndoButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <!-- 第二行：重做按钮和清空按钮 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示重做按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowRedoButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowRedoButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示清空按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowClearButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <!-- 第三行：白板按钮和隐藏按钮 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示白板按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowWhiteboardButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowWhiteboardButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示隐藏按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowHideButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowHideButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <!-- 第四行：套索选择按钮和清并鼠按钮 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,8">
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示套索选择按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowLassoSelectButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowLassoSelectButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
+                                            <TextBlock Foreground="#fafafa" Text="显示清并鼠按钮" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,8,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearAndMouseButton"
+                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchShowClearAndMouseButton_Toggled" />
+                                        </ui:SimpleStackPanel>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <!-- 第五行：快捷调色盘（单独一行，因为需要更多空间） -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
+                                        <TextBlock Foreground="#fafafa" Text="显示快捷调色盘" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,8,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowQuickColorPalette"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchShowQuickColorPalette_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="快捷调色盘显示模式" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxQuickColorPaletteDisplayMode"
+                                                  FontFamily="Microsoft YaHei UI" SelectedIndex="1"
+                                                  SelectionChanged="ComboBoxQuickColorPaletteDisplayMode_SelectionChanged">
+                                            <ComboBoxItem Content="单行显示(6色)" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="双行显示(8色)" FontFamily="Microsoft YaHei UI" />
+                                        </ComboBox>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="橡皮按钮显示" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxEraserDisplayOption"
+                                                  FontFamily="Microsoft YaHei UI" SelectedIndex="0"
+                                                  SelectionChanged="ComboBoxEraserDisplayOption_SelectionChanged">
+                                            <ComboBoxItem Content="两个都显示" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="仅显示面积擦" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="仅显示线擦" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="都不显示" FontFamily="Microsoft YaHei UI" />
+                                        </ComboBox>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
+                                          Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
+                                    
                                     <Border Background="#101010" Height="50" Margin="-20,0" Padding="20,0">
                                         <Grid>
                                             <ui:SimpleStackPanel Orientation="Horizontal" FlowDirection="RightToLeft">
@@ -3155,33 +3304,94 @@
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,900,0,0"
                     CornerRadius="5" Height="80"
                     Background="{DynamicResource FloatBarBackground}"
-                    Visibility="Collapsed"
+                    Visibility="{Binding ElementName=GridInkCanvasSelectionCover, Path=Visibility}"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
                 <Viewbox Margin="0,-2.5">
                     <ui:SimpleStackPanel Orientation="Horizontal" Spacing="10" Height="60">
-                        <Border Name="BorderImageRotateLeft" Margin="0,2,-9,2" Background="Transparent"
+                        <Border Name="BorderImageClone" Margin="0,2,-9,2" Background="Transparent"
                                 CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
-                                Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageRotateLeft_MouseUp">
+                                Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageClone_MouseUp">
                             <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_flip_horizontal_24_regular.png"
+                                <Image Source="/Resources/Icons-Fluent/ic_fluent_copy_24_regular.png"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="左转" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
+                                <TextBlock Text="克隆" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
                             </ui:SimpleStackPanel>
                         </Border>
-                        <Border Name="BorderImageRotateRight" Margin="0,2,-9,2" Background="Transparent"
+                        <Border Name="BorderImageCloneToNewBoard"
+                                Margin="0,2,-9,2"
+                                Background="Transparent"
                                 CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
-                                Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageRotateRight_MouseUp">
-                            <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_flip_vertical_24_regular.png"
-                                       RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
-                                <TextBlock Text="右转" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
+                                Width="40"
+                                MouseDown="Border_MouseDown" 
+                                MouseUp="BorderImageCloneToNewBoard_MouseUp"
+                                Visibility="{Binding Visibility, ElementName=GridBackgroundCover}">
+                            <ui:SimpleStackPanel VerticalAlignment="Center"
+                                                 HorizontalAlignment="Center">
+                                <Image Source="/Resources/Icons-Fluent/ic_fluent_copy_add_24_regular.png"
+                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                       Height="25"
+                                       Width="25" />
+                                <TextBlock Text="克隆至新页"
+                                           FontSize="8"
+                                           Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
+                            </ui:SimpleStackPanel>
+                        </Border>
+                        <Border Width="1" 
+                                Height="45" 
+                                BorderBrush="{DynamicResource FloatBarForeground}"
+                                Background="{DynamicResource FloatBarForeground}" />
+                        <Border CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
+                                Height="40">
+                            <ui:SimpleStackPanel VerticalAlignment="Center" 
+                                                 Spacing="5" 
+                                                 Margin="0,-10">
+                                <ui:SimpleStackPanel Orientation="Horizontal"
+                                                     Spacing="10">
+                                    <Image Source="{DynamicResource Rotate45DrawingImage}"
+                                           Height="22"
+                                           MouseDown="Border_MouseDown"
+                                           MouseUp="BorderImageRotateLeft_MouseUp" />
+                                    <Image Source="{DynamicResource Rotate90DrawingImage}"
+                                           Height="22"
+                                           MouseDown="Border_MouseDown"
+                                           MouseUp="BorderImageRotateRight_MouseUp" />
+                                </ui:SimpleStackPanel>
+                                <TextBlock Text="旋转"
+                                           FontSize="10"
+                                           HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource FloatBarForeground}" />
                             </ui:SimpleStackPanel>
                         </Border>
                         <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
                                 Background="{DynamicResource FloatBarForeground}" />
-                        <Border Name="BorderImageDelete" Margin="-8,0,0,0"
+                        <Border CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
+                                Height="40">
+                            <ui:SimpleStackPanel VerticalAlignment="Center" Spacing="5" Margin="0,-10">
+                                <ui:SimpleStackPanel Orientation="Horizontal" Spacing="10">
+                                    <Grid MouseDown="Border_MouseDown" MouseUp="GridImageScaleDecrease_MouseUp">
+                                        <Image Source="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular.png"
+                                               RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
+                                        <TextBlock Text="-" Foreground="{DynamicResource FloatBarForeground}"
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                                                   Margin="0,0,-2,-7" FontSize="15" />
+                                    </Grid>
+                                    <Grid MouseDown="Border_MouseDown" MouseUp="GridImageScaleIncrease_MouseUp">
+                                        <Image Source="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular.png"
+                                               RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
+                                        <TextBlock Text="+" Foreground="{DynamicResource FloatBarForeground}"
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right"
+                                                   Margin="0,0,-3,-4" FontSize="11" />
+                                    </Grid>
+                                </ui:SimpleStackPanel>
+                                <TextBlock Text="缩放" FontSize="10" HorizontalAlignment="Center"
+                                           Foreground="{DynamicResource FloatBarForeground}" />
+                            </ui:SimpleStackPanel>
+                        </Border>
+                        <Border Width="1" Height="45" BorderBrush="{DynamicResource FloatBarForeground}"
+                                Background="{DynamicResource FloatBarForeground}" />
+                        <Border Margin="-8,0,0,0"
                                 CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageDelete_MouseUp">
                             <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -3438,6 +3648,12 @@
                                                                    Padding="0,7"
                                                                    FontSize="17" FontWeight="Bold"
                                                                    TextAlignment="Center" />
+                                                        <Image Margin="144,10,0,0"
+                                                               Source="/Resources/new-icons/close-white.png"
+                                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                                               Height="16"
+                                                               Width="16" MouseDown="Border_MouseDown"
+                                                               MouseUp="CloseBordertools_MouseUp" />
                                                     </Canvas>
                                                 </Border>
                                                 <Viewbox Margin="8,0,8,0">
@@ -4560,6 +4776,12 @@
                                                                        Padding="0,5"
                                                                        FontSize="11" FontWeight="Bold"
                                                                        TextAlignment="Center" />
+                                                            <Image Margin="100,4,0,0"
+                                                           Source="/Resources/new-icons/close-white.png"
+                                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                                           Height="16"
+                                                           Width="16" MouseDown="Border_MouseDown"
+                                                           MouseUp="CloseBordertools_MouseUp" />
                                                         </Canvas>
                                                     </Border>
                                                     <ui:SimpleStackPanel Orientation="Horizontal" Margin="0,6,0,0"
@@ -4771,7 +4993,7 @@
                                         <Border x:Name="BoardBorderDrawShape" Visibility="Visible"
                                                 Background="LightGray"
                                                 Opacity="0.85" BorderBrush="Black" BorderThickness="1" CornerRadius="5"
-                                                Margin="-147,-286,-89,59">
+                                                Margin="-147,-286,-89,55">
                                             <Viewbox>
                                                 <ui:SimpleStackPanel Spacing="-8" Orientation="Vertical">
                                                     <TextBlock FontSize="16"
@@ -4891,7 +5113,7 @@
                                                                 <TransformGroup>
                                                                     <ScaleTransform />
                                                                     <SkewTransform />
-                                                                    <RotateTransform Angle="90" />
+                                                                    <RotateTransform Angle="90"/>
                                                                     <TranslateTransform />
                                                                 </TransformGroup>
                                                             </Image.RenderTransform>
@@ -4916,10 +5138,8 @@
                                         </Border>
                                     </Border>
                                     <Border x:Name="BoardInsertImage" Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            MouseUp="InsertImage_MouseUp" BorderThickness="0,1,0,1"
-                                            BorderBrush="#a1a1aa"
-                                            Background="#f4f4f5"
-                                            Opacity="0.95">
+                                            BorderThickness="0,1,0,1" BorderBrush="#a1a1aa"
+                                            MouseUp="InsertImageOptions_MouseUp" Background="#f4f4f5" Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
                                             <Image VerticalAlignment="Top"
                                                    RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
@@ -4938,16 +5158,95 @@
                                                        HorizontalAlignment="Center" FontSize="12" />
                                         </Grid>
                                     </Border>
-                                    <Border x:Name="BoardUndo" Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            MouseUp="SymbolIconUndo_MouseUp" BorderThickness="0,1,0,1"
-                                            BorderBrush="#a1a1aa"
-                                            IsEnabled="{Binding ElementName=BtnUndo, Path=IsEnabled}"
-                                            Background="#f4f4f5"
-                                            Opacity="0.95">
+                                    <Border>
+                                        <!-- Image Insertion Options Panel -->
+                                        <Grid RenderTransformOrigin="0,1" Margin="-133,-172,13,55">
+                                            <Grid.RenderTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+                                                    <SkewTransform />
+                                                    <RotateTransform />
+                                                    <TranslateTransform />
+                                                </TransformGroup>
+                                            </Grid.RenderTransform>
+                                            <Border Name="BoardImageOptionsPanel" Visibility="Collapsed" ClipToBounds="True" CornerRadius="5" Background="#fafafa" Opacity="1" BorderThickness="1" BorderBrush="#2563eb" Margin="0,76,0,0">
+                                                <ui:SimpleStackPanel Margin="0">
+                                                    <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1" Margin="-1,-1,-1,1" CornerRadius="6,6,0,0" Background="#2563eb">
+                                                        <Canvas Height="24" ClipToBounds="True">
+                                                            <TextBlock Text="选择图片" Foreground="White" Padding="0,5" FontSize="11" FontWeight="Bold" Canvas.Left="8" TextAlignment="Center" />
+                                                            <Image Margin="100,4,0,0" Source="/Resources/new-icons/close-white.png" RenderOptions.BitmapScalingMode="HighQuality" Height="12" Width="12" MouseDown="Border_MouseDown" MouseUp="CloseImageOptionsPanel_MouseUp" />
+                                                        </Canvas>
+                                                    </Border>
+                                                    <ui:SimpleStackPanel Margin="6,4,6,4" Spacing="2">
+                                                        <!-- Screenshot Option -->
+                                                        <Border MouseDown="Border_MouseDown" MouseUp="ImageOptionScreenshot_MouseUp"
+                                                                        Background="Transparent" CornerRadius="3" Padding="6,4">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Background" Value="#f0f9ff"/>
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                                                <Image Height="16" Width="16">
+                                                                    <Image.Source>
+                                                                        <DrawingImage>
+                                                                            <DrawingImage.Drawing>
+                                                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                                    <GeometryDrawing Brush="#2563eb"
+                                                                                                Geometry="F0 M24,24z M0,0z M9,3C8.46957,3 7.96086,3.21071 7.58579,3.58579 7.21071,3.96086 7,4.46957 7,5 7,5.26522 6.89464,5.51957 6.70711,5.70711 6.51957,5.89464 6.26522,6 6,6L5,6C4.20435,6 3.44129,6.31607 2.87868,6.87868 2.31607,7.44129 2,8.20435 2,9L2,18C2,18.7956 2.31607,19.5587 2.87868,20.1213 3.44129,20.6839 4.20435,21 5,21L19,21C19.7957,21 20.5587,20.6839 21.1213,20.1213 21.6839,19.5587 22,18.7957 22,18L22,9C22,8.20435 21.6839,7.44129 21.1213,6.87868 20.5587,6.31607 19.7957,6 19,6L18,6C17.7348,6 17.4804,5.89464 17.2929,5.70711 17.1054,5.51957 17,5.26522 17,5 17,4.46957 16.7893,3.96086 16.4142,3.58579 16.0391,3.21071 15.5304,3 15,3L9,3z M9,5L15,5C15,5.79565 15.3161,6.55871 15.8787,7.12132 16.4413,7.68393 17.2044,8 18,8L19,8C19.2652,8 19.5196,8.10536 19.7071,8.29289 19.8946,8.48043 20,8.73478 20,9L20,18C20,18.2652 19.8946,18.5196 19.7071,18.7071 19.5196,18.8946 19.2652,19 19,19L5,19C4.73478,19 4.48043,18.8946 4.29289,18.7071 4.10536,18.5196 4,18.2652 4,18L4,9C4,8.73478 4.10536,8.48043 4.29289,8.29289 4.48043,8.10536 4.73478,8 5,8L6,8C6.79565,8 7.55871,7.68393 8.12132,7.12132 8.68393,6.55871 9,5.79565 9,5z M12,9C10.9391,9 9.92172,9.42143 9.17157,10.1716 8.42143,10.9217 8,11.9391 8,13 8,14.0609 8.42143,15.0783 9.17157,15.8284 9.92172,16.5786 10.9391,17 12,17 13.0609,17 14.0783,16.5786 14.8284,15.8284 15.5786,15.0783 16,14.0609 16,13 16,11.9391 15.5786,10.9217 14.8284,10.1716 14.0783,9.42143 13.0609,9 12,9z M10.5858,11.5858C10.9609,11.2107 11.4696,11 12,11 12.5304,11 13.0391,11.2107 13.4142,11.5858 13.7893,11.9609 14,12.4696 14,13 14,13.5304 13.7893,14.0391 13.4142,14.4142 13.0391,14.7893 12.5304,15 12,15 11.4696,15 10.9609,14.7893 10.5858,14.4142 10.2107,14.0391 10,13.5304 10,13 10,12.4696 10.2107,11.9609 10.5858,11.5858z" />
+                                                                                </DrawingGroup>
+                                                                            </DrawingImage.Drawing>
+                                                                        </DrawingImage>
+                                                                    </Image.Source>
+                                                                </Image>
+                                                                <TextBlock Text="截图" FontSize="10" 
+                                                                                  Foreground="#1f2937" VerticalAlignment="Center"/>
+                                                            </ui:SimpleStackPanel>
+                                                        </Border>
+                                                        <!-- Select Image Option -->
+                                                        <Border MouseDown="Border_MouseDown" MouseUp="ImageOptionSelectFile_MouseUp"
+                                                                        Background="Transparent" CornerRadius="3" Padding="6,4">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Background" Value="#f0f9ff"/>
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="6">
+                                                                <Image Height="16" Width="16">
+                                                                    <Image.Source>
+                                                                        <DrawingImage>
+                                                                            <DrawingImage.Drawing>
+                                                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                                    <GeometryDrawing Brush="#2563eb"
+                                                                                                Geometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"/>
+                                                                                </DrawingGroup>
+                                                                            </DrawingImage.Drawing>
+                                                                        </DrawingImage>
+                                                                    </Image.Source>
+                                                                </Image>
+                                                                <TextBlock Text="选择图片" FontSize="10"
+                                                                                  Foreground="#1f2937" VerticalAlignment="Center"/>
+                                                            </ui:SimpleStackPanel>
+                                                        </Border>
+                                                    </ui:SimpleStackPanel>
+                                                </ui:SimpleStackPanel>
+                                            </Border>
+                                        </Grid>
+                                    </Border>
+                                    <Border x:Name="BoardUndo" Width="60" Height="50" MouseDown="Border_MouseDown" MouseUp="SymbolIconUndo_MouseUp" BorderThickness="0,1,0,1" BorderBrush="#a1a1aa" IsEnabled="{Binding ElementName=BtnUndo, Path=IsEnabled}" Background="#f4f4f5" Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
                                             <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"
-                                                   Opacity="{Binding ElementName=BtnUndo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
+                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20" Opacity="{Binding ElementName=BtnUndo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
                                                 <Image.Source>
                                                     <DrawingImage>
                                                         <DrawingImage.Drawing>
@@ -4959,21 +5258,12 @@
                                                     </DrawingImage>
                                                 </Image.Source>
                                             </Image>
-                                            <TextBlock Text="撤销" Foreground="Black" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12" />
+                                            <TextBlock Text="撤销" Foreground="Black" VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="12" />
                                         </Grid>
                                     </Border>
-                                    <Border x:Name="BoardRedo" Width="60" Height="50" CornerRadius="0,5,5,0"
-                                            MouseDown="Border_MouseDown" MouseUp="SymbolIconRedo_MouseUp"
-                                            BorderThickness="0,1,1,1"
-                                            BorderBrush="#a1a1aa"
-                                            IsEnabled="{Binding ElementName=BtnRedo, Path=IsEnabled}"
-                                            Background="#f4f4f5"
-                                            Opacity="0.95">
+                                    <Border x:Name="BoardRedo" Width="60" Height="50" CornerRadius="0,5,5,0" MouseDown="Border_MouseDown" MouseUp="SymbolIconRedo_MouseUp" BorderThickness="0,1,1,1" BorderBrush="#a1a1aa" IsEnabled="{Binding ElementName=BtnRedo, Path=IsEnabled}" Background="#f4f4f5" Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"
-                                                   Opacity="{Binding ElementName=BtnRedo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
+                                            <Image VerticalAlignment="Top" RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20" Opacity="{Binding ElementName=BtnRedo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
                                                 <Image.Source>
                                                     <DrawingImage>
                                                         <DrawingImage.Drawing>
@@ -5027,7 +5317,7 @@
                                                 </TransformGroup>
                                             </Grid.RenderTransform>
                                             <Border ClipToBounds="True" Name="BoardBorderTools"
-                                                    Margin="-105,-138.5,-14,33.5"
+                                                    Margin="-80,-138.5,-39,33.5"
                                                     CornerRadius="5" Background="#fafafa" Opacity="1"
                                                     BorderThickness="1"
                                                     BorderBrush="#2563eb">
@@ -5181,7 +5471,6 @@
                                                         <ui:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
                                                                              Orientation="Horizontal">
                                                             <ui:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                MouseUp="SymbolIconScreenshot_MouseUp"
                                                                 Margin="0,0,0,0" Height="38" Width="32"
                                                                 Orientation="Vertical">
                                                                 <Image Margin="0,4,0,2" Height="19" Width="19">
@@ -5933,7 +6222,7 @@
 
         <Grid Name="FloatingbarUIForInkReplay">
             <Viewbox Name="ViewboxFloatingBar" Margin="100,5,0,0" Cursor="Arrow"
-                     HorizontalAlignment="Left" Height="58" VerticalAlignment="Top" Width="733"
+                     HorizontalAlignment="Left" Height="58" VerticalAlignment="Top" MinWidth="200" MaxWidth="1200"
                      RenderTransformOrigin="0.5,0.5">
                 <Viewbox.LayoutTransform>
                     <ScaleTransform x:Name="ViewboxFloatingBarScaleTransform" ScaleX="1" ScaleY="1" />
@@ -5950,7 +6239,8 @@
                     <Border Margin="2,0,0,0" Padding="2" Visibility="Visible" Height="36"
                             Name="BorderFloatingBarMainControls" Background="#fafafa" CornerRadius="5"
                             BorderThickness="1"
-                            BorderBrush="#9952525b">
+                            BorderBrush="#9952525b"
+                            HorizontalAlignment="Left">
                         <Grid>
                             <Canvas Name="FloatingbarSelectionBGCanvas" Margin="2,0,2,0">
                                 <Border Name="FloatingbarSelectionBG" Visibility="Hidden" Width="28" Height="34"
@@ -5961,7 +6251,7 @@
                                     </Canvas>
                                 </Border>
                             </Canvas>
-                            <ui:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow">
+                            <ui:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow" HorizontalAlignment="Left">
                                 <!--<ui:SimpleStackPanel Name="Cursor_Icon" MouseDown="Border_MouseDown" MouseUp="CursorIcon_Click"-->
                                 <ui:SimpleStackPanel Name="Cursor_Icon"
                                                      MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
@@ -6007,6 +6297,580 @@
                                     <TextBlock x:Name="PenToolbarTextBlock" Text="批注" Foreground="Black" FontSize="8"
                                                Margin="0,1,0,0" TextAlignment="Center" />
                                 </ui:SimpleStackPanel>
+                                
+                                <!-- 快捷调色盘 - 双行显示模式 -->
+                                <ui:SimpleStackPanel Name="QuickColorPalettePanel" 
+                                                     Visibility="Collapsed"
+                                                     Orientation="Vertical" 
+                                                     HorizontalAlignment="Center" 
+                                                     Margin="4,0,4,0"
+                                                     Width="60"
+                                                     Height="42"
+                                                     MaxWidth="60"
+                                                     MaxHeight="42"
+                                                     MinWidth="60">
+                                    <!-- 第一行：黑、白、红、橙 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" Margin="0,0,0,2">
+                                        <!-- 黑色 -->
+                                        <Border Name="QuickColorBlack" 
+                                                Width="13" Height="13" 
+                                                Background="Black" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorBlack_Click"
+                                                ToolTip="黑色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- Check图标容器 -->
+                                            <Grid>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorBlackCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="White" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 白色 -->
+                                        <Border Name="QuickColorWhite" 
+                                                Width="13" Height="13" 
+                                                Background="White" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorWhite_Click"
+                                                ToolTip="白色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- Check图标容器 -->
+                                            <Grid>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorWhiteCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="Black" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 红色 -->
+                                        <Border Name="QuickColorRed" 
+                                                Width="13" Height="13" 
+                                                Background="#FF0000" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorRed_Click"
+                                                ToolTip="红色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- Check图标容器 -->
+                                            <Grid>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorRedCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="White" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 橙色 -->
+                                        <Border Name="QuickColorOrange" 
+                                                Width="13" Height="13" 
+                                                Background="#FFA500" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorOrange_Click"
+                                                ToolTip="橙色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- Check图标容器 -->
+                                            <Grid>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorOrangeCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="Black" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <!-- 第二行：黄、绿、蓝、紫 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" Margin="0,2,0,0">
+                                        <!-- 黄色 -->
+                                        <Border Name="QuickColorYellow" 
+                                                Width="13" Height="13" 
+                                                Background="#FFFF00" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorYellow_Click"
+                                                ToolTip="黄色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- Check图标容器 -->
+                                            <Grid>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorYellowCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="Black" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 绿色 -->
+                                        <Border Name="QuickColorGreen" 
+                                                Width="13" Height="13" 
+                                                Background="#16A34A" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorGreen_Click"
+                                                ToolTip="绿色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- Check图标容器 -->
+                                            <Grid>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorGreenCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="Black" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 蓝色 -->
+                                        <Border Name="QuickColorBlue" 
+                                                Width="13" Height="13" 
+                                                Background="#2563EB" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorBlue_Click"
+                                                ToolTip="蓝色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- Check图标容器 -->
+                                            <Grid>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorBlueCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="White" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                        
+                                        <!-- 紫色 -->
+                                        <Border Name="QuickColorPurple" 
+                                                Width="13" Height="13" 
+                                                Background="#9333EA" 
+                                                BorderBrush="#CCCCCC" 
+                                                BorderThickness="1" 
+                                                CornerRadius="3" 
+                                                Margin="1,0,1,0"
+                                                MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                MouseUp="QuickColorPurple_Click"
+                                                ToolTip="紫色">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                            <Setter Property="BorderThickness" Value="2"/>
+                                                            <Setter Property="BorderBrush" Value="#666666"/>
+                                                        </Trigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <!-- Check图标容器 -->
+                                            <Grid>
+                                                <!-- Check图标 -->
+                                                <Path Name="QuickColorPurpleCheck" 
+                                                      Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                      Fill="White" 
+                                                      Stretch="Uniform" 
+                                                      Width="8" 
+                                                      Height="8"
+                                                      Opacity="1.0"
+                                                      Visibility="Collapsed"
+                                                      HorizontalAlignment="Center"
+                                                      VerticalAlignment="Center"/>
+                                            </Grid>
+                                        </Border>
+                                    </ui:SimpleStackPanel>
+                                </ui:SimpleStackPanel>
+                                
+                                <!-- 快捷调色盘 - 单行显示模式 -->
+                                <ui:SimpleStackPanel Name="QuickColorPaletteSingleRowPanel" 
+                                                     Visibility="Collapsed"
+                                                     Orientation="Horizontal" 
+                                                     HorizontalAlignment="Center" 
+                                                     Margin="4,0,4,0"
+                                                     Height="24"
+                                                     MaxHeight="24"
+                                                     MinWidth="120">
+                                    <!-- 单行显示：黑、白、红、橙、黄、绿 -->
+                                    <!-- 黑色 -->
+                                    <Border Name="QuickColorBlackSingle" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
+                                            Background="Black" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="3" 
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorBlack_Click"
+                                            ToolTip="黑色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <!-- Check图标容器 -->
+                                        <Grid>
+                                            <!-- Check图标 -->
+                                            <Path Name="QuickColorBlackCheckSingle" 
+                                                  Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                  Fill="White" 
+                                                  Stretch="Uniform" 
+                                                  Width="10" 
+                                                  Height="10"
+                                                  Opacity="1.0"
+                                                  Visibility="Collapsed"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- 白色 -->
+                                    <Border Name="QuickColorWhiteSingle" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
+                                            Background="White" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="3" 
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorWhite_Click"
+                                            ToolTip="白色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <!-- Check图标容器 -->
+                                        <Grid>
+                                            <!-- Check图标 -->
+                                            <Path Name="QuickColorWhiteCheckSingle" 
+                                                  Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                  Fill="Black" 
+                                                  Stretch="Uniform" 
+                                                  Width="10" 
+                                                  Height="10"
+                                                  Opacity="1.0"
+                                                  Visibility="Collapsed"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- 红色 -->
+                                    <Border Name="QuickColorRedSingle" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
+                                            Background="#FF0000" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="3" 
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorRed_Click"
+                                            ToolTip="红色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <!-- Check图标容器 -->
+                                        <Grid>
+                                            <!-- Check图标 -->
+                                            <Path Name="QuickColorRedCheckSingle" 
+                                                  Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                  Fill="White" 
+                                                  Stretch="Uniform" 
+                                                  Width="10" 
+                                                  Height="10"
+                                                  Opacity="1.0"
+                                                  Visibility="Collapsed"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- 橙色 -->
+                                    <Border Name="QuickColorOrangeSingle" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
+                                            Background="#FFA500" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="3" 
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorOrange_Click"
+                                            ToolTip="橙色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <!-- Check图标容器 -->
+                                        <Grid>
+                                            <!-- Check图标 -->
+                                            <Path Name="QuickColorOrangeCheckSingle" 
+                                                  Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                  Fill="Black" 
+                                                  Stretch="Uniform" 
+                                                  Width="10" 
+                                                  Height="10"
+                                                  Opacity="1.0"
+                                                  Visibility="Collapsed"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- 黄色 -->
+                                    <Border Name="QuickColorYellowSingle" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
+                                            Background="#FFFF00" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="3" 
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorYellow_Click"
+                                            ToolTip="黄色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <!-- Check图标容器 -->
+                                        <Grid>
+                                            <!-- Check图标 -->
+                                            <Path Name="QuickColorYellowCheckSingle" 
+                                                  Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                  Fill="Black" 
+                                                  Stretch="Uniform" 
+                                                  Width="10" 
+                                                  Height="10"
+                                                  Opacity="1.0"
+                                                  Visibility="Collapsed"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                    
+                                    <!-- 绿色 -->
+                                    <Border Name="QuickColorGreenSingle" 
+                                            MinWidth="16" MinHeight="16"
+                                            MaxWidth="20" MaxHeight="20"
+                                            Background="#16A34A" 
+                                            BorderBrush="#CCCCCC" 
+                                            BorderThickness="1" 
+                                            CornerRadius="3" 
+                                            Margin="2,0,2,0"
+                                            VerticalAlignment="Center"
+                                            MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                            MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                            MouseUp="QuickColorGreen_Click"
+                                            ToolTip="绿色">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="BorderThickness" Value="2"/>
+                                                        <Setter Property="BorderBrush" Value="#666666"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <!-- Check图标容器 -->
+                                        <Grid>
+                                            <!-- Check图标 -->
+                                            <Path Name="QuickColorGreenCheckSingle" 
+                                                  Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z" 
+                                                  Fill="Black" 
+                                                  Stretch="Uniform" 
+                                                  Width="10" 
+                                                  Height="10"
+                                                  Opacity="1.0"
+                                                  Visibility="Collapsed"
+                                                  HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"/>
+                                        </Grid>
+                                    </Border>
+                                </ui:SimpleStackPanel>
+                                
                                 <ui:SimpleStackPanel Name="SymbolIconDelete"
                                                      MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
                                                      MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
@@ -6904,7 +7768,7 @@
                                         <Border x:Name="BorderDrawShape" Background="#fafafa" Opacity="1"
                                                 Visibility="Visible" BorderBrush="#2563eb"
                                                 BorderThickness="1"
-                                                CornerRadius="5" Margin="-200,-122,-117,37">
+                                                CornerRadius="5" Margin="-170,-122,-147,37">
                                             <ui:SimpleStackPanel Spacing="0" Orientation="Vertical">
                                                 <!--<TextBlock FontSize="16" Foreground="{DynamicResource FloatBarForeground}" HorizontalAlignment="Left" Margin="10,8">
                                                 <Run Text="图形"/>
@@ -6920,6 +7784,12 @@
                                                             <TextBlock Text="几何绘图" Canvas.Left="8" Foreground="White"
                                                                        Padding="0,5" FontSize="11" FontWeight="Bold"
                                                                        TextAlignment="Center" />
+                                                            <Image Margin="295,3.5,0,0"
+                                                                   Source="/Resources/new-icons/close-white.png"
+                                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                                   Height="16"
+                                                                   Width="16" MouseDown="Border_MouseDown"
+                                                                   MouseUp="CloseBordertools_MouseUp" />
                                                         </Canvas>
                                                     </ui:SimpleStackPanel>
                                                 </Border>
@@ -7224,7 +8094,7 @@
                                         <!-- 背景面板将在代码中动态添加 -->
                                     </Grid>
                                     <Border Visibility="Visible" ClipToBounds="True" Name="EraserSizePanel"
-                                            Margin="-203,-128,83,37" CornerRadius="5" Background="#fafafa" Opacity="1"
+                                            Margin="-203,-148,83,40" CornerRadius="5" Background="#fafafa" Opacity="1"
                                             BorderBrush="#2563eb" BorderThickness="1">
                                         <ui:SimpleStackPanel Margin="0">
                                             <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
@@ -7234,6 +8104,12 @@
                                                     <TextBlock Text="橡皮选项" Canvas.Left="8" Foreground="White"
                                                                Padding="0,5"
                                                                FontSize="11" FontWeight="Bold" TextAlignment="Center" />
+                                                    <Image Margin="100,4,0,0"
+                                                           Source="/Resources/new-icons/close-white.png"
+                                                           RenderOptions.BitmapScalingMode="HighQuality"
+                                                           Height="16"
+                                                           Width="16" MouseDown="Border_MouseDown"
+                                                           MouseUp="CloseBordertools_MouseUp" />
                                                 </Canvas>
                                             </Border>
                                             <ui:SimpleStackPanel Orientation="Horizontal" Margin="0,8,0,0" Spacing="-2"
@@ -7311,6 +8187,42 @@
                                                     </Canvas>
                                                 </Border>
                                             </ui:SimpleStackPanel>
+                                            <Button Click="EraserPanelSymbolIconDelete_MouseUp" Foreground="White"
+                                                    HorizontalAlignment="Center" Margin="0,6,0,8">
+                                                <Button.Resources>
+                                                    <SolidColorBrush
+                                                        x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}"
+                                                        Color="#b91c1c" />
+                                                    <SolidColorBrush
+                                                        x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}"
+                                                        Color="#b91c1c" />
+                                                    <SolidColorBrush
+                                                        x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}"
+                                                        Color="#991b1b" />
+                                                </Button.Resources>
+                                                <Button.Content>
+                                                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="3">
+                                                        <Image RenderOptions.BitmapScalingMode="HighQuality"
+                                                               Height="12">
+                                                            <Image.Source>
+                                                                <DrawingImage>
+                                                                    <DrawingImage.Drawing>
+                                                                        <DrawingGroup
+                                                                            ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                            <GeometryDrawing Brush="White"
+                                                                                Geometry="F0 M24,24z M0,0z M10.1573,10.0421C10.7298,10.0421,11.1938,10.5062,11.1938,11.0787L11.1938,16.6067C11.1938,17.1792 10.7298,17.6433 10.1573,17.6433 9.58485,17.6433 9.12079,17.1792 9.12079,16.6067L9.12079,11.0787C9.12079,10.5062,9.58485,10.0421,10.1573,10.0421z M13.8427,10.0421C14.4151,10.0421,14.8792,10.5062,14.8792,11.0787L14.8792,16.6067C14.8792,17.1792 14.4151,17.6433 13.8427,17.6433 13.2702,17.6433 12.8062,17.1792 12.8062,16.6067L12.8062,11.0787C12.8062,10.5062,13.2702,10.0421,13.8427,10.0421z M3.70787,5.43539C3.13541,5.43539 2.67135,5.89946 2.67135,6.47191 2.67135,7.04436 3.13541,7.50843 3.70787,7.50843L4.51405,7.50843 4.51405,19.3708C4.51405,20.1686 4.9025,20.8796 5.39348,21.3706 5.88445,21.8615 6.59548,22.25 7.39326,22.25L16.6067,22.25C17.4045,22.25 18.1155,21.8615 18.6065,21.3706 19.0975,20.8796 19.486,20.1686 19.486,19.3708L19.486,7.50843 20.2921,7.50843C20.8646,7.50843 21.3287,7.04436 21.3287,6.47191 21.3287,5.89946 20.8646,5.43539 20.2921,5.43539L16.7219,5.43539 16.7219,4.62921C16.7219,3.83143 16.3335,3.12041 15.8425,2.62943 15.3515,2.13845 14.6405,1.75 13.8427,1.75L10.1573,1.75C9.35952,1.75 8.6485,2.13845 8.15752,2.62943 7.66654,3.12041 7.27809,3.83143 7.27809,4.62921L7.27809,5.43539 3.70787,5.43539z M6.58708,19.3708C6.58708,19.4944 6.6593,19.7047 6.85933,19.9047 7.05937,20.1047 7.26969,20.177 7.39326,20.177L16.6067,20.177C16.7303,20.177 16.9406,20.1047 17.1407,19.9047 17.3407,19.7047 17.4129,19.4944 17.4129,19.3708L17.4129,7.50843 6.58708,7.50843 6.58708,19.3708z M9.62338,4.09529C9.42334,4.29532,9.35112,4.50565,9.35112,4.62921L9.35112,5.43539 14.6489,5.43539 14.6489,4.62921C14.6489,4.50565 14.5767,4.29532 14.3766,4.09529 14.1766,3.89525 13.9663,3.82303 13.8427,3.82303L10.1573,3.82303C10.0337,3.82303,9.82341,3.89525,9.62338,4.09529z" />
+                                                                        </DrawingGroup>
+                                                                    </DrawingImage.Drawing>
+                                                                </DrawingImage>
+                                                            </Image.Source>
+                                                        </Image>
+                                                        <TextBlock FontSize="10" VerticalAlignment="Center"
+                                                                   Foreground="White" FontWeight="Bold">
+                                                            清空墨迹
+                                                        </TextBlock>
+                                                    </ui:SimpleStackPanel>
+                                                </Button.Content>
+                                            </Button>
                                         </ui:SimpleStackPanel>
                                     </Border>
                                 </Grid>
@@ -7389,7 +8301,7 @@
                                                    Margin="0,1,0,0" TextAlignment="Center" />
                                     </ui:SimpleStackPanel>
                                     <Grid Width="0">
-                                        <Border ClipToBounds="True" Name="BorderTools" Margin="-133,-156,14,37"
+                                        <Border ClipToBounds="True" Name="BorderTools" Margin="-103,-156,-16,37"
                                                 CornerRadius="5" Background="#fafafa" Opacity="1" BorderThickness="1"
                                                 BorderBrush="#2563eb">
                                             <ui:SimpleStackPanel Margin="-1,0,0,0">
@@ -7540,7 +8452,6 @@
                                                     <ui:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
                                                                          Orientation="Horizontal">
                                                         <ui:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="SymbolIconScreenshot_MouseUp"
                                                                              Margin="0,0,0,0" Height="38" Width="32"
                                                                              Orientation="Vertical">
                                                             <Image Margin="0,4,0,2" Height="19" Width="19">
@@ -7637,6 +8548,12 @@
                                     <Canvas Height="24" ClipToBounds="True">
                                         <TextBlock Text="手势选项" Canvas.Left="8" Foreground="White" Padding="0,5"
                                                    FontSize="11" FontWeight="Bold" TextAlignment="Center" />
+                                        <Image Margin="98,5,0,0"
+                                                               Source="/Resources/new-icons/close-white.png"
+                                                               RenderOptions.BitmapScalingMode="HighQuality"
+                                                               Height="16"
+                                                               Width="16" MouseDown="Border_MouseDown"
+                                                               MouseUp="CloseBordertools_MouseUp" />
                                     </Canvas>
                                 </Border>
                                 <ui:SimpleStackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"

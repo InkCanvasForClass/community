@@ -1,10 +1,10 @@
+using Ink_Canvas.Windows;
+using Microsoft.Win32;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
-using Ink_Canvas.Windows;
-using Microsoft.Win32;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
 {
@@ -17,7 +17,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         /// 父插件
         /// </summary>
         private readonly SuperLauncherPlugin _plugin;
-        
+
         /// <summary>
         /// 构造函数
         /// </summary>
@@ -25,20 +25,20 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         public LauncherSettingsControl(SuperLauncherPlugin plugin)
         {
             InitializeComponent();
-            
+
             _plugin = plugin;
-            
+
             // 设置按钮位置
             RbtnLeft.IsChecked = _plugin.Config.ButtonPosition == LauncherButtonPosition.Left;
             RbtnRight.IsChecked = _plugin.Config.ButtonPosition == LauncherButtonPosition.Right;
-            
+
             // 绑定应用列表
             DgApps.ItemsSource = _plugin.LauncherItems;
-            
+
             // 初始化按钮状态
             UpdateButtonStates();
         }
-        
+
         /// <summary>
         /// 更新按钮状态
         /// </summary>
@@ -48,16 +48,16 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             BtnEdit.IsEnabled = hasSelection;
             BtnDelete.IsEnabled = hasSelection;
         }
-        
+
         /// <summary>
         /// 位置单选按钮选择事件
         /// </summary>
         private void RbtnPosition_Checked(object sender, RoutedEventArgs e)
         {
             if (!IsLoaded) return;
-            
+
             LauncherButtonPosition oldPosition = _plugin.Config.ButtonPosition;
-            
+
             if (sender == RbtnLeft)
             {
                 _plugin.Config.ButtonPosition = LauncherButtonPosition.Left;
@@ -66,7 +66,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             {
                 _plugin.Config.ButtonPosition = LauncherButtonPosition.Right;
             }
-            
+
             // 如果位置发生变化，更新按钮位置
             if (oldPosition != _plugin.Config.ButtonPosition)
             {
@@ -74,10 +74,10 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 {
                     // 更新按钮位置
                     _plugin.UpdateButtonPosition();
-                    
+
                     // 保存配置
                     _plugin.SaveConfig();
-                    
+
                     LogHelper.WriteLogToFile($"启动台按钮位置已更改为: {_plugin.Config.ButtonPosition}");
                 }
                 catch (Exception ex)
@@ -87,7 +87,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 }
             }
         }
-        
+
         /// <summary>
         /// 添加按钮点击事件
         /// </summary>
@@ -103,7 +103,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     IsVisible = true,
                     Position = -1 // 让插件管理器分配位置
                 };
-                
+
                 // 直接显示编辑对话框
                 EditLauncherItem(item, true);
             }
@@ -113,7 +113,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 MessageBox.Show($"添加启动项时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
         /// <summary>
         /// 编辑应用按钮点击事件
         /// </summary>
@@ -124,7 +124,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 EditLauncherItem(item, false);
             }
         }
-        
+
         /// <summary>
         /// 删除应用按钮点击事件
         /// </summary>
@@ -134,22 +134,22 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             {
                 // 确认删除
                 MessageBoxResult result = MessageBox.Show(
-                    $"确定要删除 {item.Name} 吗？", 
-                    "删除确认", 
-                    MessageBoxButton.YesNo, 
+                    $"确定要删除 {item.Name} 吗？",
+                    "删除确认",
+                    MessageBoxButton.YesNo,
                     MessageBoxImage.Question);
-                
+
                 if (result == MessageBoxResult.Yes)
                 {
                     // 从集合中移除
                     _plugin.LauncherItems.Remove(item);
-                    
+
                     // 保存配置
                     _plugin.SaveConfig();
                 }
             }
         }
-        
+
         /// <summary>
         /// 保存设置按钮点击事件
         /// </summary>
@@ -159,7 +159,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             {
                 // 保存配置
                 _plugin.SaveConfig();
-                
+
                 // 如果插件已启用，重新加载启动台按钮
                 if (_plugin.IsEnabled)
                 {
@@ -170,7 +170,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 {
                     // 如果插件未启用，则启用它
                     _plugin.Enable();
-                    
+
                     // 通知PluginSettingsWindow刷新插件列表
                     var window = Window.GetWindow(this);
                     if (window is PluginSettingsWindow pluginSettingsWindow)
@@ -179,7 +179,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                         pluginSettingsWindow.RefreshPluginList();
                     }
                 }
-                
+
                 MessageBox.Show("设置已保存并应用！", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -188,7 +188,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 MessageBox.Show($"保存设置时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        
+
         /// <summary>
         /// 应用项选择变更事件
         /// </summary>
@@ -196,7 +196,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
         {
             UpdateButtonStates();
         }
-        
+
         /// <summary>
         /// 编辑启动项
         /// </summary>
@@ -213,63 +213,63 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 ResizeMode = ResizeMode.NoResize
             };
-            
+
             // 创建编辑表单
             Grid grid = new Grid
             {
                 Margin = new Thickness(20)
             };
-            
+
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             grid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
-            
+
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(80) });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-            
+
             // 名称输入框
-            TextBlock nameLabel = new TextBlock 
-            { 
-                Text = "名称:", 
-                VerticalAlignment = VerticalAlignment.Center 
+            TextBlock nameLabel = new TextBlock
+            {
+                Text = "名称:",
+                VerticalAlignment = VerticalAlignment.Center
             };
-            TextBox nameTextBox = new TextBox 
-            { 
-                Text = item.Name, 
-                Margin = new Thickness(0, 5, 0, 5) 
+            TextBox nameTextBox = new TextBox
+            {
+                Text = item.Name,
+                Margin = new Thickness(0, 5, 0, 5)
             };
-            
+
             Grid.SetRow(nameLabel, 0);
             Grid.SetColumn(nameLabel, 0);
             Grid.SetRow(nameTextBox, 0);
             Grid.SetColumn(nameTextBox, 1);
-            
+
             grid.Children.Add(nameLabel);
             grid.Children.Add(nameTextBox);
-            
+
             // 路径输入框
-            TextBlock pathLabel = new TextBlock 
-            { 
-                Text = "路径:", 
-                VerticalAlignment = VerticalAlignment.Center 
+            TextBlock pathLabel = new TextBlock
+            {
+                Text = "路径:",
+                VerticalAlignment = VerticalAlignment.Center
             };
             Grid pathGrid = new Grid();
             pathGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             pathGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength() });
-            
-            TextBox pathTextBox = new TextBox 
-            { 
-                Text = item.Path, 
-                Margin = new Thickness(0, 5, 5, 5) 
+
+            TextBox pathTextBox = new TextBox
+            {
+                Text = item.Path,
+                Margin = new Thickness(0, 5, 5, 5)
             };
-            Button browseButton = new Button 
-            { 
-                Content = "浏览", 
+            Button browseButton = new Button
+            {
+                Content = "浏览",
                 Padding = new Thickness(5, 0, 5, 0),
                 Margin = new Thickness(0, 5, 0, 5)
             };
-            
-            browseButton.Click += (s, e) => 
+
+            browseButton.Click += (s, e) =>
             {
                 OpenFileDialog dialog = new OpenFileDialog
                 {
@@ -278,11 +278,11 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     Multiselect = false,
                     FileName = pathTextBox.Text
                 };
-                
+
                 if (dialog.ShowDialog() == true)
                 {
                     pathTextBox.Text = dialog.FileName;
-                    
+
                     // 如果选择的是.exe文件，自动获取文件名填入名称字段
                     if (Path.GetExtension(dialog.FileName).ToLower() == ".exe")
                     {
@@ -295,20 +295,20 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     }
                 }
             };
-            
+
             Grid.SetColumn(pathTextBox, 0);
             Grid.SetColumn(browseButton, 1);
             pathGrid.Children.Add(pathTextBox);
             pathGrid.Children.Add(browseButton);
-            
+
             Grid.SetRow(pathLabel, 1);
             Grid.SetColumn(pathLabel, 0);
             Grid.SetRow(pathGrid, 1);
             Grid.SetColumn(pathGrid, 1);
-            
+
             grid.Children.Add(pathLabel);
             grid.Children.Add(pathGrid);
-            
+
             // 确认和取消按钮
             StackPanel buttonPanel = new StackPanel
             {
@@ -316,7 +316,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 HorizontalAlignment = HorizontalAlignment.Right,
                 Margin = new Thickness(0, 10, 0, 0)
             };
-            
+
             Button okButton = new Button
             {
                 Content = "确定",
@@ -324,15 +324,15 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                 Margin = new Thickness(0, 0, 10, 0),
                 IsDefault = true
             };
-            
+
             Button cancelButton = new Button
             {
                 Content = "取消",
                 Padding = new Thickness(15, 5, 15, 5),
                 IsCancel = true
             };
-            
-            okButton.Click += (s, e) => 
+
+            okButton.Click += (s, e) =>
             {
                 // 验证输入
                 if (string.IsNullOrWhiteSpace(nameTextBox.Text))
@@ -340,17 +340,17 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     MessageBox.Show("请输入应用名称！", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                
+
                 if (string.IsNullOrWhiteSpace(pathTextBox.Text))
                 {
                     MessageBox.Show("请输入应用路径！", "提示", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
-                
+
                 // 更新项目
                 item.Name = nameTextBox.Text;
                 item.Path = pathTextBox.Text;
-                
+
                 // 如果是新建，添加到集合
                 if (isNew)
                 {
@@ -363,34 +363,34 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     {
                         view.Refresh();
                     }
-                    
+
                     // 保存配置
                     _plugin.SaveConfig();
                 }
-                
+
                 editWindow.DialogResult = true;
                 editWindow.Close();
             };
-            
-            cancelButton.Click += (s, e) => 
+
+            cancelButton.Click += (s, e) =>
             {
                 editWindow.DialogResult = false;
                 editWindow.Close();
             };
-            
+
             buttonPanel.Children.Add(okButton);
             buttonPanel.Children.Add(cancelButton);
-            
+
             Grid.SetRow(buttonPanel, 2);
             Grid.SetColumnSpan(buttonPanel, 2);
-            
+
             grid.Children.Add(buttonPanel);
-            
+
             // 设置窗口内容
             editWindow.Content = grid;
-            
+
             // 显示窗口
             editWindow.ShowDialog();
         }
     }
-} 
+}

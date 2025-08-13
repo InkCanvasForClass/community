@@ -5,11 +5,15 @@ using System.Windows.Forms;
 using System.Windows.Interop;
 using Point = System.Windows.Point;
 
-namespace Ink_Canvas.Helpers {
-    internal class IsOutsideOfScreenHelper {
-        public static bool IsOutsideOfScreen(FrameworkElement target) {
+namespace Ink_Canvas.Helpers
+{
+    internal class IsOutsideOfScreenHelper
+    {
+        public static bool IsOutsideOfScreen(FrameworkElement target)
+        {
             var hwndSource = (HwndSource)PresentationSource.FromVisual(target);
-            if (hwndSource is null) {
+            if (hwndSource is null)
+            {
                 return true;
             }
 
@@ -19,7 +23,8 @@ namespace Ink_Canvas.Helpers {
             var screens = Screen.AllScreens;
             return !screens.Any(x => x.Bounds.IntersectsWith(targetBounds));
 
-            Rectangle GetPixelBoundsToScreen(FrameworkElement visual) {
+            Rectangle GetPixelBoundsToScreen(FrameworkElement visual)
+            {
                 var pixelBoundsToScreen = Rect.Empty;
                 pixelBoundsToScreen.Union(visual.PointToScreen(new Point(0, 0)));
                 pixelBoundsToScreen.Union(visual.PointToScreen(new Point(visual.ActualWidth, 0)));

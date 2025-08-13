@@ -1,3 +1,5 @@
+using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,8 +7,6 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Win32;
-using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers
 {
@@ -128,7 +128,7 @@ namespace Ink_Canvas.Helpers
             {
                 // 收集硬件信息
                 var hardwareInfo = new StringBuilder();
-                
+
                 // 使用反射获取硬件信息，避免直接引用System.Management
                 try
                 {
@@ -143,10 +143,10 @@ namespace Ink_Canvas.Helpers
                             var searcher = Activator.CreateInstance(searcherType, "SELECT ProcessorId FROM Win32_Processor");
                             var getMethod = searcherType.GetMethod("Get");
                             var enumerator = getMethod.Invoke(searcher, null);
-                            
+
                             var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
                             var currentProperty = enumerator.GetType().GetProperty("Current");
-                            
+
                             if ((bool)moveNextMethod.Invoke(enumerator, null))
                             {
                                 var obj = currentProperty.GetValue(enumerator);
@@ -154,7 +154,7 @@ namespace Ink_Canvas.Helpers
                                 var processorId = indexer.GetValue(obj, new object[] { "ProcessorId" });
                                 hardwareInfo.Append(processorId?.ToString() ?? "");
                             }
-                            
+
                             var disposeMethod = searcher.GetType().GetMethod("Dispose");
                             disposeMethod?.Invoke(searcher, null);
                         }
@@ -167,10 +167,10 @@ namespace Ink_Canvas.Helpers
                             var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BaseBoard");
                             var getMethod = searcherType.GetMethod("Get");
                             var enumerator = getMethod.Invoke(searcher, null);
-                            
+
                             var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
                             var currentProperty = enumerator.GetType().GetProperty("Current");
-                            
+
                             if ((bool)moveNextMethod.Invoke(enumerator, null))
                             {
                                 var obj = currentProperty.GetValue(enumerator);
@@ -178,7 +178,7 @@ namespace Ink_Canvas.Helpers
                                 var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
                                 hardwareInfo.Append(serialNumber?.ToString() ?? "");
                             }
-                            
+
                             var disposeMethod = searcher.GetType().GetMethod("Dispose");
                             disposeMethod?.Invoke(searcher, null);
                         }
@@ -191,10 +191,10 @@ namespace Ink_Canvas.Helpers
                             var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BIOS");
                             var getMethod = searcherType.GetMethod("Get");
                             var enumerator = getMethod.Invoke(searcher, null);
-                            
+
                             var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
                             var currentProperty = enumerator.GetType().GetProperty("Current");
-                            
+
                             if ((bool)moveNextMethod.Invoke(enumerator, null))
                             {
                                 var obj = currentProperty.GetValue(enumerator);
@@ -202,7 +202,7 @@ namespace Ink_Canvas.Helpers
                                 var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
                                 hardwareInfo.Append(serialNumber?.ToString() ?? "");
                             }
-                            
+
                             var disposeMethod = searcher.GetType().GetMethod("Dispose");
                             disposeMethod?.Invoke(searcher, null);
                         }
@@ -215,10 +215,10 @@ namespace Ink_Canvas.Helpers
                             var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_DiskDrive WHERE MediaType='Fixed hard disk media'");
                             var getMethod = searcherType.GetMethod("Get");
                             var enumerator = getMethod.Invoke(searcher, null);
-                            
+
                             var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
                             var currentProperty = enumerator.GetType().GetProperty("Current");
-                            
+
                             if ((bool)moveNextMethod.Invoke(enumerator, null))
                             {
                                 var obj = currentProperty.GetValue(enumerator);
@@ -226,7 +226,7 @@ namespace Ink_Canvas.Helpers
                                 var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
                                 hardwareInfo.Append(serialNumber?.ToString() ?? "");
                             }
-                            
+
                             var disposeMethod = searcher.GetType().GetMethod("Dispose");
                             disposeMethod?.Invoke(searcher, null);
                         }
@@ -251,7 +251,7 @@ namespace Ink_Canvas.Helpers
 
                     // 取前25个字符，确保唯一性
                     string deviceId = hashString.Substring(0, 25);
-                    
+
                     // 添加校验位（第25位）
                     int checksum = 0;
                     for (int i = 0; i < 24; i++)
@@ -260,7 +260,7 @@ namespace Ink_Canvas.Helpers
                     }
                     checksum %= 36; // 0-9, A-Z
                     char checksumChar = checksum < 10 ? (char)(checksum + '0') : (char)(checksum - 10 + 'A');
-                    
+
                     return deviceId.Substring(0, 24) + checksumChar;
                 }
             }
@@ -281,7 +281,7 @@ namespace Ink_Canvas.Helpers
                 string timestamp = DateTime.Now.Ticks.ToString("X");
                 string random = Guid.NewGuid().ToString("N").Substring(0, 8);
                 string combined = timestamp + random;
-                
+
                 using (var sha256 = SHA256.Create())
                 {
                     byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(combined));
@@ -2746,4 +2746,4 @@ namespace Ink_Canvas.Helpers
             }
         }
     }
-} 
+}
