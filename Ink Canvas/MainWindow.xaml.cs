@@ -1702,9 +1702,6 @@ namespace Ink_Canvas
                         // 停止置顶维护定时器
                         StopTopmostMaintenance();
                     }
-                    
-                    // 添加调试日志
-                    LogHelper.WriteLogToFile($"应用窗口置顶: 启用置顶 (无焦点模式: {Settings.Advanced.IsNoFocusMode})", LogHelper.LogType.Trace);
                 }
                 else
                 {
