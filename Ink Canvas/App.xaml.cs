@@ -45,7 +45,7 @@ namespace Ink_Canvas
         // 新增：进程ID
         private static int currentProcessId = Process.GetCurrentProcess().Id;
         // 新增：应用启动时间
-        private static DateTime appStartTime = DateTime.Now;
+        internal static DateTime appStartTime { get; private set; }
         // 新增：最后一次错误信息
         private static string lastErrorMessage = string.Empty;
         // 新增：是否已初始化崩溃监听器
