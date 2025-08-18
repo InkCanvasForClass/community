@@ -2745,5 +2745,150 @@ namespace Ink_Canvas.Helpers
                 return errorMsg;
             }
         }
+        /// <summary>
+        /// 关机时保存使用时间数据
+        /// </summary>
+        public static void SaveUsageStatsOnShutdown()
+        {
+            lock (fileLock) // 确保线程安全
+            {
+                try
+                {
+                    // 1. 加载现有使用统计数据
+                    UsageStats stats = LoadUsageStats();
+                    if (stats == null)
+                    {
+                        stats = new UsageStats { DeviceId = DeviceId };
+                    }
+
+                    // 2. 计算本次会话时长
+                    TimeSpan sessionDuration = DateTime.Now - App.appStartTime;
+                    long sessionSeconds = (long)sessionDuration.TotalSeconds;
+
+                    // 3. 更新统计数据
+                    stats.TotalUsageSeconds += sessionSeconds;
+                    stats.LaunchCount++;
+                    stats.AverageSessionSeconds = stats.TotalUsageSeconds / (double)stats.LaunchCount;
+                    stats.LastLaunchTime = DateTime.Now;
+
+                    // 4. 保存到所有备份位置
+                    SaveUsageStatsToAllLocations(stats);
+
+                    LogHelper.WriteLogToFile($"使用时间数据已保存: 总时长 {stats.TotalUsageSeconds} 秒");
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"关机时保存使用时间数据失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载现有使用统计数据（从主文件或备份）
+        /// </summary>
+        private static UsageStats LoadUsageStats()
+        {
+            // 尝试从主文件加载
+            if (File.Exists(UsageStatsFilePath))
+            {
+                try
+                {
+                    string json = File.ReadAllText(UsageStatsFilePath);
+                    return JsonConvert.DeserializeObject<UsageStats>(json);
+                }
+                catch
+                {
+                    // 主文件损坏，尝试从备份加载
+                    if (File.Exists(BackupUsageStatsPath))
+                    {
+                        try
+                        {
+                            string backupJson = File.ReadAllText(BackupUsageStatsPath);
+                            return JsonConvert.DeserializeObject<UsageStats>(backupJson);
+                        }
+                        catch
+                        {
+                            // 可继续尝试其他备份路径
+                            return LoadFromOtherBackups();
+                        }
+                    }
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// 从其他备份路径加载数据
+        /// </summary>
+        private static UsageStats LoadFromOtherBackups()
+        {
+            // 尝试二级备份
+            if (File.Exists(SecondaryUsageBackupPath))
+            {
+                try
+                {
+                    return JsonConvert.DeserializeObject<UsageStats>(File.ReadAllText(SecondaryUsageBackupPath));
+                }
+                catch { }
+            }
+
+            // 尝试三级备份
+            if (File.Exists(TertiaryUsageBackupPath))
+            {
+                try
+                {
+                    return JsonConvert.DeserializeObject<UsageStats>(File.ReadAllText(TertiaryUsageBackupPath));
+                }
+                catch { }
+            }
+
+            // 尝试四级备份
+            if (File.Exists(QuaternaryUsageBackupPath))
+            {
+                try
+                {
+                    return JsonConvert.DeserializeObject<UsageStats>(File.ReadAllText(QuaternaryUsageBackupPath));
+                }
+                catch { }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 保存使用统计数据到所有备份位置
+        /// </summary>
+        private static void SaveUsageStatsToAllLocations(UsageStats stats)
+        {
+            string json = JsonConvert.SerializeObject(stats, Formatting.Indented);
+            
+            // 保存到主文件
+            SaveToFile(UsageStatsFilePath, json);
+            // 保存到多重备份路径
+            SaveToFile(BackupUsageStatsPath, json);
+            SaveToFile(SecondaryUsageBackupPath, json);
+            SaveToFile(TertiaryUsageBackupPath, json);
+            SaveToFile(QuaternaryUsageBackupPath, json);
+        }
+
+        /// <summary>
+        /// 辅助方法：保存内容到文件（确保目录存在）
+        /// </summary>
+        private static void SaveToFile(string path, string content)
+        {
+            try
+            {
+                string dir = Path.GetDirectoryName(path);
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+                File.WriteAllText(path, content);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存文件 {path} 失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
     }
 }
