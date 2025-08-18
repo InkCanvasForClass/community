@@ -287,6 +287,7 @@ namespace Ink_Canvas
         {
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
+            DeviceIdentifier.SaveUsageStatsOnShutdown();
         }
 
         // 新增：控制台取消事件处理
@@ -337,13 +338,6 @@ namespace Ink_Canvas
             {
                 WriteCrashLog($"最后错误信息: {lastErrorMessage}");
             }
-        }
-        
-        // 新增：关机保存使用时间数据
-        private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
-        {
-             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
-             DeviceIdentifier.SaveUsageStatsOnShutdown();
         }
 
         // 新增：记录崩溃日志
