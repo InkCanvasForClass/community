@@ -45,9 +45,9 @@ namespace Ink_Canvas.Helpers
                     new UpdateLineGroup
                     {
                         GroupName = "GitHub主线",
-                        VersionUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
-                        DownloadUrlFormat = "https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
+                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
@@ -80,9 +80,9 @@ namespace Ink_Canvas.Helpers
                     new UpdateLineGroup
                     {
                         GroupName = "GitHub主线",
-                        VersionUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
-                        DownloadUrlFormat = "https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
@@ -1195,7 +1195,7 @@ namespace Ink_Canvas.Helpers
 
                 StringBuilder batchContent = new StringBuilder();
                 batchContent.AppendLine("@echo off");
-
+                
                 batchContent.AppendLine("echo Set objShell = CreateObject(\"WScript.Shell\") > \"%temp%\\hideme.vbs\"");
                 batchContent.AppendLine("echo objShell.Run \"cmd /c \"\"\" ^& WScript.Arguments(0) ^& \"\"\"\", 0, True >> \"%temp%\\hideme.vbs\"");
                 batchContent.AppendLine("echo Wscript.Sleep 100 >> \"%temp%\\hideme.vbs\"");
@@ -1210,6 +1210,7 @@ namespace Ink_Canvas.Helpers
                 batchContent.AppendLine($"echo     goto CHECK_PROCESS >> \"{updateBatPath}\"");
                 batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
 
+                batchContent.AppendLine($"echo timeout /t 1 /nobreak > nul >> \"{updateBatPath}\"");
                 batchContent.AppendLine($"echo echo Application closed, starting update process... >> \"{updateBatPath}\"");
                 batchContent.AppendLine($"echo timeout /t 2 /nobreak ^> nul >> \"{updateBatPath}\"");
 
@@ -1514,7 +1515,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile("AutoUpdate | 开始测试Windows 7 TLS连接...");
 
                 // 测试GitHub连接
-                var testUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                var testUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
 
                 using (var handler = new HttpClientHandler())
                 {
