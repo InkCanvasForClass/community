@@ -84,7 +84,7 @@ namespace Ink_Canvas
                     startInfo.UseShellExecute = true;
 
                     // 启动进程但不等待
-                    Process.Start(startInfo);
+                    Process.Start(new ProcessStartInfo(exePath, "-delay 2000") { UseShellExecute = true });
                 }
                 catch (Exception ex)
                 {
