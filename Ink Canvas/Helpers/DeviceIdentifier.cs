@@ -2773,8 +2773,6 @@ namespace Ink_Canvas.Helpers
 
                     // 4. 保存到所有备份位置
                     SaveUsageStatsToAllLocations(stats);
-
-                    LogHelper.WriteLogToFile($"使用时间数据已保存: 总时长 {stats.TotalUsageSeconds} 秒");
                 }
                 catch (Exception ex)
                 {
