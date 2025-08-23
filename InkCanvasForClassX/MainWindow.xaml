@@ -1,0 +1,19 @@
+﻿<Window x:Class="InkCanvasForClassX.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InkCanvasForClassX"
+        xmlns:libraries="clr-namespace:InkCanvasForClassX.Libraries"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="1300" Width="1300">
+    <Grid>
+        <libraries:InkCanvas x:Name="inkCanvas" Width="600" Height="600" Margin="0,0,0,600"/>
+        <!--<libraries:InkCanvas InkStrokes="{Binding ElementName=InkC, Path=Strokes}" x:Name="inkCanvas" Width="600" Height="600" Margin="0,0,0,600"/>-->
+        <InkCanvas Height="600" Width="600" Name="InkC" Margin="0,600,0,0" Background="Wheat"></InkCanvas>
+        <StackPanel>
+            <Button Click="ButtonBase1_OnClick">Change to None</Button>
+            <Button Click="ButtonBase2_OnClick">Change to Pen</Button>
+        </StackPanel>
+    </Grid>
+</Window>

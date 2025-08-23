@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_LastSelectedProfileId>D:\vs\ica\Ink Canvas\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
+    <ActiveDebugProfile>InkCanvasForClass</ActiveDebugProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Update="Components\SegmentedButtons.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Components\ToggleSwitch.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="MainWindow_cs\MW_ShapeDrawingLayer.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="MainWindow_cs\MW_Toast.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Popups\ColorPalette.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Popups\FloatingToolBarV2.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Popups\ScreenshotWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Popups\SelectionPopup.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Popups\ShapeDrawingPopup.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\SettingsViews\AboutPanel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\SettingsViews\AppearancePanel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\SettingsViews\FloatingBarDnDSettingsPanel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\SettingsViews\SettingsBaseView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\SettingsWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Components\SegmentedButtons.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Components\ToggleSwitch.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="MainWindow_cs\MW_ContextMenus.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="MainWindow_cs\MW_Eraser.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="MainWindow_cs\MW_ShapeDrawingLayer.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="MainWindow_cs\MW_Toast.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Popups\ColorPalette.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Popups\FloatingToolBarV2.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Popups\ScreenshotWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Popups\SelectionPopup.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Popups\ShapeDrawingPopup.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Resources\GeometryIcons.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\SettingsViews\AboutPanel.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\SettingsViews\AppearancePanel.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\SettingsViews\FloatingBarDnDSettingsPanel.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\SettingsViews\SettingsBaseView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\SettingsWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+</Project>

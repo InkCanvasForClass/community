@@ -1,0 +1,97 @@
+﻿<UserControl x:Class="Ink_Canvas.Windows.SettingsViews.FloatingBarDnDSettingsPanel"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews"
+             xmlns:dd="urn:gong-wpf-dragdrop"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="600">
+    <UserControl.Resources>
+        <DrawingImage x:Key="CursorIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF222222" Geometry="F1 M24,24z M0,0z M5.19409,16.3124C5.46422,18.0658 5.69121,19.539 5.8351,20.4621 5.9631,21.2477 6.80568,21.3359 7.22902,20.5643 7.93608,19.3044 9.20443,17.1009 10.0921,15.5636L14.9921,22.5615C15.1915,22.8462,15.5839,22.9154,15.8687,22.716L17.9309,21.272C18.2157,21.0727,18.2848,20.6802,18.0854,20.3955L13.5037,13.8522C15.6284,13.8519 18.6266,13.8518 20.2609,13.8524 21.1847,13.8201 21.258,12.9461 20.5777,12.4184 16.9666,9.91811 8.45126,4.12632 4.34164,1.42431 3.63839,0.928666 2.78717,1.12985 3.00557,2.27077 3.59731,5.94841 4.52718,11.9839 5.19409,16.3124z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="PenIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                    <GeometryDrawing Brush="#222222" Geometry="F1 M24,24z M0,0z M20.4786,1.42438C19.9985,1.23743 19.4847,1.15194 18.9698,1.17319 18.4549,1.19444 17.9499,1.32197 17.4869,1.54789 17.0368,1.76752 16.6358,2.07554 16.3083,2.45361L3.85516,14.9067 9.08243,20.134 21.5311,7.68529C21.9113,7.36382 22.223,6.96912 22.447,6.52438 22.6786,6.06462 22.8113,5.56167 22.8365,5.04763 22.8616,4.5336 22.7787,4.02012 22.593,3.54002 22.4073,3.05994 22.1232,2.62403 21.759,2.25988 21.3949,1.89574 20.9587,1.61132 20.4786,1.42438z" />
+                    <GeometryDrawing Brush="#222222" Geometry="F1 M24,24z M0,0z M7.28056,21.1605L2.8286,16.7086 1.15912,22.83 7.28056,21.1605z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="EraserIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                    <GeometryDrawing Brush="#222222" Geometry="F1 M24,24z M0,0z M15.6314,20.7262L22.7921,13.5655C24.3494,12.141,24.2819,9.81776,22.8105,8.34633L16.7793,2.31508C15.3547,0.757753,13.0315,0.825236,11.5601,2.29666L4.38099,9.47574 15.6314,20.7262z" />
+                    <GeometryDrawing Brush="#222222" Geometry="F1 M24,24z M0,0z M14.2172,22.1404L2.96677,10.89 1.20761,12.6491C-0.34971,14.0737,-0.281711,16.3974,1.18971,17.8688L6.15089,22.83 13.5276,22.83 14.2172,22.1404z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </UserControl.Resources>
+    <Grid>
+        <StackPanel Orientation="Vertical">
+            <Border Name="ToolbarItemsControl" Height="46" Background="#ebebeb" Margin="0,0,6,0">
+                <Grid Margin="4,0">
+                    <ItemsControl dd:DragDrop.IsDragSource="True" 
+                                  dd:DragDrop.IsDropTarget="True"
+                                  dd:DragDrop.DragMouseAnchorPoint="0.5,0.5"
+                                  dd:DragDrop.DropHandler="{Binding}"
+                                  ItemsSource="{Binding BarItems}">
+                        <dd:DragDrop.DragAdornerTemplate>
+                            <DataTemplate>
+                                <Border HorizontalAlignment="Center" CornerRadius="6" Background="#fafafa" BorderBrush="#a3a3a3" BorderThickness="1" Width="38" Height="38">
+                                    <Image Source="{Binding IconSource}" Width="20" Height="20"></Image>
+                                </Border>
+                            </DataTemplate>
+                        </dd:DragDrop.DragAdornerTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Background="Transparent" Orientation="Horizontal" Width="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Border},AncestorLevel=1},Path=ActualWidth}"></StackPanel>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border HorizontalAlignment="Center" CornerRadius="6" Margin="4,0,0,0" Background="#fafafa" BorderBrush="#a3a3a3" BorderThickness="1" Width="38" Height="38">
+                                    <Image Source="{Binding IconSource}" Width="20" Height="20"></Image>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+            <Border Name="ToolbarDrawerItemsControl" Height="46" Background="#ebebeb" Margin="0,0,6,0">
+                <Grid Margin="4,0">
+                    <ItemsControl dd:DragDrop.IsDragSource="True" 
+                                  dd:DragDrop.IsDropTarget="True"
+                                  dd:DragDrop.DragMouseAnchorPoint="0,0"
+                                  dd:DragDrop.DropHandler="{Binding}"
+                                  ItemsSource="{Binding BarDrawerItems}">
+                        <dd:DragDrop.DragAdornerTemplate>
+                            <DataTemplate>
+                                <Border HorizontalAlignment="Center" CornerRadius="6" Background="#fafafa" BorderBrush="#a3a3a3" BorderThickness="1" Width="38" Height="38">
+                                    <Image Source="{Binding IconSource}" Width="20" Height="20"></Image>
+                                </Border>
+                            </DataTemplate>
+                        </dd:DragDrop.DragAdornerTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Background="Transparent" Orientation="Horizontal" Width="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Border},AncestorLevel=1},Path=ActualWidth}" HorizontalAlignment="Center"></StackPanel>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border HorizontalAlignment="Center" CornerRadius="6" Margin="4,0,0,0" Background="#fafafa" BorderBrush="#a3a3a3" BorderThickness="1" Width="38" Height="38">
+                                    <Image Source="{Binding IconSource}" Width="20" Height="20"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,35 @@
+# InkCanvasForClass 配置文件
+# 版本：v1.0 2024-9-12
+Version = 1.0
+[FloatingBar]                               # 浮动工具栏
+SemiTransparent = false                     # 半透明工具栏
+# 开启半透明工具栏后，所有按钮都会呈现为半透明状态
+NearSnap = false                            # 靠近屏幕角落自动吸附
+InitialPosition = "Center"                  # 初始位置
+# 初始位置可以是 "TopLeft" "TopRight" "BottomLeft" "BottomRight" "BottomCenter" "TopCenter"
+# 或者以数组形式传入浮动工具栏左上角定位的坐标
+ElementCornerRadius = "SuperEllipse"        # 圆角类型
+# 圆角类型可以是 "SuperEllipse" "Circle" "None"
+# 也可以是具体的数字大小，如 1.14 5.14 2 16
+# 最大圆角值为 24，相当于 "Circle"，"SuperEllipse" 是超椭圆
+ParallaxEffect = true                       # 视差效果
+MiniMode = true                             # 迷你模式
+MiniModeTrigger = false                     # 浮动工具栏迷你模式触发器，暂未实现
+# 可选 "HeadIconMouseButtonRight" "HeadIconMouseButtonCenter" "HeadIconMouseButtonLeftWithCtrlKey"
+# 可使用 KeyStroke 来填入触发器
+ClearButtonColor = [224, 27, 36]            # 清空按钮颜色
+ClearButtonPressColor = [254, 226, 226]     # 清空按钮按下时颜色
+ToolButtonSelectedBgColor = [37, 99, 235]   # 工具按钮选中颜色
+MovingLimitationNoSnap = 12                 # 移动限制 无Snap，0 关闭
+MovingLimitationSnapped = 24                # 移动限制 Snaped，0 关闭
+[FloatingBar.NearSnapAreaSize]   # 浮动工具栏角落吸附区域大小
+TopLeft = 24                     # 左上角
+TopRight = 24                    # 右上角
+BottomLeft = [24,24]             # 左下角
+BottomRight = [24,24]            # 右下角
+TopCenter = 24                   # 顶部
+BottomCenter = 24                # 底部
+[FloatingBar.ToolBarItems]       # 浮动工具栏工具按钮排序和显示
+CursorMode = [ "Cursor", "Pen", "Clear" , "Separator", "Whiteboard", "Gesture", "Menu", "Fold" ]
+MiniMode = [ "Cursor", "Pen", "Clear" ]
+AnnotationMode = [ "Cursor", "Pen", "Clear", "Separator", "Eraser", "ShapeDrawing", "Select", "Separator", "Undo", "Redo", "Separator", "Whiteboard", "Gesture", "Menu", "Fold" ]

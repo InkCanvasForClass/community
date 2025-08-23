@@ -1,0 +1,36 @@
+rev-1.0.0.0:
+1. 重写大部分代码中...
+
+5.0.5.0:
+1. 支持自动收纳希沃轻白板5C，希沃白板3，鸿合轻量白板。
+2. 支持自动查杀鸿合屏幕书写。
+3. 带来FitToCurve，给平滑墨迹加上了开关。
+4. 修复了FitToCurve导致的部分形状绘制出错的问题也保留了其他墨迹的FitToCurve。
+5. 白板，浮动工具栏，子面板，设置UI几乎全部优化。
+6. 添加修改橡皮大小，橡皮形状的菜单。
+7. PPT现在会自动提示是否关闭自动播放和排练计时。
+8. 条件性的墨迹识别，可以关闭部分不需要的形状识别。可以修改是否为墨迹识别的三角形或矩形应用模拟压感值。
+9. 带来了荧光笔功能并为荧光笔适配了形状识别。
+10. 允许清空墨迹时可删除历史记录。
+11. 带来了Quick Panel。
+12. 浮动工具栏缩放调节，取消收纳按钮图标修改。
+13. 修复了多指书写StylusDown事件可能触发在工具栏而不是inkCanvas上导致的Bug。
+14. 修复了鼠标和触摸屏（无RealTimeStylus和非多指书写模式）的绘制时Pointer捕获Bug。
+15. Merge了Ink Canvas的新撤回行为
+16. 修复了白板模式下直接新增页面导致的TimeMachine不记录历史记录的Bug
+17. 添加了一个简陋的白板页面列表。
+18. 优化了墨迹重播，支持暂停，重新开始和倍速，拥有更人性化的UI。
+19. 优化自动收纳行为和FoldFloatingBar函数的相关Bug修复。
+20. 添加了EdgeGestureUtil实验性选项。
+21. 添加了ForceFullScreen实验性选项
+22. 添加了FullScreenHelper实验性选项。
+23. 添加了ResolutionChangeDetection和DPIChangeDetection实验性选项。
+24. 修复了同时打开ICC和ICA的冲突。
+25. 修复浮动工具栏手势按钮开启多指书写时InkCanvas的InkCanvasEditingMode被修改为None的Bug。
+26. 修复Merge ICA仓库代码后导致浮动工具栏批注按钮UI MouseLeave反馈的问题。
+27. 为大部分UI的按钮添加了lastBorderMouseDown的检测代码和MouseDown的视觉反馈。
+28. 支持自动收纳安道系列，艺云系列和 MAXHUB 白板书写。
+
+4.5.8.0:
+1. 将ICA的代码换了个名字变成了InkCanvasForClass，万物起源。
+2. 优化了ICA的部分UI界面设计。

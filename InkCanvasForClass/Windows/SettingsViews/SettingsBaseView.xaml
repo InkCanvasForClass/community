@@ -1,0 +1,53 @@
+﻿<UserControl x:Class="Ink_Canvas.Windows.SettingsViews.SettingsBaseView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews"
+             xmlns:components="clr-namespace:Ink_Canvas.Components"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="SettingsViewScrollViewer" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+            <ItemsControl Name="SettingsViewBaseItemsControl">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Margin="0,12,0,24" HorizontalAlignment="Center" Width="524"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Vertical" Margin="0,0,0,25">
+                            <TextBlock Visibility="{Binding _TitleVisibility}" Text="{Binding Title}" FontSize="15" FontWeight="Bold" Foreground="#2e3436"/>
+                            <Border Margin="{Binding _PanelMargin}" Background="#fafafa" BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
+                                <StackPanel Orientation="Vertical">
+                                    <ItemsControl ItemsSource="{Binding Items}">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <StackPanel Orientation="Vertical"></StackPanel>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Vertical">
+                                                    <Grid Height="54">
+                                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="{Binding Title}" HorizontalAlignment="Left"/>
+                                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="{Binding Description}" HorizontalAlignment="Left"/>
+                                                        </StackPanel>
+                                                        <components:ToggleSwitch IsEnabled="{Binding ToggleSwitchEnabled}" SwitchBackground="{Binding ToggleSwitchBackground, Mode=TwoWay}" IsOn="{Binding ToggleSwitchToggled, Mode=TwoWay}" Tag="{Binding}" Visibility="{Binding _ToggleSwitchVisibility}" Margin="0,0,15,0"/>
+                                                    </Grid>
+                                                    <Border Visibility="{Binding _SeparatorVisibility}" Height="1" Background="#ebebeb"/>
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

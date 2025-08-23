@@ -1,0 +1,299 @@
+﻿<UserControl x:Class="Ink_Canvas.Popups.ShapeDrawingPopup"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ink_Canvas.Popups"
+             xmlns:modern="http://schemas.inkore.net/lib/ui/wpf/modern"
+             mc:Ignorable="d" Width="570" Height="380" UseLayoutRounding="True">
+    <UserControl.Resources>
+        <DrawingImage x:Key="LineIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M85.0522,17.5355L17.5355,85.0522 14,81.5167 81.5167,14 85.0522,17.5355z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="DottedLineIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M84.2489,16.7322C85.2252,17.7085,85.2252,19.2915,84.2489,20.2678L84.213,20.3037C83.2367,21.28 81.6538,21.28 80.6775,20.3037 79.7012,19.3274 79.7012,17.7444 80.6775,16.7681L80.7134,16.7322C81.6897,15.7559,83.2726,15.7559,84.2489,16.7322z M78.4683,22.5128C79.4447,23.4891,79.4447,25.072,78.4683,26.0483L78.3965,26.1201C77.4202,27.0965 75.8373,27.0965 74.861,26.1201 73.8847,25.1438 73.8847,23.5609 74.861,22.5846L74.9328,22.5128C75.9091,21.5365,77.492,21.5365,78.4683,22.5128z M72.6519,28.3293C73.6282,29.3056,73.6282,30.8885,72.6519,31.8648L72.5801,31.9366C71.6037,32.9129 70.0208,32.9129 69.0445,31.9366 68.0682,30.9603 68.0682,29.3774 69.0445,28.4011L69.1163,28.3293C70.0926,27.353,71.6756,27.353,72.6519,28.3293z M66.8354,34.1457C67.8117,35.122,67.8117,36.705,66.8354,37.6813L66.7636,37.7531C65.7873,38.7294 64.2044,38.7294 63.2281,37.7531 62.2517,36.7768 62.2517,35.1939 63.2281,34.2175L63.2999,34.1457C64.2762,33.1694,65.8591,33.1694,66.8354,34.1457z M61.0189,39.9622C61.9952,40.9385,61.9952,42.5214,61.0189,43.4977L60.9471,43.5695C59.9708,44.5459 58.3879,44.5459 57.4116,43.5695 56.4353,42.5932 56.4353,41.0103 57.4116,40.034L57.4834,39.9622C58.4597,38.9859,60.0426,38.9859,61.0189,39.9622z M55.2025,45.7787C56.1788,46.755,56.1788,48.3379,55.2025,49.3142L55.1307,49.386C54.1544,50.3623 52.5714,50.3623 51.5951,49.386 50.6188,48.4097 50.6188,46.8268 51.5951,45.8505L51.6669,45.7787C52.6432,44.8024,54.2262,44.8024,55.2025,45.7787z M49.386,51.5951C50.3623,52.5714,50.3623,54.1544,49.386,55.1307L49.3142,55.2025C48.3379,56.1788 46.755,56.1788 45.7787,55.2025 44.8024,54.2262 44.8024,52.6432 45.7787,51.6669L45.8505,51.5951C46.8268,50.6188,48.4097,50.6188,49.386,51.5951z M43.5695,57.4116C44.5458,58.3879,44.5458,59.9708,43.5695,60.9471L43.4977,61.0189C42.5214,61.9953 40.9385,61.9953 39.9622,61.0189 38.9859,60.0426 38.9859,58.4597 39.9622,57.4834L40.034,57.4116C41.0103,56.4353,42.5932,56.4353,43.5695,57.4116z M37.7531,63.2281C38.7294,64.2044,38.7294,65.7873,37.7531,66.7636L37.6813,66.8354C36.705,67.8117 35.122,67.8117 34.1457,66.8354 33.1694,65.8591 33.1694,64.2762 34.1457,63.2999L34.2175,63.2281C35.1938,62.2518,36.7768,62.2518,37.7531,63.2281z M31.9366,69.0445C32.9129,70.0208,32.9129,71.6038,31.9366,72.5801L31.8648,72.6519C30.8885,73.6282 29.3056,73.6282 28.3293,72.6519 27.353,71.6756 27.353,70.0927 28.3293,69.1163L28.4011,69.0445C29.3774,68.0682,30.9603,68.0682,31.9366,69.0445z M26.1201,74.861C27.0964,75.8373,27.0964,77.4202,26.1201,78.3965L26.0483,78.4683C25.072,79.4447 23.4891,79.4447 22.5128,78.4683 21.5365,77.492 21.5365,75.9091 22.5128,74.9328L22.5846,74.861C23.5609,73.8847,25.1438,73.8847,26.1201,74.861z M20.3037,80.6775C21.28,81.6538,21.28,83.2367,20.3037,84.213L20.2678,84.2489C19.2915,85.2252 17.7085,85.2252 16.7322,84.2489 15.7559,83.2726 15.7559,81.6897 16.7322,80.7134L16.7681,80.6775C17.7444,79.7011,19.3274,79.7011,20.3037,80.6775z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="DashedLineIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M18.0094,85.5261L14.4739,81.9906 19.6175,76.847 23.153,80.3825 18.0094,85.5261z M22.8336,73.6309L33.1208,63.3437 36.6563,66.8792 26.3691,77.1664 22.8336,73.6309z M36.3369,60.1275L46.6241,49.8403 50.1597,53.3759 39.8725,63.6631 36.3369,60.1275z M49.8403,46.6242L60.1275,36.337 63.663,39.8725 53.3758,50.1597 49.8403,46.6242z M63.3436,33.1209L73.6308,22.8337 77.1663,26.3692 66.8791,36.6564 63.3436,33.1209z M76.8469,19.6175L81.9905,14.4739 85.5261,18.0095 80.3825,23.1531 76.8469,19.6175z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="ArrowLineIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M44.0901,76.2514L16.2062,83.7229 23.6777,55.839 32.1161,64.2774 81.9551,14.4384 85.4906,17.974 35.6516,67.813 44.0901,76.2514z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="ArrowLineTwoSideIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M44.0901,76.2514L16.2062,83.7229 23.6777,55.839 32.1161,64.2774 64.2774,32.1161 55.839,23.6777 83.7229,16.2062 76.2514,44.0901 67.813,35.6516 35.6516,67.813 44.0901,76.2514z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="RectIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M14,14L86,14 86,86 14,86 14,14z M19,19L19,81 81,81 81,19 19,19z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="CircleIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M50,81C67.1208,81 81,67.1208 81,50 81,32.8792 67.1208,19 50,19 32.8792,19 19,32.8792 19,50 19,67.1208 32.8792,81 50,81z M50,86C69.8823,86 86,69.8823 86,50 86,30.1177 69.8823,14 50,14 30.1177,14 14,30.1177 14,50 14,69.8823 30.1177,86 50,86z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="PieIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M50,50L50,14C48.3206,14 46.6501,14.1175 45,14.3489 39.6543,15.0986 34.5233,17.0444 29.9995,20.0671 24.0793,24.0228 19.4651,29.6453 16.7404,36.2234 14.0156,42.8015 13.3027,50.0399 14.6917,57.0232 16.0808,64.0066 19.5095,70.4211 24.5442,75.4558 29.5789,80.4905 35.9934,83.9192 42.9768,85.3083 49.9601,86.6973 57.1985,85.9844 63.7766,83.2596 70.3547,80.5349 75.9772,75.9207 79.9329,70.0005 82.9556,65.4767 84.9014,60.3457 85.6511,55 85.8825,53.3499 86,51.6794 86,50L50,50z M80.5941,55L45,55 45,19.4059C40.6473,20.1173 36.4765,21.7527 32.7773,24.2244 27.6794,27.6308 23.7061,32.4723 21.3597,38.1368 19.0134,43.8013 18.3995,50.0344 19.5957,56.0478 20.7918,62.0612 23.7443,67.5849 28.0797,71.9203 32.4151,76.2557 37.9388,79.2082 43.9522,80.4043 49.9656,81.6005 56.1987,80.9866 61.8632,78.6403 67.5277,76.2939 72.3692,72.3206 75.7756,67.2227 78.2473,63.5235 79.8828,59.3527 80.5941,55z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="TriangleIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M49.9999,14L91.5691,86 8.43066,86 49.9999,14z M49.9999,24L17.0909,81 82.9089,81 49.9999,24z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="RightTriangleIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M14,14L87,87 14,87 14,14z M19.0644,81.9356L19.0644,26.2267 74.7733,81.9356 19.0644,81.9356z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="DiamondIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M50.0711,14L86.1421,50.0711 50.0711,86.1421 14,50.0711 50.0711,14z M50.0711,21.0711L79.0711,50.0711 50.0711,79.0711 21.0711,50.0711 50.0711,21.0711z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="ParallelogramIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M25.9355,14L88.1211,14 74.1856,86 12,86 25.9355,14z M30.0605,19L82.0605,19 70.0605,81 18.0605,81 30.0605,19z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="FourLineIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M15,19L85,19 85,14 15,14 15,19z M15,41.3922L85,41.3922 85,36.3922 15,36.3922 15,41.3922z M85,63.7844L15,63.7844 15,58.7844 85,58.7844 85,63.7844z M15,86.1766L85,86.1766 85,81.1766 15,81.1766 15,86.1766z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="FiveLineIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M85,19.0398L15,19.0398 15,14.0398 85,14.0398 85,19.0398z M85,35.7699L15,35.7699 15,30.7699 85,30.7699 85,35.7699z M15,52.5L85,52.5 85,47.5 15,47.5 15,52.5z M85,69.2301L15,69.2301 15,64.2301 85,64.2301 85,69.2301z M15,85.9602L85,85.9602 85,80.9602 15,80.9602 15,85.9602z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="DefaultAxisIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M47.1749,12L55.8352,30 49.6748,30 49.6748,48.6945 72.1748,48.6945 72.1748,42.3397 90.1748,51 72.1748,59.6602 72.1748,53.6945 49.6748,53.6945 49.6748,88 44.6748,88 44.6748,53.6945 9.8252,53.6945 9.8252,48.6945 44.6748,48.6945 44.6748,30 38.5146,30 47.1749,12z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="Axis2Icon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M21.0001,14L29.6604,32 23.5,32 23.5,73.5 72,73.5 72,67.3397 90,76 72,84.6602 72,78.5 23.5,78.5 23.5,86 18.5,86 18.5,78.5 10,78.5 10,73.5 18.5,73.5 18.5,32 12.3398,32 21.0001,14z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="Axis3Icon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M28.4904,30.6699L19.8302,12.6699 11.1699,30.6699 16.8379,30.6699 16.8379,76.8167 16.8198,81.1698 70.8301,81.3941 70.8301,87.3301 88.8301,78.6698 70.8301,70.0096 70.8301,76.394 21.8379,76.1906 21.8379,30.6699 28.4904,30.6699z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="Axis4Icon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M58.3352,29.5L49.6749,11.5 41.0146,29.5 47.1748,29.5 47.1748,75.1945 10.3252,75.1945 10.3252,80.1945 47.1748,80.1945 47.1748,88.5 52.1748,88.5 52.1748,80.1945 71.6748,80.1945 71.6748,86.1602 89.6748,77.5 71.6748,68.8397 71.6748,75.1945 52.1748,75.1945 52.1748,29.5 58.3352,29.5z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="ThreeDimensionAxisIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M47.6249,26.9792L38.9646,8.97919 30.3044,26.9792 36.3913,26.9792 36.3913,59.1528 19.5074,76.0367 15.6398,72.1692 9.03564,91.0208 27.8873,84.4166 23.0429,79.5723 39.9269,62.6883 72.9645,62.6883 72.9645,68.6394 90.9645,59.9792 72.9645,51.3189 72.9645,57.6883 41.3913,57.6883 41.3913,26.9792 47.6249,26.9792z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="HyperbolaIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M34.0563,69.4454C28.899,74.6027,21.9043,77.5,14.6109,77.5L14.6109,82.5C23.2304,82.5 31.4969,79.0759 37.5918,72.981 43.6868,66.886 47.1108,58.6195 47.1108,50 47.1108,41.3805 43.6867,33.114 37.5918,27.019 31.4969,20.9241 23.2304,17.5 14.6108,17.5L14.6108,22.5C21.9043,22.5 28.899,25.3973 34.0563,30.5546 39.2135,35.7118 42.1108,42.7065 42.1108,50 42.1108,57.2934 39.2135,64.2882 34.0563,69.4454z M65.9437,69.4454C71.101,74.6027,78.0957,77.5,85.3891,77.5L85.3891,82.5C76.7696,82.5 68.5031,79.0759 62.4082,72.981 56.3132,66.886 52.8892,58.6195 52.8892,50 52.8892,41.3805 56.3133,33.114 62.4082,27.019 68.5031,20.9241 76.7696,17.5 85.3892,17.5L85.3892,22.5C78.0957,22.5 71.101,25.3973 65.9437,30.5546 60.7865,35.7118 57.8892,42.7065 57.8892,50 57.8892,57.2934 60.7865,64.2882 65.9437,69.4454z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="HyperbolaWithFocalPointIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M34.0563,69.4454C28.899,74.6027,21.9043,77.5,14.6109,77.5L14.6109,82.5C23.2304,82.5 31.4969,79.0759 37.5918,72.981 43.6868,66.886 47.1108,58.6195 47.1108,50 47.1108,41.3805 43.6867,33.114 37.5918,27.019 31.4969,20.9241 23.2304,17.5 14.6108,17.5L14.6108,22.5C21.9043,22.5 28.899,25.3973 34.0563,30.5546 39.2135,35.7118 42.1108,42.7065 42.1108,50 42.1108,57.2934 39.2135,64.2882 34.0563,69.4454z M65.9437,69.4454C71.101,74.6027,78.0957,77.5,85.3891,77.5L85.3891,82.5C76.7696,82.5 68.5031,79.0759 62.4082,72.981 56.3132,66.886 52.8892,58.6195 52.8892,50 52.8892,41.3805 56.3133,33.114 62.4082,27.019 68.5031,20.9241 76.7696,17.5 85.3892,17.5L85.3892,22.5C78.0957,22.5 71.101,25.3973 65.9437,30.5546 60.7865,35.7118 57.8892,42.7065 57.8892,50 57.8892,57.2934 60.7865,64.2882 65.9437,69.4454z M34,50C34,52.2091 32.2091,54 30,54 27.7909,54 26,52.2091 26,50 26,47.7909 27.7909,46 30,46 32.2091,46 34,47.7909 34,50z M70,54C72.2091,54 74,52.2091 74,50 74,47.7909 72.2091,46 70,46 67.7909,46 66,47.7909 66,50 66,52.2091 67.7909,54 70,54z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="ParabolaIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M20,16.2501C20,33.2011 23.3736,49.3308 29.2551,61.0939 35.1952,72.974 42.807,78.75 50,78.75 57.1931,78.75 64.8049,72.974 70.7449,61.0939 76.6265,49.3308 80,33.201 80,16.25L85,16.25C85,33.7771 81.5253,50.7134 75.217,63.33 68.9672,75.8296 60.046,83.75 50,83.75 39.954,83.75 31.0328,75.8297 24.783,63.33 18.4747,50.7134 15,33.7772 15,16.2501L20,16.2501z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="Parabola2Icon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M83.7499,20C66.7989,20 50.6692,23.3736 38.9061,29.2551 27.026,35.1952 21.25,42.807 21.25,50 21.25,57.1931 27.026,64.8049 38.9061,70.7449 50.6692,76.6265 66.799,80 83.75,80L83.75,85C66.2229,85 49.2866,81.5253 36.67,75.217 24.1704,68.9672 16.25,60.046 16.25,50 16.25,39.954 24.1703,31.0328 36.67,24.783 49.2866,18.4747 66.2228,15 83.7499,15L83.7499,20z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="Parabola2WithFocalPointIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M38.9061,29.2551C50.6692,23.3736,66.7989,20,83.7499,20L83.7499,15C66.2228,15 49.2866,18.4747 36.67,24.783 24.1703,31.0328 16.25,39.954 16.25,50 16.25,60.046 24.1704,68.9672 36.67,75.217 49.2866,81.5253 66.2229,85 83.75,85L83.75,80C66.799,80 50.6692,76.6265 38.9061,70.7449 27.026,64.8049 21.25,57.1931 21.25,50 21.25,42.807 27.026,35.1952 38.9061,29.2551z M36.25,54C38.4591,54 40.25,52.2091 40.25,50 40.25,47.7909 38.4591,46 36.25,46 34.0409,46 32.25,47.7909 32.25,50 32.25,52.2091 34.0409,54 36.25,54z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="CylinderIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M50,13.1923C42.4374,13.1923 35.5317,14.1336 30.467,15.692 27.9438,16.4683 25.7926,17.4234 24.2394,18.5533 22.719,19.6594 21.5,21.1431 21.5,23L21.5,74.9231C21.5,76.9249 22.5606,78.6637 24.1126,80.075 25.6643,81.4859 27.8258,82.6877 30.3696,83.6661 35.4673,85.6268 42.4082,86.8077 50,86.8077 57.5918,86.8077 64.5327,85.6268 69.6304,83.6661 72.1742,82.6877 74.3358,81.4859 75.8874,80.075 77.4394,78.6637 78.5,76.9249 78.5,74.9231L78.5,23C78.5,21.1431 77.281,19.6594 75.7606,18.5533 74.2074,17.4234 72.0562,16.4683 69.533,15.692 64.4683,14.1336 57.5626,13.1923 50,13.1923z M65.45,31.3473C68.5378,30.7025,71.273,29.8527,73.4231,28.8166L73.4231,74.9231C73.4231,75.4135 73.1263,76.1195 72.036,76.9787 70.9627,77.8245 69.3167,78.6519 67.1489,79.3745 62.8291,80.8144 56.7659,81.7308 50,81.7308 43.2341,81.7308 37.1709,80.8144 32.8511,79.3745 30.6833,78.6519 29.0373,77.8245 27.964,76.9787 26.8737,76.1195 26.5769,75.4135 26.5769,74.9231L26.5769,28.8167C28.7271,29.8528 31.4622,30.7026 34.5501,31.3474 38.983,32.2731 44.2995,32.8077 50,32.8077 55.7005,32.8077 61.017,32.273 65.45,31.3473z M26.5769,23C26.5769,22.9974 26.6152,22.5655 27.7988,21.866 28.8819,21.2258 30.549,20.5973 32.7405,20.0494 37.1006,18.9594 43.2034,18.2692 50,18.2692 56.7966,18.2692 62.8994,18.9594 67.2595,20.0494 69.451,20.5973 71.1181,21.2258 72.2012,21.866 73.3848,22.5655 73.4231,22.9974 73.4231,23 73.4231,23.0026 73.3848,23.4345 72.2012,24.1341 71.1181,24.7742 69.451,25.4028 67.2595,25.9507 62.8994,27.0407 56.7966,27.7308 50,27.7308 43.2034,27.7308 37.1006,27.0407 32.7405,25.9507 30.549,25.4028 28.8819,24.7742 27.7988,24.1341 26.6152,23.4345 26.5769,23.0026 26.5769,23z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="CubeIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M86.3113,18.0801L44.9459,13.5372 13.689,20.4027 13.689,77.4306 54.8103,86.4628 57.2977,86.4628 86.3113,72.807 86.3113,18.0801z M31.3145,21.7874L45.1083,18.7576 69.6455,21.4524 56.8659,24.4599 31.3145,21.7874z M81.3221,69.6549L58.4624,80.4143 58.4624,29.3508 81.3221,23.9711 81.3221,69.6549z M18.6782,73.2372L18.6782,25.6667 53.4731,29.306 53.4731,80.5158 18.6782,73.2372z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="ConeIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M51.3661,14.1383C51.1808,13.7301 50.8167,13.4146 50.3598,13.3017 49.6901,13.1362 48.9939,13.4488 48.6726,14.0593L19.0272,70.3833 19.0196,70.3979 18.8911,70.6487C18.8747,70.6807 18.8594,70.7133 18.8454,70.7465 18.4691,71.6328 18.3608,72.526 18.3608,73.3332 18.3608,75.5298 19.4936,77.4657 21.2053,79.0648 22.9147,80.6617 25.3067,82.0308 28.1372,83.1492 33.8069,85.3895 41.5372,86.7422 50,86.7422 58.4627,86.7422 66.193,85.3895 71.8628,83.1492 74.6933,82.0308 77.0852,80.6617 78.7946,79.0648 80.5064,77.4657 81.6391,75.5298 81.6391,73.3332 81.6391,72.6065 81.5963,71.6942 81.2005,70.7621 81.191,70.7398 81.181,70.7176 81.1704,70.6958L81.0417,70.4294C81.0341,70.4136,81.0262,70.3979,81.018,70.3824L51.3661,14.1383z M50.0024,22.9267L23.4628,72.713C23.3998,72.9248 23.3701,73.1305 23.3701,73.3332 23.3701,74.083 23.7971,75.0062 25.0415,76.0442 26.2774,77.0751 28.1556,78.0708 30.6082,78.9361 35.4999,80.6619 42.3559,81.7574 50,81.7574 57.6441,81.7574 64.5,80.6619 69.3917,78.9361 71.8444,78.0708 73.7225,77.0751 74.9584,76.0442 76.2029,75.0062 76.6298,74.083 76.6298,73.3332 76.6298,72.7912 76.5554,72.4221 76.368,72.0964 76.3623,72.0866 76.3568,72.0768 76.3514,72.0669 76.3497,72.0636 76.3479,72.0604 76.3462,72.0572L50.0024,22.9267z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="CircleWithCenterPointIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M81,50C81,67.1208 67.1208,81 50,81 32.8792,81 19,67.1208 19,50 19,32.8792 32.8792,19 50,19 67.1208,19 81,32.8792 81,50z M86,50C86,69.8822 69.8822,86 50,86 30.1177,86 14,69.8822 14,50 14,30.1177 30.1177,14 50,14 69.8822,14 86,30.1177 86,50z M50,54C52.2091,54 54,52.2091 54,50 54,47.7909 52.2091,46 50,46 47.7909,46 46,47.7909 46,50 46,52.2091 47.7909,54 50,54z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="RectWithCenterPointIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V100 H100 V0 H0 Z">
+                    <GeometryDrawing Brush="#FF2B2B2F" Geometry="F0 M100,100z M0,0z M86,14L14,14 14,86 86,86 86,14z M19,81L19,19 81,19 81,81 19,81z M50,54C52.2091,54 54,52.2091 54,50 54,47.7909 52.2091,46 50,46 47.7909,46 46,47.7909 46,50 46,52.2091 47.7909,54 50,54z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </UserControl.Resources>
+    <Grid>
+        <Border Margin="8" Background="#f4f4f5" BorderBrush="#3b82f6" BorderThickness="2" CornerRadius="6">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="5" Opacity="0.2" />
+            </Border.Effect>
+            <Grid>
+                <modern:SimpleStackPanel Spacing="4" Margin="8,0" Height="40" VerticalAlignment="Top" Orientation="Horizontal">
+                    <Border VerticalAlignment="Bottom" Height="34" Padding="6,0">
+                        <Grid>
+                            <modern:SimpleStackPanel
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal"
+                                    HorizontalAlignment="Center">
+                                <Image Height="24" Width="24">
+                                    <Image.Source>
+                                        <DrawingImage>
+                                            <DrawingImage.Drawing>
+                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                    <GeometryDrawing Brush="#2563eb" Geometry="F0 M24,24z M0,0z M13.0573,17.3383C13.0573,15.0674 14.8982,13.2265 17.169,13.2265 19.4399,13.2265 21.2808,15.0674 21.2808,17.3383 21.2808,19.6091 19.4399,21.45 17.169,21.45 14.8982,21.45 13.0573,19.6091 13.0573,17.3383z M4.48141,13.2265C3.50819,13.2265,2.71924,14.0155,2.71924,14.9887L2.71924,19.6878C2.71924,20.6611,3.50819,21.45,4.48141,21.45L9.18053,21.45C10.1537,21.45,10.9427,20.6611,10.9427,19.6878L10.9427,14.9887C10.9427,14.0155,10.1537,13.2265,9.18053,13.2265L4.48141,13.2265z M12.6923,2.71599C12.4659,2.59866 12.213,2.54181 11.9581,2.55096 11.7033,2.5601 11.4551,2.63494 11.2377,2.7682 11.028,2.89676 10.8537,3.07549 10.7305,3.28809L7.24046,8.83413C7.09431,9.06224 7.01353,9.32612 7.007,9.59703 7.00043,9.86995 7.06945,10.1394 7.20645,10.3755 7.34345,10.6117 7.54308,10.8053 7.78328,10.9351 8.01558,11.0605 8.27707,11.1215 8.5406,11.1119L15.5037,11.1119 15.5065,11.1119C15.7766,11.111 16.0412,11.0362 16.2717,10.8957 16.5023,10.7551 16.6901,10.5542 16.8146,10.3146 16.9392,10.0751 16.9959,9.80598 16.9785,9.53651 16.9617,9.27545 16.876,9.02367 16.7303,8.80672L13.26,3.23562 13.2505,3.22067C13.111,3.00717,12.9187,2.83333,12.6923,2.71599z" />
+                                                </DrawingGroup>
+                                            </DrawingImage.Drawing>
+                                        </DrawingImage>
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock
+                                        Foreground="#2563eb"
+                                        FontWeight="Bold"
+                                        FontSize="17" TextAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Text="形状绘制" Margin="4,0,0,0" />
+                            </modern:SimpleStackPanel>
+                        </Grid>
+                    </Border>
+                </modern:SimpleStackPanel>
+                <Border Name="CloseButtonBorder" MouseDown="CloseButtonBorder_MouseDown" MouseUp="CloseButtonBorder_MouseUp" MouseLeave="CloseButtonBorder_MouseLeave"
+                        Height="34" Width="34" CornerRadius="6" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,6,8,0">
+                    <Image Height="24" Width="24">
+                        <Image.Source>
+                            <DrawingImage>
+                                <DrawingImage.Drawing>
+                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                        <GeometryDrawing Brush="#dc2626" Geometry="F0 M24,24z M0,0z M18.7071,6.70711C19.0976,6.31658 19.0976,5.68342 18.7071,5.29289 18.3166,4.90237 17.6834,4.90237 17.2929,5.29289L12,10.5858 6.70711,5.29289C6.31658,4.90237 5.68342,4.90237 5.29289,5.29289 4.90237,5.68342 4.90237,6.31658 5.29289,6.70711L10.5858,12 5.29289,17.2929C4.90237,17.6834 4.90237,18.3166 5.29289,18.7071 5.68342,19.0976 6.31658,19.0976 6.70711,18.7071L12,13.4142 17.2929,18.7071C17.6834,19.0976 18.3166,19.0976 18.7071,18.7071 19.0976,18.3166 19.0976,17.6834 18.7071,17.2929L13.4142,12 18.7071,6.70711z" />
+                                    </DrawingGroup>
+                                </DrawingImage.Drawing>
+                            </DrawingImage>
+                        </Image.Source>
+                    </Image>
+                </Border>
+                <Grid Margin="0,40,0,0" modern:ThemeManager.RequestedTheme="Light">
+                    <!--main menu-->
+                    <Border Margin="6" Height="272" VerticalAlignment="Top" CornerRadius="6" Background="#fafafa" BorderBrush="#d4d4d8" BorderThickness="1">
+                        <Grid>
+                            <ItemsControl Name="ShapeDrawingItemsControl">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Margin="5" Orientation="Horizontal">
+                                        </WrapPanel>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border MouseDown="ShapeDrawingButtonBorder_MouseDown" MouseUp="ShapeDrawingButtonBorder_MouseUp" MouseLeave="ShapeDrawingButtonBorder_MouseLeave"
+                                                Margin="5" Width="56" Height="56" CornerRadius="4" Tag="{Binding}">
+                                            <Image Width="48" Height="48" Source="{Binding Image}"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </Grid>
+                    </Border>
+                    <Grid Height="40" VerticalAlignment="Bottom" Margin="12,0">
+                        <modern:SimpleStackPanel HorizontalAlignment="Left" Orientation="Horizontal" Spacing="16">
+                            <CheckBox Content="仅单次绘制" MinWidth="0"/>
+                        </modern:SimpleStackPanel>
+                        <StackPanel Margin="0,0,6,0" HorizontalAlignment="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Foreground="#18181b" FontSize="14" Text="粗细 : " VerticalAlignment="Center"/>
+                            <TextBlock FontWeight="Bold" Margin="0,0,24,0" Foreground="#18181b" FontSize="14" Text="4" VerticalAlignment="Center"/>
+                            <TextBlock Foreground="#18181b" FontSize="14" Text="颜色 : " VerticalAlignment="Center"/>
+                            <Border Height="16" Width="16" CornerRadius="8" Background="Red"/>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

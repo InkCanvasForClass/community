@@ -1,0 +1,204 @@
+﻿<UserControl x:Class="Ink_Canvas.ShapeDrawingLayer"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:Ink_Canvas"
+             xmlns:modern="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
+             mc:Ignorable="d"
+             d:DesignWidth="1920" d:DesignHeight="1080">
+    <Grid>
+        <helpers:DrawingVisualCanvas IsHitTestVisible="False" x:Name="DrawingVisualCanvas"/>
+        <Grid Name="FullscreenGrid"/>
+        <Border Name="Toolbar" Height="48" Width="728" Background="#fafafa" BorderBrush="#e4e4e7" BorderThickness="1" CornerRadius="6" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,0,0,36">
+            <Grid>
+                <Border Name="ToolbarMoveHandle" Width="24" Height="48" Background="#d4d4d8" BorderBrush="#88a1a1aa" Margin="-1,-1,0,-1" CornerRadius="6,0,0,6" HorizontalAlignment="Left" BorderThickness="1">
+                    <Image Width="12" Margin="2,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <Image.Source>
+                            <DrawingImage>
+                                <DrawingImage.Drawing>
+                                    <DrawingGroup ClipGeometry="M0,0 V37 H16 V0 H0 Z">
+                                        <GeometryDrawing Brush="#a1a1aa" Geometry="F0 M16,37z M0,0z M13,6C14.6567,6 16,4.65686 16,3 16,1.34314 14.6567,0 13,0 11.3433,0 10,1.34314 10,3 10,4.65686 11.3433,6 13,6z M3,6.11261C4.65674,6.11261 6,4.76947 6,3.11261 6,1.45575 4.65674,0.11261 3,0.11261 1.34326,0.11261 0,1.45575 0,3.11261 0,4.76947 1.34326,6.11261 3,6.11261z M6,13.1126C6,14.7695 4.65674,16.1126 3,16.1126 1.34326,16.1126 0,14.7695 0,13.1126 0,11.4557 1.34326,10.1126 3,10.1126 4.65674,10.1126 6,11.4557 6,13.1126z M13,16C14.6567,16 16,14.6569 16,13 16,11.3431 14.6567,10 13,10 11.3433,10 10,11.3431 10,13 10,14.6569 11.3433,16 13,16z M6,23.1126C6,24.7695 4.65674,26.1126 3,26.1126 1.34326,26.1126 0,24.7695 0,23.1126 0,21.4557 1.34326,20.1126 3,20.1126 4.65674,20.1126 6,21.4557 6,23.1126z M13,26C14.6567,26 16,24.6569 16,23 16,21.3431 14.6567,20 13,20 11.3433,20 10,21.3431 10,23 10,24.6569 11.3433,26 13,26z M6,33.1126C6,34.7695 4.65674,36.1126 3,36.1126 1.34326,36.1126 0,34.7695 0,33.1126 0,31.4557 1.34326,30.1126 3,30.1126 4.65674,30.1126 6,31.4557 6,33.1126z M13,36C14.6567,36 16,34.6569 16,33 16,31.3431 14.6567,30 13,30 11.3433,30 10,31.3431 10,33 10,34.6569 11.3433,36 13,36z" />
+                                    </DrawingGroup>
+                                </DrawingImage.Drawing>
+                            </DrawingImage>
+                        </Image.Source>
+                    </Image>
+                </Border>
+                <Button Foreground="White" Content="完成" Padding="16,6" FontSize="16" Click="DoneButtonClicked"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0">
+                    <Button.Resources>
+                        <SolidColorBrush
+                            x:Key="{x:Static modern:ThemeKeys.ButtonBackgroundKey}"
+                            Color="#2563eb" />
+                        <SolidColorBrush
+                            x:Key="{x:Static modern:ThemeKeys.ButtonBackgroundPointerOverKey}"
+                            Color="#2563eb" />
+                        <SolidColorBrush
+                            x:Key="{x:Static modern:ThemeKeys.ButtonBackgroundPressedKey}"
+                            Color="#1e40af" />
+                    </Button.Resources>
+                </Button>
+                <modern:SimpleStackPanel Margin="30,0,82,0" Spacing="4" Orientation="Horizontal">
+                    <Border Name="CursorButton" Padding="9,0" Height="36" Width="36" CornerRadius="5">
+                        <Image Width="23" Height="23" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V16 H16 V0 H0 Z">
+                                            <GeometryDrawing Brush="#18181b" Geometry="F1 M16,16z M0,0z M4.22929,10.3892C4.37895,11.3606 4.5047,12.1768 4.58442,12.6882 4.65533,13.1234 5.12214,13.1723 5.35668,12.7448 5.7484,12.0468 6.45109,10.826 6.94285,9.97433L9.65754,13.8513C9.768,14.009,9.98544,14.0474,10.1432,13.9369L11.2857,13.1369C11.4435,13.0265,11.4817,12.809,11.3713,12.6513L8.83296,9.02618C10.0101,9.02604 11.6711,9.02597 12.5766,9.02632 13.0884,9.00839 13.1289,8.5242 12.7521,8.23186 10.7514,6.84664 6.03382,3.63789 3.75702,2.14093 3.36741,1.86634 2.89582,1.9778 3.01682,2.60989 3.34465,4.64736 3.85981,7.99113 4.22929,10.3892z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </Border>
+                    <Border Name="UndoButton" Padding="9,0" Height="36" Width="36" CornerRadius="5">
+                        <Image Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V16 H16 V0 H0 Z">
+                                            <GeometryDrawing Brush="#18181b" Geometry="F1 M16,16z M0,0z M7.04202,4.02051C7.04757,3.43213 6.47012,3.28587 6.18416,3.57018 5.10859,4.63952 3.1937,6.53764 2.26671,7.45928 1.92345,7.80055 1.91016,8.21537 2.23474,8.53802 3.14903,9.44705 5.09052,11.2748 6.17629,12.3543 6.46488,12.6412 7.04227,12.7032 7.04202,11.9083 7.04202,11.1775 7.06964,9.7887 7.06964,9.7887 8.87951,9.79135 11.9537,10.7495 13.4887,12.437 13.7194,12.6906 14.0567,12.2934 13.9919,11.9491 13.37,8.64627 10.2122,6.48714 7.06391,6.07519 7.06391,6.07519 7.04202,4.75251 7.04202,4.02051z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </Border>
+                    <Border Name="RedoButton" Padding="9,0" Height="36" Width="36" CornerRadius="5">
+                        <Image Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V16 H16 V0 H0 Z">
+                                            <GeometryDrawing Brush="#18181b" Geometry="F1 M16,16z M0,0z M8.95798,4.02051C8.95243,3.43213 9.52988,3.28587 9.81584,3.57018 10.8914,4.63952 12.8063,6.53764 13.7333,7.45928 14.0766,7.80055 14.0898,8.21537 13.7653,8.53802 12.851,9.44705 10.9095,11.2748 9.82371,12.3543 9.53512,12.6412 8.95773,12.7032 8.95798,11.9083 8.95798,11.1775 8.93036,9.7887 8.93036,9.7887 7.12049,9.79135 4.04627,10.7495 2.51129,12.437 2.28061,12.6906 1.94328,12.2934 2.00813,11.9491 2.63002,8.64627 5.78777,6.48714 8.93609,6.07519 8.93609,6.07519 8.95798,4.75251 8.95798,4.02051z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </Border>
+                    <Border Name="ClearButton" Padding="9,0" Height="36" Width="36" CornerRadius="5">
+                        <Image Width="23" Height="23" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V16 H16 V0 H0 Z">
+                                            <GeometryDrawing Brush="#18181b" Geometry="F0 M16,16z M0,0z M6.24025,2C6.09677,2,5.96939,2.09181,5.92403,2.22793L5.55555,3.33333 2.33333,3.33333C2.14924,3.33333,2,3.48257,2,3.66667L2,4.33333C2,4.51743,2.14924,4.66667,2.33333,4.66667L13.6667,4.66667C13.8507,4.66667,14,4.51743,14,4.33333L14,3.66667C14,3.48257,13.8507,3.33333,13.6667,3.33333L10.4445,3.33333 10.076,2.22793C10.0306,2.09181,9.9032,2,9.75973,2L6.24025,2z M3.33333,5.66667L12.6667,5.66667 12.0491,13.3865C12.0213,13.7329,11.7321,14,11.3845,14L4.61546,14C4.26789,14,3.97864,13.7329,3.95092,13.3865L3.33333,5.66667z M6.33333,8C6.14924,8,6,8.14927,6,8.33333L6,11C6,11.1841,6.14924,11.3333,6.33333,11.3333L6.66667,11.3333C6.85073,11.3333,7,11.1841,7,11L7,8.33333C7,8.14927,6.85073,8,6.66667,8L6.33333,8z M9,8.33333C9,8.14927,9.14927,8,9.33333,8L9.66667,8C9.85073,8,10,8.14927,10,8.33333L10,11C10,11.1841,9.85073,11.3333,9.66667,11.3333L9.33333,11.3333C9.14927,11.3333,9,11.1841,9,11L9,8.33333z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </Border>
+                    <Line X1="0" Y1="0" X2="0" Y2="36" VerticalAlignment="Center" StrokeThickness="1" Stroke="#a1a1aa"/>
+                    <Border Name="GridLineButton" Padding="9,0" Height="36" CornerRadius="5">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="20" Height="20" VerticalAlignment="Center">
+                                <Image.Source>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                <GeometryDrawing Brush="#18181b" Geometry="F0 M24,24z M0,0z M7,3C7,2.44772 6.55228,2 6,2 5.44772,2 5,2.44772 5,3L5,5 3,5C2.44772,5 2,5.44772 2,6 2,6.55228 2.44772,7 3,7L5,7 5,11 3,11C2.44772,11 2,11.4477 2,12 2,12.5523 2.44772,13 3,13L5,13 5,17 3,17C2.44772,17 2,17.4477 2,18 2,18.5523 2.44772,19 3,19L5,19 5,21C5,21.5523 5.44772,22 6,22 6.55228,22 7,21.5523 7,21L7,19 11,19 11,21C11,21.5523 11.4477,22 12,22 12.5523,22 13,21.5523 13,21L13,19 17,19 17,21C17,21.5523 17.4477,22 18,22 18.5523,22 19,21.5523 19,21L19,19 21,19C21.5523,19 22,18.5523 22,18 22,17.4477 21.5523,17 21,17L19,17 19,13 21,13C21.5523,13 22,12.5523 22,12 22,11.4477 21.5523,11 21,11L19,11 19,7 21,7C21.5523,7 22,6.55228 22,6 22,5.44772 21.5523,5 21,5L19,5 19,3C19,2.44772 18.5523,2 18,2 17.4477,2 17,2.44772 17,3L17,5 13,5 13,3C13,2.44772 12.5523,2 12,2 11.4477,2 11,2.44772 11,3L11,5 7,5 7,3z M17,7L13,7 13,11 17,11 17,7z M17,13L13,13 13,17 17,17 17,13z M11,13L11,17 7,17 7,13 11,13z M11,7L11,11 7,11 7,7 11,7z" />
+                                            </DrawingGroup>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </Image.Source>
+                            </Image>
+                            <TextBlock FontSize="14" Margin="4,0,0,0" Text="网格辅助线" VerticalAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <Border Name="SnapButton" Padding="9,0" Height="36" CornerRadius="5">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="20" Height="20" VerticalAlignment="Center">
+                                <Image.Source>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                <GeometryDrawing Brush="#18181b" Geometry="F0 M24,24z M0,0z M4,4C3.46957,4 2.96086,4.21071 2.58579,4.58579 2.21071,4.96086 2,5.46957 2,6L2,18C2,18.5304 2.21071,19.0391 2.58579,19.4142 2.96086,19.7893 3.46957,20 4,20L20,20C20.5304,20 21.0391,19.7893 21.4142,19.4142 21.7893,19.0391 22,18.5304 22,18L22,13C22,12.4477 21.5523,12 21,12 20.4477,12 20,12.4477 20,13L20,18 4,18 4,6 13,6C13.5523,6 14,5.55228 14,5 14,4.44772 13.5523,4 13,4L4,4z M17.5858,8.41421C17.2107,8.03914 17,7.53043 17,7 17,6.46957 17.2107,5.96086 17.5858,5.58579 17.9609,5.21071 18.4696,5 19,5 19.5304,5 20.0391,5.21071 20.4142,5.58579 20.7893,5.96086 21,6.46957 21,7 21,7.53043 20.7893,8.03914 20.4142,8.41421 20.0391,8.78929 19.5304,9 19,9 18.4696,9 17.9609,8.78929 17.5858,8.41421z M10,12C9.44772,12 9,11.5523 9,11 9,10.4477 9.44772,10 10,10L14,10C14.2751,10 14.5242,10.1111 14.705,10.2908 14.7064,10.2922 14.7078,10.2936 14.7092,10.295 14.804,10.3904 14.8757,10.5001 14.9241,10.6172 14.9727,10.7343 14.9996,10.8625 15,10.997 15,10.998 15,10.999 15,11L15,11.0007 15,15C15,15.5523 14.5523,16 14,16 13.4477,16 13,15.5523 13,15L13,13.4142 10.7071,15.7071C10.3166,16.0976 9.68342,16.0976 9.29289,15.7071 8.90237,15.3166 8.90237,14.6834 9.29289,14.2929L11.5858,12 10,12z" />
+                                            </DrawingGroup>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </Image.Source>
+                            </Image>
+                            <TextBlock FontSize="14" Margin="4,0,0,0" Text="顶点吸附" VerticalAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <Border Name="MultiPointButton" Padding="9,0" Height="36" CornerRadius="5">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="20" Height="20" VerticalAlignment="Center">
+                                <Image.Source>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                <GeometryDrawing Brush="#18181b" Geometry="F1 M24,24z M0,0z M20.5023,9.22252C19.8223,8.53252 18.7423,8.35252 17.8523,8.67252 17.7523,8.51252 17.6423,8.36252 17.5023,8.22252 16.8223,7.53252 15.7423,7.35252 14.8523,7.67252 14.7523,7.51252 14.6423,7.35252 14.5023,7.22252 14.2723,6.99252 13.9923,6.80252 13.6923,6.68252 13.2323,6.49252 12.7223,6.44252 12.2323,6.54252L12.2323,3.99252C12.2323,3.32252 11.9723,2.69252 11.5023,2.22252 10.5623,1.28252 8.90226,1.28252 7.96226,2.22252 7.49226,2.69252 7.23226,3.32252 7.23226,3.99252L7.23226,10.1125C6.82226,9.78252 6.32226,9.56252 5.79226,9.49252 5.16226,9.41252 4.51226,9.55252 3.97226,9.88252 3.41226,10.2225 3.01226,10.7525 2.84226,11.3825 2.67226,12.0125 2.76226,12.6825 3.08226,13.2525 4.98226,16.6325 6.07226,18.5325 6.40226,19.0325L6.60226,19.3425C7.23226,20.3025 8.11226,21.1025 9.13226,21.6525 10.0523,22.1425 11.0723,22.4325 12.1123,22.4825 12.1523,22.4825 12.1923,22.4825 12.2423,22.4825L14.2423,22.4825C16.1123,22.4825 17.8723,21.7525 19.1923,20.4325 20.4923,19.1325 21.2423,17.3225 21.2423,15.4825L21.2423,10.9825C21.2423,10.3125,20.9823,9.68252,20.5123,9.21252L20.5023,9.22252z M19.2323,15.4925C19.2323,16.8125 18.7023,18.0925 17.7723,19.0325 16.8423,19.9725 15.5723,20.4925 14.2323,20.4925L12.4423,20.4925C11.6223,20.4925 10.7923,20.2825 10.0723,19.8925 9.34226,19.5025 8.72226,18.9325 8.27226,18.2425L8.08226,17.9425C7.87226,17.6225 7.14226,16.3825 4.83226,12.2725 4.77226,12.1625 4.75226,12.0225 4.78226,11.9025 4.81226,11.7725 4.89226,11.6725 5.01226,11.6025 5.17226,11.5025 5.37226,11.4625 5.56226,11.4825 5.75226,11.5025 5.93226,11.5925 6.07226,11.7325L7.54226,13.2025C7.63226,13.2925 7.74226,13.3725 7.87226,13.4225 8.11226,13.5225 8.39226,13.5225 8.63226,13.4225 8.87226,13.3225 9.07226,13.1225 9.17226,12.8825 9.22226,12.7625 9.25226,12.6325 9.25226,12.5025L9.25226,3.99252C9.25226,3.86252 9.30226,3.73252 9.40226,3.64252 9.59226,3.45252 9.92226,3.45252 10.1123,3.64252 10.2023,3.73252 10.2623,3.86252 10.2623,3.99252L10.2623,11.4925C10.2623,12.0425 10.7123,12.4925 11.2623,12.4925 11.8123,12.4925 12.2623,12.0425 12.2623,11.4925L12.2623,8.99252C12.2623,8.92252 12.2723,8.86252 12.3023,8.80252 12.3323,8.74252 12.3623,8.68252 12.4123,8.64252 12.4623,8.60252 12.5123,8.56252 12.5723,8.53252 12.6923,8.48252 12.8323,8.48252 12.9523,8.53252 13.0123,8.55252 13.0623,8.59252 13.1123,8.64252 13.1623,8.69252 13.1923,8.74252 13.2223,8.80252 13.2523,8.86252 13.2623,8.93252 13.2623,8.99252L13.2623,11.4925C13.2623,12.0425 13.7123,12.4925 14.2623,12.4925 14.8123,12.4925 15.2623,12.0425 15.2623,11.4925L15.2623,9.99252C15.2623,9.86252 15.3123,9.73252 15.4123,9.64252 15.6023,9.45252 15.9323,9.45252 16.1223,9.64252 16.2123,9.73252 16.2723,9.86252 16.2723,9.99252L16.2723,11.4925C16.2723,12.0425 16.7223,12.4925 17.2723,12.4925 17.8223,12.4925 18.2723,12.0425 18.2723,11.4925L18.2723,10.9925C18.2723,10.8625 18.3223,10.7325 18.4223,10.6425 18.6123,10.4525 18.9423,10.4525 19.1323,10.6425 19.2223,10.7325 19.2823,10.8625 19.2823,10.9925L19.2823,15.4925 19.2323,15.4925z" />
+                                            </DrawingGroup>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </Image.Source>
+                            </Image>
+                            <TextBlock FontSize="14" Margin="4,0,0,0" Text="多指绘制" VerticalAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <Border Name="InfoButton" Padding="9,0" Height="36" CornerRadius="5">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Width="20" Height="20" VerticalAlignment="Center">
+                                <Image.Source>
+                                    <DrawingImage>
+                                        <DrawingImage.Drawing>
+                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                <GeometryDrawing Brush="#18181b" Geometry="F0 M24,24z M0,0z M4.92893,4.92893C6.8043,3.05357 9.34784,2 12,2 14.6522,2 17.1957,3.05357 19.0711,4.92893 20.9464,6.8043 22,9.34784 22,12 22,13.3132 21.7413,14.6136 21.2388,15.8268 20.7362,17.0401 19.9997,18.1425 19.0711,19.0711 18.1425,19.9997 17.0401,20.7362 15.8268,21.2388 14.6136,21.7413 13.3132,22 12,22 10.6868,22 9.38642,21.7413 8.17317,21.2388 6.95991,20.7362 5.85752,19.9997 4.92893,19.0711 4.00035,18.1425 3.26375,17.0401 2.7612,15.8268 2.25866,14.6136 2,13.3132 2,12 2,9.34784 3.05357,6.8043 4.92893,4.92893z M12,4C9.87827,4 7.84344,4.84285 6.34315,6.34315 4.84285,7.84344 4,9.87827 4,12 4,13.0506 4.20693,14.0909 4.60896,15.0615 5.011,16.0321 5.60028,16.914 6.34315,17.6569 7.08601,18.3997 7.96793,18.989 8.93853,19.391 9.90914,19.7931 10.9494,20 12,20 13.0506,20 14.0909,19.7931 15.0615,19.391 16.0321,18.989 16.914,18.3997 17.6569,17.6569 18.3997,16.914 18.989,16.0321 19.391,15.0615 19.7931,14.0909 20,13.0506 20,12 20,9.87827 19.1571,7.84344 17.6569,6.34315 16.1566,4.84285 14.1217,4 12,4z M11,9C11,8.44772,11.4477,8,12,8L12.01,8C12.5623,8 13.01,8.44772 13.01,9 13.01,9.55228 12.5623,10 12.01,10L12,10C11.4477,10,11,9.55228,11,9z M11,11C10.4477,11 10,11.4477 10,12 10,12.5523 10.4477,13 11,13L11,16C11,16.5523,11.4477,17,12,17L13,17C13.5523,17 14,16.5523 14,16 14,15.4477 13.5523,15 13,15L13,12C13,11.4477,12.5523,11,12,11L11,11z" />
+                                            </DrawingGroup>
+                                        </DrawingImage.Drawing>
+                                    </DrawingImage>
+                                </Image.Source>
+                            </Image>
+                            <TextBlock FontSize="14" Margin="4,0,0,0" Text="信息" VerticalAlignment="Center"></TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <Border Name="MoreButton"  Padding="9,0" Height="36" Width="36" CornerRadius="5">
+                        <Image Width="24" Height="24" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                            <GeometryDrawing Brush="#18181b" Geometry="F0 M24,24z M0,0z M3.58579,10.5858C3.96086,10.2107 4.46957,10 5,10 5.53043,10 6.03914,10.2107 6.41421,10.5858 6.78929,10.9609 7,11.4696 7,12 7,12.5304 6.78929,13.0391 6.41421,13.4142 6.03914,13.7893 5.53043,14 5,14 4.46957,14 3.96086,13.7893 3.58579,13.4142 3.21071,13.0391 3,12.5304 3,12 3,11.4696 3.21071,10.9609 3.58579,10.5858z M10.5858,10.5858C10.9609,10.2107 11.4696,10 12,10 12.5304,10 13.0391,10.2107 13.4142,10.5858 13.7893,10.9609 14,11.4696 14,12 14,12.5304 13.7893,13.0391 13.4142,13.4142 13.0391,13.7893 12.5304,14 12,14 11.4696,14 10.9609,13.7893 10.5858,13.4142 10.2107,13.0391 10,12.5304 10,12 10,11.4696 10.2107,10.9609 10.5858,10.5858z M19,10C18.4696,10 17.9609,10.2107 17.5858,10.5858 17.2107,10.9609 17,11.4696 17,12 17,12.5304 17.2107,13.0391 17.5858,13.4142 17.9609,13.7893 18.4696,14 19,14 19.5304,14 20.0391,13.7893 20.4142,13.4142 20.7893,13.0391 21,12.5304 21,12 21,11.4696 20.7893,10.9609 20.4142,10.5858 20.0391,10.2107 19.5304,10 19,10z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </Border>
+                </modern:SimpleStackPanel>
+                <modern:SimpleStackPanel Spacing="8" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,-42,0,48">
+                    <Border Padding="12,0" Height="32" Background="#bb450a0a" CornerRadius="4">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock FontSize="14" Foreground="White" FontWeight="Bold" Text="形状绘制模式 : "/>
+                            <TextBlock Name="ShapeDrawingTypeText" FontSize="14" Foreground="White" Text="直线"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Name="AngleTooltip" Padding="12,0" Height="32" Background="#bb422006" CornerRadius="4">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock FontSize="14" Foreground="White" Text="角度 : "/>
+                            <TextBlock FontSize="14" Foreground="White" Name="AngleText" FontWeight="Bold" Text="0°"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Name="LengthTooltip" Padding="12,0" Height="32" Background="#bb052e16" CornerRadius="4">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock FontSize="14" Foreground="White" Text="长度 : "/>
+                            <TextBlock FontSize="14" Foreground="White" Name="LengthText" FontWeight="Bold" Text="0.00 px"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Padding="12,0" Height="32" Background="#bb172554" CornerRadius="4">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock FontSize="14" Foreground="White" Text="粗细 : "/>
+                            <TextBlock FontSize="14" Foreground="White" FontWeight="Bold" Name="PenSizeText" Text="4 像素"/>
+                        </StackPanel>
+                    </Border>
+                </modern:SimpleStackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

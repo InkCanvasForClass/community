@@ -1,0 +1,71 @@
+﻿<Window x:Class="InkCanvasForClass.IccInkCanvas.Demo.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:InkCanvasForClass.IccInkCanvas.Demo"
+        xmlns:iccInkCanvas="clr-namespace:InkCanvasForClass.IccInkCanvas;assembly=InkCanvasForClass.IccInkCanvas"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="950" Width="800">
+    <Grid>
+        <TabControl>
+            <TabItem Header="IccInkCanvasOld">
+                <StackPanel Orientation="Vertical" Margin="8">
+                    <TextBlock FontSize="24">IccInkCanvasDemo</TextBlock>
+                    <iccInkCanvas:IccBoard EditingMode="None" Name="IccBoard" Width="512" Height="512"/>
+                    <WrapPanel Orientation="Horizontal">
+                        <Button Content="EditingMode = None" Click="EditingModeChangeToNone_ButtonClick"/>
+                        <Button Content="EditingMode = Writing" Click="EditingModeChangeToWriting_ButtonClick"/>
+                        <Button Content="EditingMode = GeometryErasing" Click="EditingModeChangeToGeometryErasing_ButtonClick"/>
+                        <Button Content="EditingMode = AreaErasing" Click="EditingModeChangeToAreaErasing_ButtonClick"/>
+                        <Button Content="EditingMode = RoamingMode" Click="EditingModeChangeToRoamingMode_ButtonClick"/>
+                    </WrapPanel>
+                    <TextBlock Name="BoardSettingsTextBlock"/>
+                    <WrapPanel Orientation="Horizontal">
+                        <Button Content="BoardSettings.NibSize = 2" Click="BoardSettingsNibSizeChangeTo2_ButtonClick"/>
+                        <Button Content="BoardSettings.NibSize = 4" Click="BoardSettingsNibSizeChangeTo4_ButtonClick"/>
+                        <Button Content="BoardSettings.NibSize = 6" Click="BoardSettingsNibSizeChangeTo6_ButtonClick"/>
+                        <Button Content="BoardSettings.NibColor = Red" Click="BoardSettingsNibColorChangeToRed_ButtonClick"/>
+                        <Button Content="BoardSettings.NibColor = Blue" Click="BoardSettingsNibColorChangeToBlue_ButtonClick"/>
+                        <Button Content="BoardSettings.NibColor = Green" Click="BoardSettingsNibColorChangeToGreen_ButtonClick"/>
+                        <Button Content="BoardSettings.NibColor = Black" Click="BoardSettingsNibColorChangeToBlack_ButtonClick"/>
+                        <Button Content="BoardSettings.StrokeNibStyle = Solid" Click="BoardSettingsStrokeNibStyleChangeToSolid_ButtonClick"/>
+                        <Button Content="BoardSettings.StrokeNibStyle = Beautiful" Click="BoardSettingsStrokeNibStyleChangeToBeautiful_ButtonClick"/>
+                    </WrapPanel>
+                    <TextBlock Name="BoardPageTextBlock"/>
+                    <WrapPanel Orientation="Horizontal">
+                        <Button Content="AddPage" Click="AddPage_ButtonClick"/>
+                        <Button Content="SwitchToPreviousPage" Click="SwitchToPreviousPage_ButtonClick"/>
+                        <Button Content="SwitchToNextPage" Click="SwitchToNextPage_ButtonClick"/>
+                        <Button Content="RemoveCurrentPage" Click="RemoveCurrentPage_ButtonClick"/>
+                    </WrapPanel>
+                    <WrapPanel Orientation="Horizontal">
+                        <Button Content="BoardSettings.EraserSize = 16" Click="BoardSettingsEraserSizeChangeTo16_ButtonClick"/>
+                        <Button Content="BoardSettings.EraserSize = 32" Click="BoardSettingsEraserSizeChangeTo32_ButtonClick"/>
+                        <Button Content="BoardSettings.EraserSize = 48" Click="BoardSettingsEraserSizeChangeTo48_ButtonClick"/>
+                        <Button Content="BoardSettings.EraserSize = 64" Click="BoardSettingsEraserSizeChangeTo64_ButtonClick"/>
+                        <Button Content="BoardSettings.EraserType = Rectangle" Click="BoardSettingsEraserTypeChangeToRectangle_ButtonClick"/>
+                        <Button Content="BoardSettings.EraserType = Ellipse" Click="BoardSettingsEraserTypeChangeToEllipse_ButtonClick"/>
+                    </WrapPanel>
+                    <TextBlock Name="TimeMachineTextBlock"/>
+                    <WrapPanel Orientation="Horizontal">
+                        <Button Content="Undo" Click="Undo_ButtonClick"/>
+                        <Button Content="Undo 2" Click="Undo2_ButtonClick"/>
+                        <Button Content="Redo" Click="Redo_ButtonClick"/>
+                        <Button Content="Redo 2" Click="Redo2_ButtonClick"/>
+                    </WrapPanel>
+                    <TextBlock Text="TimeMachineV2 Test"/>
+                    <TextBlock Name="TimeMachineV2Status"/>
+                    <WrapPanel Orientation="Horizontal">
+                        <Button Content="PushTestAction" Click="PushTestAction_TimeMachineV2_ButtonClick"/>
+                        <Button Content="Undo" Click="Undo_TimeMachineV2_ButtonClick"/>
+                        <Button Content="Redo" Click="Redo_TimeMachineV2_ButtonClick"/>
+                    </WrapPanel>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="IccInkCanvasNew">
+                <iccInkCanvas:InkBoard Width="269" Height="269"/>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</Window>

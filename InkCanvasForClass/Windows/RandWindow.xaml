@@ -1,0 +1,128 @@
+﻿<Window x:Class="Ink_Canvas.RandWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:local="clr-namespace:Ink_Canvas" FontFamily="Microsoft YaHei UI"
+        ui:ThemeManager.RequestedTheme="Light" Topmost="True" Background="Transparent"
+        mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True" Loaded="Window_Loaded"
+        WindowStartupLocation="CenterScreen"
+        Title="Ink Canvas 抽奖" Height="500" Width="900">
+    <Border Background="#F0F3F9" CornerRadius="10" BorderThickness="1" BorderBrush="#0066BF" Margin="0" ClipToBounds="True">
+        <Canvas>
+            <Image Source="/Resources/hatsune-miku1.png" Width="300" Canvas.Bottom="-140" Canvas.Left="-48" Canvas.Top="304"></Image>
+            <Grid Canvas.Left="0" Canvas.Right="0" Canvas.Top="0" Canvas.Bottom="0" Width="900" Height="309" HorizontalAlignment="Center" VerticalAlignment="Top">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.8*"/>
+                    <ColumnDefinition Width="1*"/>
+                </Grid.ColumnDefinitions>
+                <Viewbox HorizontalAlignment="Center" Margin="20,0">
+                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="50" MinHeight="470">
+                        <Label Name="LabelOutput" FontSize="130" Content="" Block.TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Label Name="LabelOutput2" FontSize="130" Visibility="Collapsed" Content="" Block.TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        <Label Name="LabelOutput3" FontSize="130" Visibility="Collapsed" Content="" Block.TextAlignment="Center" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </ui:SimpleStackPanel>
+                </Viewbox>
+                <ui:SimpleStackPanel Spacing="8" Grid.Column="1" HorizontalAlignment="Left" VerticalAlignment="Center" Opacity="1" Name="PeopleControlPane" Width="256">
+                    <StackPanel Orientation="Horizontal">
+                        <Border x:Name="BorderBtnMinus" MouseUp="BorderBtnMinus_MouseUp" Background="#FBFBFD" Height="70" Width="70" CornerRadius="100">
+                            <Border.Effect>
+                                <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.15" BlurRadius="3"/>
+                            </Border.Effect>
+                            <Viewbox Margin="20">
+                                <Image Width="18" Height="18">
+                                    <Image.Source>
+                                        <DrawingImage>
+                                            <DrawingImage.Drawing>
+                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                    <DrawingGroup Opacity="1">
+                                                        <DrawingGroup.ClipGeometry>
+                                                            <RectangleGeometry RadiusX="0" RadiusY="0" Rect="0,0,24,24" />
+                                                        </DrawingGroup.ClipGeometry>
+                                                        <GeometryDrawing Brush="#FF000000" Geometry="F0 M24,24z M0,0z M4,12C4,11.4477,4.44772,11,5,11L19,11C19.5523,11 20,11.4477 20,12 20,12.5523 19.5523,13 19,13L5,13C4.44772,13,4,12.5523,4,12z" />
+                                                    </DrawingGroup>
+                                                </DrawingGroup>
+                                            </DrawingImage.Drawing>
+                                        </DrawingImage>
+                                    </Image.Source>
+                                </Image>
+                            </Viewbox>
+                        </Border>
+                        <TextBlock Name="LabelNumberCount" Text="1" FontFamily="Consolas" FontSize="55" Margin="10" Width="80" TextAlignment="Center"/>
+                        <Border x:Name="BorderBtnAdd" MouseUp="BorderBtnAdd_MouseUp" Background="#FBFBFD" Height="70" Width="70" CornerRadius="100">
+                            <Border.Effect>
+                                <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.15" BlurRadius="3"/>
+                            </Border.Effect>
+                            <Viewbox Margin="20">
+                                <Image Width="18" Height="18">
+                                    <Image.Source>
+                                        <DrawingImage>
+                                            <DrawingImage.Drawing>
+                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                    <DrawingGroup Opacity="1">
+                                                        <DrawingGroup.ClipGeometry>
+                                                            <RectangleGeometry RadiusX="0" RadiusY="0" Rect="0,0,24,24" />
+                                                        </DrawingGroup.ClipGeometry>
+                                                        <GeometryDrawing Brush="#18181b" Geometry="F0 M24,24z M0,0z M13,5C13,4.44772 12.5523,4 12,4 11.4477,4 11,4.44772 11,5L11,11 5,11C4.44772,11 4,11.4477 4,12 4,12.5523 4.44772,13 5,13L11,13 11,19C11,19.5523 11.4477,20 12,20 12.5523,20 13,19.5523 13,19L13,13 19,13C19.5523,13 20,12.5523 20,12 20,11.4477 19.5523,11 19,11L13,11 13,5z" />
+                                                    </DrawingGroup>
+                                                </DrawingGroup>
+                                            </DrawingImage.Drawing>
+                                        </DrawingImage>
+                                    </Image.Source>
+                                </Image>
+                            </Viewbox>
+                        </Border>
+                    </StackPanel>
+                    <ui:SimpleStackPanel Visibility="Collapsed" Margin="0,8,0,0" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24">
+                        <CheckBox x:Name="NoHotStudents" MinWidth="0"
+                                  Content="不抽热门人选" IsThreeState="True"
+                                  HorizontalAlignment="Center" />
+                        <CheckBox x:Name="NoShengPiZi" MinWidth="0"
+                                  Content="避开生僻字" IsThreeState="True"
+                                  HorizontalAlignment="Center" />
+                    </ui:SimpleStackPanel>
+                    <ui:SimpleStackPanel Visibility="Collapsed"  Margin="0,0,0,8" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24">
+                        <ComboBox Name="ComboBoxRandMode"
+                                  MinWidth="0"
+                                  IsEditable="False"
+                                  SelectedIndex="0"
+                                  IsReadOnly="True">
+                            <ComboBoxItem>全都抽</ComboBoxItem>
+                            <ComboBoxItem>只抽男</ComboBoxItem>
+                            <ComboBoxItem>只抽女</ComboBoxItem>
+                        </ComboBox>
+                    </ui:SimpleStackPanel>
+                    <Border x:Name="BorderBtnRand" MouseUp="BorderBtnRand_MouseUp" Background="#0066BF" Height="70" Width="200" CornerRadius="35">
+                        <ui:SimpleStackPanel Margin="3,0" Spacing="20" Orientation="Horizontal" HorizontalAlignment="Center">
+                            <Viewbox Margin="0,20">
+                                <ui:SymbolIcon Name="SymbolIconStart" Symbol="Contact" Foreground="White"/>
+                            </Viewbox>
+                            <TextBlock Text="开抽" Foreground="White" FontSize="32" Margin="-1,-1,4,0" VerticalAlignment="Center"/>
+                        </ui:SimpleStackPanel>
+                    </Border>
+                </ui:SimpleStackPanel>
+            </Grid>
+            <Border UseLayoutRounding="True" Canvas.Bottom="8" Canvas.Right="8" x:Name="BorderBtnHelp" MouseUp="BorderBtnHelp_MouseUp" Background="#FBFBFD" Grid.Column="1" Margin="10,10,60,10" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right" CornerRadius="20">
+                <Border.Effect>
+                    <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.15" BlurRadius="3"/>
+                </Border.Effect>
+                <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Viewbox Margin="15,12">
+                        <ui:SymbolIcon Symbol="People" Foreground="Black"/>
+                    </Viewbox>
+                    <TextBlock Margin="-5,12,15,12" Name="TextBlockPeopleCount" Text="点击此处以导入名单" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </ui:SimpleStackPanel>
+            </Border>
+            <Border UseLayoutRounding="True" Canvas.Bottom="8" Canvas.Right="8" x:Name="BtnClose" MouseUp="BtnClose_MouseUp" HorizontalAlignment="Right" VerticalAlignment="{Binding ElementName=BorderBtnHelp, Path=VerticalAlignment}" Margin="10" Grid.Column="1" Background="#E32A34" Height="40" Width="40" CornerRadius="100">
+                <Border.Effect>
+                    <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
+                </Border.Effect>
+                <Viewbox Margin="14">
+                    <ui:SymbolIcon Symbol="Clear" Foreground="White"/>
+                </Viewbox>
+            </Border>
+        </Canvas>
+
+    </Border>
+</Window>

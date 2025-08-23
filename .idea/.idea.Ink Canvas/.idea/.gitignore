@@ -1,12 +1,12 @@
-﻿# Default ignored files
+﻿# 默认忽略的文件
 /shelf/
 /workspace.xml
-# Rider ignored files
+# Rider 忽略的文件
+/contentModel.xml
 /projectSettingsUpdater.xml
 /modules.xml
-/contentModel.xml
 /.idea.Ink Canvas.iml
-# Editor-based HTTP Client requests
+# 基于编辑器的 HTTP 客户端请求
 /httpRequests/
 # Datasource local storage ignored files
 /dataSources/

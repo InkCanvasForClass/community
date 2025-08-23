@@ -1,0 +1,73 @@
+﻿<UserControl x:Class="Ink_Canvas.MW_Toast"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Ink_Canvas"
+             xmlns:modern="http://schemas.inkore.net/lib/ui/wpf/modern"
+             mc:Ignorable="d">
+    <UserControl.Resources>
+        <DrawingImage x:Key="ErrorIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                    <GeometryDrawing Geometry="F1 M24,24z M0,0z M0,12C0,6.34315 0,3.51472 1.75736,1.75736 3.51472,0 6.34315,0 12,0 17.6569,0 20.4853,0 22.2426,1.75736 24,3.51472 24,6.34315 24,12 24,17.6569 24,20.4853 22.2426,22.2426 20.4853,24 17.6569,24 12,24 6.34315,24 3.51472,24 1.75736,22.2426 0,20.4853 0,17.6569 0,12z">
+                        <GeometryDrawing.Brush>
+                            <SolidColorBrush Color="#FF000000" Opacity="0.3" />
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#FFFFFFFF" Geometry="F0 M24,24z M0,0z M8.46967,8.46967C8.76256,8.17678,9.23744,8.17678,9.53033,8.46967L12,10.9394 14.4697,8.46969C14.7626,8.1768 15.2374,8.1768 15.5303,8.46969 15.8232,8.76259 15.8232,9.23746 15.5303,9.53035L13.0607,12 15.5303,14.4696C15.8232,14.7625 15.8232,15.2374 15.5303,15.5303 15.2374,15.8232 14.7625,15.8232 14.4696,15.5303L12,13.0607 9.53036,15.5303C9.23746,15.8232 8.76259,15.8232 8.4697,15.5303 8.1768,15.2374 8.1768,14.7626 8.4697,14.4697L10.9394,12 8.46967,9.53033C8.17678,9.23744,8.17678,8.76256,8.46967,8.46967z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="WarningIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                    <GeometryDrawing Geometry="F1 M24,24z M0,0z M0,12C0,6.34315 0,3.51472 1.75736,1.75736 3.51472,0 6.34315,0 12,0 17.6569,0 20.4853,0 22.2426,1.75736 24,3.51472 24,6.34315 24,12 24,17.6569 24,20.4853 22.2426,22.2426 20.4853,24 17.6569,24 12,24 6.34315,24 3.51472,24 1.75736,22.2426 0,20.4853 0,17.6569 0,12z">
+                        <GeometryDrawing.Brush>
+                            <SolidColorBrush Color="#FF000000" Opacity="0.3" />
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#FFFFFFFF" Geometry="F0 M24,24z M0,0z M12.75,7.5C12.75,7.08579 12.4142,6.75 12,6.75 11.5858,6.75 11.25,7.08579 11.25,7.5L11.25,12.5C11.25,12.9142 11.5858,13.25 12,13.25 12.4142,13.25 12.75,12.9142 12.75,12.5L12.75,7.5z M12,16.5C12.5523,16.5 13,16.0523 13,15.5 13,14.9477 12.5523,14.5 12,14.5 11.4477,14.5 11,14.9477 11,15.5 11,16.0523 11.4477,16.5 12,16.5z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="InfoIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                    <GeometryDrawing Geometry="F1 M24,24z M0,0z M0,12C0,6.34315 0,3.51472 1.75736,1.75736 3.51472,0 6.34315,0 12,0 17.6569,0 20.4853,0 22.2426,1.75736 24,3.51472 24,6.34315 24,12 24,17.6569 24,20.4853 22.2426,22.2426 20.4853,24 17.6569,24 12,24 6.34315,24 3.51472,24 1.75736,22.2426 0,20.4853 0,17.6569 0,12z">
+                        <GeometryDrawing.Brush>
+                            <SolidColorBrush Color="#FF000000" Opacity="0.3" />
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#FFFFFFFF" Geometry="F0 M24,24z M0,0z M12,7C12.5523,7 13,7.44772 13,8 13,8.55229 12.5523,9 12,9 11.4477,9 11,8.55229 11,8 11,7.44772 11.4477,7 12,7z M12.75,16C12.75,16.4142 12.4142,16.75 12,16.75 11.5858,16.75 11.25,16.4142 11.25,16L11.25,11C11.25,10.5858 11.5858,10.25 12,10.25 12.4142,10.25 12.75,10.5858 12.75,11L12.75,16z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+        <DrawingImage x:Key="SuccessIcon">
+            <DrawingImage.Drawing>
+                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                    <GeometryDrawing Geometry="F1 M24,24z M0,0z M0,12C0,6.34315 0,3.51472 1.75736,1.75736 3.51472,0 6.34315,0 12,0 17.6569,0 20.4853,0 22.2426,1.75736 24,3.51472 24,6.34315 24,12 24,17.6569 24,20.4853 22.2426,22.2426 20.4853,24 17.6569,24 12,24 6.34315,24 3.51472,24 1.75736,22.2426 0,20.4853 0,17.6569 0,12z">
+                        <GeometryDrawing.Brush>
+                            <SolidColorBrush Color="#FF000000" Opacity="0.3" />
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="#FFFFFFFF" Geometry="F0 M24,24z M0,0z M16.0303,8.96967C16.3232,9.26256,16.3232,9.73744,16.0303,10.0303L11.0303,15.0303C10.7374,15.3232,10.2626,15.3232,9.96967,15.0303L7.96967,13.0303C7.67678,12.7374 7.67678,12.2626 7.96967,11.9697 8.26256,11.6768 8.73744,11.6768 9.03033,11.9697L10.5,13.4393 14.9697,8.96967C15.2626,8.67678,15.7374,8.67678,16.0303,8.96967z" />
+                </DrawingGroup>
+            </DrawingImage.Drawing>
+        </DrawingImage>
+    </UserControl.Resources>
+    <Grid Name="ToastGrid" IsHitTestVisible="False" Opacity="1">
+        <Border Name="ToastBorder" BorderBrush="#F0863A" BorderThickness="1.5" CornerRadius="8" Padding="28,10" Height="56">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="-1,-1" EndPoint="2,2" >
+                    <GradientStop x:Name="GradientStop1" Color="#F6743E" Offset="0"/>
+                    <GradientStop x:Name="GradientStop2" Color="#D42525" Offset="1"/>
+                </LinearGradientBrush>
+            </Border.Background>
+            <modern:SimpleStackPanel Orientation="Horizontal" Spacing="14">
+                <Image Name="ToastIconImage" Width="32" Height="32" VerticalAlignment="Center" Source="{StaticResource ErrorIcon}"/>
+                <TextBlock Name="ToastTextBlock" Foreground="White" VerticalAlignment="Center" Margin="0,-1,0,0" FontSize="17" Text="這是 InkCanvasForClass 新版Toast控件測試"></TextBlock>
+            </modern:SimpleStackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,4 +1,16 @@
-﻿obj/
-bin/
-.vs/
-/Ink Canvas/obj
+﻿InkCanvasForClass/obj
+InkCanvasForClass/bin
+InkCanvasForClassX/obj
+InkCanvasForClassX/bin
+InkCanvasForClass.IACoreHelper/obj
+InkCanvasForClass.IACoreHelper/bin
+InkCanvasForClass.PowerPoint.InteropHelper/obj
+InkCanvasForClass.PowerPoint.InteropHelper/bin
+InkCanvasForClass.PowerPoint.VstoPlugin/obj
+InkCanvasForClass.PowerPoint.VstoPlugin/bin
+InkCanvasForClass.IccInkCanvas/obj
+InkCanvasForClass.IccInkCanvas/bin
+InkCanvasForClass.IccInkCanvas.Demo/obj
+InkCanvasForClass.IccInkCanvas.Demo/bin
+.vs
+.idea
