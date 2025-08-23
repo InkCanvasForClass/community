@@ -2472,6 +2472,10 @@ namespace Ink_Canvas
 
                     DeselectUIElement();
 
+                    // 在PPT模式下隐藏手势面板
+                    AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                    AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+
                     SaveStrokes(true);
                     ClearStrokes(true);
                     RestoreStrokes(true);
@@ -2516,6 +2520,10 @@ namespace Ink_Canvas
 
                         // 取消任何UI元素的选择
                         DeselectUIElement();
+
+                        // 在PPT模式下隐藏手势面板
+                        AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                        AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
 
                         SaveStrokes();
                         ClearStrokes(true);

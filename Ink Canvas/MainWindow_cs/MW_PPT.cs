@@ -292,6 +292,10 @@ namespace Ink_Canvas
 
                     BorderFloatingBarMainControls.Visibility = Visibility.Visible;
 
+                    // 在PPT模式下隐藏手势面板
+                    AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                    AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+
                     if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
                         !Settings.Automation.IsAutoFoldInPPTSlideShow)
                         BtnColorRed_Click(null, null);
@@ -393,6 +397,13 @@ namespace Ink_Canvas
                         // 清空备份历史记录，防止退出白板时恢复已结束PPT的墨迹
                         // 注意：这里只清空索引0的备份，不影响白板页面的墨迹（索引1及以上）
                         TimeMachineHistories[0] = null;
+
+                        // 退出PPT模式时恢复手势面板的显示状态
+                        if (Settings.Gesture.IsEnableTwoFingerGesture && ToggleSwitchEnableMultiTouchMode.IsOn)
+                        {
+                            // 根据手势设置决定是否显示手势面板
+                            CheckEnableTwoFingerGestureBtnVisibility(true);
+                        }
 
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
                             BtnHideInkCanvas_Click(BtnHideInkCanvas, null);

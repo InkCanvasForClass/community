@@ -28,6 +28,10 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
+                    
+                    // 在PPT模式下隐藏手势面板
+                    AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                    AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
                 }
 
                 BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
