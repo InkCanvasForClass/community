@@ -2011,8 +2011,10 @@ namespace Ink_Canvas
                 {
                     highlighterColor = 103; // 黄色荧光笔
                 }
-                else if (color == Color.FromRgb(255, 165, 0) || IsColorSimilar(color, Color.FromRgb(249, 115, 22), 15) ||
-                         IsColorSimilar(color, Color.FromRgb(234, 88, 12), 15))
+                else if (color == Color.FromRgb(255, 165, 0) || IsColorSimilar(color, Color.FromRgb(249, 115, 22), 20) ||
+                         IsColorSimilar(color, Color.FromRgb(234, 88, 12), 20) ||
+                         IsColorSimilar(color, Color.FromRgb(251, 146, 60), 20) ||
+                         IsColorSimilar(color, Color.FromRgb(253, 126, 20), 20))
                 {
                     highlighterColor = 109; // 橙色荧光笔
                 }
@@ -2044,6 +2046,9 @@ namespace Ink_Canvas
                 inkCanvas.DefaultDrawingAttributes.Height = Settings.Canvas.HighlighterWidth;
                 inkCanvas.DefaultDrawingAttributes.StylusTip = StylusTip.Rectangle;
                 inkCanvas.DefaultDrawingAttributes.IsHighlighter = true;
+                
+                // 确保荧光笔颜色索引正确更新
+                inkCanvas.DefaultDrawingAttributes.Color = drawingAttributes.Color;
             }
 
             // 更新颜色状态
@@ -2077,6 +2082,12 @@ namespace Ink_Canvas
 
             // 更新颜色显示
             ColorSwitchCheck();
+            
+            // 如果当前是荧光笔模式，调用ColorSwitchCheck确保颜色索引正确更新
+            if (penType == 1)
+            {
+                ColorSwitchCheck();
+            }
         }
 
         private void UpdateQuickColorPaletteIndicator(Color selectedColor)
@@ -2123,7 +2134,9 @@ namespace Ink_Canvas
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), tolerance) || 
                      IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), tolerance) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), tolerance))
+                     IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(251, 146, 60), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(253, 126, 20), tolerance))
             {
                 QuickColorOrangeCheck.Visibility = Visibility.Visible;
                 QuickColorOrangeCheckSingle.Visibility = Visibility.Visible;
@@ -2140,8 +2153,7 @@ namespace Ink_Canvas
                 QuickColorRedCheck.Visibility = Visibility.Visible;
                 QuickColorRedCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Colors.Green, tolerance) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), tolerance))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), tolerance))
             {
                 QuickColorGreenCheck.Visibility = Visibility.Visible;
                 QuickColorGreenCheckSingle.Visibility = Visibility.Visible;

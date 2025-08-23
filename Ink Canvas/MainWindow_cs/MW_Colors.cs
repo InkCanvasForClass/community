@@ -595,6 +595,9 @@ namespace Ink_Canvas
             drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
             drawingAttributes.StylusTip = StylusTip.Rectangle;
             drawingAttributes.IsHighlighter = true;
+            
+            // 确保荧光笔模式切换后正确更新颜色和快捷调色板指示器
+            ColorSwitchCheck();
         }
 
         private void BtnColorBlack_Click(object sender, RoutedEventArgs e)
