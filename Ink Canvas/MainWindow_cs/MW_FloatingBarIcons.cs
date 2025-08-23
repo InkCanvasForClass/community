@@ -1724,13 +1724,27 @@ namespace Ink_Canvas
                     }
                 }
 
-                // 修复：从线擦切换到批注时，重置为默认笔模式（非高光显示）
+                // 修复：从线擦切换到批注时，保持之前的笔类型状态
+                // 如果之前是荧光笔模式，则保持荧光笔状态；否则重置为默认笔模式
                 forceEraser = false;
                 forcePointEraser = false;
                 drawingShapeMode = 0;
-                penType = 0;
-                drawingAttributes.IsHighlighter = false;
-                drawingAttributes.StylusTip = StylusTip.Ellipse;
+                
+                // 保持之前的笔类型状态，而不是强制重置
+                if (!wasHighlighter)
+                {
+                    penType = 0;
+                    drawingAttributes.IsHighlighter = false;
+                    drawingAttributes.StylusTip = StylusTip.Ellipse;
+                }
+                // 如果之前是荧光笔模式，则保持荧光笔属性
+                else if (penType == 1)
+                {
+                    drawingAttributes.IsHighlighter = true;
+                    drawingAttributes.StylusTip = StylusTip.Rectangle;
+                    drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                    drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                }
 
                 ColorSwitchCheck();
                 HideSubPanels("pen", true);
@@ -1742,13 +1756,26 @@ namespace Ink_Canvas
                     // 修复：从线擦切换到批注时，确保正确重置状态
                     if (forceEraser)
                     {
-                        // 从橡皮擦模式切换过来，重置为默认笔模式
+                        // 从橡皮擦模式切换过来，保持之前的笔类型状态
                         forceEraser = false;
                         forcePointEraser = false;
                         drawingShapeMode = 0;
-                        penType = 0;
-                        drawingAttributes.IsHighlighter = false;
-                        drawingAttributes.StylusTip = StylusTip.Ellipse;
+                        
+                        // 保持之前的笔类型状态，而不是强制重置
+                        if (!wasHighlighter)
+                        {
+                            penType = 0;
+                            drawingAttributes.IsHighlighter = false;
+                            drawingAttributes.StylusTip = StylusTip.Ellipse;
+                        }
+                        // 如果之前是荧光笔模式，则保持荧光笔属性
+                        else if (penType == 1)
+                        {
+                            drawingAttributes.IsHighlighter = true;
+                            drawingAttributes.StylusTip = StylusTip.Rectangle;
+                            drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                            drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                        }
 
                         // 在非白板模式下，从线擦切换到批注时不直接弹出子面板
                         if (currentMode != 1)
@@ -1800,13 +1827,26 @@ namespace Ink_Canvas
                     }
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
 
-                    // 修复：从线擦切换到批注时，重置为默认笔模式（非高光显示）
+                    // 修复：从线擦切换到批注时，保持之前的笔类型状态
                     forceEraser = false;
                     forcePointEraser = false;
                     drawingShapeMode = 0;
-                    penType = 0;
-                    drawingAttributes.IsHighlighter = false;
-                    drawingAttributes.StylusTip = StylusTip.Ellipse;
+                    
+                    // 保持之前的笔类型状态，而不是强制重置
+                    if (!wasHighlighter)
+                    {
+                        penType = 0;
+                        drawingAttributes.IsHighlighter = false;
+                        drawingAttributes.StylusTip = StylusTip.Ellipse;
+                    }
+                    // 如果之前是荧光笔模式，则保持荧光笔属性
+                    else if (penType == 1)
+                    {
+                        drawingAttributes.IsHighlighter = true;
+                        drawingAttributes.StylusTip = StylusTip.Rectangle;
+                        drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                        drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                    }
 
                     ColorSwitchCheck();
                     HideSubPanels("pen", true);
@@ -1918,10 +1958,9 @@ namespace Ink_Canvas
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
             drawingShapeMode = 0;
 
-            // 修复：切换到线擦时，确保重置笔的状态
-            penType = 0;
-            drawingAttributes.IsHighlighter = false;
-            drawingAttributes.StylusTip = StylusTip.Ellipse;
+            // 修复：切换到线擦时，保存当前的笔类型状态，而不是强制重置
+            // 这样从线擦切换回批注时，可以恢复之前的荧光笔状态
+            // penType 和 drawingAttributes 的状态将在 PenIcon_Click 中根据 wasHighlighter 来恢复
 
             inkCanvas_EditingModeChanged(inkCanvas, null);
             CancelSingleFingerDragMode();
