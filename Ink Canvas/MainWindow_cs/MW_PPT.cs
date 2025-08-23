@@ -411,6 +411,16 @@ namespace Ink_Canvas
                             EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
                         }
 
+                        // 退出PPT模式时隐藏快捷调色盘
+                        if (QuickColorPalettePanel != null)
+                        {
+                            QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                        }
+                        if (QuickColorPaletteSingleRowPanel != null)
+                        {
+                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                        }
+
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
                             BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
                     }
@@ -423,6 +433,9 @@ namespace Ink_Canvas
                 await Task.Delay(150);
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    // 强制重新计算浮动栏位置，确保在退出PPT模式后正确复位
+                    // 先调用桌面模式的复位方法，然后调用通用的位置计算方法
+                    PureViewboxFloatingBarMarginAnimationInDesktopMode();
                     ViewboxFloatingBarMarginAnimation(100, true);
                 });
             }
