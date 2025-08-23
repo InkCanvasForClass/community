@@ -1993,6 +1993,59 @@ namespace Ink_Canvas
             drawingAttributes.Color = color;
             inkCanvas.DefaultDrawingAttributes.Color = color;
 
+            // 如果当前是荧光笔模式，同时更新荧光笔颜色和属性
+            if (penType == 1)
+            {
+                // 根据颜色设置对应的荧光笔颜色索引
+                if (color == Colors.White || IsColorSimilar(color, Color.FromRgb(250, 250, 250), 10))
+                {
+                    highlighterColor = 101; // 白色荧光笔
+                }
+                else if (color == Colors.Black)
+                {
+                    highlighterColor = 100; // 黑色荧光笔
+                }
+                else if (color == Colors.Yellow || IsColorSimilar(color, Color.FromRgb(234, 179, 8), 15) ||
+                         IsColorSimilar(color, Color.FromRgb(250, 204, 21), 15) ||
+                         IsColorSimilar(color, Color.FromRgb(253, 224, 71), 15))
+                {
+                    highlighterColor = 103; // 黄色荧光笔
+                }
+                else if (color == Color.FromRgb(255, 165, 0) || IsColorSimilar(color, Color.FromRgb(249, 115, 22), 15) ||
+                         IsColorSimilar(color, Color.FromRgb(234, 88, 12), 15))
+                {
+                    highlighterColor = 109; // 橙色荧光笔
+                }
+                else if (color == Color.FromRgb(37, 99, 235))
+                {
+                    highlighterColor = 106; // 蓝色荧光笔
+                }
+                else if (color == Colors.Red || IsColorSimilar(color, Color.FromRgb(220, 38, 38), 15) ||
+                         IsColorSimilar(color, Color.FromRgb(239, 68, 68), 15))
+                {
+                    highlighterColor = 102; // 红色荧光笔
+                }
+                else if (color == Colors.Green || IsColorSimilar(color, Color.FromRgb(22, 163, 74), 15))
+                {
+                    highlighterColor = 104; // 绿色荧光笔
+                }
+                else if (color == Color.FromRgb(147, 51, 234))
+                {
+                    highlighterColor = 107; // 紫色荧光笔
+                }
+
+                // 确保荧光笔属性正确设置
+                drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                drawingAttributes.StylusTip = StylusTip.Rectangle;
+                drawingAttributes.IsHighlighter = true;
+                
+                inkCanvas.DefaultDrawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                inkCanvas.DefaultDrawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                inkCanvas.DefaultDrawingAttributes.StylusTip = StylusTip.Rectangle;
+                inkCanvas.DefaultDrawingAttributes.IsHighlighter = true;
+            }
+
             // 更新颜色状态
             if (currentMode == 0)
             {
@@ -2047,50 +2100,53 @@ namespace Ink_Canvas
             QuickColorGreenCheckSingle.Visibility = Visibility.Collapsed;
 
             // 显示当前选中颜色的check图标
-            if (IsColorSimilar(selectedColor, Colors.White, 10) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), 10))
+            // 在荧光笔模式下，使用更宽松的颜色匹配
+            int tolerance = (penType == 1) ? 25 : 15; // 荧光笔模式使用更大的容差
+            
+            if (IsColorSimilar(selectedColor, Colors.White, tolerance) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), tolerance))
             {
                 QuickColorWhiteCheck.Visibility = Visibility.Visible;
                 QuickColorWhiteCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Colors.Black, 10))
+            else if (IsColorSimilar(selectedColor, Colors.Black, tolerance))
             {
                 QuickColorBlackCheck.Visibility = Visibility.Visible;
                 QuickColorBlackCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Colors.Yellow, 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(250, 204, 21), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), 15))
+            else if (IsColorSimilar(selectedColor, Colors.Yellow, tolerance) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(250, 204, 21), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), tolerance))
             {
                 QuickColorYellowCheck.Visibility = Visibility.Visible;
                 QuickColorYellowCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), 15))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), tolerance) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), tolerance))
             {
                 QuickColorOrangeCheck.Visibility = Visibility.Visible;
                 QuickColorOrangeCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), 15))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), tolerance))
             {
                 QuickColorBlueCheck.Visibility = Visibility.Visible;
                 // 单行显示模式没有蓝色，所以不设置单行的check
             }
-            else if (IsColorSimilar(selectedColor, Colors.Red, 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), 15))
+            else if (IsColorSimilar(selectedColor, Colors.Red, tolerance) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), tolerance))
             {
                 QuickColorRedCheck.Visibility = Visibility.Visible;
                 QuickColorRedCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Colors.Green, 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), 15))
+            else if (IsColorSimilar(selectedColor, Colors.Green, tolerance) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), tolerance))
             {
                 QuickColorGreenCheck.Visibility = Visibility.Visible;
                 QuickColorGreenCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), 15))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), tolerance))
             {
                 QuickColorPurpleCheck.Visibility = Visibility.Visible;
                 // 单行显示模式没有紫色，所以不设置单行的check
