@@ -427,6 +427,10 @@ namespace Ink_Canvas
 
                 PPTButtonRightPositionValueSlider.Value = Settings.PowerPointSettings.PPTRSButtonPosition;
 
+                PPTButtonLBPositionValueSlider.Value = Settings.PowerPointSettings.PPTLBButtonPosition;
+
+                PPTButtonRBPositionValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonPosition;
+
                 UpdatePPTBtnSlidersStatus();
 
                 UpdatePPTBtnPreview();

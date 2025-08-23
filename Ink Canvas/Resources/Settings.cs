@@ -245,6 +245,14 @@ namespace Ink_Canvas
         [JsonProperty("pptRSButtonPosition")]
         public int PPTRSButtonPosition { get; set; }
 
+        // 0居中，+就是往右，-就是往左
+        [JsonProperty("pptLBButtonPosition")]
+        public int PPTLBButtonPosition { get; set; }
+
+        // 0居中，+就是往右，-就是往左
+        [JsonProperty("pptRBButtonPosition")]
+        public int PPTRBButtonPosition { get; set; }
+
         [JsonProperty("pptSButtonsOption")]
         public int PPTSButtonsOption { get; set; } = 221;
 

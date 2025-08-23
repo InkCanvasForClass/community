@@ -19,6 +19,8 @@ namespace Ink_Canvas.Helpers
         public int PPTBButtonsOption { get; set; } = 121;
         public int PPTLSButtonPosition { get; set; } = 0;
         public int PPTRSButtonPosition { get; set; } = 0;
+        public int PPTLBButtonPosition { get; set; } = 0;
+        public int PPTRBButtonPosition { get; set; } = 0;
         public bool EnablePPTButtonPageClickable { get; set; } = true;
         #endregion
 
@@ -168,6 +170,10 @@ namespace Ink_Canvas.Helpers
                     // 设置侧边按钮位置
                     _mainWindow.LeftSidePanelForPPTNavigation.Margin = new Thickness(0, 0, 0, PPTLSButtonPosition * 2);
                     _mainWindow.RightSidePanelForPPTNavigation.Margin = new Thickness(0, 0, 0, PPTRSButtonPosition * 2);
+
+                    // 设置底部按钮水平位置
+                    _mainWindow.LeftBottomPanelForPPTNavigation.Margin = new Thickness(6 + PPTLBButtonPosition, 0, 0, 6);
+                    _mainWindow.RightBottomPanelForPPTNavigation.Margin = new Thickness(0, 0, 6 + PPTRBButtonPosition, 6);
 
                     // 根据显示选项设置面板可见性
                     var displayOption = PPTButtonsDisplayOption.ToString();

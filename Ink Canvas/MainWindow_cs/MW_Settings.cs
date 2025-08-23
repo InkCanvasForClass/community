@@ -728,6 +728,53 @@ namespace Ink_Canvas
                 PPTBtnRSMinusBtn.IsEnabled = true;
                 PPTBtnRSMinusBtn.Opacity = 1;
             }
+
+            // 底部按钮滑块状态管理
+            if (PPTButtonLBPositionValueSlider.Value <= -500 || PPTButtonLBPositionValueSlider.Value >= 500)
+            {
+                if (PPTButtonLBPositionValueSlider.Value >= 500)
+                {
+                    PPTBtnLBPlusBtn.IsEnabled = false;
+                    PPTBtnLBPlusBtn.Opacity = 0.5;
+                    PPTButtonLBPositionValueSlider.Value = 500;
+                }
+                else if (PPTButtonLBPositionValueSlider.Value <= -500)
+                {
+                    PPTBtnLBMinusBtn.IsEnabled = false;
+                    PPTBtnLBMinusBtn.Opacity = 0.5;
+                    PPTButtonLBPositionValueSlider.Value = -500;
+                }
+            }
+            else
+            {
+                PPTBtnLBPlusBtn.IsEnabled = true;
+                PPTBtnLBPlusBtn.Opacity = 1;
+                PPTBtnLBMinusBtn.IsEnabled = true;
+                PPTBtnLBMinusBtn.Opacity = 1;
+            }
+
+            if (PPTButtonRBPositionValueSlider.Value <= -500 || PPTButtonRBPositionValueSlider.Value >= 500)
+            {
+                if (PPTButtonRBPositionValueSlider.Value >= 500)
+                {
+                    PPTBtnRBPlusBtn.IsEnabled = false;
+                    PPTBtnRBPlusBtn.Opacity = 0.5;
+                    PPTButtonRBPositionValueSlider.Value = 500;
+                }
+                else if (PPTButtonRBPositionValueSlider.Value <= -500)
+                {
+                    PPTBtnRBMinusBtn.IsEnabled = false;
+                    PPTBtnRBMinusBtn.Opacity = 0.5;
+                    PPTButtonRBPositionValueSlider.Value = -500;
+                }
+            }
+            else
+            {
+                PPTBtnRBPlusBtn.IsEnabled = true;
+                PPTBtnRBPlusBtn.Opacity = 1;
+                PPTBtnRBMinusBtn.IsEnabled = true;
+                PPTBtnRBMinusBtn.Opacity = 1;
+            }
         }
 
         private void PPTBtnLSPlusBtn_Clicked(object sender, RoutedEventArgs e)
@@ -834,6 +881,8 @@ namespace Ink_Canvas
                 _pptUIManager.PPTBButtonsOption = Settings.PowerPointSettings.PPTBButtonsOption;
                 _pptUIManager.PPTLSButtonPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
                 _pptUIManager.PPTRSButtonPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
+                _pptUIManager.PPTLBButtonPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
+                _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
                 _pptUIManager.UpdateNavigationPanelsVisibility();
                 _pptUIManager.UpdateNavigationButtonStyles();
             }
@@ -2797,6 +2846,109 @@ namespace Ink_Canvas
             Settings.Canvas.ShowCircleCenter = ToggleSwitchShowCircleCenter.IsOn;
             SaveSettingsToFile();
         }
+
+        #region 底部按钮水平位置控制
+
+        private void PPTButtonLBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
+            UpdatePPTBtnSlidersStatus();
+            UpdatePPTUIManagerSettings();
+            SliderDelayAction.DebounceAction(2000, null, SaveSettingsToFile);
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTButtonRBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
+            UpdatePPTBtnSlidersStatus();
+            UpdatePPTUIManagerSettings();
+            SliderDelayAction.DebounceAction(2000, null, SaveSettingsToFile);
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnLBPlusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonLBPositionValueSlider.Value++;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnLBMinusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonLBPositionValueSlider.Value--;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnLBSyncBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonRBPositionValueSlider.Value = PPTButtonLBPositionValueSlider.Value;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnLBResetBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonLBPositionValueSlider.Value = 0;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTLBButtonPosition = 0;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnRBPlusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonRBPositionValueSlider.Value++;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnRBMinusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonRBPositionValueSlider.Value--;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnRBSyncBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonLBPositionValueSlider.Value = PPTButtonRBPositionValueSlider.Value;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnRBResetBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonRBPositionValueSlider.Value = 0;
+            Settings.PowerPointSettings.PPTRBButtonPosition = 0;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        #endregion
 
 
     }
