@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Input;
 using System.IO;
+using System.Reflection;
 using Newtonsoft.Json;
 using NHotkey.Wpf;
 
@@ -66,6 +67,13 @@ namespace Ink_Canvas.Helpers
                 {
                     try
                     {
+                        // 检查是否处于选择模式，如果是则不拦截键盘操作
+                        if (IsInSelectMode())
+                        {
+                            LogHelper.WriteLogToFile($"快捷键 {hotkeyName} 在选择模式下被忽略", LogHelper.LogType.Info);
+                            return;
+                        }
+
                         // 确保在主线程中执行
                         _mainWindow.Dispatcher.Invoke(() =>
                         {
@@ -548,6 +556,43 @@ namespace Ink_Canvas.Helpers
             {
                 LogHelper.WriteLogToFile($"获取快捷键 {hotkeyName} 对应动作时出错: {ex.Message}", LogHelper.LogType.Error);
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// 检查当前是否处于选择模式
+        /// </summary>
+        /// <returns>如果处于选择模式则返回true，否则返回false</returns>
+        private bool IsInSelectMode()
+        {
+            try
+            {
+                // 通过反射访问主窗口的inkCanvas属性
+                var inkCanvasProperty = _mainWindow.GetType().GetProperty("inkCanvas", 
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                
+                if (inkCanvasProperty != null)
+                {
+                    var inkCanvas = inkCanvasProperty.GetValue(_mainWindow);
+                    if (inkCanvas != null)
+                    {
+                        // 通过反射访问EditingMode属性
+                        var editingModeProperty = inkCanvas.GetType().GetProperty("EditingMode");
+                        if (editingModeProperty != null)
+                        {
+                            var editingMode = editingModeProperty.GetValue(inkCanvas);
+                            // 检查是否为选择模式
+                            return editingMode != null && editingMode.ToString() == "Select";
+                        }
+                    }
+                }
+                
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查选择模式状态时出错: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
             }
         }
         #endregion
