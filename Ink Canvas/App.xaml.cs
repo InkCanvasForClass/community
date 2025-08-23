@@ -331,12 +331,34 @@ namespace Ink_Canvas
         private void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             TimeSpan runDuration = DateTime.Now - appStartTime;
-            WriteCrashLog($"应用程序退出，运行时长: {runDuration}");
+            string durationText = FormatTimeSpan(runDuration);
+            WriteCrashLog($"应用程序退出，运行时长: {durationText}");
 
             // 如果有最后错误消息，记录到日志
             if (!string.IsNullOrEmpty(lastErrorMessage))
             {
                 WriteCrashLog($"最后错误信息: {lastErrorMessage}");
+            }
+        }
+
+        // 新增：格式化时间跨度
+        private static string FormatTimeSpan(TimeSpan timeSpan)
+        {
+            if (timeSpan.TotalDays >= 1)
+            {
+                return $"{timeSpan.Days}天 {timeSpan.Hours}小时 {timeSpan.Minutes}分钟";
+            }
+            else if (timeSpan.TotalHours >= 1)
+            {
+                return $"{timeSpan.Hours}小时 {timeSpan.Minutes}分钟";
+            }
+            else if (timeSpan.TotalMinutes >= 1)
+            {
+                return $"{timeSpan.Minutes}分钟 {timeSpan.Seconds}秒";
+            }
+            else
+            {
+                return $"{timeSpan.Seconds}秒";
             }
         }
 
@@ -356,7 +378,7 @@ namespace Ink_Canvas
                 // 收集系统状态信息
                 string memoryUsage = (Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024)) + " MB";
                 string cpuTime = Process.GetCurrentProcess().TotalProcessorTime.ToString();
-                string processUptime = (DateTime.Now - Process.GetCurrentProcess().StartTime).ToString();
+                string processUptime = FormatTimeSpan(DateTime.Now - Process.GetCurrentProcess().StartTime);
 
                 string statusInfo = $"[内存: {memoryUsage}, CPU时间: {cpuTime}, 运行时长: {processUptime}]";
 
@@ -436,6 +458,9 @@ namespace Ink_Canvas
 
         void App_Startup(object sender, StartupEventArgs e)
         {
+            // 初始化应用启动时间
+            appStartTime = DateTime.Now;
+            
             /*if (!StoreHelper.IsStoreApp) */
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
