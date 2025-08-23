@@ -997,7 +997,7 @@ namespace Ink_Canvas
                 {
                     Process.Start(new ProcessStartInfo
                     {
-                        FileName = "classisland://plugins/IslandCaller/Run",
+                        FileName = "classisland://plugins/IslandCaller/Simple/1",
                         UseShellExecute = true
                     });
                 }

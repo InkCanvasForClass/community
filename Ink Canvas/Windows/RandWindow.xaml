@@ -103,14 +103,22 @@
                             <TextBlock Text="开抽" Foreground="White" FontSize="32" Margin="-1,-1,4,0" VerticalAlignment="Center"/>
                         </ui:SimpleStackPanel>
                     </Border>
-                    <Border x:Name="BorderBtnIslandCaller" MouseUp="BorderBtnIslandCaller_MouseUp" Background="#00B894" Height="50" Width="200" CornerRadius="25" Margin="0,16,0,0">
-                        <ui:SimpleStackPanel Margin="3,0" Spacing="12" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Viewbox Margin="0,10">
-                                <ui:SymbolIcon Symbol="Globe" Foreground="White"/>
-                            </Viewbox>
-                            <TextBlock Text="ClassIsland点名" Foreground="White" FontSize="18" Margin="-1,-1,4,0" VerticalAlignment="Center"/>
-                        </ui:SimpleStackPanel>
-                    </Border>
+                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="8" Margin="0,16,0,0" HorizontalAlignment="Center">
+                        <ComboBox Name="ComboBoxCallerType" Width="120" Height="50" VerticalAlignment="Center"
+                                  IsEditable="False" IsReadOnly="True" SelectedIndex="0">
+                            <ComboBoxItem>ClassIsland点名</ComboBoxItem>
+                            <ComboBoxItem>SecRandom点名</ComboBoxItem>
+                            <ComboBoxItem>NamePicker点名</ComboBoxItem>
+                        </ComboBox>
+                        <Border x:Name="BorderBtnExternalCaller" MouseUp="BorderBtnExternalCaller_MouseUp" Background="#00B894" Height="50" Width="120" CornerRadius="25">
+                            <ui:SimpleStackPanel Margin="3,0" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Viewbox Margin="0,10">
+                                    <ui:SymbolIcon Symbol="Globe" Foreground="White"/>
+                                </Viewbox>
+                                <TextBlock Text="外部点名" Foreground="White" FontSize="16" Margin="-1,-1,4,0" VerticalAlignment="Center"/>
+                            </ui:SimpleStackPanel>
+                        </Border>
+                    </ui:SimpleStackPanel>
                 </ui:SimpleStackPanel>
             </Grid>
             <Border UseLayoutRounding="True" Canvas.Bottom="8" Canvas.Right="8" x:Name="BorderBtnHelp" MouseUp="BorderBtnHelp_MouseUp" Background="#FBFBFD" Grid.Column="1" Margin="10,10,60,10" Height="40" VerticalAlignment="Bottom" HorizontalAlignment="Right" CornerRadius="20">

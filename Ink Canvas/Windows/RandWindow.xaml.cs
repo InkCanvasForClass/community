@@ -295,13 +295,13 @@ namespace Ink_Canvas
         // 将 isIslandCallerFirstClick 设为静态字段，实现全局记录
         private static bool isIslandCallerFirstClick = true;
 
-        private void BorderBtnIslandCaller_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BorderBtnExternalCaller_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (isIslandCallerFirstClick)
             {
                 MessageBox.Show(
-                    "首次使用ClassIsland点名功能，请确保已安装ClassIsland和Island caller插件。\n" +
-                    "如未安装，请前往官网下载并安装后再使用。如果安装请再次点击此按钮。",
+                    "首次使用外部点名功能，请确保已安装相应的点名软件。\n" +
+                    "如未安装，请前往官网下载并安装后再使用。如果已安装请再次点击此按钮。",
                     "提示", MessageBoxButton.OK, MessageBoxImage.Information);
                 isIslandCallerFirstClick = false;
                 return;
@@ -309,9 +309,26 @@ namespace Ink_Canvas
 
             try
             {
+                string protocol = "";
+                switch (ComboBoxCallerType.SelectedIndex)
+                {
+                    case 0: // ClassIsland点名
+                        protocol = "classisland://plugins/IslandCaller/Simple/1";
+                        break;
+                    case 1: // SecRandom点名
+                        protocol = "secrandom://pumping?action=start";
+                        break;
+                    case 2: // NamePicker点名
+                        protocol = "namepicker://调起没有浮窗的NamePicker";
+                        break;
+                    default:
+                        protocol = "classisland://plugins/IslandCaller/Simple/1";
+                        break;
+                }
+
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = "classisland://plugins/IslandCaller/Run",
+                    FileName = protocol,
                     UseShellExecute = true
                 });
             }
