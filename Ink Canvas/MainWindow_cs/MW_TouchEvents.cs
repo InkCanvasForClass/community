@@ -139,10 +139,13 @@ namespace Ink_Canvas
 
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e)
         {
+            LogHelper.WriteLogToFile($"MainWindow_StylusDown 被调用，笔尾状态: {e.StylusDevice.Inverted}, 当前 drawingShapeMode: {drawingShapeMode}, 当前 EditingMode: {inkCanvas.EditingMode}", LogHelper.LogType.Info);
+            
             // 新增：根据是否为笔尾自动切换橡皮擦/画笔模式
             if (e.StylusDevice.Inverted)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+                LogHelper.WriteLogToFile("检测到笔尾，设置 EditingMode 为 EraseByPoint", LogHelper.LogType.Info);
             }
             else
             {
@@ -151,12 +154,18 @@ namespace Ink_Canvas
                 {
                     // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    LogHelper.WriteLogToFile("几何绘制模式，设置 EditingMode 为 None", LogHelper.LogType.Info);
                     return;
                 }
                 // 修复：保持当前的线擦模式，不要强制切换到Ink模式
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    LogHelper.WriteLogToFile("设置 EditingMode 为 Ink", LogHelper.LogType.Info);
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("保持当前线擦模式", LogHelper.LogType.Info);
                 }
             }
             SetCursorBasedOnEditingMode(inkCanvas);
@@ -198,15 +207,25 @@ namespace Ink_Canvas
         {
             try
             {
-                inkCanvas.Strokes.Add(GetStrokeVisual(e.StylusDevice.Id).Stroke);
+                LogHelper.WriteLogToFile($"MainWindow_StylusUp 被调用，EditingMode: {inkCanvas.EditingMode}, EnableInkFade: {Settings.Canvas.EnableInkFade}", LogHelper.LogType.Info);
+                
+                var stroke = GetStrokeVisual(e.StylusDevice.Id).Stroke;
+                LogHelper.WriteLogToFile($"获取到墨迹，StylusPoints数量: {stroke.StylusPoints.Count}", LogHelper.LogType.Info);
+                
+                // 正常模式：添加到画布并参与墨迹纠正
+                // 墨迹渐隐功能现在在 StrokeCollected 事件中统一处理所有输入方式
+                LogHelper.WriteLogToFile("StylusUp: 添加墨迹到画布", LogHelper.LogType.Info);
+                
+                inkCanvas.Strokes.Add(stroke);
                 await Task.Delay(5); // 避免渲染墨迹完成前预览墨迹被删除导致墨迹闪烁
                 inkCanvas.Children.Remove(GetVisualCanvas(e.StylusDevice.Id));
 
                 inkCanvas_StrokeCollected(inkCanvas,
-                    new InkCanvasStrokeCollectedEventArgs(GetStrokeVisual(e.StylusDevice.Id).Stroke));
+                    new InkCanvasStrokeCollectedEventArgs(stroke));
             }
             catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"MainWindow_StylusUp 出错: {ex}", LogHelper.LogType.Error);
                 Label.Content = ex.ToString();
             }
 

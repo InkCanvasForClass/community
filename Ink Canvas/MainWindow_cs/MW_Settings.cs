@@ -2405,74 +2405,146 @@ namespace Ink_Canvas
 
         #region 浮动栏按钮显示控制
 
-        private void ToggleSwitchShowShapeButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowShapeButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowShapeButton = ToggleSwitchShowShapeButton.IsOn;
+            Settings.Appearance.IsShowShapeButton = CheckBoxShowShapeButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowUndoButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowShapeButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowUndoButton = ToggleSwitchShowUndoButton.IsOn;
+            Settings.Appearance.IsShowShapeButton = CheckBoxShowShapeButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowRedoButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowUndoButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowRedoButton = ToggleSwitchShowRedoButton.IsOn;
+            Settings.Appearance.IsShowUndoButton = CheckBoxShowUndoButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowClearButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowUndoButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowClearButton = ToggleSwitchShowClearButton.IsOn;
+            Settings.Appearance.IsShowUndoButton = CheckBoxShowUndoButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowWhiteboardButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowRedoButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowWhiteboardButton = ToggleSwitchShowWhiteboardButton.IsOn;
+            Settings.Appearance.IsShowRedoButton = CheckBoxShowRedoButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowRedoButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowRedoButton = CheckBoxShowRedoButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowClearButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowClearButton = CheckBoxShowClearButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowClearButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowClearButton = CheckBoxShowClearButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowWhiteboardButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowWhiteboardButton = CheckBoxShowWhiteboardButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowWhiteboardButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowWhiteboardButton = CheckBoxShowWhiteboardButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
         
-        private void ToggleSwitchShowLassoSelectButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowLassoSelectButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowLassoSelectButton = ToggleSwitchShowLassoSelectButton.IsOn;
+            Settings.Appearance.IsShowLassoSelectButton = CheckBoxShowLassoSelectButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowClearAndMouseButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowLassoSelectButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowClearAndMouseButton = ToggleSwitchShowClearAndMouseButton.IsOn;
+            Settings.Appearance.IsShowLassoSelectButton = CheckBoxShowLassoSelectButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowHideButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowClearAndMouseButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowHideButton = ToggleSwitchShowHideButton.IsOn;
+            Settings.Appearance.IsShowClearAndMouseButton = CheckBoxShowClearAndMouseButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowQuickColorPalette_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowClearAndMouseButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowQuickColorPalette = ToggleSwitchShowQuickColorPalette.IsOn;
+            Settings.Appearance.IsShowClearAndMouseButton = CheckBoxShowClearAndMouseButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowHideButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowHideButton = CheckBoxShowHideButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowHideButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowHideButton = CheckBoxShowHideButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowQuickColorPalette_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowQuickColorPalette = CheckBoxShowQuickColorPalette.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowQuickColorPalette_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowQuickColorPalette = CheckBoxShowQuickColorPalette.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }

@@ -45,6 +45,9 @@ namespace Ink_Canvas
         // 全局快捷键管理器
         private GlobalHotkeyManager _globalHotkeyManager;
 
+        // 墨迹渐隐管理器
+        private InkFadeManager _inkFadeManager;
+
 
 
         #region Window Initialization
@@ -154,6 +157,9 @@ namespace Ink_Canvas
 
             // 初始化墨迹平滑管理器
             _inkSmoothingManager = new InkSmoothingManager(Dispatcher);
+
+            // 初始化墨迹渐隐管理器
+            _inkFadeManager = new InkFadeManager(this);
 
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
@@ -501,6 +507,9 @@ namespace Ink_Canvas
             
             // 初始化全局快捷键管理器
             InitializeGlobalHotkeyManager();
+
+            // 初始化墨迹渐隐管理器
+            InitializeInkFadeManager();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -635,6 +644,13 @@ namespace Ink_Canvas
             {
                 _globalHotkeyManager.Dispose();
                 _globalHotkeyManager = null;
+            }
+
+            // 清理墨迹渐隐管理器
+            if (_inkFadeManager != null)
+            {
+                _inkFadeManager.ClearAllFadingStrokes();
+                _inkFadeManager = null;
             }
 
             // 停止置顶维护定时器
@@ -1968,6 +1984,31 @@ namespace Ink_Canvas
 
         #region 全局快捷键管理
         /// <summary>
+        /// 初始化墨迹渐隐管理器
+        /// </summary>
+        private void InitializeInkFadeManager()
+        {
+            try
+            {
+                // 确保墨迹渐隐管理器已初始化
+                if (_inkFadeManager == null)
+                {
+                    _inkFadeManager = new InkFadeManager(this);
+                }
+
+                // 同步设置状态
+                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+
+                LogHelper.WriteLogToFile("墨迹渐隐管理器已初始化", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化墨迹渐隐管理器时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
         /// 初始化全局快捷键管理器
         /// </summary>
         private void InitializeGlobalHotkeyManager()
@@ -2003,6 +2044,75 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"打开快捷键设置窗口时出错: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show($"打开快捷键设置窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        #endregion
+
+        #region 墨迹渐隐功能
+        /// <summary>
+        /// 墨迹渐隐开关切换事件处理
+        /// </summary>
+        private void ToggleSwitchEnableInkFade_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Settings.Canvas.EnableInkFade = ToggleSwitchEnableInkFade.IsOn;
+                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                
+                // 同步批注子面板中的开关状态
+                if (ToggleSwitchInkFadeInPanel != null)
+                {
+                    ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
+                }
+                
+                LogHelper.WriteLogToFile($"墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换墨迹渐隐功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 墨迹渐隐时间滑块值改变事件处理
+        /// </summary>
+        private void InkFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            try
+            {
+                Settings.Canvas.InkFadeTime = (int)e.NewValue;
+                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                LogHelper.WriteLogToFile($"墨迹渐隐时间已更新为 {Settings.Canvas.InkFadeTime}ms", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新墨迹渐隐时间时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+
+
+        /// <summary>
+        /// 批注子面板中墨迹渐隐开关切换事件处理
+        /// </summary>
+        private void ToggleSwitchInkFadeInPanel_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Settings.Canvas.EnableInkFade = ToggleSwitchInkFadeInPanel.IsOn;
+                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                
+                // 同步设置面板中的开关状态
+                if (ToggleSwitchEnableInkFade != null)
+                {
+                    ToggleSwitchEnableInkFade.IsOn = Settings.Canvas.EnableInkFade;
+                }
+                
+                LogHelper.WriteLogToFile($"批注子面板中墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"批注子面板中切换墨迹渐隐功能时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
         #endregion

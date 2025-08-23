@@ -832,6 +832,27 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchAdvancedBezierSmoothing_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
+                                          StrokeThickness="1" Margin="0,4,0,4" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用墨迹渐隐功能" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableInkFade"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchEnableInkFade_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后墨迹不会绘制到画布上，而是保持湿墨迹状态，根据设置的渐隐时间自动消失" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                         Visibility="{Binding ElementName=ToggleSwitchEnableInkFade, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="墨迹渐隐时间" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider Name="InkFadeTimeSlider" Width="150" Minimum="1000" Maximum="10000" 
+                                                Value="3000" TickFrequency="1000" IsSnapToTickEnabled="True"
+                                                ValueChanged="InkFadeTimeSlider_ValueChanged" />
+                                        <TextBlock Foreground="#fafafa" Text="{Binding ElementName=InkFadeTimeSlider, Path=Value, StringFormat={}{0:0}ms}" 
+                                                   VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
+                                    </ui:SimpleStackPanel>
+
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <!-- 新增：崩溃后操作设置 -->
@@ -1197,16 +1218,16 @@
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示形状按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowShapeButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowShapeButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowShapeButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowShapeButton_Checked" Unchecked="CheckBoxShowShapeButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示撤销按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowUndoButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowUndoButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowUndoButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowUndoButton_Checked" Unchecked="CheckBoxShowUndoButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
@@ -1215,16 +1236,16 @@
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示重做按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowRedoButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowRedoButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowRedoButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowRedoButton_Checked" Unchecked="CheckBoxShowRedoButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示清空按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowClearButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowClearButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowClearButton_Checked" Unchecked="CheckBoxShowClearButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
@@ -1233,16 +1254,16 @@
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示白板按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowWhiteboardButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowWhiteboardButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowWhiteboardButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowWhiteboardButton_Checked" Unchecked="CheckBoxShowWhiteboardButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示隐藏按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowHideButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowHideButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowHideButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowHideButton_Checked" Unchecked="CheckBoxShowHideButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
@@ -1251,16 +1272,16 @@
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示套索选择按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowLassoSelectButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowLassoSelectButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowLassoSelectButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowLassoSelectButton_Checked" Unchecked="CheckBoxShowLassoSelectButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示清并鼠按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearAndMouseButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowClearAndMouseButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowClearAndMouseButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowClearAndMouseButton_Checked" Unchecked="CheckBoxShowClearAndMouseButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
@@ -1268,9 +1289,9 @@
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
                                         <TextBlock Foreground="#fafafa" Text="显示快捷调色盘" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,8,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowQuickColorPalette"
-                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowQuickColorPalette_Toggled" />
+                                        <CheckBox Name="CheckBoxShowQuickColorPalette"
+                                                  IsChecked="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                  Checked="CheckBoxShowQuickColorPalette_Checked" Unchecked="CheckBoxShowQuickColorPalette_Unchecked" />
                                     </ui:SimpleStackPanel>
                                     
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -7948,7 +7969,7 @@
                                         <Border x:Name="BorderDrawShape" Background="#fafafa" Opacity="1"
                                                 Visibility="Visible" BorderBrush="#2563eb"
                                                 BorderThickness="1"
-                                                CornerRadius="5" Margin="-170,-122,-147,37">
+                                                CornerRadius="5" Margin="-170,-140,-147,37">
                                             <ui:SimpleStackPanel Spacing="0" Orientation="Vertical">
                                                 <!--<TextBlock FontSize="16" Foreground="{DynamicResource FloatBarForeground}" HorizontalAlignment="Left" Margin="10,8">
                                                 <Run Text="图形"/>
@@ -7973,6 +7994,17 @@
                                                         </Canvas>
                                                     </ui:SimpleStackPanel>
                                                 </Border>
+                                                <!-- 墨迹渐隐开关 -->
+                                                <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" 
+                                                                     Margin="8,8,8,4" Spacing="8">
+                                                    <TextBlock Foreground="#1e3a8a" Text="墨迹渐隐" FontSize="12" 
+                                                               VerticalAlignment="Center" FontWeight="SemiBold" />
+                                                    <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchInkFadeInPanel"
+                                                                     IsOn="False" FontFamily="Microsoft YaHei UI" 
+                                                                     FontWeight="Bold" Toggled="ToggleSwitchInkFadeInPanel_Toggled" />
+                                                </ui:SimpleStackPanel>
+                                                <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="315" Y2="0" 
+                                                      Stroke="#e5e7eb" StrokeThickness="1" Margin="8,0,8,4" />
                                                 <ui:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
                                                                      Margin="4,6,4,0">
                                                     <ui:SimpleStackPanel Name="BoardImageDrawLine"

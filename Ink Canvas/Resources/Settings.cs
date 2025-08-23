@@ -92,6 +92,13 @@ namespace Ink_Canvas
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
         public bool ShowCircleCenter { get; set; } = false; 
+
+        // 墨迹渐隐功能设置
+        [JsonProperty("enableInkFade")]
+        public bool EnableInkFade { get; set; } = false; // 是否启用墨迹渐隐功能
+        [JsonProperty("inkFadeTime")]
+        public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
+        
     }
 
     public enum OptionalOperation
