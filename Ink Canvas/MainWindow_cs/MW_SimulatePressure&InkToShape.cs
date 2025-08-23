@@ -59,8 +59,6 @@ namespace Ink_Canvas
             // 检查是否启用墨迹渐隐功能
             if (Settings.Canvas.EnableInkFade)
             {
-                LogHelper.WriteLogToFile("StrokeCollected: 进入墨迹渐隐模式", LogHelper.LogType.Info);
-                
                 // 获取墨迹的起点和终点
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
                 var endPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint() : new Point();
@@ -75,7 +73,6 @@ namespace Ink_Canvas
                 if (_inkFadeManager != null)
                 {
                     _inkFadeManager.AddFadingStroke(e.Stroke, startPoint, endPoint);
-                    LogHelper.WriteLogToFile($"StrokeCollected: 墨迹已添加到渐隐管理器，起点：{startPoint}，终点：{endPoint}", LogHelper.LogType.Info);
                 }
                 else
                 {

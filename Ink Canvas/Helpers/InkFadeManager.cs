@@ -64,17 +64,13 @@ namespace Ink_Canvas.Helpers
         /// <param name="endPoint">抬笔点</param>
         public void AddFadingStroke(Stroke stroke, Point startPoint, Point endPoint)
         {
-            LogHelper.WriteLogToFile($"AddFadingStroke 被调用，IsEnabled: {IsEnabled}, stroke: {(stroke != null ? "非空" : "空")}", LogHelper.LogType.Info);
-            
             if (!IsEnabled || stroke == null) 
             {
-                LogHelper.WriteLogToFile($"AddFadingStroke 被拒绝，IsEnabled: {IsEnabled}, stroke: {(stroke != null ? "非空" : "空")}", LogHelper.LogType.Warning);
                 return;
             }
 
             try
             {
-                LogHelper.WriteLogToFile($"开始添加渐隐墨迹，渐隐时间：{FadeTime}ms，动画时间：{AnimationDuration}ms", LogHelper.LogType.Info);
 
                 // 记录墨迹的起点和终点
                 _strokeStartPoints[stroke] = startPoint;
@@ -94,7 +90,6 @@ namespace Ink_Canvas.Helpers
 
                 timer.Tick += (sender, e) =>
                 {
-                    LogHelper.WriteLogToFile("定时器触发，开始渐隐动画", LogHelper.LogType.Info);
                     StartFadeAnimation(stroke);
                     timer.Stop();
                     _fadeTimers.Remove(stroke);
@@ -102,8 +97,6 @@ namespace Ink_Canvas.Helpers
 
                 _fadeTimers[stroke] = timer;
                 timer.Start();
-
-                LogHelper.WriteLogToFile($"定时器已启动，将在 {FadeTime}ms 后开始渐隐", LogHelper.LogType.Info);
 
                 // 将视觉元素添加到画布上
                 _dispatcher.InvokeAsync(() =>
@@ -118,13 +111,11 @@ namespace Ink_Canvas.Helpers
                             if (parent != null)
                             {
                                 parent.Children.Add(strokeVisual);
-                                LogHelper.WriteLogToFile("墨迹已添加到父容器", LogHelper.LogType.Info);
                             }
                             else
                             {
                                 // 如果无法获取父容器，则添加到 inkCanvas.Children
                                 _mainWindow.inkCanvas.Children.Add(strokeVisual);
-                                LogHelper.WriteLogToFile("墨迹已添加到 inkCanvas.Children", LogHelper.LogType.Info);
                             }
                         }
                     }
@@ -291,17 +282,12 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile("开始创建墨迹视觉元素", LogHelper.LogType.Info);
-                
                 // 创建路径几何，使用墨迹的实际位置
                 var geometry = stroke.GetGeometry();
                 if (geometry == null) 
                 {
-                    LogHelper.WriteLogToFile("墨迹几何为空，无法创建视觉元素", LogHelper.LogType.Error);
                     return null;
                 }
-                
-                LogHelper.WriteLogToFile($"墨迹几何边界：{geometry.Bounds}", LogHelper.LogType.Info);
 
                 // 获取绘画属性
                 var drawingAttribs = stroke.DrawingAttributes;
@@ -334,14 +320,12 @@ namespace Ink_Canvas.Helpers
                     path.StrokeEndLineCap = PenLineCap.Flat;
                     path.StrokeLineJoin = PenLineJoin.Miter;
                     
-                    // 高亮笔通常需要更宽的笔触来覆盖下面的内容
-                    if (drawingAttribs.Width < 20)
-                    {
-                        path.StrokeThickness = Math.Max(drawingAttribs.Width * 1.5, 20);
-                    }
-                    
-                    LogHelper.WriteLogToFile($"高亮笔特殊处理：透明度={path.Opacity}，笔触宽度={path.StrokeThickness}", LogHelper.LogType.Info);
-                }
+                                         // 高亮笔通常需要更宽的笔触来覆盖下面的内容
+                     if (drawingAttribs.Width < 20)
+                     {
+                         path.StrokeThickness = Math.Max(drawingAttribs.Width * 1.5, 20);
+                     }
+                 }
 
                 // 不设置任何变换，保持墨迹原有粗细
                 var bounds = geometry.Bounds;
@@ -350,13 +334,10 @@ namespace Ink_Canvas.Helpers
                 System.Windows.Controls.Canvas.SetLeft(path, bounds.Left);
                 System.Windows.Controls.Canvas.SetTop(path, bounds.Top);
 
-                LogHelper.WriteLogToFile($"墨迹视觉元素创建完成，位置：({bounds.Left}, {bounds.Top})，大小：{bounds.Width} x {bounds.Height}，粗细：{drawingAttribs.Width}，高亮笔：{drawingAttribs.IsHighlighter}", LogHelper.LogType.Info);
-
                 return path;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"创建墨迹视觉元素失败: {ex}", LogHelper.LogType.Error);
                 return null;
             }
         }
@@ -371,8 +352,6 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                LogHelper.WriteLogToFile("开始执行渐隐动画", LogHelper.LogType.Info);
-                
                 _dispatcher.InvokeAsync(() =>
                 {
                     // 获取当前透明度和判断是否为高亮笔
@@ -403,7 +382,6 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile("开始普通墨迹渐进式渐隐动画", LogHelper.LogType.Info);
                 StartProgressiveFadeAnimation(visual, stroke, currentOpacity, AnimationDuration);
             }
             catch (Exception ex)
@@ -419,7 +397,6 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile("开始高亮笔渐进式渐隐动画", LogHelper.LogType.Info);
                 StartProgressiveFadeAnimation(visual, stroke, currentOpacity, (int)(AnimationDuration * 1.5));
             }
             catch (Exception ex)
@@ -435,8 +412,6 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile($"开始渐进式渐隐动画，墨迹点数：{stroke.StylusPoints.Count}", LogHelper.LogType.Info);
-                
                 // 确保所有墨迹都能显示动画，包括短墨迹
                 if (stroke.StylusPoints.Count < 2)
                 {
@@ -474,8 +449,6 @@ namespace Ink_Canvas.Helpers
                 segmentCount = Math.Max(segmentCount, 4);
                 
                 var pointsPerSegment = Math.Max(1, totalPoints / segmentCount);
-                
-                LogHelper.WriteLogToFile($"创建 {segmentCount} 个分段，每段约 {pointsPerSegment} 个点", LogHelper.LogType.Info);
 
                 // 隐藏原始视觉元素
                 originalVisual.Visibility = Visibility.Hidden;
@@ -527,7 +500,6 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"创建分段墨迹失败: {ex}", LogHelper.LogType.Error);
                 StartSimpleFadeAnimation(originalVisual, stroke, opacity, duration);
             }
         }
@@ -582,7 +554,6 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"创建墨迹分段失败: {ex}", LogHelper.LogType.Error);
                 return null;
             }
         }
@@ -594,8 +565,6 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile($"开始 {segments.Count} 个分段的渐隐动画", LogHelper.LogType.Info);
-                
                 // 动画时序算法
                 var segmentDuration = CalculateOptimalSegmentDuration(totalDuration, segments.Count);
                 var animationCurve = CreateAppleStyleAnimationCurve(segments.Count, totalDuration);
@@ -627,12 +596,10 @@ namespace Ink_Canvas.Helpers
                             lock (completedSegments)
                             {
                                 completedSegments.Add(segment);
-                                LogHelper.WriteLogToFile($"分段 {segmentIndex} 动画完成，已完成 {completedSegments.Count}/{totalSegments}", LogHelper.LogType.Info);
                                 
                                 // 检查是否所有分段都完成了
                                 if (completedSegments.Count >= totalSegments)
                                 {
-                                    LogHelper.WriteLogToFile("所有分段动画完成，开始清理", LogHelper.LogType.Info);
                                     CleanupSegmentedAnimation(segments, originalStroke, originalVisual);
                                 }
                             }
@@ -652,7 +619,6 @@ namespace Ink_Canvas.Helpers
 
                 safetyTimer.Tick += (sender, e) =>
                 {
-                    LogHelper.WriteLogToFile($"安全超时触发，强制清理动画", LogHelper.LogType.Warning);
                     CleanupSegmentedAnimation(segments, originalStroke, originalVisual);
                     safetyTimer.Stop();
                 };
@@ -709,8 +675,6 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile("清理分段渐隐动画", LogHelper.LogType.Info);
-                
                 // 移除所有分段
                 var parent = _mainWindow.inkCanvas?.Parent as System.Windows.Controls.Panel;
                 
@@ -742,8 +706,6 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile("使用简单渐隐动画", LogHelper.LogType.Info);
-                
                 var fadeAnimation = new DoubleAnimation
                 {
                     From = currentOpacity,
@@ -848,19 +810,15 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile("渐隐动画完成，开始清理墨迹", LogHelper.LogType.Info);
-                
                 // 从父容器中移除墨迹
                 var parent = _mainWindow.inkCanvas?.Parent as System.Windows.Controls.Panel;
                 if (parent != null && parent.Children.Contains(visual))
                 {
                     parent.Children.Remove(visual);
-                    LogHelper.WriteLogToFile("墨迹已从父容器移除", LogHelper.LogType.Info);
                 }
                 else if (_mainWindow.inkCanvas != null && _mainWindow.inkCanvas.Children.Contains(visual))
                 {
                     _mainWindow.inkCanvas.Children.Remove(visual);
-                    LogHelper.WriteLogToFile("墨迹已从 inkCanvas.Children 移除", LogHelper.LogType.Info);
                 }
 
                 RemoveStroke(stroke);
