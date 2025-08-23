@@ -1430,9 +1430,21 @@
                                                 </Image.RenderTransform>
                                             </Image>
                                             <Image Name="PPTBtnPreviewLB" Source="Resources/PresentationExample/bottombar-white.png" Height="10"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <TranslateTransform x:Name="PPTBtnPreviewLBTransform"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
                                             <Image Name="PPTBtnPreviewRB" Source="Resources/PresentationExample/bottombar-white.png" Height="12"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <TranslateTransform x:Name="PPTBtnPreviewRBTransform"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
                                         </Grid>
                                     </Border>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">

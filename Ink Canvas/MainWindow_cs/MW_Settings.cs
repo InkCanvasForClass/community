@@ -971,6 +971,9 @@ namespace Ink_Canvas
 
             PPTBtnPreviewRSTransform.Y = -(Settings.PowerPointSettings.PPTRSButtonPosition * 0.5);
             PPTBtnPreviewLSTransform.Y = -(Settings.PowerPointSettings.PPTLSButtonPosition * 0.5);
+            
+            PPTBtnPreviewLBTransform.X = -(Settings.PowerPointSettings.PPTLBButtonPosition * 0.5);
+            PPTBtnPreviewRBTransform.X = -(Settings.PowerPointSettings.PPTRBButtonPosition * 0.5);
         }
 
         private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
