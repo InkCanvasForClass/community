@@ -124,6 +124,13 @@ namespace Ink_Canvas
         /// </summary>
         private void CheckEnableTwoFingerGestureBtnVisibility(bool isVisible)
         {
+            // 在PPT模式下始终隐藏手势按钮
+            if (currentMode == 0 || BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                return;
+            }
+
             if (StackPanelCanvasControls.Visibility != Visibility.Visible
                 || BorderFloatingBarMainControls.Visibility != Visibility.Visible)
             {
@@ -131,9 +138,7 @@ namespace Ink_Canvas
             }
             else if (isVisible)
             {
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                else EnableTwoFingerGestureBorder.Visibility = Visibility.Visible;
+                EnableTwoFingerGestureBorder.Visibility = Visibility.Visible;
             }
             else
             {
@@ -2472,9 +2477,10 @@ namespace Ink_Canvas
 
                     DeselectUIElement();
 
-                    // 在PPT模式下隐藏手势面板
+                    // 在PPT模式下隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
 
                     SaveStrokes(true);
                     ClearStrokes(true);
@@ -2521,9 +2527,10 @@ namespace Ink_Canvas
                         // 取消任何UI元素的选择
                         DeselectUIElement();
 
-                        // 在PPT模式下隐藏手势面板
+                        // 在PPT模式下隐藏手势面板和手势按钮
                         AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                         AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                        EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
 
                         SaveStrokes();
                         ClearStrokes(true);
