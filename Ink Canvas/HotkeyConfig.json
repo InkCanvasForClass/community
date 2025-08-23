@@ -1,0 +1,96 @@
+{
+  "Version": "1.0",
+  "LastModified": "2025-01-28T15:30:00",
+  "Hotkeys": [
+    {
+      "Name": "Undo",
+      "Key": "Z",
+      "Modifiers": "Control"
+    },
+    {
+      "Name": "Redo",
+      "Key": "Y",
+      "Modifiers": "Control"
+    },
+    {
+      "Name": "Clear",
+      "Key": "E",
+      "Modifiers": "Control"
+    },
+    {
+      "Name": "Paste",
+      "Key": "V",
+      "Modifiers": "Control"
+    },
+    {
+      "Name": "SelectTool",
+      "Key": "S",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "DrawTool",
+      "Key": "D",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "EraserTool",
+      "Key": "E",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "BlackboardTool",
+      "Key": "B",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "QuitDrawTool",
+      "Key": "Q",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "Pen1",
+      "Key": "D1",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "Pen2",
+      "Key": "D2",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "Pen3",
+      "Key": "D3",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "Pen4",
+      "Key": "D4",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "Pen5",
+      "Key": "D5",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "DrawLine",
+      "Key": "L",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "Screenshot",
+      "Key": "C",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "Hide",
+      "Key": "V",
+      "Modifiers": "Alt"
+    },
+    {
+      "Name": "Exit",
+      "Key": "Escape",
+      "Modifiers": "None"
+    }
+  ]
+} 

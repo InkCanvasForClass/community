@@ -32,6 +32,11 @@ namespace Ink_Canvas.Windows
 
         public string DefaultKey { get; set; }
         public string DefaultModifiers { get; set; }
+        
+        /// <summary>
+        /// 快捷键名称（用于标识，如"Undo"）
+        /// </summary>
+        public string HotkeyName { get; set; }
 
         private Key _currentKey = Key.None;
         private ModifierKeys _currentModifiers = ModifierKeys.None;
@@ -144,7 +149,7 @@ namespace Ink_Canvas.Windows
             // 触发快捷键变更事件
             HotkeyChanged?.Invoke(this, new HotkeyChangedEventArgs
             {
-                HotkeyName = Title,
+                HotkeyName = HotkeyName ?? Title, // 优先使用HotkeyName，如果没有则使用Title
                 Key = _currentKey,
                 Modifiers = _currentModifiers
             });

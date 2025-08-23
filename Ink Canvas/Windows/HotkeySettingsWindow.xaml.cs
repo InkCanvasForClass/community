@@ -39,25 +39,60 @@ namespace Ink_Canvas.Windows
         #region Private Methods
         private void InitializeHotkeyItems()
         {
-            // 初始化快捷键项
+            // 初始化快捷键项并设置HotkeyName
             _hotkeyItems["Undo"] = UndoHotkey;
+            UndoHotkey.HotkeyName = "Undo";
+            
             _hotkeyItems["Redo"] = RedoHotkey;
+            RedoHotkey.HotkeyName = "Redo";
+            
             _hotkeyItems["Clear"] = ClearHotkey;
+            ClearHotkey.HotkeyName = "Clear";
+            
             _hotkeyItems["Paste"] = PasteHotkey;
+            PasteHotkey.HotkeyName = "Paste";
+            
             _hotkeyItems["SelectTool"] = SelectToolHotkey;
+            SelectToolHotkey.HotkeyName = "SelectTool";
+            
             _hotkeyItems["DrawTool"] = DrawToolHotkey;
+            DrawToolHotkey.HotkeyName = "DrawTool";
+            
             _hotkeyItems["EraserTool"] = EraserToolHotkey;
+            EraserToolHotkey.HotkeyName = "EraserTool";
+            
             _hotkeyItems["BlackboardTool"] = BlackboardToolHotkey;
+            BlackboardToolHotkey.HotkeyName = "BlackboardTool";
+            
             _hotkeyItems["QuitDrawTool"] = QuitDrawToolHotkey;
+            QuitDrawToolHotkey.HotkeyName = "QuitDrawTool";
+            
             _hotkeyItems["Pen1"] = Pen1Hotkey;
+            Pen1Hotkey.HotkeyName = "Pen1";
+            
             _hotkeyItems["Pen2"] = Pen2Hotkey;
+            Pen2Hotkey.HotkeyName = "Pen2";
+            
             _hotkeyItems["Pen3"] = Pen3Hotkey;
+            Pen3Hotkey.HotkeyName = "Pen3";
+            
             _hotkeyItems["Pen4"] = Pen4Hotkey;
+            Pen4Hotkey.HotkeyName = "Pen4";
+            
             _hotkeyItems["Pen5"] = Pen5Hotkey;
+            Pen5Hotkey.HotkeyName = "Pen5";
+            
             _hotkeyItems["DrawLine"] = DrawLineHotkey;
+            DrawLineHotkey.HotkeyName = "DrawLine";
+            
             _hotkeyItems["Screenshot"] = ScreenshotHotkey;
+            ScreenshotHotkey.HotkeyName = "Screenshot";
+            
             _hotkeyItems["Hide"] = HideHotkey;
+            HideHotkey.HotkeyName = "Hide";
+            
             _hotkeyItems["Exit"] = ExitHotkey;
+            ExitHotkey.HotkeyName = "Exit";
         }
 
         private void LoadCurrentHotkeys()
@@ -132,7 +167,15 @@ namespace Ink_Canvas.Windows
                 var action = GetActionForHotkey(hotkeyName);
                 if (action != null)
                 {
-                    _hotkeyManager.RegisterHotkey(hotkeyName, key, modifiers, action);
+                    // 使用快捷键管理器的UpdateHotkey方法，这会自动保存配置
+                    if (_hotkeyManager.UpdateHotkey(hotkeyName, key, modifiers))
+                    {
+                        LogHelper.WriteLogToFile($"快捷键 {hotkeyName} 已更新为 {modifiers}+{key} 并自动保存", LogHelper.LogType.Event);
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"更新快捷键 {hotkeyName} 失败", LogHelper.LogType.Error);
+                    }
                 }
             }
             catch (Exception ex)
