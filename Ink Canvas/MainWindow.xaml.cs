@@ -41,6 +41,9 @@ namespace Ink_Canvas
         private int currentPageIndex;
         private System.Windows.Controls.Canvas currentCanvas;
         private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup;
+        
+        // 全局快捷键管理器
+        private GlobalHotkeyManager _globalHotkeyManager;
 
 
 
@@ -495,6 +498,9 @@ namespace Ink_Canvas
 
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
+            
+            // 初始化全局快捷键管理器
+            InitializeGlobalHotkeyManager();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -623,6 +629,13 @@ namespace Ink_Canvas
             // 清理剪贴板监控
             CleanupClipboardMonitoring();
             ClipboardNotification.Stop();
+            
+            // 清理全局快捷键管理器
+            if (_globalHotkeyManager != null)
+            {
+                _globalHotkeyManager.Dispose();
+                _globalHotkeyManager = null;
+            }
 
             // 停止置顶维护定时器
             StopTopmostMaintenance();
@@ -1067,10 +1080,7 @@ namespace Ink_Canvas
         // 新增：快捷键设置
         private void NavShortcuts_Click(object sender, RoutedEventArgs e)
         {
-            // 切换到快捷键设置页面
-            ShowSettingsSection("shortcuts");
-            // 如果设置部分尚未快捷键
-            MessageBox.Show("设置功能正在开发中", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            OpenHotkeySettingsWindow();
         }
 
         private void BtnCloseSettings_Click(object sender, RoutedEventArgs e)
@@ -1954,6 +1964,47 @@ namespace Ink_Canvas
             }
         }
 
+        #endregion
+
+        #region 全局快捷键管理
+        /// <summary>
+        /// 初始化全局快捷键管理器
+        /// </summary>
+        private void InitializeGlobalHotkeyManager()
+        {
+            try
+            {
+                _globalHotkeyManager = new GlobalHotkeyManager(this);
+                _globalHotkeyManager.LoadHotkeysFromSettings();
+                LogHelper.WriteLogToFile("全局快捷键管理器已初始化", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化全局快捷键管理器时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 打开快捷键设置窗口
+        /// </summary>
+        private void OpenHotkeySettingsWindow()
+        {
+            try
+            {
+                if (_globalHotkeyManager == null)
+                {
+                    MessageBox.Show("快捷键管理器尚未初始化，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
+                hotkeySettingsWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"打开快捷键设置窗口时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"打开快捷键设置窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
         #endregion
     }
 }

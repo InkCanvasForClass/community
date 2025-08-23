@@ -57,7 +57,7 @@ namespace Ink_Canvas
         }
 
 
-        private void KeyExit(object sender, ExecutedRoutedEventArgs e)
+        internal void KeyExit(object sender, ExecutedRoutedEventArgs e)
         {
             if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }

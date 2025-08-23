@@ -186,7 +186,7 @@ namespace Ink_Canvas
             GridForFloatingBarDraging.Visibility = Visibility.Visible;
         }
 
-        private void SymbolIconEmoji_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconEmoji_MouseUp(object sender, MouseButtonEventArgs e)
         {
             isDragDropInEffect = false;
 
@@ -495,7 +495,8 @@ namespace Ink_Canvas
         #endregion
 
         #region 撤銷重做按鈕
-        private void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
+
+        internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             //if (lastBorderMouseDownObject != sender) return;
 
@@ -508,7 +509,7 @@ namespace Ink_Canvas
             HideSubPanels();
         }
 
-        private void SymbolIconRedo_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconRedo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             //if (lastBorderMouseDownObject != sender) return;
 
@@ -528,7 +529,7 @@ namespace Ink_Canvas
         //private bool Not_Enter_Blackboard_fir_Mouse_Click = true;
         private bool isDisplayingOrHidingBlackboard;
 
-        private void ImageBlackboard_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void ImageBlackboard_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
@@ -728,7 +729,7 @@ namespace Ink_Canvas
 
         #region 清空畫布按鈕
 
-        private void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
@@ -778,7 +779,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">sender</param>
         /// <param name="e">MouseButtonEventArgs</param>
-        private void SymbolIconSelect_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconSelect_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
@@ -1542,7 +1543,7 @@ namespace Ink_Canvas
             });
         }
 
-        private async void CursorIcon_Click(object sender, RoutedEventArgs e)
+        internal async void CursorIcon_Click(object sender, RoutedEventArgs e)
         {
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
                 ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
@@ -1648,7 +1649,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void PenIcon_Click(object sender, RoutedEventArgs e)
+        internal void PenIcon_Click(object sender, RoutedEventArgs e)
         {
 
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
@@ -1866,7 +1867,7 @@ namespace Ink_Canvas
             CheckColorTheme();
         }
 
-        private void EraserIcon_Click(object sender, RoutedEventArgs e)
+        internal void EraserIcon_Click(object sender, RoutedEventArgs e)
         {
             EnterMultiTouchModeIfNeeded();
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
