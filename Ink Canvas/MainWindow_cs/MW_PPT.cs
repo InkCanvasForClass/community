@@ -200,6 +200,15 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    // 在初始化墨迹管理器之前，先清理画布上的所有墨迹
+                    ClearStrokes(true);
+                    
+                    // 清理备份历史记录，防止旧演示文稿的墨迹影响新演示文稿
+                    if (TimeMachineHistories != null && TimeMachineHistories.Length > 0)
+                    {
+                        TimeMachineHistories[0] = null;
+                    }
+                    
                     // 初始化墨迹管理器
                     _pptInkManager?.InitializePresentation(pres);
 
@@ -219,6 +228,8 @@ namespace Ink_Canvas
                     }
 
                     _pptUIManager?.UpdateConnectionStatus(true);
+                    
+                    LogHelper.WriteLogToFile($"已打开新演示文稿: {pres.Name}，墨迹状态已清理", LogHelper.LogType.Event);
                 });
             }
             catch (Exception ex)
