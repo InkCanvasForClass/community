@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas.Helpers
 {
@@ -121,6 +122,29 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 处理PPT放映状态变化
+        /// </summary>
+        public void OnSlideShowStateChanged(bool isInSlideShow)
+        {
+            _dispatcher.InvokeAsync(() =>
+            {
+                try
+                {
+                    if (!isInSlideShow)
+                    {
+                        // 如果不在放映模式，隐藏所有导航面板
+                        HideAllNavigationPanels();
+                        LogHelper.WriteLogToFile("PPT放映状态变化：隐藏导航面板", LogHelper.LogType.Trace);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"处理PPT放映状态变化失败: {ex}", LogHelper.LogType.Error);
+                }
+            });
+        }
+
+        /// <summary>
         /// 更新导航面板显示状态
         /// </summary>
         public void UpdateNavigationPanelsVisibility()
@@ -130,7 +154,10 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     // 检查是否应该显示PPT按钮
-                    bool shouldShowButtons = ShowPPTButton && _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
+                    // 不仅要检查按钮设置，还要确保确实在PPT放映模式下
+                    bool shouldShowButtons = ShowPPTButton && 
+                                          _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                                          _mainWindow.PPTManager?.IsInSlideShow == true;
 
                     if (!shouldShowButtons)
                     {

@@ -86,6 +86,11 @@ namespace Ink_Canvas
         private PPTManager _pptManager;
         private PPTInkManager _pptInkManager;
         private PPTUIManager _pptUIManager;
+
+        /// <summary>
+        /// 获取PPT管理器实例（供UI管理器使用）
+        /// </summary>
+        public PPTManager PPTManager => _pptManager;
         #endregion
 
         #region PPT Manager Initialization
@@ -104,6 +109,7 @@ namespace Ink_Canvas
                 _pptManager.SlideShowEnd += OnPPTSlideShowEnd;
                 _pptManager.PresentationOpen += OnPPTPresentationOpen;
                 _pptManager.PresentationClose += OnPPTPresentationClose;
+                _pptManager.SlideShowStateChanged += OnPPTSlideShowStateChanged;
 
                 // 初始化墨迹管理器
                 _pptInkManager = new PPTInkManager();
@@ -239,6 +245,27 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"处理演示文稿关闭事件失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void OnPPTSlideShowStateChanged(bool isInSlideShow)
+        {
+            try
+            {
+                Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    // 通知UI管理器放映状态变化
+                    _pptUIManager?.OnSlideShowStateChanged(isInSlideShow);
+
+                    if (!isInSlideShow)
+                    {
+                        LogHelper.WriteLogToFile("PPT放映状态变化：退出放映模式", LogHelper.LogType.Trace);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理PPT放映状态变化失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
