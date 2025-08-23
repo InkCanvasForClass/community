@@ -1843,6 +1843,19 @@
                                         <TextBlock
                                             Text="# 开启该选项后，点击页码按钮可以唤起PowerPoint自带的网格缩略图视图。WPS不支持该功能，开启也没用。"
                                             TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <ui:SimpleStackPanel Orientation="Horizontal"
+                                                             HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#fafafa" Text="PPT 翻页按钮长按翻页"
+                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent=""
+                                                             Name="ToggleSwitchEnablePPTButtonLongPressPageTurn"
+                                                             IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled" />
+                                        </ui:SimpleStackPanel>
+                                        <TextBlock
+                                            Text="# 开启该选项后，长按PPT翻页按钮可以连续翻页，提高翻页效率。"
+                                            TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     </ui:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                           StrokeThickness="1" Margin="0,4,0,4" />

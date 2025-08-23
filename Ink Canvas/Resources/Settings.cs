@@ -262,6 +262,9 @@ namespace Ink_Canvas
         [JsonProperty("enablePPTButtonPageClickable")]
         public bool EnablePPTButtonPageClickable { get; set; } = true;
 
+        [JsonProperty("enablePPTButtonLongPressPageTurn")]
+        public bool EnablePPTButtonLongPressPageTurn { get; set; } = true;
+
         // -- new --
 
         [JsonProperty("powerPointSupport")]

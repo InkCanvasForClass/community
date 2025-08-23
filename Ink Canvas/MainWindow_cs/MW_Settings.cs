@@ -511,6 +511,13 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn = ToggleSwitchEnablePPTButtonLongPressPageTurn.IsOn;
+            SaveSettingsToFile();
+        }
+
         private void CheckboxEnableLBPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -883,6 +890,8 @@ namespace Ink_Canvas
                 _pptUIManager.PPTRSButtonPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
                 _pptUIManager.PPTLBButtonPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
                 _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
+                _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
+                _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
                 _pptUIManager.UpdateNavigationPanelsVisibility();
                 _pptUIManager.UpdateNavigationButtonStyles();
             }

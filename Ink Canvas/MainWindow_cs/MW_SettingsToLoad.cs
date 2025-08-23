@@ -367,6 +367,9 @@ namespace Ink_Canvas
                 ToggleSwitchEnablePPTButtonPageClickable.IsOn =
                     Settings.PowerPointSettings.EnablePPTButtonPageClickable;
 
+                ToggleSwitchEnablePPTButtonLongPressPageTurn.IsOn =
+                    Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
+
                 var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                 var dopsc = dops.ToCharArray();
                 if ((dopsc[0] == '1' || dopsc[0] == '2') && (dopsc[1] == '1' || dopsc[1] == '2') &&

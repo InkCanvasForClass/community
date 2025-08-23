@@ -22,6 +22,7 @@ namespace Ink_Canvas.Helpers
         public int PPTLBButtonPosition { get; set; } = 0;
         public int PPTRBButtonPosition { get; set; } = 0;
         public bool EnablePPTButtonPageClickable { get; set; } = true;
+        public bool EnablePPTButtonLongPressPageTurn { get; set; } = true;
         #endregion
 
         #region Private Fields
