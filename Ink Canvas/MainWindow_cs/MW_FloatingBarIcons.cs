@@ -836,7 +836,7 @@ namespace Ink_Canvas
                             break;
                         case "QuickColorOrange":
                         case "QuickColorOrangeSingle":
-                            border.Background = new SolidColorBrush(Color.FromRgb(255, 165, 0));
+                            border.Background = new SolidColorBrush(Color.FromRgb(251, 150, 80));
                             break;
                         case "QuickColorYellow":
                         case "QuickColorYellowSingle":
@@ -1948,7 +1948,7 @@ namespace Ink_Canvas
 
         private void QuickColorOrange_Click(object sender, RoutedEventArgs e)
         {
-            SetQuickColor(Color.FromRgb(255, 165, 0)); // 橙色
+                            SetQuickColor(Color.FromRgb(251, 150, 80)); // 橙色
         }
 
         private void QuickColorYellow_Click(object sender, RoutedEventArgs e)
@@ -2011,7 +2011,7 @@ namespace Ink_Canvas
                 {
                     highlighterColor = 103; // 黄色荧光笔
                 }
-                else if (color == Color.FromRgb(255, 165, 0) || IsColorSimilar(color, Color.FromRgb(249, 115, 22), 20) ||
+                else if (color == Color.FromRgb(255, 165, 0) || color == Color.FromRgb(251, 150, 80) || IsColorSimilar(color, Color.FromRgb(249, 115, 22), 20) ||
                          IsColorSimilar(color, Color.FromRgb(234, 88, 12), 20) ||
                          IsColorSimilar(color, Color.FromRgb(251, 146, 60), 20) ||
                          IsColorSimilar(color, Color.FromRgb(253, 126, 20), 20))
@@ -2056,7 +2056,7 @@ namespace Ink_Canvas
             {
                 // 桌面模式
                 if (color == Colors.White) lastDesktopInkColor = 5;
-                else if (color == Color.FromRgb(255, 165, 0)) lastDesktopInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastDesktopInkColor = 4;
                 else if (color == Colors.Black) lastDesktopInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3; // 蓝色
@@ -2068,7 +2068,7 @@ namespace Ink_Canvas
             {
                 // 白板模式
                 if (color == Colors.White) lastBoardInkColor = 5;
-                else if (color == Color.FromRgb(255, 165, 0)) lastBoardInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastBoardInkColor = 4;
                 else if (color == Colors.Black) lastBoardInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3; // 蓝色
@@ -2133,6 +2133,7 @@ namespace Ink_Canvas
                 QuickColorYellowCheckSingle.Visibility = Visibility.Visible;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), tolerance) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(251, 150, 80), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(251, 146, 60), tolerance) ||
