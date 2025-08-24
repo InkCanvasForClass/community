@@ -4075,7 +4075,7 @@
                                                         Background="#fafafa"
                                                         Opacity="1" BorderBrush="#2563eb"
                                                         BorderThickness="1" CornerRadius="8">
-                                                    <ui:SimpleStackPanel>
+                                                    <ui:SimpleStackPanel Margin="0,-20,0,0">
                                                         <Border BorderBrush="#1e3a8a" Height="32"
                                                                 BorderThickness="0,0,0,1"
                                                                 CornerRadius="8,8,0,0" Background="#2563eb"
@@ -7113,7 +7113,7 @@
                                             <Border x:Name="PenPalette" Visibility="Visible" Background="#fafafa"
                                                     Opacity="1" BorderBrush="#2563eb"
                                                     BorderThickness="1" CornerRadius="8" Margin="-160,-200,-33,32">
-                                                <ui:SimpleStackPanel>
+                                                <ui:SimpleStackPanel Margin="0,-20,0,0">
                                                     <Border BorderBrush="#1e3a8a" Height="32" BorderThickness="0,0,0,1"
                                                             CornerRadius="8,8,0,0" Background="#2563eb"
                                                             Margin="-1,-1,-1,0"
