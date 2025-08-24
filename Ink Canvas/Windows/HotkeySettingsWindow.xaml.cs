@@ -34,8 +34,10 @@ namespace Ink_Canvas.Windows
             {
                 try
                 {
-                    // 不自动启用快捷键注册功能，让用户手动决定
-                    // 只加载当前已注册的快捷键
+                    // 不启用快捷键注册功能，只读取配置文件中的快捷键信息用于显示
+                    // 这样用户可以看到配置文件中保存的快捷键，但不会自动注册
+                    
+                    // 加载当前快捷键（包括配置文件中的）
                     LoadCurrentHotkeys();
                     SetupEventHandlers();
                 }
@@ -124,22 +126,31 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                var registeredHotkeys = _hotkeyManager.GetRegisteredHotkeys();
-                LogHelper.WriteLogToFile($"当前已注册快捷键数量: {registeredHotkeys.Count}", LogHelper.LogType.Info);
+                // 首先尝试从配置文件获取快捷键信息
+                var configHotkeys = _hotkeyManager.GetHotkeysFromConfigFile();
+                LogHelper.WriteLogToFile($"配置文件中的快捷键数量: {configHotkeys.Count}", LogHelper.LogType.Info);
                 
-                // 显示已注册的快捷键
-                foreach (var hotkey in registeredHotkeys)
+                // 显示配置文件中的快捷键
+                foreach (var hotkey in configHotkeys)
                 {
                     if (_hotkeyItems.TryGetValue(hotkey.Name, out var hotkeyItem))
                     {
                         hotkeyItem.SetCurrentHotkey(hotkey.Key, hotkey.Modifiers);
-                        LogHelper.WriteLogToFile($"设置快捷键项: {hotkey.Name} -> {hotkey.Modifiers}+{hotkey.Key}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"从配置文件设置快捷键项: {hotkey.Name} -> {hotkey.Modifiers}+{hotkey.Key}", LogHelper.LogType.Info);
                     }
                 }
                 
-                // 对于没有快捷键的项目，不设置任何值，保持为空状态
-                // 这样用户就能清楚地知道哪些快捷键还没有设置
-                LogHelper.WriteLogToFile("未注册的快捷键项保持为空状态", LogHelper.LogType.Info);
+                // 为没有快捷键的项目设置默认显示值（仅用于UI显示，不实际注册）
+                foreach (var kvp in _hotkeyItems)
+                {
+                    var hotkeyItem = kvp.Value;
+                    if (hotkeyItem.GetCurrentHotkey().key == Key.None)
+                    {
+                        // 根据DefaultKey和DefaultModifiers设置默认显示值
+                        SetDefaultHotkeyForItem(hotkeyItem);
+                        LogHelper.WriteLogToFile($"设置默认显示值: {hotkeyItem.HotkeyName}", LogHelper.LogType.Info);
+                    }
+                }
             }
             catch (Exception ex)
             {

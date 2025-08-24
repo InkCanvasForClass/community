@@ -4061,7 +4061,7 @@
                                     </Border>
                                     <Border>
                                         <Grid Margin="0,5,0,5" Width="0">
-                                            <Grid Name="BoardPenPaletteGrid" Margin="-160,-200,-33,50"
+                                            <Grid Name="BoardPenPaletteGrid" Margin="-160,-200,-53,50"
                                                   RenderTransformOrigin="0,1">
                                                 <Grid.RenderTransform>
                                                     <TransformGroup>
@@ -4176,57 +4176,69 @@
                                                                  Margin="12,8,12,0" HorizontalAlignment="Center"
                                                                  VerticalAlignment="Center" Stretch="Fill">
                                                             <ui:SimpleStackPanel>
-                                                                <Controls:UniformGrid Columns="2" Width="300"
+                                                                <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                    Height="35" Margin="0,0,0,8">
+                                                                    <Label Content="笔锋" Margin="0,0,6,0"
+                                                                           Foreground="{DynamicResource FloatBarForeground}"
+                                                                           FontSize="16" FontWeight="Bold"
+                                                                           VerticalAlignment="Center" />
+                                                                    <ComboBox Height="30"
+                                                                        VerticalAlignment="Center"
+                                                                        Name="BoardComboBoxPenStyle"
+                                                                        FontFamily="Microsoft YaHei UI"
+                                                                        SelectedIndex="0"
+                                                                        SelectionChanged="ComboBoxPenStyle_SelectionChanged">
+                                                                        <ComboBoxItem Content="基于点集"
+                                                                            FontFamily="Microsoft YaHei UI" />
+                                                                        <ComboBoxItem Content="基于速率"
+                                                                            FontFamily="Microsoft YaHei UI" />
+                                                                        <ComboBoxItem Content="关闭笔锋"
+                                                                            FontFamily="Microsoft YaHei UI" />
+                                                                    </ComboBox>
+                                                                </ui:SimpleStackPanel>
+                                                                <Controls:UniformGrid Columns="3" Width="300"
                                                                     Height="55">
-                                                                    <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                        Height="35">
-                                                                        <Label Content="笔锋" Margin="0,0,6,0"
-                                                                               Foreground="{DynamicResource FloatBarForeground}"
-                                                                               FontSize="16" FontWeight="Bold"
-                                                                               VerticalAlignment="Center" />
-                                                                        <ComboBox Height="30"
-                                                                            VerticalAlignment="Center"
-                                                                            Name="BoardComboBoxPenStyle"
+                                                                    <ui:SimpleStackPanel
+                                                                        x:Name="BoardNibModeSimpleStackPanel"
+                                                                        Orientation="Horizontal" Width="100">
+                                                                        <Label Content="笔尖模式" FontSize="15"
+                                                                            VerticalAlignment="Center" />
+                                                                        <ui:ToggleSwitch
+                                                                            x:Name="BoardToggleSwitchEnableNibMode"
+                                                                            MinWidth="0"
                                                                             FontFamily="Microsoft YaHei UI"
-                                                                            SelectedIndex="0"
-                                                                            SelectionChanged="ComboBoxPenStyle_SelectionChanged">
-                                                                            <ComboBoxItem Content="基于点集"
-                                                                                FontFamily="Microsoft YaHei UI" />
-                                                                            <ComboBoxItem Content="基于速率"
-                                                                                FontFamily="Microsoft YaHei UI" />
-                                                                            <ComboBoxItem Content="关闭笔锋"
-                                                                                FontFamily="Microsoft YaHei UI" />
-                                                                        </ComboBox>
+                                                                            Width="80" Margin="10,0,0,0"
+                                                                            Toggled="ToggleSwitchEnableNibMode_Toggled"
+                                                                            IsOn="True" />
                                                                     </ui:SimpleStackPanel>
-                                                                    <ui:SimpleStackPanel Margin="0,-5,0,-5"
-                                                                        VerticalAlignment="Center">
-                                                                        <ui:SimpleStackPanel
-                                                                            x:Name="BoardNibModeSimpleStackPanel"
-                                                                            Orientation="Horizontal" Width="140">
-                                                                            <Label Content="笔尖模式" FontSize="15"
-                                                                                VerticalAlignment="Center" />
-                                                                            <ui:ToggleSwitch
-                                                                                x:Name="BoardToggleSwitchEnableNibMode"
-                                                                                MinWidth="0"
-                                                                                FontFamily="Microsoft YaHei UI"
-                                                                                Width="70" Margin="10,0,0,0"
-                                                                                Toggled="ToggleSwitchEnableNibMode_Toggled"
-                                                                                IsOn="True" />
-                                                                        </ui:SimpleStackPanel>
-                                                                        <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                            Width="140">
-                                                                            <Label Margin="0,0,10,0" Content="墨迹纠正"
-                                                                                Foreground="{DynamicResource FloatBarForeground}"
-                                                                                FontSize="15"
-                                                                                VerticalAlignment="Center" />
-                                                                            <ui:ToggleSwitch
-                                                                                Foreground="{DynamicResource FloatBarForeground}"
-                                                                                FontFamily="Microsoft YaHei UI"
-                                                                                Width="70"
-                                                                                Toggled="ToggleSwitchEnableInkToShape_Toggled"
-                                                                                MinWidth="0"
-                                                                                IsOn="{Binding ElementName=ToggleSwitchEnableInkToShape, Path=IsOn}" />
-                                                                        </ui:SimpleStackPanel>
+                                                                    <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                        Width="100">
+                                                                        <Label Margin="0,0,10,0" Content="墨迹纠正"
+                                                                            Foreground="{DynamicResource FloatBarForeground}"
+                                                                            FontSize="15"
+                                                                            VerticalAlignment="Center" />
+                                                                        <ui:ToggleSwitch
+                                                                            Foreground="{DynamicResource FloatBarForeground}"
+                                                                            FontFamily="Microsoft YaHei UI"
+                                                                            Width="80"
+                                                                            Toggled="ToggleSwitchEnableInkToShape_Toggled"
+                                                                            MinWidth="0"
+                                                                            IsOn="{Binding ElementName=ToggleSwitchEnableInkToShape, Path=IsOn}" />
+                                                                    </ui:SimpleStackPanel>
+                                                                    <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                        Width="100">
+                                                                        <Label Margin="0,0,10,0" Content="墨迹渐隐"
+                                                                            Foreground="{DynamicResource FloatBarForeground}"
+                                                                            FontSize="15"
+                                                                            VerticalAlignment="Center" />
+                                                                        <ui:ToggleSwitch
+                                                                            x:Name="ToggleSwitchInkFadeInPanel"
+                                                                            Foreground="{DynamicResource FloatBarForeground}"
+                                                                            FontFamily="Microsoft YaHei UI"
+                                                                            Width="90"
+                                                                            Toggled="ToggleSwitchInkFadeInPanel_Toggled"
+                                                                            MinWidth="0"
+                                                                            IsOn="False" />
                                                                     </ui:SimpleStackPanel>
                                                                 </Controls:UniformGrid>
 
@@ -7193,53 +7205,63 @@
                                                              Margin="12,8,12,0" HorizontalAlignment="Center"
                                                              VerticalAlignment="Center" Stretch="Fill">
                                                         <ui:SimpleStackPanel>
-                                                            <Controls:UniformGrid Columns="2" Width="300" Height="55">
-                                                                <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                    Height="35">
-                                                                    <Label Content="笔锋" Margin="0,0,6,0"
-                                                                           Foreground="{DynamicResource FloatBarForeground}"
-                                                                           FontSize="16" FontWeight="Bold"
+                                                            <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                Height="35" Margin="0,0,0,8">
+                                                                <Label Content="笔锋" Margin="0,0,6,0"
+                                                                       Foreground="{DynamicResource FloatBarForeground}"
+                                                                       FontSize="16" FontWeight="Bold"
+                                                                       VerticalAlignment="Center" />
+                                                                <ComboBox Height="30" VerticalAlignment="Center"
+                                                                          Name="ComboBoxPenStyle"
+                                                                          FontFamily="Microsoft YaHei UI"
+                                                                          SelectedIndex="0"
+                                                                          SelectionChanged="ComboBoxPenStyle_SelectionChanged">
+                                                                    <ComboBoxItem Content="基于点集"
+                                                                        FontFamily="Microsoft YaHei UI" />
+                                                                    <ComboBoxItem Content="基于速率"
+                                                                        FontFamily="Microsoft YaHei UI" />
+                                                                    <ComboBoxItem Content="关闭笔锋"
+                                                                        FontFamily="Microsoft YaHei UI" />
+                                                                </ComboBox>
+                                                            </ui:SimpleStackPanel>
+                                                            <Controls:UniformGrid Columns="3" Width="300" Height="55">
+                                                                <ui:SimpleStackPanel
+                                                                    x:Name="NibModeSimpleStackPanel"
+                                                                    Orientation="Horizontal" Width="100">
+                                                                    <Label Content="笔尖模式" FontSize="15"
                                                                            VerticalAlignment="Center" />
-                                                                    <ComboBox Height="30" VerticalAlignment="Center"
-                                                                              Name="ComboBoxPenStyle"
-                                                                              FontFamily="Microsoft YaHei UI"
-                                                                              SelectedIndex="0"
-                                                                              SelectionChanged="ComboBoxPenStyle_SelectionChanged">
-                                                                        <ComboBoxItem Content="基于点集"
-                                                                            FontFamily="Microsoft YaHei UI" />
-                                                                        <ComboBoxItem Content="基于速率"
-                                                                            FontFamily="Microsoft YaHei UI" />
-                                                                        <ComboBoxItem Content="关闭笔锋"
-                                                                            FontFamily="Microsoft YaHei UI" />
-                                                                    </ComboBox>
+                                                                    <ui:ToggleSwitch
+                                                                        x:Name="ToggleSwitchEnableNibMode"
+                                                                        MinWidth="0"
+                                                                        FontFamily="Microsoft YaHei UI"
+                                                                        Width="80" Margin="10,0,0,0"
+                                                                        Toggled="ToggleSwitchEnableNibMode_Toggled"
+                                                                        IsOn="True" />
                                                                 </ui:SimpleStackPanel>
-                                                                <ui:SimpleStackPanel Margin="0,-5,0,-5"
-                                                                    VerticalAlignment="Center">
-                                                                    <ui:SimpleStackPanel
-                                                                        x:Name="NibModeSimpleStackPanel"
-                                                                        Orientation="Horizontal" Width="140">
-                                                                        <Label Content="笔尖模式" FontSize="15"
-                                                                               VerticalAlignment="Center" />
-                                                                        <ui:ToggleSwitch
-                                                                            x:Name="ToggleSwitchEnableNibMode"
-                                                                            MinWidth="0"
-                                                                            FontFamily="Microsoft YaHei UI"
-                                                                            Width="70" Margin="10,0,0,0"
-                                                                            Toggled="ToggleSwitchEnableNibMode_Toggled"
-                                                                            IsOn="True" />
-                                                                    </ui:SimpleStackPanel>
-                                                                    <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                        Width="140">
-                                                                        <Label Margin="0,0,10,0" Content="墨迹纠正"
-                                                                               Foreground="{DynamicResource FloatBarForeground}"
-                                                                               FontSize="15" VerticalAlignment="Center" />
-                                                                        <ui:ToggleSwitch
-                                                                            Foreground="{DynamicResource FloatBarForeground}"
-                                                                            FontFamily="Microsoft YaHei UI" Width="70"
-                                                                            Toggled="ToggleSwitchEnableInkToShape_Toggled"
-                                                                            MinWidth="0"
-                                                                            IsOn="{Binding ElementName=ToggleSwitchEnableInkToShape, Path=IsOn}" />
-                                                                    </ui:SimpleStackPanel>
+                                                                <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                    Width="100">
+                                                                    <Label Margin="0,0,10,0" Content="墨迹纠正"
+                                                                           Foreground="{DynamicResource FloatBarForeground}"
+                                                                           FontSize="15" VerticalAlignment="Center" />
+                                                                    <ui:ToggleSwitch
+                                                                        Foreground="{DynamicResource FloatBarForeground}"
+                                                                        FontFamily="Microsoft YaHei UI" Width="80"
+                                                                        Toggled="ToggleSwitchEnableInkToShape_Toggled"
+                                                                        MinWidth="0"
+                                                                        IsOn="{Binding ElementName=ToggleSwitchEnableInkToShape, Path=IsOn}" />
+                                                                </ui:SimpleStackPanel>
+                                                                <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                    Width="100">
+                                                                    <Label Margin="0,0,10,0" Content="墨迹渐隐"
+                                                                           Foreground="{DynamicResource FloatBarForeground}"
+                                                                           FontSize="15" VerticalAlignment="Center" />
+                                                                    <ui:ToggleSwitch
+                                                                        x:Name="ToggleSwitchInkFadeInPanel2"
+                                                                        Foreground="{DynamicResource FloatBarForeground}"
+                                                                        FontFamily="Microsoft YaHei UI" Width="90"
+                                                                        Toggled="ToggleSwitchInkFadeInPanel_Toggled"
+                                                                        MinWidth="0"
+                                                                        IsOn="{Binding ElementName=ToggleSwitchInkFadeInPanel, Path=IsOn}" />
                                                                 </ui:SimpleStackPanel>
                                                             </Controls:UniformGrid>
 
@@ -7994,17 +8016,7 @@
                                                         </Canvas>
                                                     </ui:SimpleStackPanel>
                                                 </Border>
-                                                <!-- 墨迹渐隐开关 -->
-                                                <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" 
-                                                                     Margin="8,8,8,4" Spacing="8">
-                                                    <TextBlock Foreground="#1e3a8a" Text="墨迹渐隐" FontSize="12" 
-                                                               VerticalAlignment="Center" FontWeight="SemiBold" />
-                                                    <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchInkFadeInPanel"
-                                                                     IsOn="False" FontFamily="Microsoft YaHei UI" 
-                                                                     FontWeight="Bold" Toggled="ToggleSwitchInkFadeInPanel_Toggled" />
-                                                </ui:SimpleStackPanel>
-                                                <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="315" Y2="0" 
-                                                      Stroke="#e5e7eb" StrokeThickness="1" Margin="8,0,8,4" />
+
                                                 <ui:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
                                                                      Margin="4,6,4,0">
                                                     <ui:SimpleStackPanel Name="BoardImageDrawLine"

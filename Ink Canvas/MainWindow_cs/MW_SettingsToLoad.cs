@@ -907,6 +907,12 @@ namespace Ink_Canvas
                     ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
                 }
 
+                // 同步普通画笔面板中的开关状态
+                if (ToggleSwitchInkFadeInPanel2 != null)
+                {
+                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                }
+
                 // 同步滑块值
                 if (InkFadeTimeSlider != null)
                 {

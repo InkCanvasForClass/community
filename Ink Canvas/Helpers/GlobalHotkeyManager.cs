@@ -166,6 +166,59 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 获取配置文件中的快捷键信息（不注册，仅用于显示）
+        /// </summary>
+        /// <returns>配置文件中的快捷键列表</returns>
+        public List<HotkeyInfo> GetHotkeysFromConfigFile()
+        {
+            try
+            {
+                if (!File.Exists(HotkeyConfigFile))
+                {
+                    LogHelper.WriteLogToFile("快捷键配置文件不存在", LogHelper.LogType.Info);
+                    return new List<HotkeyInfo>();
+                }
+
+                // 读取配置文件内容
+                string jsonContent = File.ReadAllText(HotkeyConfigFile, System.Text.Encoding.UTF8);
+                if (string.IsNullOrEmpty(jsonContent))
+                {
+                    LogHelper.WriteLogToFile("快捷键配置文件为空", LogHelper.LogType.Warning);
+                    return new List<HotkeyInfo>();
+                }
+
+                // 反序列化配置
+                var config = JsonConvert.DeserializeObject<HotkeyConfig>(jsonContent);
+                if (config?.Hotkeys == null || config.Hotkeys.Count == 0)
+                {
+                    LogHelper.WriteLogToFile("快捷键配置为空或格式错误", LogHelper.LogType.Warning);
+                    return new List<HotkeyInfo>();
+                }
+
+                // 转换为HotkeyInfo列表（不注册，仅用于显示）
+                var hotkeyList = new List<HotkeyInfo>();
+                foreach (var hotkeyConfig in config.Hotkeys)
+                {
+                    hotkeyList.Add(new HotkeyInfo
+                    {
+                        Name = hotkeyConfig.Name,
+                        Key = hotkeyConfig.Key,
+                        Modifiers = hotkeyConfig.Modifiers,
+                        Action = null // 不设置动作，仅用于显示
+                    });
+                }
+
+                LogHelper.WriteLogToFile($"从配置文件读取到 {hotkeyList.Count} 个快捷键信息", LogHelper.LogType.Info);
+                return hotkeyList;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从配置文件读取快捷键信息时出错: {ex.Message}", LogHelper.LogType.Error);
+                return new List<HotkeyInfo>();
+            }
+        }
+
+        /// <summary>
         /// 注册默认快捷键集合
         /// </summary>
         public void RegisterDefaultHotkeys()
@@ -211,7 +264,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 从设置加载快捷键
+        /// 从配置文件加载快捷键
         /// </summary>
         public void LoadHotkeysFromSettings()
         {
