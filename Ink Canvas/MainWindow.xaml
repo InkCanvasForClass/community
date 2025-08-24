@@ -4201,7 +4201,7 @@
                                                                     <ui:SimpleStackPanel
                                                                         x:Name="BoardNibModeSimpleStackPanel"
                                                                         Orientation="Horizontal" Width="100">
-                                                                        <Label Content="笔尖模式" FontSize="15"
+                                                                        <Label Content="笔尖模式" FontSize="12"
                                                                             VerticalAlignment="Center" />
                                                                         <ui:ToggleSwitch
                                                                             x:Name="BoardToggleSwitchEnableNibMode"
@@ -4215,7 +4215,7 @@
                                                                         Width="100">
                                                                         <Label Margin="0,0,10,0" Content="墨迹纠正"
                                                                             Foreground="{DynamicResource FloatBarForeground}"
-                                                                            FontSize="15"
+                                                                            FontSize="12"
                                                                             VerticalAlignment="Center" />
                                                                         <ui:ToggleSwitch
                                                                             Foreground="{DynamicResource FloatBarForeground}"
@@ -4229,7 +4229,7 @@
                                                                         Width="100">
                                                                         <Label Margin="0,0,10,0" Content="墨迹渐隐"
                                                                             Foreground="{DynamicResource FloatBarForeground}"
-                                                                            FontSize="15"
+                                                                            FontSize="12"
                                                                             VerticalAlignment="Center" />
                                                                         <ui:ToggleSwitch
                                                                             x:Name="ToggleSwitchInkFadeInPanel"
@@ -7228,7 +7228,7 @@
                                                                 <ui:SimpleStackPanel
                                                                     x:Name="NibModeSimpleStackPanel"
                                                                     Orientation="Horizontal" Width="100">
-                                                                    <Label Content="笔尖模式" FontSize="15"
+                                                                    <Label Content="笔尖模式" FontSize="12"
                                                                            VerticalAlignment="Center" />
                                                                     <ui:ToggleSwitch
                                                                         x:Name="ToggleSwitchEnableNibMode"
@@ -7242,7 +7242,7 @@
                                                                     Width="100">
                                                                     <Label Margin="0,0,10,0" Content="墨迹纠正"
                                                                            Foreground="{DynamicResource FloatBarForeground}"
-                                                                           FontSize="15" VerticalAlignment="Center" />
+                                                                           FontSize="12" VerticalAlignment="Center" />
                                                                     <ui:ToggleSwitch
                                                                         Foreground="{DynamicResource FloatBarForeground}"
                                                                         FontFamily="Microsoft YaHei UI" Width="80"
@@ -7254,7 +7254,7 @@
                                                                     Width="100">
                                                                     <Label Margin="0,0,10,0" Content="墨迹渐隐"
                                                                            Foreground="{DynamicResource FloatBarForeground}"
-                                                                           FontSize="15" VerticalAlignment="Center" />
+                                                                           FontSize="12" VerticalAlignment="Center" />
                                                                     <ui:ToggleSwitch
                                                                         x:Name="ToggleSwitchInkFadeInPanel2"
                                                                         Foreground="{DynamicResource FloatBarForeground}"
