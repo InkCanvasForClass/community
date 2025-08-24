@@ -150,7 +150,7 @@ namespace Ink_Canvas
         [JsonProperty("skippedVersion")]
         public string SkippedVersion { get; set; } = "";
         [JsonProperty("isEnableNibMode")]
-        public bool IsEnableNibMode { get; set; }
+        public bool IsEnableNibMode { get; set; } = false; 
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; }
         [JsonProperty("crashAction")]
