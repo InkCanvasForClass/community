@@ -25,6 +25,7 @@ namespace Ink_Canvas.Helpers
         public event Action<Presentation> PresentationOpen;
         public event Action<Presentation> PresentationClose;
         public event Action<bool> PPTConnectionChanged;
+        public event Action<bool> SlideShowStateChanged;
         #endregion
 
         #region Properties
@@ -92,6 +93,7 @@ namespace Ink_Canvas.Helpers
 
         #region Private Fields
         private Timer _connectionCheckTimer;
+        private Timer _slideShowStateCheckTimer;
         private Timer _wpsProcessCheckTimer;
         private Process _wpsProcess;
         private bool _hasWpsProcessId;
@@ -99,6 +101,7 @@ namespace Ink_Canvas.Helpers
         private int _wpsProcessCheckCount;
         private WpsWindowInfo _lastForegroundWpsWindow;
         private DateTime _lastWindowCheckTime = DateTime.MinValue;
+        private bool _lastSlideShowState = false;
         private readonly object _lockObject = new object();
         private bool _disposed = false;
         #endregion
@@ -114,6 +117,10 @@ namespace Ink_Canvas.Helpers
             _connectionCheckTimer = new Timer(500);
             _connectionCheckTimer.Elapsed += OnConnectionCheckTimerElapsed;
             _connectionCheckTimer.AutoReset = true;
+
+            _slideShowStateCheckTimer = new Timer(1000);
+            _slideShowStateCheckTimer.Elapsed += OnSlideShowStateCheckTimerElapsed;
+            _slideShowStateCheckTimer.AutoReset = true;
         }
 
         public void StartMonitoring()
@@ -121,6 +128,7 @@ namespace Ink_Canvas.Helpers
             if (!_disposed)
             {
                 _connectionCheckTimer?.Start();
+                _slideShowStateCheckTimer?.Start();
                 LogHelper.WriteLogToFile("PPT监控已启动", LogHelper.LogType.Trace);
             }
         }
@@ -128,6 +136,7 @@ namespace Ink_Canvas.Helpers
         public void StopMonitoring()
         {
             _connectionCheckTimer?.Stop();
+            _slideShowStateCheckTimer?.Stop();
             DisconnectFromPPT();
             LogHelper.WriteLogToFile("PPT监控已停止", LogHelper.LogType.Trace);
         }
@@ -143,6 +152,18 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"PPT连接检查失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void OnSlideShowStateCheckTimerElapsed(object sender, ElapsedEventArgs e)
+        {
+            try
+            {
+                CheckSlideShowState();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PPT放映状态检查失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
@@ -184,6 +205,30 @@ namespace Ink_Canvas.Helpers
                         DisconnectFromPPT();
                     }
                 }
+            }
+        }
+
+        private void CheckSlideShowState()
+        {
+            try
+            {
+                if (!IsConnected) return;
+
+                var currentSlideShowState = IsInSlideShow;
+                if (currentSlideShowState != _lastSlideShowState)
+                {
+                    _lastSlideShowState = currentSlideShowState;
+                    SlideShowStateChanged?.Invoke(currentSlideShowState);
+                    
+                    if (!currentSlideShowState)
+                    {
+                        LogHelper.WriteLogToFile("检测到PPT放映已结束", LogHelper.LogType.Trace);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查PPT放映状态异常: {ex}", LogHelper.LogType.Error);
             }
         }
 
@@ -1627,6 +1672,7 @@ namespace Ink_Canvas.Helpers
                 StopWpsProcessCheckTimer();
 
                 _connectionCheckTimer?.Dispose();
+                _slideShowStateCheckTimer?.Dispose();
                 _wpsProcessCheckTimer?.Dispose();
 
                 _disposed = true;

@@ -27,7 +27,37 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        #region “手勢"按鈕
+        #region 快捷键状态管理
+
+        /// <summary>
+        /// 统一的快捷键状态刷新方法
+        /// 在工具切换时调用，避免重复代码
+        /// </summary>
+        private void RefreshHotkeyState()
+        {
+            try
+            {
+                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (hotkeyManagerField != null)
+                {
+                    var hotkeyManager = hotkeyManagerField.GetValue(this);
+                    if (hotkeyManager != null)
+                    {
+                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
+                        updateMethod?.Invoke(hotkeyManager, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        #endregion
+
+        #region "手勢"按鈕
 
         /// <summary>
         /// 用於浮動工具欄的"手勢"按鈕和白板工具欄的"手勢"按鈕的點擊事件
@@ -124,6 +154,13 @@ namespace Ink_Canvas
         /// </summary>
         private void CheckEnableTwoFingerGestureBtnVisibility(bool isVisible)
         {
+            // 在PPT模式下始终隐藏手势按钮
+            if (currentMode == 0 || BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+            {
+                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                return;
+            }
+
             if (StackPanelCanvasControls.Visibility != Visibility.Visible
                 || BorderFloatingBarMainControls.Visibility != Visibility.Visible)
             {
@@ -131,9 +168,7 @@ namespace Ink_Canvas
             }
             else if (isVisible)
             {
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                else EnableTwoFingerGestureBorder.Visibility = Visibility.Visible;
+                EnableTwoFingerGestureBorder.Visibility = Visibility.Visible;
             }
             else
             {
@@ -181,7 +216,7 @@ namespace Ink_Canvas
             GridForFloatingBarDraging.Visibility = Visibility.Visible;
         }
 
-        private void SymbolIconEmoji_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconEmoji_MouseUp(object sender, MouseButtonEventArgs e)
         {
             isDragDropInEffect = false;
 
@@ -490,7 +525,8 @@ namespace Ink_Canvas
         #endregion
 
         #region 撤銷重做按鈕
-        private void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
+
+        internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             //if (lastBorderMouseDownObject != sender) return;
 
@@ -503,7 +539,7 @@ namespace Ink_Canvas
             HideSubPanels();
         }
 
-        private void SymbolIconRedo_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconRedo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             //if (lastBorderMouseDownObject != sender) return;
 
@@ -523,7 +559,7 @@ namespace Ink_Canvas
         //private bool Not_Enter_Blackboard_fir_Mouse_Click = true;
         private bool isDisplayingOrHidingBlackboard;
 
-        private void ImageBlackboard_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void ImageBlackboard_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
@@ -723,7 +759,7 @@ namespace Ink_Canvas
 
         #region 清空畫布按鈕
 
-        private void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
@@ -773,7 +809,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">sender</param>
         /// <param name="e">MouseButtonEventArgs</param>
-        private void SymbolIconSelect_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconSelect_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
@@ -782,6 +818,9 @@ namespace Ink_Canvas
 
             BtnSelect_Click(null, null);
             HideSubPanels("select");
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
         }
 
         #endregion
@@ -836,7 +875,7 @@ namespace Ink_Canvas
                             break;
                         case "QuickColorOrange":
                         case "QuickColorOrangeSingle":
-                            border.Background = new SolidColorBrush(Color.FromRgb(255, 165, 0));
+                            border.Background = new SolidColorBrush(Color.FromRgb(251, 150, 80));
                             break;
                         case "QuickColorYellow":
                         case "QuickColorYellowSingle":
@@ -991,7 +1030,7 @@ namespace Ink_Canvas
                 {
                     Process.Start(new ProcessStartInfo
                     {
-                        FileName = "classisland://plugins/IslandCaller/Run",
+                        FileName = "classisland://plugins/IslandCaller/Simple/1",
                         UseShellExecute = true
                     });
                 }
@@ -1537,7 +1576,7 @@ namespace Ink_Canvas
             });
         }
 
-        private async void CursorIcon_Click(object sender, RoutedEventArgs e)
+        internal async void CursorIcon_Click(object sender, RoutedEventArgs e)
         {
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
                 ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
@@ -1641,9 +1680,17 @@ namespace Ink_Canvas
                 else
                     ViewboxFloatingBarMarginAnimation(100, true);
             }
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
+
+            if (BtnSwitchTheme.Content.ToString() == "浅色")
+                BtnSwitch.Content = "黑板";
+            else
+                BtnSwitch.Content = "白板";
         }
 
-        private void PenIcon_Click(object sender, RoutedEventArgs e)
+        internal void PenIcon_Click(object sender, RoutedEventArgs e)
         {
 
             if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
@@ -1724,13 +1771,27 @@ namespace Ink_Canvas
                     }
                 }
 
-                // 修复：从线擦切换到批注时，重置为默认笔模式（非高光显示）
+                // 修复：从线擦切换到批注时，保持之前的笔类型状态
+                // 如果之前是荧光笔模式，则保持荧光笔状态；否则重置为默认笔模式
                 forceEraser = false;
                 forcePointEraser = false;
                 drawingShapeMode = 0;
-                penType = 0;
-                drawingAttributes.IsHighlighter = false;
-                drawingAttributes.StylusTip = StylusTip.Ellipse;
+                
+                // 保持之前的笔类型状态，而不是强制重置
+                if (!wasHighlighter)
+                {
+                    penType = 0;
+                    drawingAttributes.IsHighlighter = false;
+                    drawingAttributes.StylusTip = StylusTip.Ellipse;
+                }
+                // 如果之前是荧光笔模式，则保持荧光笔属性
+                else if (penType == 1)
+                {
+                    drawingAttributes.IsHighlighter = true;
+                    drawingAttributes.StylusTip = StylusTip.Rectangle;
+                    drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                    drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                }
 
                 ColorSwitchCheck();
                 HideSubPanels("pen", true);
@@ -1742,13 +1803,26 @@ namespace Ink_Canvas
                     // 修复：从线擦切换到批注时，确保正确重置状态
                     if (forceEraser)
                     {
-                        // 从橡皮擦模式切换过来，重置为默认笔模式
+                        // 从橡皮擦模式切换过来，保持之前的笔类型状态
                         forceEraser = false;
                         forcePointEraser = false;
                         drawingShapeMode = 0;
-                        penType = 0;
-                        drawingAttributes.IsHighlighter = false;
-                        drawingAttributes.StylusTip = StylusTip.Ellipse;
+                        
+                        // 保持之前的笔类型状态，而不是强制重置
+                        if (!wasHighlighter)
+                        {
+                            penType = 0;
+                            drawingAttributes.IsHighlighter = false;
+                            drawingAttributes.StylusTip = StylusTip.Ellipse;
+                        }
+                        // 如果之前是荧光笔模式，则保持荧光笔属性
+                        else if (penType == 1)
+                        {
+                            drawingAttributes.IsHighlighter = true;
+                            drawingAttributes.StylusTip = StylusTip.Rectangle;
+                            drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                            drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                        }
 
                         // 在非白板模式下，从线擦切换到批注时不直接弹出子面板
                         if (currentMode != 1)
@@ -1800,18 +1874,39 @@ namespace Ink_Canvas
                     }
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
 
-                    // 修复：从线擦切换到批注时，重置为默认笔模式（非高光显示）
+                    // 修复：从线擦切换到批注时，保持之前的笔类型状态
                     forceEraser = false;
                     forcePointEraser = false;
                     drawingShapeMode = 0;
-                    penType = 0;
-                    drawingAttributes.IsHighlighter = false;
-                    drawingAttributes.StylusTip = StylusTip.Ellipse;
+                    
+                    // 保持之前的笔类型状态，而不是强制重置
+                    if (!wasHighlighter)
+                    {
+                        penType = 0;
+                        drawingAttributes.IsHighlighter = false;
+                        drawingAttributes.StylusTip = StylusTip.Ellipse;
+                    }
+                    // 如果之前是荧光笔模式，则保持荧光笔属性
+                    else if (penType == 1)
+                    {
+                        drawingAttributes.IsHighlighter = true;
+                        drawingAttributes.StylusTip = StylusTip.Rectangle;
+                        drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                        drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                    }
 
                     ColorSwitchCheck();
                     HideSubPanels("pen", true);
                 }
             }
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
+
+            // 修复：从线擦切换到批注时，保持之前的笔类型状态
+            forceEraser = false;
+            forcePointEraser = false;
+            drawingShapeMode = 0;
         }
 
         private void ColorThemeSwitch_MouseUp(object sender, RoutedEventArgs e)
@@ -1821,7 +1916,7 @@ namespace Ink_Canvas
             CheckColorTheme();
         }
 
-        private void EraserIcon_Click(object sender, RoutedEventArgs e)
+        internal void EraserIcon_Click(object sender, RoutedEventArgs e)
         {
             EnterMultiTouchModeIfNeeded();
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
@@ -1864,6 +1959,9 @@ namespace Ink_Canvas
                         AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
                 }
             }
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
         }
 
         private void BoardEraserIcon_Click(object sender, RoutedEventArgs e)
@@ -1898,6 +1996,9 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
                 }
             }
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
         }
 
         private void EraserIconByStrokes_Click(object sender, RoutedEventArgs e)
@@ -1918,15 +2019,17 @@ namespace Ink_Canvas
             inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
             drawingShapeMode = 0;
 
-            // 修复：切换到线擦时，确保重置笔的状态
-            penType = 0;
-            drawingAttributes.IsHighlighter = false;
-            drawingAttributes.StylusTip = StylusTip.Ellipse;
+            // 修复：切换到线擦时，保存当前的笔类型状态，而不是强制重置
+            // 这样从线擦切换回批注时，可以恢复之前的荧光笔状态
+            // penType 和 drawingAttributes 的状态将在 PenIcon_Click 中根据 wasHighlighter 来恢复
 
             inkCanvas_EditingModeChanged(inkCanvas, null);
             CancelSingleFingerDragMode();
 
             HideSubPanels("eraserByStrokes");
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
         }
 
         private void CursorWithDelIcon_Click(object sender, RoutedEventArgs e)
@@ -1948,7 +2051,7 @@ namespace Ink_Canvas
 
         private void QuickColorOrange_Click(object sender, RoutedEventArgs e)
         {
-            SetQuickColor(Color.FromRgb(255, 165, 0)); // 橙色
+                            SetQuickColor(Color.FromRgb(251, 150, 80)); // 橙色
         }
 
         private void QuickColorYellow_Click(object sender, RoutedEventArgs e)
@@ -1993,12 +2096,70 @@ namespace Ink_Canvas
             drawingAttributes.Color = color;
             inkCanvas.DefaultDrawingAttributes.Color = color;
 
+            // 如果当前是荧光笔模式，同时更新荧光笔颜色和属性
+            if (penType == 1)
+            {
+                // 根据颜色设置对应的荧光笔颜色索引
+                if (color == Colors.White || IsColorSimilar(color, Color.FromRgb(250, 250, 250), 10))
+                {
+                    highlighterColor = 101; // 白色荧光笔
+                }
+                else if (color == Colors.Black)
+                {
+                    highlighterColor = 100; // 黑色荧光笔
+                }
+                else if (color == Colors.Yellow || IsColorSimilar(color, Color.FromRgb(234, 179, 8), 15) ||
+                         IsColorSimilar(color, Color.FromRgb(250, 204, 21), 15) ||
+                         IsColorSimilar(color, Color.FromRgb(253, 224, 71), 15))
+                {
+                    highlighterColor = 103; // 黄色荧光笔
+                }
+                else if (color == Color.FromRgb(255, 165, 0) || color == Color.FromRgb(251, 150, 80) || IsColorSimilar(color, Color.FromRgb(249, 115, 22), 20) ||
+                         IsColorSimilar(color, Color.FromRgb(234, 88, 12), 20) ||
+                         IsColorSimilar(color, Color.FromRgb(251, 146, 60), 20) ||
+                         IsColorSimilar(color, Color.FromRgb(253, 126, 20), 20))
+                {
+                    highlighterColor = 109; // 橙色荧光笔
+                }
+                else if (color == Color.FromRgb(37, 99, 235))
+                {
+                    highlighterColor = 106; // 蓝色荧光笔
+                }
+                else if (color == Colors.Red || IsColorSimilar(color, Color.FromRgb(220, 38, 38), 15) ||
+                         IsColorSimilar(color, Color.FromRgb(239, 68, 68), 15))
+                {
+                    highlighterColor = 102; // 红色荧光笔
+                }
+                else if (color == Colors.Green || IsColorSimilar(color, Color.FromRgb(22, 163, 74), 15))
+                {
+                    highlighterColor = 104; // 绿色荧光笔
+                }
+                else if (color == Color.FromRgb(147, 51, 234))
+                {
+                    highlighterColor = 107; // 紫色荧光笔
+                }
+
+                // 确保荧光笔属性正确设置
+                drawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                drawingAttributes.StylusTip = StylusTip.Rectangle;
+                drawingAttributes.IsHighlighter = true;
+                
+                inkCanvas.DefaultDrawingAttributes.Width = Settings.Canvas.HighlighterWidth / 2;
+                inkCanvas.DefaultDrawingAttributes.Height = Settings.Canvas.HighlighterWidth;
+                inkCanvas.DefaultDrawingAttributes.StylusTip = StylusTip.Rectangle;
+                inkCanvas.DefaultDrawingAttributes.IsHighlighter = true;
+                
+                // 确保荧光笔颜色索引正确更新
+                inkCanvas.DefaultDrawingAttributes.Color = drawingAttributes.Color;
+            }
+
             // 更新颜色状态
             if (currentMode == 0)
             {
                 // 桌面模式
                 if (color == Colors.White) lastDesktopInkColor = 5;
-                else if (color == Color.FromRgb(255, 165, 0)) lastDesktopInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastDesktopInkColor = 4;
                 else if (color == Colors.Black) lastDesktopInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3; // 蓝色
@@ -2010,7 +2171,7 @@ namespace Ink_Canvas
             {
                 // 白板模式
                 if (color == Colors.White) lastBoardInkColor = 5;
-                else if (color == Color.FromRgb(255, 165, 0)) lastBoardInkColor = 8; // 橙色
+                else if (color == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8; // 橙色
                 else if (color == Colors.Yellow) lastBoardInkColor = 4;
                 else if (color == Colors.Black) lastBoardInkColor = 0;
                 else if (color == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3; // 蓝色
@@ -2024,6 +2185,12 @@ namespace Ink_Canvas
 
             // 更新颜色显示
             ColorSwitchCheck();
+            
+            // 如果当前是荧光笔模式，调用ColorSwitchCheck确保颜色索引正确更新
+            if (penType == 1)
+            {
+                ColorSwitchCheck();
+            }
         }
 
         private void UpdateQuickColorPaletteIndicator(Color selectedColor)
@@ -2047,50 +2214,55 @@ namespace Ink_Canvas
             QuickColorGreenCheckSingle.Visibility = Visibility.Collapsed;
 
             // 显示当前选中颜色的check图标
-            if (IsColorSimilar(selectedColor, Colors.White, 10) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), 10))
+            // 在荧光笔模式下，使用更宽松的颜色匹配
+            int tolerance = (penType == 1) ? 25 : 15; // 荧光笔模式使用更大的容差
+            
+            if (IsColorSimilar(selectedColor, Colors.White, tolerance) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), tolerance))
             {
                 QuickColorWhiteCheck.Visibility = Visibility.Visible;
                 QuickColorWhiteCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Colors.Black, 10))
+            else if (IsColorSimilar(selectedColor, Colors.Black, tolerance))
             {
                 QuickColorBlackCheck.Visibility = Visibility.Visible;
                 QuickColorBlackCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Colors.Yellow, 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(250, 204, 21), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), 15))
+            else if (IsColorSimilar(selectedColor, Colors.Yellow, tolerance) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(250, 204, 21), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), tolerance))
             {
                 QuickColorYellowCheck.Visibility = Visibility.Visible;
                 QuickColorYellowCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), 15))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), tolerance) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(251, 150, 80), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(249, 115, 22), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(234, 88, 12), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(251, 146, 60), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(253, 126, 20), tolerance))
             {
                 QuickColorOrangeCheck.Visibility = Visibility.Visible;
                 QuickColorOrangeCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), 15))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), tolerance))
             {
                 QuickColorBlueCheck.Visibility = Visibility.Visible;
                 // 单行显示模式没有蓝色，所以不设置单行的check
             }
-            else if (IsColorSimilar(selectedColor, Colors.Red, 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), 15) ||
-                     IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), 15))
+            else if (IsColorSimilar(selectedColor, Colors.Red, tolerance) || 
+                     IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), tolerance) ||
+                     IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), tolerance))
             {
                 QuickColorRedCheck.Visibility = Visibility.Visible;
                 QuickColorRedCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Colors.Green, 15) || 
-                     IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), 15))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), tolerance))
             {
                 QuickColorGreenCheck.Visibility = Visibility.Visible;
                 QuickColorGreenCheckSingle.Visibility = Visibility.Visible;
             }
-            else if (IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), 15))
+            else if (IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), tolerance))
             {
                 QuickColorPurpleCheck.Visibility = Visibility.Visible;
                 // 单行显示模式没有紫色，所以不设置单行的check
@@ -2364,6 +2536,11 @@ namespace Ink_Canvas
 
                     DeselectUIElement();
 
+                    // 在PPT模式下隐藏手势面板和手势按钮
+                    AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                    AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+
                     SaveStrokes(true);
                     ClearStrokes(true);
                     RestoreStrokes(true);
@@ -2408,6 +2585,11 @@ namespace Ink_Canvas
 
                         // 取消任何UI元素的选择
                         DeselectUIElement();
+
+                        // 在PPT模式下隐藏手势面板和手势按钮
+                        AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                        AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                        EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
 
                         SaveStrokes();
                         ClearStrokes(true);
@@ -2906,15 +3088,6 @@ namespace Ink_Canvas
                 // 设置高光位置
                 FloatingbarSelectionBG.Visibility = Visibility.Visible;
                 System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, position);
-                
-                // 详细的调试信息
-                string debugInfo = $"设置高光位置: {mode} -> {position:F2}, " +
-                                   $"高光宽度: {actualHighlightWidth:F2}, " +
-                                   $"快捷调色盘: {quickColorPaletteMode}, 宽度: {quickColorPaletteWidth:F2}, 总宽度: {quickColorPaletteTotalWidth:F2}, " +
-                                   $"按钮宽度: cursor={cursorWidth:F2}, pen={penWidth:F2}, delete={deleteWidth:F2}, " +
-                                   $"eraser={eraserWidth:F2}, eraserByStrokes={eraserByStrokesWidth:F2}, select={selectWidth:F2}";
-                
-                LogHelper.WriteLogToFile(debugInfo, LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {

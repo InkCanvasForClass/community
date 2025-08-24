@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Application = System.Windows.Application;
 using File = System.IO.File;
 using MessageBox = System.Windows.MessageBox;
@@ -80,12 +81,24 @@ namespace Ink_Canvas
         private bool isPresentationHaveBlackSpace;
         private string pptName;
         private bool _isPptClickingBtnTurned;
+
+        // 长按翻页相关字段
+        private DispatcherTimer _longPressTimer;
+        private bool _isLongPressActive = false;
+        private bool _isLongPressNext = true; // true为下一页，false为上一页
+        private const int LongPressDelay = 50; // 长按延迟时间（毫秒）
+        private const int LongPressInterval = 50; // 长按翻页间隔（毫秒）
         #endregion
 
         #region PPT Managers
         private PPTManager _pptManager;
         private PPTInkManager _pptInkManager;
         private PPTUIManager _pptUIManager;
+
+        /// <summary>
+        /// 获取PPT管理器实例（供UI管理器使用）
+        /// </summary>
+        public PPTManager PPTManager => _pptManager;
         #endregion
 
         #region PPT Manager Initialization
@@ -93,6 +106,9 @@ namespace Ink_Canvas
         {
             try
             {
+                // 初始化长按定时器
+                InitializeLongPressTimer();
+
                 // 初始化PPT管理器
                 _pptManager = new PPTManager();
                 _pptManager.IsSupportWPS = Settings.PowerPointSettings.IsSupportWPS;
@@ -104,6 +120,7 @@ namespace Ink_Canvas
                 _pptManager.SlideShowEnd += OnPPTSlideShowEnd;
                 _pptManager.PresentationOpen += OnPPTPresentationOpen;
                 _pptManager.PresentationClose += OnPPTPresentationClose;
+                _pptManager.SlideShowStateChanged += OnPPTSlideShowStateChanged;
 
                 // 初始化墨迹管理器
                 _pptInkManager = new PPTInkManager();
@@ -118,7 +135,10 @@ namespace Ink_Canvas
                 _pptUIManager.PPTBButtonsOption = Settings.PowerPointSettings.PPTBButtonsOption;
                 _pptUIManager.PPTLSButtonPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
                 _pptUIManager.PPTRSButtonPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
+                _pptUIManager.PPTLBButtonPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
+                _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
                 _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
+                _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
 
                 LogHelper.WriteLogToFile("PPT管理器初始化完成", LogHelper.LogType.Event);
             }
@@ -149,6 +169,8 @@ namespace Ink_Canvas
             {
                 _pptManager?.Dispose();
                 _pptInkManager?.Dispose();
+                _longPressTimer?.Stop();
+                _longPressTimer = null;
                 _pptManager = null;
                 _pptInkManager = null;
                 _pptUIManager = null;
@@ -157,6 +179,60 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"释放PPT管理器失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 初始化长按定时器
+        /// </summary>
+        private void InitializeLongPressTimer()
+        {
+            _longPressTimer = new DispatcherTimer();
+            _longPressTimer.Interval = TimeSpan.FromMilliseconds(LongPressDelay);
+            _longPressTimer.Tick += OnLongPressTimerTick;
+        }
+
+        /// <summary>
+        /// 启动长按检测
+        /// </summary>
+        /// <param name="sender">触发事件的控件</param>
+        /// <param name="isNext">是否为下一页按钮</param>
+        private void StartLongPressDetection(object sender, bool isNext)
+        {
+            if (!Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn) return;
+
+            _isLongPressNext = isNext;
+            _isLongPressActive = false;
+            _longPressTimer?.Start();
+        }
+
+        /// <summary>
+        /// 停止长按检测
+        /// </summary>
+        private void StopLongPressDetection()
+        {
+            _longPressTimer?.Stop();
+            _isLongPressActive = false;
+        }
+
+        /// <summary>
+        /// 长按定时器事件处理
+        /// </summary>
+        private void OnLongPressTimerTick(object sender, EventArgs e)
+        {
+            if (!Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn) return;
+
+            _isLongPressActive = true;
+            _longPressTimer.Interval = TimeSpan.FromMilliseconds(LongPressInterval);
+
+            // 执行翻页
+            if (_isLongPressNext)
+            {
+                BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+            }
+            else
+            {
+                BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
             }
         }
         #endregion
@@ -194,6 +270,15 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    // 在初始化墨迹管理器之前，先清理画布上的所有墨迹
+                    ClearStrokes(true);
+                    
+                    // 清理备份历史记录，防止旧演示文稿的墨迹影响新演示文稿
+                    if (TimeMachineHistories != null && TimeMachineHistories.Length > 0)
+                    {
+                        TimeMachineHistories[0] = null;
+                    }
+                    
                     // 初始化墨迹管理器
                     _pptInkManager?.InitializePresentation(pres);
 
@@ -213,6 +298,8 @@ namespace Ink_Canvas
                     }
 
                     _pptUIManager?.UpdateConnectionStatus(true);
+                    
+                    LogHelper.WriteLogToFile($"已打开新演示文稿: {pres.Name}，墨迹状态已清理", LogHelper.LogType.Event);
                 });
             }
             catch (Exception ex)
@@ -239,6 +326,27 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"处理演示文稿关闭事件失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void OnPPTSlideShowStateChanged(bool isInSlideShow)
+        {
+            try
+            {
+                Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    // 通知UI管理器放映状态变化
+                    _pptUIManager?.OnSlideShowStateChanged(isInSlideShow);
+
+                    if (!isInSlideShow)
+                    {
+                        LogHelper.WriteLogToFile("PPT放映状态变化：退出放映模式", LogHelper.LogType.Trace);
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理PPT放映状态变化失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
@@ -291,6 +399,11 @@ namespace Ink_Canvas
                     }
 
                     BorderFloatingBarMainControls.Visibility = Visibility.Visible;
+
+                    // 在PPT模式下隐藏手势面板和手势按钮
+                    AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                    AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
 
                     if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
                         !Settings.Automation.IsAutoFoldInPPTSlideShow)
@@ -394,6 +507,28 @@ namespace Ink_Canvas
                         // 注意：这里只清空索引0的备份，不影响白板页面的墨迹（索引1及以上）
                         TimeMachineHistories[0] = null;
 
+                        // 退出PPT模式时恢复手势面板和手势按钮的显示状态
+                        if (Settings.Gesture.IsEnableTwoFingerGesture && ToggleSwitchEnableMultiTouchMode.IsOn)
+                        {
+                            // 根据手势设置决定是否显示手势面板和手势按钮
+                            CheckEnableTwoFingerGestureBtnVisibility(true);
+                        }
+                        else
+                        {
+                            // 如果手势功能未启用，确保手势按钮保持隐藏
+                            EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                        }
+
+                        // 退出PPT模式时隐藏快捷调色盘
+                        if (QuickColorPalettePanel != null)
+                        {
+                            QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                        }
+                        if (QuickColorPaletteSingleRowPanel != null)
+                        {
+                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
+                        }
+
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
                             BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
                     }
@@ -406,6 +541,9 @@ namespace Ink_Canvas
                 await Task.Delay(150);
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    // 强制重新计算浮动栏位置，确保在退出PPT模式后正确复位
+                    // 先调用桌面模式的复位方法，然后调用通用的位置计算方法
+                    PureViewboxFloatingBarMarginAnimationInDesktopMode();
                     ViewboxFloatingBarMarginAnimation(100, true);
                 });
             }
@@ -977,6 +1115,12 @@ namespace Ink_Canvas
             {
                 PPTRBPreviousButtonFeedbackBorder.Opacity = 0.15;
             }
+
+            // 启动长按检测
+            if (Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn)
+            {
+                StartLongPressDetection(sender, false);
+            }
         }
         private void GridPPTControlPrevious_MouseLeave(object sender, MouseEventArgs e)
         {
@@ -997,6 +1141,9 @@ namespace Ink_Canvas
             {
                 PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
             }
+
+            // 停止长按检测
+            StopLongPressDetection();
         }
         private void GridPPTControlPrevious_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -1017,6 +1164,10 @@ namespace Ink_Canvas
             {
                 PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
             }
+
+            // 停止长按检测
+            StopLongPressDetection();
+
             BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
         }
 
@@ -1040,6 +1191,12 @@ namespace Ink_Canvas
             {
                 PPTRBNextButtonFeedbackBorder.Opacity = 0.15;
             }
+
+            // 启动长按检测
+            if (Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn)
+            {
+                StartLongPressDetection(sender, true);
+            }
         }
         private void GridPPTControlNext_MouseLeave(object sender, MouseEventArgs e)
         {
@@ -1060,6 +1217,9 @@ namespace Ink_Canvas
             {
                 PPTRBNextButtonFeedbackBorder.Opacity = 0;
             }
+
+            // 停止长按检测
+            StopLongPressDetection();
         }
         private void GridPPTControlNext_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -1080,6 +1240,10 @@ namespace Ink_Canvas
             {
                 PPTRBNextButtonFeedbackBorder.Opacity = 0;
             }
+
+            // 停止长按检测
+            StopLongPressDetection();
+
             BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
         }
 

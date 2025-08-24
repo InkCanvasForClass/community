@@ -56,6 +56,33 @@ namespace Ink_Canvas
 
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
         {
+            // 检查是否启用墨迹渐隐功能
+            if (Settings.Canvas.EnableInkFade)
+            {
+                // 获取墨迹的起点和终点
+                var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
+                var endPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint() : new Point();
+                
+                // 从InkCanvas中移除墨迹，因为我们要用渐隐管理器来管理它
+                if (inkCanvas.Strokes.Contains(e.Stroke))
+                {
+                    inkCanvas.Strokes.Remove(e.Stroke);
+                }
+                
+                // 添加到墨迹渐隐管理器
+                if (_inkFadeManager != null)
+                {
+                    _inkFadeManager.AddFadingStroke(e.Stroke, startPoint, endPoint);
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("StrokeCollected: 墨迹渐隐管理器为空，无法添加墨迹", LogHelper.LogType.Error);
+                }
+                
+                // 墨迹渐隐模式下不参与墨迹纠正和其他处理，直接返回
+                return;
+            }
+            
             // 标记是否进行了直线拉直
             bool wasStraightened = false;
 

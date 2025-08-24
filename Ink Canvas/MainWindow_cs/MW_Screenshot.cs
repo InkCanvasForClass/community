@@ -42,7 +42,7 @@ namespace Ink_Canvas
                 SaveInkCanvasStrokes(false);
         }
 
-        private void SaveScreenShotToDesktop()
+        internal void SaveScreenShotToDesktop()
         {
             var desktopPath = Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),

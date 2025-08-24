@@ -1,5 +1,9 @@
 ﻿using System.Windows;
 using System.Windows.Input;
+using System.Diagnostics;
+using System;
+using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Ink_Canvas
 {
@@ -8,19 +12,36 @@ namespace Ink_Canvas
         private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (StackPanelPPTControls.Visibility != Visibility.Visible || currentMode != 0) return;
+            
+            // 直接发送翻页请求到PPT放映软件，不通过软件处理
             if (e.Delta >= 120)
-                BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
-            else if (e.Delta <= -120) BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+            {
+                // 上一页 - 发送PageUp键到PPT放映窗口
+                SendKeyToPPTSlideShow(true);
+            }
+            else if (e.Delta <= -120)
+            {
+                // 下一页 - 发送PageDown键到PPT放映窗口
+                SendKeyToPPTSlideShow(false);
+            }
         }
 
         private void Main_Grid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (StackPanelPPTControls.Visibility != Visibility.Visible || currentMode != 0) return;
 
+            // 直接发送翻页请求到PPT放映软件，不通过软件处理
             if (e.Key == Key.Down || e.Key == Key.PageDown || e.Key == Key.Right || e.Key == Key.N ||
-                e.Key == Key.Space) BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
-            if (e.Key == Key.Up || e.Key == Key.PageUp || e.Key == Key.Left || e.Key == Key.P)
-                BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+                e.Key == Key.Space)
+            {
+                e.Handled = true; // 阻止事件继续传播
+                SendKeyToPPTSlideShow(false); // 下一页
+            }
+            else if (e.Key == Key.Up || e.Key == Key.PageUp || e.Key == Key.Left || e.Key == Key.P)
+            {
+                e.Handled = true; // 阻止事件继续传播
+                SendKeyToPPTSlideShow(true); // 上一页
+            }
         }
 
         private void Window_KeyDown(object sender, KeyEventArgs e)
@@ -57,7 +78,7 @@ namespace Ink_Canvas
         }
 
 
-        private void KeyExit(object sender, ExecutedRoutedEventArgs e)
+        internal void KeyExit(object sender, ExecutedRoutedEventArgs e)
         {
             if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }

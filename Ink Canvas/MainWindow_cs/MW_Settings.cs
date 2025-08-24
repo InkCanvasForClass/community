@@ -511,6 +511,13 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn = ToggleSwitchEnablePPTButtonLongPressPageTurn.IsOn;
+            SaveSettingsToFile();
+        }
+
         private void CheckboxEnableLBPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -728,6 +735,53 @@ namespace Ink_Canvas
                 PPTBtnRSMinusBtn.IsEnabled = true;
                 PPTBtnRSMinusBtn.Opacity = 1;
             }
+
+            // 底部按钮滑块状态管理
+            if (PPTButtonLBPositionValueSlider.Value <= -500 || PPTButtonLBPositionValueSlider.Value >= 500)
+            {
+                if (PPTButtonLBPositionValueSlider.Value >= 500)
+                {
+                    PPTBtnLBPlusBtn.IsEnabled = false;
+                    PPTBtnLBPlusBtn.Opacity = 0.5;
+                    PPTButtonLBPositionValueSlider.Value = 500;
+                }
+                else if (PPTButtonLBPositionValueSlider.Value <= -500)
+                {
+                    PPTBtnLBMinusBtn.IsEnabled = false;
+                    PPTBtnLBMinusBtn.Opacity = 0.5;
+                    PPTButtonLBPositionValueSlider.Value = -500;
+                }
+            }
+            else
+            {
+                PPTBtnLBPlusBtn.IsEnabled = true;
+                PPTBtnLBPlusBtn.Opacity = 1;
+                PPTBtnLBMinusBtn.IsEnabled = true;
+                PPTBtnLBMinusBtn.Opacity = 1;
+            }
+
+            if (PPTButtonRBPositionValueSlider.Value <= -500 || PPTButtonRBPositionValueSlider.Value >= 500)
+            {
+                if (PPTButtonRBPositionValueSlider.Value >= 500)
+                {
+                    PPTBtnRBPlusBtn.IsEnabled = false;
+                    PPTBtnRBPlusBtn.Opacity = 0.5;
+                    PPTButtonRBPositionValueSlider.Value = 500;
+                }
+                else if (PPTButtonRBPositionValueSlider.Value <= -500)
+                {
+                    PPTBtnRBMinusBtn.IsEnabled = false;
+                    PPTBtnRBMinusBtn.Opacity = 0.5;
+                    PPTButtonRBPositionValueSlider.Value = -500;
+                }
+            }
+            else
+            {
+                PPTBtnRBPlusBtn.IsEnabled = true;
+                PPTBtnRBPlusBtn.Opacity = 1;
+                PPTBtnRBMinusBtn.IsEnabled = true;
+                PPTBtnRBMinusBtn.Opacity = 1;
+            }
         }
 
         private void PPTBtnLSPlusBtn_Clicked(object sender, RoutedEventArgs e)
@@ -834,6 +888,10 @@ namespace Ink_Canvas
                 _pptUIManager.PPTBButtonsOption = Settings.PowerPointSettings.PPTBButtonsOption;
                 _pptUIManager.PPTLSButtonPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
                 _pptUIManager.PPTRSButtonPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
+                _pptUIManager.PPTLBButtonPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
+                _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
+                _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
+                _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
                 _pptUIManager.UpdateNavigationPanelsVisibility();
                 _pptUIManager.UpdateNavigationButtonStyles();
             }
@@ -922,6 +980,9 @@ namespace Ink_Canvas
 
             PPTBtnPreviewRSTransform.Y = -(Settings.PowerPointSettings.PPTRSButtonPosition * 0.5);
             PPTBtnPreviewLSTransform.Y = -(Settings.PowerPointSettings.PPTLSButtonPosition * 0.5);
+            
+            PPTBtnPreviewLBTransform.X = -(Settings.PowerPointSettings.PPTLBButtonPosition * 0.5);
+            PPTBtnPreviewRBTransform.X = -(Settings.PowerPointSettings.PPTRBButtonPosition * 0.5);
         }
 
         private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
@@ -2344,74 +2405,146 @@ namespace Ink_Canvas
 
         #region 浮动栏按钮显示控制
 
-        private void ToggleSwitchShowShapeButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowShapeButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowShapeButton = ToggleSwitchShowShapeButton.IsOn;
+            Settings.Appearance.IsShowShapeButton = CheckBoxShowShapeButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowUndoButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowShapeButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowUndoButton = ToggleSwitchShowUndoButton.IsOn;
+            Settings.Appearance.IsShowShapeButton = CheckBoxShowShapeButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowRedoButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowUndoButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowRedoButton = ToggleSwitchShowRedoButton.IsOn;
+            Settings.Appearance.IsShowUndoButton = CheckBoxShowUndoButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowClearButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowUndoButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowClearButton = ToggleSwitchShowClearButton.IsOn;
+            Settings.Appearance.IsShowUndoButton = CheckBoxShowUndoButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowWhiteboardButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowRedoButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowWhiteboardButton = ToggleSwitchShowWhiteboardButton.IsOn;
+            Settings.Appearance.IsShowRedoButton = CheckBoxShowRedoButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowRedoButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowRedoButton = CheckBoxShowRedoButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowClearButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowClearButton = CheckBoxShowClearButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowClearButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowClearButton = CheckBoxShowClearButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowWhiteboardButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowWhiteboardButton = CheckBoxShowWhiteboardButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowWhiteboardButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowWhiteboardButton = CheckBoxShowWhiteboardButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
         
-        private void ToggleSwitchShowLassoSelectButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowLassoSelectButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowLassoSelectButton = ToggleSwitchShowLassoSelectButton.IsOn;
+            Settings.Appearance.IsShowLassoSelectButton = CheckBoxShowLassoSelectButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowClearAndMouseButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowLassoSelectButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowClearAndMouseButton = ToggleSwitchShowClearAndMouseButton.IsOn;
+            Settings.Appearance.IsShowLassoSelectButton = CheckBoxShowLassoSelectButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowHideButton_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowClearAndMouseButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowHideButton = ToggleSwitchShowHideButton.IsOn;
+            Settings.Appearance.IsShowClearAndMouseButton = CheckBoxShowClearAndMouseButton.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchShowQuickColorPalette_Toggled(object sender, RoutedEventArgs e)
+        private void CheckBoxShowClearAndMouseButton_Unchecked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.Appearance.IsShowQuickColorPalette = ToggleSwitchShowQuickColorPalette.IsOn;
+            Settings.Appearance.IsShowClearAndMouseButton = CheckBoxShowClearAndMouseButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowHideButton_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowHideButton = CheckBoxShowHideButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowHideButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowHideButton = CheckBoxShowHideButton.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowQuickColorPalette_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowQuickColorPalette = CheckBoxShowQuickColorPalette.IsChecked ?? false;
+            UpdateFloatingBarButtonsVisibility();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxShowQuickColorPalette_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.IsShowQuickColorPalette = CheckBoxShowQuickColorPalette.IsChecked ?? false;
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
@@ -2797,6 +2930,109 @@ namespace Ink_Canvas
             Settings.Canvas.ShowCircleCenter = ToggleSwitchShowCircleCenter.IsOn;
             SaveSettingsToFile();
         }
+
+        #region 底部按钮水平位置控制
+
+        private void PPTButtonLBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
+            UpdatePPTBtnSlidersStatus();
+            UpdatePPTUIManagerSettings();
+            SliderDelayAction.DebounceAction(2000, null, SaveSettingsToFile);
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTButtonRBPositionValueSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
+            UpdatePPTBtnSlidersStatus();
+            UpdatePPTUIManagerSettings();
+            SliderDelayAction.DebounceAction(2000, null, SaveSettingsToFile);
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnLBPlusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonLBPositionValueSlider.Value++;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnLBMinusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonLBPositionValueSlider.Value--;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnLBSyncBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonRBPositionValueSlider.Value = PPTButtonLBPositionValueSlider.Value;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonLBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnLBResetBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonLBPositionValueSlider.Value = 0;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTLBButtonPosition = 0;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnRBPlusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonRBPositionValueSlider.Value++;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnRBMinusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonRBPositionValueSlider.Value--;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTRBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnRBSyncBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonLBPositionValueSlider.Value = PPTButtonRBPositionValueSlider.Value;
+            UpdatePPTBtnSlidersStatus();
+            Settings.PowerPointSettings.PPTLBButtonPosition = (int)PPTButtonRBPositionValueSlider.Value;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTBtnRBResetBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTButtonRBPositionValueSlider.Value = 0;
+            Settings.PowerPointSettings.PPTRBButtonPosition = 0;
+            SaveSettingsToFile();
+            UpdatePPTBtnPreview();
+        }
+
+        #endregion
 
 
     }

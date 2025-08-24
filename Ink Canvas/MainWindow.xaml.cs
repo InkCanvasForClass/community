@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -41,6 +42,12 @@ namespace Ink_Canvas
         private int currentPageIndex;
         private System.Windows.Controls.Canvas currentCanvas;
         private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup;
+        
+        // 全局快捷键管理器
+        private GlobalHotkeyManager _globalHotkeyManager;
+
+        // 墨迹渐隐管理器
+        private InkFadeManager _inkFadeManager;
 
 
 
@@ -151,6 +158,9 @@ namespace Ink_Canvas
 
             // 初始化墨迹平滑管理器
             _inkSmoothingManager = new InkSmoothingManager(Dispatcher);
+
+            // 初始化墨迹渐隐管理器
+            _inkFadeManager = new InkFadeManager(this);
 
             // 注册输入事件
             inkCanvas.PreviewMouseDown += inkCanvas_PreviewMouseDown;
@@ -283,9 +293,15 @@ namespace Ink_Canvas
                     if (StackPanelPPTControls.Visibility == Visibility.Visible)
                     {
                         if (gest.ApplicationGesture == ApplicationGesture.Left)
-                            BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+                        {
+                            // 直接发送翻页请求到PPT放映软件
+                            SendKeyToPPTSlideShow(false); // 下一页
+                        }
                         if (gest.ApplicationGesture == ApplicationGesture.Right)
-                            BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+                        {
+                            // 直接发送翻页请求到PPT放映软件
+                            SendKeyToPPTSlideShow(true); // 上一页
+                        }
                     }
             }
             catch { }
@@ -495,6 +511,12 @@ namespace Ink_Canvas
 
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
+            
+            // 初始化全局快捷键管理器
+            InitializeGlobalHotkeyManager();
+
+            // 初始化墨迹渐隐管理器
+            InitializeInkFadeManager();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -623,6 +645,20 @@ namespace Ink_Canvas
             // 清理剪贴板监控
             CleanupClipboardMonitoring();
             ClipboardNotification.Stop();
+            
+            // 清理全局快捷键管理器
+            if (_globalHotkeyManager != null)
+            {
+                _globalHotkeyManager.Dispose();
+                _globalHotkeyManager = null;
+            }
+
+            // 清理墨迹渐隐管理器
+            if (_inkFadeManager != null)
+            {
+                _inkFadeManager.ClearAllFadingStrokes();
+                _inkFadeManager = null;
+            }
 
             // 停止置顶维护定时器
             StopTopmostMaintenance();
@@ -1067,10 +1103,7 @@ namespace Ink_Canvas
         // 新增：快捷键设置
         private void NavShortcuts_Click(object sender, RoutedEventArgs e)
         {
-            // 切换到快捷键设置页面
-            ShowSettingsSection("shortcuts");
-            // 如果设置部分尚未快捷键
-            MessageBox.Show("设置功能正在开发中", "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+            OpenHotkeySettingsWindow();
         }
 
         private void BtnCloseSettings_Click(object sender, RoutedEventArgs e)
@@ -1641,6 +1674,8 @@ namespace Ink_Canvas
         private static extern bool BringWindowToTop(IntPtr hWnd);
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
         
         private const int GWL_EXSTYLE = -20;
@@ -1702,9 +1737,6 @@ namespace Ink_Canvas
                         // 停止置顶维护定时器
                         StopTopmostMaintenance();
                     }
-                    
-                    // 添加调试日志
-                    LogHelper.WriteLogToFile($"应用窗口置顶: 启用置顶 (无焦点模式: {Settings.Advanced.IsNoFocusMode})", LogHelper.LogType.Trace);
                 }
                 else
                 {
@@ -1801,7 +1833,6 @@ namespace Ink_Canvas
                         SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
                     }
                     
-                    LogHelper.WriteLogToFile("置顶维护: 重新设置窗口置顶", LogHelper.LogType.Trace);
                 }
             }
             catch (Exception ex)
@@ -1958,6 +1989,195 @@ namespace Ink_Canvas
             }
         }
 
+        #endregion
+
+        #region 全局快捷键管理
+        /// <summary>
+        /// 初始化墨迹渐隐管理器
+        /// </summary>
+        private void InitializeInkFadeManager()
+        {
+            try
+            {
+                // 确保墨迹渐隐管理器已初始化
+                if (_inkFadeManager == null)
+                {
+                    _inkFadeManager = new InkFadeManager(this);
+                }
+
+                // 同步设置状态
+                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+
+                LogHelper.WriteLogToFile("墨迹渐隐管理器已初始化", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化墨迹渐隐管理器时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 初始化全局快捷键管理器
+        /// </summary>
+        private void InitializeGlobalHotkeyManager()
+        {
+            try
+            {
+                _globalHotkeyManager = new GlobalHotkeyManager(this);
+                // 不在这里加载快捷键，等待需要时再加载
+                LogHelper.WriteLogToFile("全局快捷键管理器已初始化（未加载快捷键）", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化全局快捷键管理器时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 打开快捷键设置窗口
+        /// </summary>
+        private void OpenHotkeySettingsWindow()
+        {
+            try
+            {
+                if (_globalHotkeyManager == null)
+                {
+                    MessageBox.Show("快捷键管理器尚未初始化，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
+                hotkeySettingsWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"打开快捷键设置窗口时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"打开快捷键设置窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        #endregion
+
+        #region 墨迹渐隐功能
+        /// <summary>
+        /// 墨迹渐隐开关切换事件处理
+        /// </summary>
+        private void ToggleSwitchEnableInkFade_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Settings.Canvas.EnableInkFade = ToggleSwitchEnableInkFade.IsOn;
+                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                
+                // 同步批注子面板中的开关状态
+                if (ToggleSwitchInkFadeInPanel != null)
+                {
+                    ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
+                }
+
+                // 同步普通画笔面板中的开关状态
+                if (ToggleSwitchInkFadeInPanel2 != null)
+                {
+                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                }
+                
+                LogHelper.WriteLogToFile($"墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换墨迹渐隐功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 墨迹渐隐时间滑块值改变事件处理
+        /// </summary>
+        private void InkFadeTimeSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            try
+            {
+                Settings.Canvas.InkFadeTime = (int)e.NewValue;
+                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                LogHelper.WriteLogToFile($"墨迹渐隐时间已更新为 {Settings.Canvas.InkFadeTime}ms", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新墨迹渐隐时间时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+
+
+        /// <summary>
+        /// 批注子面板中墨迹渐隐开关切换事件处理
+        /// </summary>
+        private void ToggleSwitchInkFadeInPanel_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Settings.Canvas.EnableInkFade = ToggleSwitchInkFadeInPanel.IsOn;
+                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                
+                // 同步设置面板中的开关状态
+                if (ToggleSwitchEnableInkFade != null)
+                {
+                    ToggleSwitchEnableInkFade.IsOn = Settings.Canvas.EnableInkFade;
+                }
+
+                // 同步普通画笔面板中的开关状态
+                if (ToggleSwitchInkFadeInPanel2 != null)
+                {
+                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                }
+                
+                LogHelper.WriteLogToFile($"批注子面板中墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"批注子面板中切换墨迹渐隐功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        #endregion
+
+        #region PPT翻页直接传递
+        /// <summary>
+        /// 直接发送翻页请求到PPT放映软件，让PPT软件处理翻页
+        /// </summary>
+        /// <param name="isPrevious">是否为上一页</param>
+        private void SendKeyToPPTSlideShow(bool isPrevious)
+        {
+            try
+            {
+                // 查找PPT放映窗口并发送按键
+                var pptWindows = Process.GetProcessesByName("POWERPNT");
+                var wpsWindows = Process.GetProcessesByName("wpp");
+                
+                foreach (var process in pptWindows.Concat(wpsWindows))
+                {
+                    if (process.MainWindowHandle != IntPtr.Zero)
+                    {
+                        // 激活PPT窗口
+                        SetForegroundWindow(process.MainWindowHandle);
+                        
+                        // 发送翻页按键消息
+                        int keyCode = isPrevious ? 0x21 : 0x22; // VK_PRIOR : VK_NEXT
+                        
+                        // 发送按键按下和释放消息
+                        PostMessage(process.MainWindowHandle, 0x0100, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYDOWN
+                        PostMessage(process.MainWindowHandle, 0x0101, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYUP
+                        
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // 如果直接发送失败，回退到原来的方法
+                if (isPrevious)
+                    BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+                else
+                    BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+            }
+        }
         #endregion
     }
 }

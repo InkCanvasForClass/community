@@ -92,6 +92,13 @@ namespace Ink_Canvas
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
         public bool ShowCircleCenter { get; set; } = false; 
+
+        // 墨迹渐隐功能设置
+        [JsonProperty("enableInkFade")]
+        public bool EnableInkFade { get; set; } = false; // 是否启用墨迹渐隐功能
+        [JsonProperty("inkFadeTime")]
+        public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
+        
     }
 
     public enum OptionalOperation
@@ -245,6 +252,14 @@ namespace Ink_Canvas
         [JsonProperty("pptRSButtonPosition")]
         public int PPTRSButtonPosition { get; set; }
 
+        // 0居中，+就是往右，-就是往左
+        [JsonProperty("pptLBButtonPosition")]
+        public int PPTLBButtonPosition { get; set; }
+
+        // 0居中，+就是往右，-就是往左
+        [JsonProperty("pptRBButtonPosition")]
+        public int PPTRBButtonPosition { get; set; }
+
         [JsonProperty("pptSButtonsOption")]
         public int PPTSButtonsOption { get; set; } = 221;
 
@@ -253,6 +268,9 @@ namespace Ink_Canvas
 
         [JsonProperty("enablePPTButtonPageClickable")]
         public bool EnablePPTButtonPageClickable { get; set; } = true;
+
+        [JsonProperty("enablePPTButtonLongPressPageTurn")]
+        public bool EnablePPTButtonLongPressPageTurn { get; set; } = true;
 
         // -- new --
 

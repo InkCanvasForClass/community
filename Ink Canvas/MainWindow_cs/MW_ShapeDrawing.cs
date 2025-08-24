@@ -172,8 +172,8 @@ namespace Ink_Canvas
 
             return Task.FromResult(true);
         }
-        
-        private async void BtnDrawLine_Click(object sender, MouseButtonEventArgs e)
+
+        internal async void BtnDrawLine_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(1);

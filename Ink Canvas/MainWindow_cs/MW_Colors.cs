@@ -28,6 +28,11 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
+                    
+                    // 在PPT模式下隐藏手势面板和手势按钮
+                    AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                    AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
                 }
 
                 BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
@@ -595,6 +600,9 @@ namespace Ink_Canvas
             drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
             drawingAttributes.StylusTip = StylusTip.Rectangle;
             drawingAttributes.IsHighlighter = true;
+            
+            // 确保荧光笔模式切换后正确更新颜色和快捷调色板指示器
+            ColorSwitchCheck();
         }
 
         private void BtnColorBlack_Click(object sender, RoutedEventArgs e)

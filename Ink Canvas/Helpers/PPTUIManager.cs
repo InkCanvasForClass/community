@@ -18,7 +18,10 @@ namespace Ink_Canvas.Helpers
         public int PPTBButtonsOption { get; set; } = 121;
         public int PPTLSButtonPosition { get; set; } = 0;
         public int PPTRSButtonPosition { get; set; } = 0;
+        public int PPTLBButtonPosition { get; set; } = 0;
+        public int PPTRBButtonPosition { get; set; } = 0;
         public bool EnablePPTButtonPageClickable { get; set; } = true;
+        public bool EnablePPTButtonLongPressPageTurn { get; set; } = true;
         #endregion
 
         #region Private Fields
@@ -121,6 +124,29 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 处理PPT放映状态变化
+        /// </summary>
+        public void OnSlideShowStateChanged(bool isInSlideShow)
+        {
+            _dispatcher.InvokeAsync(() =>
+            {
+                try
+                {
+                    if (!isInSlideShow)
+                    {
+                        // 如果不在放映模式，隐藏所有导航面板
+                        HideAllNavigationPanels();
+                        LogHelper.WriteLogToFile("PPT放映状态变化：隐藏导航面板", LogHelper.LogType.Trace);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"处理PPT放映状态变化失败: {ex}", LogHelper.LogType.Error);
+                }
+            });
+        }
+
+        /// <summary>
         /// 更新导航面板显示状态
         /// </summary>
         public void UpdateNavigationPanelsVisibility()
@@ -130,7 +156,10 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     // 检查是否应该显示PPT按钮
-                    bool shouldShowButtons = ShowPPTButton && _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
+                    // 不仅要检查按钮设置，还要确保确实在PPT放映模式下
+                    bool shouldShowButtons = ShowPPTButton && 
+                                          _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                                          _mainWindow.PPTManager?.IsInSlideShow == true;
 
                     if (!shouldShowButtons)
                     {
@@ -141,6 +170,10 @@ namespace Ink_Canvas.Helpers
                     // 设置侧边按钮位置
                     _mainWindow.LeftSidePanelForPPTNavigation.Margin = new Thickness(0, 0, 0, PPTLSButtonPosition * 2);
                     _mainWindow.RightSidePanelForPPTNavigation.Margin = new Thickness(0, 0, 0, PPTRSButtonPosition * 2);
+
+                    // 设置底部按钮水平位置
+                    _mainWindow.LeftBottomPanelForPPTNavigation.Margin = new Thickness(6 + PPTLBButtonPosition, 0, 0, 6);
+                    _mainWindow.RightBottomPanelForPPTNavigation.Margin = new Thickness(0, 0, 6 + PPTRBButtonPosition, 6);
 
                     // 根据显示选项设置面板可见性
                     var displayOption = PPTButtonsDisplayOption.ToString();

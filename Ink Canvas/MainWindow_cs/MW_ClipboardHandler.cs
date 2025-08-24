@@ -185,7 +185,7 @@ namespace Ink_Canvas
         }
 
         // 处理全局粘贴快捷键
-        private async void HandleGlobalPaste(object sender, ExecutedRoutedEventArgs e)
+        internal async void HandleGlobalPaste(object sender, ExecutedRoutedEventArgs e)
         {
             try
             {

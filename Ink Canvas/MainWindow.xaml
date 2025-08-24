@@ -832,6 +832,27 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchAdvancedBezierSmoothing_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
+                                          StrokeThickness="1" Margin="0,4,0,4" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用墨迹渐隐功能" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableInkFade"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchEnableInkFade_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后墨迹不会绘制到画布上，而是保持湿墨迹状态，根据设置的渐隐时间自动消失" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                         Visibility="{Binding ElementName=ToggleSwitchEnableInkFade, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="墨迹渐隐时间" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider Name="InkFadeTimeSlider" Width="150" Minimum="1000" Maximum="10000" 
+                                                Value="3000" TickFrequency="1000" IsSnapToTickEnabled="True"
+                                                ValueChanged="InkFadeTimeSlider_ValueChanged" />
+                                        <TextBlock Foreground="#fafafa" Text="{Binding ElementName=InkFadeTimeSlider, Path=Value, StringFormat={}{0:0}ms}" 
+                                                   VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
+                                    </ui:SimpleStackPanel>
+
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <!-- 新增：崩溃后操作设置 -->
@@ -1197,16 +1218,16 @@
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示形状按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowShapeButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowShapeButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowShapeButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowShapeButton_Checked" Unchecked="CheckBoxShowShapeButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示撤销按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowUndoButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowUndoButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowUndoButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowUndoButton_Checked" Unchecked="CheckBoxShowUndoButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
@@ -1215,16 +1236,16 @@
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示重做按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowRedoButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowRedoButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowRedoButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowRedoButton_Checked" Unchecked="CheckBoxShowRedoButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示清空按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowClearButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowClearButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowClearButton_Checked" Unchecked="CheckBoxShowClearButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
@@ -1233,16 +1254,16 @@
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示白板按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowWhiteboardButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowWhiteboardButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowWhiteboardButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowWhiteboardButton_Checked" Unchecked="CheckBoxShowWhiteboardButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示隐藏按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowHideButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowHideButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowHideButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowHideButton_Checked" Unchecked="CheckBoxShowHideButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
@@ -1251,16 +1272,16 @@
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示套索选择按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowLassoSelectButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowLassoSelectButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowLassoSelectButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowLassoSelectButton_Checked" Unchecked="CheckBoxShowLassoSelectButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
                                             <TextBlock Foreground="#fafafa" Text="显示清并鼠按钮" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,8,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowClearAndMouseButton"
-                                                             IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowClearAndMouseButton_Toggled" />
+                                            <CheckBox Name="CheckBoxShowClearAndMouseButton"
+                                                      IsChecked="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                      Checked="CheckBoxShowClearAndMouseButton_Checked" Unchecked="CheckBoxShowClearAndMouseButton_Unchecked" />
                                         </ui:SimpleStackPanel>
                                     </ui:SimpleStackPanel>
                                     
@@ -1268,9 +1289,9 @@
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
                                         <TextBlock Foreground="#fafafa" Text="显示快捷调色盘" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,8,0" />
-                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowQuickColorPalette"
-                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
-                                                         Toggled="ToggleSwitchShowQuickColorPalette_Toggled" />
+                                        <CheckBox Name="CheckBoxShowQuickColorPalette"
+                                                  IsChecked="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                  Checked="CheckBoxShowQuickColorPalette_Checked" Unchecked="CheckBoxShowQuickColorPalette_Unchecked" />
                                     </ui:SimpleStackPanel>
                                     
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -1430,9 +1451,21 @@
                                                 </Image.RenderTransform>
                                             </Image>
                                             <Image Name="PPTBtnPreviewLB" Source="Resources/PresentationExample/bottombar-white.png" Height="10"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Left" />
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <TranslateTransform x:Name="PPTBtnPreviewLBTransform"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
                                             <Image Name="PPTBtnPreviewRB" Source="Resources/PresentationExample/bottombar-white.png" Height="12"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right" />
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <TranslateTransform x:Name="PPTBtnPreviewRBTransform"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
                                         </Grid>
                                     </Border>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -1619,6 +1652,161 @@
                                         <TextBlock
                                             Text="# 调大往上偏移，调小往下偏移，修改为0为不偏移，居中放置"
                                             TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                                                                <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#fafafa" Text="左下偏移" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,12,0" />
+                                            <Slider x:Name="PPTButtonLBPositionValueSlider" Minimum="-500"
+                                                    Maximum="500" Width="138" FontFamily="Microsoft YaHei UI"
+                                                    FontSize="20" IsSnapToTickEnabled="True" Value="0"
+                                                    TickFrequency="1"
+                                                    TickPlacement="None" AutoToolTipPlacement="None"
+                                                    ValueChanged="PPTButtonLBPositionValueSlider_ValueChanged" />
+                                            <Button Padding="5" Margin="8,0,0,0" Name="PPTBtnLBPlusBtn"
+                                                    Click="PPTBtnLBPlusBtn_Clicked">
+                                                <Image Width="16" Height="16">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V16 H16 V0 H0 Z">
+                                                                    <GeometryDrawing Brush="#f4f4f5"
+                                                                        Geometry="F0 M16,16z M0,0z M9,1C9,0.447715 8.55229,0 8,0 7.44772,0 7,0.447715 7,1L7,7 1,7C0.447715,7 0,7.55272 0,8 0,8.44728 0.447715,9 1,9L7,9 7,15C7,15.5523 7.44772,16 8,16 8.55229,16 9,15.5523 9,15L9,9 15,9C15.5523,9 16,8.44728 16,8 16,7.55272 15.5523,7 15,7L9,7 9,1z" />
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                            </Button>
+                                            <Button Margin="6,0,0,0" Padding="5" Name="PPTBtnLBMinusBtn"
+                                                    Click="PPTBtnLBMinusBtn_Clicked">
+                                                <Image Width="16" Height="16">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V2 H16 V0 H0 Z">
+                                                                    <GeometryDrawing Brush="#f4f4f5"
+                                                                        Geometry="F0 M16,2z M0,0z M0,1C0,0.447715,0.447715,0,1,0L15,0C15.5523,0 16,0.447715 16,1 16,1.55228 15.5523,2 15,2L1,2C0.447715,2,0,1.55228,0,1z" />
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                            </Button>
+                                            <Button Margin="6,0,0,0" Padding="5" Name="PPTBtnLBSyncBtn"
+                                                    Click="PPTBtnLBSyncBtn_Clicked">
+                                                <Image Width="16" Height="16">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V6 H16 V0 H0 Z">
+                                                                    <DrawingGroup ClipGeometry="M0,0 V6 H16 V0 H0 Z">
+                                                                        <GeometryDrawing Brush="#f4f4f5"
+                                                                            Geometry="F0 M16,6z M0,0z M1,0C0.447715,0 0,0.447715 0,1 0,1.55228 0.447715,2 1,2L15,2C15.5523,2 16,1.55228 16,1 16,0.447715 15.5523,0 15,0L1,0z M1,4C0.447715,4 0,4.44772 0,5 0,5.55228 0.447715,6 1,6L15,6C15.5523,6 16,5.55228 16,5 16,4.44772 15.5523,4 15,4L1,4z" />
+                                                                    </DrawingGroup>
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                            </Button>
+                                            <Button Margin="6,0,0,0" Padding="5" Name="PPTBtnLBResetBtn"
+                                                    Click="PPTBtnLBResetBtn_Clicked">
+                                                <Image Width="16" Height="16">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                    <GeometryDrawing Brush="#f4f4f5"
+                                                                        Geometry="F0 M24,24z M0,0z M12,2.01123C10.5428,2.01123 9.14528,2.5901 8.11488,3.6205 7.08449,4.65089 6.50562,6.04841 6.50562,7.50561L6.50562,16.4944C6.50562,17.9516 7.08449,19.3491 8.11488,20.3795 9.14528,21.4099 10.5428,21.9888 12,21.9888 13.4572,21.9888 14.8547,21.4099 15.8851,20.3795 16.9135,19.3511 17.4922,17.9569 17.4944,16.5027 17.4944,16.4999 17.4944,16.4972 17.4944,16.4944L17.4944,7.50563C17.4944,7.50285 17.4944,7.50007 17.4944,7.4973 17.4922,6.0431 16.9135,4.64893 15.8851,3.6205 14.8547,2.5901 13.4572,2.01123 12,2.01123z M9.5291,5.03471C10.1844,4.37939 11.0732,4.01123 12,4.01123 12.9268,4.01123 13.8156,4.37939 14.4709,5.03471 15.1262,5.69003 15.4944,6.57884 15.4944,7.50561L15.4944,16.4944C15.4944,17.4211 15.1262,18.31 14.4709,18.9653 13.8156,19.6206 12.9268,19.9888 12,19.9888 11.0732,19.9888 10.1844,19.6206 9.5291,18.9653 8.87377,18.31 8.50562,17.4211 8.50562,16.4944L8.50562,7.50561C8.50562,6.57884 8.87377,5.69003 9.5291,5.03471z" />
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                            </Button>
+                                            <TextBlock
+                                                Text="{Binding ElementName=PPTButtonLBPositionValueSlider, Path=Value}"
+                                                VerticalAlignment="Center" FontSize="13"
+                                                Margin="8,0,8,0" />
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#fafafa" Text="右下偏移" VerticalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,12,0" />
+                                            <Slider x:Name="PPTButtonRBPositionValueSlider" Minimum="-500"
+                                                    Maximum="500" Width="138" FontFamily="Microsoft YaHei UI"
+                                                    FontSize="20" IsSnapToTickEnabled="True" Value="0"
+                                                    TickFrequency="1"
+                                                    TickPlacement="None" AutoToolTipPlacement="None"
+                                                    ValueChanged="PPTButtonRBPositionValueSlider_ValueChanged" />
+                                            <Button Padding="5" Margin="8,0,0,0" Name="PPTBtnRBPlusBtn"
+                                                    Click="PPTBtnRBPlusBtn_Clicked">
+                                                <Image Width="16" Height="16">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V16 H16 V0 H0 Z">
+                                                                    <GeometryDrawing Brush="#f4f4f5"
+                                                                        Geometry="F0 M16,16z M0,0z M9,1C9,0.447715 8.55229,0 8,0 7.44772,0 7,0.447715 7,1L7,7 1,7C0.447715,7 0,7.55272 0,8 0,8.44728 0.447715,9 1,9L7,9 7,15C7,15.5523 7.44772,16 8,16 8.55229,16 9,15.5523 9,15L9,9 15,9C15.5523,9 16,8.44728 16,8 16,7.55272 15.5523,7 15,7L9,7 9,1z" />
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                            </Button>
+                                            <Button Margin="6,0,0,0" Padding="5" Name="PPTBtnRBMinusBtn"
+                                                    Click="PPTBtnRBMinusBtn_Clicked">
+                                                <Image Width="16" Height="16">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V2 H16 V0 H0 Z">
+                                                                    <GeometryDrawing Brush="#f4f4f5"
+                                                                        Geometry="F0 M16,2z M0,0z M0,1C0,0.447715,0.447715,0,1,0L15,0C15.5523,0 16,0.447715 16,1 16,1.55228 15.5523,2 15,2L1,2C0.447715,2,0,1.55228,0,1z" />
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                            </Button>
+                                            <Button Margin="6,0,0,0" Padding="5" Name="PPTBtnRBSyncBtn"
+                                                    Click="PPTBtnRBSyncBtn_Clicked">
+                                                <Image Width="16" Height="16">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V6 H16 V0 H0 Z">
+                                                                    <DrawingGroup ClipGeometry="M0,0 V6 H16 V0 H0 Z">
+                                                                        <GeometryDrawing Brush="#f4f4f5"
+                                                                            Geometry="F0 M16,6z M0,0z M1,0C0.447715,0 0,0.447715 0,1 0,1.55228 0.447715,2 1,2L15,2C15.5523,2 16,1.55228 16,1 16,0.447715 15.5523,0 15,0L1,0z M1,4C0.447715,4 0,4.44772 0,5 0,5.55228 0.447715,6 1,6L15,6C15.5523,6 16,5.55228 16,5 16,4.44772 15.5523,4 15,4L1,4z" />
+                                                                    </DrawingGroup>
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                            </Button>
+                                            <Button Margin="6,0,0,0" Padding="5" Name="PPTBtnRBResetBtn"
+                                                    Click="PPTBtnRBResetBtn_Clicked">
+                                                <Image Width="16" Height="16">
+                                                    <Image.Source>
+                                                        <DrawingImage>
+                                                            <DrawingImage.Drawing>
+                                                                <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                                                    <GeometryDrawing Brush="#f4f4f5"
+                                                                        Geometry="F0 M24,24z M0,0z M12,2.01123C10.5428,2.01123 9.14528,2.5901 8.11488,3.6205 7.08449,4.65089 6.50562,6.04841 6.50562,7.50561L6.50562,16.4944C6.50562,17.9516 7.08449,19.3491 8.11488,20.3795 9.14528,21.4099 10.5428,21.9888 12,21.9888 13.4572,21.9888 14.8547,21.4099 15.8851,20.3795 16.9135,19.3511 17.4922,17.9569 17.4944,16.5027 17.4944,16.4999 17.4944,16.4972 17.4944,16.4944L17.4944,7.50563C17.4944,7.50285 17.4944,7.50007 17.4944,7.4973 17.4922,6.0431 16.9135,4.64893 15.8851,3.6205 14.8547,2.5901 13.4572,2.01123 12,2.01123z M9.5291,5.03471C10.1844,4.37939 11.0732,4.01123 12,4.01123 12.9268,4.01123 13.8156,4.37939 14.4709,5.03471 15.1262,5.69003 15.4944,6.57884 15.4944,7.50561L15.4944,16.4944C15.4944,17.4211 15.1262,18.31 14.4709,18.9653 13.8156,19.6206 12.9268,19.9888 12,19.9888 11.0732,19.9888 10.1844,19.6206 9.5291,18.9653 8.87377,18.31 8.50562,17.4211 8.50562,16.4944L8.50562,7.50561C8.50562,6.57884,8.87377,5.69003,9.5291,5.03471z" />
+                                                                </DrawingGroup>
+                                                            </DrawingImage.Drawing>
+                                                        </DrawingImage>
+                                                    </Image.Source>
+                                                </Image>
+                                            </Button>
+                                            <TextBlock
+                                                Text="{Binding ElementName=PPTButtonRBPositionValueSlider, Path=Value}"
+                                                VerticalAlignment="Center" FontSize="13"
+                                                Margin="8,0,16,0" />
+                                        </ui:SimpleStackPanel>
+                                        <TextBlock
+                                            Text="# 调大往右偏移，调小往左偏移，修改为0为不偏移，居中放置"
+                                            TextWrapping="Wrap" Foreground="#a1a1aa" />
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <TextBlock Margin="0,0,24,0" Text="两侧" FontWeight="Bold"
                                                        VerticalAlignment="Center" Foreground="#fafafa"
@@ -1675,6 +1863,19 @@
                                         </ui:SimpleStackPanel>
                                         <TextBlock
                                             Text="# 开启该选项后，点击页码按钮可以唤起PowerPoint自带的网格缩略图视图。WPS不支持该功能，开启也没用。"
+                                            TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <ui:SimpleStackPanel Orientation="Horizontal"
+                                                             HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#fafafa" Text="PPT 翻页按钮长按翻页"
+                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent=""
+                                                             Name="ToggleSwitchEnablePPTButtonLongPressPageTurn"
+                                                             IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled" />
+                                        </ui:SimpleStackPanel>
+                                        <TextBlock
+                                            Text="# 开启该选项后，长按PPT翻页按钮可以连续翻页，提高翻页效率。"
                                             TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     </ui:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
@@ -3860,7 +4061,7 @@
                                     </Border>
                                     <Border>
                                         <Grid Margin="0,5,0,5" Width="0">
-                                            <Grid Name="BoardPenPaletteGrid" Margin="-160,-200,-33,50"
+                                            <Grid Name="BoardPenPaletteGrid" Margin="-160,-200,-53,50"
                                                   RenderTransformOrigin="0,1">
                                                 <Grid.RenderTransform>
                                                     <TransformGroup>
@@ -3874,7 +4075,7 @@
                                                         Background="#fafafa"
                                                         Opacity="1" BorderBrush="#2563eb"
                                                         BorderThickness="1" CornerRadius="8">
-                                                    <ui:SimpleStackPanel>
+                                                    <ui:SimpleStackPanel Margin="0,-20,0,0">
                                                         <Border BorderBrush="#1e3a8a" Height="32"
                                                                 BorderThickness="0,0,0,1"
                                                                 CornerRadius="8,8,0,0" Background="#2563eb"
@@ -3975,57 +4176,69 @@
                                                                  Margin="12,8,12,0" HorizontalAlignment="Center"
                                                                  VerticalAlignment="Center" Stretch="Fill">
                                                             <ui:SimpleStackPanel>
-                                                                <Controls:UniformGrid Columns="2" Width="300"
+                                                                <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                    Height="35" Margin="0,0,0,8">
+                                                                    <Label Content="笔锋" Margin="0,0,6,0"
+                                                                           Foreground="{DynamicResource FloatBarForeground}"
+                                                                           FontSize="16" FontWeight="Bold"
+                                                                           VerticalAlignment="Center" />
+                                                                    <ComboBox Height="30"
+                                                                        VerticalAlignment="Center"
+                                                                        Name="BoardComboBoxPenStyle"
+                                                                        FontFamily="Microsoft YaHei UI"
+                                                                        SelectedIndex="0"
+                                                                        SelectionChanged="ComboBoxPenStyle_SelectionChanged">
+                                                                        <ComboBoxItem Content="基于点集"
+                                                                            FontFamily="Microsoft YaHei UI" />
+                                                                        <ComboBoxItem Content="基于速率"
+                                                                            FontFamily="Microsoft YaHei UI" />
+                                                                        <ComboBoxItem Content="关闭笔锋"
+                                                                            FontFamily="Microsoft YaHei UI" />
+                                                                    </ComboBox>
+                                                                </ui:SimpleStackPanel>
+                                                                <Controls:UniformGrid Columns="3" Width="300"
                                                                     Height="55">
-                                                                    <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                        Height="35">
-                                                                        <Label Content="笔锋" Margin="0,0,6,0"
-                                                                               Foreground="{DynamicResource FloatBarForeground}"
-                                                                               FontSize="16" FontWeight="Bold"
-                                                                               VerticalAlignment="Center" />
-                                                                        <ComboBox Height="30"
-                                                                            VerticalAlignment="Center"
-                                                                            Name="BoardComboBoxPenStyle"
+                                                                    <ui:SimpleStackPanel
+                                                                        x:Name="BoardNibModeSimpleStackPanel"
+                                                                        Orientation="Horizontal" Width="100">
+                                                                        <Label Content="笔尖模式" FontSize="12"
+                                                                            VerticalAlignment="Center" />
+                                                                        <ui:ToggleSwitch
+                                                                            x:Name="BoardToggleSwitchEnableNibMode"
+                                                                            MinWidth="0"
                                                                             FontFamily="Microsoft YaHei UI"
-                                                                            SelectedIndex="0"
-                                                                            SelectionChanged="ComboBoxPenStyle_SelectionChanged">
-                                                                            <ComboBoxItem Content="基于点集"
-                                                                                FontFamily="Microsoft YaHei UI" />
-                                                                            <ComboBoxItem Content="基于速率"
-                                                                                FontFamily="Microsoft YaHei UI" />
-                                                                            <ComboBoxItem Content="关闭笔锋"
-                                                                                FontFamily="Microsoft YaHei UI" />
-                                                                        </ComboBox>
+                                                                            Width="80" Margin="10,0,0,0"
+                                                                            Toggled="ToggleSwitchEnableNibMode_Toggled"
+                                                                            IsOn="True" />
                                                                     </ui:SimpleStackPanel>
-                                                                    <ui:SimpleStackPanel Margin="0,-5,0,-5"
-                                                                        VerticalAlignment="Center">
-                                                                        <ui:SimpleStackPanel
-                                                                            x:Name="BoardNibModeSimpleStackPanel"
-                                                                            Orientation="Horizontal" Width="140">
-                                                                            <Label Content="笔尖模式" FontSize="15"
-                                                                                VerticalAlignment="Center" />
-                                                                            <ui:ToggleSwitch
-                                                                                x:Name="BoardToggleSwitchEnableNibMode"
-                                                                                MinWidth="0"
-                                                                                FontFamily="Microsoft YaHei UI"
-                                                                                Width="70" Margin="10,0,0,0"
-                                                                                Toggled="ToggleSwitchEnableNibMode_Toggled"
-                                                                                IsOn="True" />
-                                                                        </ui:SimpleStackPanel>
-                                                                        <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                            Width="140">
-                                                                            <Label Margin="0,0,10,0" Content="墨迹纠正"
-                                                                                Foreground="{DynamicResource FloatBarForeground}"
-                                                                                FontSize="15"
-                                                                                VerticalAlignment="Center" />
-                                                                            <ui:ToggleSwitch
-                                                                                Foreground="{DynamicResource FloatBarForeground}"
-                                                                                FontFamily="Microsoft YaHei UI"
-                                                                                Width="70"
-                                                                                Toggled="ToggleSwitchEnableInkToShape_Toggled"
-                                                                                MinWidth="0"
-                                                                                IsOn="{Binding ElementName=ToggleSwitchEnableInkToShape, Path=IsOn}" />
-                                                                        </ui:SimpleStackPanel>
+                                                                    <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                        Width="100">
+                                                                        <Label Margin="0,0,10,0" Content="墨迹纠正"
+                                                                            Foreground="{DynamicResource FloatBarForeground}"
+                                                                            FontSize="12"
+                                                                            VerticalAlignment="Center" />
+                                                                        <ui:ToggleSwitch
+                                                                            Foreground="{DynamicResource FloatBarForeground}"
+                                                                            FontFamily="Microsoft YaHei UI"
+                                                                            Width="80"
+                                                                            Toggled="ToggleSwitchEnableInkToShape_Toggled"
+                                                                            MinWidth="0"
+                                                                            IsOn="{Binding ElementName=ToggleSwitchEnableInkToShape, Path=IsOn}" />
+                                                                    </ui:SimpleStackPanel>
+                                                                    <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                        Width="100">
+                                                                        <Label Margin="0,0,10,0" Content="墨迹渐隐"
+                                                                            Foreground="{DynamicResource FloatBarForeground}"
+                                                                            FontSize="12"
+                                                                            VerticalAlignment="Center" />
+                                                                        <ui:ToggleSwitch
+                                                                            x:Name="ToggleSwitchInkFadeInPanel"
+                                                                            Foreground="{DynamicResource FloatBarForeground}"
+                                                                            FontFamily="Microsoft YaHei UI"
+                                                                            Width="90"
+                                                                            Toggled="ToggleSwitchInkFadeInPanel_Toggled"
+                                                                            MinWidth="0"
+                                                                            IsOn="False" />
                                                                     </ui:SimpleStackPanel>
                                                                 </Controls:UniformGrid>
 
@@ -6900,7 +7113,7 @@
                                             <Border x:Name="PenPalette" Visibility="Visible" Background="#fafafa"
                                                     Opacity="1" BorderBrush="#2563eb"
                                                     BorderThickness="1" CornerRadius="8" Margin="-160,-200,-33,32">
-                                                <ui:SimpleStackPanel>
+                                                <ui:SimpleStackPanel Margin="0,-20,0,0">
                                                     <Border BorderBrush="#1e3a8a" Height="32" BorderThickness="0,0,0,1"
                                                             CornerRadius="8,8,0,0" Background="#2563eb"
                                                             Margin="-1,-1,-1,0"
@@ -6992,53 +7205,63 @@
                                                              Margin="12,8,12,0" HorizontalAlignment="Center"
                                                              VerticalAlignment="Center" Stretch="Fill">
                                                         <ui:SimpleStackPanel>
-                                                            <Controls:UniformGrid Columns="2" Width="300" Height="55">
-                                                                <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                    Height="35">
-                                                                    <Label Content="笔锋" Margin="0,0,6,0"
-                                                                           Foreground="{DynamicResource FloatBarForeground}"
-                                                                           FontSize="16" FontWeight="Bold"
+                                                            <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                Height="35" Margin="0,0,0,8">
+                                                                <Label Content="笔锋" Margin="0,0,6,0"
+                                                                       Foreground="{DynamicResource FloatBarForeground}"
+                                                                       FontSize="16" FontWeight="Bold"
+                                                                       VerticalAlignment="Center" />
+                                                                <ComboBox Height="30" VerticalAlignment="Center"
+                                                                          Name="ComboBoxPenStyle"
+                                                                          FontFamily="Microsoft YaHei UI"
+                                                                          SelectedIndex="0"
+                                                                          SelectionChanged="ComboBoxPenStyle_SelectionChanged">
+                                                                    <ComboBoxItem Content="基于点集"
+                                                                        FontFamily="Microsoft YaHei UI" />
+                                                                    <ComboBoxItem Content="基于速率"
+                                                                        FontFamily="Microsoft YaHei UI" />
+                                                                    <ComboBoxItem Content="关闭笔锋"
+                                                                        FontFamily="Microsoft YaHei UI" />
+                                                                </ComboBox>
+                                                            </ui:SimpleStackPanel>
+                                                            <Controls:UniformGrid Columns="3" Width="300" Height="55">
+                                                                <ui:SimpleStackPanel
+                                                                    x:Name="NibModeSimpleStackPanel"
+                                                                    Orientation="Horizontal" Width="100">
+                                                                    <Label Content="笔尖模式" FontSize="12"
                                                                            VerticalAlignment="Center" />
-                                                                    <ComboBox Height="30" VerticalAlignment="Center"
-                                                                              Name="ComboBoxPenStyle"
-                                                                              FontFamily="Microsoft YaHei UI"
-                                                                              SelectedIndex="0"
-                                                                              SelectionChanged="ComboBoxPenStyle_SelectionChanged">
-                                                                        <ComboBoxItem Content="基于点集"
-                                                                            FontFamily="Microsoft YaHei UI" />
-                                                                        <ComboBoxItem Content="基于速率"
-                                                                            FontFamily="Microsoft YaHei UI" />
-                                                                        <ComboBoxItem Content="关闭笔锋"
-                                                                            FontFamily="Microsoft YaHei UI" />
-                                                                    </ComboBox>
+                                                                    <ui:ToggleSwitch
+                                                                        x:Name="ToggleSwitchEnableNibMode"
+                                                                        MinWidth="0"
+                                                                        FontFamily="Microsoft YaHei UI"
+                                                                        Width="80" Margin="10,0,0,0"
+                                                                        Toggled="ToggleSwitchEnableNibMode_Toggled"
+                                                                        IsOn="True" />
                                                                 </ui:SimpleStackPanel>
-                                                                <ui:SimpleStackPanel Margin="0,-5,0,-5"
-                                                                    VerticalAlignment="Center">
-                                                                    <ui:SimpleStackPanel
-                                                                        x:Name="NibModeSimpleStackPanel"
-                                                                        Orientation="Horizontal" Width="140">
-                                                                        <Label Content="笔尖模式" FontSize="15"
-                                                                               VerticalAlignment="Center" />
-                                                                        <ui:ToggleSwitch
-                                                                            x:Name="ToggleSwitchEnableNibMode"
-                                                                            MinWidth="0"
-                                                                            FontFamily="Microsoft YaHei UI"
-                                                                            Width="70" Margin="10,0,0,0"
-                                                                            Toggled="ToggleSwitchEnableNibMode_Toggled"
-                                                                            IsOn="True" />
-                                                                    </ui:SimpleStackPanel>
-                                                                    <ui:SimpleStackPanel Orientation="Horizontal"
-                                                                        Width="140">
-                                                                        <Label Margin="0,0,10,0" Content="墨迹纠正"
-                                                                               Foreground="{DynamicResource FloatBarForeground}"
-                                                                               FontSize="15" VerticalAlignment="Center" />
-                                                                        <ui:ToggleSwitch
-                                                                            Foreground="{DynamicResource FloatBarForeground}"
-                                                                            FontFamily="Microsoft YaHei UI" Width="70"
-                                                                            Toggled="ToggleSwitchEnableInkToShape_Toggled"
-                                                                            MinWidth="0"
-                                                                            IsOn="{Binding ElementName=ToggleSwitchEnableInkToShape, Path=IsOn}" />
-                                                                    </ui:SimpleStackPanel>
+                                                                <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                    Width="100">
+                                                                    <Label Margin="0,0,10,0" Content="墨迹纠正"
+                                                                           Foreground="{DynamicResource FloatBarForeground}"
+                                                                           FontSize="12" VerticalAlignment="Center" />
+                                                                    <ui:ToggleSwitch
+                                                                        Foreground="{DynamicResource FloatBarForeground}"
+                                                                        FontFamily="Microsoft YaHei UI" Width="80"
+                                                                        Toggled="ToggleSwitchEnableInkToShape_Toggled"
+                                                                        MinWidth="0"
+                                                                        IsOn="{Binding ElementName=ToggleSwitchEnableInkToShape, Path=IsOn}" />
+                                                                </ui:SimpleStackPanel>
+                                                                <ui:SimpleStackPanel Orientation="Horizontal"
+                                                                    Width="100">
+                                                                    <Label Margin="0,0,10,0" Content="墨迹渐隐"
+                                                                           Foreground="{DynamicResource FloatBarForeground}"
+                                                                           FontSize="12" VerticalAlignment="Center" />
+                                                                    <ui:ToggleSwitch
+                                                                        x:Name="ToggleSwitchInkFadeInPanel2"
+                                                                        Foreground="{DynamicResource FloatBarForeground}"
+                                                                        FontFamily="Microsoft YaHei UI" Width="90"
+                                                                        Toggled="ToggleSwitchInkFadeInPanel_Toggled"
+                                                                        MinWidth="0"
+                                                                        IsOn="{Binding ElementName=ToggleSwitchInkFadeInPanel, Path=IsOn}" />
                                                                 </ui:SimpleStackPanel>
                                                             </Controls:UniformGrid>
 
@@ -7768,7 +7991,7 @@
                                         <Border x:Name="BorderDrawShape" Background="#fafafa" Opacity="1"
                                                 Visibility="Visible" BorderBrush="#2563eb"
                                                 BorderThickness="1"
-                                                CornerRadius="5" Margin="-170,-122,-147,37">
+                                                CornerRadius="5" Margin="-170,-140,-147,37">
                                             <ui:SimpleStackPanel Spacing="0" Orientation="Vertical">
                                                 <!--<TextBlock FontSize="16" Foreground="{DynamicResource FloatBarForeground}" HorizontalAlignment="Left" Margin="10,8">
                                                 <Run Text="图形"/>
@@ -7793,6 +8016,7 @@
                                                         </Canvas>
                                                     </ui:SimpleStackPanel>
                                                 </Border>
+
                                                 <ui:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
                                                                      Margin="4,6,4,0">
                                                     <ui:SimpleStackPanel Name="BoardImageDrawLine"

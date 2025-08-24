@@ -307,15 +307,15 @@ namespace Ink_Canvas
                     Settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
                 // 浮动栏按钮显示控制开关初始化
-                ToggleSwitchShowShapeButton.IsOn = Settings.Appearance.IsShowShapeButton;
-                ToggleSwitchShowUndoButton.IsOn = Settings.Appearance.IsShowUndoButton;
-                ToggleSwitchShowRedoButton.IsOn = Settings.Appearance.IsShowRedoButton;
-                ToggleSwitchShowClearButton.IsOn = Settings.Appearance.IsShowClearButton;
-                ToggleSwitchShowWhiteboardButton.IsOn = Settings.Appearance.IsShowWhiteboardButton;
-                ToggleSwitchShowHideButton.IsOn = Settings.Appearance.IsShowHideButton;
-                ToggleSwitchShowQuickColorPalette.IsOn = Settings.Appearance.IsShowQuickColorPalette;
-                ToggleSwitchShowLassoSelectButton.IsOn = Settings.Appearance.IsShowLassoSelectButton;
-                ToggleSwitchShowClearAndMouseButton.IsOn = Settings.Appearance.IsShowClearAndMouseButton;
+                CheckBoxShowShapeButton.IsChecked = Settings.Appearance.IsShowShapeButton;
+                CheckBoxShowUndoButton.IsChecked = Settings.Appearance.IsShowUndoButton;
+                CheckBoxShowRedoButton.IsChecked = Settings.Appearance.IsShowRedoButton;
+                CheckBoxShowClearButton.IsChecked = Settings.Appearance.IsShowClearButton;
+                CheckBoxShowWhiteboardButton.IsChecked = Settings.Appearance.IsShowWhiteboardButton;
+                CheckBoxShowHideButton.IsChecked = Settings.Appearance.IsShowHideButton;
+                CheckBoxShowQuickColorPalette.IsChecked = Settings.Appearance.IsShowQuickColorPalette;
+                CheckBoxShowLassoSelectButton.IsChecked = Settings.Appearance.IsShowLassoSelectButton;
+                CheckBoxShowClearAndMouseButton.IsChecked = Settings.Appearance.IsShowClearAndMouseButton;
                 ComboBoxEraserDisplayOption.SelectedIndex = Settings.Appearance.EraserDisplayOption;
                 ComboBoxQuickColorPaletteDisplayMode.SelectedIndex = Settings.Appearance.QuickColorPaletteDisplayMode;
                 
@@ -366,6 +366,9 @@ namespace Ink_Canvas
 
                 ToggleSwitchEnablePPTButtonPageClickable.IsOn =
                     Settings.PowerPointSettings.EnablePPTButtonPageClickable;
+
+                ToggleSwitchEnablePPTButtonLongPressPageTurn.IsOn =
+                    Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
 
                 var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                 var dopsc = dops.ToCharArray();
@@ -426,6 +429,10 @@ namespace Ink_Canvas
                 PPTButtonLeftPositionValueSlider.Value = Settings.PowerPointSettings.PPTLSButtonPosition;
 
                 PPTButtonRightPositionValueSlider.Value = Settings.PowerPointSettings.PPTRSButtonPosition;
+
+                PPTButtonLBPositionValueSlider.Value = Settings.PowerPointSettings.PPTLBButtonPosition;
+
+                PPTButtonRBPositionValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonPosition;
 
                 UpdatePPTBtnSlidersStatus();
 
@@ -875,6 +882,57 @@ namespace Ink_Canvas
             else
             {
                 ViewboxFloatingBarMarginAnimation(100, true);
+            }
+
+            // 加载墨迹渐隐设置
+            LoadInkFadeSettings();
+        }
+
+        /// <summary>
+        /// 加载墨迹渐隐设置
+        /// </summary>
+        private void LoadInkFadeSettings()
+        {
+            try
+            {
+                // 同步设置面板中的开关状态
+                if (ToggleSwitchEnableInkFade != null)
+                {
+                    ToggleSwitchEnableInkFade.IsOn = Settings.Canvas.EnableInkFade;
+                }
+
+                // 同步批注子面板中的开关状态
+                if (ToggleSwitchInkFadeInPanel != null)
+                {
+                    ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
+                }
+
+                // 同步普通画笔面板中的开关状态
+                if (ToggleSwitchInkFadeInPanel2 != null)
+                {
+                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                }
+
+                // 同步滑块值
+                if (InkFadeTimeSlider != null)
+                {
+                    InkFadeTimeSlider.Value = Settings.Canvas.InkFadeTime;
+                }
+
+
+
+                // 同步墨迹渐隐管理器的状态
+                if (_inkFadeManager != null)
+                {
+                    _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                    _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                }
+
+                LogHelper.WriteLogToFile("墨迹渐隐设置已加载", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"加载墨迹渐隐设置时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }

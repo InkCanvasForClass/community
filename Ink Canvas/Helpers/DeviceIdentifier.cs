@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -2745,5 +2746,303 @@ namespace Ink_Canvas.Helpers
                 return errorMsg;
             }
         }
+        /// <summary>
+        /// 关机时保存使用时间数据
+        /// </summary>
+        public static void SaveUsageStatsOnShutdown()
+        {
+            // 使用超时锁防止死锁
+            if (!Monitor.TryEnter(fileLock, TimeSpan.FromSeconds(30)))
+            {
+                LogHelper.WriteLogToFile("DeviceIdentifier | 关机保存超时，使用备用保存策略", LogHelper.LogType.Warning);
+                SaveUsageStatsOnShutdownFallback();
+                return;
+            }
+
+            try
+            {
+                LogHelper.WriteLogToFile("DeviceIdentifier | 开始关机时保存使用时间数据", LogHelper.LogType.Info);
+
+                // 1. 加载现有使用统计数据（多重恢复策略）
+                UsageStats stats = LoadUsageStatsWithFallback();
+                if (stats == null)
+                {
+                    stats = new UsageStats { DeviceId = DeviceId };
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 创建新的使用统计数据", LogHelper.LogType.Info);
+                }
+
+                // 2. 计算本次会话时长（防止异常值）
+                TimeSpan sessionDuration = DateTime.Now - App.appStartTime;
+                long sessionSeconds = Math.Max(0, (long)sessionDuration.TotalSeconds);
+                
+                // 防止异常大的会话时长（超过24小时）
+                if (sessionSeconds > 86400)
+                {
+                    sessionSeconds = 86400;
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 会话时长异常，已限制为24小时: {sessionSeconds}秒", LogHelper.LogType.Warning);
+                }
+
+                // 3. 更新统计数据
+                stats.TotalUsageSeconds += sessionSeconds;
+                stats.LaunchCount++;
+                stats.AverageSessionSeconds = stats.TotalUsageSeconds / (double)Math.Max(1, stats.LaunchCount);
+                stats.LastLaunchTime = DateTime.Now;
+                
+                // 更新数据哈希值
+                stats.UpdateDataHash();
+
+                // 4. 多重保存策略 - 确保数据不丢失
+                var saveResults = new List<string>();
+                
+                // 4.1 保存到所有文件位置
+                saveResults.Add(SaveUsageStatsToAllFileLocations(stats));
+                
+                // 4.2 保存到所有注册表位置
+                saveResults.Add(SaveUsageStatsToAllRegistryLocations(stats));
+                
+                // 4.3 保存到内存缓存（作为最后防线）
+                SaveUsageStatsToMemoryCache(stats);
+                
+                // 4.4 强制刷新文件系统缓存
+                ForceFlushFileSystem();
+                
+                // 4.5 验证保存结果
+                var verificationResult = VerifyDataSaveResults(stats, saveResults);
+                
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 关机保存完成，验证结果: {verificationResult}", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 关机时保存使用时间数据失败: {ex.Message}", LogHelper.LogType.Error);
+                
+                // 即使主保存失败，也要尝试备用保存
+                try
+                {
+                    SaveUsageStatsOnShutdownFallback();
+                }
+                catch (Exception fallbackEx)
+                {
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 备用保存也失败: {fallbackEx.Message}", LogHelper.LogType.Error);
+                }
+            }
+            finally
+            {
+                Monitor.Exit(fileLock);
+            }
+        }
+
+        /// <summary>
+        /// 关机保存的备用策略
+        /// </summary>
+        private static void SaveUsageStatsOnShutdownFallback()
+        {
+            try
+            {
+                LogHelper.WriteLogToFile("DeviceIdentifier | 执行关机保存备用策略", LogHelper.LogType.Warning);
+                
+                // 使用最基本的保存方式
+                var stats = new UsageStats { DeviceId = DeviceId };
+                stats.TotalUsageSeconds = 1; // 最小记录
+                stats.LaunchCount = 1;
+                stats.LastLaunchTime = DateTime.Now;
+                
+                // 只保存到最可靠的位置
+                SaveUsageStatsToFile(BackupUsageStatsPath, stats);
+                SaveUsageStatsToRegistry(stats);
+                
+                LogHelper.WriteLogToFile("DeviceIdentifier | 备用策略执行完成", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 备用策略执行失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 加载使用统计数据（带多重恢复策略）
+        /// </summary>
+        private static UsageStats LoadUsageStatsWithFallback()
+        {
+            try
+            {
+                // 1. 尝试从主文件加载
+                var stats = LoadUsageStats();
+                if (stats != null) return stats;
+                
+                // 2. 尝试从备份文件加载
+                stats = LoadUsageStatsFromFile(BackupUsageStatsPath);
+                if (stats != null) return stats;
+                
+                // 3. 尝试从其他备份位置加载
+                var backupPaths = new[] { SecondaryUsageBackupPath, TertiaryUsageBackupPath, QuaternaryUsageBackupPath };
+                foreach (var path in backupPaths)
+                {
+                    stats = LoadUsageStatsFromFile(path);
+                    if (stats != null) return stats;
+                }
+                
+                // 4. 尝试从注册表恢复
+                stats = LoadUsageStatsFromRegistry();
+                if (stats != null) return stats;
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 多重恢复加载失败: {ex.Message}", LogHelper.LogType.Error);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 保存使用统计到所有文件位置
+        /// </summary>
+        private static string SaveUsageStatsToAllFileLocations(UsageStats stats)
+        {
+            var results = new List<string>();
+            var filePaths = new[] 
+            { 
+                UsageStatsFilePath, 
+                BackupUsageStatsPath, 
+                SecondaryUsageBackupPath, 
+                TertiaryUsageBackupPath, 
+                QuaternaryUsageBackupPath 
+            };
+            
+            foreach (var filePath in filePaths)
+            {
+                try
+                {
+                    SaveUsageStatsToFile(filePath, stats);
+                    results.Add($"✓ {Path.GetFileName(filePath)}");
+                }
+                catch (Exception ex)
+                {
+                    results.Add($"✗ {Path.GetFileName(filePath)}: {ex.Message}");
+                }
+            }
+            
+            return string.Join("\n", results);
+        }
+
+        /// <summary>
+        /// 保存使用统计到所有注册表位置
+        /// </summary>
+        private static string SaveUsageStatsToAllRegistryLocations(UsageStats stats)
+        {
+            var results = new List<string>();
+            
+            try
+            {
+                // 主注册表位置
+                SaveUsageStatsToRegistry(stats);
+                results.Add("✓ 主注册表位置");
+            }
+            catch (Exception ex)
+            {
+                results.Add($"✗ 主注册表位置: {ex.Message}");
+            }
+            
+            try
+            {
+                // 备用注册表位置
+                SaveUsageStatsToMultipleRegistryLocations(stats);
+                results.Add("✓ 备用注册表位置");
+            }
+            catch (Exception ex)
+            {
+                results.Add($"✗ 备用注册表位置: {ex.Message}");
+            }
+            
+            return string.Join("\n", results);
+        }
+
+        /// <summary>
+        /// 保存使用统计到内存缓存
+        /// </summary>
+        private static void SaveUsageStatsToMemoryCache(UsageStats stats)
+        {
+            try
+            {
+                // 将数据保存到静态变量作为内存备份
+                _cachedUsageStats = stats;
+                LogHelper.WriteLogToFile("DeviceIdentifier | 数据已保存到内存缓存", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 保存到内存缓存失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 强制刷新文件系统缓存
+        /// </summary>
+        private static void ForceFlushFileSystem()
+        {
+            try
+            {
+                // 强制刷新所有相关目录
+                var directories = new[] 
+                { 
+                    Path.GetDirectoryName(UsageStatsFilePath),
+                    Path.GetDirectoryName(BackupUsageStatsPath),
+                    Path.GetDirectoryName(SecondaryUsageBackupPath),
+                    Path.GetDirectoryName(TertiaryUsageBackupPath),
+                    Path.GetDirectoryName(QuaternaryUsageBackupPath)
+                };
+                
+                foreach (var dir in directories.Where(d => !string.IsNullOrEmpty(d) && Directory.Exists(d)))
+                {
+                    try
+                    {
+                        // 创建临时文件来强制刷新
+                        var tempFile = Path.Combine(dir, ".flush.tmp");
+                        File.WriteAllText(tempFile, DateTime.Now.ToString());
+                        File.Delete(tempFile);
+                    }
+                    catch { /* 忽略刷新错误 */ }
+                }
+                
+                LogHelper.WriteLogToFile("DeviceIdentifier | 文件系统缓存刷新完成", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 文件系统缓存刷新失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 验证数据保存结果
+        /// </summary>
+        private static string VerifyDataSaveResults(UsageStats stats, List<string> saveResults)
+        {
+            var verification = new StringBuilder();
+            verification.AppendLine("数据保存验证结果:");
+            verification.AppendLine(string.Join("\n", saveResults));
+            
+            // 验证关键数据是否保存成功
+            try
+            {
+                var savedStats = LoadUsageStats();
+                if (savedStats != null && savedStats.DeviceId == stats.DeviceId)
+                {
+                    verification.AppendLine("✓ 主数据文件验证成功");
+                }
+                else
+                {
+                    verification.AppendLine("✗ 主数据文件验证失败");
+                }
+            }
+            catch (Exception ex)
+            {
+                verification.AppendLine($"✗ 主数据文件验证异常: {ex.Message}");
+            }
+            
+            return verification.ToString();
+        }
+
+        // 内存缓存变量
+        private static UsageStats _cachedUsageStats;
     }
 }
+
