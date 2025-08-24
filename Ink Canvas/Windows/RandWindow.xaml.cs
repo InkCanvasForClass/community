@@ -316,7 +316,7 @@ namespace Ink_Canvas
                         protocol = "classisland://plugins/IslandCaller/Simple/1";
                         break;
                     case 1: // SecRandom点名
-                        protocol = "secrandom://pumping?action=start";
+                        protocol = "secrandom://direct_extraction";
                         break;
                     case 2: // NamePicker点名
                         protocol = "namepicker://";

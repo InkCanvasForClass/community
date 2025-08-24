@@ -54,10 +54,15 @@ namespace Ink_Canvas
                 {
                     ToggleSwitchRunAtStartup.IsOn = true;
                 }
+                else
+                {
+                    ToggleSwitchRunAtStartup.IsOn = false;
+                }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+                ToggleSwitchRunAtStartup.IsOn = false;
             }
 
             if (Settings.Startup != null)
@@ -141,6 +146,10 @@ namespace Ink_Canvas
             else
             {
                 Settings.Startup = new Startup();
+                Settings.Startup.IsEnableNibMode = false; // 默认关闭笔尖模式
+                ToggleSwitchEnableNibMode.IsOn = false; // 默认关闭笔尖模式
+                BoardToggleSwitchEnableNibMode.IsOn = false; // 默认关闭笔尖模式
+                BoundsWidth = Settings.Advanced.FingerModeBoundsWidth; // 使用手指模式边界宽度
             }
 
             // 恢复崩溃后操作设置

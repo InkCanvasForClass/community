@@ -1121,7 +1121,7 @@
                                         <TextBlock Foreground="#fafafa" Text="在调色盘窗口中显示 笔尖模式 按钮"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent=""
-                                                         Name="ToggleSwitchEnableDisPlayNibModeToggle" IsOn="True"
+                                                         Name="ToggleSwitchEnableDisPlayNibModeToggle" IsOn="False"
                                                          FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchEnableDisPlayNibModeToggle_Toggled" />
                                     </ui:SimpleStackPanel>

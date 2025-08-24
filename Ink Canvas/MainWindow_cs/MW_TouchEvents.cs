@@ -539,6 +539,9 @@ namespace Ink_Canvas
                 // 确保触摸事件能正常响应
                 inkCanvas.IsHitTestVisible = true;
                 inkCanvas.IsManipulationEnabled = true;
+                
+                ViewboxFloatingBar.IsHitTestVisible = true;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
             }
             
             // 新增：超时检测 - 如果手掌擦激活时间过长，强制重置状态
@@ -579,6 +582,9 @@ namespace Ink_Canvas
                     palmEraserTouchDownHandled = false;
                     inkCanvas.IsHitTestVisible = true;
                     inkCanvas.IsManipulationEnabled = true;
+                    
+                    ViewboxFloatingBar.IsHitTestVisible = true;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = true;
                     
                     // 停止恢复定时器
                     StopPalmEraserRecoveryTimer();
@@ -652,6 +658,9 @@ namespace Ink_Canvas
                         palmEraserTouchDownHandled = false;
                         inkCanvas.IsHitTestVisible = true;
                         inkCanvas.IsManipulationEnabled = true;
+                        
+                        ViewboxFloatingBar.IsHitTestVisible = true;
+                        BlackboardUIGridForInkReplay.IsHitTestVisible = true;
                     }
                 }
             }
@@ -925,6 +934,9 @@ namespace Ink_Canvas
                 palmEraserTouchDownHandled = false;
                 inkCanvas.IsHitTestVisible = true;
                 inkCanvas.IsManipulationEnabled = true;
+                
+                ViewboxFloatingBar.IsHitTestVisible = true;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
                 
                 // 停止定时器
                 StopPalmEraserRecoveryTimer();

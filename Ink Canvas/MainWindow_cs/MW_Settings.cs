@@ -2028,7 +2028,7 @@ namespace Ink_Canvas
                 LoadSettings();
                 isLoaded = true;
 
-                ToggleSwitchRunAtStartup.IsOn = true;
+                ToggleSwitchRunAtStartup.IsOn = false; 
             }
             catch { }
 
