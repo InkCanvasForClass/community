@@ -27,7 +27,37 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        #region “手勢"按鈕
+        #region 快捷键状态管理
+
+        /// <summary>
+        /// 统一的快捷键状态刷新方法
+        /// 在工具切换时调用，避免重复代码
+        /// </summary>
+        private void RefreshHotkeyState()
+        {
+            try
+            {
+                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (hotkeyManagerField != null)
+                {
+                    var hotkeyManager = hotkeyManagerField.GetValue(this);
+                    if (hotkeyManager != null)
+                    {
+                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
+                        updateMethod?.Invoke(hotkeyManager, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        #endregion
+
+        #region "手勢"按鈕
 
         /// <summary>
         /// 用於浮動工具欄的"手勢"按鈕和白板工具欄的"手勢"按鈕的點擊事件
@@ -706,26 +736,6 @@ namespace Ink_Canvas
 
             SwitchToDefaultPen(null, null);
             CheckColorTheme(true);
-
-            // 更新快捷键注册状态
-            try
-            {
-                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (hotkeyManagerField != null)
-                {
-                    var hotkeyManager = hotkeyManagerField.GetValue(this);
-                    if (hotkeyManager != null)
-                    {
-                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
-                        updateMethod?.Invoke(hotkeyManager, null);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
-            }
         }
 
         #endregion
@@ -809,25 +819,8 @@ namespace Ink_Canvas
             BtnSelect_Click(null, null);
             HideSubPanels("select");
 
-            // 更新快捷键注册状态
-            try
-            {
-                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (hotkeyManagerField != null)
-                {
-                    var hotkeyManager = hotkeyManagerField.GetValue(this);
-                    if (hotkeyManager != null)
-                    {
-                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
-                        updateMethod?.Invoke(hotkeyManager, null);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
-            }
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
         }
 
         #endregion
@@ -1655,26 +1648,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"退出白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
             }
 
-            // 更新快捷键注册状态
-            try
-            {
-                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (hotkeyManagerField != null)
-                {
-                    var hotkeyManager = hotkeyManagerField.GetValue(this);
-                    if (hotkeyManager != null)
-                    {
-                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
-                        updateMethod?.Invoke(hotkeyManager, null);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
-            }
-
             if (BtnSwitchTheme.Content.ToString() == "浅色")
                 BtnSwitch.Content = "黑板";
             else
@@ -1707,6 +1680,14 @@ namespace Ink_Canvas
                 else
                     ViewboxFloatingBarMarginAnimation(100, true);
             }
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
+
+            if (BtnSwitchTheme.Content.ToString() == "浅色")
+                BtnSwitch.Content = "黑板";
+            else
+                BtnSwitch.Content = "白板";
         }
 
         internal void PenIcon_Click(object sender, RoutedEventArgs e)
@@ -1788,26 +1769,6 @@ namespace Ink_Canvas
                         QuickColorPalettePanel.Visibility = Visibility.Visible;
                         QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
                     }
-                }
-
-                // 更新快捷键注册状态
-                try
-                {
-                    var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    if (hotkeyManagerField != null)
-                    {
-                        var hotkeyManager = hotkeyManagerField.GetValue(this);
-                        if (hotkeyManager != null)
-                        {
-                            var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
-                            updateMethod?.Invoke(hotkeyManager, null);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // 更新快捷键状态时出错
                 }
 
                 // 修复：从线擦切换到批注时，保持之前的笔类型状态
@@ -1938,6 +1899,14 @@ namespace Ink_Canvas
                     HideSubPanels("pen", true);
                 }
             }
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
+
+            // 修复：从线擦切换到批注时，保持之前的笔类型状态
+            forceEraser = false;
+            forcePointEraser = false;
+            drawingShapeMode = 0;
         }
 
         private void ColorThemeSwitch_MouseUp(object sender, RoutedEventArgs e)
@@ -1991,25 +1960,8 @@ namespace Ink_Canvas
                 }
             }
 
-            // 更新快捷键注册状态
-            try
-            {
-                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (hotkeyManagerField != null)
-                {
-                    var hotkeyManager = hotkeyManagerField.GetValue(this);
-                    if (hotkeyManager != null)
-                    {
-                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
-                        updateMethod?.Invoke(hotkeyManager, null);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
-            }
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
         }
 
         private void BoardEraserIcon_Click(object sender, RoutedEventArgs e)
@@ -2044,6 +1996,9 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
                 }
             }
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
         }
 
         private void EraserIconByStrokes_Click(object sender, RoutedEventArgs e)
@@ -2072,6 +2027,9 @@ namespace Ink_Canvas
             CancelSingleFingerDragMode();
 
             HideSubPanels("eraserByStrokes");
+
+            // 工具切换完成后，统一刷新快捷键状态
+            RefreshHotkeyState();
         }
 
         private void CursorWithDelIcon_Click(object sender, RoutedEventArgs e)
