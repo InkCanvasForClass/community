@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -292,9 +293,15 @@ namespace Ink_Canvas
                     if (StackPanelPPTControls.Visibility == Visibility.Visible)
                     {
                         if (gest.ApplicationGesture == ApplicationGesture.Left)
-                            BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+                        {
+                            // 直接发送翻页请求到PPT放映软件
+                            SendKeyToPPTSlideShow(false); // 下一页
+                        }
                         if (gest.ApplicationGesture == ApplicationGesture.Right)
-                            BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+                        {
+                            // 直接发送翻页请求到PPT放映软件
+                            SendKeyToPPTSlideShow(true); // 上一页
+                        }
                     }
             }
             catch { }
@@ -1667,6 +1674,8 @@ namespace Ink_Canvas
         private static extern bool BringWindowToTop(IntPtr hWnd);
         [DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
+        [DllImport("user32.dll")]
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
         
         private const int GWL_EXSTYLE = -20;
@@ -2125,6 +2134,48 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"批注子面板中切换墨迹渐隐功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        #endregion
+
+        #region PPT翻页直接传递
+        /// <summary>
+        /// 直接发送翻页请求到PPT放映软件，让PPT软件处理翻页
+        /// </summary>
+        /// <param name="isPrevious">是否为上一页</param>
+        private void SendKeyToPPTSlideShow(bool isPrevious)
+        {
+            try
+            {
+                // 查找PPT放映窗口并发送按键
+                var pptWindows = Process.GetProcessesByName("POWERPNT");
+                var wpsWindows = Process.GetProcessesByName("wpp");
+                
+                foreach (var process in pptWindows.Concat(wpsWindows))
+                {
+                    if (process.MainWindowHandle != IntPtr.Zero)
+                    {
+                        // 激活PPT窗口
+                        SetForegroundWindow(process.MainWindowHandle);
+                        
+                        // 发送翻页按键消息
+                        int keyCode = isPrevious ? 0x21 : 0x22; // VK_PRIOR : VK_NEXT
+                        
+                        // 发送按键按下和释放消息
+                        PostMessage(process.MainWindowHandle, 0x0100, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYDOWN
+                        PostMessage(process.MainWindowHandle, 0x0101, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYUP
+                        
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // 如果直接发送失败，回退到原来的方法
+                if (isPrevious)
+                    BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+                else
+                    BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
             }
         }
         #endregion
