@@ -28,8 +28,22 @@ namespace Ink_Canvas.Windows
             // 隐藏主窗口的设置页面
             HideMainWindowSettings();
             InitializeHotkeyItems();
-            LoadCurrentHotkeys();
-            SetupEventHandlers();
+            
+            // 延迟加载快捷键，确保快捷键管理器已完全初始化
+            this.Loaded += (s, e) => 
+            {
+                try
+                {
+                    // 不自动启用快捷键注册功能，让用户手动决定
+                    // 只加载当前已注册的快捷键
+                    LoadCurrentHotkeys();
+                    SetupEventHandlers();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"快捷键设置窗口初始化时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+            };
 
             // 注册窗口关闭事件
             this.Closed += HotkeySettingsWindow_Closed;
@@ -39,60 +53,71 @@ namespace Ink_Canvas.Windows
         #region Private Methods
         private void InitializeHotkeyItems()
         {
-            // 初始化快捷键项并设置HotkeyName
-            _hotkeyItems["Undo"] = UndoHotkey;
-            UndoHotkey.HotkeyName = "Undo";
-            
-            _hotkeyItems["Redo"] = RedoHotkey;
-            RedoHotkey.HotkeyName = "Redo";
-            
-            _hotkeyItems["Clear"] = ClearHotkey;
-            ClearHotkey.HotkeyName = "Clear";
-            
-            _hotkeyItems["Paste"] = PasteHotkey;
-            PasteHotkey.HotkeyName = "Paste";
-            
-            _hotkeyItems["SelectTool"] = SelectToolHotkey;
-            SelectToolHotkey.HotkeyName = "SelectTool";
-            
-            _hotkeyItems["DrawTool"] = DrawToolHotkey;
-            DrawToolHotkey.HotkeyName = "DrawTool";
-            
-            _hotkeyItems["EraserTool"] = EraserToolHotkey;
-            EraserToolHotkey.HotkeyName = "EraserTool";
-            
-            _hotkeyItems["BlackboardTool"] = BlackboardToolHotkey;
-            BlackboardToolHotkey.HotkeyName = "BlackboardTool";
-            
-            _hotkeyItems["QuitDrawTool"] = QuitDrawToolHotkey;
-            QuitDrawToolHotkey.HotkeyName = "QuitDrawTool";
-            
-            _hotkeyItems["Pen1"] = Pen1Hotkey;
-            Pen1Hotkey.HotkeyName = "Pen1";
-            
-            _hotkeyItems["Pen2"] = Pen2Hotkey;
-            Pen2Hotkey.HotkeyName = "Pen2";
-            
-            _hotkeyItems["Pen3"] = Pen3Hotkey;
-            Pen3Hotkey.HotkeyName = "Pen3";
-            
-            _hotkeyItems["Pen4"] = Pen4Hotkey;
-            Pen4Hotkey.HotkeyName = "Pen4";
-            
-            _hotkeyItems["Pen5"] = Pen5Hotkey;
-            Pen5Hotkey.HotkeyName = "Pen5";
-            
-            _hotkeyItems["DrawLine"] = DrawLineHotkey;
-            DrawLineHotkey.HotkeyName = "DrawLine";
-            
-            _hotkeyItems["Screenshot"] = ScreenshotHotkey;
-            ScreenshotHotkey.HotkeyName = "Screenshot";
-            
-            _hotkeyItems["Hide"] = HideHotkey;
-            HideHotkey.HotkeyName = "Hide";
-            
-            _hotkeyItems["Exit"] = ExitHotkey;
-            ExitHotkey.HotkeyName = "Exit";
+            try
+            {
+                LogHelper.WriteLogToFile("开始初始化快捷键项", LogHelper.LogType.Info);
+                
+                // 初始化快捷键项并设置HotkeyName
+                _hotkeyItems["Undo"] = UndoHotkey;
+                UndoHotkey.HotkeyName = "Undo";
+                
+                _hotkeyItems["Redo"] = RedoHotkey;
+                RedoHotkey.HotkeyName = "Redo";
+                
+                _hotkeyItems["Clear"] = ClearHotkey;
+                ClearHotkey.HotkeyName = "Clear";
+                
+                _hotkeyItems["Paste"] = PasteHotkey;
+                PasteHotkey.HotkeyName = "Paste";
+                
+                _hotkeyItems["SelectTool"] = SelectToolHotkey;
+                SelectToolHotkey.HotkeyName = "SelectTool";
+                
+                _hotkeyItems["DrawTool"] = DrawToolHotkey;
+                DrawToolHotkey.HotkeyName = "DrawTool";
+                
+                _hotkeyItems["EraserTool"] = EraserToolHotkey;
+                EraserToolHotkey.HotkeyName = "EraserTool";
+                
+                _hotkeyItems["BlackboardTool"] = BlackboardToolHotkey;
+                BlackboardToolHotkey.HotkeyName = "BlackboardTool";
+                
+                _hotkeyItems["QuitDrawTool"] = QuitDrawToolHotkey;
+                QuitDrawToolHotkey.HotkeyName = "QuitDrawTool";
+                
+                _hotkeyItems["Pen1"] = Pen1Hotkey;
+                Pen1Hotkey.HotkeyName = "Pen1";
+                
+                _hotkeyItems["Pen2"] = Pen2Hotkey;
+                Pen2Hotkey.HotkeyName = "Pen2";
+                
+                _hotkeyItems["Pen3"] = Pen3Hotkey;
+                Pen3Hotkey.HotkeyName = "Pen3";
+                
+                _hotkeyItems["Pen4"] = Pen4Hotkey;
+                Pen4Hotkey.HotkeyName = "Pen4";
+                
+                _hotkeyItems["Pen5"] = Pen5Hotkey;
+                Pen5Hotkey.HotkeyName = "Pen5";
+                
+                _hotkeyItems["DrawLine"] = DrawLineHotkey;
+                DrawLineHotkey.HotkeyName = "DrawLine";
+                
+                _hotkeyItems["Screenshot"] = ScreenshotHotkey;
+                ScreenshotHotkey.HotkeyName = "Screenshot";
+                
+                _hotkeyItems["Hide"] = HideHotkey;
+                HideHotkey.HotkeyName = "Hide";
+                
+                _hotkeyItems["Exit"] = ExitHotkey;
+                ExitHotkey.HotkeyName = "Exit";
+                
+                LogHelper.WriteLogToFile($"成功初始化 {_hotkeyItems.Count} 个快捷键项", LogHelper.LogType.Info);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化快捷键项时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void LoadCurrentHotkeys()
@@ -100,17 +125,97 @@ namespace Ink_Canvas.Windows
             try
             {
                 var registeredHotkeys = _hotkeyManager.GetRegisteredHotkeys();
+                LogHelper.WriteLogToFile($"当前已注册快捷键数量: {registeredHotkeys.Count}", LogHelper.LogType.Info);
+                
+                // 显示已注册的快捷键
                 foreach (var hotkey in registeredHotkeys)
                 {
                     if (_hotkeyItems.TryGetValue(hotkey.Name, out var hotkeyItem))
                     {
                         hotkeyItem.SetCurrentHotkey(hotkey.Key, hotkey.Modifiers);
+                        LogHelper.WriteLogToFile($"设置快捷键项: {hotkey.Name} -> {hotkey.Modifiers}+{hotkey.Key}", LogHelper.LogType.Info);
                     }
                 }
+                
+                // 对于没有快捷键的项目，不设置任何值，保持为空状态
+                // 这样用户就能清楚地知道哪些快捷键还没有设置
+                LogHelper.WriteLogToFile("未注册的快捷键项保持为空状态", LogHelper.LogType.Info);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"加载当前快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 为快捷键项设置默认值
+        /// </summary>
+        private void SetDefaultHotkeyForItem(HotkeyItem hotkeyItem)
+        {
+            try
+            {
+                // 根据HotkeyName设置默认快捷键
+                switch (hotkeyItem.HotkeyName)
+                {
+                    case "Undo":
+                        hotkeyItem.SetCurrentHotkey(Key.Z, ModifierKeys.Control);
+                        break;
+                    case "Redo":
+                        hotkeyItem.SetCurrentHotkey(Key.Y, ModifierKeys.Control);
+                        break;
+                    case "Clear":
+                        hotkeyItem.SetCurrentHotkey(Key.E, ModifierKeys.Control);
+                        break;
+                    case "Paste":
+                        hotkeyItem.SetCurrentHotkey(Key.V, ModifierKeys.Control);
+                        break;
+                    case "SelectTool":
+                        hotkeyItem.SetCurrentHotkey(Key.S, ModifierKeys.Alt);
+                        break;
+                    case "DrawTool":
+                        hotkeyItem.SetCurrentHotkey(Key.D, ModifierKeys.Alt);
+                        break;
+                    case "EraserTool":
+                        hotkeyItem.SetCurrentHotkey(Key.E, ModifierKeys.Alt);
+                        break;
+                    case "BlackboardTool":
+                        hotkeyItem.SetCurrentHotkey(Key.B, ModifierKeys.Alt);
+                        break;
+                    case "QuitDrawTool":
+                        hotkeyItem.SetCurrentHotkey(Key.Q, ModifierKeys.Alt);
+                        break;
+                    case "Pen1":
+                        hotkeyItem.SetCurrentHotkey(Key.D1, ModifierKeys.Alt);
+                        break;
+                    case "Pen2":
+                        hotkeyItem.SetCurrentHotkey(Key.D2, ModifierKeys.Alt);
+                        break;
+                    case "Pen3":
+                        hotkeyItem.SetCurrentHotkey(Key.D3, ModifierKeys.Alt);
+                        break;
+                    case "Pen4":
+                        hotkeyItem.SetCurrentHotkey(Key.D4, ModifierKeys.Alt);
+                        break;
+                    case "Pen5":
+                        hotkeyItem.SetCurrentHotkey(Key.D5, ModifierKeys.Alt);
+                        break;
+                    case "DrawLine":
+                        hotkeyItem.SetCurrentHotkey(Key.L, ModifierKeys.Alt);
+                        break;
+                    case "Screenshot":
+                        hotkeyItem.SetCurrentHotkey(Key.C, ModifierKeys.Alt);
+                        break;
+                    case "Hide":
+                        hotkeyItem.SetCurrentHotkey(Key.V, ModifierKeys.Alt);
+                        break;
+                    case "Exit":
+                        hotkeyItem.SetCurrentHotkey(Key.Escape, ModifierKeys.None);
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                // 设置默认快捷键时出错，忽略
             }
         }
 
@@ -127,6 +232,8 @@ namespace Ink_Canvas.Windows
         {
             try
             {
+                LogHelper.WriteLogToFile($"收到快捷键变更事件: {e.HotkeyName} -> {e.Modifiers}+{e.Key}", LogHelper.LogType.Info);
+                
                 // 检查快捷键冲突
                 if (IsHotkeyConflict(e.Key, e.Modifiers, e.HotkeyName))
                 {
@@ -146,6 +253,7 @@ namespace Ink_Canvas.Windows
 
         private bool IsHotkeyConflict(Key key, ModifierKeys modifiers, string excludeHotkeyName)
         {
+            // 检查是否与已注册的快捷键冲突
             var registeredHotkeys = _hotkeyManager.GetRegisteredHotkeys();
             foreach (var hotkey in registeredHotkeys)
             {
@@ -156,6 +264,29 @@ namespace Ink_Canvas.Windows
                     return true;
                 }
             }
+            
+            // 检查是否与默认快捷键冲突（如果当前快捷键项还没有注册）
+            if (excludeHotkeyName != null && _hotkeyItems.TryGetValue(excludeHotkeyName, out var currentItem))
+            {
+                var currentHotkey = currentItem.GetCurrentHotkey();
+                if (currentHotkey.key == Key.None)
+                {
+                    // 如果当前项还没有快捷键，检查是否与其他默认快捷键冲突
+                    foreach (var kvp in _hotkeyItems)
+                    {
+                        if (kvp.Key != excludeHotkeyName)
+                        {
+                            var item = kvp.Value;
+                            var itemHotkey = item.GetCurrentHotkey();
+                            if (itemHotkey.key == key && itemHotkey.modifiers == modifiers)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            
             return false;
         }
 
@@ -163,19 +294,41 @@ namespace Ink_Canvas.Windows
         {
             try
             {
+                LogHelper.WriteLogToFile($"开始更新快捷键: {hotkeyName} -> {modifiers}+{key}", LogHelper.LogType.Info);
+                
+                // 先注销原有的快捷键（如果存在）
+                _hotkeyManager.UnregisterHotkey(hotkeyName);
+                LogHelper.WriteLogToFile($"已注销原有快捷键: {hotkeyName}", LogHelper.LogType.Info);
+                
                 // 根据快捷键名称获取对应的动作
                 var action = GetActionForHotkey(hotkeyName);
                 if (action != null)
                 {
-                    // 使用快捷键管理器的UpdateHotkey方法，这会自动保存配置
-                    if (_hotkeyManager.UpdateHotkey(hotkeyName, key, modifiers))
+                    LogHelper.WriteLogToFile($"找到快捷键动作: {hotkeyName}", LogHelper.LogType.Info);
+                    
+                    // 直接注册新的快捷键
+                    if (_hotkeyManager.RegisterHotkey(hotkeyName, key, modifiers, action))
                     {
-                        LogHelper.WriteLogToFile($"快捷键 {hotkeyName} 已更新为 {modifiers}+{key} 并自动保存", LogHelper.LogType.Event);
+                        LogHelper.WriteLogToFile($"成功注册新快捷键: {hotkeyName} -> {modifiers}+{key}", LogHelper.LogType.Info);
+                        
+                        // 立即保存到配置文件
+                        _hotkeyManager.SaveHotkeysToSettings();
+                        LogHelper.WriteLogToFile($"已保存快捷键配置", LogHelper.LogType.Info);
+                        
+                        // 更新UI显示
+                        LoadCurrentHotkeys();
+                        LogHelper.WriteLogToFile($"已更新UI显示", LogHelper.LogType.Info);
+                        
+                        LogHelper.WriteLogToFile($"快捷键 {hotkeyName} 已更新为 {modifiers}+{key} 并保存", LogHelper.LogType.Event);
                     }
                     else
                     {
                         LogHelper.WriteLogToFile($"更新快捷键 {hotkeyName} 失败", LogHelper.LogType.Error);
                     }
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile($"未找到快捷键 {hotkeyName} 对应的动作", LogHelper.LogType.Warning);
                 }
             }
             catch (Exception ex)
@@ -351,8 +504,14 @@ namespace Ink_Canvas.Windows
                                            "确认重置", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
+                    // 先注销所有现有快捷键
+                    _hotkeyManager.UnregisterAllHotkeys();
+                    
                     // 重置为默认快捷键
                     _hotkeyManager.RegisterDefaultHotkeys();
+                    
+                    // 立即保存到配置文件
+                    _hotkeyManager.SaveHotkeysToSettings();
                     
                     // 更新UI显示
                     LoadCurrentHotkeys();

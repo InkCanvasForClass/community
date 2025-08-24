@@ -17,11 +17,10 @@ namespace Ink_Canvas.Helpers
         private readonly Dictionary<string, HotkeyInfo> _registeredHotkeys;
         private readonly MainWindow _mainWindow;
         private bool _isDisposed = false;
-        private bool _hotkeysShouldBeRegistered = true; // 跟踪快捷键是否应该被注册
+        private bool _hotkeysShouldBeRegistered = false; // 启动时不注册热键，等待需要时再注册
         
         // 配置文件路径
         private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "HotkeyConfig.json");
-        private static readonly string HotkeyConfigBackupFile = Path.Combine(App.RootPath, "HotkeyConfig.json.bak");
         #endregion
 
         #region Constructor
@@ -212,7 +211,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 从设置加载快捷键配置
+        /// 从设置加载快捷键
         /// </summary>
         public void LoadHotkeysFromSettings()
         {
@@ -232,20 +231,28 @@ namespace Ink_Canvas.Helpers
                 {
                     // 成功从配置文件加载快捷键设置
                     _hotkeysShouldBeRegistered = true;
+                    LogHelper.WriteLogToFile("成功从配置文件加载快捷键设置", LogHelper.LogType.Info);
                 }
                 else
                 {
-                    // 如果配置文件不存在或加载失败，使用默认快捷键
-                    RegisterDefaultHotkeys();
-                    _hotkeysShouldBeRegistered = true;
+                    // 如果配置文件不存在，才使用默认快捷键
+                    if (!File.Exists(HotkeyConfigFile))
+                    {
+                        LogHelper.WriteLogToFile("配置文件不存在，注册默认快捷键", LogHelper.LogType.Info);
+                        RegisterDefaultHotkeys();
+                        _hotkeysShouldBeRegistered = true;
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("配置文件存在但加载失败，保持当前状态", LogHelper.LogType.Warning);
+                    }
                 }
             }
-                            catch (Exception ex)
-                {
-                    // 出错时使用默认快捷键
-                    RegisterDefaultHotkeys();
-                    _hotkeysShouldBeRegistered = true;
-                }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从设置加载快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
+                // 出错时不自动使用默认快捷键，保持当前状态
+            }
         }
 
         /// <summary>
@@ -283,18 +290,14 @@ namespace Ink_Canvas.Helpers
                 if (!_hotkeysShouldBeRegistered)
                 {
                     _hotkeysShouldBeRegistered = true;
+                    LogHelper.WriteLogToFile("启用快捷键注册功能", LogHelper.LogType.Info);
                     
-                    // 如果当前不在鼠标模式下，立即注册快捷键
-                    var currentIsMouseMode = IsInSelectMode();
-                    
-                    if (!currentIsMouseMode)
-                    {
-                        LoadHotkeysFromSettings();
-                    }
+                    // 立即加载快捷键设置
+                    LoadHotkeysFromSettings();
                 }
                 else
                 {
-                    // 快捷键注册功能已经启用
+                    LogHelper.WriteLogToFile("快捷键注册功能已经启用", LogHelper.LogType.Info);
                 }
             }
             catch (Exception ex)
@@ -445,29 +448,6 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"从配置文件加载快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
-                
-                // 尝试从备份文件加载
-                if (File.Exists(HotkeyConfigBackupFile))
-                {
-                    LogHelper.WriteLogToFile("尝试从备份文件加载快捷键配置", LogHelper.LogType.Warning);
-                    try
-                    {
-                        string backupContent = File.ReadAllText(HotkeyConfigBackupFile, System.Text.Encoding.UTF8);
-                        var backupConfig = JsonConvert.DeserializeObject<HotkeyConfig>(backupContent);
-                        if (backupConfig?.Hotkeys != null && backupConfig.Hotkeys.Count > 0)
-                        {
-                            // 恢复备份文件
-                            File.Copy(HotkeyConfigBackupFile, HotkeyConfigFile, true);
-                            LogHelper.WriteLogToFile("已从备份文件恢复快捷键配置", LogHelper.LogType.Event);
-                            return LoadHotkeysFromConfigFile();
-                        }
-                    }
-                    catch (Exception backupEx)
-                    {
-                        LogHelper.WriteLogToFile($"从备份文件加载快捷键配置时出错: {backupEx.Message}", LogHelper.LogType.Error);
-                    }
-                }
-                
                 return false;
             }
         }
@@ -514,18 +494,8 @@ namespace Ink_Canvas.Helpers
                 
                 string jsonContent = JsonConvert.SerializeObject(config, settings);
 
-                // 先写入临时文件，然后替换原文件（原子操作）
-                string tempFile = HotkeyConfigFile + ".temp";
-                File.WriteAllText(tempFile, jsonContent, System.Text.Encoding.UTF8);
-
-                // 如果原文件存在，先备份
-                if (File.Exists(HotkeyConfigFile))
-                {
-                    File.Copy(HotkeyConfigFile, HotkeyConfigBackupFile, true);
-                }
-
-                // 替换原文件
-                File.Move(tempFile, HotkeyConfigFile);
+                // 直接写入原文件，覆盖原有内容
+                File.WriteAllText(HotkeyConfigFile, jsonContent, System.Text.Encoding.UTF8);
 
                 LogHelper.WriteLogToFile($"快捷键配置已保存到: {HotkeyConfigFile}", LogHelper.LogType.Event);
                 return true;

@@ -2016,8 +2016,8 @@ namespace Ink_Canvas
             try
             {
                 _globalHotkeyManager = new GlobalHotkeyManager(this);
-                _globalHotkeyManager.LoadHotkeysFromSettings();
-                LogHelper.WriteLogToFile("全局快捷键管理器已初始化", LogHelper.LogType.Event);
+                // 不在这里加载快捷键，等待需要时再加载
+                LogHelper.WriteLogToFile("全局快捷键管理器已初始化（未加载快捷键）", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -2064,6 +2064,12 @@ namespace Ink_Canvas
                 {
                     ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
                 }
+
+                // 同步普通画笔面板中的开关状态
+                if (ToggleSwitchInkFadeInPanel2 != null)
+                {
+                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                }
                 
                 LogHelper.WriteLogToFile($"墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
@@ -2106,6 +2112,12 @@ namespace Ink_Canvas
                 if (ToggleSwitchEnableInkFade != null)
                 {
                     ToggleSwitchEnableInkFade.IsOn = Settings.Canvas.EnableInkFade;
+                }
+
+                // 同步普通画笔面板中的开关状态
+                if (ToggleSwitchInkFadeInPanel2 != null)
+                {
+                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
                 }
                 
                 LogHelper.WriteLogToFile($"批注子面板中墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
