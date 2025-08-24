@@ -319,7 +319,7 @@ namespace Ink_Canvas
                         protocol = "secrandom://pumping?action=start";
                         break;
                     case 2: // NamePicker点名
-                        protocol = "namepicker://调起没有浮窗的NamePicker";
+                        protocol = "namepicker://";
                         break;
                     default:
                         protocol = "classisland://plugins/IslandCaller/Simple/1";
