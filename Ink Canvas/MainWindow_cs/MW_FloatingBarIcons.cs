@@ -706,6 +706,26 @@ namespace Ink_Canvas
 
             SwitchToDefaultPen(null, null);
             CheckColorTheme(true);
+
+            // 更新快捷键注册状态
+            try
+            {
+                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (hotkeyManagerField != null)
+                {
+                    var hotkeyManager = hotkeyManagerField.GetValue(this);
+                    if (hotkeyManager != null)
+                    {
+                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
+                        updateMethod?.Invoke(hotkeyManager, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         #endregion
@@ -788,6 +808,26 @@ namespace Ink_Canvas
 
             BtnSelect_Click(null, null);
             HideSubPanels("select");
+
+            // 更新快捷键注册状态
+            try
+            {
+                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (hotkeyManagerField != null)
+                {
+                    var hotkeyManager = hotkeyManagerField.GetValue(this);
+                    if (hotkeyManager != null)
+                    {
+                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
+                        updateMethod?.Invoke(hotkeyManager, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         #endregion
@@ -1615,6 +1655,26 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"退出白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
             }
 
+            // 更新快捷键注册状态
+            try
+            {
+                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (hotkeyManagerField != null)
+                {
+                    var hotkeyManager = hotkeyManagerField.GetValue(this);
+                    if (hotkeyManager != null)
+                    {
+                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
+                        updateMethod?.Invoke(hotkeyManager, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
             if (BtnSwitchTheme.Content.ToString() == "浅色")
                 BtnSwitch.Content = "黑板";
             else
@@ -1728,6 +1788,26 @@ namespace Ink_Canvas
                         QuickColorPalettePanel.Visibility = Visibility.Visible;
                         QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
                     }
+                }
+
+                // 更新快捷键注册状态
+                try
+                {
+                    var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    if (hotkeyManagerField != null)
+                    {
+                        var hotkeyManager = hotkeyManagerField.GetValue(this);
+                        if (hotkeyManager != null)
+                        {
+                            var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
+                            updateMethod?.Invoke(hotkeyManager, null);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // 更新快捷键状态时出错
                 }
 
                 // 修复：从线擦切换到批注时，保持之前的笔类型状态
@@ -1909,6 +1989,26 @@ namespace Ink_Canvas
                     if (BoardEraserSizePanel != null)
                         AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
                 }
+            }
+
+            // 更新快捷键注册状态
+            try
+            {
+                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (hotkeyManagerField != null)
+                {
+                    var hotkeyManager = hotkeyManagerField.GetValue(this);
+                    if (hotkeyManager != null)
+                    {
+                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
+                        updateMethod?.Invoke(hotkeyManager, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
