@@ -13,6 +13,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
@@ -1899,9 +1900,10 @@ namespace Ink_Canvas
                     HideSubPanels("pen", true);
                 }
             }
-
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
+            
+            
+            // 延迟半秒后再刷新快捷键状态
+            Task.Delay(500).ContinueWith(_ => Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => RefreshHotkeyState())));
 
             // 修复：从线擦切换到批注时，保持之前的笔类型状态
             forceEraser = false;
