@@ -67,11 +67,13 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Release/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
                     }
                 }
             },
@@ -102,11 +104,13 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
                     }
                 }
             }
