@@ -5684,6 +5684,7 @@
                                                         <ui:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
                                                                              Orientation="Horizontal">
                                                             <ui:SimpleStackPanel MouseDown="Border_MouseDown"
+                                                                MouseUp="SymbolIconScreenshot_MouseUp"
                                                                 Margin="0,0,0,0" Height="38" Width="32"
                                                                 Orientation="Vertical">
                                                                 <Image Margin="0,4,0,2" Height="19" Width="19">
@@ -8676,6 +8677,7 @@
                                                     <ui:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
                                                                          Orientation="Horizontal">
                                                         <ui:SimpleStackPanel MouseDown="Border_MouseDown"
+                                                                             MouseUp="SymbolIconScreenshot_MouseUp"
                                                                              Margin="0,0,0,0" Height="38" Width="32"
                                                                              Orientation="Vertical">
                                                             <Image Margin="0,4,0,2" Height="19" Width="19">
