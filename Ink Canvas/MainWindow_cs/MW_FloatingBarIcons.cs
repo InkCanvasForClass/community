@@ -915,7 +915,11 @@ namespace Ink_Canvas
             HideSubPanels();
             BtnSettings_Click(null, null);
         }
-
+        private async void SymbolIconScreenshot_MouseUp(object sender, MouseButtonEventArgs e) {
+            HideSubPanelsImmediately();
+            await Task.Delay(50);
+            SaveScreenShotToDesktop();
+        }
 
         private void ImageCountdownTimer_MouseUp(object sender, MouseButtonEventArgs e)
         {
