@@ -17,7 +17,7 @@ namespace Ink_Canvas.Helpers
         private readonly Dictionary<string, HotkeyInfo> _registeredHotkeys;
         private readonly MainWindow _mainWindow;
         private bool _isDisposed = false;
-        private bool _hotkeysShouldBeRegistered = false; // 启动时不注册热键，等待需要时再注册
+        private bool _hotkeysShouldBeRegistered = ture // 启动时注册热键
         
         // 配置文件路径
         private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "HotkeyConfig.json");
@@ -28,7 +28,7 @@ namespace Ink_Canvas.Helpers
         {
             _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
             _registeredHotkeys = new Dictionary<string, HotkeyInfo>();
-            _hotkeysShouldBeRegistered = false; // 启动时不注册热键，等待需要时再注册
+            _hotkeysShouldBeRegistered = true; // 启动时注册热键
         }
         #endregion
 
@@ -764,33 +764,14 @@ namespace Ink_Canvas.Helpers
                 
                 if (isMouseMode)
                 {
-                    // 在鼠标模式下，注销所有快捷键以释放系统快捷键
+                    // 在鼠标模式下
                     if (_hotkeysShouldBeRegistered)
                     {
-                        UnregisterAllHotkeys();
-                        _hotkeysShouldBeRegistered = false;
+                        e.Handled = false;
                     }
                     else
                     {
-                        // 快捷键已经处于注销状态，无需重复注销
-                    }
-                }
-                else
-                {
-                    // 在批注/选择/其他工具模式下，重新注册所有快捷键
-                    if (!_hotkeysShouldBeRegistered)
-                    {
-                        // 第一次切换到批注/选择/其他工具模式，启用快捷键注册
-                        EnableHotkeyRegistration();
-                    }
-                    else if (_registeredHotkeys.Count == 0)
-                    {
-                        // 快捷键已启用但数量为0，重新注册
-                        LoadHotkeysFromSettings();
-                    }
-                    else
-                    {
-                        // 当前已有快捷键注册，无需重新注册
+                        // 快捷键已经处于放行状态
                     }
                 }
             }
@@ -806,7 +787,7 @@ namespace Ink_Canvas.Helpers
         {
             if (!_isDisposed)
             {
-                UnregisterAllHotkeys();
+                
                 _isDisposed = true;
             }
         }
