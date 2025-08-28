@@ -770,6 +770,25 @@ namespace Ink_Canvas.Helpers
                 EnableHotkeyRegistration();
                 LoadHotkeysFromSettings();
             }
+            // 更新快捷键注册状态
+            try
+            {
+                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                if (hotkeyManagerField != null)
+                {
+                    var hotkeyManager = hotkeyManagerField.GetValue(this);
+                    if (hotkeyManager != null)
+                    {
+                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
+                        updateMethod?.Invoke(hotkeyManager, null);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         #endregion
