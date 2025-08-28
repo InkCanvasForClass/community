@@ -768,6 +768,34 @@ namespace Ink_Canvas.Helpers
                 UpdateHotkeyRegistrationState();
             }
         }
+        
+        /// <summary>
+        /// 动态管理快捷键
+        /// </summary>
+        public void UpdateHotkeyRegistrationState()
+        {
+            try
+            {
+                bool isMouseMode = IsInSelectMode();
+                
+                if (isMouseMode)
+                {
+                    // 在鼠标模式下
+                    if (_hotkeysShouldBeRegistered)
+                    {
+                        e.Handled = false;
+                    }
+                    else
+                    {
+                        // 快捷键已经处于放行状态
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新快捷键注册状态时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
         #endregion
 
         #region IDisposable Implementation
