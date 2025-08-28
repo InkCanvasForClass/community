@@ -28,35 +28,6 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        #region 快捷键状态管理
-
-        /// <summary>
-        /// 统一的快捷键状态刷新方法
-        /// 在工具切换时调用，避免重复代码
-        /// </summary>
-        private void RefreshHotkeyState()
-        {
-            try
-            {
-                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (hotkeyManagerField != null)
-                {
-                    var hotkeyManager = hotkeyManagerField.GetValue(this);
-                    if (hotkeyManager != null)
-                    {
-                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
-                        updateMethod?.Invoke(hotkeyManager, null);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"刷新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
-            }
-        }
-
-        #endregion
 
         #region "手勢"按鈕
 
@@ -820,8 +791,6 @@ namespace Ink_Canvas
             BtnSelect_Click(null, null);
             HideSubPanels("select");
 
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
         }
 
         #endregion
@@ -1685,14 +1654,6 @@ namespace Ink_Canvas
                 else
                     ViewboxFloatingBarMarginAnimation(100, true);
             }
-
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
-
-            if (BtnSwitchTheme.Content.ToString() == "浅色")
-                BtnSwitch.Content = "黑板";
-            else
-                BtnSwitch.Content = "白板";
         }
 
         internal void PenIcon_Click(object sender, RoutedEventArgs e)
@@ -1965,9 +1926,6 @@ namespace Ink_Canvas
                         AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
                 }
             }
-
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
         }
 
         private void BoardEraserIcon_Click(object sender, RoutedEventArgs e)
@@ -2002,9 +1960,6 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
                 }
             }
-
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
         }
 
         private void EraserIconByStrokes_Click(object sender, RoutedEventArgs e)
@@ -2034,8 +1989,6 @@ namespace Ink_Canvas
 
             HideSubPanels("eraserByStrokes");
 
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
         }
 
         private void CursorWithDelIcon_Click(object sender, RoutedEventArgs e)
