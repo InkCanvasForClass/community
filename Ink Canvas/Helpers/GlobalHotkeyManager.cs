@@ -28,6 +28,7 @@ namespace Ink_Canvas.Helpers
         {
             _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
             _registeredHotkeys = new Dictionary<string, HotkeyInfo>();
+            _hotkeysShouldBeRegistered = true; // 启动时注册热键
         }
         #endregion
 
@@ -762,6 +763,10 @@ namespace Ink_Canvas.Helpers
             {
                 // 在鼠标模式下设置事件处理状态
                 e.Handled = false; 
+            }
+            else
+            {
+                e.Handled = true;
             }
         }
 
