@@ -28,6 +28,7 @@ namespace Ink_Canvas.Helpers
         {
             _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
             _registeredHotkeys = new Dictionary<string, HotkeyInfo>();
+            InitializeHotkeysOnStartup();
         }
         #endregion
 
