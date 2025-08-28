@@ -1866,9 +1866,6 @@ namespace Ink_Canvas
                 }
             }
             
-            
-            // 延迟半秒后再刷新快捷键状态
-            Task.Delay(500).ContinueWith(_ => Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => RefreshHotkeyState())));
 
             // 修复：从线擦切换到批注时，保持之前的笔类型状态
             forceEraser = false;
