@@ -94,6 +94,7 @@
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/PrefacedCorg"><img src="https://avatars.githubusercontent.com/u/129855423?v=4?s=100" width="100px;" alt="PrefacedCorg"/><br /><sub><b>PrefacedCorg</b></sub></a><br /><a href="#code-PrefacedCorg" title="Code">💻</a> <a href="#design-PrefacedCorg" title="Design">🎨</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://blog.jursin.top"><img src="https://avatars.githubusercontent.com/u/127487914?v=4?s=100" width="100px;" alt="Jursin"/><br /><sub><b>Jursin</b></sub></a><br /><a href="#design-Jursin" title="Design">🎨</a></td>
     </tr>
   </tbody>
 </table>
