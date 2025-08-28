@@ -753,31 +753,19 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 动态管理快捷键注册状态
-        /// 根据当前工具选择状态自动注册或注销快捷键
+        /// 鼠标事件处理方法
         /// </summary>
-        public void UpdateHotkeyRegistrationState()
+        private void OnMouseModeEvent(object sender, MouseEventArgs e)
         {
-            try
+            bool isMouseMode = IsInSelectMode();
+    
+            if (isMouseMode)
             {
-                bool isMouseMode = IsInSelectMode();
-                
-                if (isMouseMode)
-                {
-                    // 在鼠标模式下
-                    if (_hotkeysShouldBeRegistered)
-                    {
-                        Handled = false;
-                    }
-                    else
-                    {
-                        // 快捷键已经处于放行状态
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新快捷键注册状态时出错: {ex.Message}", LogHelper.LogType.Error);
+                // 在鼠标模式下设置事件处理状态
+                e.Handled = false; 
+        
+                // 调用快捷键状态更新方法
+                UpdateHotkeyRegistrationState();
             }
         }
         #endregion
