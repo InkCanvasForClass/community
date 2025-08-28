@@ -767,6 +767,8 @@ namespace Ink_Canvas.Helpers
             else
             {
                 e.Handled = true;
+                EnableHotkeyRegistration();
+                LoadHotkeysFromSettings();
             }
         }
 
