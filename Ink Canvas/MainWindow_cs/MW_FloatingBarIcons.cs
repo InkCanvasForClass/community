@@ -737,8 +737,6 @@ namespace Ink_Canvas
 
             SwitchToDefaultPen(null, null);
             CheckColorTheme(true);
-            // 延迟半秒后再刷新快捷键状态
-            Task.Delay(500).ContinueWith(_ => Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => RefreshHotkeyState())));
         }
 
         #endregion
