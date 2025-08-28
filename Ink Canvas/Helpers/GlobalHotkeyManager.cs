@@ -767,7 +767,7 @@ namespace Ink_Canvas.Helpers
                     // 在鼠标模式下
                     if (_hotkeysShouldBeRegistered)
                     {
-                        e.Handled = false;
+                        Handled = false;
                     }
                     else
                     {
