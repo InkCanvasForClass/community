@@ -17,7 +17,6 @@ namespace Ink_Canvas.Helpers
         private readonly Dictionary<string, HotkeyInfo> _registeredHotkeys;
         private readonly MainWindow _mainWindow;
         private bool _isDisposed = false;
-        private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
         
         // 配置文件路径
         private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "HotkeyConfig.json");
@@ -28,7 +27,6 @@ namespace Ink_Canvas.Helpers
         {
             _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
             _registeredHotkeys = new Dictionary<string, HotkeyInfo>();
-            _hotkeysShouldBeRegistered = true; // 启动时注册热键
         }
         #endregion
 
