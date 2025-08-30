@@ -40,11 +40,6 @@ namespace Ink_Canvas
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     image.Name = timestamp;
 
-                    // 初始化TransformGroup
-                    InitializeElementTransform(image);
-
-                    CenterAndScaleElement(image);
-                    
                     // 设置图片属性，避免被InkCanvas选择系统处理
                     image.IsHitTestVisible = true;
                     image.Focusable = false;
@@ -52,7 +47,14 @@ namespace Ink_Canvas
                     // 初始化InkCanvas选择设置
                     InitializeInkCanvasSelectionSettings();
                     
+                    // 先添加到画布
                     inkCanvas.Children.Add(image);
+
+                    // 初始化TransformGroup
+                    InitializeElementTransform(image);
+
+                    // 居中缩放
+                    CenterAndScaleElement(image);
 
                     // 绑定事件处理器
                     BindElementEvents(image);
@@ -99,6 +101,8 @@ namespace Ink_Canvas
         {
             if (sender is FrameworkElement element)
             {
+                LogHelper.WriteLogToFile($"图片鼠标按下: {element.Name}");
+                
                 // 取消之前选中的元素
                 if (currentSelectedElement != null && currentSelectedElement != element)
                 {
@@ -151,6 +155,8 @@ namespace Ink_Canvas
         {
             if (sender is FrameworkElement element)
             {
+                LogHelper.WriteLogToFile($"图片滚轮事件: {element.Name}, Delta={e.Delta}");
+                
                 // 使用滚轮缩放的核心机制
                 ApplyWheelScaleTransform(element, e);
 
@@ -890,8 +896,13 @@ namespace Ink_Canvas
                 InkCanvas.SetLeft(element, centerX);
                 InkCanvas.SetTop(element, centerY);
 
-                // 清除任何现有的RenderTransform
-                element.RenderTransform = Transform.Identity;
+                // 保持TransformGroup，不清除RenderTransform
+                // 这样可以保持滚轮缩放和拖动功能
+                if (element.RenderTransform == null || element.RenderTransform == Transform.Identity)
+                {
+                    // 只有在没有TransformGroup时才创建
+                    InitializeElementTransform(element);
+                }
 
                 LogHelper.WriteLogToFile($"元素居中完成: 位置({centerX}, {centerY}), 尺寸({newWidth}x{newHeight})");
             }

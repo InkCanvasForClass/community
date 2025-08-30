@@ -97,11 +97,18 @@ namespace Ink_Canvas.Helpers
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            // 确保点数合理
-            if (smoothedPoints.Length > originalPoints.Length * 3)
+            // 严格控制点数，避免产生过多点
+            if (smoothedPoints.Length > originalPoints.Length * 2)
             {
                 // 如果点数增加太多，进行重采样
                 smoothedPoints = ResampleEquidistantOptimized(smoothedPoints, ResampleInterval);
+            }
+
+            // 最终检查：确保点数不会过多
+            if (smoothedPoints.Length > originalPoints.Length * 1.5)
+            {
+                // 如果仍然太多点，使用原始笔画
+                return stroke;
             }
 
             // 创建平滑后的笔画
@@ -125,23 +132,23 @@ namespace Ink_Canvas.Helpers
             // 添加第一个点
             result.Add(points[0]);
 
-            // 使用滑动窗口进行贝塞尔曲线拟合
-            for (int i = 0; i <= points.Length - 4; i++)
+            // 使用非重叠的窗口进行贝塞尔曲线拟合
+            for (int i = 0; i < points.Length - 3; i += 3) // 每次移动3个点，避免重叠
             {
                 var p0 = points[i];
-                var p1 = points[i + 1];
-                var p2 = points[i + 2];
-                var p3 = points[i + 3];
+                var p1 = points[Math.Min(i + 1, points.Length - 1)];
+                var p2 = points[Math.Min(i + 2, points.Length - 1)];
+                var p3 = points[Math.Min(i + 3, points.Length - 1)];
 
                 // 计算改进的控制点
                 var controlPoints = CalculateImprovedControlPoints(p0, p1, p2, p3);
                 
-                // 自适应插值步数
-                int steps = UseAdaptiveInterpolation ? 
-                    CalculateAdaptiveSteps(p0, p1, p2, p3) : InterpolationSteps;
+                // 限制插值步数，避免点数爆炸
+                int steps = Math.Min(UseAdaptiveInterpolation ? 
+                    CalculateAdaptiveSteps(p0, p1, p2, p3) : InterpolationSteps, 16);
 
-                // 生成贝塞尔曲线点
-                for (int j = 1; j <= steps; j++) // 从1开始避免重复第一个点
+                // 生成贝塞尔曲线点，但跳过第一个点避免重复
+                for (int j = 1; j <= steps; j++)
                 {
                     double t = (double)j / steps;
                     var bezierPoint = CubicBezierWithControlPoints(controlPoints, t, p0, p3);
@@ -152,7 +159,8 @@ namespace Ink_Canvas.Helpers
             // 添加最后一个点
             result.Add(points[points.Length - 1]);
 
-            return result.ToArray();
+            // 去重和优化点数
+            return RemoveDuplicatePoints(result.ToArray());
         }
 
         /// <summary>
@@ -231,6 +239,38 @@ namespace Ink_Canvas.Helpers
             double angle2 = Math.Acos(Math.Max(-1, Math.Min(1, Vector.Multiply(v2, v3))));
 
             return (angle1 + angle2) / Math.PI; // 归一化到0-1
+        }
+
+        /// <summary>
+        /// 去除重复和过近的点
+        /// </summary>
+        private StylusPoint[] RemoveDuplicatePoints(StylusPoint[] points)
+        {
+            if (points.Length < 2) return points;
+
+            var result = new List<StylusPoint>();
+            result.Add(points[0]);
+
+            double minDistance = ResampleInterval * 0.5; // 最小距离阈值
+
+            for (int i = 1; i < points.Length; i++)
+            {
+                var lastPoint = result[result.Count - 1];
+                var currentPoint = points[i];
+
+                // 计算距离
+                double distance = Math.Sqrt(
+                    (currentPoint.X - lastPoint.X) * (currentPoint.X - lastPoint.X) +
+                    (currentPoint.Y - lastPoint.Y) * (currentPoint.Y - lastPoint.Y));
+
+                // 如果距离足够大，添加这个点
+                if (distance >= minDistance)
+                {
+                    result.Add(currentPoint);
+                }
+            }
+
+            return result.ToArray();
         }
 
         /// <summary>
