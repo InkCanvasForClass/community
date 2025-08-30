@@ -28,6 +28,9 @@ namespace Ink_Canvas.Helpers
         private static readonly string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
         private static string statusFilePath;
 
+        // GitHub Token认证
+        private static readonly string GitHubToken = "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";
+
         // 线路组结构体（包含版本、下载、日志地址）
         public class UpdateLineGroup
         {
@@ -413,6 +416,8 @@ namespace Ink_Canvas.Helpers
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    client.DefaultRequestHeaders.Add("Authorization", $"token {GitHubToken}");
+                    LogHelper.WriteLogToFile("AutoUpdate | 使用GitHub Token进行API调用");
                     var response = await client.GetStringAsync(apiUrl);
                     var releases = JArray.Parse(response);
 
@@ -454,6 +459,8 @@ namespace Ink_Canvas.Helpers
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    client.DefaultRequestHeaders.Add("Authorization", $"token {GitHubToken}");
+                    LogHelper.WriteLogToFile("AutoUpdate | 使用GitHub Token进行API调用");
                     var response = await client.GetStringAsync(apiUrl);
                     var json = JObject.Parse(response);
                     string version = json["tag_name"]?.ToString();
@@ -1893,6 +1900,8 @@ namespace Ink_Canvas.Helpers
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    client.DefaultRequestHeaders.Add("Authorization", $"token {GitHubToken}");
+                    LogHelper.WriteLogToFile("AutoUpdate | 使用GitHub Token进行API调用");
                     var response = await client.GetStringAsync(apiUrl);
                     var arr = JArray.Parse(response);
                     foreach (var item in arr)
