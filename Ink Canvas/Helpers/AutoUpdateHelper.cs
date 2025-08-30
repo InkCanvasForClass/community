@@ -28,7 +28,7 @@ namespace Ink_Canvas.Helpers
         private static string statusFilePath;
 
         // GitHub Token认证
-        private static readonly string GitHubToken = "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";
+        private static readonly string GitHubToken = "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";
 
         // 线路组结构体（包含版本、下载、日志地址）
         public class UpdateLineGroup
