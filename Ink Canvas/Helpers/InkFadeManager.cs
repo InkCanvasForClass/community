@@ -335,7 +335,7 @@ namespace Ink_Canvas.Helpers
 
                 return path;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }
@@ -497,7 +497,7 @@ namespace Ink_Canvas.Helpers
                 // 开始分段渐隐动画
                 StartSegmentedFadeAnimation(segments, stroke, originalVisual, duration);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 StartSimpleFadeAnimation(originalVisual, stroke, opacity, duration);
             }
@@ -551,7 +551,7 @@ namespace Ink_Canvas.Helpers
 
                 return path;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }

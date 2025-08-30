@@ -1360,7 +1360,7 @@ namespace Ink_Canvas
                         // 直接设置滚动位置，不使用动画
                         SettingsPanelScrollViewer.ScrollToVerticalOffset(targetPosition);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // 如果出现异常，恢复到原来的滚动位置
                         SettingsPanelScrollViewer.ScrollToVerticalOffset(originalOffset);
@@ -2106,7 +2106,7 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 如果直接发送失败，回退到原来的方法
                 if (isPrevious)

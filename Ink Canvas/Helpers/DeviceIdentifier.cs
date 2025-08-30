@@ -404,28 +404,28 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     // 如果新字段为空但旧字段有数据，进行迁移
-                    if (TotalUsageSeconds == 0 && TotalUsageMinutes > 0)
+                    if (TotalUsageSeconds == 0 && TotalUsageSeconds > 0)
                     {
-                        TotalUsageSeconds = TotalUsageMinutes * 60;
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移总使用时长: {TotalUsageMinutes}分钟 -> {TotalUsageSeconds}秒");
+                        TotalUsageSeconds = TotalUsageSeconds * 60;
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移总使用时长: {TotalUsageSeconds}分钟 -> {TotalUsageSeconds}秒");
                     }
 
-                    if (AverageSessionSeconds == 0 && AverageSessionMinutes > 0)
+                    if (AverageSessionSeconds == 0 && AverageSessionSeconds > 0)
                     {
-                        AverageSessionSeconds = AverageSessionMinutes * 60;
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移平均会话时长: {AverageSessionMinutes}分钟 -> {AverageSessionSeconds}秒");
+                        AverageSessionSeconds = AverageSessionSeconds * 60;
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移平均会话时长: {AverageSessionSeconds}分钟 -> {AverageSessionSeconds}秒");
                     }
 
-                    if (WeeklyUsageSeconds == 0 && WeeklyUsageMinutes > 0)
+                    if (WeeklyUsageSeconds == 0 && WeeklyUsageSeconds > 0)
                     {
-                        WeeklyUsageSeconds = WeeklyUsageMinutes * 60;
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移每周使用时长: {WeeklyUsageMinutes}分钟 -> {WeeklyUsageSeconds}秒");
+                        WeeklyUsageSeconds = WeeklyUsageSeconds * 60;
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移每周使用时长: {WeeklyUsageSeconds}分钟 -> {WeeklyUsageSeconds}秒");
                     }
 
-                    if (LastWeekUsageSeconds == 0 && LastWeekUsageMinutes > 0)
+                    if (LastWeekUsageSeconds == 0 && LastWeekUsageSeconds > 0)
                     {
-                        LastWeekUsageSeconds = LastWeekUsageMinutes * 60;
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移上周使用时长: {LastWeekUsageMinutes}分钟 -> {LastWeekUsageSeconds}秒");
+                        LastWeekUsageSeconds = LastWeekUsageSeconds * 60;
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移上周使用时长: {LastWeekUsageSeconds}分钟 -> {LastWeekUsageSeconds}秒");
                     }
                 }
                 catch (Exception ex)
@@ -450,12 +450,12 @@ namespace Ink_Canvas.Helpers
                     LastWeekUsageSeconds = WeeklyUsageSeconds;
 
                     // 同时更新旧字段以保持兼容性
-                    LastWeekUsageMinutes = LastWeekUsageSeconds / 60;
+                    LastWeekUsageSeconds = LastWeekUsageSeconds / 60;
 
                     // 重置本周数据
                     WeeklyLaunchCount = 0;
                     WeeklyUsageSeconds = 0;
-                    WeeklyUsageMinutes = 0;
+                    WeeklyUsageSeconds = 0;
                     WeekStartDate = currentWeekStart;
 
                     LogHelper.WriteLogToFile($"DeviceIdentifier | 每周统计重置 - 上周启动: {LastWeekLaunchCount}次, 上周使用: {FormatDuration(LastWeekUsageSeconds)}");
@@ -489,7 +489,7 @@ namespace Ink_Canvas.Helpers
                 CheckAndResetWeeklyStats();
                 WeeklyUsageSeconds += seconds;
                 // 同时更新旧字段以保持兼容性
-                WeeklyUsageMinutes = WeeklyUsageSeconds / 60;
+                WeeklyUsageSeconds = WeeklyUsageSeconds / 60;
             }
         }
 
@@ -601,7 +601,7 @@ namespace Ink_Canvas.Helpers
                         stats.TotalUsageSeconds += sessionSeconds;
 
                         // 同时更新旧字段以保持兼容性
-                        stats.TotalUsageMinutes = stats.TotalUsageSeconds / 60;
+                        stats.TotalUsageSeconds = stats.TotalUsageSeconds / 60;
 
                         // 记录每周使用时长（秒级精度）
                         stats.RecordWeeklyUsage(sessionSeconds);
@@ -611,7 +611,7 @@ namespace Ink_Canvas.Helpers
                         {
                             stats.AverageSessionSeconds = (double)stats.TotalUsageSeconds / stats.LaunchCount;
                             // 同时更新旧字段以保持兼容性
-                            stats.AverageSessionMinutes = stats.AverageSessionSeconds / 60;
+                            stats.AverageSessionSeconds = stats.AverageSessionSeconds / 60;
                         }
                     }
 
@@ -650,9 +650,9 @@ namespace Ink_Canvas.Helpers
                 var currentWeekSeconds = stats.WeeklyUsageSeconds;
 
                 // 如果秒级数据为空但分钟数据存在，进行转换
-                if (currentWeekSeconds == 0 && stats.WeeklyUsageMinutes > 0)
+                if (currentWeekSeconds == 0 && stats.WeeklyUsageSeconds > 0)
                 {
-                    currentWeekSeconds = stats.WeeklyUsageMinutes * 60;
+                    currentWeekSeconds = stats.WeeklyUsageSeconds * 60;
                 }
 
                 // 如果本周数据不足，参考上周数据
@@ -660,9 +660,9 @@ namespace Ink_Canvas.Helpers
                 var weeklySeconds = currentWeekSeconds > 0 ? currentWeekSeconds : stats.LastWeekUsageSeconds;
 
                 // 如果秒级数据仍为空，使用分钟数据转换
-                if (weeklySeconds == 0 && stats.LastWeekUsageMinutes > 0)
+                if (weeklySeconds == 0 && stats.LastWeekUsageSeconds > 0)
                 {
-                    weeklySeconds = stats.LastWeekUsageMinutes * 60;
+                    weeklySeconds = stats.LastWeekUsageSeconds * 60;
                 }
 
                 // 综合评分系统（0-100分）
@@ -731,7 +731,7 @@ namespace Ink_Canvas.Helpers
             else if (weeklySeconds >= 3600) score += 5;      // 1-2小时：轻度使用
 
             // 历史使用深度评分（10分）- 反映用户的长期使用习惯（秒级精度）
-            var totalSeconds = stats.TotalUsageSeconds > 0 ? stats.TotalUsageSeconds : stats.TotalUsageMinutes * 60;
+            var totalSeconds = stats.TotalUsageSeconds > 0 ? stats.TotalUsageSeconds : stats.TotalUsageSeconds * 60;
             if (totalSeconds >= 180000) score += 10;    // 50小时以上：资深用户
             else if (totalSeconds >= 72000) score += 7; // 20-50小时：中等用户
             else if (totalSeconds >= 18000) score += 4;  // 5-20小时：新手用户
@@ -854,10 +854,8 @@ namespace Ink_Canvas.Helpers
                 DeviceId = DeviceId,
                 LastLaunchTime = DateTime.Now,
                 LaunchCount = 0,
-                TotalUsageSeconds = 0,
-                AverageSessionSeconds = 0,
-                TotalUsageMinutes = 0, // 保持兼容性
-                AverageSessionMinutes = 0, // 保持兼容性
+                TotalUsageSeconds = 0, // 保持兼容性
+                AverageSessionSeconds = 0, // 保持兼容性
                 LastUpdateCheck = DateTime.MinValue,
                 UpdatePriority = UpdatePriority.Medium,
                 UsageFrequency = UsageFrequency.Medium
@@ -879,8 +877,6 @@ namespace Ink_Canvas.Helpers
                     LaunchCount = 0,
                     TotalUsageSeconds = 0,
                     AverageSessionSeconds = 0,
-                    TotalUsageMinutes = 0,
-                    AverageSessionMinutes = 0,
                     LastUpdateCheck = DateTime.MinValue,
                     UpdatePriority = UpdatePriority.Medium,
                     UsageFrequency = UsageFrequency.Medium
@@ -1316,7 +1312,7 @@ namespace Ink_Canvas.Helpers
             double daysBetweenVersions, double daysSinceLastUse, UsageStats stats, UpdateType updateType)
         {
             // 考虑用户的总体使用模式
-            var isHeavyUser = stats.TotalUsageMinutes > 3000; // 超过50小时的重度用户
+            var isHeavyUser = stats.TotalUsageSeconds > 3000; // 超过50小时的重度用户
             var isFrequentUser = stats.LaunchCount > 100; // 启动超过100次的频繁用户
 
             // 根据更新类型调整推送策略
@@ -1490,7 +1486,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private static string GetUserTypeDescription(UsageStats stats)
         {
-            var isHeavyUser = stats.TotalUsageMinutes > 3000;
+            var isHeavyUser = stats.TotalUsageSeconds > 3000;
             var isFrequentUser = stats.LaunchCount > 100;
             var daysSinceLastUse = (DateTime.Now - stats.LastLaunchTime).TotalDays;
 

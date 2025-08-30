@@ -224,7 +224,7 @@ namespace Ink_Canvas.Windows
                         break;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 设置默认快捷键时出错，忽略
             }
