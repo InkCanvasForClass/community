@@ -154,6 +154,12 @@ namespace Ink_Canvas
                 // 使用鼠标拖动的完整实现机制
                 ApplyMouseDragTransform(element, currentPoint, dragStartPoint);
 
+                // 如果是图片元素，更新工具栏位置
+                if (element is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageSelectionToolbarPosition(element);
+                }
+
                 dragStartPoint = currentPoint;
                 e.Handled = true;
             }
@@ -180,6 +186,12 @@ namespace Ink_Canvas
             {
                 // 使用触摸拖动的完整实现
                 ApplyTouchManipulationTransform(element, e);
+
+                // 如果是图片元素，更新工具栏位置
+                if (element is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageSelectionToolbarPosition(element);
+                }
 
                 e.Handled = true;
             }
@@ -247,8 +259,37 @@ namespace Ink_Canvas
             currentSelectedElement = element;
             isElementSelected = true;
             
-            // 去除选中效果，避免蓝色底边问题
-            // 可以通过其他方式（如状态变量）来跟踪选中状态
+            // 根据元素类型显示不同的选择工具栏
+            if (element is Image)
+            {
+                // 显示图片选择工具栏并设置位置
+                if (BorderImageSelectionControl != null)
+                {
+                    // 计算工具栏位置
+                    UpdateImageSelectionToolbarPosition(element);
+                    BorderImageSelectionControl.Visibility = Visibility.Visible;
+                }
+                
+                // 隐藏笔画选择工具栏
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                // 显示笔画选择工具栏
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Visible;
+                }
+                
+                // 隐藏图片选择工具栏
+                if (BorderImageSelectionControl != null)
+                {
+                    BorderImageSelectionControl.Visibility = Visibility.Collapsed;
+                }
+            }
             
             // 确保选择框不显示，避免蓝色边框
             if (GridInkCanvasSelectionCover != null)
@@ -271,6 +312,17 @@ namespace Ink_Canvas
         {
             // 去除选中效果
             isElementSelected = false;
+            
+            // 隐藏所有选择工具栏
+            if (BorderImageSelectionControl != null)
+            {
+                BorderImageSelectionControl.Visibility = Visibility.Collapsed;
+            }
+            
+            if (BorderStrokeSelectionControl != null)
+            {
+                BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+            }
             
             // 确保选择框隐藏
             if (GridInkCanvasSelectionCover != null)
@@ -676,9 +728,9 @@ namespace Ink_Canvas
         /// 克隆图片
         /// </summary>
         /// <param name="image">要克隆的图片</param>
-        private void CloneImage(Image image)
+        private Image CloneImage(Image image)
         {
-            if (image == null) return;
+            if (image == null) return null;
 
             try
             {
@@ -707,6 +759,8 @@ namespace Ink_Canvas
                 // 记录错误但不中断程序
                 System.Diagnostics.Debug.WriteLine($"克隆图片时发生错误: {ex.Message}");
             }
+
+            return null;
         }
 
         /// <summary>
@@ -932,5 +986,249 @@ namespace Ink_Canvas
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
             }
         }
+
+        // 更新图片选择工具栏位置
+        private void UpdateImageSelectionToolbarPosition(FrameworkElement element)
+        {
+            try
+            {
+                if (BorderImageSelectionControl == null || element == null) return;
+
+                // 获取元素在画布中的位置
+                double elementLeft = InkCanvas.GetLeft(element);
+                double elementTop = InkCanvas.GetTop(element);
+                double elementWidth = element.ActualWidth;
+                double elementHeight = element.ActualHeight;
+
+                // 如果元素位置未设置，使用默认值
+                if (double.IsNaN(elementLeft)) elementLeft = 0;
+                if (double.IsNaN(elementTop)) elementTop = 0;
+
+                // 计算工具栏位置（显示在图片下方）
+                double toolbarLeft = elementLeft + (elementWidth / 2) - (BorderImageSelectionControl.ActualWidth / 2);
+                double toolbarTop = elementTop + elementHeight + 10; // 图片下方10像素
+
+                // 确保工具栏不超出画布边界
+                double maxLeft = inkCanvas.ActualWidth - BorderImageSelectionControl.ActualWidth;
+                double maxTop = inkCanvas.ActualHeight - BorderImageSelectionControl.ActualHeight;
+
+                toolbarLeft = Math.Max(0, Math.Min(toolbarLeft, maxLeft));
+                toolbarTop = Math.Max(0, Math.Min(toolbarTop, maxTop));
+
+                // 设置工具栏位置
+                BorderImageSelectionControl.Margin = new Thickness(toolbarLeft, toolbarTop, 0, 0);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新图片选择工具栏位置失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #region Image Selection Toolbar Event Handlers
+
+        // 图片克隆功能
+        private void BorderImageClone_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement is Image originalImage)
+                {
+                    // 创建克隆图片
+                    Image clonedImage = CloneImage(originalImage);
+                    
+                    // 添加到画布
+                    inkCanvas.Children.Add(clonedImage);
+                    
+                    // 初始化变换
+                    InitializeElementTransform(clonedImage);
+                    
+                    // 绑定事件
+                    BindElementEvents(clonedImage);
+                    
+                    // 记录历史
+                    timeMachine.CommitElementInsertHistory(clonedImage);
+                    
+                    LogHelper.WriteLogToFile($"图片克隆完成: {clonedImage.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片克隆失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片克隆到新页面
+        private void BorderImageCloneToNewBoard_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement is Image originalImage)
+                {
+                    // 创建克隆图片
+                    Image clonedImage = CloneImage(originalImage);
+                    
+                    // 这里可以添加切换到新页面的逻辑
+                    // 暂时先添加到当前页面
+                    inkCanvas.Children.Add(clonedImage);
+                    
+                    // 初始化变换
+                    InitializeElementTransform(clonedImage);
+                    
+                    // 绑定事件
+                    BindElementEvents(clonedImage);
+                    
+                    // 记录历史
+                    timeMachine.CommitElementInsertHistory(clonedImage);
+                    
+                    LogHelper.WriteLogToFile($"图片克隆到新页面完成: {clonedImage.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片克隆到新页面失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片左旋转
+        private void BorderImageRotateLeft_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    ApplyRotateTransform(currentSelectedElement, -45);
+                    LogHelper.WriteLogToFile($"图片左旋转完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片左旋转失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片右旋转
+        private void BorderImageRotateRight_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    ApplyRotateTransform(currentSelectedElement, 45);
+                    LogHelper.WriteLogToFile($"图片右旋转完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片右旋转失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片缩放减小
+        private void GridImageScaleDecrease_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
+                    ApplyScaleTransform(currentSelectedElement, 0.9, elementCenter);
+                    LogHelper.WriteLogToFile($"图片缩放减小完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片缩放减小失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片缩放增大
+        private void GridImageScaleIncrease_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
+                    ApplyScaleTransform(currentSelectedElement, 1.1, elementCenter);
+                    LogHelper.WriteLogToFile($"图片缩放增大完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片缩放增大失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片删除
+        private void BorderImageDelete_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    // 记录删除历史
+                    timeMachine.CommitElementRemoveHistory(currentSelectedElement);
+                    
+                    // 从画布中移除
+                    inkCanvas.Children.Remove(currentSelectedElement);
+                    
+                    // 清除选中状态
+                    UnselectElement(currentSelectedElement);
+                    currentSelectedElement = null;
+                    
+                    LogHelper.WriteLogToFile($"图片删除完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片删除失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 克隆图片的辅助方法
+        private Image CreateClonedImage(Image originalImage)
+        {
+            try
+            {
+                Image clonedImage = new Image();
+                
+                // 复制图片源
+                if (originalImage.Source is BitmapSource bitmapSource)
+                {
+                    clonedImage.Source = bitmapSource;
+                }
+                
+                // 复制属性
+                clonedImage.Width = originalImage.Width;
+                clonedImage.Height = originalImage.Height;
+                clonedImage.Stretch = originalImage.Stretch;
+                clonedImage.StretchDirection = originalImage.StretchDirection;
+                
+                // 复制位置
+                double left = InkCanvas.GetLeft(originalImage);
+                double top = InkCanvas.GetTop(originalImage);
+                InkCanvas.SetLeft(clonedImage, left + 20); // 稍微偏移位置
+                InkCanvas.SetTop(clonedImage, top + 20);
+                
+                // 复制变换
+                if (originalImage.RenderTransform is TransformGroup originalTransformGroup)
+                {
+                    clonedImage.RenderTransform = originalTransformGroup.Clone();
+                }
+                
+                // 设置名称
+                string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                clonedImage.Name = timestamp;
+                
+                return clonedImage;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"克隆图片失败: {ex.Message}", LogHelper.LogType.Error);
+                return null;
+            }
+        }
+
+        #endregion
     }
 }
