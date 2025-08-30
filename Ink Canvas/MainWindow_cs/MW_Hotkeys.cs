@@ -77,7 +77,7 @@ namespace Ink_Canvas
             PenIcon_Click(lastBorderMouseDownObject, null);
         }
 
-        private void KeyChangeToQuitDrawTool(object sender, ExecutedRoutedEventArgs e)
+        internal void KeyChangeToQuitDrawTool(object sender, ExecutedRoutedEventArgs e)
         {
             if (currentMode != 0)
             {
