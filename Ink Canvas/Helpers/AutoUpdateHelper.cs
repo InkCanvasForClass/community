@@ -1851,8 +1851,8 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
 
-                // 执行安装，非静默模式
-                InstallNewVersionApp(remoteVersion, false);
+                // 执行安装，静默模式
+                InstallNewVersionApp(remoteVersion, true);  
                 App.IsAppExitByUser = true;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -1981,7 +1981,7 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
                 LogHelper.WriteLogToFile($"AutoUpdate | 手动安装版本: {version}");
-                InstallNewVersionApp(version, false);
+                InstallNewVersionApp(version, true);  
                 App.IsAppExitByUser = true;
                 Application.Current.Dispatcher.Invoke(() =>
                 {

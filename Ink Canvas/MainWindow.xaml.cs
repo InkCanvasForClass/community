@@ -843,7 +843,7 @@ namespace Ink_Canvas
                                 App.IsAppExitByUser = true;
 
                                 // 准备批处理脚本
-                                AutoUpdateHelper.InstallNewVersionApp(AvailableLatestVersion, false);
+                                AutoUpdateHelper.InstallNewVersionApp(AvailableLatestVersion, true);  // 修改为静默模式，避免重复启动进程
 
                                 // 关闭软件，让安装程序接管
                                 Application.Current.Shutdown();
