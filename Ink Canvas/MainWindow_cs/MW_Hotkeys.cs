@@ -44,15 +44,8 @@ namespace Ink_Canvas
             }
         }
 
-        private void Window_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Escape) KeyExit(null, null);
-        }
-
-        private void CommandBinding_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
-        }
+        // 保留PPT翻页快捷键处理
+        // 以下方法保留供全局快捷键调用
 
         private void HotKey_Undo(object sender, ExecutedRoutedEventArgs e)
         {
