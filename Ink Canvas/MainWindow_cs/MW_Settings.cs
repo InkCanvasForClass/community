@@ -2678,10 +2678,13 @@ namespace Ink_Canvas
                 
                 // 在按钮可见性更新后，重新计算当前高光位置
                 // 延迟执行以确保UI更新完成
-                Dispatcher.BeginInvoke(new Action(() =>
+                Dispatcher.BeginInvoke(new Action(async () =>
                 {
                     try
                     {
+                        // 等待UI完全更新
+                        await Task.Delay(100);
+                        
                         // 获取当前选中的模式并重新设置高光位置
                         string currentMode = GetCurrentSelectedMode();
                         if (!string.IsNullOrEmpty(currentMode))
