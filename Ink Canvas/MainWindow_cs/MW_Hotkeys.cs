@@ -79,8 +79,16 @@ namespace Ink_Canvas
 
         private void KeyChangeToQuitDrawTool(object sender, ExecutedRoutedEventArgs e)
         {
-            if (currentMode != 0) ImageBlackboard_MouseUp(lastBorderMouseDownObject, null);
-            CursorIcon_Click(lastBorderMouseDownObject, null);
+            if (currentMode != 0)
+            {
+                // 在白板模式下，alt+q 退出白板模式
+                ImageBlackboard_MouseUp(lastBorderMouseDownObject, null);
+            }
+            else
+            {
+                // 在非白板模式下，alt+q 切换到鼠标模式
+                CursorIcon_Click(lastBorderMouseDownObject, null);
+            }
         }
 
         private void KeyChangeToSelect(object sender, ExecutedRoutedEventArgs e)
