@@ -274,8 +274,6 @@ namespace Ink_Canvas
                     drawingAttributes.FitToCurve = Settings.Canvas.FitToCurve;
                 }
 
-                // 使用集中化的工具模式切换方法
-                SetCurrentToolMode(InkCanvasEditingMode.Ink);
                 inkCanvas.Gesture += InkCanvas_Gesture;
             }
             catch { }
@@ -2026,9 +2024,11 @@ namespace Ink_Canvas
             try
             {
                 _globalHotkeyManager = new GlobalHotkeyManager(this);
-                // 启动时加载快捷键，默认启用
+                // 启动时加载快捷键，但默认为鼠标模式，禁用快捷键以放行键盘操作
                 _globalHotkeyManager.EnableHotkeyRegistration();
-                LogHelper.WriteLogToFile("全局快捷键管理器已初始化并加载快捷键", LogHelper.LogType.Event);
+                // 启动时默认为鼠标模式，禁用快捷键
+                _globalHotkeyManager.UpdateHotkeyStateForToolMode(true);
+                LogHelper.WriteLogToFile("全局快捷键管理器已初始化，启动时默认为鼠标模式并禁用快捷键", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
