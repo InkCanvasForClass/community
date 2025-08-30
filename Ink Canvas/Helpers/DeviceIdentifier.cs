@@ -1512,14 +1512,14 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile("DeviceIdentifier | 开始关机时保存使用时间数据", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("DeviceIdentifier | 开始关机时保存使用时间数据");
 
                 // 1. 加载现有使用统计数据
                 var stats = LoadUsageStats();
                 if (stats == null)
                 {
                     stats = new UsageStats { DeviceId = DeviceId };
-                    LogHelper.WriteLogToFile("DeviceIdentifier | 创建新的使用统计数据", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 创建新的使用统计数据");
                 }
 
                 // 2. 计算本次会话时长（防止异常值）
@@ -1542,7 +1542,7 @@ namespace Ink_Canvas.Helpers
                 // 4. 保存数据
                 SaveUsageStats(stats);
                 
-                LogHelper.WriteLogToFile("DeviceIdentifier | 关机保存完成", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("DeviceIdentifier | 关机保存完成");
             }
             catch (Exception ex)
             {

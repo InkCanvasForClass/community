@@ -748,19 +748,30 @@ namespace Ink_Canvas
                 InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
                 InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
 
+                // 设置图片属性，避免被InkCanvas选择系统处理
+                clonedImage.IsHitTestVisible = true;
+                clonedImage.Focusable = false;
+
+                // 初始化变换
+                InitializeElementTransform(clonedImage);
+
+                // 绑定事件
+                BindElementEvents(clonedImage);
+
                 // 添加到画布
                 inkCanvas.Children.Add(clonedImage);
 
                 // 提交到时间机器以支持撤销
                 timeMachine.CommitElementInsertHistory(clonedImage);
+
+                return clonedImage;
             }
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"克隆图片时发生错误: {ex.Message}");
+                LogHelper.WriteLogToFile($"克隆图片时发生错误: {ex.Message}", LogHelper.LogType.Error);
+                return null;
             }
-
-            return null;
         }
 
         /// <summary>
@@ -1064,23 +1075,32 @@ namespace Ink_Canvas
             {
                 if (currentSelectedElement is Image originalImage)
                 {
-                    // 创建克隆图片
-                    Image clonedImage = CloneImage(originalImage);
+                    // 创建新页面
+                    BtnWhiteBoardAdd_Click(null, null);
                     
-                    // 这里可以添加切换到新页面的逻辑
-                    // 暂时先添加到当前页面
-                    inkCanvas.Children.Add(clonedImage);
+                    // 创建克隆图片（不添加到当前画布，因为已经创建了新页面）
+                    Image clonedImage = CreateClonedImage(originalImage);
                     
-                    // 初始化变换
-                    InitializeElementTransform(clonedImage);
-                    
-                    // 绑定事件
-                    BindElementEvents(clonedImage);
-                    
-                    // 记录历史
-                    timeMachine.CommitElementInsertHistory(clonedImage);
-                    
-                    LogHelper.WriteLogToFile($"图片克隆到新页面完成: {clonedImage.Name}");
+                    if (clonedImage != null)
+                    {
+                        // 设置图片属性，避免被InkCanvas选择系统处理
+                        clonedImage.IsHitTestVisible = true;
+                        clonedImage.Focusable = false;
+
+                        // 初始化变换
+                        InitializeElementTransform(clonedImage);
+
+                        // 绑定事件
+                        BindElementEvents(clonedImage);
+
+                        // 添加到新页面的画布
+                        inkCanvas.Children.Add(clonedImage);
+
+                        // 记录历史
+                        timeMachine.CommitElementInsertHistory(clonedImage);
+                        
+                        LogHelper.WriteLogToFile($"图片克隆到新页面完成: {clonedImage.Name}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -1185,7 +1205,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 克隆图片的辅助方法
+        // 克隆图片的辅助方法（只创建图片，不添加到画布）
         private Image CreateClonedImage(Image originalImage)
         {
             try
@@ -1204,7 +1224,7 @@ namespace Ink_Canvas
                 clonedImage.Stretch = originalImage.Stretch;
                 clonedImage.StretchDirection = originalImage.StretchDirection;
                 
-                // 复制位置
+                // 复制位置（在新页面中居中显示）
                 double left = InkCanvas.GetLeft(originalImage);
                 double top = InkCanvas.GetTop(originalImage);
                 InkCanvas.SetLeft(clonedImage, left + 20); // 稍微偏移位置

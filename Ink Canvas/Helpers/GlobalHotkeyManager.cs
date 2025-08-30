@@ -175,7 +175,7 @@ namespace Ink_Canvas.Helpers
             {
                 if (!File.Exists(HotkeyConfigFile))
                 {
-                    LogHelper.WriteLogToFile("快捷键配置文件不存在", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("快捷键配置文件不存在");
                     return new List<HotkeyInfo>();
                 }
 
@@ -208,7 +208,7 @@ namespace Ink_Canvas.Helpers
                     });
                 }
 
-                LogHelper.WriteLogToFile($"从配置文件读取到 {hotkeyList.Count} 个快捷键信息", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"从配置文件读取到 {hotkeyList.Count} 个快捷键信息");
                 return hotkeyList;
             }
             catch (Exception ex)
@@ -284,14 +284,14 @@ namespace Ink_Canvas.Helpers
                 {
                     // 成功从配置文件加载快捷键设置
                     _hotkeysShouldBeRegistered = true;
-                    LogHelper.WriteLogToFile("成功从配置文件加载快捷键设置", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("成功从配置文件加载快捷键设置");
                 }
                 else
                 {
                     // 如果配置文件不存在或加载失败，使用默认快捷键
                     if (!File.Exists(HotkeyConfigFile))
                     {
-                        LogHelper.WriteLogToFile("配置文件不存在，注册默认快捷键", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("配置文件不存在，注册默认快捷键");
                         RegisterDefaultHotkeys();
                         _hotkeysShouldBeRegistered = true;
                     }
@@ -345,14 +345,14 @@ namespace Ink_Canvas.Helpers
                 if (!_hotkeysShouldBeRegistered)
                 {
                     _hotkeysShouldBeRegistered = true;
-                    LogHelper.WriteLogToFile("启用快捷键注册功能", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("启用快捷键注册功能");
                     
                     // 立即加载快捷键设置
                     LoadHotkeysFromSettings();
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("快捷键注册功能已经启用，重新加载快捷键设置", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("快捷键注册功能已经启用，重新加载快捷键设置");
                     // 即使已经启用，也要重新加载快捷键设置以确保快捷键正常工作
                     LoadHotkeysFromSettings();
                 }
@@ -374,14 +374,14 @@ namespace Ink_Canvas.Helpers
                 if (_hotkeysShouldBeRegistered)
                 {
                     _hotkeysShouldBeRegistered = false;
-                    LogHelper.WriteLogToFile("禁用快捷键注册功能", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("禁用快捷键注册功能");
                     
                     // 注销所有快捷键
                     UnregisterAllHotkeys();
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("快捷键注册功能已经禁用", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("快捷键注册功能已经禁用");
                 }
             }
             catch (Exception ex)
@@ -403,13 +403,13 @@ namespace Ink_Canvas.Helpers
                 {
                     // 鼠标模式下禁用快捷键，让键盘操作放行
                     DisableHotkeyRegistration();
-                    LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作");
                 }
                 else
                 {
                     // 非鼠标模式下启用快捷键
                     EnableHotkeyRegistration();
-                    LogHelper.WriteLogToFile("切换到非鼠标模式，启用快捷键", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("切换到非鼠标模式，启用快捷键");
                 }
             }
             catch (Exception ex)

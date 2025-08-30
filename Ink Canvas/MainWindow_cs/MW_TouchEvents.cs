@@ -162,13 +162,13 @@ namespace Ink_Canvas
                 return;
             }
             
-            LogHelper.WriteLogToFile($"MainWindow_StylusDown 被调用，笔尾状态: {e.StylusDevice.Inverted}, 当前 drawingShapeMode: {drawingShapeMode}, 当前 EditingMode: {inkCanvas.EditingMode}", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile($"MainWindow_StylusDown 被调用，笔尾状态: {e.StylusDevice.Inverted}, 当前 drawingShapeMode: {drawingShapeMode}, 当前 EditingMode: {inkCanvas.EditingMode}");
             
             // 新增：根据是否为笔尾自动切换橡皮擦/画笔模式
             if (e.StylusDevice.Inverted)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-                LogHelper.WriteLogToFile("检测到笔尾，设置 EditingMode 为 EraseByPoint", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("检测到笔尾，设置 EditingMode 为 EraseByPoint");
             }
             else
             {
@@ -177,18 +177,18 @@ namespace Ink_Canvas
                 {
                     // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    LogHelper.WriteLogToFile("几何绘制模式，设置 EditingMode 为 None", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("几何绘制模式，设置 EditingMode 为 None");
                     return;
                 }
                 // 修复：保持当前的线擦模式，不要强制切换到Ink模式
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                    LogHelper.WriteLogToFile("设置 EditingMode 为 Ink", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("设置 EditingMode 为 Ink");
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("保持当前线擦模式", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("保持当前线擦模式");
                 }
             }
             SetCursorBasedOnEditingMode(inkCanvas);
@@ -230,14 +230,14 @@ namespace Ink_Canvas
         {
             try
             {
-                LogHelper.WriteLogToFile($"MainWindow_StylusUp 被调用，EditingMode: {inkCanvas.EditingMode}, EnableInkFade: {Settings.Canvas.EnableInkFade}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"MainWindow_StylusUp 被调用，EditingMode: {inkCanvas.EditingMode}, EnableInkFade: {Settings.Canvas.EnableInkFade}");
                 
                 var stroke = GetStrokeVisual(e.StylusDevice.Id).Stroke;
-                LogHelper.WriteLogToFile($"获取到墨迹，StylusPoints数量: {stroke.StylusPoints.Count}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"获取到墨迹，StylusPoints数量: {stroke.StylusPoints.Count}");
                 
                 // 正常模式：添加到画布并参与墨迹纠正
                 // 墨迹渐隐功能现在在 StrokeCollected 事件中统一处理所有输入方式
-                LogHelper.WriteLogToFile("StylusUp: 添加墨迹到画布", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("StylusUp: 添加墨迹到画布");
                 
                 inkCanvas.Strokes.Add(stroke);
                 await Task.Delay(5); // 避免渲染墨迹完成前预览墨迹被删除导致墨迹闪烁
@@ -528,7 +528,7 @@ namespace Ink_Canvas
                 StartPalmEraserRecoveryTimer();
                 
                 // 记录日志
-                LogHelper.WriteLogToFile($"Palm eraser activated - Sensitivity: {Settings.Canvas.PalmEraserSensitivity}, Touch bounds: {bounds.Width}x{bounds.Height}, Aspect ratio: {aspectRatio:F2}, Touch points: {dec.Count}", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"Palm eraser activated - Sensitivity: {Settings.Canvas.PalmEraserSensitivity}, Touch bounds: {bounds.Width}x{bounds.Height}, Aspect ratio: {aspectRatio:F2}, Touch points: {dec.Count}");
             }
         }
         
@@ -623,7 +623,7 @@ namespace Ink_Canvas
                                 break;
                         }
                         
-                        LogHelper.WriteLogToFile($"Palm eraser recovered to mode: {palmEraserLastEditingMode}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"Palm eraser recovered to mode: {palmEraserLastEditingMode}");
                     }
                 }
                 catch (Exception ex)
@@ -648,7 +648,7 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.IsHitTestVisible = true;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
                 
-                LogHelper.WriteLogToFile("Palm eraser state reset completed", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("Palm eraser state reset completed");
             }
             
             // 新增：超时检测 - 如果手掌擦激活时间过长，强制重置状态
@@ -697,7 +697,7 @@ namespace Ink_Canvas
                     // 停止恢复定时器
                     StopPalmEraserRecoveryTimer();
                     
-                    LogHelper.WriteLogToFile("Palm eraser timeout recovery completed", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("Palm eraser timeout recovery completed");
                 }
             }
             // 修复：几何绘制模式下，触摸抬手时应该正确处理，而不是简单模拟鼠标事件
@@ -1033,7 +1033,7 @@ namespace Ink_Canvas
                                 break;
                         }
                         
-                        LogHelper.WriteLogToFile($"Palm eraser timer recovery to mode: {palmEraserLastEditingMode}", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile($"Palm eraser timer recovery to mode: {palmEraserLastEditingMode}");
                     }
                 }
                 catch (Exception ex)
@@ -1055,7 +1055,7 @@ namespace Ink_Canvas
                 // 停止定时器
                 StopPalmEraserRecoveryTimer();
                 
-                LogHelper.WriteLogToFile("Palm eraser timer recovery completed", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile("Palm eraser timer recovery completed");
             }
         }
     }

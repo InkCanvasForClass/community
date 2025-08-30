@@ -2077,9 +2077,9 @@ namespace Ink_Canvas
                 {
                     highlighterColor = 100; // 黑色荧光笔
                 }
-                else if (color == Colors.Yellow || IsColorSimilar(color, Color.FromRgb(234, 179, 8), 15) ||
-                         IsColorSimilar(color, Color.FromRgb(250, 204, 21), 15) ||
-                         IsColorSimilar(color, Color.FromRgb(253, 224, 71), 15))
+                else if (color == Colors.Yellow || IsColorSimilar(color, Color.FromRgb(234, 179, 8)) ||
+                         IsColorSimilar(color, Color.FromRgb(250, 204, 21)) ||
+                         IsColorSimilar(color, Color.FromRgb(253, 224, 71)))
                 {
                     highlighterColor = 103; // 黄色荧光笔
                 }
@@ -2094,12 +2094,12 @@ namespace Ink_Canvas
                 {
                     highlighterColor = 106; // 蓝色荧光笔
                 }
-                else if (color == Colors.Red || IsColorSimilar(color, Color.FromRgb(220, 38, 38), 15) ||
-                         IsColorSimilar(color, Color.FromRgb(239, 68, 68), 15))
+                else if (color == Colors.Red || IsColorSimilar(color, Color.FromRgb(220, 38, 38)) ||
+                         IsColorSimilar(color, Color.FromRgb(239, 68, 68)))
                 {
                     highlighterColor = 102; // 红色荧光笔
                 }
-                else if (color == Colors.Green || IsColorSimilar(color, Color.FromRgb(22, 163, 74), 15))
+                else if (color == Colors.Green || IsColorSimilar(color, Color.FromRgb(22, 163, 74)))
                 {
                     highlighterColor = 104; // 绿色荧光笔
                 }
