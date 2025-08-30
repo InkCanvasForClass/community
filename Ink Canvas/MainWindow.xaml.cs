@@ -2030,7 +2030,10 @@ namespace Ink_Canvas
             try
             {
                 Settings.Canvas.InkFadeTime = (int)e.NewValue;
-                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                if (_inkFadeManager != null)
+                {
+                    _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                }
                 LogHelper.WriteLogToFile($"墨迹渐隐时间已更新为 {Settings.Canvas.InkFadeTime}ms", LogHelper.LogType.Event);
             }
             catch (Exception ex)
