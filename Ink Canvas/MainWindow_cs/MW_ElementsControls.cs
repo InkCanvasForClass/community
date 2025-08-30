@@ -31,10 +31,6 @@ namespace Ink_Canvas
                     CenterAndScaleElement(image);
                     inkCanvas.Children.Add(image);
 
-                    // 添加鼠标事件处理，使图片可以被选择
-                    image.MouseDown += UIElement_MouseDown;
-                    image.IsManipulationEnabled = true;
-
                     timeMachine.CommitElementInsertHistory(image);
                 }
             }
@@ -114,10 +110,6 @@ namespace Ink_Canvas
                     InkCanvas.SetLeft(mediaElement, 0);
                     InkCanvas.SetTop(mediaElement, 0);
                     inkCanvas.Children.Add(mediaElement);
-
-                    // 添加鼠标事件处理，使媒体元素可以被选择
-                    mediaElement.MouseDown += UIElement_MouseDown;
-                    mediaElement.IsManipulationEnabled = true;
 
                     mediaElement.LoadedBehavior = MediaState.Manual;
                     mediaElement.UnloadedBehavior = MediaState.Manual;
@@ -242,16 +234,8 @@ namespace Ink_Canvas
                 InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
                 InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
 
-                // 添加鼠标事件处理，使图片可以被选择
-                clonedImage.MouseDown += UIElement_MouseDown;
-                clonedImage.IsManipulationEnabled = true;
-
                 // 添加到画布
                 inkCanvas.Children.Add(clonedImage);
-
-                // 选择新克隆的图片
-                DeselectUIElement();
-                SelectUIElement(clonedImage);
 
                 // 提交到时间机器以支持撤销
                 timeMachine.CommitElementInsertHistory(clonedImage);
@@ -287,19 +271,11 @@ namespace Ink_Canvas
                 InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
                 InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
 
-                // 添加鼠标事件处理，使图片可以被选择
-                clonedImage.MouseDown += UIElement_MouseDown;
-                clonedImage.IsManipulationEnabled = true;
-
                 // 创建新页面
                 BtnWhiteBoardAdd_Click(null, null);
 
                 // 添加到新页面的画布
                 inkCanvas.Children.Add(clonedImage);
-
-                // 选择新克隆的图片
-                DeselectUIElement();
-                SelectUIElement(clonedImage);
 
                 // 提交到时间机器以支持撤销
                 timeMachine.CommitElementInsertHistory(clonedImage);
@@ -378,9 +354,6 @@ namespace Ink_Canvas
                 if (inkCanvas.Children.Contains(image))
                 {
                     inkCanvas.Children.Remove(image);
-
-                    // 取消选择
-                    DeselectUIElement();
 
                     // 提交到时间机器以支持撤销
                     timeMachine.CommitElementRemoveHistory(image);

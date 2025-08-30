@@ -86,9 +86,6 @@ namespace Ink_Canvas
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    // 取消任何UI元素的选择（只在真正切换页面时）
-                    DeselectUIElement();
-
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;
@@ -111,9 +108,6 @@ namespace Ink_Canvas
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
-                    // 取消任何UI元素的选择（只在真正切换页面时）
-                    DeselectUIElement();
-
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;

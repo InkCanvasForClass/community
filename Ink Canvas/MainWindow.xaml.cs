@@ -509,7 +509,7 @@ namespace Ink_Canvas
             ApplyAlwaysOnTop();
 
             // 初始化UIElement选择系统
-            InitializeUIElementSelection();
+
 
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
@@ -1003,19 +1003,7 @@ namespace Ink_Canvas
                 // 如果点击的不是图片或其他UI元素，则取消选择
                 if (!(hitTest is Image) && !(hitTest is MediaElement))
                 {
-                    // 检查是否点击在已选择的UI元素上
-                    bool clickedOnSelectedElement = false;
-                    if (selectedUIElement != null)
-                    {
-                        var elementBounds = GetUIElementBounds(selectedUIElement);
-                        var clickPoint = e.GetPosition(inkCanvas);
-                        clickedOnSelectedElement = elementBounds.Contains(clickPoint);
-                    }
-
-                    if (!clickedOnSelectedElement)
-                    {
-                        DeselectUIElement();
-                    }
+                    
                 }
             }
         }
@@ -1931,79 +1919,7 @@ namespace Ink_Canvas
             }
         }
 
-        #region Image Toolbar Event Handlers
 
-        private void BorderImageClone_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                CloneImage(image);
-            }
-        }
-
-        private void BorderImageCloneToNewBoard_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                CloneImageToNewBoard(image);
-            }
-        }
-
-        private void BorderImageRotateLeft_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                RotateImage(image, -90);
-            }
-        }
-
-        private void BorderImageRotateRight_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                RotateImage(image, 90);
-            }
-        }
-
-        private void GridImageScaleIncrease_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                ScaleImage(image, 1.25);
-            }
-        }
-
-        private void GridImageScaleDecrease_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                ScaleImage(image, 0.8);
-            }
-        }
-
-        private void BorderImageDelete_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                DeleteImage(image);
-            }
-        }
-
-        #endregion
 
         #region 全局快捷键管理
         /// <summary>

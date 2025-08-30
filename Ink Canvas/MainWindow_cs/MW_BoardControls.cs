@@ -116,8 +116,7 @@ namespace Ink_Canvas
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
-            // 取消任何UI元素的选择，隐藏拉伸控件
-            DeselectUIElement();
+
 
             // 只清除笔画，不清除图片元素
             // 图片元素的清除由调用方决定
@@ -159,11 +158,7 @@ namespace Ink_Canvas
                     foreach (var item in TimeMachineHistories[CurrentWhiteboardIndex]) ApplyHistoryToCanvas(item);
                 }
 
-                // 确保选中状态被清除，因为我们切换了页面
-                if (selectedUIElement != null)
-                {
-                    DeselectUIElement();
-                }
+
             }
             catch
             {
@@ -214,8 +209,7 @@ namespace Ink_Canvas
         {
             if (CurrentWhiteboardIndex <= 1) return;
 
-            // 取消任何UI元素的选择
-            DeselectUIElement();
+
 
             SaveStrokes();
 
@@ -239,9 +233,7 @@ namespace Ink_Canvas
                 BtnWhiteBoardAdd_Click(sender, e);
                 return;
             }
-
-            // 取消任何UI元素的选择
-            DeselectUIElement();
+            
 
             SaveStrokes();
 
@@ -258,10 +250,7 @@ namespace Ink_Canvas
             if (WhiteboardTotalCount >= 99) return;
             if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) SaveScreenShot(true);
-
-            // 取消任何UI元素的选择
-            DeselectUIElement();
-
+            
             SaveStrokes();
             ClearStrokes(true);
 

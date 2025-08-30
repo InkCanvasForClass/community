@@ -190,19 +190,11 @@ namespace Ink_Canvas
                         {
                             if (item.InsertedElement is Image img)
                             {
-                                img.MouseDown -= UIElement_MouseDown;
-                                img.MouseDown += UIElement_MouseDown;
-                                img.IsManipulationEnabled = true;
-
                                 // 重新应用CenterAndScaleElement变换
                                 CenterAndScaleElement(img);
                             }
                             else if (item.InsertedElement is MediaElement media)
                             {
-                                media.MouseDown -= UIElement_MouseDown;
-                                media.MouseDown += UIElement_MouseDown;
-                                media.IsManipulationEnabled = true;
-
                                 // 重新应用CenterAndScaleElement变换
                                 CenterAndScaleElement(media);
                             }

@@ -29,6 +29,7 @@ namespace Ink_Canvas
                     return;
                 }
             }
+
             lastBorderMouseDownObject = sender;
         }
 
@@ -93,6 +94,7 @@ namespace Ink_Canvas
                 stroke.DrawingAttributes.Width = newWidth;
                 stroke.DrawingAttributes.Height = newHeight;
             }
+
             if (DrawingAttributesHistory.Count > 0)
             {
 
@@ -240,6 +242,7 @@ namespace Ink_Canvas
                 {
                     collecion.Add(item.Key);
                 }
+
                 timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
                 DrawingAttributesHistory = new Dictionary<Stroke, Tuple<DrawingAttributes, DrawingAttributes>>();
                 foreach (var item in DrawingAttributesHistoryFlag)
@@ -277,9 +280,8 @@ namespace Ink_Canvas
                 if (inkCanvas.GetSelectedStrokes().Count == inkCanvas.Strokes.Count)
                 {
                     // 使用集中化的工具模式切换方法
-                    SetCurrentToolMode(InkCanvasEditingMode.Ink, () => {
-                        SetCurrentToolMode(InkCanvasEditingMode.Select);
-                    });
+                    SetCurrentToolMode(InkCanvasEditingMode.Ink,
+                        () => { SetCurrentToolMode(InkCanvasEditingMode.Select); });
                 }
                 else
                 {
@@ -307,8 +309,7 @@ namespace Ink_Canvas
             if (inkCanvas.GetSelectedStrokes().Count == 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                // 当没有选中笔画时，检查是否有选中的UIElement
-                CheckUIElementSelection();
+
             }
             else
             {
@@ -316,25 +317,11 @@ namespace Ink_Canvas
                 BorderStrokeSelectionClone.Background = Brushes.Transparent;
                 isStrokeSelectionCloneOn = false;
                 updateBorderStrokeSelectionControlLocation();
-                // 当选中笔画时，取消UIElement选择
-                DeselectUIElement();
+
             }
         }
 
-        private void CheckUIElementSelection()
-        {
-            // 检查InkCanvas中的UIElement是否被选中
-            var selectedElements = inkCanvas.GetSelectedElements();
-            if (selectedElements.Count > 0)
-            {
-                var element = selectedElements[0];
-                SelectUIElement(element);
-            }
-            else
-            {
-                DeselectUIElement();
-            }
-        }
+
 
         private void updateBorderStrokeSelectionControlLocation()
         {
@@ -366,8 +353,10 @@ namespace Ink_Canvas
                 {
                     StrokeInitialHistory[item.Key] = item.Value.Item2;
                 }
+
                 StrokeManipulationHistory = null;
             }
+
             if (DrawingAttributesHistory.Count > 0)
             {
                 timeMachine.CommitStrokeDrawingAttributesHistory(DrawingAttributesHistory);
@@ -419,18 +408,26 @@ namespace Ink_Canvas
                             stroke.DrawingAttributes.Width *= md.Scale.X;
                             stroke.DrawingAttributes.Height *= md.Scale.Y;
                         }
-                        catch { }
+                        catch
+                        {
+                        }
                     }
 
                     updateBorderStrokeSelectionControlLocation();
                 }
             }
-            catch { }
+            catch
+            {
+            }
         }
 
-        private void GridInkCanvasSelectionCover_TouchDown(object sender, TouchEventArgs e) { }
+        private void GridInkCanvasSelectionCover_TouchDown(object sender, TouchEventArgs e)
+        {
+        }
 
-        private void GridInkCanvasSelectionCover_TouchUp(object sender, TouchEventArgs e) { }
+        private void GridInkCanvasSelectionCover_TouchUp(object sender, TouchEventArgs e)
+        {
+        }
 
         private Point lastTouchPointOnGridInkCanvasCover = new Point(0, 0);
 
@@ -514,225 +511,7 @@ namespace Ink_Canvas
         }
 
         #region UIElement Selection and Resize
-
-        private UIElement selectedUIElement;
-        private System.Windows.Controls.Canvas resizeHandlesCanvas;
-        private readonly List<Rectangle> resizeHandles = new List<Rectangle>();
-        private bool isResizing;
-        private ResizeDirection currentResizeDirection = ResizeDirection.None;
-        private Point resizeStartPoint;
-        private Rect originalElementBounds;
-
-        // 图片工具栏相关
-        private Border borderImageSelectionControl;
-        private double BorderImageSelectionControlWidth = 490.0; // 6个按钮 + 分隔线的实际宽度
-        private double BorderImageSelectionControlHeight = 80.0;
-
-        // 元素变化监听相关
-        private DispatcherTimer elementUpdateTimer;
-        private Rect lastElementBounds;
-
-        private enum ResizeDirection
-        {
-            None,
-            TopLeft,
-            TopCenter,
-            TopRight,
-            MiddleLeft,
-            MiddleRight,
-            BottomLeft,
-            BottomCenter,
-            BottomRight
-        }
-
-        private void InitializeUIElementSelection()
-        {
-            // 创建拖拽手柄画布
-            if (resizeHandlesCanvas == null)
-            {
-                resizeHandlesCanvas = new System.Windows.Controls.Canvas
-                {
-                    Background = Brushes.Transparent,
-                    IsHitTestVisible = true,
-                    Visibility = Visibility.Collapsed
-                };
-
-                // 将手柄画布添加到主网格中，确保它在InkCanvas之上
-                var mainGrid = inkCanvas.Parent as Grid;
-                if (mainGrid != null)
-                {
-                    mainGrid.Children.Add(resizeHandlesCanvas);
-                    Panel.SetZIndex(resizeHandlesCanvas, 1000); // 确保在最上层
-                }
-            }
-
-            // 初始化图片工具栏引用
-            if (borderImageSelectionControl == null)
-            {
-                borderImageSelectionControl = FindName("BorderImageSelectionControl") as Border;
-            }
-
-            // 创建8个拖拽手柄
-            CreateResizeHandles();
-        }
-
-        private void CreateResizeHandles()
-        {
-            resizeHandles.Clear();
-            resizeHandlesCanvas.Children.Clear();
-
-            var directions = new[]
-            {
-                ResizeDirection.TopLeft, ResizeDirection.TopCenter, ResizeDirection.TopRight,
-                ResizeDirection.MiddleLeft, ResizeDirection.MiddleRight,
-                ResizeDirection.BottomLeft, ResizeDirection.BottomCenter, ResizeDirection.BottomRight
-            };
-
-            foreach (var direction in directions)
-            {
-                var handle = new Rectangle
-                {
-                    Width = 12,
-                    Height = 12,
-                    Fill = Brushes.White,
-                    Stroke = Brushes.DodgerBlue,
-                    StrokeThickness = 2,
-                    Cursor = GetCursorForDirection(direction),
-                    Tag = direction
-                };
-
-                handle.MouseDown += ResizeHandle_MouseDown;
-                handle.MouseMove += ResizeHandle_MouseMove;
-                handle.MouseUp += ResizeHandle_MouseUp;
-
-                resizeHandles.Add(handle);
-                resizeHandlesCanvas.Children.Add(handle);
-            }
-        }
-
-        private Cursor GetCursorForDirection(ResizeDirection direction)
-        {
-            switch (direction)
-            {
-                case ResizeDirection.TopLeft:
-                case ResizeDirection.BottomRight:
-                    return Cursors.SizeNWSE;
-                case ResizeDirection.TopRight:
-                case ResizeDirection.BottomLeft:
-                    return Cursors.SizeNESW;
-                case ResizeDirection.TopCenter:
-                case ResizeDirection.BottomCenter:
-                    return Cursors.SizeNS;
-                case ResizeDirection.MiddleLeft:
-                case ResizeDirection.MiddleRight:
-                    return Cursors.SizeWE;
-                default:
-                    return Cursors.Arrow;
-            }
-        }
-
-        private void SelectUIElement(UIElement element)
-        {
-            if (selectedUIElement == element) return;
-
-            // 取消之前的选择
-            DeselectUIElement();
-
-            // 清除笔画选择
-            if (inkCanvas.GetSelectedStrokes().Count > 0)
-            {
-                isProgramChangeStrokeSelection = true;
-                inkCanvas.Select(new StrokeCollection());
-                isProgramChangeStrokeSelection = false;
-            }
-
-            selectedUIElement = element;
-
-            if (element != null)
-            {
-                // 初始化选择系统（如果还没有初始化）
-                if (resizeHandlesCanvas == null)
-                {
-                    InitializeUIElementSelection();
-                }
-
-                // 显示拖拽手柄（所有UI元素都需要）
-                ShowResizeHandles();
-
-                // 根据元素类型显示特定的工具栏
-                if (element is Image)
-                {
-                    ShowImageToolbar();
-                }
-
-                // 监听元素的布局变化，以便实时更新手柄位置
-                StartMonitoringElementChanges(element);
-            }
-        }
-
-        private void DeselectUIElement()
-        {
-            // 停止监听之前选中元素的变化
-            StopMonitoringElementChanges();
-
-            selectedUIElement = null;
-            HideResizeHandles();
-            HideImageToolbar();
-        }
-
-        private void ShowResizeHandles()
-        {
-            if (selectedUIElement == null || resizeHandlesCanvas == null) return;
-
-            var bounds = GetUIElementBounds(selectedUIElement);
-            UpdateResizeHandlesPosition(bounds);
-            resizeHandlesCanvas.Visibility = Visibility.Visible;
-        }
-
-        private void HideResizeHandles()
-        {
-            if (resizeHandlesCanvas != null)
-            {
-                resizeHandlesCanvas.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private void ShowImageToolbar()
-        {
-            if (selectedUIElement == null || borderImageSelectionControl == null) return;
-
-            var bounds = GetUIElementBounds(selectedUIElement);
-            UpdateImageToolbarPosition(bounds);
-            borderImageSelectionControl.Visibility = Visibility.Visible;
-        }
-
-        private void HideImageToolbar()
-        {
-            if (borderImageSelectionControl != null)
-            {
-                borderImageSelectionControl.Visibility = Visibility.Collapsed;
-            }
-        }
-
-        private void UpdateImageToolbarPosition(Rect bounds)
-        {
-            if (borderImageSelectionControl == null) return;
-
-            // 计算工具栏位置，类似于墨迹选择工具栏的逻辑
-            var toolbarX = bounds.X + bounds.Width / 2 - BorderImageSelectionControlWidth / 2;
-            var toolbarY = bounds.Y + bounds.Height + 10; // 在图片下方10像素处
-
-            // 确保工具栏不会超出画布边界
-            if (toolbarX < 0) toolbarX = 0;
-            if (toolbarX + BorderImageSelectionControlWidth > inkCanvas.ActualWidth)
-                toolbarX = inkCanvas.ActualWidth - BorderImageSelectionControlWidth;
-
-            if (toolbarY + BorderImageSelectionControlHeight > inkCanvas.ActualHeight)
-                toolbarY = bounds.Y - BorderImageSelectionControlHeight - 10; // 如果下方空间不够，显示在上方
-
-            borderImageSelectionControl.Margin = new Thickness(toolbarX, toolbarY, 0, 0);
-        }
-
+        
         private Rect GetUIElementBounds(UIElement element)
         {
             if (element is FrameworkElement fe)
@@ -772,270 +551,7 @@ namespace Ink_Canvas
 
             return new Rect(0, 0, 0, 0);
         }
-
-        private void UpdateResizeHandlesPosition(Rect bounds)
-        {
-            if (resizeHandles.Count != 8) return;
-
-            var handleSize = 12.0;
-            var halfHandle = handleSize / 2;
-
-            // 计算手柄位置
-            var positions = new[]
-            {
-                new Point(bounds.Left - halfHandle, bounds.Top - halfHandle), // TopLeft
-                new Point(bounds.Left + bounds.Width / 2 - halfHandle, bounds.Top - halfHandle), // TopCenter
-                new Point(bounds.Right - halfHandle, bounds.Top - halfHandle), // TopRight
-                new Point(bounds.Left - halfHandle, bounds.Top + bounds.Height / 2 - halfHandle), // MiddleLeft
-                new Point(bounds.Right - halfHandle, bounds.Top + bounds.Height / 2 - halfHandle), // MiddleRight
-                new Point(bounds.Left - halfHandle, bounds.Bottom - halfHandle), // BottomLeft
-                new Point(bounds.Left + bounds.Width / 2 - halfHandle, bounds.Bottom - halfHandle), // BottomCenter
-                new Point(bounds.Right - halfHandle, bounds.Bottom - halfHandle) // BottomRight
-            };
-
-            for (int i = 0; i < resizeHandles.Count && i < positions.Length; i++)
-            {
-                System.Windows.Controls.Canvas.SetLeft(resizeHandles[i], positions[i].X);
-                System.Windows.Controls.Canvas.SetTop(resizeHandles[i], positions[i].Y);
-            }
-        }
-
-        private void ResizeHandle_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (selectedUIElement == null) return;
-
-            var handle = sender as Rectangle;
-            if (handle?.Tag is ResizeDirection direction)
-            {
-                isResizing = true;
-                currentResizeDirection = direction;
-                resizeStartPoint = e.GetPosition(inkCanvas);
-                originalElementBounds = GetUIElementBounds(selectedUIElement);
-
-                handle.CaptureMouse();
-                e.Handled = true;
-            }
-        }
-
-        private void ResizeHandle_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (!isResizing || selectedUIElement == null) return;
-
-            var currentPoint = e.GetPosition(inkCanvas);
-            var deltaX = currentPoint.X - resizeStartPoint.X;
-            var deltaY = currentPoint.Y - resizeStartPoint.Y;
-
-            ResizeUIElement(deltaX, deltaY);
-            e.Handled = true;
-        }
-
-        private void ResizeHandle_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (isResizing)
-            {
-                isResizing = false;
-                currentResizeDirection = ResizeDirection.None;
-
-                var handle = sender as Rectangle;
-                handle?.ReleaseMouseCapture();
-                e.Handled = true;
-            }
-        }
-
-        private void ResizeUIElement(double deltaX, double deltaY)
-        {
-            if (selectedUIElement == null) return;
-
-            var newBounds = originalElementBounds;
-            const double minSize = 20.0;
-
-            switch (currentResizeDirection)
-            {
-                case ResizeDirection.TopLeft:
-                    var newWidth = originalElementBounds.Width - deltaX;
-                    var newHeight = originalElementBounds.Height - deltaY;
-                    if (newWidth >= minSize && newHeight >= minSize)
-                    {
-                        newBounds.X = originalElementBounds.X + deltaX;
-                        newBounds.Y = originalElementBounds.Y + deltaY;
-                        newBounds.Width = newWidth;
-                        newBounds.Height = newHeight;
-                    }
-                    break;
-
-                case ResizeDirection.TopCenter:
-                    var newHeightTC = originalElementBounds.Height - deltaY;
-                    if (newHeightTC >= minSize)
-                    {
-                        newBounds.Y = originalElementBounds.Y + deltaY;
-                        newBounds.Height = newHeightTC;
-                    }
-                    break;
-
-                case ResizeDirection.TopRight:
-                    var newWidthTR = originalElementBounds.Width + deltaX;
-                    var newHeightTR = originalElementBounds.Height - deltaY;
-                    if (newWidthTR >= minSize && newHeightTR >= minSize)
-                    {
-                        newBounds.Y = originalElementBounds.Y + deltaY;
-                        newBounds.Width = newWidthTR;
-                        newBounds.Height = newHeightTR;
-                    }
-                    break;
-
-                case ResizeDirection.MiddleLeft:
-                    var newWidthML = originalElementBounds.Width - deltaX;
-                    if (newWidthML >= minSize)
-                    {
-                        newBounds.X = originalElementBounds.X + deltaX;
-                        newBounds.Width = newWidthML;
-                    }
-                    break;
-
-                case ResizeDirection.MiddleRight:
-                    var newWidthMR = originalElementBounds.Width + deltaX;
-                    if (newWidthMR >= minSize)
-                    {
-                        newBounds.Width = newWidthMR;
-                    }
-                    break;
-
-                case ResizeDirection.BottomLeft:
-                    var newWidthBL = originalElementBounds.Width - deltaX;
-                    var newHeightBL = originalElementBounds.Height + deltaY;
-                    if (newWidthBL >= minSize && newHeightBL >= minSize)
-                    {
-                        newBounds.X = originalElementBounds.X + deltaX;
-                        newBounds.Width = newWidthBL;
-                        newBounds.Height = newHeightBL;
-                    }
-                    break;
-
-                case ResizeDirection.BottomCenter:
-                    var newHeightBC = originalElementBounds.Height + deltaY;
-                    if (newHeightBC >= minSize)
-                    {
-                        newBounds.Height = newHeightBC;
-                    }
-                    break;
-
-                case ResizeDirection.BottomRight:
-                    var newWidthBR = originalElementBounds.Width + deltaX;
-                    var newHeightBR = originalElementBounds.Height + deltaY;
-                    if (newWidthBR >= minSize && newHeightBR >= minSize)
-                    {
-                        newBounds.Width = newWidthBR;
-                        newBounds.Height = newHeightBR;
-                    }
-                    break;
-            }
-
-            // 应用新的尺寸和位置
-            ApplyUIElementBounds(selectedUIElement, newBounds);
-
-            // 更新手柄位置
-            UpdateResizeHandlesPosition(newBounds);
-
-            // 如果是图片，也更新工具栏位置
-            if (selectedUIElement is Image)
-            {
-                UpdateImageToolbarPosition(newBounds);
-            }
-        }
-
-        private void ApplyUIElementBounds(UIElement element, Rect bounds)
-        {
-            if (element is FrameworkElement fe)
-            {
-                // 清除RenderTransform，避免与直接设置Width/Height冲突
-                fe.RenderTransform = Transform.Identity;
-
-                // 直接设置位置和大小
-                InkCanvas.SetLeft(element, bounds.X);
-                InkCanvas.SetTop(element, bounds.Y);
-                fe.Width = bounds.Width;
-                fe.Height = bounds.Height;
-            }
-        }
-
-        private void UIElement_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
-            {
-                var element = sender as UIElement;
-                if (element != null)
-                {
-                    // 切换到选择模式并选择这个元素
-                    inkCanvas.Select(new[] { element });
-                    SelectUIElement(element);
-                    e.Handled = true;
-                }
-            }
-        }
-
-        private void StartMonitoringElementChanges(UIElement element)
-        {
-            // 停止之前的监听
-            StopMonitoringElementChanges();
-
-            if (element == null) return;
-
-            // 记录初始边界
-            lastElementBounds = GetUIElementBounds(element);
-
-            // 创建定时器，定期检查元素边界变化
-            elementUpdateTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromMilliseconds(16) // 约60FPS的更新频率
-            };
-
-            elementUpdateTimer.Tick += (sender, e) =>
-            {
-                if (selectedUIElement == null)
-                {
-                    StopMonitoringElementChanges();
-                    return;
-                }
-
-                var currentBounds = GetUIElementBounds(selectedUIElement);
-
-                // 检查边界是否发生变化
-                if (!AreRectsEqual(lastElementBounds, currentBounds))
-                {
-                    lastElementBounds = currentBounds;
-
-                    // 更新手柄位置
-                    UpdateResizeHandlesPosition(currentBounds);
-
-                    // 如果是图片，也更新工具栏位置
-                    if (selectedUIElement is Image)
-                    {
-                        UpdateImageToolbarPosition(currentBounds);
-                    }
-                }
-            };
-
-            elementUpdateTimer.Start();
-        }
-
-        private void StopMonitoringElementChanges()
-        {
-            if (elementUpdateTimer != null)
-            {
-                elementUpdateTimer.Stop();
-                elementUpdateTimer = null;
-            }
-        }
-
-        private bool AreRectsEqual(Rect rect1, Rect rect2)
-        {
-            const double tolerance = 0.1; // 允许的误差范围
-            return Math.Abs(rect1.X - rect2.X) < tolerance &&
-                   Math.Abs(rect1.Y - rect2.Y) < tolerance &&
-                   Math.Abs(rect1.Width - rect2.Width) < tolerance &&
-                   Math.Abs(rect1.Height - rect2.Height) < tolerance;
-        }
-
-        #endregion
     }
 }
+
+#endregion

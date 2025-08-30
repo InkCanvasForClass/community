@@ -188,10 +188,6 @@ namespace Ink_Canvas
                 // 添加到画布
                 inkCanvas.Children.Add(image);
 
-                // 添加鼠标事件处理，使图片可以被选择
-                image.MouseDown += UIElement_MouseDown;
-                image.IsManipulationEnabled = true;
-
                 // 提交历史记录
                 timeMachine.CommitElementInsertHistory(image);
 

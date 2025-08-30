@@ -2500,8 +2500,6 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
 
-                    DeselectUIElement();
-
                     // 在PPT模式下隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -2549,9 +2547,6 @@ namespace Ink_Canvas
                         AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                         AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
 
-                        // 取消任何UI元素的选择
-                        DeselectUIElement();
-
                         // 在PPT模式下隐藏手势面板和手势按钮
                         AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                         AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -2591,9 +2586,6 @@ namespace Ink_Canvas
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardLeftSide);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardCenterSide);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardRightSide);
-
-                        // 取消任何UI元素的选择
-                        DeselectUIElement();
 
                         SaveStrokes(true);
                         ClearStrokes(true);
@@ -2831,10 +2823,6 @@ namespace Ink_Canvas
                     CenterAndScaleElement(image);
                     inkCanvas.Children.Add(image);
 
-                    // 添加鼠标事件处理，使图片可以被选择
-                    image.MouseDown += UIElement_MouseDown;
-                    image.IsManipulationEnabled = true;
-
                     timeMachine.CommitElementInsertHistory(image);
                 }
             }
@@ -2858,10 +2846,6 @@ namespace Ink_Canvas
 
                     CenterAndScaleElement(image);
                     inkCanvas.Children.Add(image);
-
-                    // 添加鼠标事件处理，使图片可以被选择
-                    image.MouseDown += UIElement_MouseDown;
-                    image.IsManipulationEnabled = true;
 
                     timeMachine.CommitElementInsertHistory(image);
                 }
