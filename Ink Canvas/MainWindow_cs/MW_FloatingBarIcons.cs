@@ -2776,17 +2776,20 @@ namespace Ink_Canvas
 
         private void InsertImageOptions_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            // Hide other sub-panels first
-            HideSubPanelsImmediately();
-
-            // Show the image options panel
-            if (BoardImageOptionsPanel.Visibility == Visibility.Collapsed)
+            // Check if the image options panel is currently visible
+            bool isImagePanelVisible = BoardImageOptionsPanel.Visibility == Visibility.Visible;
+            
+            // Toggle the image options panel
+            if (isImagePanelVisible)
             {
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardImageOptionsPanel);
+                // Panel was visible, so hide it with animation
+                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
             }
             else
             {
-                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+                // Panel was hidden, so hide other panels and show this one
+                HideSubPanelsImmediately();
+                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardImageOptionsPanel);
             }
         }
 
