@@ -190,13 +190,33 @@ namespace Ink_Canvas
                         {
                             if (item.InsertedElement is Image img)
                             {
-                                // 重新应用CenterAndScaleElement变换
-                                CenterAndScaleElement(img);
+                                // 检查图片是否有位置信息，如果没有则应用居中
+                                double left = InkCanvas.GetLeft(img);
+                                double top = InkCanvas.GetTop(img);
+                                
+                                if (double.IsNaN(left) || double.IsNaN(top))
+                                {
+                                    // 图片没有位置信息，应用居中
+                                    CenterAndScaleElement(img);
+                                }
+                                
+                                // 重新绑定事件处理器
+                                BindElementEvents(img);
                             }
                             else if (item.InsertedElement is MediaElement media)
                             {
-                                // 重新应用CenterAndScaleElement变换
-                                CenterAndScaleElement(media);
+                                // 检查媒体元素是否有位置信息，如果没有则应用居中
+                                double left = InkCanvas.GetLeft(media);
+                                double top = InkCanvas.GetTop(media);
+                                
+                                if (double.IsNaN(left) || double.IsNaN(top))
+                                {
+                                    // 媒体元素没有位置信息，应用居中
+                                    CenterAndScaleElement(media);
+                                }
+                                
+                                // 重新绑定事件处理器
+                                BindElementEvents(media);
                             }
                         }
                     }
