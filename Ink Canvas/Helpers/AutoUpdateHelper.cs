@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
@@ -28,6 +28,9 @@ namespace Ink_Canvas.Helpers
         private static readonly string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
         private static string statusFilePath;
 
+        // GitHub Token认证
+        private static readonly string GitHubToken = "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";
+
         // 线路组结构体（包含版本、下载、日志地址）
         public class UpdateLineGroup
         {
@@ -45,9 +48,9 @@ namespace Ink_Canvas.Helpers
                     new UpdateLineGroup
                     {
                         GroupName = "GitHub主线",
-                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
-                        DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
+                        VersionUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://github.com/InkCanvasForClass/community/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
@@ -67,11 +70,13 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Release/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/UpdateLog.md"
                     }
                 }
             },
@@ -80,9 +85,9 @@ namespace Ink_Canvas.Helpers
                     new UpdateLineGroup
                     {
                         GroupName = "GitHub主线",
-                        VersionUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
-                        DownloadUrlFormat = "https://bgithub.xyz/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
-                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
+                        VersionUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/AutomaticUpdateVersionControl.txt",
+                        DownloadUrlFormat = "https://github.com/InkCanvasForClass/community-beta/releases/download/{0}/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://github.com/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
@@ -102,11 +107,13 @@ namespace Ink_Canvas.Helpers
                     {
                         GroupName = "智教联盟",
                         DownloadUrlFormat = "https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community-beta/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
                     },
                     new UpdateLineGroup
                     {
                         GroupName = "inkeys",
                         DownloadUrlFormat = "https://iccce.inkeys.top/Beta/InkCanvasForClass.CE.{0}.zip",
+                        LogUrl = "https://bgithub.xyz/InkCanvasForClass/community-beta/raw/refs/heads/main/UpdateLog.md"
                     }
                 }
             }
@@ -409,6 +416,8 @@ namespace Ink_Canvas.Helpers
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    client.DefaultRequestHeaders.Add("Authorization", $"token {GitHubToken}");
+                    LogHelper.WriteLogToFile("AutoUpdate | 使用GitHub Token进行API调用");
                     var response = await client.GetStringAsync(apiUrl);
                     var releases = JArray.Parse(response);
 
@@ -450,6 +459,8 @@ namespace Ink_Canvas.Helpers
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    client.DefaultRequestHeaders.Add("Authorization", $"token {GitHubToken}");
+                    LogHelper.WriteLogToFile("AutoUpdate | 使用GitHub Token进行API调用");
                     var response = await client.GetStringAsync(apiUrl);
                     var json = JObject.Parse(response);
                     string version = json["tag_name"]?.ToString();
@@ -1130,7 +1141,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        // 安装新版本应用
+        // 安装新版本应用 - 优化版本，不使用命令行
         public static void InstallNewVersionApp(string version, bool isInSilence)
         {
             try
@@ -1183,113 +1194,109 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | ZIP文件大小: {fileInfo.Length} 字节");
 
                 string currentAppDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-                int currentProcessId = Process.GetCurrentProcess().Id;
                 string appPath = Assembly.GetExecutingAssembly().Location;
+                int currentProcessId = Process.GetCurrentProcess().Id;
 
                 LogHelper.WriteLogToFile($"AutoUpdate | 当前应用程序目录: {currentAppDir}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 当前进程ID: {currentProcessId}");
                 LogHelper.WriteLogToFile($"AutoUpdate | 静默更新模式: {isInSilence}");
 
-                string batchFilePath = Path.Combine(Path.GetTempPath(), "UpdateICC_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
-                LogHelper.WriteLogToFile($"AutoUpdate | 创建更新批处理文件: {batchFilePath}");
-
-                StringBuilder batchContent = new StringBuilder();
-                batchContent.AppendLine("@echo off");
-                
-                batchContent.AppendLine("echo Set objShell = CreateObject(\"WScript.Shell\") > \"%temp%\\hideme.vbs\"");
-                batchContent.AppendLine("echo objShell.Run \"cmd /c \"\"\" ^& WScript.Arguments(0) ^& \"\"\"\", 0, True >> \"%temp%\\hideme.vbs\"");
-                batchContent.AppendLine("echo Wscript.Sleep 100 >> \"%temp%\\hideme.vbs\"");
-
-                string updateBatPath = Path.Combine(Path.GetTempPath(), "ICCUpdate_" + Guid.NewGuid().ToString().Substring(0, 8) + ".bat");
-                batchContent.AppendLine($"echo @echo off > \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo set PROC_ID={currentProcessId} >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo :CHECK_PROCESS >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo tasklist /fi \"PID eq %PROC_ID%\" ^| find \"%PROC_ID%\" ^> nul >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo if %%ERRORLEVEL%% == 0 ( >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo     timeout /t 1 /nobreak ^> nul >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo     goto CHECK_PROCESS >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
-
-                batchContent.AppendLine($"echo timeout /t 1 /nobreak > nul >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo echo Application closed, starting update process... >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo timeout /t 2 /nobreak ^> nul >> \"{updateBatPath}\"");
-
+                // 创建解压目录
                 string extractPath = Path.Combine(updatesFolderPath, $"Extract_{version}");
-                batchContent.AppendLine($"echo echo Extracting update files... >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo if exist \"{extractPath}\" rd /s /q \"{extractPath}\" >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo mkdir \"{extractPath}\" >> \"{updateBatPath}\"");
-
-                batchContent.AppendLine($"echo powershell -command \"Expand-Archive -Path '{zipFilePath.Replace("'", "''")}' -DestinationPath '{extractPath.Replace("'", "''")}' -Force\" >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo     goto ERROR_EXIT >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
-
-                batchContent.AppendLine($"echo echo Copying updated files to application directory... >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo xcopy /s /y /e \"{extractPath}\\*\" \"{currentAppDir}\\\" >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo     goto ERROR_EXIT >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
-
-                batchContent.AppendLine($"echo echo Cleaning up temporary files... >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo if exist \"{extractPath}\" rd /s /q \"{extractPath}\" >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo if exist \"{zipFilePath}\" del /f /q \"{zipFilePath}\" >> \"{updateBatPath}\"");
-
-                batchContent.AppendLine($"echo echo Update completed successfully! >> \"{updateBatPath}\"");
-
-                if (isInSilence)
+                if (Directory.Exists(extractPath))
                 {
-                    batchContent.AppendLine($"echo echo 自动启动应用程序... >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo start \"\" \"{appPath}\" >> \"{updateBatPath}\"");
-                }
-                else
-                {
-                    batchContent.AppendLine($"echo taskkill /F /IM \"InkCanvasForClass.exe\" >nul 2>nul >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo :: 检查应用程序是否已经在运行 >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo tasklist /FI \"IMAGENAME eq InkCanvasForClass.exe\" | find /i \"InkCanvasForClass.exe\" > nul >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo if %%ERRORLEVEL%% neq 0 ( >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo     echo 启动应用程序... >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo     start \"\" \"{appPath}\" >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo ) else ( >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo     echo 应用程序已经在运行，不再重复启动 >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo ) >> \"{updateBatPath}\"");
+                    try
+                    {
+                        Directory.Delete(extractPath, true);
+                        LogHelper.WriteLogToFile($"AutoUpdate | 清理已存在的解压目录: {extractPath}");
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 清理解压目录失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
                 }
 
-                batchContent.AppendLine($"echo exit /b 0 >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo goto EXIT >> \"{updateBatPath}\"");
-
-                if (isInSilence)
+                try
                 {
-                    batchContent.AppendLine($"echo :ERROR_EXIT >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo echo Update failed! >> \"%temp%\\icc_update_error.log\" >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo exit /b 1 >> \"{updateBatPath}\"");
+                    Directory.CreateDirectory(extractPath);
+                    LogHelper.WriteLogToFile($"AutoUpdate | 创建解压目录: {extractPath}");
                 }
-                else
+                catch (Exception ex)
                 {
-                    batchContent.AppendLine($"echo :ERROR_EXIT >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo start \"\" cmd /c \"echo Update failed! ^& pause\" >> \"{updateBatPath}\"");
-                    batchContent.AppendLine($"echo exit /b 1 >> \"{updateBatPath}\"");
+                    LogHelper.WriteLogToFile($"AutoUpdate | 创建解压目录失败: {ex.Message}", LogHelper.LogType.Error);
+                    return;
                 }
 
-                batchContent.AppendLine($"echo :EXIT >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo del \"{updateBatPath}\" >> \"{updateBatPath}\"");
-                batchContent.AppendLine($"echo exit >> \"{updateBatPath}\"");
-
-                batchContent.AppendLine($"wscript \"%temp%\\hideme.vbs\" \"{updateBatPath}\"");
-                batchContent.AppendLine("del \"%temp%\\hideme.vbs\"");
-                batchContent.AppendLine("exit");
-
-                File.WriteAllText(batchFilePath, batchContent.ToString());
-                LogHelper.WriteLogToFile("AutoUpdate | 创建更新批处理文件完成");
-
-                Process.Start(new ProcessStartInfo
+                // 解压ZIP文件
+                try
                 {
-                    FileName = batchFilePath,
-                    CreateNoWindow = true,
-                    UseShellExecute = true,
-                    WindowStyle = ProcessWindowStyle.Hidden
-                });
+                    LogHelper.WriteLogToFile($"AutoUpdate | 开始解压ZIP文件到: {extractPath}");
+                    ZipFile.ExtractToDirectory(zipFilePath, extractPath);
+                    LogHelper.WriteLogToFile("AutoUpdate | ZIP文件解压完成");
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 解压ZIP文件失败: {ex.Message}", LogHelper.LogType.Error);
+                    return;
+                }
 
-                LogHelper.WriteLogToFile("AutoUpdate | 启动更新批处理进程（隐藏窗口）");
+                // 查找解压后的主程序文件
+                string newAppPath = null;
+                string[] possibleExeNames = { "InkCanvasForClass.exe", "Ink Canvas.exe", "InkCanvas.exe" };
+                
+                foreach (string exeName in possibleExeNames)
+                {
+                    string testPath = Path.Combine(extractPath, exeName);
+                    if (File.Exists(testPath))
+                    {
+                        newAppPath = testPath;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 找到新版本主程序: {newAppPath}");
+                        break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(newAppPath))
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 在解压目录中未找到主程序文件", LogHelper.LogType.Error);
+                    return;
+                }
+
+                // 启动新版本进程
+                try
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 准备启动新版本进程: {newAppPath}");
+                    
+                    // 启动新版本进程（以更新模式）
+                    string arguments = $"--update-mode --old-process-id={currentProcessId} --extract-path=\"{extractPath}\" --target-path=\"{currentAppDir}\" --is-silence={isInSilence}";
+                    
+                    LogHelper.WriteLogToFile($"AutoUpdate | 启动新进程的命令行: {newAppPath} {arguments}");
+                    
+                    ProcessStartInfo startInfo = new ProcessStartInfo
+                    {
+                        FileName = newAppPath,
+                        Arguments = arguments,
+                        UseShellExecute = false,
+                        CreateNoWindow = false
+                    };
+
+                    Process.Start(startInfo);
+                    LogHelper.WriteLogToFile("AutoUpdate | 新版本进程启动命令已执行");
+                    
+                    // 等待一小段时间确保新进程启动
+                    Thread.Sleep(2000);
+                    
+                    // 关闭当前旧软件进程
+                    LogHelper.WriteLogToFile("AutoUpdate | 关闭当前旧软件进程");
+                    App.IsAppExitByUser = true;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Application.Current.Shutdown();
+                    });
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 启动新版本进程时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
             }
             catch (Exception ex)
             {
@@ -1298,6 +1305,421 @@ namespace Ink_Canvas.Helpers
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 内部异常: {ex.InnerException.Message}", LogHelper.LogType.Error);
                 }
+            }
+        }
+
+        // 处理更新模式的启动参数
+        public static bool HandleUpdateModeStartup(string[] args)
+        {
+            try
+            {
+                // 检查是否以更新模式启动
+                if (args.Contains("--update-mode"))
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 检测到更新模式启动");
+                    
+                    // 解析命令行参数
+                    int oldProcessId = -1;
+                    string extractPath = null;
+                    string targetPath = null;
+                    bool isSilence = false;
+
+                    // 记录所有参数用于调试
+                    LogHelper.WriteLogToFile($"AutoUpdate | 接收到的命令行参数: {string.Join(" ", args)}");
+
+                    for (int i = 0; i < args.Length; i++)
+                    {
+                        string arg = args[i];
+                        LogHelper.WriteLogToFile($"AutoUpdate | 处理参数 {i}: {arg}");
+                        
+                        if (arg.StartsWith("--old-process-id="))
+                        {
+                            string processIdStr = arg.Substring("--old-process-id=".Length);
+                            if (int.TryParse(processIdStr, out int pid))
+                            {
+                                oldProcessId = pid;
+                                LogHelper.WriteLogToFile($"AutoUpdate | 解析到老进程ID: {oldProcessId}");
+                            }
+                        }
+                        else if (arg.StartsWith("--extract-path="))
+                        {
+                            extractPath = arg.Substring("--extract-path=".Length).Trim('"');
+                            LogHelper.WriteLogToFile($"AutoUpdate | 解析到解压路径: {extractPath}");
+                        }
+                        else if (arg.StartsWith("--target-path="))
+                        {
+                            targetPath = arg.Substring("--target-path=".Length).Trim('"');
+                            LogHelper.WriteLogToFile($"AutoUpdate | 解析到目标路径: {targetPath}");
+                        }
+                        else if (arg.StartsWith("--is-silence="))
+                        {
+                            string silenceStr = arg.Substring("--is-silence=".Length);
+                            if (bool.TryParse(silenceStr, out bool silence))
+                            {
+                                isSilence = silence;
+                                LogHelper.WriteLogToFile($"AutoUpdate | 解析到静默模式: {isSilence}");
+                            }
+                        }
+                    }
+
+                    LogHelper.WriteLogToFile($"AutoUpdate | 更新参数 - 老进程ID: {oldProcessId}, 解压路径: {extractPath}, 目标路径: {targetPath}, 静默模式: {isSilence}");
+
+                    if (oldProcessId > 0 && !string.IsNullOrEmpty(extractPath) && !string.IsNullOrEmpty(targetPath))
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 参数验证通过，启动更新任务");
+                        // 启动更新任务
+                        Task.Run(async () => await PerformUpdate(oldProcessId, extractPath, targetPath, isSilence));
+                        return true; // 返回true表示是更新模式
+                }
+                else
+                {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 参数验证失败 - 老进程ID: {oldProcessId}, 解压路径: {extractPath}, 目标路径: {targetPath}", LogHelper.LogType.Error);
+                        return false;
+                    }
+                }
+                return false; // 返回false表示不是更新模式
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 处理更新模式启动时出错: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        // 执行实际的更新操作
+        private static async Task PerformUpdate(int oldProcessId, string extractPath, string targetPath, bool isSilence)
+        {
+            try
+            {
+                LogHelper.WriteLogToFile("AutoUpdate | 开始执行更新操作");
+
+                // 等待老进程完全退出
+                LogHelper.WriteLogToFile($"AutoUpdate | 等待老进程 {oldProcessId} 退出");
+                int waitCount = 0;
+                const int maxWaitCount = 30; // 最多等待30秒
+
+                while (waitCount < maxWaitCount)
+                {
+                    try
+                    {
+                        Process oldProcess = Process.GetProcessById(oldProcessId);
+                        if (oldProcess.HasExited)
+                        {
+                            LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出");
+                            break;
+                        }
+                        LogHelper.WriteLogToFile($"AutoUpdate | 老进程仍在运行，等待中... ({waitCount + 1}/{maxWaitCount})");
+                        Thread.Sleep(1000);
+                        waitCount++;
+                    }
+                    catch (ArgumentException)
+                    {
+                        // 进程不存在，说明已经退出
+                        LogHelper.WriteLogToFile("AutoUpdate | 老进程已退出（进程不存在）");
+                        break;
+                    }
+                }
+
+                if (waitCount >= maxWaitCount)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 等待老进程退出超时，尝试强制结束", LogHelper.LogType.Warning);
+                    try
+                    {
+                        Process oldProcess = Process.GetProcessById(oldProcessId);
+                        oldProcess.Kill();
+                        Thread.Sleep(2000); // 等待进程完全结束
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 强制结束老进程失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                }
+
+                // 确保目标目录存在
+                if (!Directory.Exists(targetPath))
+                {
+                    Directory.CreateDirectory(targetPath);
+                    LogHelper.WriteLogToFile($"AutoUpdate | 创建目标目录: {targetPath}");
+                }
+
+                // 复制文件到目标目录
+                LogHelper.WriteLogToFile($"AutoUpdate | 开始复制文件从 {extractPath} 到 {targetPath}");
+                
+                try
+                {
+                    // 使用递归复制方法，支持重试机制
+                    bool copySuccess = await CopyDirectoryWithRetryAsync(extractPath, targetPath);
+                    if (copySuccess)
+                    {
+                        LogHelper.WriteLogToFile("AutoUpdate | 文件复制完成");
+                }
+                else
+                {
+                        LogHelper.WriteLogToFile("AutoUpdate | 文件复制失败，部分文件可能无法覆盖", LogHelper.LogType.Error);
+                        
+                        if (!isSilence)
+                        {
+                            MessageBox.Show("更新失败：部分文件无法覆盖，可能是文件正在使用中。\n请关闭所有相关程序后重试。", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                        return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 文件复制失败: {ex.Message}", LogHelper.LogType.Error);
+                    
+                    if (!isSilence)
+                    {
+                        MessageBox.Show($"更新失败：文件复制时出错\n{ex.Message}", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    return;
+                }
+
+                // 清理临时文件
+                try
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | 清理临时文件");
+                    
+                    // 删除解压目录
+                    if (Directory.Exists(extractPath))
+                    {
+                        Directory.Delete(extractPath, true);
+                        LogHelper.WriteLogToFile($"AutoUpdate | 删除解压目录: {extractPath}");
+                    }
+
+                    // 删除ZIP文件
+                    string zipFile = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.*.zip");
+                    string[] zipFiles = Directory.GetFiles(updatesFolderPath, "InkCanvasForClass.CE.*.zip");
+                    foreach (string zip in zipFiles)
+                    {
+                        try
+                        {
+                            File.Delete(zip);
+                            LogHelper.WriteLogToFile($"AutoUpdate | 删除ZIP文件: {zip}");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 删除ZIP文件失败: {ex.Message}", LogHelper.LogType.Warning);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 清理临时文件时出错: {ex.Message}", LogHelper.LogType.Warning);
+                }
+
+                LogHelper.WriteLogToFile("AutoUpdate | 更新操作完成");
+
+                                // 启动更新后的应用程序
+                string newAppPath = Path.Combine(targetPath, "InkCanvasForClass.exe");
+                if (File.Exists(newAppPath))
+                {
+                    try
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 准备启动更新后的应用程序: {newAppPath}");
+                        
+                        // 获取当前更新进程ID
+                        int currentUpdateProcessId = Process.GetCurrentProcess().Id;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 当前更新进程ID: {currentUpdateProcessId}");
+                        
+                        // 创建一个临时标记文件，用于新进程检测更新状态
+                        string updateMarkerFile = Path.Combine(targetPath, "update_in_progress.tmp");
+                        File.WriteAllText(updateMarkerFile, currentUpdateProcessId.ToString());
+                        LogHelper.WriteLogToFile($"AutoUpdate | 创建更新标记文件: {updateMarkerFile}");
+                        
+                        // 启动更新后的应用程序（标记为最终应用，不受相同进程影响）
+                        ProcessStartInfo startInfo = new ProcessStartInfo
+                        {
+                            FileName = newAppPath,
+                            Arguments = "--final-app --skip-mutex-check",
+                            WorkingDirectory = targetPath,
+                            UseShellExecute = false
+                        };
+                        
+                        Process newProcess = Process.Start(startInfo);
+                        LogHelper.WriteLogToFile($"AutoUpdate | 最终应用程序启动成功，PID: {newProcess?.Id}，已标记为最终应用");
+                        
+                        // 等待一小段时间确保最终应用程序启动
+                        Thread.Sleep(2000);
+                        
+                        // 结束当前更新进程
+                        LogHelper.WriteLogToFile("AutoUpdate | 更新流程完成，结束更新进程");
+                        
+                        // 强制结束当前更新进程
+                        try
+                        {
+                            LogHelper.WriteLogToFile("AutoUpdate | 强制结束更新进程");
+                            
+                            // 标记为应用主动退出，避免看门狗重启
+                            App.IsAppExitByUser = true;
+                            
+                            // 写入退出信号文件，确保看门狗不会重启
+                            try
+                            {
+                                string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + Process.GetCurrentProcess().Id + ".flag");
+                                File.WriteAllText(watchdogExitSignalFile, "exit");
+                                LogHelper.WriteLogToFile("AutoUpdate | 已写入看门狗退出信号文件");
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 写入看门狗退出信号文件失败: {ex.Message}", LogHelper.LogType.Warning);
+                            }
+ 
+                            Environment.Exit(0);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"AutoUpdate | 结束当前更新进程失败: {ex.Message}", LogHelper.LogType.Error);
+                            Environment.Exit(0);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 启动更新后的应用程序失败: {ex.Message}", LogHelper.LogType.Error);
+                        
+                        if (!isSilence)
+                        {
+                            MessageBox.Show($"更新完成，但启动应用程序失败：{ex.Message}\n请手动启动应用程序。", "启动失败", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                    }
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 更新后的应用程序文件不存在: {newAppPath}", LogHelper.LogType.Error);
+                    
+                    if (!isSilence)
+                    {
+                        MessageBox.Show($"更新完成，但未找到应用程序文件：{newAppPath}\n请检查更新是否成功。", "文件缺失", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | 执行更新操作时出错: {ex.Message}", LogHelper.LogType.Error);
+                
+                if (!isSilence)
+                {
+                    MessageBox.Show($"更新失败：{ex.Message}", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        // 异步复制目录的辅助方法（带重试机制）
+        private static async Task<bool> CopyDirectoryWithRetryAsync(string sourceDir, string destinationDir)
+        {
+            var dir = new DirectoryInfo(sourceDir);
+            DirectoryInfo[] dirs = dir.GetDirectories();
+            bool allFilesCopied = true;
+
+            // 如果目标目录不存在，则创建它
+            if (!Directory.Exists(destinationDir))
+            {
+                Directory.CreateDirectory(destinationDir);
+            }
+
+            // 复制文件
+            foreach (FileInfo file in dir.GetFiles())
+            {
+                string targetFilePath = Path.Combine(destinationDir, file.Name);
+                bool fileCopied = false;
+                
+                // 重试机制，最多重试3次
+                for (int retry = 0; retry < 3; retry++)
+                {
+                    try
+                    {
+                        // 如果目标文件存在，先尝试删除
+                        if (File.Exists(targetFilePath))
+                        {
+                            try
+                            {
+                                File.Delete(targetFilePath);
+                            }
+                            catch (IOException)
+                            {
+                                // 文件可能正在使用，等待一下再重试
+                                if (retry < 2)
+                                {
+                                    Thread.Sleep(1000);
+                                    continue;
+                                }
+                            }
+                        }
+                        
+                        await Task.Run(() => file.CopyTo(targetFilePath));
+                        fileCopied = true;
+                        break;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"AutoUpdate | 复制文件失败 (重试 {retry + 1}/3) {file.FullName} -> {targetFilePath}: {ex.Message}", LogHelper.LogType.Warning);
+                        
+                        if (retry < 2)
+                        {
+                            Thread.Sleep(1000); // 等待1秒后重试
+                        }
+                    }
+                }
+                
+                if (!fileCopied)
+                {
+                    allFilesCopied = false;
+                    LogHelper.WriteLogToFile($"AutoUpdate | 文件复制最终失败: {file.FullName}", LogHelper.LogType.Error);
+                }
+            }
+
+            // 递归复制子目录
+            foreach (DirectoryInfo subDir in dirs)
+            {
+                string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                bool subDirCopied = await CopyDirectoryWithRetryAsync(subDir.FullName, newDestinationDir);
+                if (!subDirCopied)
+                {
+                    allFilesCopied = false;
+                }
+            }
+
+            return allFilesCopied;
+        }
+
+        // 异步复制目录的辅助方法（原版本，保留兼容性）
+        private static async Task CopyDirectoryAsync(string sourceDir, string destinationDir)
+        {
+            var dir = new DirectoryInfo(sourceDir);
+            DirectoryInfo[] dirs = dir.GetDirectories();
+
+            // 如果目标目录不存在，则创建它
+            if (!Directory.Exists(destinationDir))
+            {
+                Directory.CreateDirectory(destinationDir);
+            }
+
+            // 复制文件
+            foreach (FileInfo file in dir.GetFiles())
+            {
+                string targetFilePath = Path.Combine(destinationDir, file.Name);
+                try
+                {
+                    // 如果目标文件存在且正在使用，先删除
+                    if (File.Exists(targetFilePath))
+                    {
+                        File.Delete(targetFilePath);
+                    }
+                    
+                    await Task.Run(() => file.CopyTo(targetFilePath));
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 复制文件失败 {file.FullName} -> {targetFilePath}: {ex.Message}", LogHelper.LogType.Warning);
+                    // 继续复制其他文件，不中断整个过程
+                }
+            }
+
+            // 递归复制子目录
+            foreach (DirectoryInfo subDir in dirs)
+            {
+                string newDestinationDir = Path.Combine(destinationDir, subDir.Name);
+                await CopyDirectoryAsync(subDir.FullName, newDestinationDir);
             }
         }
 
@@ -1450,8 +1872,8 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
 
-                // 执行安装，非静默模式
-                InstallNewVersionApp(remoteVersion, false);
+                // 执行安装，静默模式
+                InstallNewVersionApp(remoteVersion, true);  
                 App.IsAppExitByUser = true;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -1478,6 +1900,8 @@ namespace Ink_Canvas.Helpers
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "ICC-CE Auto Updater");
+                    client.DefaultRequestHeaders.Add("Authorization", $"token {GitHubToken}");
+                    LogHelper.WriteLogToFile("AutoUpdate | 使用GitHub Token进行API调用");
                     var response = await client.GetStringAsync(apiUrl);
                     var arr = JArray.Parse(response);
                     foreach (var item in arr)
@@ -1515,7 +1939,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile("AutoUpdate | 开始测试Windows 7 TLS连接...");
 
                 // 测试GitHub连接
-                var testUrl = "https://bgithub.xyz/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
+                var testUrl = "https://github.com/InkCanvasForClass/community/raw/refs/heads/main/AutomaticUpdateVersionControl.txt";
 
                 using (var handler = new HttpClientHandler())
                 {
@@ -1580,7 +2004,7 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
                 LogHelper.WriteLogToFile($"AutoUpdate | 手动安装版本: {version}");
-                InstallNewVersionApp(version, false);
+                InstallNewVersionApp(version, true);  
                 App.IsAppExitByUser = true;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -1631,4 +2055,3 @@ namespace Ink_Canvas.Helpers
         }
     }
 }
-

@@ -17,7 +17,7 @@ namespace Ink_Canvas.Helpers
         private readonly Dictionary<string, HotkeyInfo> _registeredHotkeys;
         private readonly MainWindow _mainWindow;
         private bool _isDisposed = false;
-        private bool _hotkeysShouldBeRegistered = false; // 启动时不注册热键，等待需要时再注册
+        private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
         
         // 配置文件路径
         private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "HotkeyConfig.json");
@@ -28,7 +28,7 @@ namespace Ink_Canvas.Helpers
         {
             _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
             _registeredHotkeys = new Dictionary<string, HotkeyInfo>();
-            _hotkeysShouldBeRegistered = false; // 启动时不注册热键，等待需要时再注册
+            _hotkeysShouldBeRegistered = true; // 启动时注册热键
         }
         #endregion
 
@@ -288,7 +288,7 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    // 如果配置文件不存在，才使用默认快捷键
+                    // 如果配置文件不存在或加载失败，使用默认快捷键
                     if (!File.Exists(HotkeyConfigFile))
                     {
                         LogHelper.WriteLogToFile("配置文件不存在，注册默认快捷键", LogHelper.LogType.Info);
@@ -297,7 +297,9 @@ namespace Ink_Canvas.Helpers
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile("配置文件存在但加载失败，保持当前状态", LogHelper.LogType.Warning);
+                        LogHelper.WriteLogToFile("配置文件存在但加载失败，回退到默认快捷键", LogHelper.LogType.Warning);
+                        RegisterDefaultHotkeys();
+                        _hotkeysShouldBeRegistered = true;
                     }
                 }
             }
@@ -350,12 +352,69 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("快捷键注册功能已经启用", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("快捷键注册功能已经启用，重新加载快捷键设置", LogHelper.LogType.Info);
+                    // 即使已经启用，也要重新加载快捷键设置以确保快捷键正常工作
+                    LoadHotkeysFromSettings();
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启用快捷键注册功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 禁用快捷键注册功能
+        /// 调用此方法后，快捷键将被注销
+        /// </summary>
+        public void DisableHotkeyRegistration()
+        {
+            try
+            {
+                if (_hotkeysShouldBeRegistered)
+                {
+                    _hotkeysShouldBeRegistered = false;
+                    LogHelper.WriteLogToFile("禁用快捷键注册功能", LogHelper.LogType.Info);
+                    
+                    // 注销所有快捷键
+                    UnregisterAllHotkeys();
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("快捷键注册功能已经禁用", LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"禁用快捷键注册功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 根据当前工具模式更新快捷键状态
+        /// 在工具切换时调用此方法
+        /// </summary>
+        /// <param name="isMouseMode">是否为鼠标模式（选择模式）</param>
+        public void UpdateHotkeyStateForToolMode(bool isMouseMode)
+        {
+            try
+            {
+                if (isMouseMode)
+                {
+                    // 鼠标模式下禁用快捷键，让键盘操作放行
+                    DisableHotkeyRegistration();
+                    LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作", LogHelper.LogType.Info);
+                }
+                else
+                {
+                    // 非鼠标模式下启用快捷键
+                    EnableHotkeyRegistration();
+                    LogHelper.WriteLogToFile("切换到非鼠标模式，启用快捷键", LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -752,53 +811,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 动态管理快捷键注册状态
-        /// 根据当前工具选择状态自动注册或注销快捷键
-        /// </summary>
-        public void UpdateHotkeyRegistrationState()
-        {
-            try
-            {
-                bool isMouseMode = IsInSelectMode();
-                
-                if (isMouseMode)
-                {
-                    // 在鼠标模式下，注销所有快捷键以释放系统快捷键
-                    if (_hotkeysShouldBeRegistered)
-                    {
-                        UnregisterAllHotkeys();
-                        _hotkeysShouldBeRegistered = false;
-                    }
-                    else
-                    {
-                        // 快捷键已经处于注销状态，无需重复注销
-                    }
-                }
-                else
-                {
-                    // 在批注/选择/其他工具模式下，重新注册所有快捷键
-                    if (!_hotkeysShouldBeRegistered)
-                    {
-                        // 第一次切换到批注/选择/其他工具模式，启用快捷键注册
-                        EnableHotkeyRegistration();
-                    }
-                    else if (_registeredHotkeys.Count == 0)
-                    {
-                        // 快捷键已启用但数量为0，重新注册
-                        LoadHotkeysFromSettings();
-                    }
-                    else
-                    {
-                        // 当前已有快捷键注册，无需重新注册
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新快捷键注册状态时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
+
         #endregion
 
         #region IDisposable Implementation
@@ -806,7 +819,7 @@ namespace Ink_Canvas.Helpers
         {
             if (!_isDisposed)
             {
-                UnregisterAllHotkeys();
+                
                 _isDisposed = true;
             }
         }

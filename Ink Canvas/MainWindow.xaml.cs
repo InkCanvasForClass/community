@@ -239,6 +239,9 @@ namespace Ink_Canvas
             // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
             this.Activated += Window_Activated;
             this.Deactivated += Window_Deactivated;
+            
+            // 为浮动栏按钮添加触摸事件支持
+            AddTouchSupportToFloatingBarButtons();
         }
 
 
@@ -274,7 +277,6 @@ namespace Ink_Canvas
                     drawingAttributes.FitToCurve = Settings.Canvas.FitToCurve;
                 }
 
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 inkCanvas.Gesture += InkCanvas_Gesture;
             }
             catch { }
@@ -808,6 +810,7 @@ namespace Ink_Canvas
 
                 // 创建并显示更新窗口
                 HasNewUpdateWindow updateWindow = new HasNewUpdateWindow(currentVersion, AvailableLatestVersion, releaseDate, releaseNotes);
+                updateWindow.Owner = this;
                 bool? dialogResult = updateWindow.ShowDialog();
 
                 // 如果窗口被关闭但没有点击按钮，则不执行任何操作
@@ -844,7 +847,7 @@ namespace Ink_Canvas
                                 App.IsAppExitByUser = true;
 
                                 // 准备批处理脚本
-                                AutoUpdateHelper.InstallNewVersionApp(AvailableLatestVersion, false);
+                                AutoUpdateHelper.InstallNewVersionApp(AvailableLatestVersion, true);  // 修改为静默模式，避免重复启动进程
 
                                 // 关闭软件，让安装程序接管
                                 Application.Current.Shutdown();
@@ -1676,6 +1679,8 @@ namespace Ink_Canvas
         private static extern bool SetForegroundWindow(IntPtr hWnd);
         [DllImport("user32.dll")]
         private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        [DllImport("kernel32.dll")]
+        private static extern uint GetCurrentProcessId();
 
         
         private const int GWL_EXSTYLE = -20;
@@ -1818,11 +1823,21 @@ namespace Ink_Canvas
                     return;
                 }
 
-                // 检查当前窗口是否在最顶层
+                // 检查是否有子窗口打开（模态对话框）
                 var foregroundWindow = GetForegroundWindow();
                 if (foregroundWindow != hwnd)
                 {
-                    // 如果窗口不在最顶层，重新设置置顶
+                    // 检查前景窗口是否是当前应用程序的子窗口
+                    var foregroundWindowProcessId = GetWindowThreadProcessId(foregroundWindow, out uint processId);
+                    var currentProcessId = GetCurrentProcessId();
+                    
+                    if (processId == currentProcessId)
+                    {
+                        // 如果有子窗口在前景，暂停置顶维护
+                        return;
+                    }
+                    
+                    // 如果窗口不在最顶层且没有子窗口，重新设置置顶
                     SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, 
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
                     
@@ -1832,7 +1847,6 @@ namespace Ink_Canvas
                     {
                         SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
                     }
-                    
                 }
             }
             catch (Exception ex)
@@ -2025,8 +2039,11 @@ namespace Ink_Canvas
             try
             {
                 _globalHotkeyManager = new GlobalHotkeyManager(this);
-                // 不在这里加载快捷键，等待需要时再加载
-                LogHelper.WriteLogToFile("全局快捷键管理器已初始化（未加载快捷键）", LogHelper.LogType.Event);
+                // 启动时加载快捷键，但默认为鼠标模式，禁用快捷键以放行键盘操作
+                _globalHotkeyManager.EnableHotkeyRegistration();
+                // 启动时默认为鼠标模式，禁用快捷键
+                _globalHotkeyManager.UpdateHotkeyStateForToolMode(true);
+                LogHelper.WriteLogToFile("全局快捷键管理器已初始化，启动时默认为鼠标模式并禁用快捷键", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -2047,6 +2064,7 @@ namespace Ink_Canvas
                     return;
                 }
                 var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
+                hotkeySettingsWindow.Owner = this;
                 hotkeySettingsWindow.ShowDialog();
             }
             catch (Exception ex)
@@ -2179,5 +2197,38 @@ namespace Ink_Canvas
             }
         }
         #endregion
+
+        /// <summary>
+        /// 集中管理工具模式切换和快捷键状态更新
+        /// 避免在每个工具按钮点击时重复刷新快捷键状态
+        /// </summary>
+        /// <param name="newMode">新的编辑模式</param>
+        /// <param name="additionalActions">可选的额外操作委托</param>
+        internal void SetCurrentToolMode(InkCanvasEditingMode newMode, Action additionalActions = null)
+        {
+            try
+            {
+                // 执行模式切换
+                inkCanvas.EditingMode = newMode;
+                
+                // 根据模式确定是否为鼠标模式（无工具模式）
+                bool isMouseMode = newMode == InkCanvasEditingMode.None;
+                
+                // 更新快捷键状态
+                if (_globalHotkeyManager != null)
+                {
+                    _globalHotkeyManager.UpdateHotkeyStateForToolMode(isMouseMode);
+                }
+                
+                // 执行额外的操作（如果有）
+                additionalActions?.Invoke();
+                
+                LogHelper.WriteLogToFile($"工具模式已切换到: {newMode}, 鼠标模式: {isMouseMode}", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"设置工具模式时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
     }
 }

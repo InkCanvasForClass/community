@@ -683,6 +683,7 @@ namespace Ink_Canvas
             if (Settings.Canvas != null)
             {
                 ToggleSwitchEnablePalmEraser.IsOn = Settings.Canvas.EnablePalmEraser;
+                ComboBoxPalmEraserSensitivity.SelectedIndex = Settings.Canvas.PalmEraserSensitivity;
             }
 
             // Advanced

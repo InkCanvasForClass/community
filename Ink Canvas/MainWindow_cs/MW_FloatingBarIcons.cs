@@ -28,35 +28,6 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        #region 快捷键状态管理
-
-        /// <summary>
-        /// 统一的快捷键状态刷新方法
-        /// 在工具切换时调用，避免重复代码
-        /// </summary>
-        private void RefreshHotkeyState()
-        {
-            try
-            {
-                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (hotkeyManagerField != null)
-                {
-                    var hotkeyManager = hotkeyManagerField.GetValue(this);
-                    if (hotkeyManager != null)
-                    {
-                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
-                        updateMethod?.Invoke(hotkeyManager, null);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"刷新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
-            }
-        }
-
-        #endregion
 
         #region "手勢"按鈕
 
@@ -820,8 +791,6 @@ namespace Ink_Canvas
             BtnSelect_Click(null, null);
             HideSubPanels("select");
 
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
         }
 
         #endregion
@@ -915,7 +884,11 @@ namespace Ink_Canvas
             HideSubPanels();
             BtnSettings_Click(null, null);
         }
-
+        private async void SymbolIconScreenshot_MouseUp(object sender, MouseButtonEventArgs e) {
+            HideSubPanelsImmediately();
+            await Task.Delay(50);
+            SaveScreenShotToDesktop();
+        }
 
         private void ImageCountdownTimer_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -1589,6 +1562,10 @@ namespace Ink_Canvas
             // 隱藏高亮
             HideFloatingBarHighlight();
 
+            // 使用集中化的工具模式切换方法，确保快捷键状态正确更新
+            // 鼠标模式下应该禁用快捷键以放行键盘操作
+            SetCurrentToolMode(InkCanvasEditingMode.None);
+
             // 切换前自动截图保存墨迹
             if (inkCanvas.Strokes.Count > 0 &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -1681,14 +1658,6 @@ namespace Ink_Canvas
                 else
                     ViewboxFloatingBarMarginAnimation(100, true);
             }
-
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
-
-            if (BtnSwitchTheme.Content.ToString() == "浅色")
-                BtnSwitch.Content = "黑板";
-            else
-                BtnSwitch.Content = "白板";
         }
 
         internal void PenIcon_Click(object sender, RoutedEventArgs e)
@@ -1719,7 +1688,8 @@ namespace Ink_Canvas
 
             if (Pen_Icon.Background == null || StackPanelCanvasControls.Visibility == Visibility.Collapsed)
             {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                // 使用集中化的工具模式切换方法
+                SetCurrentToolMode(InkCanvasEditingMode.Ink);
 
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
@@ -1752,7 +1722,8 @@ namespace Ink_Canvas
                 StackPanelCanvasControls.Visibility = Visibility.Visible;
                 //AnimationsHelper.ShowWithSlideFromLeftAndFade(StackPanelCanvasControls);
                 CheckEnableTwoFingerGestureBtnVisibility(true);
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                // 使用集中化的工具模式切换方法
+                SetCurrentToolMode(InkCanvasEditingMode.Ink);
                 
                 // 在批注模式下显示快捷调色盘（如果设置中启用了）
                 if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
@@ -1873,7 +1844,8 @@ namespace Ink_Canvas
                     {
                         SaveStrokes();
                     }
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    // 使用集中化的工具模式切换方法
+                    SetCurrentToolMode(InkCanvasEditingMode.Ink);
 
                     // 修复：从线擦切换到批注时，保持之前的笔类型状态
                     forceEraser = false;
@@ -1901,9 +1873,6 @@ namespace Ink_Canvas
                 }
             }
             
-            
-            // 延迟半秒后再刷新快捷键状态
-            Task.Delay(500).ContinueWith(_ => Dispatcher.BeginInvoke(DispatcherPriority.Background, new Action(() => RefreshHotkeyState())));
 
             // 修复：从线擦切换到批注时，保持之前的笔类型状态
             forceEraser = false;
@@ -1936,7 +1905,8 @@ namespace Ink_Canvas
             EnableAdvancedEraserSystem();
 
             // 使用新的高级橡皮擦系统
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.EraseByPoint);
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
@@ -1961,9 +1931,6 @@ namespace Ink_Canvas
                         AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
                 }
             }
-
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
         }
 
         private void BoardEraserIcon_Click(object sender, RoutedEventArgs e)
@@ -1978,7 +1945,8 @@ namespace Ink_Canvas
             EnableAdvancedEraserSystem();
 
             // 使用新的高级橡皮擦系统
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.EraseByPoint);
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
@@ -1998,9 +1966,6 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
                 }
             }
-
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
         }
 
         private void EraserIconByStrokes_Click(object sender, RoutedEventArgs e)
@@ -2018,7 +1983,8 @@ namespace Ink_Canvas
             forcePointEraser = false;
 
             inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.EraseByStroke);
             drawingShapeMode = 0;
 
             // 修复：切换到线擦时，保存当前的笔类型状态，而不是强制重置
@@ -2030,8 +1996,6 @@ namespace Ink_Canvas
 
             HideSubPanels("eraserByStrokes");
 
-            // 工具切换完成后，统一刷新快捷键状态
-            RefreshHotkeyState();
         }
 
         private void CursorWithDelIcon_Click(object sender, RoutedEventArgs e)
@@ -2301,7 +2265,8 @@ namespace Ink_Canvas
             }
             else
             {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+                // 使用集中化的工具模式切换方法
+                SetCurrentToolMode(InkCanvasEditingMode.Select);
             }
         }
 
@@ -3108,6 +3073,158 @@ namespace Ink_Canvas
                 System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
             }
         }
+
+        #endregion
+
+        #region 触摸事件支持
+
+        /// <summary>
+        /// 为浮动栏按钮添加触摸和手写笔事件支持，让触摸和手写笔点击直接调用对应的鼠标点击方法
+        /// </summary>
+        private void AddTouchSupportToFloatingBarButtons()
+        {
+            // 为主要的浮动栏按钮添加触摸和手写笔事件支持
+            if (SymbolIconSelect != null)
+            {
+                SymbolIconSelect.TouchDown += (s, e) => SymbolIconSelect_MouseUp(s, null);
+                SymbolIconSelect.StylusDown += (s, e) => SymbolIconSelect_MouseUp(s, null);
+            }
+            
+            if (SymbolIconUndo != null)
+            {
+                SymbolIconUndo.TouchDown += (s, e) => SymbolIconUndo_MouseUp(s, null);
+                SymbolIconUndo.StylusDown += (s, e) => SymbolIconUndo_MouseUp(s, null);
+            }
+            
+            if (SymbolIconRedo != null)
+            {
+                SymbolIconRedo.TouchDown += (s, e) => SymbolIconRedo_MouseUp(s, null);
+                SymbolIconRedo.StylusDown += (s, e) => SymbolIconRedo_MouseUp(s, null);
+            }
+            
+            if (SymbolIconDelete != null)
+            {
+                SymbolIconDelete.TouchDown += (s, e) => SymbolIconDelete_MouseUp(s, null);
+                SymbolIconDelete.StylusDown += (s, e) => SymbolIconDelete_MouseUp(s, null);
+            }
+            
+            if (ToolsFloatingBarBtn != null)
+            {
+                ToolsFloatingBarBtn.TouchDown += (s, e) => SymbolIconTools_MouseUp(s, null);
+                ToolsFloatingBarBtn.StylusDown += (s, e) => SymbolIconTools_MouseUp(s, null);
+            }
+            
+            if (RandomDrawPanel != null)
+            {
+                RandomDrawPanel.TouchDown += (s, e) => SymbolIconRand_MouseUp(s, null);
+                RandomDrawPanel.StylusDown += (s, e) => SymbolIconRand_MouseUp(s, null);
+            }
+            
+            if (SingleDrawPanel != null)
+            {
+                SingleDrawPanel.TouchDown += (s, e) => SymbolIconRandOne_MouseUp(s, null);
+                SingleDrawPanel.StylusDown += (s, e) => SymbolIconRandOne_MouseUp(s, null);
+            }
+            
+            // 注意：Screenshot和Settings按钮在XAML中没有直接的Name属性，需要通过其他方式绑定
+            // 这些按钮的事件处理已经在XAML中通过MouseUp绑定
+            
+            if (BorderFloatingBarMoveControls != null)
+            {
+                BorderFloatingBarMoveControls.TouchDown += (s, e) => SymbolIconEmoji_MouseUp(s, null);
+                BorderFloatingBarMoveControls.StylusDown += (s, e) => SymbolIconEmoji_MouseUp(s, null);
+            }
+            
+            // 白板模式下的按钮不添加触摸事件支持，保持原有的鼠标事件处理
+            
+            // 为快捷调色盘按钮添加触摸和手写笔事件支持
+            if (QuickColorWhite != null)
+            {
+                QuickColorWhite.TouchDown += (s, e) => QuickColorWhite_Click(s, null);
+                QuickColorWhite.StylusDown += (s, e) => QuickColorWhite_Click(s, null);
+            }
+            
+            if (QuickColorOrange != null)
+            {
+                QuickColorOrange.TouchDown += (s, e) => QuickColorOrange_Click(s, null);
+                QuickColorOrange.StylusDown += (s, e) => QuickColorOrange_Click(s, null);
+            }
+            
+            if (QuickColorYellow != null)
+            {
+                QuickColorYellow.TouchDown += (s, e) => QuickColorYellow_Click(s, null);
+                QuickColorYellow.StylusDown += (s, e) => QuickColorYellow_Click(s, null);
+            }
+            
+            if (QuickColorBlack != null)
+            {
+                QuickColorBlack.TouchDown += (s, e) => QuickColorBlack_Click(s, null);
+                QuickColorBlack.StylusDown += (s, e) => QuickColorBlack_Click(s, null);
+            }
+            
+            if (QuickColorBlue != null)
+            {
+                QuickColorBlue.TouchDown += (s, e) => QuickColorBlue_Click(s, null);
+                QuickColorBlue.StylusDown += (s, e) => QuickColorBlue_Click(s, null);
+            }
+            
+            if (QuickColorRed != null)
+            {
+                QuickColorRed.TouchDown += (s, e) => QuickColorRed_Click(s, null);
+                QuickColorRed.StylusDown += (s, e) => QuickColorRed_Click(s, null);
+            }
+            
+            if (QuickColorGreen != null)
+            {
+                QuickColorGreen.TouchDown += (s, e) => QuickColorGreen_Click(s, null);
+                QuickColorGreen.StylusDown += (s, e) => QuickColorGreen_Click(s, null);
+            }
+            
+            if (QuickColorPurple != null)
+            {
+                QuickColorPurple.TouchDown += (s, e) => QuickColorPurple_Click(s, null);
+                QuickColorPurple.StylusDown += (s, e) => QuickColorPurple_Click(s, null);
+            }
+            
+            // 单行快捷调色盘
+            if (QuickColorWhiteSingle != null)
+            {
+                QuickColorWhiteSingle.TouchDown += (s, e) => QuickColorWhite_Click(s, null);
+                QuickColorWhiteSingle.StylusDown += (s, e) => QuickColorWhite_Click(s, null);
+            }
+            
+            if (QuickColorOrangeSingle != null)
+            {
+                QuickColorOrangeSingle.TouchDown += (s, e) => QuickColorOrange_Click(s, null);
+                QuickColorOrangeSingle.StylusDown += (s, e) => QuickColorOrange_Click(s, null);
+            }
+            
+            if (QuickColorYellowSingle != null)
+            {
+                QuickColorYellowSingle.TouchDown += (s, e) => QuickColorYellow_Click(s, null);
+                QuickColorYellowSingle.StylusDown += (s, e) => QuickColorYellow_Click(s, null);
+            }
+            
+            if (QuickColorBlackSingle != null)
+            {
+                QuickColorBlackSingle.TouchDown += (s, e) => QuickColorBlack_Click(s, null);
+                QuickColorBlackSingle.StylusDown += (s, e) => QuickColorBlack_Click(s, null);
+            }
+            
+            if (QuickColorRedSingle != null)
+            {
+                QuickColorRedSingle.TouchDown += (s, e) => QuickColorRed_Click(s, null);
+                QuickColorRedSingle.StylusDown += (s, e) => QuickColorRed_Click(s, null);
+            }
+            
+            if (QuickColorGreenSingle != null)
+            {
+                QuickColorGreenSingle.TouchDown += (s, e) => QuickColorGreen_Click(s, null);
+                QuickColorGreenSingle.StylusDown += (s, e) => QuickColorGreen_Click(s, null);
+            }
+        }
+
+
 
         #endregion
 

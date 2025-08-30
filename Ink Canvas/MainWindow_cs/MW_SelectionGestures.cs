@@ -276,8 +276,10 @@ namespace Ink_Canvas
             {
                 if (inkCanvas.GetSelectedStrokes().Count == inkCanvas.Strokes.Count)
                 {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+                    // 使用集中化的工具模式切换方法
+                    SetCurrentToolMode(InkCanvasEditingMode.Ink, () => {
+                        SetCurrentToolMode(InkCanvasEditingMode.Select);
+                    });
                 }
                 else
                 {
@@ -290,7 +292,8 @@ namespace Ink_Canvas
             }
             else
             {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+                // 使用集中化的工具模式切换方法
+                SetCurrentToolMode(InkCanvasEditingMode.Select);
             }
         }
 
@@ -454,7 +457,8 @@ namespace Ink_Canvas
                 else
                 {
                     // 新增：启动套索选择模式
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+                    // 使用集中化的工具模式切换方法
+                    SetCurrentToolMode(InkCanvasEditingMode.Select);
                     inkCanvas.Select(new StrokeCollection());
                 }
             }
@@ -492,7 +496,8 @@ namespace Ink_Canvas
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;
-            inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.Select);
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 
@@ -502,7 +507,8 @@ namespace Ink_Canvas
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;
-            inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.Select);
             inkCanvas.IsManipulationEnabled = true;
             SetCursorBasedOnEditingMode(inkCanvas);
         }

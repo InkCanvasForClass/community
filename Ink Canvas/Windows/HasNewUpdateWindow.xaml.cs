@@ -340,7 +340,7 @@ namespace Ink_Canvas
                 downloadUrl = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
             }
             LogHelper.WriteLogToFile($"AutoUpdate | 开始安装版本: {version}");
-            AutoUpdateHelper.InstallNewVersionApp(version, false);
+            AutoUpdateHelper.InstallNewVersionApp(version, true);  
             App.IsAppExitByUser = true;
             Application.Current.Dispatcher.Invoke(() =>
             {
