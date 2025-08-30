@@ -1503,7 +1503,7 @@ namespace Ink_Canvas.Helpers
 
                 LogHelper.WriteLogToFile("AutoUpdate | 更新操作完成");
 
-                                // 启动更新后的应用程序
+                // 启动更新后的应用程序
                 string newAppPath = Path.Combine(targetPath, "InkCanvasForClass.exe");
                 if (File.Exists(newAppPath))
                 {
@@ -1530,9 +1530,6 @@ namespace Ink_Canvas.Helpers
                         
                         Process newProcess = Process.Start(startInfo);
                         LogHelper.WriteLogToFile($"AutoUpdate | 最终应用程序启动成功，PID: {newProcess?.Id}");
-                        
-                        // 等待一小段时间确保最终应用程序启动
-                        Thread.Sleep(2000);
                         
                         // 结束当前更新进程
                         LogHelper.WriteLogToFile("AutoUpdate | 更新流程完成，结束更新进程");
