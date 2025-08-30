@@ -6,11 +6,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using Ink_Canvas.Helpers;
 using System.Windows.Input;
 using System.Linq;
-using System.Collections.Generic;
 using System.Windows.Ink;
 
 namespace Ink_Canvas

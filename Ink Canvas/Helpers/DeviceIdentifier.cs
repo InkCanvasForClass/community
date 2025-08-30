@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
 
 namespace Ink_Canvas.Helpers
 {
