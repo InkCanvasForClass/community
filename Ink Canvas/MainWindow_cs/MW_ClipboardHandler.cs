@@ -163,8 +163,9 @@ namespace Ink_Canvas
                 {
                     // 清除当前选择，避免显示控制点
                     inkCanvas.Select(new StrokeCollection());
-                    // 设置编辑模式为非选择模式
-                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    // 设置编辑模式为Ink模式，这样可以保持图片的交互功能
+                    // 同时通过图片的IsHitTestVisible和Focusable属性来避免InkCanvas选择系统的干扰
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
 
                 // 添加到画布

@@ -50,14 +50,23 @@ namespace Ink_Canvas
                     // 先添加到画布
                     inkCanvas.Children.Add(image);
 
-                    // 初始化TransformGroup
-                    InitializeElementTransform(image);
+                    // 等待图片加载完成后再进行后续处理
+                    image.Loaded += (s, args) =>
+                    {
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            // 初始化TransformGroup
+                            InitializeElementTransform(image);
 
-                    // 居中缩放
-                    CenterAndScaleElement(image);
+                            // 居中缩放
+                            CenterAndScaleElement(image);
 
-                    // 绑定事件处理器
-                    BindElementEvents(image);
+                            // 最后绑定事件处理器
+                            BindElementEvents(image);
+                            
+                            LogHelper.WriteLogToFile($"图片插入完成: {image.Name}");
+                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                    };
 
                     timeMachine.CommitElementInsertHistory(image);
                 }
@@ -101,7 +110,7 @@ namespace Ink_Canvas
         {
             if (sender is FrameworkElement element)
             {
-                LogHelper.WriteLogToFile($"图片鼠标按下: {element.Name}");
+
                 
                 // 取消之前选中的元素
                 if (currentSelectedElement != null && currentSelectedElement != element)
@@ -155,7 +164,7 @@ namespace Ink_Canvas
         {
             if (sender is FrameworkElement element)
             {
-                LogHelper.WriteLogToFile($"图片滚轮事件: {element.Name}, Delta={e.Delta}");
+
                 
                 // 使用滚轮缩放的核心机制
                 ApplyWheelScaleTransform(element, e);
@@ -314,7 +323,7 @@ namespace Ink_Canvas
                     stroke.Transform(matrix, false);
                 }
                 
-                LogHelper.WriteLogToFile($"滚轮缩放应用: 缩放因子={scaleFactor}, 中心点=({elementCenter.X}, {elementCenter.Y})");
+                
             }
             catch (Exception ex)
             {
@@ -351,7 +360,7 @@ namespace Ink_Canvas
                     CommitTransformHistory(element, initialTransform, transformGroup);
                 }
                 
-                LogHelper.WriteLogToFile($"矩阵变换应用成功: 元素={element.Name}");
+
             }
             catch (Exception ex)
             {
@@ -384,7 +393,7 @@ namespace Ink_Canvas
                 // 更新选择框的位置（如果有选择框）
                 UpdateSelectionBorderPosition(delta);
                 
-                LogHelper.WriteLogToFile($"鼠标拖动应用: 位移=({delta.X}, {delta.Y})");
+
             }
             catch (Exception ex)
             {
@@ -481,7 +490,7 @@ namespace Ink_Canvas
                     stroke.Transform(matrix, false);
                 }
                 
-                LogHelper.WriteLogToFile($"触摸操作应用: 平移=({translation.X}, {translation.Y}), 旋转={rotation}, 缩放=({scale.X}, {scale.Y})");
+                
             }
             catch (Exception ex)
             {
