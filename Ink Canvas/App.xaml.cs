@@ -482,32 +482,196 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile($"App | 使用频率: {DeviceIdentifier.GetUsageFrequency()}");
             LogHelper.WriteLogToFile($"App | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
 
-            bool ret;
-            mutex = new Mutex(true, "InkCanvasForClass CE", out ret);
-
-            if (!ret && !e.Args.Contains("-m")) //-m multiple
+            // 处理更新模式启动
+            bool isUpdateMode = AutoUpdateHelper.HandleUpdateModeStartup(e.Args);
+            
+            // 如果是更新模式，不显示主窗口但保持应用运行
+            if (isUpdateMode)
             {
-                LogHelper.NewLog("Detected existing instance");
-                MessageBox.Show("已有一个程序实例正在运行");
-                LogHelper.NewLog("Ink Canvas automatically closed");
-                IsAppExitByUser = true; // 多开时标记为用户主动退出
-                // 写入退出信号，确保看门狗不会重启
+                LogHelper.WriteLogToFile("App | 检测到更新模式，跳过主窗口显示，保持应用运行");
+                
+                // 在更新模式下，保持应用程序运行直到更新完成
+                // 更新任务会在后台运行，完成后会自动启动新版本
+                // 设置一个定时器来检查更新是否完成
+                var updateCheckTimer = new Timer(async _ =>
+                {
+                    try
+                    {
+                        // 检查是否有新的InkCanvasForClass.exe进程启动
+                        var processes = Process.GetProcessesByName("InkCanvasForClass");
+                        if (processes.Length > 1) // 如果有多个进程，说明新版本已启动
+                        {
+                            LogHelper.WriteLogToFile("App | 检测到新版本已启动，退出更新进程");
+                            IsAppExitByUser = true;
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                Application.Current.Shutdown();
+                            });
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"App | 更新检查定时器出错: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                }, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+                
+                // 在更新模式下，不创建主窗口，但保持应用程序运行
+                // 通过返回而不创建主窗口来实现
+                return;
+            }
+
+            // 检查是否存在更新标记文件
+            string updateMarkerFile = Path.Combine(App.RootPath, "update_in_progress.tmp");
+            bool isUpdateInProgress = false;
+            
+            // 检查是否以更新模式启动
+            isUpdateMode = e.Args.Contains("--update-mode");
+            
+            if (File.Exists(updateMarkerFile))
+            {
                 try
                 {
-                    StartupCount.Reset();
-                    File.WriteAllText(watchdogExitSignalFile, "exit");
-                    if (watchdogProcess != null && !watchdogProcess.HasExited)
+                    string updateProcessIdStr = File.ReadAllText(updateMarkerFile).Trim();
+                    if (int.TryParse(updateProcessIdStr, out int updateProcessId))
                     {
-                        watchdogProcess.Kill();
+                        LogHelper.WriteLogToFile($"App | 检测到更新标记文件，更新进程ID: {updateProcessId}");
+                        
+                        // 检查更新进程是否还在运行
+                        try
+                        {
+                            Process updateProcess = Process.GetProcessById(updateProcessId);
+                            if (!updateProcess.HasExited)
+                            {
+                                LogHelper.WriteLogToFile("App | 更新进程仍在运行，等待更新完成");
+                                isUpdateInProgress = true;
+                                
+                                // 等待更新进程完成
+                                int waitCount = 0;
+                                const int maxWaitCount = 10; // 减少等待时间到10秒
+                                
+                                while (waitCount < maxWaitCount && !updateProcess.HasExited)
+                                {
+                                    Thread.Sleep(500); // 减少等待间隔到500ms
+                                    waitCount++;
+                                    LogHelper.WriteLogToFile($"App | 等待更新进程完成... ({waitCount}/{maxWaitCount})");
+                                }
+                                
+                                if (updateProcess.HasExited)
+                                {
+                                    LogHelper.WriteLogToFile("App | 更新进程已结束");
+                                }
+                                else
+                                {
+                                    LogHelper.WriteLogToFile("App | 等待更新进程超时，强制清理", LogHelper.LogType.Warning);
+                                    // 超时后强制清理标记文件
+                                    try
+                                    {
+                                        if (File.Exists(updateMarkerFile))
+                                        {
+                                            File.Delete(updateMarkerFile);
+                                            LogHelper.WriteLogToFile("App | 强制清理更新标记文件");
+                                        }
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogHelper.WriteLogToFile($"App | 强制清理更新标记文件失败: {ex.Message}", LogHelper.LogType.Warning);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                LogHelper.WriteLogToFile("App | 更新进程已结束");
+                            }
+                        }
+                        catch (ArgumentException)
+                        {
+                            LogHelper.WriteLogToFile("App | 更新进程已不存在");
+                        }
+                        
+                        // 无论更新进程是否还在运行，都清理标记文件
+                        try
+                        {
+                            if (File.Exists(updateMarkerFile))
+                            {
+                                File.Delete(updateMarkerFile);
+                                LogHelper.WriteLogToFile("App | 清理更新标记文件");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"App | 清理更新标记文件失败: {ex.Message}", LogHelper.LogType.Warning);
+                        }
                     }
                 }
-                catch { }
-                Environment.Exit(0);
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"App | 读取更新标记文件失败: {ex.Message}", LogHelper.LogType.Warning);
+                    // 如果读取失败，也尝试删除标记文件
+                    try
+                    {
+                        if (File.Exists(updateMarkerFile))
+                        {
+                            File.Delete(updateMarkerFile);
+                            LogHelper.WriteLogToFile("App | 清理损坏的更新标记文件");
+                        }
+                    }
+                    catch { }
+                }
+            }
+
+            // 如果是更新过程或更新模式，跳过Mutex检查
+            if (!isUpdateInProgress && !isUpdateMode)
+            {
+                bool ret;
+                mutex = new Mutex(true, "InkCanvasForClass CE", out ret);
+
+                if (!ret && !e.Args.Contains("-m")) //-m multiple
+                {
+                    LogHelper.NewLog("Detected existing instance");
+                    MessageBox.Show("已有一个程序实例正在运行");
+                    LogHelper.NewLog("Ink Canvas automatically closed");
+                    IsAppExitByUser = true; // 多开时标记为用户主动退出
+                    // 写入退出信号，确保看门狗不会重启
+                    try
+                    {
+                        StartupCount.Reset();
+                        File.WriteAllText(watchdogExitSignalFile, "exit");
+                        if (watchdogProcess != null && !watchdogProcess.HasExited)
+                        {
+                            watchdogProcess.Kill();
+                        }
+                    }
+                    catch { }
+                    Environment.Exit(0);
+                }
+            }
+            else
+            {
+                if (isUpdateMode)
+                {
+                    LogHelper.WriteLogToFile("App | 更新模式启动，跳过重复运行检测");
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("App | 更新过程中，跳过重复运行检测");
+                }
+                
+                // 在更新过程中，创建一个临时的Mutex以避免其他检查出错
+                mutex = new Mutex(true, "InkCanvasForClass CE Update", out bool tempRet);
+                
+                // 额外等待一小段时间确保更新进程完全退出
+                Thread.Sleep(1000);
+                LogHelper.WriteLogToFile("App | 更新等待完成，继续启动");
             }
 
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
 
             StartArgs = e.Args;
+            
+            // 在非更新模式下创建主窗口
+            var mainWindow = new MainWindow();
+            MainWindow = mainWindow;
+            mainWindow.Show();
 
             // 新增：Office注册表检测
             try
