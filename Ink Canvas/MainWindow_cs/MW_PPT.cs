@@ -86,8 +86,8 @@ namespace Ink_Canvas
         private DispatcherTimer _longPressTimer;
         private bool _isLongPressActive = false;
         private bool _isLongPressNext = true; // true为下一页，false为上一页
-        private const int LongPressDelay = 50; // 长按延迟时间（毫秒）
-        private const int LongPressInterval = 50; // 长按翻页间隔（毫秒）
+        private const int LongPressDelay = 15; // 长按延迟时间（毫秒）
+        private const int LongPressInterval = 15; // 长按翻页间隔（毫秒）
         #endregion
 
         #region PPT Managers
