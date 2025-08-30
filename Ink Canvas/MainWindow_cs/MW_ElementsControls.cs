@@ -6,6 +6,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -370,32 +372,88 @@ namespace Ink_Canvas
 
         private void CenterAndScaleElement(FrameworkElement element)
         {
-            double maxWidth = SystemParameters.PrimaryScreenWidth / 2;
-            double maxHeight = SystemParameters.PrimaryScreenHeight / 2;
+            try
+            {
+                // 确保元素已加载且有有效尺寸
+                if (element == null || element.ActualWidth <= 0 || element.ActualHeight <= 0)
+                {
+                    // 如果元素尺寸无效，等待加载完成后再处理
+                    element.Loaded += (sender, e) =>
+                    {
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            CenterAndScaleElement(element);
+                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                    };
+                    return;
+                }
 
-            double scaleX = maxWidth / element.Width;
-            double scaleY = maxHeight / element.Height;
-            double scale = Math.Min(scaleX, scaleY);
+                // 获取画布的实际尺寸
+                double canvasWidth = inkCanvas.ActualWidth;
+                double canvasHeight = inkCanvas.ActualHeight;
 
-            // 直接设置元素的大小，而不使用RenderTransform
-            double newWidth = element.Width * scale;
-            double newHeight = element.Height * scale;
+                // 如果画布尺寸为0，使用窗口尺寸作为备选
+                if (canvasWidth <= 0 || canvasHeight <= 0)
+                {
+                    canvasWidth = this.ActualWidth;
+                    canvasHeight = this.ActualHeight;
+                }
 
-            element.Width = newWidth;
-            element.Height = newHeight;
+                // 如果仍然为0，使用屏幕尺寸
+                if (canvasWidth <= 0 || canvasHeight <= 0)
+                {
+                    canvasWidth = SystemParameters.PrimaryScreenWidth;
+                    canvasHeight = SystemParameters.PrimaryScreenHeight;
+                }
 
-            // 计算居中位置
-            double canvasWidth = inkCanvas.ActualWidth;
-            double canvasHeight = inkCanvas.ActualHeight;
-            double centerX = (canvasWidth - newWidth) / 2;
-            double centerY = (canvasHeight - newHeight) / 2;
+                // 计算最大允许尺寸（画布的70%）
+                double maxWidth = canvasWidth * 0.7;
+                double maxHeight = canvasHeight * 0.7;
 
-            // 直接设置位置，而不使用RenderTransform
-            InkCanvas.SetLeft(element, centerX);
-            InkCanvas.SetTop(element, centerY);
+                // 获取元素的当前尺寸
+                double elementWidth = element.ActualWidth;
+                double elementHeight = element.ActualHeight;
 
-            // 清除任何现有的RenderTransform
-            element.RenderTransform = Transform.Identity;
+                // 计算缩放比例
+                double scaleX = maxWidth / elementWidth;
+                double scaleY = maxHeight / elementHeight;
+                double scale = Math.Min(scaleX, scaleY);
+
+                // 如果元素本身比最大尺寸小，不进行缩放
+                if (scale > 1.0)
+                {
+                    scale = 1.0;
+                }
+
+                // 计算新的尺寸
+                double newWidth = elementWidth * scale;
+                double newHeight = elementHeight * scale;
+
+                // 设置元素尺寸
+                element.Width = newWidth;
+                element.Height = newHeight;
+
+                // 计算居中位置
+                double centerX = (canvasWidth - newWidth) / 2;
+                double centerY = (canvasHeight - newHeight) / 2;
+
+                // 确保位置不为负数
+                centerX = Math.Max(0, centerX);
+                centerY = Math.Max(0, centerY);
+
+                // 设置位置
+                InkCanvas.SetLeft(element, centerX);
+                InkCanvas.SetTop(element, centerY);
+
+                // 清除任何现有的RenderTransform
+                element.RenderTransform = Transform.Identity;
+
+                LogHelper.WriteLogToFile($"元素居中完成: 位置({centerX}, {centerY}), 尺寸({newWidth}x{newHeight})");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"元素居中失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
     }
 }

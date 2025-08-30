@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -182,8 +183,15 @@ namespace Ink_Canvas
                 string timestamp = "screenshot_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                 image.Name = timestamp;
 
-                // 居中并缩放图片
-                CenterAndScaleElement(image);
+                // 等待图片加载完成后再进行居中处理
+                image.Loaded += (sender, e) =>
+                {
+                    // 确保在UI线程中执行
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        CenterAndScaleScreenshot(image);
+                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                };
 
                 // 添加到画布
                 inkCanvas.Children.Add(image);
@@ -197,6 +205,87 @@ namespace Ink_Canvas
             {
                 ShowNotification($"插入截图失败: {ex.Message}");
                 LogHelper.WriteLogToFile($"插入截图失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 专门为截图优化的居中缩放方法
+        private void CenterAndScaleScreenshot(System.Windows.Controls.Image image)
+        {
+            try
+            {
+                // 确保图片已加载
+                if (image.Source == null || image.ActualWidth == 0 || image.ActualHeight == 0)
+                {
+                    return;
+                }
+
+                // 获取画布的实际尺寸
+                double canvasWidth = inkCanvas.ActualWidth;
+                double canvasHeight = inkCanvas.ActualHeight;
+
+                // 如果画布尺寸为0，使用窗口尺寸作为备选
+                if (canvasWidth <= 0 || canvasHeight <= 0)
+                {
+                    canvasWidth = this.ActualWidth;
+                    canvasHeight = this.ActualHeight;
+                }
+
+                // 如果仍然为0，使用屏幕尺寸
+                if (canvasWidth <= 0 || canvasHeight <= 0)
+                {
+                    canvasWidth = SystemParameters.PrimaryScreenWidth;
+                    canvasHeight = SystemParameters.PrimaryScreenHeight;
+                }
+
+                // 计算最大允许尺寸（画布的80%）
+                double maxWidth = canvasWidth * 0.8;
+                double maxHeight = canvasHeight * 0.8;
+
+                // 获取图片的原始尺寸
+                double originalWidth = image.Source.Width;
+                double originalHeight = image.Source.Height;
+
+                // 计算缩放比例
+                double scaleX = maxWidth / originalWidth;
+                double scaleY = maxHeight / originalHeight;
+                double scale = Math.Min(scaleX, scaleY);
+
+                // 如果图片本身比最大尺寸小，不进行缩放
+                if (scale > 1.0)
+                {
+                    scale = 1.0;
+                }
+
+                // 计算新的尺寸
+                double newWidth = originalWidth * scale;
+                double newHeight = originalHeight * scale;
+
+                // 设置图片尺寸
+                image.Width = newWidth;
+                image.Height = newHeight;
+
+                // 计算居中位置
+                double centerX = (canvasWidth - newWidth) / 2;
+                double centerY = (canvasHeight - newHeight) / 2;
+
+                // 确保位置不为负数
+                centerX = Math.Max(0, centerX);
+                centerY = Math.Max(0, centerY);
+
+                // 设置位置
+                InkCanvas.SetLeft(image, centerX);
+                InkCanvas.SetTop(image, centerY);
+
+                // 清除任何现有的RenderTransform
+                image.RenderTransform = Transform.Identity;
+
+                LogHelper.WriteLogToFile($"截图居中完成: 位置({centerX}, {centerY}), 尺寸({newWidth}x{newHeight})");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"截图居中失败: {ex.Message}", LogHelper.LogType.Error);
+                // 如果居中失败，使用默认的居中方法作为备选
+                CenterAndScaleElement(image);
             }
         }
 
