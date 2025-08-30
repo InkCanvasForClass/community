@@ -238,6 +238,9 @@ namespace Ink_Canvas
             BoardBorderLeftPageListView.Visibility = Visibility.Collapsed;
             BoardBorderRightPageListView.Visibility = Visibility.Collapsed;
             BoardImageOptionsPanel.Visibility = Visibility.Collapsed;
+            // 添加隐藏图形工具的二级菜单面板
+            BorderDrawShape.Visibility = Visibility.Collapsed;
+            BoardBorderDrawShape.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
