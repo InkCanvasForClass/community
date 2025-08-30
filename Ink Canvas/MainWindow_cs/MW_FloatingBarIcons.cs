@@ -3076,5 +3076,157 @@ namespace Ink_Canvas
 
         #endregion
 
+        #region 触摸事件支持
+
+        /// <summary>
+        /// 为浮动栏按钮添加触摸和手写笔事件支持，让触摸和手写笔点击直接调用对应的鼠标点击方法
+        /// </summary>
+        private void AddTouchSupportToFloatingBarButtons()
+        {
+            // 为主要的浮动栏按钮添加触摸和手写笔事件支持
+            if (SymbolIconSelect != null)
+            {
+                SymbolIconSelect.TouchDown += (s, e) => SymbolIconSelect_MouseUp(s, null);
+                SymbolIconSelect.StylusDown += (s, e) => SymbolIconSelect_MouseUp(s, null);
+            }
+            
+            if (SymbolIconUndo != null)
+            {
+                SymbolIconUndo.TouchDown += (s, e) => SymbolIconUndo_MouseUp(s, null);
+                SymbolIconUndo.StylusDown += (s, e) => SymbolIconUndo_MouseUp(s, null);
+            }
+            
+            if (SymbolIconRedo != null)
+            {
+                SymbolIconRedo.TouchDown += (s, e) => SymbolIconRedo_MouseUp(s, null);
+                SymbolIconRedo.StylusDown += (s, e) => SymbolIconRedo_MouseUp(s, null);
+            }
+            
+            if (SymbolIconDelete != null)
+            {
+                SymbolIconDelete.TouchDown += (s, e) => SymbolIconDelete_MouseUp(s, null);
+                SymbolIconDelete.StylusDown += (s, e) => SymbolIconDelete_MouseUp(s, null);
+            }
+            
+            if (ToolsFloatingBarBtn != null)
+            {
+                ToolsFloatingBarBtn.TouchDown += (s, e) => SymbolIconTools_MouseUp(s, null);
+                ToolsFloatingBarBtn.StylusDown += (s, e) => SymbolIconTools_MouseUp(s, null);
+            }
+            
+            if (RandomDrawPanel != null)
+            {
+                RandomDrawPanel.TouchDown += (s, e) => SymbolIconRand_MouseUp(s, null);
+                RandomDrawPanel.StylusDown += (s, e) => SymbolIconRand_MouseUp(s, null);
+            }
+            
+            if (SingleDrawPanel != null)
+            {
+                SingleDrawPanel.TouchDown += (s, e) => SymbolIconRandOne_MouseUp(s, null);
+                SingleDrawPanel.StylusDown += (s, e) => SymbolIconRandOne_MouseUp(s, null);
+            }
+            
+            // 注意：Screenshot和Settings按钮在XAML中没有直接的Name属性，需要通过其他方式绑定
+            // 这些按钮的事件处理已经在XAML中通过MouseUp绑定
+            
+            if (BorderFloatingBarMoveControls != null)
+            {
+                BorderFloatingBarMoveControls.TouchDown += (s, e) => SymbolIconEmoji_MouseUp(s, null);
+                BorderFloatingBarMoveControls.StylusDown += (s, e) => SymbolIconEmoji_MouseUp(s, null);
+            }
+            
+            // 白板模式下的按钮不添加触摸事件支持，保持原有的鼠标事件处理
+            
+            // 为快捷调色盘按钮添加触摸和手写笔事件支持
+            if (QuickColorWhite != null)
+            {
+                QuickColorWhite.TouchDown += (s, e) => QuickColorWhite_Click(s, null);
+                QuickColorWhite.StylusDown += (s, e) => QuickColorWhite_Click(s, null);
+            }
+            
+            if (QuickColorOrange != null)
+            {
+                QuickColorOrange.TouchDown += (s, e) => QuickColorOrange_Click(s, null);
+                QuickColorOrange.StylusDown += (s, e) => QuickColorOrange_Click(s, null);
+            }
+            
+            if (QuickColorYellow != null)
+            {
+                QuickColorYellow.TouchDown += (s, e) => QuickColorYellow_Click(s, null);
+                QuickColorYellow.StylusDown += (s, e) => QuickColorYellow_Click(s, null);
+            }
+            
+            if (QuickColorBlack != null)
+            {
+                QuickColorBlack.TouchDown += (s, e) => QuickColorBlack_Click(s, null);
+                QuickColorBlack.StylusDown += (s, e) => QuickColorBlack_Click(s, null);
+            }
+            
+            if (QuickColorBlue != null)
+            {
+                QuickColorBlue.TouchDown += (s, e) => QuickColorBlue_Click(s, null);
+                QuickColorBlue.StylusDown += (s, e) => QuickColorBlue_Click(s, null);
+            }
+            
+            if (QuickColorRed != null)
+            {
+                QuickColorRed.TouchDown += (s, e) => QuickColorRed_Click(s, null);
+                QuickColorRed.StylusDown += (s, e) => QuickColorRed_Click(s, null);
+            }
+            
+            if (QuickColorGreen != null)
+            {
+                QuickColorGreen.TouchDown += (s, e) => QuickColorGreen_Click(s, null);
+                QuickColorGreen.StylusDown += (s, e) => QuickColorGreen_Click(s, null);
+            }
+            
+            if (QuickColorPurple != null)
+            {
+                QuickColorPurple.TouchDown += (s, e) => QuickColorPurple_Click(s, null);
+                QuickColorPurple.StylusDown += (s, e) => QuickColorPurple_Click(s, null);
+            }
+            
+            // 单行快捷调色盘
+            if (QuickColorWhiteSingle != null)
+            {
+                QuickColorWhiteSingle.TouchDown += (s, e) => QuickColorWhite_Click(s, null);
+                QuickColorWhiteSingle.StylusDown += (s, e) => QuickColorWhite_Click(s, null);
+            }
+            
+            if (QuickColorOrangeSingle != null)
+            {
+                QuickColorOrangeSingle.TouchDown += (s, e) => QuickColorOrange_Click(s, null);
+                QuickColorOrangeSingle.StylusDown += (s, e) => QuickColorOrange_Click(s, null);
+            }
+            
+            if (QuickColorYellowSingle != null)
+            {
+                QuickColorYellowSingle.TouchDown += (s, e) => QuickColorYellow_Click(s, null);
+                QuickColorYellowSingle.StylusDown += (s, e) => QuickColorYellow_Click(s, null);
+            }
+            
+            if (QuickColorBlackSingle != null)
+            {
+                QuickColorBlackSingle.TouchDown += (s, e) => QuickColorBlack_Click(s, null);
+                QuickColorBlackSingle.StylusDown += (s, e) => QuickColorBlack_Click(s, null);
+            }
+            
+            if (QuickColorRedSingle != null)
+            {
+                QuickColorRedSingle.TouchDown += (s, e) => QuickColorRed_Click(s, null);
+                QuickColorRedSingle.StylusDown += (s, e) => QuickColorRed_Click(s, null);
+            }
+            
+            if (QuickColorGreenSingle != null)
+            {
+                QuickColorGreenSingle.TouchDown += (s, e) => QuickColorGreen_Click(s, null);
+                QuickColorGreenSingle.StylusDown += (s, e) => QuickColorGreen_Click(s, null);
+            }
+        }
+
+
+
+        #endregion
+
     }
 }

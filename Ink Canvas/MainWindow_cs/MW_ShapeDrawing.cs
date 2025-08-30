@@ -555,6 +555,7 @@ namespace Ink_Canvas
         {
             // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
             if (Settings.Canvas.FitToCurve) drawingAttributes.FitToCurve = false;
+            // 在绘制过程中禁用浮动栏交互，避免干扰绘制
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
             List<Point> pointList;
@@ -1668,6 +1669,18 @@ namespace Ink_Canvas
 
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            // 检查鼠标点击是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
+            var mousePoint = e.GetPosition(this);
+            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
+                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
+            
+            // 如果鼠标点击发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收鼠标事件
+            if (floatingBarBounds.Contains(mousePoint))
+            {
+                // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收鼠标事件
+                return;
+            }
+            
             inkCanvas.CaptureMouse();
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;

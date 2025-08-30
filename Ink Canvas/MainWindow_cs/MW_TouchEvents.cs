@@ -109,6 +109,18 @@ namespace Ink_Canvas
 
         private void MainWindow_TouchDown(object sender, TouchEventArgs e)
         {
+            // 检查触摸是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
+            var touchPoint = e.GetTouchPoint(this);
+            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
+                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
+            
+            // 如果触摸发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收触摸事件
+            if (floatingBarBounds.Contains(touchPoint.Position))
+            {
+                // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收触摸事件
+                return;
+            }
+            
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
                 || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
                 || inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
@@ -139,6 +151,18 @@ namespace Ink_Canvas
 
         private void MainWindow_StylusDown(object sender, StylusDownEventArgs e)
         {
+            // 检查手写笔点击是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
+            var stylusPoint = e.GetPosition(this);
+            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
+                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
+            
+            // 如果手写笔点击发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收手写笔事件
+            if (floatingBarBounds.Contains(stylusPoint))
+            {
+                // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收手写笔事件
+                return;
+            }
+            
             LogHelper.WriteLogToFile($"MainWindow_StylusDown 被调用，笔尾状态: {e.StylusDevice.Inverted}, 当前 drawingShapeMode: {drawingShapeMode}, 当前 EditingMode: {inkCanvas.EditingMode}", LogHelper.LogType.Info);
             
             // 新增：根据是否为笔尾自动切换橡皮擦/画笔模式
@@ -323,6 +347,18 @@ namespace Ink_Canvas
 
         private void Main_Grid_TouchDown(object sender, TouchEventArgs e)
         {
+            // 检查触摸是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
+            var touchPoint = e.GetTouchPoint(this);
+            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
+                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
+            
+            // 如果触摸发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收触摸事件
+            if (floatingBarBounds.Contains(touchPoint.Position))
+            {
+                // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收触摸事件
+                return;
+            }
+            
             SetCursorBasedOnEditingMode(inkCanvas);
             inkCanvas.CaptureTouch(e.TouchDevice);
 
@@ -371,6 +407,18 @@ namespace Ink_Canvas
 
         private void inkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            // 检查触摸是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
+            var touchPoint = e.GetTouchPoint(this);
+            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
+                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
+            
+            // 如果触摸发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收触摸事件
+            if (floatingBarBounds.Contains(touchPoint.Position))
+            {
+                // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收触摸事件
+                return;
+            }
+            
             // 橡皮状态下不做任何切换，直接return，保证橡皮可持续
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
                 || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
@@ -391,21 +439,21 @@ namespace Ink_Canvas
                 // 修复：几何绘制模式下，只记录几何绘制的起点，不记录触摸轨迹
                 if (dec.Count == 0)
                 {
-                    var touchPoint = e.GetTouchPoint(inkCanvas);
+                    var inkTouchPoint = e.GetTouchPoint(inkCanvas);
                     // 对于双曲线绘制，第一笔时记录起点，第二笔时不更新起点
                     if (drawingShapeMode == 24 || drawingShapeMode == 25)
                     {
                         // 双曲线绘制：第一笔记录起点，第二笔保持第一笔的起点
                         if (drawMultiStepShapeCurrentStep == 0)
                         {
-                            iniP = touchPoint.Position;
+                            iniP = inkTouchPoint.Position;
                         }
                         // 第二笔时不更新iniP，保持第一笔的起点
                     }
                     else
                     {
                         // 其他图形正常记录起点
-                        iniP = touchPoint.Position;
+                        iniP = inkTouchPoint.Position;
                     }
                     lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
                 }
@@ -488,7 +536,7 @@ namespace Ink_Canvas
         // 设备1个的时候，记录中心点
         if (dec.Count == 1)
         {
-            var touchPoint = e.GetTouchPoint(inkCanvas);
+            touchPoint = e.GetTouchPoint(inkCanvas);
             centerPoint = touchPoint.Position;
 
             // 修复：只允许在此处赋值iniP，防止TouchMove等其他地方覆盖，保证几何绘制起点一致
