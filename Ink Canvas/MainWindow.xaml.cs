@@ -807,6 +807,7 @@ namespace Ink_Canvas
 
                 // 创建并显示更新窗口
                 HasNewUpdateWindow updateWindow = new HasNewUpdateWindow(currentVersion, AvailableLatestVersion, releaseDate, releaseNotes);
+                updateWindow.Owner = this;
                 bool? dialogResult = updateWindow.ShowDialog();
 
                 // 如果窗口被关闭但没有点击按钮，则不执行任何操作
@@ -1675,6 +1676,8 @@ namespace Ink_Canvas
         private static extern bool SetForegroundWindow(IntPtr hWnd);
         [DllImport("user32.dll")]
         private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        [DllImport("kernel32.dll")]
+        private static extern uint GetCurrentProcessId();
 
         
         private const int GWL_EXSTYLE = -20;
@@ -1817,11 +1820,21 @@ namespace Ink_Canvas
                     return;
                 }
 
-                // 检查当前窗口是否在最顶层
+                // 检查是否有子窗口打开（模态对话框）
                 var foregroundWindow = GetForegroundWindow();
                 if (foregroundWindow != hwnd)
                 {
-                    // 如果窗口不在最顶层，重新设置置顶
+                    // 检查前景窗口是否是当前应用程序的子窗口
+                    var foregroundWindowProcessId = GetWindowThreadProcessId(foregroundWindow, out uint processId);
+                    var currentProcessId = GetCurrentProcessId();
+                    
+                    if (processId == currentProcessId)
+                    {
+                        // 如果有子窗口在前景，暂停置顶维护
+                        return;
+                    }
+                    
+                    // 如果窗口不在最顶层且没有子窗口，重新设置置顶
                     SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, 
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
                     
@@ -1831,7 +1844,6 @@ namespace Ink_Canvas
                     {
                         SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
                     }
-                    
                 }
             }
             catch (Exception ex)
@@ -2049,6 +2061,7 @@ namespace Ink_Canvas
                     return;
                 }
                 var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
+                hotkeySettingsWindow.Owner = this;
                 hotkeySettingsWindow.ShowDialog();
             }
             catch (Exception ex)
