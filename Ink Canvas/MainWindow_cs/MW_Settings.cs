@@ -2688,10 +2688,23 @@ namespace Ink_Canvas
                         {
                             SetFloatingBarHighlightPosition(currentMode);
                         }
+                        
+                        // 重新计算浮动栏位置，因为按钮可见性变化会影响浮动栏宽度
+                        if (!isFloatingBarFolded)
+                        {
+                            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                            {
+                                ViewboxFloatingBarMarginAnimation(60);
+                            }
+                            else
+                            {
+                                ViewboxFloatingBarMarginAnimation(100, true);
+                            }
+                        }
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"重新计算高光位置失败: {ex.Message}", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile($"重新计算高光位置和浮动栏位置失败: {ex.Message}", LogHelper.LogType.Error);
                     }
                 }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
