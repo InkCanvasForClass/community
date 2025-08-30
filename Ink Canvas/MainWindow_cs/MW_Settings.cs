@@ -3034,6 +3034,12 @@ namespace Ink_Canvas
 
         #endregion
 
+        private void ComboBoxPalmEraserSensitivity_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Canvas.PalmEraserSensitivity = ComboBoxPalmEraserSensitivity.SelectedIndex;
+            SaveSettingsToFile();
+        }
 
     }
 }

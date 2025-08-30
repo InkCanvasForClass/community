@@ -841,7 +841,20 @@
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchEnablePalmEraser_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 开启后，两个及以上触点且触摸面积较大时自动切换为橡皮擦，抬手后恢复原编辑模式。" TextWrapping="Wrap" Foreground="#a1a1aa" />    
+                                    <TextBlock Text="# 开启后，两个及以上触点且触摸面积较大时自动切换为橡皮擦，抬手后恢复原编辑模式。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
+                                                         Visibility="{Binding ElementName=ToggleSwitchEnablePalmEraser, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="手掌擦敏感度" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxPalmEraserSensitivity" Width="120" SelectionChanged="ComboBoxPalmEraserSensitivity_SelectionChanged">
+                                            <ComboBoxItem Content="低敏感度" />
+                                            <ComboBoxItem Content="中敏感度" />
+                                            <ComboBoxItem Content="高敏感度" />
+                                        </ComboBox>
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 低敏感度：需要更大的触摸面积和更多触摸点，减少误判；高敏感度：更容易触发手掌擦，但可能误判手指。" 
+                                               TextWrapping="Wrap" Foreground="#a1a1aa"
+                                               Visibility="{Binding ElementName=ToggleSwitchEnablePalmEraser, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}" />    
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <GroupBox Name="GroupBoxInkRecognition">

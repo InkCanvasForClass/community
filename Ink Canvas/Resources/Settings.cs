@@ -88,6 +88,8 @@ namespace Ink_Canvas
         public bool IsCompressPicturesUploaded { get; set; }
         [JsonProperty("enablePalmEraser")]
         public bool EnablePalmEraser { get; set; } = true;
+        [JsonProperty("palmEraserSensitivity")]
+        public int PalmEraserSensitivity { get; set; } = 2; // 0-低敏感度, 1-中敏感度, 2-高敏感度
         [JsonProperty("clearCanvasAlsoClearImages")]
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
