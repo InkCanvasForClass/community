@@ -288,7 +288,7 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    // 如果配置文件不存在，才使用默认快捷键
+                    // 如果配置文件不存在或加载失败，使用默认快捷键
                     if (!File.Exists(HotkeyConfigFile))
                     {
                         LogHelper.WriteLogToFile("配置文件不存在，注册默认快捷键", LogHelper.LogType.Info);
@@ -297,7 +297,9 @@ namespace Ink_Canvas.Helpers
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile("配置文件存在但加载失败，保持当前状态", LogHelper.LogType.Warning);
+                        LogHelper.WriteLogToFile("配置文件存在但加载失败，回退到默认快捷键", LogHelper.LogType.Warning);
+                        RegisterDefaultHotkeys();
+                        _hotkeysShouldBeRegistered = true;
                     }
                 }
             }
@@ -350,12 +352,69 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("快捷键注册功能已经启用", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("快捷键注册功能已经启用，重新加载快捷键设置", LogHelper.LogType.Info);
+                    // 即使已经启用，也要重新加载快捷键设置以确保快捷键正常工作
+                    LoadHotkeysFromSettings();
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"启用快捷键注册功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 禁用快捷键注册功能
+        /// 调用此方法后，快捷键将被注销
+        /// </summary>
+        public void DisableHotkeyRegistration()
+        {
+            try
+            {
+                if (_hotkeysShouldBeRegistered)
+                {
+                    _hotkeysShouldBeRegistered = false;
+                    LogHelper.WriteLogToFile("禁用快捷键注册功能", LogHelper.LogType.Info);
+                    
+                    // 注销所有快捷键
+                    UnregisterAllHotkeys();
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("快捷键注册功能已经禁用", LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"禁用快捷键注册功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 根据当前工具模式更新快捷键状态
+        /// 在工具切换时调用此方法
+        /// </summary>
+        /// <param name="isMouseMode">是否为鼠标模式（选择模式）</param>
+        public void UpdateHotkeyStateForToolMode(bool isMouseMode)
+        {
+            try
+            {
+                if (isMouseMode)
+                {
+                    // 鼠标模式下禁用快捷键，让键盘操作放行
+                    DisableHotkeyRegistration();
+                    LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作", LogHelper.LogType.Info);
+                }
+                else
+                {
+                    // 非鼠标模式下启用快捷键
+                    EnableHotkeyRegistration();
+                    LogHelper.WriteLogToFile("切换到非鼠标模式，启用快捷键", LogHelper.LogType.Info);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -752,44 +811,6 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 鼠标事件处理方法
-        /// </summary>
-        private void OnMouseModeEvent(object sender, MouseEventArgs e)
-        {
-            bool isMouseMode = IsInSelectMode();
-    
-            if (isMouseMode)
-            {
-                // 在鼠标模式下设置事件处理状态
-                e.Handled = false; 
-            }
-            else
-            {
-                e.Handled = true;
-                EnableHotkeyRegistration();
-                LoadHotkeysFromSettings();
-            }
-            // 更新快捷键注册状态
-            try
-            {
-                var hotkeyManagerField = this.GetType().GetField("_globalHotkeyManager", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                if (hotkeyManagerField != null)
-                {
-                    var hotkeyManager = hotkeyManagerField.GetValue(this);
-                    if (hotkeyManager != null)
-                    {
-                        var updateMethod = hotkeyManager.GetType().GetMethod("UpdateHotkeyRegistrationState");
-                        updateMethod?.Invoke(hotkeyManager, null);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新快捷键状态时出错: {ex.Message}", LogHelper.LogType.Warning);
-            }
-        }
 
         #endregion
 

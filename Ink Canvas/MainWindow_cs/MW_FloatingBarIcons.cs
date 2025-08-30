@@ -1562,6 +1562,10 @@ namespace Ink_Canvas
             // 隱藏高亮
             HideFloatingBarHighlight();
 
+            // 使用集中化的工具模式切换方法，确保快捷键状态正确更新
+            // 鼠标模式下应该禁用快捷键以放行键盘操作
+            SetCurrentToolMode(InkCanvasEditingMode.None);
+
             // 切换前自动截图保存墨迹
             if (inkCanvas.Strokes.Count > 0 &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber)
@@ -1684,7 +1688,8 @@ namespace Ink_Canvas
 
             if (Pen_Icon.Background == null || StackPanelCanvasControls.Visibility == Visibility.Collapsed)
             {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                // 使用集中化的工具模式切换方法
+                SetCurrentToolMode(InkCanvasEditingMode.Ink);
 
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
@@ -1717,7 +1722,8 @@ namespace Ink_Canvas
                 StackPanelCanvasControls.Visibility = Visibility.Visible;
                 //AnimationsHelper.ShowWithSlideFromLeftAndFade(StackPanelCanvasControls);
                 CheckEnableTwoFingerGestureBtnVisibility(true);
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                // 使用集中化的工具模式切换方法
+                SetCurrentToolMode(InkCanvasEditingMode.Ink);
                 
                 // 在批注模式下显示快捷调色盘（如果设置中启用了）
                 if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
@@ -1838,7 +1844,8 @@ namespace Ink_Canvas
                     {
                         SaveStrokes();
                     }
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    // 使用集中化的工具模式切换方法
+                    SetCurrentToolMode(InkCanvasEditingMode.Ink);
 
                     // 修复：从线擦切换到批注时，保持之前的笔类型状态
                     forceEraser = false;
@@ -1898,7 +1905,8 @@ namespace Ink_Canvas
             EnableAdvancedEraserSystem();
 
             // 使用新的高级橡皮擦系统
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.EraseByPoint);
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
@@ -1937,7 +1945,8 @@ namespace Ink_Canvas
             EnableAdvancedEraserSystem();
 
             // 使用新的高级橡皮擦系统
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.EraseByPoint);
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
@@ -1974,7 +1983,8 @@ namespace Ink_Canvas
             forcePointEraser = false;
 
             inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.EraseByStroke);
             drawingShapeMode = 0;
 
             // 修复：切换到线擦时，保存当前的笔类型状态，而不是强制重置
@@ -2255,7 +2265,8 @@ namespace Ink_Canvas
             }
             else
             {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+                // 使用集中化的工具模式切换方法
+                SetCurrentToolMode(InkCanvasEditingMode.Select);
             }
         }
 

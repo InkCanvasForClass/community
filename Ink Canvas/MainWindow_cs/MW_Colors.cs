@@ -64,7 +64,8 @@ namespace Ink_Canvas
             {
                 inkCanvas.IsManipulationEnabled = true;
                 drawingShapeMode = 0;
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                // 使用集中化的工具模式切换方法
+                SetCurrentToolMode(InkCanvasEditingMode.Ink);
                 CancelSingleFingerDragMode();
                 CheckColorTheme();
             }

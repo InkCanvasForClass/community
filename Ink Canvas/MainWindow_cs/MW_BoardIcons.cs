@@ -704,7 +704,8 @@ namespace Ink_Canvas
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;
-            inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.Select);
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 
@@ -721,7 +722,8 @@ namespace Ink_Canvas
             forcePointEraser = false;
 
             inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
-            inkCanvas.EditingMode = InkCanvasEditingMode.EraseByStroke;
+            // 使用集中化的工具模式切换方法
+            SetCurrentToolMode(InkCanvasEditingMode.EraseByStroke);
             drawingShapeMode = 0;
 
             // 修复：切换到线擦时，确保重置笔的状态

@@ -274,7 +274,8 @@ namespace Ink_Canvas
                     drawingAttributes.FitToCurve = Settings.Canvas.FitToCurve;
                 }
 
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                // 使用集中化的工具模式切换方法
+                SetCurrentToolMode(InkCanvasEditingMode.Ink);
                 inkCanvas.Gesture += InkCanvas_Gesture;
             }
             catch { }
@@ -2025,8 +2026,9 @@ namespace Ink_Canvas
             try
             {
                 _globalHotkeyManager = new GlobalHotkeyManager(this);
-                // 不在这里加载快捷键，等待需要时再加载
-                LogHelper.WriteLogToFile("全局快捷键管理器已初始化（未加载快捷键）", LogHelper.LogType.Event);
+                // 启动时加载快捷键，默认启用
+                _globalHotkeyManager.EnableHotkeyRegistration();
+                LogHelper.WriteLogToFile("全局快捷键管理器已初始化并加载快捷键", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -2179,5 +2181,38 @@ namespace Ink_Canvas
             }
         }
         #endregion
+
+        /// <summary>
+        /// 集中管理工具模式切换和快捷键状态更新
+        /// 避免在每个工具按钮点击时重复刷新快捷键状态
+        /// </summary>
+        /// <param name="newMode">新的编辑模式</param>
+        /// <param name="additionalActions">可选的额外操作委托</param>
+        internal void SetCurrentToolMode(InkCanvasEditingMode newMode, Action additionalActions = null)
+        {
+            try
+            {
+                // 执行模式切换
+                inkCanvas.EditingMode = newMode;
+                
+                // 根据模式确定是否为鼠标模式（无工具模式）
+                bool isMouseMode = newMode == InkCanvasEditingMode.None;
+                
+                // 更新快捷键状态
+                if (_globalHotkeyManager != null)
+                {
+                    _globalHotkeyManager.UpdateHotkeyStateForToolMode(isMouseMode);
+                }
+                
+                // 执行额外的操作（如果有）
+                additionalActions?.Invoke();
+                
+                LogHelper.WriteLogToFile($"工具模式已切换到: {newMode}, 鼠标模式: {isMouseMode}", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"设置工具模式时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
     }
 }
