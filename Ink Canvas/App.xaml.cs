@@ -484,7 +484,7 @@ namespace Ink_Canvas
             // 在应用启动时自动释放IACore相关DLL
             try
             {
-                Helpers.IACoreDllExtractor.ExtractIACoreDlls();
+                IACoreDllExtractor.ExtractIACoreDlls();
             }
             catch (Exception ex)
             {
@@ -508,7 +508,7 @@ namespace Ink_Canvas
             }
 
             // 检查是否存在更新标记文件
-            string updateMarkerFile = Path.Combine(App.RootPath, "update_in_progress.tmp");
+            string updateMarkerFile = Path.Combine(RootPath, "update_in_progress.tmp");
             bool isUpdateInProgress = false;
             
             // 检查是否以更新模式启动

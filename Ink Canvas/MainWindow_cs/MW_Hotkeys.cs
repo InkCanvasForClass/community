@@ -1,9 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-using System.Diagnostics;
-using System;
-using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace Ink_Canvas
 {

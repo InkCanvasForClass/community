@@ -16,13 +16,13 @@ namespace Ink_Canvas
     {
         private bool _isSelecting = false;
         private bool _isFreehandMode = false;
-        private System.Windows.Point _startPoint;
-        private System.Windows.Point _currentPoint;
-        private List<System.Windows.Point> _freehandPoints;
+        private Point _startPoint;
+        private Point _currentPoint;
+        private List<Point> _freehandPoints;
         private Polyline _freehandPolyline;
 
         public DrawingRectangle? SelectedArea { get; private set; }
-        public List<System.Windows.Point> SelectedPath { get; private set; }
+        public List<Point> SelectedPath { get; private set; }
 
         public ScreenshotSelectorWindow()
         {
@@ -47,7 +47,7 @@ namespace Ink_Canvas
 
         private void InitializeFreehandMode()
         {
-            _freehandPoints = new List<System.Windows.Point>();
+            _freehandPoints = new List<Point>();
             _freehandPolyline = new Polyline
             {
                 Stroke = Brushes.Red,
@@ -65,10 +65,10 @@ namespace Ink_Canvas
             // 转换为WPF坐标系统
             var dpiScale = GetDpiScale();
 
-            this.Left = virtualScreen.Left / dpiScale;
-            this.Top = virtualScreen.Top / dpiScale;
-            this.Width = virtualScreen.Width / dpiScale;
-            this.Height = virtualScreen.Height / dpiScale;
+            Left = virtualScreen.Left / dpiScale;
+            Top = virtualScreen.Top / dpiScale;
+            Width = virtualScreen.Width / dpiScale;
+            Height = virtualScreen.Height / dpiScale;
         }
 
         private double GetDpiScale()
@@ -186,7 +186,7 @@ namespace Ink_Canvas
                     if (_freehandPoints.Count > 3) // 至少需要3个点形成有效路径
                     {
                         // 创建路径的副本，避免修改原始列表
-                        var pathPoints = new List<System.Windows.Point>(_freehandPoints);
+                        var pathPoints = new List<Point>(_freehandPoints);
                         
                         // 确保路径闭合（如果最后一个点不是起始点，则添加起始点）
                         if (pathPoints.Count > 0 && 
@@ -284,7 +284,7 @@ namespace Ink_Canvas
             return new Rect(x, y, width, height);
         }
 
-        private Rect CalculatePathBounds(List<System.Windows.Point> points)
+        private Rect CalculatePathBounds(List<Point> points)
         {
             if (points == null || points.Count == 0)
                 return new Rect();
@@ -306,12 +306,12 @@ namespace Ink_Canvas
         }
 
         // 优化路径：移除重复点和过于接近的点，提高路径质量
-        private List<System.Windows.Point> OptimizePath(List<System.Windows.Point> originalPath)
+        private List<Point> OptimizePath(List<Point> originalPath)
         {
             if (originalPath == null || originalPath.Count < 3)
                 return originalPath;
 
-            var optimizedPath = new List<System.Windows.Point>();
+            var optimizedPath = new List<Point>();
             const double minDistance = 2.0; // 最小距离阈值
 
             // 添加第一个点

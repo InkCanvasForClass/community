@@ -340,7 +340,7 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"PPT事件注册失败: {ex}", LogHelper.LogType.Error);
                         throw; // 重新抛出异常，让外层处理
                     }
-                }, DispatcherPriority.Normal, System.Threading.CancellationToken.None, TimeSpan.FromSeconds(2));
+                }, DispatcherPriority.Normal, CancellationToken.None, TimeSpan.FromSeconds(2));
 
                 // 获取当前演示文稿信息
                 UpdateCurrentPresentationInfo();
@@ -407,7 +407,7 @@ namespace Ink_Canvas.Helpers
                                     // COM对象类型转换失败，通常是因为对象已经被释放
                                     LogHelper.WriteLogToFile("PPT COM对象已被释放，跳过事件注册取消", LogHelper.LogType.Trace);
                                 }
-                            }, DispatcherPriority.Normal, System.Threading.CancellationToken.None, TimeSpan.FromSeconds(1));
+                            }, DispatcherPriority.Normal, CancellationToken.None, TimeSpan.FromSeconds(1));
                         }
                     }
                     catch (Exception ex)

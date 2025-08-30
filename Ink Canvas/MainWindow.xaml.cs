@@ -237,8 +237,8 @@ namespace Ink_Canvas
             ApplyAlwaysOnTop();
             
             // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
-            this.Activated += Window_Activated;
-            this.Deactivated += Window_Deactivated;
+            Activated += Window_Activated;
+            Deactivated += Window_Deactivated;
             
             // 为浮动栏按钮添加触摸事件支持
             AddTouchSupportToFloatingBarButtons();
@@ -1911,7 +1911,7 @@ namespace Ink_Canvas
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ApplyAlwaysOnTop();
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }), DispatcherPriority.Loaded);
             }
         }
         
@@ -1927,7 +1927,7 @@ namespace Ink_Canvas
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ApplyAlwaysOnTop();
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }), DispatcherPriority.Loaded);
             }
         }
 

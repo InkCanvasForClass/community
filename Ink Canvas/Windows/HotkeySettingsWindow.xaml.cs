@@ -30,7 +30,7 @@ namespace Ink_Canvas.Windows
             InitializeHotkeyItems();
             
             // 延迟加载快捷键，确保快捷键管理器已完全初始化
-            this.Loaded += (s, e) => 
+            Loaded += (s, e) => 
             {
                 try
                 {
@@ -48,7 +48,7 @@ namespace Ink_Canvas.Windows
             };
 
             // 注册窗口关闭事件
-            this.Closed += HotkeySettingsWindow_Closed;
+            Closed += HotkeySettingsWindow_Closed;
         }
         #endregion
 
@@ -440,7 +440,7 @@ namespace Ink_Canvas.Windows
                 
                 if (settingsBorder != null)
                 {
-                    settingsBorder.Visibility = System.Windows.Visibility.Collapsed;
+                    settingsBorder.Visibility = Visibility.Collapsed;
                 }
 
                 // 隐藏设置蒙版
@@ -449,7 +449,7 @@ namespace Ink_Canvas.Windows
                 
                 if (settingsMask != null)
                 {
-                    settingsMask.Visibility = System.Windows.Visibility.Collapsed;
+                    settingsMask.Visibility = Visibility.Collapsed;
                 }
             }
             catch (Exception ex)
@@ -471,7 +471,7 @@ namespace Ink_Canvas.Windows
                 
                 if (settingsBorder != null)
                 {
-                    settingsBorder.Visibility = System.Windows.Visibility.Visible;
+                    settingsBorder.Visibility = Visibility.Visible;
                 }
 
                 // 显示设置蒙版
@@ -480,7 +480,7 @@ namespace Ink_Canvas.Windows
                 
                 if (settingsMask != null)
                 {
-                    settingsMask.Visibility = System.Windows.Visibility.Visible;
+                    settingsMask.Visibility = Visibility.Visible;
                 }
             }
             catch (Exception ex)

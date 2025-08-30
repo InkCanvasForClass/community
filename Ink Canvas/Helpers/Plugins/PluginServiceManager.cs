@@ -1,10 +1,7 @@
-using Ink_Canvas.Helpers;
-using Ink_Canvas.Windows;
 using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Ink;
 using System.Windows.Media;
 using System.Linq;
 

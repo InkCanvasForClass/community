@@ -472,7 +472,7 @@ namespace Ink_Canvas.Helpers
             {
                 // 通过反射访问主窗口的penType字段
                 var penTypeField = _mainWindow.GetType().GetField("penType", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    BindingFlags.NonPublic | BindingFlags.Instance);
                 
                 if (penTypeField != null)
                 {
@@ -480,7 +480,7 @@ namespace Ink_Canvas.Helpers
                     
                     // 调用CheckPenTypeUIState方法更新UI状态
                     var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState", 
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        BindingFlags.NonPublic | BindingFlags.Instance);
                     
                     if (checkPenTypeMethod != null)
                     {

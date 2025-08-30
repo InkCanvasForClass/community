@@ -13,7 +13,6 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
@@ -2806,8 +2805,8 @@ namespace Ink_Canvas
             // Wait a bit for the panel to hide
             await Task.Delay(100);
 
-            // Capture screenshot and copy to clipboard
-            await CaptureScreenshotToClipboard();
+            // Capture screenshot and insert to canvas
+            await CaptureScreenshotAndInsert();
         }
 
         private async void ImageOptionSelectFile_MouseUp(object sender, MouseButtonEventArgs e)
