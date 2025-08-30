@@ -15,6 +15,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
+using Cursors = System.Windows.Input.Cursors;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using Image = System.Windows.Controls.Image;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
@@ -2828,6 +2829,72 @@ namespace Ink_Canvas
             }
         }
 
+        // 新增：插入图片方法
+        private async void InsertImage_MouseUp_New(object sender, MouseButtonEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif"
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                string filePath = dialog.FileName;
+                Image image = await CreateAndCompressImageAsync(filePath);
+                if (image != null)
+                {
+                    string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                    image.Name = timestamp;
+
+                    // 初始化TransformGroup
+                    if (image is FrameworkElement element)
+                    {
+                        var transformGroup = new TransformGroup();
+                        transformGroup.Children.Add(new ScaleTransform(1, 1));
+                        transformGroup.Children.Add(new TranslateTransform(0, 0));
+                        transformGroup.Children.Add(new RotateTransform(0));
+                        element.RenderTransform = transformGroup;
+                    }
+
+                    CenterAndScaleElement(image);
+                    
+                    // 设置图片属性，避免被InkCanvas选择系统处理
+                    image.IsHitTestVisible = true;
+                    image.Focusable = false;
+                    
+                    // 初始化InkCanvas选择设置
+                    if (inkCanvas != null)
+                    {
+                        // 清除当前选择，避免显示控制点
+                        inkCanvas.Select(new StrokeCollection());
+                        // 设置编辑模式为非选择模式
+                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    }
+                    
+                    inkCanvas.Children.Add(image);
+
+                    // 绑定事件处理器
+                    if (image is FrameworkElement elementForEvents)
+                    {
+                        // 鼠标事件
+                        elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                        elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+                        elementForEvents.MouseMove += Element_MouseMove;
+                        elementForEvents.MouseWheel += Element_MouseWheel;
+
+                        // 触摸事件
+                        elementForEvents.IsManipulationEnabled = true;
+                        elementForEvents.ManipulationDelta += Element_ManipulationDelta;
+                        elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
+
+                        // 设置光标
+                        elementForEvents.Cursor = Cursors.Hand;
+                    }
+
+                    timeMachine.CommitElementInsertHistory(image);
+                }
+            }
+        }
+
         // Keep the old method for backward compatibility
         private async void InsertImage_MouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -2844,8 +2911,50 @@ namespace Ink_Canvas
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     image.Name = timestamp;
 
+                    // 初始化TransformGroup
+                    if (image is FrameworkElement element)
+                    {
+                        var transformGroup = new TransformGroup();
+                        transformGroup.Children.Add(new ScaleTransform(1, 1));
+                        transformGroup.Children.Add(new TranslateTransform(0, 0));
+                        transformGroup.Children.Add(new RotateTransform(0));
+                        element.RenderTransform = transformGroup;
+                    }
+
                     CenterAndScaleElement(image);
+                    
+                    // 设置图片属性，避免被InkCanvas选择系统处理
+                    image.IsHitTestVisible = true;
+                    image.Focusable = false;
+                    
+                    // 初始化InkCanvas选择设置
+                    if (inkCanvas != null)
+                    {
+                        // 清除当前选择，避免显示控制点
+                        inkCanvas.Select(new StrokeCollection());
+                        // 设置编辑模式为非选择模式
+                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    }
+                    
                     inkCanvas.Children.Add(image);
+
+                    // 绑定事件处理器
+                    if (image is FrameworkElement elementForEvents)
+                    {
+                        // 鼠标事件
+                        elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                        elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+                        elementForEvents.MouseMove += Element_MouseMove;
+                        elementForEvents.MouseWheel += Element_MouseWheel;
+
+                        // 触摸事件
+                        elementForEvents.IsManipulationEnabled = true;
+                        elementForEvents.ManipulationDelta += Element_ManipulationDelta;
+                        elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
+
+                        // 设置光标
+                        elementForEvents.Cursor = Cursors.Hand;
+                    }
 
                     timeMachine.CommitElementInsertHistory(image);
                 }

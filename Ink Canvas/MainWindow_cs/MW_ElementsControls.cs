@@ -906,15 +906,10 @@ namespace Ink_Canvas
         {
             if (inkCanvas != null)
             {
-                // 隐藏选择控制点 - 通过清除选择和设置编辑模式
+                // 清除当前选择，避免显示控制点
                 inkCanvas.Select(new StrokeCollection());
+                // 设置编辑模式为非选择模式
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                
-                // 隐藏选择框
-                if (GridInkCanvasSelectionCover != null)
-                {
-                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                }
             }
         }
     }
