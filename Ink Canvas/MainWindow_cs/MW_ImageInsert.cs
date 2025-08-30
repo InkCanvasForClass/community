@@ -183,6 +183,16 @@ namespace Ink_Canvas
                 string timestamp = "screenshot_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                 image.Name = timestamp;
 
+                // 初始化TransformGroup
+                InitializeScreenshotTransform(image);
+                
+                // 设置截图属性，避免被InkCanvas选择系统处理
+                image.IsHitTestVisible = true;
+                image.Focusable = false;
+                
+                // 初始化InkCanvas选择设置
+                InitializeInkCanvasSelectionSettings();
+
                 // 等待图片加载完成后再进行居中处理
                 image.Loaded += (sender, e) =>
                 {
@@ -190,6 +200,8 @@ namespace Ink_Canvas
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
                         CenterAndScaleScreenshot(image);
+                        // 绑定事件处理器
+                        BindScreenshotEvents(image);
                     }), System.Windows.Threading.DispatcherPriority.Loaded);
                 };
 
@@ -206,6 +218,38 @@ namespace Ink_Canvas
                 ShowNotification($"插入截图失败: {ex.Message}");
                 LogHelper.WriteLogToFile($"插入截图失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        // 初始化截图的TransformGroup
+        private void InitializeScreenshotTransform(System.Windows.Controls.Image image)
+        {
+            var transformGroup = new TransformGroup();
+            transformGroup.Children.Add(new ScaleTransform(1, 1));
+            transformGroup.Children.Add(new TranslateTransform(0, 0));
+            transformGroup.Children.Add(new RotateTransform(0));
+            image.RenderTransform = transformGroup;
+        }
+
+        // 绑定截图事件处理器
+        private void BindScreenshotEvents(System.Windows.Controls.Image image)
+        {
+            // 鼠标事件
+            image.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+            image.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+            image.MouseMove += Element_MouseMove;
+            image.MouseWheel += Element_MouseWheel;
+
+            // 触摸事件
+            image.IsManipulationEnabled = true;
+            image.ManipulationDelta += Element_ManipulationDelta;
+            image.ManipulationCompleted += Element_ManipulationCompleted;
+
+            // 设置光标
+            image.Cursor = System.Windows.Input.Cursors.Hand;
+            
+            // 禁用InkCanvas对截图的选择处理
+            image.IsHitTestVisible = true;
+            image.Focusable = false;
         }
 
         // 专门为截图优化的居中缩放方法

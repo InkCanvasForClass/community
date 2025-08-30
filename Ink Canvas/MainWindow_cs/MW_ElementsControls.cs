@@ -8,11 +8,21 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Ink_Canvas.Helpers;
+using System.Windows.Input;
+using System.Linq;
+using System.Collections.Generic;
+using System.Windows.Ink;
 
 namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        // 当前选中的可操作元素
+        private FrameworkElement currentSelectedElement;
+        private bool isDragging = false;
+        private Point dragStartPoint;
+        private bool isElementSelected = false;
+
         #region Image
         private async void BtnImageInsert_Click(object sender, RoutedEventArgs e)
         {
@@ -30,11 +40,446 @@ namespace Ink_Canvas
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     image.Name = timestamp;
 
+                    // 初始化TransformGroup
+                    InitializeElementTransform(image);
+
                     CenterAndScaleElement(image);
+                    
+                    // 设置图片属性，避免被InkCanvas选择系统处理
+                    image.IsHitTestVisible = true;
+                    image.Focusable = false;
+                    
+                    // 初始化InkCanvas选择设置
+                    InitializeInkCanvasSelectionSettings();
+                    
                     inkCanvas.Children.Add(image);
+
+                    // 绑定事件处理器
+                    BindElementEvents(image);
 
                     timeMachine.CommitElementInsertHistory(image);
                 }
+            }
+        }
+
+        // 初始化元素的TransformGroup
+        private void InitializeElementTransform(FrameworkElement element)
+        {
+            var transformGroup = new TransformGroup();
+            transformGroup.Children.Add(new ScaleTransform(1, 1));
+            transformGroup.Children.Add(new TranslateTransform(0, 0));
+            transformGroup.Children.Add(new RotateTransform(0));
+            element.RenderTransform = transformGroup;
+        }
+
+        // 绑定元素事件处理器
+        private void BindElementEvents(FrameworkElement element)
+        {
+            // 鼠标事件
+            element.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+            element.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+            element.MouseMove += Element_MouseMove;
+            element.MouseWheel += Element_MouseWheel;
+
+            // 触摸事件
+            element.IsManipulationEnabled = true;
+            element.ManipulationDelta += Element_ManipulationDelta;
+            element.ManipulationCompleted += Element_ManipulationCompleted;
+
+            // 设置光标
+            element.Cursor = Cursors.Hand;
+            
+            // 禁用InkCanvas对图片的选择处理
+            element.IsHitTestVisible = true;
+            element.Focusable = false;
+        }
+
+        // 鼠标左键按下事件
+        private void Element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                // 取消之前选中的元素
+                if (currentSelectedElement != null && currentSelectedElement != element)
+                {
+                    UnselectElement(currentSelectedElement);
+                }
+
+                // 选中当前元素
+                SelectElement(element);
+                
+                // 开始拖动
+                isDragging = true;
+                dragStartPoint = e.GetPosition(inkCanvas);
+                element.CaptureMouse();
+                element.Cursor = Cursors.SizeAll;
+
+                e.Handled = true;
+            }
+        }
+
+        // 鼠标左键释放事件
+        private void Element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                isDragging = false;
+                element.ReleaseMouseCapture();
+                element.Cursor = Cursors.Hand;
+
+                e.Handled = true;
+            }
+        }
+
+        // 鼠标移动事件
+        private void Element_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (sender is FrameworkElement element && isDragging && element.IsMouseCaptured)
+            {
+                var currentPoint = e.GetPosition(inkCanvas);
+                
+                // 使用鼠标拖动的完整实现机制
+                ApplyMouseDragTransform(element, currentPoint, dragStartPoint);
+
+                dragStartPoint = currentPoint;
+                e.Handled = true;
+            }
+        }
+
+        // 鼠标滚轮事件 - 缩放
+        private void Element_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                // 使用滚轮缩放的核心机制
+                ApplyWheelScaleTransform(element, e);
+
+                e.Handled = true;
+            }
+        }
+
+        // 触摸操作事件
+        private void Element_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                // 使用触摸拖动的完整实现
+                ApplyTouchManipulationTransform(element, e);
+
+                e.Handled = true;
+            }
+        }
+
+        // 触摸操作完成事件
+        private void Element_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
+        {
+            // 可以在这里添加操作完成后的处理逻辑
+        }
+
+        // 应用平移变换
+        private void ApplyTranslateTransform(FrameworkElement element, double deltaX, double deltaY)
+        {
+            if (element.RenderTransform is TransformGroup transformGroup)
+            {
+                var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
+                if (translateTransform != null)
+                {
+                    translateTransform.X += deltaX;
+                    translateTransform.Y += deltaY;
+                }
+            }
+        }
+
+        // 应用缩放变换
+        private void ApplyScaleTransform(FrameworkElement element, double scaleFactor, Point center)
+        {
+            if (element.RenderTransform is TransformGroup transformGroup)
+            {
+                var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
+                if (scaleTransform != null)
+                {
+                    // 设置缩放中心
+                    scaleTransform.CenterX = center.X;
+                    scaleTransform.CenterY = center.Y;
+
+                    // 应用缩放
+                    scaleTransform.ScaleX *= scaleFactor;
+                    scaleTransform.ScaleY *= scaleFactor;
+
+                    // 限制缩放范围
+                    scaleTransform.ScaleX = Math.Max(0.1, Math.Min(scaleTransform.ScaleX, 5.0));
+                    scaleTransform.ScaleY = Math.Max(0.1, Math.Min(scaleTransform.ScaleY, 5.0));
+                }
+            }
+        }
+
+        // 应用旋转变换
+        private void ApplyRotateTransform(FrameworkElement element, double angle)
+        {
+            if (element.RenderTransform is TransformGroup transformGroup)
+            {
+                var rotateTransform = transformGroup.Children.OfType<RotateTransform>().FirstOrDefault();
+                if (rotateTransform != null)
+                {
+                    rotateTransform.Angle += angle;
+                }
+            }
+        }
+
+        // 选中元素
+        private void SelectElement(FrameworkElement element)
+        {
+            currentSelectedElement = element;
+            isElementSelected = true;
+            
+            // 去除选中效果，避免蓝色底边问题
+            // 可以通过其他方式（如状态变量）来跟踪选中状态
+            
+            // 确保选择框不显示，避免蓝色边框
+            if (GridInkCanvasSelectionCover != null)
+            {
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            }
+            
+            // 禁用InkCanvas的选择功能，去除控制点
+            if (inkCanvas != null)
+            {
+                // 清除当前选择
+                inkCanvas.Select(new StrokeCollection());
+                // 设置编辑模式为非选择模式
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            }
+        }
+
+        // 取消选中元素
+        private void UnselectElement(FrameworkElement element)
+        {
+            // 去除选中效果
+            isElementSelected = false;
+            
+            // 确保选择框隐藏
+            if (GridInkCanvasSelectionCover != null)
+            {
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            }
+            
+            // 恢复InkCanvas的编辑模式
+            if (inkCanvas != null)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+            }
+        }
+
+        // 应用矩阵变换到元素
+        private void ApplyElementMatrixTransform(FrameworkElement element, Matrix matrix)
+        {
+            if (element.RenderTransform is TransformGroup transformGroup)
+            {
+                // 创建MatrixTransform
+                var matrixTransform = new MatrixTransform(matrix);
+                
+                // 将MatrixTransform添加到TransformGroup
+                transformGroup.Children.Add(matrixTransform);
+            }
+        }
+
+        // 滚轮缩放的核心机制
+        private void ApplyWheelScaleTransform(FrameworkElement element, MouseWheelEventArgs e)
+        {
+            try
+            {
+                // 根据滚轮方向确定缩放比例（向上1.1倍，向下0.9倍）
+                double scaleFactor = e.Delta > 0 ? 1.1 : 0.9;
+                
+                // 计算选中元素的中心点作为缩放中心
+                var elementCenter = new Point(element.ActualWidth / 2, element.ActualHeight / 2);
+                
+                // 创建 Matrix 对象并应用 ScaleAt 变换
+                var matrix = new Matrix();
+                matrix.ScaleAt(scaleFactor, scaleFactor, elementCenter.X, elementCenter.Y);
+                
+                // 对选中的图片元素调用 ApplyElementMatrixTransform
+                ApplyElementMatrixTransform(element, matrix);
+                
+                // 对选中的笔画应用 Transform 方法（如果有选中的笔画）
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+                
+                LogHelper.WriteLogToFile($"滚轮缩放应用: 缩放因子={scaleFactor}, 中心点=({elementCenter.X}, {elementCenter.Y})");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"滚轮缩放失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 矩阵变换的完整实现
+        private void ApplyMatrixTransformToElement(FrameworkElement element, Matrix matrix, bool saveHistory = true)
+        {
+            try
+            {
+                // 获取元素的 RenderTransform，如果不存在则创建新的 TransformGroup
+                TransformGroup transformGroup = element.RenderTransform as TransformGroup;
+                if (transformGroup == null)
+                {
+                    transformGroup = new TransformGroup();
+                    element.RenderTransform = transformGroup;
+                }
+
+                // 保存初始变换状态用于历史记录
+                var initialTransform = transformGroup.Clone() as TransformGroup;
+                
+                // 创建新的 TransformGroup 并添加 MatrixTransform
+                var newTransformGroup = new TransformGroup();
+                newTransformGroup.Children.Add(new MatrixTransform(matrix));
+                
+                // 将新的变换组添加到现有的变换组中
+                transformGroup.Children.Add(newTransformGroup);
+                
+                // 如果启用了历史记录，提交变换历史
+                if (saveHistory)
+                {
+                    CommitTransformHistory(element, initialTransform, transformGroup);
+                }
+                
+                LogHelper.WriteLogToFile($"矩阵变换应用成功: 元素={element.Name}");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"矩阵变换失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 鼠标拖动的完整实现机制
+        private void ApplyMouseDragTransform(FrameworkElement element, Point currentPoint, Point startPoint)
+        {
+            try
+            {
+                // 计算鼠标移动的位移向量
+                var delta = currentPoint - startPoint;
+                
+                // 创建 Matrix 对象并应用 Translate 变换
+                var matrix = new Matrix();
+                matrix.Translate(delta.X, delta.Y);
+                
+                // 对选中的图片元素应用矩阵变换
+                ApplyMatrixTransformToElement(element, matrix, false);
+                
+                // 对选中的笔画应用变换
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+                
+                // 更新选择框的位置（如果有选择框）
+                UpdateSelectionBorderPosition(delta);
+                
+                LogHelper.WriteLogToFile($"鼠标拖动应用: 位移=({delta.X}, {delta.Y})");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"鼠标拖动失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 更新选择框位置
+        private void UpdateSelectionBorderPosition(Vector delta)
+        {
+            try
+            {
+                // 这里可以添加更新选择框位置的逻辑
+                // 例如更新 BorderStrokeSelectionControl 的位置
+                if (BorderStrokeSelectionControl != null)
+                {
+                    var currentMargin = BorderStrokeSelectionControl.Margin;
+                    BorderStrokeSelectionControl.Margin = new Thickness(
+                        currentMargin.Left + delta.X,
+                        currentMargin.Top + delta.Y,
+                        currentMargin.Right,
+                        currentMargin.Bottom
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新选择框位置失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 提交变换历史
+        private void CommitTransformHistory(FrameworkElement element, TransformGroup initialTransform, TransformGroup finalTransform)
+        {
+            try
+            {
+                // 这里可以添加提交变换历史到时间机器的逻辑
+                // 例如记录变换前后的状态
+                LogHelper.WriteLogToFile($"变换历史已记录: 元素={element.Name}");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"提交变换历史失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 触摸拖动的完整实现
+        private void ApplyTouchManipulationTransform(FrameworkElement element, ManipulationDeltaEventArgs e)
+        {
+            try
+            {
+                var md = e.DeltaManipulation;
+                var matrix = new Matrix();
+
+                // 支持单指拖动和多指手势
+                // 可以同时进行平移、旋转和缩放
+                
+                // 通过 ManipulationDelta 获取手势变化信息
+                var translation = md.Translation;
+                var rotation = md.Rotation;
+                var scale = md.Scale;
+
+                // 应用平移
+                if (translation.X != 0 || translation.Y != 0)
+                {
+                    matrix.Translate(translation.X, translation.Y);
+                }
+
+                // 支持两指缩放和旋转操作
+                if (e.Manipulators.Count() >= 2)
+                {
+                    var center = e.ManipulationOrigin;
+                    
+                    // 应用缩放
+                    if (scale.X != 1.0 || scale.Y != 1.0)
+                    {
+                        matrix.ScaleAt(scale.X, scale.Y, center.X, center.Y);
+                    }
+                    
+                    // 应用旋转
+                    if (rotation != 0)
+                    {
+                        matrix.RotateAt(rotation, center.X, center.Y);
+                    }
+                }
+
+                // 应用变换到元素
+                ApplyMatrixTransformToElement(element, matrix, false);
+                
+                // 应用变换到选中的笔画
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+                
+                LogHelper.WriteLogToFile($"触摸操作应用: 平移=({translation.X}, {translation.Y}), 旋转={rotation}, 缩放=({scale.X}, {scale.Y})");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"触摸操作失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -453,6 +898,23 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"元素居中失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 初始化InkCanvas选择设置
+        private void InitializeInkCanvasSelectionSettings()
+        {
+            if (inkCanvas != null)
+            {
+                // 隐藏选择控制点 - 通过清除选择和设置编辑模式
+                inkCanvas.Select(new StrokeCollection());
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                
+                // 隐藏选择框
+                if (GridInkCanvasSelectionCover != null)
+                {
+                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                }
             }
         }
     }

@@ -9,6 +9,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Point = System.Windows.Point;
+using System.Linq;
 
 namespace Ink_Canvas
 {
@@ -306,10 +307,21 @@ namespace Ink_Canvas
         private void inkCanvas_SelectionChanged(object sender, EventArgs e)
         {
             if (isProgramChangeStrokeSelection) return;
+            
+            // 检查是否有图片元素被选中
+            var selectedElements = inkCanvas.GetSelectedElements();
+            bool hasImageElement = selectedElements.Any(element => element is System.Windows.Controls.Image);
+            
+            // 如果有图片元素被选中，不显示选择框
+            if (hasImageElement)
+            {
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                return;
+            }
+            
             if (inkCanvas.GetSelectedStrokes().Count == 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-
             }
             else
             {
@@ -317,7 +329,6 @@ namespace Ink_Canvas
                 BorderStrokeSelectionClone.Background = Brushes.Transparent;
                 isStrokeSelectionCloneOn = false;
                 updateBorderStrokeSelectionControlLocation();
-
             }
         }
 
