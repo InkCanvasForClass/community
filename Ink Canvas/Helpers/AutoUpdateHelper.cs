@@ -1503,7 +1503,7 @@ namespace Ink_Canvas.Helpers
 
                 LogHelper.WriteLogToFile("AutoUpdate | 更新操作完成");
 
-                // 启动更新后的应用程序
+                                // 启动更新后的应用程序
                 string newAppPath = Path.Combine(targetPath, "InkCanvasForClass.exe");
                 if (File.Exists(newAppPath))
                 {
@@ -1520,16 +1520,20 @@ namespace Ink_Canvas.Helpers
                         File.WriteAllText(updateMarkerFile, currentUpdateProcessId.ToString());
                         LogHelper.WriteLogToFile($"AutoUpdate | 创建更新标记文件: {updateMarkerFile}");
                         
-                        // 启动更新后的应用程序
+                        // 启动更新后的应用程序（标记为最终应用，不受相同进程影响）
                         ProcessStartInfo startInfo = new ProcessStartInfo
                         {
                             FileName = newAppPath,
+                            Arguments = "--final-app --skip-mutex-check",
                             WorkingDirectory = targetPath,
                             UseShellExecute = false
                         };
                         
                         Process newProcess = Process.Start(startInfo);
-                        LogHelper.WriteLogToFile($"AutoUpdate | 最终应用程序启动成功，PID: {newProcess?.Id}");
+                        LogHelper.WriteLogToFile($"AutoUpdate | 最终应用程序启动成功，PID: {newProcess?.Id}，已标记为最终应用");
+                        
+                        // 等待一小段时间确保最终应用程序启动
+                        Thread.Sleep(2000);
                         
                         // 结束当前更新进程
                         LogHelper.WriteLogToFile("AutoUpdate | 更新流程完成，结束更新进程");
@@ -1538,9 +1542,22 @@ namespace Ink_Canvas.Helpers
                         try
                         {
                             LogHelper.WriteLogToFile("AutoUpdate | 强制结束更新进程");
-                            Process.GetCurrentProcess().Kill();
-                            // 如果Kill()没有立即生效，使用Environment.Exit强制退出
-                            Thread.Sleep(100);
+                            
+                            // 标记为应用主动退出，避免看门狗重启
+                            App.IsAppExitByUser = true;
+                            
+                            // 写入退出信号文件，确保看门狗不会重启
+                            try
+                            {
+                                string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + Process.GetCurrentProcess().Id + ".flag");
+                                File.WriteAllText(watchdogExitSignalFile, "exit");
+                                LogHelper.WriteLogToFile("AutoUpdate | 已写入看门狗退出信号文件");
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"AutoUpdate | 写入看门狗退出信号文件失败: {ex.Message}", LogHelper.LogType.Warning);
+                            }
+ 
                             Environment.Exit(0);
                         }
                         catch (Exception ex)

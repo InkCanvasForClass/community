@@ -76,7 +76,12 @@ namespace Ink_Canvas
             InitializeCrashListeners();
 
             // 仅在崩溃后操作为静默重启时才启动看门狗
-            if (CrashAction == CrashActionType.SilentRestart)
+            // 在更新模式下不启动看门狗，避免干扰更新流程
+            args = Environment.GetCommandLineArgs();
+            bool isUpdateMode = args.Contains("--update-mode");
+            bool isFinalApp = args.Contains("--final-app");
+            
+            if (CrashAction == CrashActionType.SilentRestart && !isUpdateMode && !isFinalApp)
             {
                 StartWatchdogIfNeeded();
             }
@@ -465,6 +470,16 @@ namespace Ink_Canvas
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
+            
+            // 检查是否为最终应用启动（更新后的应用）
+            bool isFinalApp = e.Args.Contains("--final-app");
+            bool skipMutexCheck = e.Args.Contains("--skip-mutex-check");
+            
+            // 记录最终应用启动状态
+            if (isFinalApp)
+            {
+                LogHelper.WriteLogToFile("App | 检测到最终应用启动（更新后的应用）");
+            }
 
             // 在应用启动时自动释放IACore相关DLL
             try
@@ -489,34 +504,6 @@ namespace Ink_Canvas
             if (isUpdateMode)
             {
                 LogHelper.WriteLogToFile("App | 检测到更新模式，跳过主窗口显示，保持应用运行");
-                
-                // 在更新模式下，保持应用程序运行直到更新完成
-                // 更新任务会在后台运行，完成后会自动启动新版本
-                // 设置一个定时器来检查更新是否完成
-                var updateCheckTimer = new Timer(async _ =>
-                {
-                    try
-                    {
-                        // 检查是否有新的InkCanvasForClass.exe进程启动
-                        var processes = Process.GetProcessesByName("InkCanvasForClass");
-                        if (processes.Length > 1) // 如果有多个进程，说明新版本已启动
-                        {
-                            LogHelper.WriteLogToFile("App | 检测到新版本已启动，退出更新进程");
-                            IsAppExitByUser = true;
-                            Application.Current.Dispatcher.Invoke(() =>
-                            {
-                                Application.Current.Shutdown();
-                            });
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"App | 更新检查定时器出错: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                }, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
-                
-                // 在更新模式下，不创建主窗口，但保持应用程序运行
-                // 通过返回而不创建主窗口来实现
                 return;
             }
 
@@ -527,7 +514,25 @@ namespace Ink_Canvas
             // 检查是否以更新模式启动
             isUpdateMode = e.Args.Contains("--update-mode");
             
-            if (File.Exists(updateMarkerFile))
+            // 如果是最终应用启动，立即清理更新标记文件
+            if (isFinalApp)
+            {
+                try
+                {
+                    if (File.Exists(updateMarkerFile))
+                    {
+                        File.Delete(updateMarkerFile);
+                        LogHelper.WriteLogToFile("App | 最终应用启动，清理更新标记文件");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"App | 清理更新标记文件失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+            }
+            
+            // 如果不是最终应用启动，才检查更新标记文件
+            if (!isFinalApp && File.Exists(updateMarkerFile))
             {
                 try
                 {
@@ -619,8 +624,8 @@ namespace Ink_Canvas
                 }
             }
 
-            // 如果是更新过程或更新模式，跳过Mutex检查
-            if (!isUpdateInProgress && !isUpdateMode)
+            // 如果是更新过程、更新模式、最终应用或跳过Mutex检查，跳过Mutex检查
+            if (!isUpdateInProgress && !isUpdateMode && !isFinalApp && !skipMutexCheck)
             {
                 bool ret;
                 mutex = new Mutex(true, "InkCanvasForClass CE", out ret);
@@ -651,17 +656,26 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile("App | 更新模式启动，跳过重复运行检测");
                 }
+                else if (isFinalApp)
+                {
+                    LogHelper.WriteLogToFile("App | 最终应用启动，跳过重复运行检测");
+                }
+                else if (skipMutexCheck)
+                {
+                    LogHelper.WriteLogToFile("App | 跳过Mutex检查模式启动，跳过重复运行检测");
+                }
                 else
                 {
                     LogHelper.WriteLogToFile("App | 更新过程中，跳过重复运行检测");
                 }
                 
-                // 在更新过程中，创建一个临时的Mutex以避免其他检查出错
-                mutex = new Mutex(true, "InkCanvasForClass CE Update", out bool tempRet);
+                // 在特殊模式下，创建一个临时的Mutex以避免其他检查出错
+                string mutexName = isFinalApp ? "InkCanvasForClass CE Final" : "InkCanvasForClass CE Update";
+                mutex = new Mutex(true, mutexName, out bool tempRet);
                 
                 // 额外等待一小段时间确保更新进程完全退出
                 Thread.Sleep(1000);
-                LogHelper.WriteLogToFile("App | 更新等待完成，继续启动");
+                LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
             }
 
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
