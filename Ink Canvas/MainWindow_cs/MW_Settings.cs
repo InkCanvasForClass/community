@@ -2675,6 +2675,25 @@ namespace Ink_Canvas
                             break;
                     }
                 }
+                
+                // 在按钮可见性更新后，重新计算当前高光位置
+                // 延迟执行以确保UI更新完成
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        // 获取当前选中的模式并重新设置高光位置
+                        string currentMode = GetCurrentSelectedMode();
+                        if (!string.IsNullOrEmpty(currentMode))
+                        {
+                            SetFloatingBarHighlightPosition(currentMode);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"重新计算高光位置失败: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
             }
             catch (Exception ex)
             {

@@ -2971,13 +2971,13 @@ namespace Ink_Canvas
                     quickColorPaletteMode = "single";
                 }
 
-                // 获取实际按钮宽度，如果获取不到则使用默认值
-                double cursorWidth = Cursor_Icon?.ActualWidth > 0 ? Cursor_Icon.ActualWidth : buttonWidth;
-                double penWidth = Pen_Icon?.ActualWidth > 0 ? Pen_Icon.ActualWidth : buttonWidth;
-                double deleteWidth = SymbolIconDelete?.ActualWidth > 0 ? SymbolIconDelete.ActualWidth : buttonWidth;
-                double eraserWidth = Eraser_Icon?.ActualWidth > 0 ? Eraser_Icon.ActualWidth : buttonWidth;
-                double eraserByStrokesWidth = EraserByStrokes_Icon?.ActualWidth > 0 ? EraserByStrokes_Icon.ActualWidth : buttonWidth;
-                double selectWidth = SymbolIconSelect?.ActualWidth > 0 ? SymbolIconSelect.ActualWidth : buttonWidth;
+                // 获取实际按钮宽度，如果获取不到则使用默认值，同时考虑按钮的可见性
+                double cursorWidth = (Cursor_Icon?.Visibility == Visibility.Visible && Cursor_Icon?.ActualWidth > 0) ? Cursor_Icon.ActualWidth : 0;
+                double penWidth = (Pen_Icon?.Visibility == Visibility.Visible && Pen_Icon?.ActualWidth > 0) ? Pen_Icon.ActualWidth : 0;
+                double deleteWidth = (SymbolIconDelete?.Visibility == Visibility.Visible && SymbolIconDelete?.ActualWidth > 0) ? SymbolIconDelete.ActualWidth : 0;
+                double eraserWidth = (Eraser_Icon?.Visibility == Visibility.Visible && Eraser_Icon?.ActualWidth > 0) ? Eraser_Icon.ActualWidth : 0;
+                double eraserByStrokesWidth = (EraserByStrokes_Icon?.Visibility == Visibility.Visible && EraserByStrokes_Icon?.ActualWidth > 0) ? EraserByStrokes_Icon.ActualWidth : 0;
+                double selectWidth = (SymbolIconSelect?.Visibility == Visibility.Visible && SymbolIconSelect?.ActualWidth > 0) ? SymbolIconSelect.ActualWidth : 0;
 
                 // 获取高光的实际宽度
                 double actualHighlightWidth = FloatingbarSelectionBG.ActualWidth > 0 ? FloatingbarSelectionBG.ActualWidth : highlightWidth;
@@ -3072,6 +3072,60 @@ namespace Ink_Canvas
                 FloatingbarSelectionBG.Visibility = Visibility.Hidden;
                 System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
             }
+        }
+
+        /// <summary>
+        /// 获取当前选中的模式
+        /// </summary>
+        /// <returns>当前选中的模式名称</returns>
+        public string GetCurrentSelectedMode()
+        {
+            try
+            {
+                // 检查当前编辑模式
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+                {
+                    return "select";
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                {
+                    // 检查是否是荧光笔模式
+                    if (drawingAttributes != null && drawingAttributes.IsHighlighter)
+                    {
+                        return "color";
+                    }
+                    else
+                    {
+                        return "pen";
+                    }
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                {
+                    // 检查是面积擦还是线擦
+                    if (Eraser_Icon != null && Eraser_Icon.Visibility == Visibility.Visible)
+                    {
+                        return "eraser";
+                    }
+                    else if (EraserByStrokes_Icon != null && EraserByStrokes_Icon.Visibility == Visibility.Visible)
+                    {
+                        return "eraserByStrokes";
+                    }
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                {
+                    return "cursor";
+                }
+                else if (drawingShapeMode != 0)
+                {
+                    return "shape";
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取当前选中模式失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            
+            return string.Empty;
         }
 
         #endregion
