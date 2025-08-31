@@ -1,6 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Media;
 using System.Timers;
@@ -9,6 +7,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Ink_Canvas.Helpers;
 using Application = System.Windows.Application;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Timer = System.Timers.Timer;
@@ -92,7 +91,7 @@ namespace Ink_Canvas
         private void Grid_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (isTimerRunning) return;
-            if (ProcessBarTime.Visibility == Visibility.Visible && isTimerRunning == false)
+            if (ProcessBarTime.Visibility == Visibility.Visible && !isTimerRunning)
             {
                 ProcessBarTime.Visibility = Visibility.Collapsed;
                 GridAdjustHour.Visibility = Visibility.Visible;

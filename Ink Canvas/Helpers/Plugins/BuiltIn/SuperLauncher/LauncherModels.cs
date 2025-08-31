@@ -1,5 +1,3 @@
-using Microsoft.Win32;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,6 +8,8 @@ using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
 {

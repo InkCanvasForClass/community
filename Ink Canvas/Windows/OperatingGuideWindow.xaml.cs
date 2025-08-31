@@ -1,7 +1,6 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {

@@ -1,15 +1,17 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Ink_Canvas.Helpers;
-using System.Windows.Input;
-using System.Linq;
-using System.Windows.Ink;
+using Microsoft.Win32;
 
 namespace Ink_Canvas
 {
@@ -17,7 +19,7 @@ namespace Ink_Canvas
     {
         // 当前选中的可操作元素
         private FrameworkElement currentSelectedElement;
-        private bool isDragging = false;
+        private bool isDragging;
         private Point dragStartPoint;
 
         #region Image
@@ -62,7 +64,7 @@ namespace Ink_Canvas
                             BindElementEvents(image);
                             
                             LogHelper.WriteLogToFile($"图片插入完成: {image.Name}");
-                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                        }), DispatcherPriority.Loaded);
                     };
 
                     timeMachine.CommitElementInsertHistory(image);
@@ -396,7 +398,7 @@ namespace Ink_Canvas
                 }
 
                 // 保存初始变换状态用于历史记录
-                var initialTransform = transformGroup.Clone() as TransformGroup;
+                var initialTransform = transformGroup.Clone();
                 
                 // 创建新的 TransformGroup 并添加 MatrixTransform
                 var newTransformGroup = new TransformGroup();
@@ -719,7 +721,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"旋转图片时发生错误: {ex.Message}");
+                Debug.WriteLine($"旋转图片时发生错误: {ex.Message}");
             }
         }
 
@@ -740,7 +742,7 @@ namespace Ink_Canvas
                     Width = image.Width,
                     Height = image.Height,
                     Stretch = image.Stretch,
-                    RenderTransform = image.RenderTransform?.Clone() as Transform
+                    RenderTransform = image.RenderTransform?.Clone()
                 };
 
                 // 设置位置，稍微偏移以避免重叠
@@ -790,7 +792,7 @@ namespace Ink_Canvas
                     Width = image.Width,
                     Height = image.Height,
                     Stretch = image.Stretch,
-                    RenderTransform = image.RenderTransform?.Clone() as Transform
+                    RenderTransform = image.RenderTransform?.Clone()
                 };
 
                 // 设置位置，稍微偏移以避免重叠
@@ -809,7 +811,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"克隆图片到新页面时发生错误: {ex.Message}");
+                Debug.WriteLine($"克隆图片到新页面时发生错误: {ex.Message}");
             }
         }
 
@@ -862,7 +864,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"缩放图片时发生错误: {ex.Message}");
+                Debug.WriteLine($"缩放图片时发生错误: {ex.Message}");
             }
         }
 
@@ -888,7 +890,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"删除图片时发生错误: {ex.Message}");
+                Debug.WriteLine($"删除图片时发生错误: {ex.Message}");
             }
         }
 
@@ -907,7 +909,7 @@ namespace Ink_Canvas
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
                             CenterAndScaleElement(element);
-                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                        }), DispatcherPriority.Loaded);
                     };
                     return;
                 }
@@ -919,8 +921,8 @@ namespace Ink_Canvas
                 // 如果画布尺寸为0，使用窗口尺寸作为备选
                 if (canvasWidth <= 0 || canvasHeight <= 0)
                 {
-                    canvasWidth = this.ActualWidth;
-                    canvasHeight = this.ActualHeight;
+                    canvasWidth = ActualWidth;
+                    canvasHeight = ActualHeight;
                 }
 
                 // 如果仍然为0，使用屏幕尺寸
@@ -1058,11 +1060,9 @@ namespace Ink_Canvas
                         return new Rect(left, top, width, height);
                     }
                 }
-                else
-                {
-                    // 没有变换时直接使用位置和大小
-                    return new Rect(left, top, width, height);
-                }
+
+                // 没有变换时直接使用位置和大小
+                return new Rect(left, top, width, height);
             }
             catch (Exception ex)
             {
@@ -1165,7 +1165,7 @@ namespace Ink_Canvas
                         UpdateImageSelectionToolbarPosition(currentSelectedElement);
                     }
                     
-                    LogHelper.WriteLogToFile($"图片左旋转完成");
+                    LogHelper.WriteLogToFile("图片左旋转完成");
                 }
             }
             catch (Exception ex)
@@ -1189,7 +1189,7 @@ namespace Ink_Canvas
                         UpdateImageSelectionToolbarPosition(currentSelectedElement);
                     }
                     
-                    LogHelper.WriteLogToFile($"图片右旋转完成");
+                    LogHelper.WriteLogToFile("图片右旋转完成");
                 }
             }
             catch (Exception ex)
@@ -1214,7 +1214,7 @@ namespace Ink_Canvas
                         UpdateImageSelectionToolbarPosition(currentSelectedElement);
                     }
                     
-                    LogHelper.WriteLogToFile($"图片缩放减小完成");
+                    LogHelper.WriteLogToFile("图片缩放减小完成");
                 }
             }
             catch (Exception ex)
@@ -1239,7 +1239,7 @@ namespace Ink_Canvas
                     UpdateImageSelectionToolbarPosition(currentSelectedElement);
                 }
                 
-                LogHelper.WriteLogToFile($"图片缩放增大完成");
+                LogHelper.WriteLogToFile("图片缩放增大完成");
             }
         }
         catch (Exception ex)

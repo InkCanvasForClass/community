@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Threading;
-using System.Windows;
 
 namespace Ink_Canvas.Helpers
 {

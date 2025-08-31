@@ -1,10 +1,10 @@
-﻿using Ink_Canvas.Helpers;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {

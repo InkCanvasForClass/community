@@ -1,5 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -12,6 +11,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {

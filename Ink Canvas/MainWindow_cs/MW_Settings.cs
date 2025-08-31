@@ -1,7 +1,3 @@
-using Hardcodet.Wpf.TaskbarNotification;
-using Ink_Canvas.Helpers;
-using Newtonsoft.Json;
-using OSVersionExtension;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +9,11 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using Newtonsoft.Json;
+using OSVersionExtension;
 using Application = System.Windows.Application;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -2709,7 +2710,7 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile($"重新计算高光位置和浮动栏位置失败: {ex.Message}", LogHelper.LogType.Error);
                     }
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }), DispatcherPriority.Loaded);
             }
             catch (Exception ex)
             {

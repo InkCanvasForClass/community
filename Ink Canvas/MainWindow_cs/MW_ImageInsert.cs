@@ -1,4 +1,3 @@
-using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,8 +10,14 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using Ink_Canvas.Helpers;
 using Application = System.Windows.Application;
+using Color = System.Drawing.Color;
+using Cursors = System.Windows.Input.Cursors;
+using Image = System.Windows.Controls.Image;
 using PixelFormat = System.Drawing.Imaging.PixelFormat;
+using Point = System.Windows.Point;
 using Size = System.Drawing.Size;
 
 namespace Ink_Canvas
@@ -21,9 +26,9 @@ namespace Ink_Canvas
     public struct ScreenshotResult
     {
         public Rectangle Area;
-        public List<System.Windows.Point> Path;
+        public List<Point> Path;
 
-        public ScreenshotResult(Rectangle area, List<System.Windows.Point> path = null)
+        public ScreenshotResult(Rectangle area, List<Point> path = null)
         {
             Area = area;
             Path = path;
@@ -172,7 +177,7 @@ namespace Ink_Canvas
                 var bitmapSource = ConvertBitmapToBitmapSource(bitmap);
 
                 // 创建WPF Image控件
-                var image = new System.Windows.Controls.Image
+                var image = new Image
                 {
                     Source = bitmapSource,
                     Stretch = Stretch.Uniform
@@ -202,7 +207,7 @@ namespace Ink_Canvas
                         CenterAndScaleScreenshot(image);
                         // 绑定事件处理器
                         BindScreenshotEvents(image);
-                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                    }), DispatcherPriority.Loaded);
                 };
 
                 // 添加到画布
@@ -221,7 +226,7 @@ namespace Ink_Canvas
         }
 
         // 初始化截图的TransformGroup
-        private void InitializeScreenshotTransform(System.Windows.Controls.Image image)
+        private void InitializeScreenshotTransform(Image image)
         {
             var transformGroup = new TransformGroup();
             transformGroup.Children.Add(new ScaleTransform(1, 1));
@@ -231,7 +236,7 @@ namespace Ink_Canvas
         }
 
         // 绑定截图事件处理器
-        private void BindScreenshotEvents(System.Windows.Controls.Image image)
+        private void BindScreenshotEvents(Image image)
         {
             // 鼠标事件
             image.MouseLeftButtonDown += Element_MouseLeftButtonDown;
@@ -245,7 +250,7 @@ namespace Ink_Canvas
             image.ManipulationCompleted += Element_ManipulationCompleted;
 
             // 设置光标
-            image.Cursor = System.Windows.Input.Cursors.Hand;
+            image.Cursor = Cursors.Hand;
             
             // 禁用InkCanvas对截图的选择处理
             image.IsHitTestVisible = true;
@@ -253,7 +258,7 @@ namespace Ink_Canvas
         }
 
         // 专门为截图优化的居中缩放方法
-        private void CenterAndScaleScreenshot(System.Windows.Controls.Image image)
+        private void CenterAndScaleScreenshot(Image image)
         {
             try
             {
@@ -270,8 +275,8 @@ namespace Ink_Canvas
                 // 如果画布尺寸为0，使用窗口尺寸作为备选
                 if (canvasWidth <= 0 || canvasHeight <= 0)
                 {
-                    canvasWidth = this.ActualWidth;
-                    canvasHeight = this.ActualHeight;
+                    canvasWidth = ActualWidth;
+                    canvasHeight = ActualHeight;
                 }
 
                 // 如果仍然为0，使用屏幕尺寸
@@ -338,7 +343,7 @@ namespace Ink_Canvas
         }
 
         // 应用形状遮罩到截图
-        private Bitmap ApplyShapeMask(Bitmap bitmap, List<System.Windows.Point> path, Rectangle area)
+        private Bitmap ApplyShapeMask(Bitmap bitmap, List<Point> path, Rectangle area)
         {
             try
             {
@@ -360,7 +365,7 @@ namespace Ink_Canvas
                 using (var resultGraphics = Graphics.FromImage(resultBitmap))
                 {
                     // 清除位图，设置为完全透明
-                    resultGraphics.Clear(System.Drawing.Color.Transparent);
+                    resultGraphics.Clear(Color.Transparent);
                     
                     // 设置高质量渲染
                     resultGraphics.SmoothingMode = SmoothingMode.AntiAlias;

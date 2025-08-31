@@ -1,8 +1,8 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers.Plugins
 {
@@ -46,17 +46,15 @@ namespace Ink_Canvas.Helpers.Plugins
                             {
                                 return typedValue;
                             }
-                            else
+
+                            // 尝试类型转换
+                            try
                             {
-                                // 尝试类型转换
-                                try
-                                {
-                                    return (T)Convert.ChangeType(value, typeof(T));
-                                }
-                                catch
-                                {
-                                    return defaultValue;
-                                }
+                                return (T)Convert.ChangeType(value, typeof(T));
+                            }
+                            catch
+                            {
+                                return defaultValue;
                             }
                         }
                     }

@@ -1,4 +1,3 @@
-using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +7,8 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
+using Ink_Canvas.Helpers;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -398,10 +399,10 @@ namespace Ink_Canvas
         private InkCanvasEditingMode palmEraserLastEditingMode = InkCanvasEditingMode.Ink;
         private bool palmEraserLastIsHighlighter;
         private bool palmEraserWasEnabledBeforeMultiTouch;
-        private bool palmEraserTouchDownHandled = false; // 新增：标记手掌擦触摸按下是否已处理
+        private bool palmEraserTouchDownHandled; // 新增：标记手掌擦触摸按下是否已处理
         private DateTime palmEraserActivationTime; // 新增：记录手掌擦激活时间
         private const int PALM_ERASER_TIMEOUT_MS = 3000; // 修改：减少手掌擦超时时间（3秒）
-        private System.Windows.Threading.DispatcherTimer palmEraserRecoveryTimer; // 新增：手掌擦恢复定时器
+        private DispatcherTimer palmEraserRecoveryTimer; // 新增：手掌擦恢复定时器
         private HashSet<int> palmEraserTouchIds = new HashSet<int>(); // 新增：记录参与手掌擦的触摸点ID
 
         private void inkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
@@ -983,7 +984,7 @@ namespace Ink_Canvas
         {
             if (palmEraserRecoveryTimer == null)
             {
-                palmEraserRecoveryTimer = new System.Windows.Threading.DispatcherTimer();
+                palmEraserRecoveryTimer = new DispatcherTimer();
                 palmEraserRecoveryTimer.Interval = TimeSpan.FromMilliseconds(1000); // 每秒检查一次
                 palmEraserRecoveryTimer.Tick += PalmEraserRecoveryTimer_Tick;
             }

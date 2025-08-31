@@ -1,7 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using MdXaml;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,6 +10,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using MdXaml;
 
 namespace Ink_Canvas
 {

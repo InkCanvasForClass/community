@@ -1,9 +1,3 @@
-using Ink_Canvas.Helpers;
-using Ink_Canvas.Helpers.Plugins;
-using Ink_Canvas.Helpers.Plugins.BuiltIn;
-using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
-using iNKORE.UI.WPF.Modern.Controls;
-using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,6 +6,12 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers.Plugins;
+using Ink_Canvas.Helpers.Plugins.BuiltIn;
+using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
+using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
 using MessageBox = System.Windows.MessageBox;
 
 namespace Ink_Canvas.Windows

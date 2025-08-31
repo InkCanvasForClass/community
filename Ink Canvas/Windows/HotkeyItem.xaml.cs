@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Ink_Canvas.Windows
 {
@@ -79,20 +80,20 @@ namespace Ink_Canvas.Windows
             if (_currentKey == Key.None)
             {
                 CurrentHotkeyTextBlock.Text = "未设置";
-                CurrentHotkeyTextBlock.Foreground = System.Windows.Media.Brushes.Gray;
+                CurrentHotkeyTextBlock.Foreground = Brushes.Gray;
             }
             else
             {
                 var modifiersText = _currentModifiers == ModifierKeys.None ? "" : $"{_currentModifiers}+";
                 CurrentHotkeyTextBlock.Text = $"{modifiersText}{_currentKey}";
-                CurrentHotkeyTextBlock.Foreground = System.Windows.Media.Brushes.Black;
+                CurrentHotkeyTextBlock.Foreground = Brushes.Black;
             }
         }
 
         private void StartHotkeyCapture()
         {
             BtnSetHotkey.Content = "请按键...";
-            BtnSetHotkey.Background = System.Windows.Media.Brushes.Orange;
+            BtnSetHotkey.Background = Brushes.Orange;
             
             // 设置焦点以捕获键盘事件
             Focus();
@@ -105,7 +106,7 @@ namespace Ink_Canvas.Windows
         private void StopHotkeyCapture()
         {
             BtnSetHotkey.Content = "设置";
-            BtnSetHotkey.Background = System.Windows.Media.Brushes.DodgerBlue;
+            BtnSetHotkey.Background = Brushes.DodgerBlue;
             
             // 移除键盘事件处理器
             KeyDown -= HotkeyItem_KeyDown;

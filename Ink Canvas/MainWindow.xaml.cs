@@ -1,9 +1,3 @@
-using Ink_Canvas.Helpers;
-using Ink_Canvas.Helpers.Plugins;
-using Ink_Canvas.Windows;
-using iNKORE.UI.WPF.Modern;
-using iNKORE.UI.WPF.Modern.Controls;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,6 +16,12 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers.Plugins;
+using Ink_Canvas.Windows;
+using iNKORE.UI.WPF.Modern;
+using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
 using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Button = System.Windows.Controls.Button;
@@ -1689,7 +1689,7 @@ namespace Ink_Canvas
 
         // 添加定时器来维护置顶状态
         private DispatcherTimer topmostMaintenanceTimer;
-        private bool isTopmostMaintenanceEnabled = false;
+        private bool isTopmostMaintenanceEnabled;
 
         private void ApplyNoFocusMode()
         {
@@ -1753,7 +1753,7 @@ namespace Ink_Canvas
                     // 注意：这里不直接设置Topmost，让其他代码根据模式决定
                     
                     // 添加调试日志
-                    LogHelper.WriteLogToFile($"应用窗口置顶: 取消置顶", LogHelper.LogType.Trace);
+                    LogHelper.WriteLogToFile("应用窗口置顶: 取消置顶", LogHelper.LogType.Trace);
                 }
             }
             catch (Exception ex)

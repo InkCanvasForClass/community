@@ -1,13 +1,13 @@
-using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using iNKORE.UI.WPF.Modern.Controls;
 using Point = System.Windows.Point;
-using System.Linq;
 
 namespace Ink_Canvas
 {
@@ -308,7 +308,7 @@ namespace Ink_Canvas
             
             // 检查是否有图片元素被选中
             var selectedElements = inkCanvas.GetSelectedElements();
-            bool hasImageElement = selectedElements.Any(element => element is System.Windows.Controls.Image);
+            bool hasImageElement = selectedElements.Any(element => element is Image);
             
             // 如果有图片元素被选中，不显示选择框
             if (hasImageElement)
@@ -551,11 +551,9 @@ namespace Ink_Canvas
                         return new Rect(left, top, width, height);
                     }
                 }
-                else
-                {
-                    // 没有变换时直接使用位置和大小
-                    return new Rect(left, top, width, height);
-                }
+
+                // 没有变换时直接使用位置和大小
+                return new Rect(left, top, width, height);
             }
 
             return new Rect(0, 0, 0, 0);

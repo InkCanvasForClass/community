@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows;
@@ -42,10 +43,10 @@ namespace Ink_Canvas
             using (var memoryGraphics = Graphics.FromImage(bitmap))
             {
                 // 设置高质量渲染
-                memoryGraphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-                memoryGraphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-                memoryGraphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-                memoryGraphics.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+                memoryGraphics.CompositingQuality = CompositingQuality.HighQuality;
+                memoryGraphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                memoryGraphics.SmoothingMode = SmoothingMode.HighQuality;
+                memoryGraphics.CompositingMode = CompositingMode.SourceOver;
 
                 memoryGraphics.CopyFromScreen(rc.X, rc.Y, 0, 0, rc.Size, CopyPixelOperation.SourceCopy);
 

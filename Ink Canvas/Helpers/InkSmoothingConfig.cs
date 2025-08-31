@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 
 namespace Ink_Canvas.Helpers
 {
@@ -63,7 +64,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"加载平滑配置失败: {ex.Message}");
+                Debug.WriteLine($"加载平滑配置失败: {ex.Message}");
             }
             
             return config;
@@ -124,7 +125,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"保存平滑配置失败: {ex.Message}");
+                Debug.WriteLine($"保存平滑配置失败: {ex.Message}");
             }
         }
 

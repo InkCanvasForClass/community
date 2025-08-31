@@ -1,19 +1,26 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Forms;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Media; 
+using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using Clipboard = System.Windows.Clipboard;
+using ContextMenu = System.Windows.Controls.ContextMenu;
+using Cursors = System.Windows.Input.Cursors;
+using MenuItem = System.Windows.Controls.MenuItem;
 
 namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        private bool isClipboardMonitoringEnabled = false;
-        private BitmapSource lastClipboardImage = null;
+        private bool isClipboardMonitoringEnabled;
+        private BitmapSource lastClipboardImage;
 
         // 初始化剪贴板监控
         private void InitializeClipboardMonitoring()
@@ -92,7 +99,7 @@ namespace Ink_Canvas
                 // 显示菜单
                 contextMenu.IsOpen = true;
                 contextMenu.PlacementTarget = inkCanvas;
-                contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+                contextMenu.Placement = PlacementMode.MousePoint;
             }
             catch (Exception ex)
             {
@@ -124,7 +131,7 @@ namespace Ink_Canvas
                     Source = clipboardImage,
                     Width = clipboardImage.PixelWidth,
                     Height = clipboardImage.PixelHeight,
-                    Stretch = System.Windows.Media.Stretch.Fill
+                    Stretch = Stretch.Fill
                 };
 
                 // 生成唯一名称
@@ -192,7 +199,7 @@ namespace Ink_Canvas
                             // 设置光标
                             elementForEvents.Cursor = Cursors.Hand;
                         }
-                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                    }), DispatcherPriority.Loaded);
                 };
 
                 // 提交到历史记录
@@ -272,13 +279,13 @@ namespace Ink_Canvas
     {
         public static event Action ClipboardUpdate;
 
-        private static System.Windows.Forms.Timer clipboardTimer;
+        private static Timer clipboardTimer;
         private static string lastClipboardText = "";
-        private static bool lastHadImage = false;
+        private static bool lastHadImage;
 
         static ClipboardNotification()
         {
-            clipboardTimer = new System.Windows.Forms.Timer();
+            clipboardTimer = new Timer();
             clipboardTimer.Interval = 500; // 每500ms检查一次
             clipboardTimer.Tick += CheckClipboard;
             clipboardTimer.Start();

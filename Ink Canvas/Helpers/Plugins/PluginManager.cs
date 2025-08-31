@@ -1,5 +1,3 @@
-using Ink_Canvas.Windows;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -10,6 +8,8 @@ using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Ink_Canvas.Windows;
+using Newtonsoft.Json;
 using Timer = System.Timers.Timer;
 
 namespace Ink_Canvas.Helpers.Plugins

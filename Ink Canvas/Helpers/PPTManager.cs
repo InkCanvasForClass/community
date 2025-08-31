@@ -1,5 +1,4 @@
-﻿using Microsoft.Office.Interop.PowerPoint;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Threading;
+using Microsoft.Office.Interop.PowerPoint;
 using Application = System.Windows.Application;
 using Timer = System.Timers.Timer;
 
@@ -101,9 +101,9 @@ namespace Ink_Canvas.Helpers
         private int _wpsProcessCheckCount;
         private WpsWindowInfo _lastForegroundWpsWindow;
         private DateTime _lastWindowCheckTime = DateTime.MinValue;
-        private bool _lastSlideShowState = false;
+        private bool _lastSlideShowState;
         private readonly object _lockObject = new object();
-        private bool _disposed = false;
+        private bool _disposed;
         #endregion
 
         #region Constructor & Initialization
@@ -888,11 +888,9 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile("成功显示幻灯片导航（PowerPoint模式）", LogHelper.LogType.Event);
                         return true;
                     }
-                    else
-                    {
-                        LogHelper.WriteLogToFile("SlideNavigation对象为空，可能是WPS不支持此功能", LogHelper.LogType.Warning);
-                        return false;
-                    }
+
+                    LogHelper.WriteLogToFile("SlideNavigation对象为空，可能是WPS不支持此功能", LogHelper.LogType.Warning);
+                    return false;
                 }
                 catch (COMException comEx)
                 {

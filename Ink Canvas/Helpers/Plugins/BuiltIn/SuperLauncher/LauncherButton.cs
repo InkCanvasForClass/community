@@ -1,9 +1,9 @@
-using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
 {

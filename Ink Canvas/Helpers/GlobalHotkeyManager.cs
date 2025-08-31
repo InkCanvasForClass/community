@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Windows.Input;
 using System.IO;
 using System.Reflection;
+using System.Text;
+using System.Windows.Input;
 using Newtonsoft.Json;
 using NHotkey.Wpf;
 
@@ -16,7 +17,7 @@ namespace Ink_Canvas.Helpers
         #region Private Fields
         private readonly Dictionary<string, HotkeyInfo> _registeredHotkeys;
         private readonly MainWindow _mainWindow;
-        private bool _isDisposed = false;
+        private bool _isDisposed;
         private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
         
         // 配置文件路径
@@ -180,7 +181,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 读取配置文件内容
-                string jsonContent = File.ReadAllText(HotkeyConfigFile, System.Text.Encoding.UTF8);
+                string jsonContent = File.ReadAllText(HotkeyConfigFile, Encoding.UTF8);
                 if (string.IsNullOrEmpty(jsonContent))
                 {
                     LogHelper.WriteLogToFile("快捷键配置文件为空", LogHelper.LogType.Warning);
@@ -509,7 +510,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 读取配置文件内容
-                string jsonContent = File.ReadAllText(HotkeyConfigFile, System.Text.Encoding.UTF8);
+                string jsonContent = File.ReadAllText(HotkeyConfigFile, Encoding.UTF8);
                 if (string.IsNullOrEmpty(jsonContent))
                 {
                     LogHelper.WriteLogToFile("快捷键配置文件为空", LogHelper.LogType.Warning);
@@ -607,7 +608,7 @@ namespace Ink_Canvas.Helpers
                 string jsonContent = JsonConvert.SerializeObject(config, settings);
 
                 // 直接写入原文件，覆盖原有内容
-                File.WriteAllText(HotkeyConfigFile, jsonContent, System.Text.Encoding.UTF8);
+                File.WriteAllText(HotkeyConfigFile, jsonContent, Encoding.UTF8);
 
                 LogHelper.WriteLogToFile($"快捷键配置已保存到: {HotkeyConfigFile}", LogHelper.LogType.Event);
                 return true;
@@ -714,7 +715,7 @@ namespace Ink_Canvas.Helpers
                             var getLeftMethod = canvasType.GetMethod("GetLeft", BindingFlags.Public | BindingFlags.Static);
                             if (getLeftMethod != null)
                             {
-                                var leftPosition = getLeftMethod.Invoke(null, new object[] { floatingbarSelectionBG });
+                                var leftPosition = getLeftMethod.Invoke(null, new[] { floatingbarSelectionBG });
                                 if (leftPosition != null)
                                 {
                                     var position = Convert.ToDouble(leftPosition);

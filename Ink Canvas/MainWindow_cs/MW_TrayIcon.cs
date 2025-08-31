@@ -1,12 +1,12 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Interop;
+using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
 using Application = System.Windows.Application;
 using ContextMenu = System.Windows.Controls.ContextMenu;
 using MenuItem = System.Windows.Controls.MenuItem;

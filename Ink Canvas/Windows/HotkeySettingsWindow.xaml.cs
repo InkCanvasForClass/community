@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using Ink_Canvas.Helpers;
 
@@ -324,11 +326,11 @@ namespace Ink_Canvas.Windows
                         
                         // 立即保存到配置文件
                         _hotkeyManager.SaveHotkeysToSettings();
-                        LogHelper.WriteLogToFile($"已保存快捷键配置");
+                        LogHelper.WriteLogToFile("已保存快捷键配置");
                         
                         // 更新UI显示
                         LoadCurrentHotkeys();
-                        LogHelper.WriteLogToFile($"已更新UI显示");
+                        LogHelper.WriteLogToFile("已更新UI显示");
                         
                         LogHelper.WriteLogToFile($"快捷键 {hotkeyName} 已更新为 {modifiers}+{key} 并保存", LogHelper.LogType.Event);
                     }
@@ -403,7 +405,7 @@ namespace Ink_Canvas.Windows
             {
                 // 通过反射访问主窗口的penType字段
                 var penTypeField = _mainWindow.GetType().GetField("penType", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    BindingFlags.NonPublic | BindingFlags.Instance);
                 
                 if (penTypeField != null)
                 {
@@ -411,7 +413,7 @@ namespace Ink_Canvas.Windows
                     
                     // 调用CheckPenTypeUIState方法更新UI状态
                     var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState", 
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        BindingFlags.NonPublic | BindingFlags.Instance);
                     
                     if (checkPenTypeMethod != null)
                     {
@@ -436,7 +438,7 @@ namespace Ink_Canvas.Windows
             {
                 // 通过反射访问主窗口的设置面板
                 var settingsBorder = _mainWindow.GetType().GetField("BorderSettings", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(_mainWindow) as System.Windows.Controls.Border;
+                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
                 
                 if (settingsBorder != null)
                 {
@@ -445,7 +447,7 @@ namespace Ink_Canvas.Windows
 
                 // 隐藏设置蒙版
                 var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(_mainWindow) as System.Windows.Controls.Border;
+                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
                 
                 if (settingsMask != null)
                 {
@@ -467,7 +469,7 @@ namespace Ink_Canvas.Windows
             {
                 // 通过反射访问主窗口的设置面板
                 var settingsBorder = _mainWindow.GetType().GetField("BorderSettings", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(_mainWindow) as System.Windows.Controls.Border;
+                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
                 
                 if (settingsBorder != null)
                 {
@@ -476,7 +478,7 @@ namespace Ink_Canvas.Windows
 
                 // 显示设置蒙版
                 var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?.GetValue(_mainWindow) as System.Windows.Controls.Border;
+                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
                 
                 if (settingsMask != null)
                 {
