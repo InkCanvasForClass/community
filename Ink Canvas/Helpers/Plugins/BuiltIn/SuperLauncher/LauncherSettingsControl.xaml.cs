@@ -1,10 +1,10 @@
-using Ink_Canvas.Windows;
-using Microsoft.Win32;
 using System;
 using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Controls;
+using Ink_Canvas.Windows;
+using Microsoft.Win32;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
 {

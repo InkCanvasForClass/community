@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas
 {
@@ -93,11 +93,11 @@ namespace Ink_Canvas
         [JsonProperty("clearCanvasAlsoClearImages")]
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
-        public bool ShowCircleCenter { get; set; } = false; 
+        public bool ShowCircleCenter { get; set; } 
 
         // 墨迹渐隐功能设置
         [JsonProperty("enableInkFade")]
-        public bool EnableInkFade { get; set; } = false; // 是否启用墨迹渐隐功能
+        public bool EnableInkFade { get; set; } // 是否启用墨迹渐隐功能
         [JsonProperty("inkFadeTime")]
         public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
         
@@ -152,7 +152,7 @@ namespace Ink_Canvas
         [JsonProperty("skippedVersion")]
         public string SkippedVersion { get; set; } = "";
         [JsonProperty("isEnableNibMode")]
-        public bool IsEnableNibMode { get; set; } = false; 
+        public bool IsEnableNibMode { get; set; } 
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; }
         [JsonProperty("crashAction")]
@@ -225,10 +225,10 @@ namespace Ink_Canvas
         public bool IsShowClearAndMouseButton { get; set; } = true;
 
         [JsonProperty("eraserDisplayOption")]
-        public int EraserDisplayOption { get; set; } = 0;
+        public int EraserDisplayOption { get; set; }
         
         [JsonProperty("isShowQuickColorPalette")]
-        public bool IsShowQuickColorPalette { get; set; } = false;
+        public bool IsShowQuickColorPalette { get; set; }
         
         [JsonProperty("quickColorPaletteDisplayMode")]
         public int QuickColorPaletteDisplayMode { get; set; } = 1; 

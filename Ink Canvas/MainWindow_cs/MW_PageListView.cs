@@ -1,10 +1,10 @@
-﻿using Ink_Canvas.Helpers;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -86,6 +86,17 @@ namespace Ink_Canvas
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
+                    // 隐藏图片选择工具栏
+                    if (currentSelectedElement != null)
+                    {
+                        // 保存当前编辑模式
+                        var previousEditingMode = inkCanvas.EditingMode;
+                        UnselectElement(currentSelectedElement);
+                        // 恢复编辑模式
+                        inkCanvas.EditingMode = previousEditingMode;
+                        currentSelectedElement = null;
+                    }
+                    
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;
@@ -108,6 +119,17 @@ namespace Ink_Canvas
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
+                    // 隐藏图片选择工具栏
+                    if (currentSelectedElement != null)
+                    {
+                        // 保存当前编辑模式
+                        var previousEditingMode = inkCanvas.EditingMode;
+                        UnselectElement(currentSelectedElement);
+                        // 恢复编辑模式
+                        inkCanvas.EditingMode = previousEditingMode;
+                        currentSelectedElement = null;
+                    }
+                    
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;

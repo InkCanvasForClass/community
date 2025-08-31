@@ -1,5 +1,3 @@
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -17,6 +15,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Ink_Canvas.Helpers
 {
@@ -1361,16 +1361,14 @@ namespace Ink_Canvas.Helpers
 
                     if (oldProcessId > 0 && !string.IsNullOrEmpty(extractPath) && !string.IsNullOrEmpty(targetPath))
                     {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 参数验证通过，启动更新任务");
+                        LogHelper.WriteLogToFile("AutoUpdate | 参数验证通过，启动更新任务");
                         // 启动更新任务
                         Task.Run(async () => await PerformUpdate(oldProcessId, extractPath, targetPath, isSilence));
                         return true; // 返回true表示是更新模式
                 }
-                else
-                {
-                        LogHelper.WriteLogToFile($"AutoUpdate | 参数验证失败 - 老进程ID: {oldProcessId}, 解压路径: {extractPath}, 目标路径: {targetPath}", LogHelper.LogType.Error);
-                        return false;
-                    }
+
+                    LogHelper.WriteLogToFile($"AutoUpdate | 参数验证失败 - 老进程ID: {oldProcessId}, 解压路径: {extractPath}, 目标路径: {targetPath}", LogHelper.LogType.Error);
+                    return false;
                 }
                 return false; // 返回false表示不是更新模式
             }
@@ -1483,7 +1481,7 @@ namespace Ink_Canvas.Helpers
                     }
 
                     // 删除ZIP文件
-                    string zipFile = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.*.zip");
+                    string zipFile = Path.Combine(updatesFolderPath, "InkCanvasForClass.CE.*.zip");
                     string[] zipFiles = Directory.GetFiles(updatesFolderPath, "InkCanvasForClass.CE.*.zip");
                     foreach (string zip in zipFiles)
                     {

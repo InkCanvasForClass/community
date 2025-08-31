@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Windows;
-using System.Windows.Media.Animation;
-using System.Windows.Threading;
-using System.Windows.Ink;
 using System.Windows.Controls;
+using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -20,7 +20,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 是否启用墨迹渐隐功能
         /// </summary>
-        public bool IsEnabled { get; set; } = false;
+        public bool IsEnabled { get; set; }
 
         /// <summary>
         /// 墨迹渐隐时间（毫秒）
@@ -258,7 +258,7 @@ namespace Ink_Canvas.Helpers
         public void Enable()
         {
             IsEnabled = true;
-            LogHelper.WriteLogToFile("墨迹渐隐功能已启用", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile("墨迹渐隐功能已启用");
         }
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace Ink_Canvas.Helpers
         public void Disable()
         {
             IsEnabled = false;
-            LogHelper.WriteLogToFile("墨迹渐隐功能已禁用", LogHelper.LogType.Info);
+            LogHelper.WriteLogToFile("墨迹渐隐功能已禁用");
         }
         #endregion
 

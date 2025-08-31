@@ -1,15 +1,22 @@
-using Ink_Canvas.Helpers;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.IO;
+using System.IO.Compression;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Ink_Canvas.Helpers;
+using Newtonsoft.Json;
+using Color = System.Drawing.Color;
 using File = System.IO.File;
+using Image = System.Windows.Controls.Image;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 
 namespace Ink_Canvas
@@ -150,7 +157,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 ShowNotification("墨迹保存失败");
-                LogHelper.WriteLogToFile("墨迹保存失败 | " + ex.ToString(), LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile("墨迹保存失败 | " + ex, LogHelper.LogType.Error);
             }
         }
 
@@ -191,7 +198,7 @@ namespace Ink_Canvas
 
                     // 保存元数据信息
                     string metadataFile = Path.Combine(tempDir, "metadata.txt");
-                    using (var writer = new StreamWriter(metadataFile, false, System.Text.Encoding.UTF8))
+                    using (var writer = new StreamWriter(metadataFile, false, Encoding.UTF8))
                     {
                         writer.WriteLine($"保存时间: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
                         writer.WriteLine($"总页数: {allPageStrokes.Count}");
@@ -219,7 +226,7 @@ namespace Ink_Canvas
                         File.Delete(zipFileName);
 
                     // 使用System.IO.Compression.FileSystem来创建ZIP
-                    System.IO.Compression.ZipFile.CreateFromDirectory(tempDir, zipFileName);
+                    ZipFile.CreateFromDirectory(tempDir, zipFileName);
 
                     if (newNotice) ShowNotification($"多页面墨迹成功保存至压缩包 {zipFileName}");
                 }
@@ -233,13 +240,13 @@ namespace Ink_Canvas
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"清理临时目录失败: {ex.ToString()}", LogHelper.LogType.Warning);
+                        LogHelper.WriteLogToFile($"清理临时目录失败: {ex}", LogHelper.LogType.Warning);
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"保存多页面墨迹压缩包失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"保存多页面墨迹压缩包失败: {ex}", LogHelper.LogType.Error);
                 throw;
             }
         }
@@ -250,16 +257,16 @@ namespace Ink_Canvas
         private void SaveSinglePageStrokesAsImage(string savePathWithName, bool newNotice)
         {
             // 全页面保存模式 - 保存整个墨迹页面的图像
-            var bitmap = new System.Drawing.Bitmap(
-                (int)System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
-                (int)System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height);
+            var bitmap = new Bitmap(
+                Screen.PrimaryScreen.Bounds.Width,
+                Screen.PrimaryScreen.Bounds.Height);
 
-            using (var g = System.Drawing.Graphics.FromImage(bitmap))
+            using (var g = Graphics.FromImage(bitmap))
             {
                 // 创建黑色或透明背景
-                System.Drawing.Color bgColor = Settings.Canvas.UsingWhiteboard
-                    ? System.Drawing.Color.White
-                    : System.Drawing.Color.FromArgb(22, 41, 36); // 黑板背景色
+                Color bgColor = Settings.Canvas.UsingWhiteboard
+                    ? Color.White
+                    : Color.FromArgb(22, 41, 36); // 黑板背景色
                 g.Clear(bgColor);
 
                 // 将InkCanvas墨迹渲染到Visual
@@ -287,7 +294,7 @@ namespace Ink_Canvas
                 {
                     encoder.Save(ms);
                     ms.Seek(0, SeekOrigin.Begin);
-                    var imgBitmap = new System.Drawing.Bitmap(ms);
+                    var imgBitmap = new Bitmap(ms);
 
                     // 将生成的墨迹图像绘制到屏幕截图上
                     // 居中绘制，确保墨迹位于屏幕中央
@@ -297,7 +304,7 @@ namespace Ink_Canvas
 
                     // 保存为PNG
                     string imagePathWithName = Path.ChangeExtension(savePathWithName, "png");
-                    bitmap.Save(imagePathWithName, System.Drawing.Imaging.ImageFormat.Png);
+                    bitmap.Save(imagePathWithName, ImageFormat.Png);
 
                     // 仍然保存墨迹文件以兼容旧版本
                     var fs = new FileStream(savePathWithName, FileMode.Create);
@@ -337,7 +344,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"保存页面图像失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"保存页面图像失败: {ex}", LogHelper.LogType.Error);
                 throw;
             }
         }
@@ -376,7 +383,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 ShowNotification("墨迹打开失败");
-                LogHelper.WriteLogToFile($"墨迹打开失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"墨迹打开失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
@@ -394,7 +401,7 @@ namespace Ink_Canvas
                 try
                 {
                     // 解压ZIP文件
-                    System.IO.Compression.ZipFile.ExtractToDirectory(zipFilePath, tempDir);
+                    ZipFile.ExtractToDirectory(zipFilePath, tempDir);
 
                     // 读取元数据文件
                     string metadataFile = Path.Combine(tempDir, "metadata.txt");
@@ -447,13 +454,13 @@ namespace Ink_Canvas
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"清理临时目录失败: {ex.ToString()}", LogHelper.LogType.Warning);
+                        LogHelper.WriteLogToFile($"清理临时目录失败: {ex}", LogHelper.LogType.Warning);
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"打开ICC压缩包失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"打开ICC压缩包失败: {ex}", LogHelper.LogType.Error);
                 throw;
             }
         }
@@ -465,7 +472,7 @@ namespace Ink_Canvas
         {
             var metadata = new Dictionary<string, string>();
 
-            using (var reader = new StreamReader(metadataPath, System.Text.Encoding.UTF8))
+            using (var reader = new StreamReader(metadataPath, Encoding.UTF8))
             {
                 string line;
                 while ((line = reader.ReadLine()) != null)
@@ -556,7 +563,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"恢复PPT墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"恢复PPT墨迹失败: {ex}", LogHelper.LogType.Error);
                 throw;
             }
         }
@@ -609,7 +616,7 @@ namespace Ink_Canvas
                             {
                                 // 创建历史记录
                                 var history = new TimeMachineHistory(strokes, TimeMachineHistoryType.UserInput, false);
-                                TimeMachineHistories[pageNumber] = new TimeMachineHistory[] { history };
+                                TimeMachineHistories[pageNumber] = new[] { history };
                             }
                         }
                     }
@@ -628,7 +635,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"恢复白板墨迹失败: {ex.ToString()}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"恢复白板墨迹失败: {ex}", LogHelper.LogType.Error);
                 throw;
             }
         }

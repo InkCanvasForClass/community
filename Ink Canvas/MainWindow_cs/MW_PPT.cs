@@ -1,8 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern;
-using Microsoft.Office.Core;
-using Microsoft.Office.Interop.PowerPoint;
-using System;
+﻿using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -12,6 +8,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern;
+using Microsoft.Office.Core;
+using Microsoft.Office.Interop.PowerPoint;
 using Application = System.Windows.Application;
 using File = System.IO.File;
 using MessageBox = System.Windows.MessageBox;
@@ -76,15 +76,11 @@ namespace Ink_Canvas
 
         #region PPT State Management
         private bool wasFloatingBarFoldedWhenEnterSlideShow;
-        private static bool hasShownWpsForceCloseWarning = false;
         private bool isEnteredSlideShowEndEvent; //防止重复调用本函数导致墨迹保存失效
         private bool isPresentationHaveBlackSpace;
-        private string pptName;
-        private bool _isPptClickingBtnTurned;
 
         // 长按翻页相关字段
         private DispatcherTimer _longPressTimer;
-        private bool _isLongPressActive = false;
         private bool _isLongPressNext = true; // true为下一页，false为上一页
         private const int LongPressDelay = 15; // 长按延迟时间（毫秒）
         private const int LongPressInterval = 15; // 长按翻页间隔（毫秒）
@@ -202,7 +198,6 @@ namespace Ink_Canvas
             if (!Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn) return;
 
             _isLongPressNext = isNext;
-            _isLongPressActive = false;
             _longPressTimer?.Start();
         }
 
@@ -212,7 +207,6 @@ namespace Ink_Canvas
         private void StopLongPressDetection()
         {
             _longPressTimer?.Stop();
-            _isLongPressActive = false;
         }
 
         /// <summary>
@@ -222,7 +216,6 @@ namespace Ink_Canvas
         {
             if (!Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn) return;
 
-            _isLongPressActive = true;
             _longPressTimer.Interval = TimeSpan.FromMilliseconds(LongPressInterval);
 
             // 执行翻页
@@ -846,8 +839,6 @@ namespace Ink_Canvas
             {
                 try
                 {
-                    _isPptClickingBtnTurned = true;
-
                     // 保存当前页墨迹
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     if (currentSlide > 0)
@@ -889,8 +880,6 @@ namespace Ink_Canvas
             {
                 try
                 {
-                    _isPptClickingBtnTurned = true;
-
                     // 保存当前页墨迹
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     if (currentSlide > 0)

@@ -1,7 +1,3 @@
-using Hardcodet.Wpf.TaskbarNotification;
-using Ink_Canvas.Helpers;
-using Newtonsoft.Json;
-using OSVersionExtension;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +9,11 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using Newtonsoft.Json;
+using OSVersionExtension;
 using Application = System.Windows.Application;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -196,11 +197,14 @@ namespace Ink_Canvas
                 val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
             ViewboxFloatingBarScaleTransform.ScaleY =
                 val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
-            // auto align
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                ViewboxFloatingBarMarginAnimation(60);
-            else
-                ViewboxFloatingBarMarginAnimation(100, true);
+            // auto align - 新增：只在屏幕模式下重新计算浮动栏位置
+            if (currentMode == 0)
+            {
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                    ViewboxFloatingBarMarginAnimation(60);
+                else
+                    ViewboxFloatingBarMarginAnimation(100, true);
+            }
         }
 
         private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -2686,14 +2690,14 @@ namespace Ink_Canvas
                         await Task.Delay(100);
                         
                         // 获取当前选中的模式并重新设置高光位置
-                        string currentMode = GetCurrentSelectedMode();
-                        if (!string.IsNullOrEmpty(currentMode))
+                        string selectedToolMode = GetCurrentSelectedMode();
+                        if (!string.IsNullOrEmpty(selectedToolMode))
                         {
-                            SetFloatingBarHighlightPosition(currentMode);
+                            SetFloatingBarHighlightPosition(selectedToolMode);
                         }
                         
                         // 重新计算浮动栏位置，因为按钮可见性变化会影响浮动栏宽度
-                        if (!isFloatingBarFolded)
+                        if (!isFloatingBarFolded && currentMode == 0) // 新增：只在屏幕模式下重新计算浮动栏位置
                         {
                             if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                             {
@@ -2709,7 +2713,7 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile($"重新计算高光位置和浮动栏位置失败: {ex.Message}", LogHelper.LogType.Error);
                     }
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }), DispatcherPriority.Loaded);
             }
             catch (Exception ex)
             {
@@ -2742,13 +2746,13 @@ namespace Ink_Canvas
 
         private void HyperlinkSourceToPresentRepository_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://bgithub.xyz/ChangSakura/Ink-Canvas");
+            Process.Start("https://github.com/ChangSakura/Ink-Canvas");
             HideSubPanels();
         }
 
         private void HyperlinkSourceToOringinalRepository_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://bgithub.xyz/WXRIW/Ink-Canvas");
+            Process.Start("https://github.com/WXRIW/Ink-Canvas");
             HideSubPanels();
         }
 

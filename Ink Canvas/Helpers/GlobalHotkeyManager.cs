@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Windows.Input;
 using System.IO;
 using System.Reflection;
+using System.Text;
+using System.Windows.Input;
 using Newtonsoft.Json;
 using NHotkey.Wpf;
 
@@ -16,7 +17,7 @@ namespace Ink_Canvas.Helpers
         #region Private Fields
         private readonly Dictionary<string, HotkeyInfo> _registeredHotkeys;
         private readonly MainWindow _mainWindow;
-        private bool _isDisposed = false;
+        private bool _isDisposed;
         private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
         
         // 配置文件路径
@@ -175,12 +176,12 @@ namespace Ink_Canvas.Helpers
             {
                 if (!File.Exists(HotkeyConfigFile))
                 {
-                    LogHelper.WriteLogToFile("快捷键配置文件不存在", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("快捷键配置文件不存在");
                     return new List<HotkeyInfo>();
                 }
 
                 // 读取配置文件内容
-                string jsonContent = File.ReadAllText(HotkeyConfigFile, System.Text.Encoding.UTF8);
+                string jsonContent = File.ReadAllText(HotkeyConfigFile, Encoding.UTF8);
                 if (string.IsNullOrEmpty(jsonContent))
                 {
                     LogHelper.WriteLogToFile("快捷键配置文件为空", LogHelper.LogType.Warning);
@@ -208,7 +209,7 @@ namespace Ink_Canvas.Helpers
                     });
                 }
 
-                LogHelper.WriteLogToFile($"从配置文件读取到 {hotkeyList.Count} 个快捷键信息", LogHelper.LogType.Info);
+                LogHelper.WriteLogToFile($"从配置文件读取到 {hotkeyList.Count} 个快捷键信息");
                 return hotkeyList;
             }
             catch (Exception ex)
@@ -284,14 +285,14 @@ namespace Ink_Canvas.Helpers
                 {
                     // 成功从配置文件加载快捷键设置
                     _hotkeysShouldBeRegistered = true;
-                    LogHelper.WriteLogToFile("成功从配置文件加载快捷键设置", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("成功从配置文件加载快捷键设置");
                 }
                 else
                 {
                     // 如果配置文件不存在或加载失败，使用默认快捷键
                     if (!File.Exists(HotkeyConfigFile))
                     {
-                        LogHelper.WriteLogToFile("配置文件不存在，注册默认快捷键", LogHelper.LogType.Info);
+                        LogHelper.WriteLogToFile("配置文件不存在，注册默认快捷键");
                         RegisterDefaultHotkeys();
                         _hotkeysShouldBeRegistered = true;
                     }
@@ -345,14 +346,14 @@ namespace Ink_Canvas.Helpers
                 if (!_hotkeysShouldBeRegistered)
                 {
                     _hotkeysShouldBeRegistered = true;
-                    LogHelper.WriteLogToFile("启用快捷键注册功能", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("启用快捷键注册功能");
                     
                     // 立即加载快捷键设置
                     LoadHotkeysFromSettings();
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("快捷键注册功能已经启用，重新加载快捷键设置", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("快捷键注册功能已经启用，重新加载快捷键设置");
                     // 即使已经启用，也要重新加载快捷键设置以确保快捷键正常工作
                     LoadHotkeysFromSettings();
                 }
@@ -374,14 +375,14 @@ namespace Ink_Canvas.Helpers
                 if (_hotkeysShouldBeRegistered)
                 {
                     _hotkeysShouldBeRegistered = false;
-                    LogHelper.WriteLogToFile("禁用快捷键注册功能", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("禁用快捷键注册功能");
                     
                     // 注销所有快捷键
                     UnregisterAllHotkeys();
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("快捷键注册功能已经禁用", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("快捷键注册功能已经禁用");
                 }
             }
             catch (Exception ex)
@@ -403,13 +404,13 @@ namespace Ink_Canvas.Helpers
                 {
                     // 鼠标模式下禁用快捷键，让键盘操作放行
                     DisableHotkeyRegistration();
-                    LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作");
                 }
                 else
                 {
                     // 非鼠标模式下启用快捷键
                     EnableHotkeyRegistration();
-                    LogHelper.WriteLogToFile("切换到非鼠标模式，启用快捷键", LogHelper.LogType.Info);
+                    LogHelper.WriteLogToFile("切换到非鼠标模式，启用快捷键");
                 }
             }
             catch (Exception ex)
@@ -509,7 +510,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 读取配置文件内容
-                string jsonContent = File.ReadAllText(HotkeyConfigFile, System.Text.Encoding.UTF8);
+                string jsonContent = File.ReadAllText(HotkeyConfigFile, Encoding.UTF8);
                 if (string.IsNullOrEmpty(jsonContent))
                 {
                     LogHelper.WriteLogToFile("快捷键配置文件为空", LogHelper.LogType.Warning);
@@ -607,7 +608,7 @@ namespace Ink_Canvas.Helpers
                 string jsonContent = JsonConvert.SerializeObject(config, settings);
 
                 // 直接写入原文件，覆盖原有内容
-                File.WriteAllText(HotkeyConfigFile, jsonContent, System.Text.Encoding.UTF8);
+                File.WriteAllText(HotkeyConfigFile, jsonContent, Encoding.UTF8);
 
                 LogHelper.WriteLogToFile($"快捷键配置已保存到: {HotkeyConfigFile}", LogHelper.LogType.Event);
                 return true;
@@ -714,33 +715,29 @@ namespace Ink_Canvas.Helpers
                             var getLeftMethod = canvasType.GetMethod("GetLeft", BindingFlags.Public | BindingFlags.Static);
                             if (getLeftMethod != null)
                             {
-                                var leftPosition = getLeftMethod.Invoke(null, new object[] { floatingbarSelectionBG });
+                                var leftPosition = getLeftMethod.Invoke(null, new[] { floatingbarSelectionBG });
                                 if (leftPosition != null)
                                 {
                                     var position = Convert.ToDouble(leftPosition);
                                     
                                     // 根据高光位置判断当前选中的工具
                                     // 位置计算基于SetFloatingBarHighlightPosition方法中的逻辑
-                                    bool isMouseMode = false;
-                                    string currentTool = "unknown";
-                                    
+                                    bool isMouseMode;
+
                                     // 简化判断：如果位置接近0，说明是鼠标模式
                                     // 如果位置接近28，说明是批注模式
                                     // 如果位置更大，说明是其他工具
                                     if (position < 5) // 鼠标模式：marginOffset + (cursorWidth - actualHighlightWidth) / 2 ≈ 0
                                     {
                                         isMouseMode = true;
-                                        currentTool = "鼠标";
                                     }
                                     else if (position < 35) // 批注模式：marginOffset + cursorWidth + (penWidth - actualHighlightWidth) / 2 ≈ 28
                                     {
                                         isMouseMode = false;
-                                        currentTool = "批注";
                                     }
                                     else // 其他工具（橡皮擦、选择等）
                                     {
                                         isMouseMode = false;
-                                        currentTool = "其他工具";
                                     }
                                     
                                     return isMouseMode;

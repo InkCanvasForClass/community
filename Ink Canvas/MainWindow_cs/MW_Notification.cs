@@ -1,8 +1,8 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading;
 using System.Windows;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {

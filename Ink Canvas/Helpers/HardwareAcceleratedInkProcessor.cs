@@ -16,7 +16,6 @@ namespace Ink_Canvas.Helpers
     {
         private readonly RenderTargetBitmap _renderTarget;
         private readonly DrawingVisual _drawingVisual;
-        private readonly DrawingContext _drawingContext;
         private bool _isInitialized;
 
         public HardwareAcceleratedInkProcessor(int width = 1920, int height = 1080)
@@ -191,7 +190,6 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void Dispose()
         {
-            _drawingContext?.Close();
             _renderTarget?.Clear();
             _isInitialized = false;
         }

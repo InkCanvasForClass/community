@@ -1,5 +1,3 @@
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -13,6 +11,8 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using Cursors = System.Windows.Input.Cursors;
@@ -641,6 +641,9 @@ namespace Ink_Canvas
                     ICCWaterMarkWhite.Visibility = Visibility.Visible;
                     ICCWaterMarkDark.Visibility = Visibility.Collapsed;
                 }
+
+                // 新增：确保在白板模式下基础浮动栏被隐藏
+                ViewboxFloatingBar.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -651,10 +654,10 @@ namespace Ink_Canvas
                 {
                     var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                     var dopsc = dops.ToCharArray();
-                    if (dopsc[0] == '2' && isDisplayingOrHidingBlackboard == false) AnimationsHelper.ShowWithFadeIn(LeftBottomPanelForPPTNavigation);
-                    if (dopsc[1] == '2' && isDisplayingOrHidingBlackboard == false) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
-                    if (dopsc[2] == '2' && isDisplayingOrHidingBlackboard == false) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
-                    if (dopsc[3] == '2' && isDisplayingOrHidingBlackboard == false) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
+                    if (dopsc[0] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftBottomPanelForPPTNavigation);
+                    if (dopsc[1] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
+                    if (dopsc[2] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
+                    if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
                 }
                 // 修复PPT放映时点击白板按钮后翻页按钮不显示的问题
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
@@ -693,6 +696,9 @@ namespace Ink_Canvas
                 BlackBoardWaterMark.Visibility = Visibility.Collapsed;
                 ICCWaterMarkDark.Visibility = Visibility.Collapsed;
                 ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
+
+                // 新增：退出白板模式时恢复基础浮动栏的显示
+                ViewboxFloatingBar.Visibility = Visibility.Visible;
             }
 
             BtnSwitch_Click(BtnSwitch, null);
@@ -1292,10 +1298,16 @@ namespace Ink_Canvas
         public async void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false)
         {
+            // 新增：在白板模式下不执行浮动栏动画
+            if (currentMode == 1)
+            {
+                return;
+            }
+
             if (MarginFromEdge == 60) MarginFromEdge = 55;
             await Dispatcher.InvokeAsync(() =>
             {
-                if (Topmost == false)
+                if (!Topmost)
                     MarginFromEdge = -60;
                 else
                     ViewboxFloatingBar.Visibility = Visibility.Visible;
@@ -1337,7 +1349,7 @@ namespace Ink_Canvas
                 
                 pos.X = (screenWidth - floatingBarWidth) / 2;
 
-                if (PosXCaculatedWithTaskbarHeight == false)
+                if (!PosXCaculatedWithTaskbarHeight)
                 {
                     // 如果任务栏高度为0(隐藏状态),则使用固定边距
                     if (toolbarHeight == 0)
@@ -1405,12 +1417,18 @@ namespace Ink_Canvas
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
-                if (Topmost == false) ViewboxFloatingBar.Visibility = Visibility.Hidden;
+                if (!Topmost) ViewboxFloatingBar.Visibility = Visibility.Hidden;
             });
         }
 
         public async void PureViewboxFloatingBarMarginAnimationInDesktopMode()
         {
+            // 新增：在白板模式下不执行浮动栏动画
+            if (currentMode == 1)
+            {
+                return;
+            }
+
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
@@ -1487,6 +1505,12 @@ namespace Ink_Canvas
 
         public async void PureViewboxFloatingBarMarginAnimationInPPTMode()
         {
+            // 新增：在白板模式下不执行浮动栏动画
+            if (currentMode == 1)
+            {
+                return;
+            }
+
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
@@ -2077,9 +2101,9 @@ namespace Ink_Canvas
                 {
                     highlighterColor = 100; // 黑色荧光笔
                 }
-                else if (color == Colors.Yellow || IsColorSimilar(color, Color.FromRgb(234, 179, 8), 15) ||
-                         IsColorSimilar(color, Color.FromRgb(250, 204, 21), 15) ||
-                         IsColorSimilar(color, Color.FromRgb(253, 224, 71), 15))
+                else if (color == Colors.Yellow || IsColorSimilar(color, Color.FromRgb(234, 179, 8)) ||
+                         IsColorSimilar(color, Color.FromRgb(250, 204, 21)) ||
+                         IsColorSimilar(color, Color.FromRgb(253, 224, 71)))
                 {
                     highlighterColor = 103; // 黄色荧光笔
                 }
@@ -2094,12 +2118,12 @@ namespace Ink_Canvas
                 {
                     highlighterColor = 106; // 蓝色荧光笔
                 }
-                else if (color == Colors.Red || IsColorSimilar(color, Color.FromRgb(220, 38, 38), 15) ||
-                         IsColorSimilar(color, Color.FromRgb(239, 68, 68), 15))
+                else if (color == Colors.Red || IsColorSimilar(color, Color.FromRgb(220, 38, 38)) ||
+                         IsColorSimilar(color, Color.FromRgb(239, 68, 68)))
                 {
                     highlighterColor = 102; // 红色荧光笔
                 }
-                else if (color == Colors.Green || IsColorSimilar(color, Color.FromRgb(22, 163, 74), 15))
+                else if (color == Colors.Green || IsColorSimilar(color, Color.FromRgb(22, 163, 74)))
                 {
                     highlighterColor = 104; // 绿色荧光笔
                 }
@@ -2560,6 +2584,9 @@ namespace Ink_Canvas
                         ClearStrokes(true);
                         RestoreStrokes(true);
 
+                        // 新增：在屏幕模式下恢复基础浮动栏的显示
+                        ViewboxFloatingBar.Visibility = Visibility.Visible;
+
                         if (BtnSwitchTheme.Content.ToString() == "浅色")
                         {
                             BtnSwitch.Content = "黑板";
@@ -2597,6 +2624,9 @@ namespace Ink_Canvas
                         // 总是恢复备份墨迹，不管是否在PPT模式
                         // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
                         RestoreStrokes();
+
+                        // 新增：在白板模式下隐藏基础浮动栏
+                        ViewboxFloatingBar.Visibility = Visibility.Collapsed;
 
                         BtnSwitch.Content = "屏幕";
                         if (BtnSwitchTheme.Content.ToString() == "浅色")
@@ -2737,11 +2767,23 @@ namespace Ink_Canvas
                 StackPanelCanvasControls.Visibility = Visibility.Collapsed;
                 CheckEnableTwoFingerGestureBtnVisibility(false);
                 HideSubPanels("cursor");
+                
+                // 新增：在屏幕模式下显示基础浮动栏
+                if (currentMode == 0)
+                {
+                    ViewboxFloatingBar.Visibility = Visibility.Visible;
+                }
             }
             else
             {
                 AnimationsHelper.ShowWithSlideFromLeftAndFade(StackPanelCanvasControls);
                 CheckEnableTwoFingerGestureBtnVisibility(true);
+                
+                // 新增：在批注模式下显示基础浮动栏
+                if (currentMode == 0)
+                {
+                    ViewboxFloatingBar.Visibility = Visibility.Visible;
+                }
             }
         }
 
@@ -3096,19 +3138,16 @@ namespace Ink_Canvas
                 // 检查快捷调色盘是否显示及其实际宽度
                 bool isQuickColorPaletteVisible = false;
                 double quickColorPaletteWidth = 0;
-                string quickColorPaletteMode = "none";
-                
+
                 if (QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible)
                 {
                     isQuickColorPaletteVisible = true;
                     quickColorPaletteWidth = QuickColorPalettePanel.ActualWidth > 0 ? QuickColorPalettePanel.ActualWidth : 60;
-                    quickColorPaletteMode = "double";
                 }
                 else if (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible)
                 {
                     isQuickColorPaletteVisible = true;
                     quickColorPaletteWidth = QuickColorPaletteSingleRowPanel.ActualWidth > 0 ? QuickColorPaletteSingleRowPanel.ActualWidth : 120;
-                    quickColorPaletteMode = "single";
                 }
 
                 // 获取实际按钮宽度，如果获取不到则使用默认值，同时考虑按钮的可见性
@@ -3227,26 +3266,27 @@ namespace Ink_Canvas
                 {
                     return "select";
                 }
-                else if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
                 {
                     // 检查是否是荧光笔模式
                     if (drawingAttributes != null && drawingAttributes.IsHighlighter)
                     {
                         return "color";
                     }
-                    else
-                    {
-                        return "pen";
-                    }
+
+                    return "pen";
                 }
-                else if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
                 {
                     // 检查是面积擦还是线擦
                     if (Eraser_Icon != null && Eraser_Icon.Visibility == Visibility.Visible)
                     {
                         return "eraser";
                     }
-                    else if (EraserByStrokes_Icon != null && EraserByStrokes_Icon.Visibility == Visibility.Visible)
+
+                    if (EraserByStrokes_Icon != null && EraserByStrokes_Icon.Visibility == Visibility.Visible)
                     {
                         return "eraserByStrokes";
                     }

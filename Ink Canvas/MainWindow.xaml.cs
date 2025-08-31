@@ -1,9 +1,3 @@
-using Ink_Canvas.Helpers;
-using Ink_Canvas.Helpers.Plugins;
-using Ink_Canvas.Windows;
-using iNKORE.UI.WPF.Modern;
-using iNKORE.UI.WPF.Modern.Controls;
-using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -22,6 +16,12 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers.Plugins;
+using Ink_Canvas.Windows;
+using iNKORE.UI.WPF.Modern;
+using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
 using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Button = System.Windows.Controls.Button;
@@ -100,7 +100,11 @@ namespace Ink_Canvas
                 (workingArea.Width - floatingBarWidth) / 2,
                 workingArea.Bottom - 60 - workingArea.Top,
                 -2000, -200);
-            ViewboxFloatingBarMarginAnimation(100, true);
+            // 新增：只在屏幕模式下初始化浮动栏动画
+            if (currentMode == 0)
+            {
+                ViewboxFloatingBarMarginAnimation(100, true);
+            }
 
             try
             {
@@ -996,14 +1000,19 @@ namespace Ink_Canvas
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(sender as InkCanvas);
 
-            // 在选择模式下，如果点击的不是UI元素，则取消选择
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+            // 检查是否点击了空白区域或其他非图片元素
+            var hitTest = e.OriginalSource;
+            if (!(hitTest is Image) && !(hitTest is MediaElement))
             {
-                var hitTest = e.OriginalSource;
-                // 如果点击的不是图片或其他UI元素，则取消选择
-                if (!(hitTest is Image) && !(hitTest is MediaElement))
+                // 如果当前有选中的元素，取消选中状态
+                if (currentSelectedElement != null)
                 {
-                    
+                    // 保存当前编辑模式
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    UnselectElement(currentSelectedElement);
+                    // 恢复编辑模式
+                    inkCanvas.EditingMode = previousEditingMode;
+                    currentSelectedElement = null;
                 }
             }
         }
@@ -1684,7 +1693,7 @@ namespace Ink_Canvas
 
         // 添加定时器来维护置顶状态
         private DispatcherTimer topmostMaintenanceTimer;
-        private bool isTopmostMaintenanceEnabled = false;
+        private bool isTopmostMaintenanceEnabled;
 
         private void ApplyNoFocusMode()
         {
@@ -1748,7 +1757,7 @@ namespace Ink_Canvas
                     // 注意：这里不直接设置Topmost，让其他代码根据模式决定
                     
                     // 添加调试日志
-                    LogHelper.WriteLogToFile($"应用窗口置顶: 取消置顶", LogHelper.LogType.Trace);
+                    LogHelper.WriteLogToFile("应用窗口置顶: 取消置顶", LogHelper.LogType.Trace);
                 }
             }
             catch (Exception ex)

@@ -1,9 +1,9 @@
-﻿using Microsoft.Office.Interop.PowerPoint;
-using System;
+﻿using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Ink;
+using Microsoft.Office.Interop.PowerPoint;
 
 namespace Ink_Canvas.Helpers
 {
@@ -23,7 +23,7 @@ namespace Ink_Canvas.Helpers
         private int _maxSlides = 100;
         private string _currentPresentationId = "";
         private readonly object _lockObject = new object();
-        private bool _disposed = false;
+        private bool _disposed;
 
         // 墨迹锁定机制，防止翻页时的墨迹冲突
         private DateTime _inkLockUntil = DateTime.MinValue;

@@ -20,71 +20,157 @@
                    Fill="Black"
                    Opacity="0.3" />
 
+        <!-- 透明选择区域遮罩 - 使用正确的几何体操作 -->
+        <Rectangle Name="TransparentSelectionMask"
+                   Fill="Black"
+                   Opacity="0.3"
+                   Visibility="Collapsed">
+            <Rectangle.Clip>
+                <CombinedGeometry GeometryCombineMode="Exclude">
+                    <CombinedGeometry.Geometry1>
+                        <RectangleGeometry Rect="0,0,10000,10000" />
+                    </CombinedGeometry.Geometry1>
+                    <CombinedGeometry.Geometry2>
+                        <RectangleGeometry x:Name="SelectionClipGeometry" Rect="0,0,0,0" />
+                    </CombinedGeometry.Geometry2>
+                </CombinedGeometry>
+            </Rectangle.Clip>
+        </Rectangle>
+
         <!-- 选择区域容器 -->
-        <Canvas Name="SelectionCanvas">
+        <Canvas Name="SelectionCanvas" Panel.ZIndex="1000">
             <!-- 矩形选择模式 -->
             <Rectangle Name="SelectionRectangle"
-                       Stroke="Red"
-                       StrokeThickness="2"
+                       Stroke="White"
+                       StrokeThickness="1"
                        Fill="Transparent"
                        Visibility="Collapsed" />
 
             <!-- 任意形状选择模式 -->
             <Path Name="SelectionPath"
-                  Stroke="Red"
-                  StrokeThickness="2"
+                  Stroke="White"
+                  StrokeThickness="1"
                   Fill="Transparent"
                   Visibility="Collapsed" />
 
+            <!-- 控制点容器 -->
+            <Canvas Name="ControlPointsCanvas" Visibility="Collapsed" Panel.ZIndex="1002">
+                <!-- 四个角控制点 -->
+                <Ellipse Name="TopLeftControl" Width="8" Height="8" Fill="White" Stroke="White" StrokeThickness="1" Cursor="SizeNWSE" />
+                <Ellipse Name="TopRightControl" Width="8" Height="8" Fill="White" Stroke="White" StrokeThickness="1" Cursor="SizeNESW" />
+                <Ellipse Name="BottomLeftControl" Width="8" Height="8" Fill="White" Stroke="White" StrokeThickness="1" Cursor="SizeNESW" />
+                <Ellipse Name="BottomRightControl" Width="8" Height="8" Fill="White" Stroke="White" StrokeThickness="1" Cursor="SizeNWSE" />
+                
+                <!-- 四个边控制点 -->
+                <Ellipse Name="TopControl" Width="8" Height="8" Fill="White" Stroke="White" StrokeThickness="1" Cursor="SizeNS" />
+                <Ellipse Name="BottomControl" Width="8" Height="8" Fill="White" Stroke="White" StrokeThickness="1" Cursor="SizeNS" />
+                <Ellipse Name="LeftControl" Width="8" Height="8" Fill="White" Stroke="White" StrokeThickness="1" Cursor="SizeWE" />
+                <Ellipse Name="RightControl" Width="8" Height="8" Fill="White" Stroke="White" StrokeThickness="1" Cursor="SizeWE" />
+            </Canvas>
+
             <!-- 尺寸信息显示 -->
             <Border Name="SizeInfoBorder"
-                    Background="Black"
-                    Opacity="0.8"
-                    CornerRadius="3"
+                    Background="#1a1a1a"
+                    Opacity="0.9"
+                    CornerRadius="4"
                     Padding="8,4"
                     Visibility="Collapsed">
                 <TextBlock Name="SizeInfoText"
                            Foreground="White"
                            FontSize="12"
+                           FontWeight="Medium"
                            Text="0 x 0" />
             </Border>
         </Canvas>
 
-        <!-- 模式切换按钮 -->
-        <StackPanel Orientation="Horizontal" 
-                    HorizontalAlignment="Center" 
-                    VerticalAlignment="Top" 
-                    Margin="0,100,0,0">
-            <Button Name="RectangleModeButton" 
-                    Content="矩形模式" 
-                    Margin="5,0" 
-                    Padding="10,5"
-                    Background="#2563eb"
-                    Foreground="White"
-                    BorderThickness="0"
-                    Click="RectangleModeButton_Click" />
-            <Button Name="FreehandModeButton" 
-                    Content="自由绘制" 
-                    Margin="5,0" 
-                    Padding="10,5"
-                    Background="#6b7280"
-                    Foreground="White"
-                    BorderThickness="0"
-                    Click="FreehandModeButton_Click" />
-        </StackPanel>
-
-        <!-- 提示文字 -->
-        <Border Background="Black"
-                Opacity="0.8"
-                CornerRadius="5"
-                Padding="15,8"
+        <!-- 顶部工具栏 -->
+        <Border Background="#1a1a1a" 
+                Opacity="0.95"
+                CornerRadius="8"
+                Padding="12,8"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
-                Margin="0,150,0,0">
+                Margin="0,20,0,0"
+                Panel.ZIndex="1000">
+            <StackPanel Orientation="Horizontal">
+                <!-- 模式切换按钮 -->
+                <Button Name="RectangleModeButton" 
+                        Content="矩形模式" 
+                        Margin="4,0"
+                        Padding="12,6"
+                        Background="#2563eb"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="Medium"
+                        Click="RectangleModeButton_Click" />
+                <Button Name="FreehandModeButton" 
+                        Content="自由绘制" 
+                        Margin="4,0"
+                        Padding="12,6"
+                        Background="#6b7280"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="Medium"
+                        Click="FreehandModeButton_Click" />
+                
+                <!-- 分隔线 -->
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" 
+                          Margin="8,0" 
+                          Background="#404040" />
+                
+                <!-- 操作按钮 -->
+                <Button Name="ConfirmButton"
+                        Content="确认截图"
+                        Margin="4,0"
+                        Padding="12,6"
+                        Background="#059669"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="Medium"
+                        Click="ConfirmButton_Click" />
+                <Button Name="CancelButton"
+                        Content="取消"
+                        Margin="4,0"
+                        Padding="12,6"
+                        Background="#dc2626"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="Medium"
+                        Click="CancelButton_Click" />
+            </StackPanel>
+        </Border>
+
+        <!-- 提示文字 -->
+        <Border Background="#1a1a1a"
+                Opacity="0.9"
+                CornerRadius="6"
+                Padding="16,10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Margin="0,80,0,0"
+                Panel.ZIndex="1000">
             <TextBlock Name="HintText"
                        Text="拖拽鼠标选择矩形区域，或使用自由绘制模式"
                        Foreground="White"
-                       FontSize="16" />
+                       FontSize="14"
+                       FontWeight="Medium" />
+        </Border>
+
+        <!-- 调整模式提示 -->
+        <Border Name="AdjustModeHint"
+                Background="#1a1a1a"
+                Opacity="0.9"
+                CornerRadius="6"
+                Padding="16,10"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,20"
+                Visibility="Collapsed"
+                Panel.ZIndex="1000">
+            <TextBlock Text="拖拽控制点调整选择区域，或拖拽边框移动位置"
+                       Foreground="White"
+                       FontSize="14"
+                       FontWeight="Medium" />
         </Border>
     </Grid>
 </Window>

@@ -1,7 +1,6 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Input;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -31,12 +30,12 @@ namespace Ink_Canvas
             if (WindowState == WindowState.Normal)
             {
                 WindowState = WindowState.Maximized;
-                SymbolIconFullscreen.Symbol = Symbol.BackToWindow;
+                FontIconFullscreen.Glyph = "&#xE73F;";
             }
             else
             {
                 WindowState = WindowState.Normal;
-                SymbolIconFullscreen.Symbol = Symbol.FullScreen;
+                FontIconFullscreen.Glyph = "&#xE740;";
             }
         }
 

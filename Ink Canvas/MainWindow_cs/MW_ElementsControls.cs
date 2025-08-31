@@ -1,17 +1,17 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Ink_Canvas.Helpers;
-using System.Windows.Input;
-using System.Linq;
-using System.Collections.Generic;
-using System.Windows.Ink;
+using Microsoft.Win32;
 
 namespace Ink_Canvas
 {
@@ -19,9 +19,8 @@ namespace Ink_Canvas
     {
         // 当前选中的可操作元素
         private FrameworkElement currentSelectedElement;
-        private bool isDragging = false;
+        private bool isDragging;
         private Point dragStartPoint;
-        private bool isElementSelected = false;
 
         #region Image
         private async void BtnImageInsert_Click(object sender, RoutedEventArgs e)
@@ -65,7 +64,7 @@ namespace Ink_Canvas
                             BindElementEvents(image);
                             
                             LogHelper.WriteLogToFile($"图片插入完成: {image.Name}");
-                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                        }), DispatcherPriority.Loaded);
                     };
 
                     timeMachine.CommitElementInsertHistory(image);
@@ -110,12 +109,14 @@ namespace Ink_Canvas
         {
             if (sender is FrameworkElement element)
             {
-
-                
                 // 取消之前选中的元素
                 if (currentSelectedElement != null && currentSelectedElement != element)
                 {
+                    // 保存当前编辑模式
+                    var previousEditingMode = inkCanvas.EditingMode;
                     UnselectElement(currentSelectedElement);
+                    // 恢复编辑模式
+                    inkCanvas.EditingMode = previousEditingMode;
                 }
 
                 // 选中当前元素
@@ -174,6 +175,12 @@ namespace Ink_Canvas
                 
                 // 使用滚轮缩放的核心机制
                 ApplyWheelScaleTransform(element, e);
+
+                // 如果是图片元素，更新工具栏位置
+                if (element is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageSelectionToolbarPosition(element);
+                }
 
                 e.Handled = true;
             }
@@ -257,7 +264,6 @@ namespace Ink_Canvas
         private void SelectElement(FrameworkElement element)
         {
             currentSelectedElement = element;
-            isElementSelected = true;
             
             // 根据元素类型显示不同的选择工具栏
             if (element is Image)
@@ -311,7 +317,6 @@ namespace Ink_Canvas
         private void UnselectElement(FrameworkElement element)
         {
             // 去除选中效果
-            isElementSelected = false;
             
             // 隐藏所有选择工具栏
             if (BorderImageSelectionControl != null)
@@ -330,11 +335,7 @@ namespace Ink_Canvas
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
             
-            // 恢复InkCanvas的编辑模式
-            if (inkCanvas != null)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-            }
+
         }
 
         // 应用矩阵变换到元素
@@ -397,7 +398,7 @@ namespace Ink_Canvas
                 }
 
                 // 保存初始变换状态用于历史记录
-                var initialTransform = transformGroup.Clone() as TransformGroup;
+                var initialTransform = transformGroup.Clone();
                 
                 // 创建新的 TransformGroup 并添加 MatrixTransform
                 var newTransformGroup = new TransformGroup();
@@ -720,7 +721,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"旋转图片时发生错误: {ex.Message}");
+                Debug.WriteLine($"旋转图片时发生错误: {ex.Message}");
             }
         }
 
@@ -741,26 +742,37 @@ namespace Ink_Canvas
                     Width = image.Width,
                     Height = image.Height,
                     Stretch = image.Stretch,
-                    RenderTransform = image.RenderTransform?.Clone() as Transform
+                    RenderTransform = image.RenderTransform?.Clone()
                 };
 
                 // 设置位置，稍微偏移以避免重叠
                 InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
                 InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
 
+                // 设置图片属性，避免被InkCanvas选择系统处理
+                clonedImage.IsHitTestVisible = true;
+                clonedImage.Focusable = false;
+
+                // 初始化变换
+                InitializeElementTransform(clonedImage);
+
+                // 绑定事件
+                BindElementEvents(clonedImage);
+
                 // 添加到画布
                 inkCanvas.Children.Add(clonedImage);
 
                 // 提交到时间机器以支持撤销
                 timeMachine.CommitElementInsertHistory(clonedImage);
+
+                return clonedImage;
             }
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"克隆图片时发生错误: {ex.Message}");
+                LogHelper.WriteLogToFile($"克隆图片时发生错误: {ex.Message}", LogHelper.LogType.Error);
+                return null;
             }
-
-            return null;
         }
 
         /// <summary>
@@ -780,7 +792,7 @@ namespace Ink_Canvas
                     Width = image.Width,
                     Height = image.Height,
                     Stretch = image.Stretch,
-                    RenderTransform = image.RenderTransform?.Clone() as Transform
+                    RenderTransform = image.RenderTransform?.Clone()
                 };
 
                 // 设置位置，稍微偏移以避免重叠
@@ -799,7 +811,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"克隆图片到新页面时发生错误: {ex.Message}");
+                Debug.WriteLine($"克隆图片到新页面时发生错误: {ex.Message}");
             }
         }
 
@@ -852,7 +864,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"缩放图片时发生错误: {ex.Message}");
+                Debug.WriteLine($"缩放图片时发生错误: {ex.Message}");
             }
         }
 
@@ -878,7 +890,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 // 记录错误但不中断程序
-                System.Diagnostics.Debug.WriteLine($"删除图片时发生错误: {ex.Message}");
+                Debug.WriteLine($"删除图片时发生错误: {ex.Message}");
             }
         }
 
@@ -897,7 +909,7 @@ namespace Ink_Canvas
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
                             CenterAndScaleElement(element);
-                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                        }), DispatcherPriority.Loaded);
                     };
                     return;
                 }
@@ -909,8 +921,8 @@ namespace Ink_Canvas
                 // 如果画布尺寸为0，使用窗口尺寸作为备选
                 if (canvasWidth <= 0 || canvasHeight <= 0)
                 {
-                    canvasWidth = this.ActualWidth;
-                    canvasHeight = this.ActualHeight;
+                    canvasWidth = ActualWidth;
+                    canvasHeight = ActualHeight;
                 }
 
                 // 如果仍然为0，使用屏幕尺寸
@@ -994,19 +1006,12 @@ namespace Ink_Canvas
             {
                 if (BorderImageSelectionControl == null || element == null) return;
 
-                // 获取元素在画布中的位置
-                double elementLeft = InkCanvas.GetLeft(element);
-                double elementTop = InkCanvas.GetTop(element);
-                double elementWidth = element.ActualWidth;
-                double elementHeight = element.ActualHeight;
-
-                // 如果元素位置未设置，使用默认值
-                if (double.IsNaN(elementLeft)) elementLeft = 0;
-                if (double.IsNaN(elementTop)) elementTop = 0;
+                // 获取元素的实际边界（考虑变换）
+                Rect elementBounds = GetElementActualBounds(element);
 
                 // 计算工具栏位置（显示在图片下方）
-                double toolbarLeft = elementLeft + (elementWidth / 2) - (BorderImageSelectionControl.ActualWidth / 2);
-                double toolbarTop = elementTop + elementHeight + 10; // 图片下方10像素
+                double toolbarLeft = elementBounds.Left + (elementBounds.Width / 2) - (BorderImageSelectionControl.ActualWidth / 2);
+                double toolbarTop = elementBounds.Bottom + 10; // 图片下方10像素
 
                 // 确保工具栏不超出画布边界
                 double maxLeft = inkCanvas.ActualWidth - BorderImageSelectionControl.ActualWidth;
@@ -1021,6 +1026,53 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新图片选择工具栏位置失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 获取元素的实际边界（考虑变换）
+        private Rect GetElementActualBounds(FrameworkElement element)
+        {
+            try
+            {
+                var left = InkCanvas.GetLeft(element);
+                var top = InkCanvas.GetTop(element);
+
+                if (double.IsNaN(left)) left = 0;
+                if (double.IsNaN(top)) top = 0;
+
+                var width = element.ActualWidth > 0 ? element.ActualWidth : element.Width;
+                var height = element.ActualHeight > 0 ? element.ActualHeight : element.Height;
+
+                // 检查是否有RenderTransform
+                if (element.RenderTransform != null && element.RenderTransform != Transform.Identity)
+                {
+                    try
+                    {
+                        // 如果有变换，使用变换后的边界
+                        var transform = element.TransformToAncestor(inkCanvas);
+                        var elementBounds = new Rect(0, 0, width, height);
+                        var transformedBounds = transform.TransformBounds(elementBounds);
+                        return transformedBounds;
+                    }
+                    catch
+                    {
+                        // 变换失败时回退到简单计算
+                        return new Rect(left, top, width, height);
+                    }
+                }
+
+                // 没有变换时直接使用位置和大小
+                return new Rect(left, top, width, height);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取元素实际边界失败: {ex.Message}", LogHelper.LogType.Error);
+                // 回退到基本计算
+                var left = InkCanvas.GetLeft(element);
+                var top = InkCanvas.GetTop(element);
+                if (double.IsNaN(left)) left = 0;
+                if (double.IsNaN(top)) top = 0;
+                return new Rect(left, top, element.ActualWidth, element.ActualHeight);
             }
         }
 
@@ -1064,23 +1116,32 @@ namespace Ink_Canvas
             {
                 if (currentSelectedElement is Image originalImage)
                 {
-                    // 创建克隆图片
-                    Image clonedImage = CloneImage(originalImage);
+                    // 创建新页面
+                    BtnWhiteBoardAdd_Click(null, null);
                     
-                    // 这里可以添加切换到新页面的逻辑
-                    // 暂时先添加到当前页面
-                    inkCanvas.Children.Add(clonedImage);
+                    // 创建克隆图片（不添加到当前画布，因为已经创建了新页面）
+                    Image clonedImage = CreateClonedImage(originalImage);
                     
-                    // 初始化变换
-                    InitializeElementTransform(clonedImage);
-                    
-                    // 绑定事件
-                    BindElementEvents(clonedImage);
-                    
-                    // 记录历史
-                    timeMachine.CommitElementInsertHistory(clonedImage);
-                    
-                    LogHelper.WriteLogToFile($"图片克隆到新页面完成: {clonedImage.Name}");
+                    if (clonedImage != null)
+                    {
+                        // 设置图片属性，避免被InkCanvas选择系统处理
+                        clonedImage.IsHitTestVisible = true;
+                        clonedImage.Focusable = false;
+
+                        // 初始化变换
+                        InitializeElementTransform(clonedImage);
+
+                        // 绑定事件
+                        BindElementEvents(clonedImage);
+
+                        // 添加到新页面的画布
+                        inkCanvas.Children.Add(clonedImage);
+
+                        // 记录历史
+                        timeMachine.CommitElementInsertHistory(clonedImage);
+                        
+                        LogHelper.WriteLogToFile($"图片克隆到新页面完成: {clonedImage.Name}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -1097,7 +1158,14 @@ namespace Ink_Canvas
                 if (currentSelectedElement != null)
                 {
                     ApplyRotateTransform(currentSelectedElement, -45);
-                    LogHelper.WriteLogToFile($"图片左旋转完成");
+                    
+                    // 更新工具栏位置
+                    if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                    {
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    }
+                    
+                    LogHelper.WriteLogToFile("图片左旋转完成");
                 }
             }
             catch (Exception ex)
@@ -1114,7 +1182,14 @@ namespace Ink_Canvas
                 if (currentSelectedElement != null)
                 {
                     ApplyRotateTransform(currentSelectedElement, 45);
-                    LogHelper.WriteLogToFile($"图片右旋转完成");
+                    
+                    // 更新工具栏位置
+                    if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                    {
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    }
+                    
+                    LogHelper.WriteLogToFile("图片右旋转完成");
                 }
             }
             catch (Exception ex)
@@ -1132,7 +1207,14 @@ namespace Ink_Canvas
                 {
                     var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
                     ApplyScaleTransform(currentSelectedElement, 0.9, elementCenter);
-                    LogHelper.WriteLogToFile($"图片缩放减小完成");
+                    
+                    // 更新工具栏位置
+                    if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                    {
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    }
+                    
+                    LogHelper.WriteLogToFile("图片缩放减小完成");
                 }
             }
             catch (Exception ex)
@@ -1147,16 +1229,23 @@ namespace Ink_Canvas
             try
             {
                 if (currentSelectedElement != null)
-                {
-                    var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
-                    ApplyScaleTransform(currentSelectedElement, 1.1, elementCenter);
-                    LogHelper.WriteLogToFile($"图片缩放增大完成");
-                }
-            }
-            catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片缩放增大失败: {ex.Message}", LogHelper.LogType.Error);
+                var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
+                ApplyScaleTransform(currentSelectedElement, 1.1, elementCenter);
+                
+                // 更新工具栏位置
+                if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                }
+                
+                LogHelper.WriteLogToFile("图片缩放增大完成");
             }
+        }
+        catch (Exception ex)
+        {
+            LogHelper.WriteLogToFile($"图片缩放增大失败: {ex.Message}", LogHelper.LogType.Error);
+        }
         }
 
         // 图片删除
@@ -1166,6 +1255,9 @@ namespace Ink_Canvas
             {
                 if (currentSelectedElement != null)
                 {
+                    // 保存删除前的编辑模式
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    
                     // 记录删除历史
                     timeMachine.CommitElementRemoveHistory(currentSelectedElement);
                     
@@ -1176,7 +1268,10 @@ namespace Ink_Canvas
                     UnselectElement(currentSelectedElement);
                     currentSelectedElement = null;
                     
-                    LogHelper.WriteLogToFile($"图片删除完成");
+                    // 恢复到删除前的编辑模式
+                    inkCanvas.EditingMode = previousEditingMode;
+                    
+                    LogHelper.WriteLogToFile($"图片删除完成，已恢复到编辑模式: {previousEditingMode}");
                 }
             }
             catch (Exception ex)
@@ -1185,7 +1280,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 克隆图片的辅助方法
+        // 克隆图片的辅助方法（只创建图片，不添加到画布）
         private Image CreateClonedImage(Image originalImage)
         {
             try
@@ -1204,7 +1299,7 @@ namespace Ink_Canvas
                 clonedImage.Stretch = originalImage.Stretch;
                 clonedImage.StretchDirection = originalImage.StretchDirection;
                 
-                // 复制位置
+                // 复制位置（在新页面中居中显示）
                 double left = InkCanvas.GetLeft(originalImage);
                 double top = InkCanvas.GetTop(originalImage);
                 InkCanvas.SetLeft(clonedImage, left + 20); // 稍微偏移位置

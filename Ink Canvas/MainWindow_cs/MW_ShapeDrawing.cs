@@ -1,6 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -10,6 +8,8 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
 using MessageBox = System.Windows.MessageBox;
 using Point = System.Windows.Point;
 
@@ -74,9 +74,9 @@ namespace Ink_Canvas
             ToggleSwitchDrawShapeBorderAutoHide.IsOn = !ToggleSwitchDrawShapeBorderAutoHide.IsOn;
 
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-                ((SymbolIcon)sender).Symbol = Symbol.Pin;
+                ((FontIcon)sender).Glyph = "&#xE840;";
             else
-                ((SymbolIcon)sender).Symbol = Symbol.UnPin;
+                ((FontIcon)sender).Glyph = "&#xE77A;";
         }
 
         private object lastMouseDownSender;
@@ -499,20 +499,18 @@ namespace Ink_Canvas
                         catch { }
                         return;
                     }
-                    else
+
+                    // 其他情况正常删除临时笔画
+                    try
                     {
-                        // 其他情况正常删除临时笔画
-                        try
-                        {
-                            inkCanvas.Strokes.Remove(lastTempStroke);
-                            inkCanvas.Strokes.Remove(lastTempStrokeCollection);
-                        }
-                        catch
-                        {
-                            Trace.WriteLine("lastTempStrokeCollection failed.");
-                        }
-                        return;
+                        inkCanvas.Strokes.Remove(lastTempStroke);
+                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
                     }
+                    catch
+                    {
+                        Trace.WriteLine("lastTempStrokeCollection failed.");
+                    }
+                    return;
                 }
                 
                 // 修复：双曲线绘制时，第二笔应该基于第一笔的起点，而不是触摸实时位置

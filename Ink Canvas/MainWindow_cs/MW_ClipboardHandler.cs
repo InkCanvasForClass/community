@@ -1,19 +1,26 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
+using System.Windows.Forms;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Media; 
+using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using Clipboard = System.Windows.Clipboard;
+using ContextMenu = System.Windows.Controls.ContextMenu;
+using Cursors = System.Windows.Input.Cursors;
+using MenuItem = System.Windows.Controls.MenuItem;
 
 namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        private bool isClipboardMonitoringEnabled = false;
-        private BitmapSource lastClipboardImage = null;
+        private bool isClipboardMonitoringEnabled;
+        private BitmapSource lastClipboardImage;
 
         // 初始化剪贴板监控
         private void InitializeClipboardMonitoring()
@@ -92,7 +99,7 @@ namespace Ink_Canvas
                 // 显示菜单
                 contextMenu.IsOpen = true;
                 contextMenu.PlacementTarget = inkCanvas;
-                contextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.MousePoint;
+                contextMenu.Placement = PlacementMode.MousePoint;
             }
             catch (Exception ex)
             {
@@ -124,7 +131,7 @@ namespace Ink_Canvas
                     Source = clipboardImage,
                     Width = clipboardImage.PixelWidth,
                     Height = clipboardImage.PixelHeight,
-                    Stretch = System.Windows.Media.Stretch.Fill
+                    Stretch = Stretch.Fill
                 };
 
                 // 生成唯一名称
@@ -141,19 +148,6 @@ namespace Ink_Canvas
                     element.RenderTransform = transformGroup;
                 }
 
-                // 设置位置
-                if (position.HasValue)
-                {
-                    // 在指定位置居中显示
-                    InkCanvas.SetLeft(image, position.Value.X - image.Width / 2);
-                    InkCanvas.SetTop(image, position.Value.Y - image.Height / 2);
-                }
-                else
-                {
-                    // 使用与文件选择相同的居中和缩放逻辑
-                    CenterAndScaleElement(image);
-                }
-
                 // 设置图片属性，避免被InkCanvas选择系统处理
                 image.IsHitTestVisible = true;
                 image.Focusable = false;
@@ -163,31 +157,50 @@ namespace Ink_Canvas
                 {
                     // 清除当前选择，避免显示控制点
                     inkCanvas.Select(new StrokeCollection());
-                    // 设置编辑模式为Ink模式，这样可以保持图片的交互功能
+                    // 设置编辑模式为非选择模式，这样可以保持图片的交互功能
                     // 同时通过图片的IsHitTestVisible和Focusable属性来避免InkCanvas选择系统的干扰
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 }
 
                 // 添加到画布
                 inkCanvas.Children.Add(image);
 
-                // 绑定事件处理器
-                if (image is FrameworkElement elementForEvents)
+                // 等待图片加载完成后再进行居中处理
+                image.Loaded += (sender, e) =>
                 {
-                    // 鼠标事件
-                    elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
-                    elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
-                    elementForEvents.MouseMove += Element_MouseMove;
-                    elementForEvents.MouseWheel += Element_MouseWheel;
+                    // 确保在UI线程中执行
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        // 先进行缩放居中处理
+                        CenterAndScaleElement(image);
+                        
+                        // 如果有指定位置，调整到指定位置
+                        if (position.HasValue)
+                        {
+                            // 在指定位置居中显示
+                            InkCanvas.SetLeft(image, position.Value.X - image.Width / 2);
+                            InkCanvas.SetTop(image, position.Value.Y - image.Height / 2);
+                        }
+                        
+                        // 绑定事件处理器
+                        if (image is FrameworkElement elementForEvents)
+                        {
+                            // 鼠标事件
+                            elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                            elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+                            elementForEvents.MouseMove += Element_MouseMove;
+                            elementForEvents.MouseWheel += Element_MouseWheel;
 
-                    // 触摸事件
-                    elementForEvents.IsManipulationEnabled = true;
-                    elementForEvents.ManipulationDelta += Element_ManipulationDelta;
-                    elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
+                            // 触摸事件
+                            elementForEvents.IsManipulationEnabled = true;
+                            elementForEvents.ManipulationDelta += Element_ManipulationDelta;
+                            elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
 
-                    // 设置光标
-                    elementForEvents.Cursor = Cursors.Hand;
-                }
+                            // 设置光标
+                            elementForEvents.Cursor = Cursors.Hand;
+                        }
+                    }), DispatcherPriority.Loaded);
+                };
 
                 // 提交到历史记录
                 timeMachine.CommitElementInsertHistory(image);
@@ -266,13 +279,13 @@ namespace Ink_Canvas
     {
         public static event Action ClipboardUpdate;
 
-        private static System.Windows.Forms.Timer clipboardTimer;
+        private static Timer clipboardTimer;
         private static string lastClipboardText = "";
-        private static bool lastHadImage = false;
+        private static bool lastHadImage;
 
         static ClipboardNotification()
         {
-            clipboardTimer = new System.Windows.Forms.Timer();
+            clipboardTimer = new Timer();
             clipboardTimer.Interval = 500; // 每500ms检查一次
             clipboardTimer.Tick += CheckClipboard;
             clipboardTimer.Start();

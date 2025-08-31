@@ -1,7 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using Microsoft.VisualBasic;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,6 +8,8 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Ink_Canvas.Helpers;
+using Microsoft.VisualBasic;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas
@@ -24,7 +23,7 @@ namespace Ink_Canvas
         {
             InitializeComponent();
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
-            BorderBtnHelp.Visibility = settings.RandSettings.DisplayRandWindowNamesInputBtn == false ? Visibility.Collapsed : Visibility.Visible;
+            BorderBtnHelp.Visibility = !settings.RandSettings.DisplayRandWindowNamesInputBtn ? Visibility.Collapsed : Visibility.Visible;
             RandMaxPeopleOneTime = settings.RandSettings.RandWindowOnceMaxStudents;
             RandDoneAutoCloseWaitTime = (int)settings.RandSettings.RandWindowOnceCloseLatency * 1000;
 
@@ -69,7 +68,7 @@ namespace Ink_Canvas
             isAutoClose = IsAutoClose;
             PeopleControlPane.Opacity = 0.4;
             PeopleControlPane.IsHitTestVisible = false;
-            BorderBtnHelp.Visibility = settings.RandSettings.DisplayRandWindowNamesInputBtn == false ? Visibility.Collapsed : Visibility.Visible;
+            BorderBtnHelp.Visibility = !settings.RandSettings.DisplayRandWindowNamesInputBtn ? Visibility.Collapsed : Visibility.Visible;
             RandMaxPeopleOneTime = settings.RandSettings.RandWindowOnceMaxStudents;
             RandDoneAutoCloseWaitTime = (int)settings.RandSettings.RandWindowOnceCloseLatency * 1000;
 
@@ -100,7 +99,7 @@ namespace Ink_Canvas
             if (RandMaxPeopleOneTime != -1 && TotalCount >= RandMaxPeopleOneTime) return;
             TotalCount++;
             LabelNumberCount.Text = TotalCount.ToString();
-            SymbolIconStart.Symbol = Symbol.People;
+            FontIconStart.Glyph = "&#xE779;";
             BorderBtnAdd.Opacity = 1;
             BorderBtnMinus.Opacity = 1;
         }
@@ -112,7 +111,7 @@ namespace Ink_Canvas
             LabelNumberCount.Text = TotalCount.ToString();
             if (TotalCount == 1)
             {
-                SymbolIconStart.Symbol = Symbol.Contact;
+                FontIconStart.Glyph = "&#xE779;";
             }
         }
 

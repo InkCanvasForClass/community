@@ -1,5 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
@@ -7,6 +6,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -766,7 +766,7 @@ namespace Ink_Canvas
         {
             PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
-            if (Settings.Canvas.ClearCanvasAndClearTimeMachine == false) timeMachine.ClearStrokeHistory();
+            if (!Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
             // 根据设置决定是否清空图片
             if (Settings.Canvas.ClearCanvasAlsoClearImages)

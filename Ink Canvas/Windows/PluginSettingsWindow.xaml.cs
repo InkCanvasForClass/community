@@ -1,9 +1,3 @@
-using Ink_Canvas.Helpers;
-using Ink_Canvas.Helpers.Plugins;
-using Ink_Canvas.Helpers.Plugins.BuiltIn;
-using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
-using iNKORE.UI.WPF.Modern.Controls;
-using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -12,6 +6,12 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers.Plugins;
+using Ink_Canvas.Helpers.Plugins.BuiltIn;
+using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
+using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
 using MessageBox = System.Windows.MessageBox;
 
 namespace Ink_Canvas.Windows
@@ -68,11 +68,11 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        public string Name => SelectedPlugin?.Name ?? string.Empty;
+        public new string Name => SelectedPlugin?.Name ?? string.Empty;
         public string Version => SelectedPlugin?.Version?.ToString() ?? string.Empty;
         public string Author => SelectedPlugin?.Author ?? string.Empty;
         public string Description => SelectedPlugin?.Description ?? string.Empty;
-        public bool IsEnabled => SelectedPlugin is PluginBase plugin && plugin.IsEnabled;
+        public new bool IsEnabled => SelectedPlugin is PluginBase plugin && plugin.IsEnabled;
         public bool IsBuiltIn => SelectedPlugin?.IsBuiltIn ?? false;
 
         /// <summary>

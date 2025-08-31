@@ -1,5 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -9,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using Ink_Canvas.Helpers;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas

@@ -1,8 +1,3 @@
-using Hardcodet.Wpf.TaskbarNotification;
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using Microsoft.Win32;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,6 +13,11 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
+using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
+using Newtonsoft.Json;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using Timer = System.Threading.Timer;
@@ -353,18 +353,18 @@ namespace Ink_Canvas
             {
                 return $"{timeSpan.Days}天 {timeSpan.Hours}小时 {timeSpan.Minutes}分钟";
             }
-            else if (timeSpan.TotalHours >= 1)
+
+            if (timeSpan.TotalHours >= 1)
             {
                 return $"{timeSpan.Hours}小时 {timeSpan.Minutes}分钟";
             }
-            else if (timeSpan.TotalMinutes >= 1)
+
+            if (timeSpan.TotalMinutes >= 1)
             {
                 return $"{timeSpan.Minutes}分钟 {timeSpan.Seconds}秒";
             }
-            else
-            {
-                return $"{timeSpan.Seconds}秒";
-            }
+
+            return $"{timeSpan.Seconds}秒";
         }
 
         // 新增：记录崩溃日志

@@ -1,8 +1,8 @@
-﻿using iNKORE.UI.WPF.Modern;
-using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Windows;
 using System.Windows.Media;
+using iNKORE.UI.WPF.Modern;
+using Microsoft.Win32;
 using Application = System.Windows.Application;
 
 namespace Ink_Canvas

@@ -1,7 +1,7 @@
-﻿using Ink_Canvas.Helpers;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.IO;
 using System.Windows;
+using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {

@@ -1,6 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Media;
 using System.Timers;
@@ -9,6 +7,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using Ink_Canvas.Helpers;
 using Application = System.Windows.Application;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using Timer = System.Timers.Timer;
@@ -57,7 +56,7 @@ namespace Ink_Canvas
                     TextBlockSecond.Text = "00";
                     timer.Stop();
                     isTimerRunning = false;
-                    SymbolIconStart.Symbol = Symbol.Play;
+                    FontIconStart.Glyph = "&#xE768;";
                     BtnStartCover.Visibility = Visibility.Visible;
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                     BorderStopTime.Visibility = Visibility.Collapsed;
@@ -92,7 +91,7 @@ namespace Ink_Canvas
         private void Grid_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (isTimerRunning) return;
-            if (ProcessBarTime.Visibility == Visibility.Visible && isTimerRunning == false)
+            if (ProcessBarTime.Visibility == Visibility.Visible && !isTimerRunning)
             {
                 ProcessBarTime.Visibility = Visibility.Collapsed;
                 GridAdjustHour.Visibility = Visibility.Visible;
@@ -208,12 +207,12 @@ namespace Ink_Canvas
             if (WindowState == WindowState.Normal)
             {
                 WindowState = WindowState.Maximized;
-                SymbolIconFullscreen.Symbol = Symbol.BackToWindow;
+                FontIconFullscreen.Glyph = "&#xE73F;";
             }
             else
             {
                 WindowState = WindowState.Normal;
-                SymbolIconFullscreen.Symbol = Symbol.FullScreen;
+                FontIconFullscreen.Glyph = "&#xE740;";
             }
         }
 
@@ -238,7 +237,7 @@ namespace Ink_Canvas
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                SymbolIconStart.Symbol = Symbol.Play;
+                FontIconStart.Glyph = "&#xE768;";
                 isTimerRunning = false;
                 timer.Stop();
                 isPaused = false;
@@ -288,7 +287,7 @@ namespace Ink_Canvas
                 startTime += DateTime.Now - pauseTime;
                 ProcessBarTime.IsPaused = false;
                 TextBlockHour.Foreground = Brushes.Black;
-                SymbolIconStart.Symbol = Symbol.Pause;
+                FontIconStart.Glyph = "&#xE769;";
                 isPaused = false;
                 timer.Start();
                 UpdateStopTime();
@@ -300,7 +299,7 @@ namespace Ink_Canvas
                 pauseTime = DateTime.Now;
                 ProcessBarTime.IsPaused = true;
                 TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                SymbolIconStart.Symbol = Symbol.Play;
+                FontIconStart.Glyph = "&#xE768;";
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 isPaused = true;
                 timer.Stop();
@@ -312,7 +311,7 @@ namespace Ink_Canvas
                 totalSeconds = ((hour * 60) + minute) * 60 + second;
                 ProcessBarTime.IsPaused = false;
                 TextBlockHour.Foreground = Brushes.Black;
-                SymbolIconStart.Symbol = Symbol.Pause;
+                FontIconStart.Glyph = "&#xE769;";
                 BtnResetCover.Visibility = Visibility.Collapsed;
 
                 if (totalSeconds <= 10)
