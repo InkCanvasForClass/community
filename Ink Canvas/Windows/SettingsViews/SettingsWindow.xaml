@@ -3534,7 +3534,7 @@
                         </Border>
                     </Border>
                     <TextBlock FontSize="16" Text="设置标题" Name="SettingsWindowTitle" Foreground="#2e3436" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                    <Border CornerRadius="8" Background="#33ef4444" Width="34" Height="34" Margin="0,0,8,0" HorizontalAlignment="Right">
+                    <Border CornerRadius="8" Background="#33ef4444" Width="34" Height="34" Margin="0,0,8,0" HorizontalAlignment="Right" MouseLeftButtonDown="CloseButton_Click" Cursor="Hand">
                         <Image Width="12" Height="12">
                             <Image.Source>
                                 <DrawingImage>

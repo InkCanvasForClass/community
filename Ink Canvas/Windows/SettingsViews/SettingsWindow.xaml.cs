@@ -382,5 +382,9 @@ namespace Ink_Canvas.Windows {
             if (_sidebarItemMouseDownBorder.FindDescendantByName("MouseFeedbackBorder") is Border feedbackBd) feedbackBd.Opacity = 0;
             _sidebarItemMouseDownBorder = null;
         }
+
+        private void CloseButton_Click(object sender, MouseButtonEventArgs e) {
+            Close();
+        }
     }
 }
