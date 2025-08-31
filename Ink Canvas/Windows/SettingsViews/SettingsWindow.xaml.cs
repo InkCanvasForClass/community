@@ -145,9 +145,6 @@ namespace Ink_Canvas.Windows {
                 IconSource = FindResource("AboutIcon") as DrawingImage,
                 Selected = false,
             });
-            _selectedSidebarItemName = "CanvasAndInkItem";
-            UpdateSidebarItemsSelection();
-
             SettingsPanes = new Grid[] {
                 AboutPane,
                 CanvasAndInkPane,
@@ -218,6 +215,9 @@ namespace Ink_Canvas.Windows {
 
             SettingsAboutPanel.IsTopBarNeedShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0.25;
             SettingsAboutPanel.IsTopBarNeedNoShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0;
+
+            _selectedSidebarItemName = "CanvasAndInkItem";
+            UpdateSidebarItemsSelection();
         }
 
 
@@ -258,26 +258,32 @@ namespace Ink_Canvas.Windows {
         public void UpdateSidebarItemsSelection() {
             foreach (var si in SidebarItems) {
                 si.Selected = si.Name == _selectedSidebarItemName;
-                if (si.Selected) SettingsWindowTitle.Text = si.Title;
+                if (si.Selected && SettingsWindowTitle != null) {
+                    SettingsWindowTitle.Text = si.Title;
+                }
             }
             CollectionViewSource.GetDefaultView(SidebarItems).Refresh();
 
-            AboutPane.Visibility = _selectedSidebarItemName == "AboutItem" ? Visibility.Visible : Visibility.Collapsed;
-            CanvasAndInkPane.Visibility = _selectedSidebarItemName == "CanvasAndInkItem" ? Visibility.Visible : Visibility.Collapsed;
-            GesturesPane.Visibility = _selectedSidebarItemName == "GesturesItem" ? Visibility.Visible : Visibility.Collapsed;
-            StartupPane.Visibility = _selectedSidebarItemName == "StartupItem" ? Visibility.Visible : Visibility.Collapsed;
-            ThemePane.Visibility = _selectedSidebarItemName == "ThemeItem" ? Visibility.Visible : Visibility.Collapsed;
-            ShortcutsPane.Visibility = _selectedSidebarItemName == "ShortcutsItem" ? Visibility.Visible : Visibility.Collapsed;
-            CrashActionPane.Visibility = _selectedSidebarItemName == "CrashActionItem" ? Visibility.Visible : Visibility.Collapsed;
-            InkRecognitionPane.Visibility = _selectedSidebarItemName == "InkRecognitionItem" ? Visibility.Visible : Visibility.Collapsed;
-            AutomationPane.Visibility = _selectedSidebarItemName == "AutomationItem" ? Visibility.Visible : Visibility.Collapsed;
-            PowerPointPane.Visibility = _selectedSidebarItemName == "PowerPointItem" ? Visibility.Visible : Visibility.Collapsed;
-            LuckyRandomPane.Visibility = _selectedSidebarItemName == "LuckyRandomItem" ? Visibility.Visible : Visibility.Collapsed;
-            StoragePane.Visibility = _selectedSidebarItemName == "StorageItem" ? Visibility.Visible : Visibility.Collapsed;
-            SnapshotPane.Visibility = _selectedSidebarItemName == "SnapshotItem" ? Visibility.Visible : Visibility.Collapsed;
-            AdvancedPane.Visibility = _selectedSidebarItemName == "AdvancedItem" ? Visibility.Visible : Visibility.Collapsed;
-            foreach (var sv in SettingsPaneScrollViewers) {
-                sv.ScrollToTop();
+            if (AboutPane != null) AboutPane.Visibility = _selectedSidebarItemName == "AboutItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (CanvasAndInkPane != null) CanvasAndInkPane.Visibility = _selectedSidebarItemName == "CanvasAndInkItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (GesturesPane != null) GesturesPane.Visibility = _selectedSidebarItemName == "GesturesItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (StartupPane != null) StartupPane.Visibility = _selectedSidebarItemName == "StartupItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (ThemePane != null) ThemePane.Visibility = _selectedSidebarItemName == "ThemeItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (ShortcutsPane != null) ShortcutsPane.Visibility = _selectedSidebarItemName == "ShortcutsItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (CrashActionPane != null) CrashActionPane.Visibility = _selectedSidebarItemName == "CrashActionItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (InkRecognitionPane != null) InkRecognitionPane.Visibility = _selectedSidebarItemName == "InkRecognitionItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (AutomationPane != null) AutomationPane.Visibility = _selectedSidebarItemName == "AutomationItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (PowerPointPane != null) PowerPointPane.Visibility = _selectedSidebarItemName == "PowerPointItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (LuckyRandomPane != null) LuckyRandomPane.Visibility = _selectedSidebarItemName == "LuckyRandomItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (StoragePane != null) StoragePane.Visibility = _selectedSidebarItemName == "StorageItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (SnapshotPane != null) SnapshotPane.Visibility = _selectedSidebarItemName == "SnapshotItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (AdvancedPane != null) AdvancedPane.Visibility = _selectedSidebarItemName == "AdvancedItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (SettingsPaneScrollViewers != null) {
+                foreach (var sv in SettingsPaneScrollViewers) {
+                    if (sv != null) {
+                        sv.ScrollToTop();
+                    }
+                }
             }
         }
 
