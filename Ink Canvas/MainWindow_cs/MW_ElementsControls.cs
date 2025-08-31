@@ -19,7 +19,6 @@ namespace Ink_Canvas
         private FrameworkElement currentSelectedElement;
         private bool isDragging = false;
         private Point dragStartPoint;
-        private bool isElementSelected = false;
 
         #region Image
         private async void BtnImageInsert_Click(object sender, RoutedEventArgs e)
@@ -253,7 +252,6 @@ namespace Ink_Canvas
         private void SelectElement(FrameworkElement element)
         {
             currentSelectedElement = element;
-            isElementSelected = true;
             
             // 根据元素类型显示不同的选择工具栏
             if (element is Image)
@@ -307,7 +305,6 @@ namespace Ink_Canvas
         private void UnselectElement(FrameworkElement element)
         {
             // 去除选中效果
-            isElementSelected = false;
             
             // 隐藏所有选择工具栏
             if (BorderImageSelectionControl != null)

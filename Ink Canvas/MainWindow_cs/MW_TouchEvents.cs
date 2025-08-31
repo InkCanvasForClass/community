@@ -340,7 +340,7 @@ namespace Ink_Canvas
         #endregion
 
 
-        private int lastTouchDownTime = 0, lastTouchUpTime = 0;
+
 
         private Point iniP = new Point(0, 0);
 
