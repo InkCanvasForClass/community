@@ -523,6 +523,9 @@ namespace Ink_Canvas
 
             // 初始化墨迹渐隐管理器
             InitializeInkFadeManager();
+
+            // 处理命令行参数中的文件路径
+            HandleCommandLineFileOpen();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -2125,6 +2128,43 @@ namespace Ink_Canvas
             }
         }
         #endregion
+
+        /// <summary>
+        /// 处理命令行参数中的文件路径
+        /// </summary>
+        private void HandleCommandLineFileOpen()
+        {
+            try
+            {
+                // 检查启动参数中是否有.icstk文件
+                string icstkFile = FileAssociationManager.GetIcstkFileFromArgs(App.StartArgs);
+                
+                if (!string.IsNullOrEmpty(icstkFile))
+                {
+                    LogHelper.WriteLogToFile($"检测到命令行参数中的.icstk文件: {icstkFile}", LogHelper.LogType.Event);
+                    
+                    // 延迟执行，确保UI已完全加载
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        try
+                        {
+                            // 打开文件
+                            OpenSingleStrokeFile(icstkFile);
+                            ShowNotification($"已加载墨迹文件: {Path.GetFileName(icstkFile)}");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"打开命令行参数中的文件失败: {ex.Message}", LogHelper.LogType.Error);
+                            ShowNotification("打开墨迹文件失败");
+                        }
+                    }), DispatcherPriority.Loaded);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理命令行文件打开时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
 
         /// <summary>
         /// 集中管理工具模式切换和快捷键状态更新

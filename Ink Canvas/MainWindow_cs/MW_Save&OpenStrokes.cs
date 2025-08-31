@@ -643,7 +643,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 打开单个墨迹文件
         /// </summary>
-        private void OpenSingleStrokeFile(string filePath)
+        public void OpenSingleStrokeFile(string filePath)
         {
             var fileStreamHasNoStroke = false;
             using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read))

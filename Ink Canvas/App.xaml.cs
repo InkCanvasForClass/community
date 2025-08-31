@@ -633,7 +633,28 @@ namespace Ink_Canvas
                 if (!ret && !e.Args.Contains("-m")) //-m multiple
                 {
                     LogHelper.NewLog("Detected existing instance");
-                    MessageBox.Show("已有一个程序实例正在运行");
+                    
+                    // 检查是否有.icstk文件参数
+                    string icstkFile = FileAssociationManager.GetIcstkFileFromArgs(e.Args);
+                    if (!string.IsNullOrEmpty(icstkFile))
+                    {
+                        LogHelper.WriteLogToFile($"检测到已运行实例，尝试通过IPC发送文件: {icstkFile}", LogHelper.LogType.Event);
+                        
+                        // 尝试通过IPC发送文件路径给已运行实例
+                        if (FileAssociationManager.TrySendFileToExistingInstance(icstkFile))
+                        {
+                            LogHelper.WriteLogToFile("文件路径已通过IPC发送给已运行实例", LogHelper.LogType.Event);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("通过IPC发送文件路径失败", LogHelper.LogType.Warning);
+                        }
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("检测到已运行实例，但无文件参数", LogHelper.LogType.Event);
+                    }
+                    
                     LogHelper.NewLog("Ink Canvas automatically closed");
                     IsAppExitByUser = true; // 多开时标记为用户主动退出
                     // 写入退出信号，确保看门狗不会重启
@@ -686,6 +707,29 @@ namespace Ink_Canvas
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
             mainWindow.Show();
+
+            // 新增：注册.icstk文件关联
+            try
+            {
+                LogHelper.WriteLogToFile("开始注册.icstk文件关联");
+                FileAssociationManager.RegisterFileAssociation();
+                FileAssociationManager.ShowFileAssociationStatus();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"注册文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 新增：启动IPC监听器
+            try
+            {
+                LogHelper.WriteLogToFile("启动IPC监听器");
+                FileAssociationManager.StartIpcListener();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动IPC监听器时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
 
             // 新增：Office注册表检测
             try
