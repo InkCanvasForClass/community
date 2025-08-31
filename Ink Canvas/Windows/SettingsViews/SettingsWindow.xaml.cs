@@ -56,34 +56,34 @@ namespace Ink_Canvas.Windows {
                 Selected = false,
             });
             SidebarItems.Add(new SidebarItem() {
-                Type = SidebarItemType.Separator
-            });
-            SidebarItems.Add(new SidebarItem() {
                 Type = SidebarItemType.Item,
-                Title = "个性化和外观",
-                Name = "AppearanceItem",
-                IconSource = FindResource("AppearanceIcon") as DrawingImage,
-                Selected = false,
-            });
-            SidebarItems.Add(new SidebarItem() {
-                Type = SidebarItemType.Item,
-                Title = "墨迹转形状",
+                Title = "墨迹纠正",
                 Name = "InkRecognitionItem",
                 IconSource = FindResource("InkRecognitionIcon") as DrawingImage,
                 Selected = false,
             });
             SidebarItems.Add(new SidebarItem() {
+                Type = SidebarItemType.Separator
+            });
+            SidebarItems.Add(new SidebarItem() {
                 Type = SidebarItemType.Item,
-                Title = "几何与形状绘制",
-                Name = "ShapeDrawingItem",
-                IconSource = FindResource("ShapeDrawingIcon") as DrawingImage,
+                Title = "个性化设置",
+                Name = "ThemeItem",
+                IconSource = FindResource("AppearanceIcon") as DrawingImage,
                 Selected = false,
             });
             SidebarItems.Add(new SidebarItem() {
                 Type = SidebarItemType.Item,
-                Title = "自动化行为",
-                Name = "AutomationItem",
-                IconSource = FindResource("AutomationIcon") as DrawingImage,
+                Title = "快捷键设置",
+                Name = "ShortcutsItem",
+                IconSource = FindResource("AppearanceIcon") as DrawingImage,
+                Selected = false,
+            });
+            SidebarItems.Add(new SidebarItem() {
+                Type = SidebarItemType.Item,
+                Title = "崩溃处理",
+                Name = "CrashActionItem",
+                IconSource = FindResource("AppearanceIcon") as DrawingImage,
                 Selected = false,
             });
             SidebarItems.Add(new SidebarItem() {
@@ -108,6 +108,23 @@ namespace Ink_Canvas.Windows {
             });
             SidebarItems.Add(new SidebarItem() {
                 Type = SidebarItemType.Item,
+                Title = "自动化行为",
+                Name = "AutomationItem",
+                IconSource = FindResource("AutomationIcon") as DrawingImage,
+                Selected = false,
+            });
+            SidebarItems.Add(new SidebarItem() {
+                Type = SidebarItemType.Item,
+                Title = "随机点名",
+                Name = "LuckyRandomItem",
+                IconSource = FindResource("LuckyRandomIcon") as DrawingImage,
+                Selected = false,
+            });
+            SidebarItems.Add(new SidebarItem() {
+                Type = SidebarItemType.Separator
+            });
+            SidebarItems.Add(new SidebarItem() {
+                Type = SidebarItemType.Item,
                 Title = "存储空间",
                 Name = "StorageItem",
                 IconSource = FindResource("StorageIcon") as DrawingImage,
@@ -121,11 +138,7 @@ namespace Ink_Canvas.Windows {
                 Selected = false,
             });
             SidebarItems.Add(new SidebarItem() {
-                Type = SidebarItemType.Item,
-                Title = "点名器设置",
-                Name = "LuckyRandomItem",
-                IconSource = FindResource("LuckyRandomIcon") as DrawingImage,
-                Selected = false,
+                Type = SidebarItemType.Separator
             });
             SidebarItems.Add(new SidebarItem() {
                 Type = SidebarItemType.Item,
@@ -150,10 +163,16 @@ namespace Ink_Canvas.Windows {
                 CanvasAndInkPane,
                 GesturesPane,
                 StartupPane,
-                AppearancePane,
+                ThemePane,
+                ShortcutsPane,
+                CrashActionPane,
                 InkRecognitionPane,
                 AutomationPane,
-                PowerPointPane
+                PowerPointPane,
+                LuckyRandomPane,
+                StoragePane,
+                SnapshotPane,
+                AdvancedPane
             };
 
             SettingsPaneScrollViewers = new ScrollViewer[] {
@@ -161,10 +180,50 @@ namespace Ink_Canvas.Windows {
                 CanvasAndInkScrollViewerEx,
                 GesturesScrollViewerEx,
                 StartupScrollViewerEx,
-                AppearanceScrollViewerEx,
+                ThemeScrollViewerEx,
+                ShortcutsScrollViewerEx,
+                CrashActionScrollViewerEx,
                 InkRecognitionScrollViewerEx,
                 AutomationScrollViewerEx,
-                PowerPointScrollViewerEx
+                PowerPointScrollViewerEx,
+                LuckyRandomScrollViewerEx,
+                StorageScrollViewerEx,
+                SnapshotScrollViewerEx,
+                AdvancedScrollViewerEx
+            };
+
+            SettingsPaneTitles = new string[] {
+                "关于",
+                "画板和墨迹",
+                "手势操作",
+                "启动时行为",
+                "个性化设置",
+                "快捷键设置",
+                "崩溃处理",
+                "墨迹识别",
+                "自动化",
+                "PowerPoint",
+                "幸运随机",
+                "存储",
+                "截图",
+                "高级"
+            };
+
+            SettingsPaneNames = new string[] {
+                "AboutItem",
+                "CanvasAndInkItem",
+                "GesturesItem",
+                "StartupItem",
+                "ThemeItem",
+                "ShortcutsItem",
+                "CrashActionItem",
+                "InkRecognitionItem",
+                "AutomationItem",
+                "PowerPointItem",
+                "LuckyRandomItem",
+                "StorageItem",
+                "SnapshotItem",
+                "AdvancedItem"
             };
 
             SettingsAboutPanel.IsTopBarNeedShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0.25;
@@ -173,6 +232,8 @@ namespace Ink_Canvas.Windows {
 
         public Grid[] SettingsPanes = new Grid[] { };
         public ScrollViewer[] SettingsPaneScrollViewers = new ScrollViewer[] { };
+        public string[] SettingsPaneTitles = new string[] { };
+        public string[] SettingsPaneNames = new string[] { };
 
         public enum SidebarItemType {
             Item,

@@ -3240,6 +3240,287 @@
                         </StackPanel>
                     </ScrollViewer>
                 </Grid>
+                
+                <!--个性化设置面板-->
+                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="ThemePane">
+                    <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="ThemeScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+                        <StackPanel Margin="60,12,60,24">
+                            <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
+                                <StackPanel Orientation="Vertical">
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="主题" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="选择应用程序的主题" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="浅色"/>
+                                            </Border>
+                                            <Border Padding="13,7" CornerRadius="8">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" Text="深色"/>
+                                            </Border>
+                                            <Border Padding="13,7" CornerRadius="8">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" Text="跟随系统"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Border Height="1" Background="#ebebeb"/>
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="语言" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="选择应用程序的语言" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="简体中文"/>
+                                            </Border>
+                                            <Border Padding="13,7" CornerRadius="8">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" Text="English"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!--快捷键设置面板-->
+                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="ShortcutsPane">
+                    <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="ShortcutsScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+                        <StackPanel Margin="60,12,60,24">
+                            <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
+                                <StackPanel Orientation="Vertical">
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="新建页面" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="创建新的画布页面" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <TextBlock Foreground="#878787" FontSize="14.5" Text="Ctrl+N" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,18,0"/>
+                                    </Grid>
+                                    <Border Height="1" Background="#ebebeb"/>
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="保存" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="保存当前画布" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <TextBlock Foreground="#878787" FontSize="14.5" Text="Ctrl+S" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,18,0"/>
+                                    </Grid>
+                                    <Border Height="1" Background="#ebebeb"/>
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="撤销" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="撤销上一步操作" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <TextBlock Foreground="#878787" FontSize="14.5" Text="Ctrl+Z" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,18,0"/>
+                                    </Grid>
+                                    <Border Height="1" Background="#ebebeb"/>
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="重做" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="重做上一步操作" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <TextBlock Foreground="#878787" FontSize="14.5" Text="Ctrl+Y" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0,0,18,0"/>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!--崩溃处理面板-->
+                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="CrashActionPane">
+                    <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="CrashActionScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+                        <StackPanel Margin="60,12,60,24">
+                            <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
+                                <StackPanel Orientation="Vertical">
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="崩溃时自动重启" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="应用程序崩溃时自动重启" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                            <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <Border.Effect>
+                                                    <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
+                                                </Border.Effect>
+                                            </Border>
+                                        </Border>
+                                    </Grid>
+                                    <Border Height="1" Background="#ebebeb"/>
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="发送崩溃报告" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="自动发送崩溃报告以帮助改进应用程序" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                            <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <Border.Effect>
+                                                    <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
+                                                </Border.Effect>
+                                            </Border>
+                                        </Border>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!--幸运随机面板-->
+                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="LuckyRandomPane">
+                    <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="LuckyRandomScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+                        <StackPanel Margin="60,12,60,24">
+                            <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
+                                <StackPanel Orientation="Vertical">
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="启用幸运随机功能" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="启用一些随机的有趣功能" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                            <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <Border.Effect>
+                                                    <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
+                                                </Border.Effect>
+                                            </Border>
+                                        </Border>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!--存储面板-->
+                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="StoragePane">
+                    <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="StorageScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+                        <StackPanel Margin="60,12,60,24">
+                            <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
+                                <StackPanel Orientation="Vertical">
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="自动保存" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="定期自动保存画布内容" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                            <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                <Border.Effect>
+                                                    <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
+                                                </Border.Effect>
+                                            </Border>
+                                        </Border>
+                                    </Grid>
+                                    <Border Height="1" Background="#ebebeb"/>
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="自动保存间隔" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="设置自动保存的时间间隔" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
+                                            <Border Padding="13,7" CornerRadius="8">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" Text="30秒"/>
+                                            </Border>
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="1分钟"/>
+                                            </Border>
+                                            <Border Padding="13,7" CornerRadius="8">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" Text="5分钟"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!--截图面板-->
+                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="SnapshotPane">
+                    <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="SnapshotScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+                        <StackPanel Margin="60,12,60,24">
+                            <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
+                                <StackPanel Orientation="Vertical">
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="截图质量" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="设置截图的图像质量" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
+                                            <Border Padding="13,7" CornerRadius="8">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" Text="低"/>
+                                            </Border>
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="中"/>
+                                            </Border>
+                                            <Border Padding="13,7" CornerRadius="8">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" Text="高"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                    <Border Height="1" Background="#ebebeb"/>
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="截图格式" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="选择截图的文件格式" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="PNG"/>
+                                            </Border>
+                                            <Border Padding="13,7" CornerRadius="8">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" Text="JPEG"/>
+                                            </Border>
+                                            <Border Padding="13,7" CornerRadius="8">
+                                                <TextBlock Foreground="#2e3436" FontSize="14" Text="BMP"/>
+                                            </Border>
+                                        </StackPanel>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!--高级面板-->
+                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="AdvancedPane">
+                    <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="AdvancedScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+                        <StackPanel Margin="60,12,60,24">
+                            <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
+                                <StackPanel Orientation="Vertical">
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="调试模式" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="启用调试模式以获取详细的错误信息" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                            <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <Border.Effect>
+                                                    <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
+                                                </Border.Effect>
+                                            </Border>
+                                        </Border>
+                                    </Grid>
+                                    <Border Height="1" Background="#ebebeb"/>
+                                    <Grid Height="54">
+                                        <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="性能监控" HorizontalAlignment="Left"/>
+                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="显示性能监控信息" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                            <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                                <Border.Effect>
+                                                    <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
+                                                </Border.Effect>
+                                            </Border>
+                                        </Border>
+                                    </Grid>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
                 <!--Topbar-->
                 <Grid Height="48" VerticalAlignment="Top" Margin="250,0,0,0">
                     <Border Height="48" CornerRadius="0,6,0,0" Background="#fafafa">
