@@ -86,6 +86,13 @@ namespace Ink_Canvas
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
+                    // 隐藏图片选择工具栏
+                    if (currentSelectedElement != null)
+                    {
+                        UnselectElement(currentSelectedElement);
+                        currentSelectedElement = null;
+                    }
+                    
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;
@@ -108,6 +115,13 @@ namespace Ink_Canvas
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
                 {
+                    // 隐藏图片选择工具栏
+                    if (currentSelectedElement != null)
+                    {
+                        UnselectElement(currentSelectedElement);
+                        currentSelectedElement = null;
+                    }
+                    
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;

@@ -74,9 +74,9 @@ namespace Ink_Canvas
             ToggleSwitchDrawShapeBorderAutoHide.IsOn = !ToggleSwitchDrawShapeBorderAutoHide.IsOn;
 
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-                ((SymbolIcon)sender).Symbol = Symbol.Pin;
+                ((FontIcon)sender).Glyph = "&#xE840;";
             else
-                ((SymbolIcon)sender).Symbol = Symbol.UnPin;
+                ((FontIcon)sender).Glyph = "&#xE77A;";
         }
 
         private object lastMouseDownSender;

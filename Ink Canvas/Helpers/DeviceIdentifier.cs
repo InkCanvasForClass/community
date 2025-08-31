@@ -1339,9 +1339,7 @@ namespace Ink_Canvas.Helpers
 
             return descriptions.Count > 0 ? string.Join(", ", descriptions) : "普通用户";
         }
-
-
-
+        
         /// <summary>
         /// 关机时保存使用时间数据
         /// </summary>

@@ -130,6 +130,13 @@ namespace Ink_Canvas
         {
             try
             {
+                // 隐藏图片选择工具栏
+                if (currentSelectedElement != null)
+                {
+                    UnselectElement(currentSelectedElement);
+                    currentSelectedElement = null;
+                }
+                
                 var targetIndex = isBackupMain ? 0 : CurrentWhiteboardIndex;
 
                 // 先清空当前画布的墨迹
@@ -209,7 +216,12 @@ namespace Ink_Canvas
         {
             if (CurrentWhiteboardIndex <= 1) return;
 
-
+            // 隐藏图片选择工具栏
+            if (currentSelectedElement != null)
+            {
+                UnselectElement(currentSelectedElement);
+                currentSelectedElement = null;
+            }
 
             SaveStrokes();
 
@@ -229,11 +241,17 @@ namespace Ink_Canvas
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) SaveScreenShot(true);
             if (CurrentWhiteboardIndex >= WhiteboardTotalCount)
             {
-                // 在最后一页时，点击“新页面”按钮直接新增一页
+                // 在最后一页时，点击"新页面"按钮直接新增一页
                 BtnWhiteBoardAdd_Click(sender, e);
                 return;
             }
             
+            // 隐藏图片选择工具栏
+            if (currentSelectedElement != null)
+            {
+                UnselectElement(currentSelectedElement);
+                currentSelectedElement = null;
+            }
 
             SaveStrokes();
 
@@ -250,6 +268,13 @@ namespace Ink_Canvas
             if (WhiteboardTotalCount >= 99) return;
             if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) SaveScreenShot(true);
+            
+            // 隐藏图片选择工具栏
+            if (currentSelectedElement != null)
+            {
+                UnselectElement(currentSelectedElement);
+                currentSelectedElement = null;
+            }
             
             SaveStrokes();
             ClearStrokes(true);
@@ -279,6 +304,13 @@ namespace Ink_Canvas
 
         private void BtnWhiteBoardDelete_Click(object sender, RoutedEventArgs e)
         {
+            // 隐藏图片选择工具栏
+            if (currentSelectedElement != null)
+            {
+                UnselectElement(currentSelectedElement);
+                currentSelectedElement = null;
+            }
+            
             ClearStrokes(true);
 
             if (CurrentWhiteboardIndex != WhiteboardTotalCount)

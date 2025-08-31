@@ -3096,19 +3096,16 @@ namespace Ink_Canvas
                 // 检查快捷调色盘是否显示及其实际宽度
                 bool isQuickColorPaletteVisible = false;
                 double quickColorPaletteWidth = 0;
-                string quickColorPaletteMode = "none";
-                
+
                 if (QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible)
                 {
                     isQuickColorPaletteVisible = true;
                     quickColorPaletteWidth = QuickColorPalettePanel.ActualWidth > 0 ? QuickColorPalettePanel.ActualWidth : 60;
-                    quickColorPaletteMode = "double";
                 }
                 else if (QuickColorPaletteSingleRowPanel != null && QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible)
                 {
                     isQuickColorPaletteVisible = true;
                     quickColorPaletteWidth = QuickColorPaletteSingleRowPanel.ActualWidth > 0 ? QuickColorPaletteSingleRowPanel.ActualWidth : 120;
-                    quickColorPaletteMode = "single";
                 }
 
                 // 获取实际按钮宽度，如果获取不到则使用默认值，同时考虑按钮的可见性

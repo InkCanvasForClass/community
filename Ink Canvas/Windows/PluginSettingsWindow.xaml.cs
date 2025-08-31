@@ -68,11 +68,11 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        public string Name => SelectedPlugin?.Name ?? string.Empty;
+        public new string Name => SelectedPlugin?.Name ?? string.Empty;
         public string Version => SelectedPlugin?.Version?.ToString() ?? string.Empty;
         public string Author => SelectedPlugin?.Author ?? string.Empty;
         public string Description => SelectedPlugin?.Description ?? string.Empty;
-        public bool IsEnabled => SelectedPlugin is PluginBase plugin && plugin.IsEnabled;
+        public new bool IsEnabled => SelectedPlugin is PluginBase plugin && plugin.IsEnabled;
         public bool IsBuiltIn => SelectedPlugin?.IsBuiltIn ?? false;
 
         /// <summary>

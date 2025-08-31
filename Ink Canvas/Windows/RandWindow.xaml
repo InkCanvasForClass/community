@@ -98,7 +98,7 @@
                     <Border x:Name="BorderBtnRand" MouseUp="BorderBtnRand_MouseUp" Background="#0066BF" Height="70" Width="200" CornerRadius="35">
                         <ui:SimpleStackPanel Margin="3,0" Spacing="20" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Viewbox Margin="0,20">
-                                <ui:SymbolIcon Name="SymbolIconStart" Symbol="Contact" Foreground="White"/>
+                                <ui:FontIcon Name="FontIconStart" Glyph="&#xE779;" Foreground="White"/>
                             </Viewbox>
                             <TextBlock Text="开抽" Foreground="White" FontSize="32" Margin="-1,-1,4,0" VerticalAlignment="Center"/>
                         </ui:SimpleStackPanel>
@@ -113,7 +113,7 @@
                         <Border x:Name="BorderBtnExternalCaller" MouseUp="BorderBtnExternalCaller_MouseUp" Background="#00B894" Height="50" Width="120" CornerRadius="25">
                             <ui:SimpleStackPanel Margin="3,0" Spacing="8" Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Viewbox Margin="0,10">
-                                    <ui:SymbolIcon Symbol="Globe" Foreground="White"/>
+                                    <ui:FontIcon Glyph="&#xE909;" Foreground="White"/>
                                 </Viewbox>
                                 <TextBlock Text="外部点名" Foreground="White" FontSize="16" Margin="-1,-1,4,0" VerticalAlignment="Center"/>
                             </ui:SimpleStackPanel>
@@ -127,7 +127,7 @@
                 </Border.Effect>
                 <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <Viewbox Margin="15,12">
-                        <ui:SymbolIcon Symbol="People" Foreground="Black"/>
+                        <ui:FontIcon Glyph="&#xE716;" Foreground="Black"/>
                     </Viewbox>
                     <TextBlock Margin="-5,12,15,12" Name="TextBlockPeopleCount" Text="点击此处以导入名单" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </ui:SimpleStackPanel>
@@ -137,7 +137,7 @@
                     <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                 </Border.Effect>
                 <Viewbox Margin="14">
-                    <ui:SymbolIcon Symbol="Clear" Foreground="White"/>
+                    <ui:FontIcon Glyph="&#xE8BB;" Foreground="White"/>
                 </Viewbox>
             </Border>
         </Canvas>

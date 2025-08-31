@@ -721,26 +721,22 @@ namespace Ink_Canvas.Helpers
                                     
                                     // 根据高光位置判断当前选中的工具
                                     // 位置计算基于SetFloatingBarHighlightPosition方法中的逻辑
-                                    bool isMouseMode = false;
-                                    string currentTool = "unknown";
-                                    
+                                    bool isMouseMode;
+
                                     // 简化判断：如果位置接近0，说明是鼠标模式
                                     // 如果位置接近28，说明是批注模式
                                     // 如果位置更大，说明是其他工具
                                     if (position < 5) // 鼠标模式：marginOffset + (cursorWidth - actualHighlightWidth) / 2 ≈ 0
                                     {
                                         isMouseMode = true;
-                                        currentTool = "鼠标";
                                     }
                                     else if (position < 35) // 批注模式：marginOffset + cursorWidth + (penWidth - actualHighlightWidth) / 2 ≈ 28
                                     {
                                         isMouseMode = false;
-                                        currentTool = "批注";
                                     }
                                     else // 其他工具（橡皮擦、选择等）
                                     {
                                         isMouseMode = false;
-                                        currentTool = "其他工具";
                                     }
                                     
                                     return isMouseMode;

@@ -80,7 +80,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:SymbolIcon Name="SymbolIconFullscreen" Symbol="FullScreen" Foreground="Black"/>
+                            <ui:FontIcon Name="FontIconFullscreen" Glyph="&#xE740;" Foreground="Black"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnClose" MouseUp="BtnClose_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -90,7 +90,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:SymbolIcon Symbol="Clear"  Foreground="White"/>
+                            <ui:FontIcon Glyph="&#xE8BB;" Foreground="White"/>
                         </Viewbox>
                     </Border>
                 </ui:SimpleStackPanel>
