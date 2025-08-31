@@ -174,6 +174,12 @@ namespace Ink_Canvas
                 // 使用滚轮缩放的核心机制
                 ApplyWheelScaleTransform(element, e);
 
+                // 如果是图片元素，更新工具栏位置
+                if (element is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageSelectionToolbarPosition(element);
+                }
+
                 e.Handled = true;
             }
         }
@@ -998,19 +1004,12 @@ namespace Ink_Canvas
             {
                 if (BorderImageSelectionControl == null || element == null) return;
 
-                // 获取元素在画布中的位置
-                double elementLeft = InkCanvas.GetLeft(element);
-                double elementTop = InkCanvas.GetTop(element);
-                double elementWidth = element.ActualWidth;
-                double elementHeight = element.ActualHeight;
-
-                // 如果元素位置未设置，使用默认值
-                if (double.IsNaN(elementLeft)) elementLeft = 0;
-                if (double.IsNaN(elementTop)) elementTop = 0;
+                // 获取元素的实际边界（考虑变换）
+                Rect elementBounds = GetElementActualBounds(element);
 
                 // 计算工具栏位置（显示在图片下方）
-                double toolbarLeft = elementLeft + (elementWidth / 2) - (BorderImageSelectionControl.ActualWidth / 2);
-                double toolbarTop = elementTop + elementHeight + 10; // 图片下方10像素
+                double toolbarLeft = elementBounds.Left + (elementBounds.Width / 2) - (BorderImageSelectionControl.ActualWidth / 2);
+                double toolbarTop = elementBounds.Bottom + 10; // 图片下方10像素
 
                 // 确保工具栏不超出画布边界
                 double maxLeft = inkCanvas.ActualWidth - BorderImageSelectionControl.ActualWidth;
@@ -1025,6 +1024,55 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新图片选择工具栏位置失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 获取元素的实际边界（考虑变换）
+        private Rect GetElementActualBounds(FrameworkElement element)
+        {
+            try
+            {
+                var left = InkCanvas.GetLeft(element);
+                var top = InkCanvas.GetTop(element);
+
+                if (double.IsNaN(left)) left = 0;
+                if (double.IsNaN(top)) top = 0;
+
+                var width = element.ActualWidth > 0 ? element.ActualWidth : element.Width;
+                var height = element.ActualHeight > 0 ? element.ActualHeight : element.Height;
+
+                // 检查是否有RenderTransform
+                if (element.RenderTransform != null && element.RenderTransform != Transform.Identity)
+                {
+                    try
+                    {
+                        // 如果有变换，使用变换后的边界
+                        var transform = element.TransformToAncestor(inkCanvas);
+                        var elementBounds = new Rect(0, 0, width, height);
+                        var transformedBounds = transform.TransformBounds(elementBounds);
+                        return transformedBounds;
+                    }
+                    catch
+                    {
+                        // 变换失败时回退到简单计算
+                        return new Rect(left, top, width, height);
+                    }
+                }
+                else
+                {
+                    // 没有变换时直接使用位置和大小
+                    return new Rect(left, top, width, height);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取元素实际边界失败: {ex.Message}", LogHelper.LogType.Error);
+                // 回退到基本计算
+                var left = InkCanvas.GetLeft(element);
+                var top = InkCanvas.GetTop(element);
+                if (double.IsNaN(left)) left = 0;
+                if (double.IsNaN(top)) top = 0;
+                return new Rect(left, top, element.ActualWidth, element.ActualHeight);
             }
         }
 
@@ -1110,6 +1158,13 @@ namespace Ink_Canvas
                 if (currentSelectedElement != null)
                 {
                     ApplyRotateTransform(currentSelectedElement, -45);
+                    
+                    // 更新工具栏位置
+                    if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                    {
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    }
+                    
                     LogHelper.WriteLogToFile($"图片左旋转完成");
                 }
             }
@@ -1127,6 +1182,13 @@ namespace Ink_Canvas
                 if (currentSelectedElement != null)
                 {
                     ApplyRotateTransform(currentSelectedElement, 45);
+                    
+                    // 更新工具栏位置
+                    if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                    {
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    }
+                    
                     LogHelper.WriteLogToFile($"图片右旋转完成");
                 }
             }
@@ -1145,6 +1207,13 @@ namespace Ink_Canvas
                 {
                     var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
                     ApplyScaleTransform(currentSelectedElement, 0.9, elementCenter);
+                    
+                    // 更新工具栏位置
+                    if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                    {
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    }
+                    
                     LogHelper.WriteLogToFile($"图片缩放减小完成");
                 }
             }
@@ -1160,16 +1229,23 @@ namespace Ink_Canvas
             try
             {
                 if (currentSelectedElement != null)
-                {
-                    var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
-                    ApplyScaleTransform(currentSelectedElement, 1.1, elementCenter);
-                    LogHelper.WriteLogToFile($"图片缩放增大完成");
-                }
-            }
-            catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"图片缩放增大失败: {ex.Message}", LogHelper.LogType.Error);
+                var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
+                ApplyScaleTransform(currentSelectedElement, 1.1, elementCenter);
+                
+                // 更新工具栏位置
+                if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                }
+                
+                LogHelper.WriteLogToFile($"图片缩放增大完成");
             }
+        }
+        catch (Exception ex)
+        {
+            LogHelper.WriteLogToFile($"图片缩放增大失败: {ex.Message}", LogHelper.LogType.Error);
+        }
         }
 
         // 图片删除
