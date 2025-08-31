@@ -2742,13 +2742,13 @@ namespace Ink_Canvas
 
         private void HyperlinkSourceToPresentRepository_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://bgithub.xyz/ChangSakura/Ink-Canvas");
+            Process.Start("https://github.com/ChangSakura/Ink-Canvas");
             HideSubPanels();
         }
 
         private void HyperlinkSourceToOringinalRepository_Click(object sender, RoutedEventArgs e)
         {
-            Process.Start("https://bgithub.xyz/WXRIW/Ink-Canvas");
+            Process.Start("https://github.com/WXRIW/Ink-Canvas");
             HideSubPanels();
         }
 

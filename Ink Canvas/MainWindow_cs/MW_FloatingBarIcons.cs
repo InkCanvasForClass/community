@@ -2802,7 +2802,7 @@ namespace Ink_Canvas
             await Task.Delay(100);
 
             // Capture screenshot and insert to canvas
-            CaptureScreenshotAndInsert();
+            await CaptureScreenshotAndInsert();
         }
 
         private async void ImageOptionSelectFile_MouseUp(object sender, MouseButtonEventArgs e)
