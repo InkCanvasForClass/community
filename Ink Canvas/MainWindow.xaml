@@ -3445,10 +3445,10 @@
 
             <!-- 图片选择工具栏 -->
             <Border Name="BorderImageSelectionControl"
-                    HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,900,0,0"
+                    HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0"
                     CornerRadius="5" Height="80"
                     Background="{DynamicResource FloatBarBackground}"
-                    Visibility="{Binding ElementName=GridInkCanvasSelectionCover, Path=Visibility}"
+                    Visibility="Collapsed"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}">
                 <Viewbox Margin="0,-2.5">
                     <ui:SimpleStackPanel Orientation="Horizontal" Spacing="10" Height="60">
@@ -3549,6 +3549,7 @@
                     </ui:SimpleStackPanel>
                 </Viewbox>
             </Border>
+
         </Grid>
 
         <Grid Visibility="Collapsed">

@@ -101,8 +101,8 @@
                                                   DefaultKey="B" 
                                                   DefaultModifiers="Alt"/>
                                 <local:HotkeyItem x:Name="QuitDrawToolHotkey" 
-                                                  Title="退出绘图" 
-                                                  Description="退出绘图模式"
+                                                  Title="退出绘图/白板" 
+                                                  Description="退出绘图模式或白板模式"
                                                   DefaultKey="Q" 
                                                   DefaultModifiers="Alt"/>
                             </ui:SimpleStackPanel>

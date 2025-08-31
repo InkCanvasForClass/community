@@ -238,7 +238,7 @@ namespace Ink_Canvas.Helpers
                 RegisterHotkey("DrawTool", Key.D, ModifierKeys.Alt, () => _mainWindow.PenIcon_Click(null, null));
                 RegisterHotkey("EraserTool", Key.E, ModifierKeys.Alt, () => _mainWindow.EraserIcon_Click(null, null));
                 RegisterHotkey("BlackboardTool", Key.B, ModifierKeys.Alt, () => _mainWindow.ImageBlackboard_MouseUp(null, null));
-                RegisterHotkey("QuitDrawTool", Key.Q, ModifierKeys.Alt, () => _mainWindow.CursorIcon_Click(null, null));
+                RegisterHotkey("QuitDrawTool", Key.Q, ModifierKeys.Alt, () => _mainWindow.KeyChangeToQuitDrawTool(null, null));
 
                 // 画笔快捷键 - 使用反射访问penType字段
                 RegisterHotkey("Pen1", Key.D1, ModifierKeys.Alt, () => SwitchToPenType(0));
@@ -472,7 +472,7 @@ namespace Ink_Canvas.Helpers
             {
                 // 通过反射访问主窗口的penType字段
                 var penTypeField = _mainWindow.GetType().GetField("penType", 
-                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    BindingFlags.NonPublic | BindingFlags.Instance);
                 
                 if (penTypeField != null)
                 {
@@ -480,7 +480,7 @@ namespace Ink_Canvas.Helpers
                     
                     // 调用CheckPenTypeUIState方法更新UI状态
                     var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState", 
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        BindingFlags.NonPublic | BindingFlags.Instance);
                     
                     if (checkPenTypeMethod != null)
                     {
@@ -647,7 +647,7 @@ namespace Ink_Canvas.Helpers
                     case "BlackboardTool":
                         return () => _mainWindow.ImageBlackboard_MouseUp(null, null);
                     case "QuitDrawTool":
-                        return () => _mainWindow.CursorIcon_Click(null, null);
+                        return () => _mainWindow.KeyChangeToQuitDrawTool(null, null);
                     case "Pen1":
                         return () => SwitchToPenType(0);
                     case "Pen2":

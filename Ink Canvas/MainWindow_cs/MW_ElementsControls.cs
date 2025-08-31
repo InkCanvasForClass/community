@@ -6,11 +6,23 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using Ink_Canvas.Helpers;
+using System.Windows.Input;
+using System.Linq;
+using System.Collections.Generic;
+using System.Windows.Ink;
 
 namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        // 当前选中的可操作元素
+        private FrameworkElement currentSelectedElement;
+        private bool isDragging = false;
+        private Point dragStartPoint;
+        private bool isElementSelected = false;
+
         #region Image
         private async void BtnImageInsert_Click(object sender, RoutedEventArgs e)
         {
@@ -28,15 +40,513 @@ namespace Ink_Canvas
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     image.Name = timestamp;
 
-                    CenterAndScaleElement(image);
+                    // 设置图片属性，避免被InkCanvas选择系统处理
+                    image.IsHitTestVisible = true;
+                    image.Focusable = false;
+                    
+                    // 初始化InkCanvas选择设置
+                    InitializeInkCanvasSelectionSettings();
+                    
+                    // 先添加到画布
                     inkCanvas.Children.Add(image);
 
-                    // 添加鼠标事件处理，使图片可以被选择
-                    image.MouseDown += UIElement_MouseDown;
-                    image.IsManipulationEnabled = true;
+                    // 等待图片加载完成后再进行后续处理
+                    image.Loaded += (s, args) =>
+                    {
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            // 初始化TransformGroup
+                            InitializeElementTransform(image);
+
+                            // 居中缩放
+                            CenterAndScaleElement(image);
+
+                            // 最后绑定事件处理器
+                            BindElementEvents(image);
+                            
+                            LogHelper.WriteLogToFile($"图片插入完成: {image.Name}");
+                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                    };
 
                     timeMachine.CommitElementInsertHistory(image);
                 }
+            }
+        }
+
+        // 初始化元素的TransformGroup
+        private void InitializeElementTransform(FrameworkElement element)
+        {
+            var transformGroup = new TransformGroup();
+            transformGroup.Children.Add(new ScaleTransform(1, 1));
+            transformGroup.Children.Add(new TranslateTransform(0, 0));
+            transformGroup.Children.Add(new RotateTransform(0));
+            element.RenderTransform = transformGroup;
+        }
+
+        // 绑定元素事件处理器
+        private void BindElementEvents(FrameworkElement element)
+        {
+            // 鼠标事件
+            element.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+            element.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+            element.MouseMove += Element_MouseMove;
+            element.MouseWheel += Element_MouseWheel;
+
+            // 触摸事件
+            element.IsManipulationEnabled = true;
+            element.ManipulationDelta += Element_ManipulationDelta;
+            element.ManipulationCompleted += Element_ManipulationCompleted;
+
+            // 设置光标
+            element.Cursor = Cursors.Hand;
+            
+            // 禁用InkCanvas对图片的选择处理
+            element.IsHitTestVisible = true;
+            element.Focusable = false;
+        }
+
+        // 鼠标左键按下事件
+        private void Element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+
+                
+                // 取消之前选中的元素
+                if (currentSelectedElement != null && currentSelectedElement != element)
+                {
+                    UnselectElement(currentSelectedElement);
+                }
+
+                // 选中当前元素
+                SelectElement(element);
+                
+                // 开始拖动
+                isDragging = true;
+                dragStartPoint = e.GetPosition(inkCanvas);
+                element.CaptureMouse();
+                element.Cursor = Cursors.SizeAll;
+
+                e.Handled = true;
+            }
+        }
+
+        // 鼠标左键释放事件
+        private void Element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                isDragging = false;
+                element.ReleaseMouseCapture();
+                element.Cursor = Cursors.Hand;
+
+                e.Handled = true;
+            }
+        }
+
+        // 鼠标移动事件
+        private void Element_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (sender is FrameworkElement element && isDragging && element.IsMouseCaptured)
+            {
+                var currentPoint = e.GetPosition(inkCanvas);
+                
+                // 使用鼠标拖动的完整实现机制
+                ApplyMouseDragTransform(element, currentPoint, dragStartPoint);
+
+                // 如果是图片元素，更新工具栏位置
+                if (element is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageSelectionToolbarPosition(element);
+                }
+
+                dragStartPoint = currentPoint;
+                e.Handled = true;
+            }
+        }
+
+        // 鼠标滚轮事件 - 缩放
+        private void Element_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+
+                
+                // 使用滚轮缩放的核心机制
+                ApplyWheelScaleTransform(element, e);
+
+                e.Handled = true;
+            }
+        }
+
+        // 触摸操作事件
+        private void Element_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                // 使用触摸拖动的完整实现
+                ApplyTouchManipulationTransform(element, e);
+
+                // 如果是图片元素，更新工具栏位置
+                if (element is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageSelectionToolbarPosition(element);
+                }
+
+                e.Handled = true;
+            }
+        }
+
+        // 触摸操作完成事件
+        private void Element_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
+        {
+            // 可以在这里添加操作完成后的处理逻辑
+        }
+
+        // 应用平移变换
+        private void ApplyTranslateTransform(FrameworkElement element, double deltaX, double deltaY)
+        {
+            if (element.RenderTransform is TransformGroup transformGroup)
+            {
+                var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
+                if (translateTransform != null)
+                {
+                    translateTransform.X += deltaX;
+                    translateTransform.Y += deltaY;
+                }
+            }
+        }
+
+        // 应用缩放变换
+        private void ApplyScaleTransform(FrameworkElement element, double scaleFactor, Point center)
+        {
+            if (element.RenderTransform is TransformGroup transformGroup)
+            {
+                var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
+                if (scaleTransform != null)
+                {
+                    // 设置缩放中心
+                    scaleTransform.CenterX = center.X;
+                    scaleTransform.CenterY = center.Y;
+
+                    // 应用缩放
+                    scaleTransform.ScaleX *= scaleFactor;
+                    scaleTransform.ScaleY *= scaleFactor;
+
+                    // 限制缩放范围
+                    scaleTransform.ScaleX = Math.Max(0.1, Math.Min(scaleTransform.ScaleX, 5.0));
+                    scaleTransform.ScaleY = Math.Max(0.1, Math.Min(scaleTransform.ScaleY, 5.0));
+                }
+            }
+        }
+
+        // 应用旋转变换
+        private void ApplyRotateTransform(FrameworkElement element, double angle)
+        {
+            if (element.RenderTransform is TransformGroup transformGroup)
+            {
+                var rotateTransform = transformGroup.Children.OfType<RotateTransform>().FirstOrDefault();
+                if (rotateTransform != null)
+                {
+                    rotateTransform.Angle += angle;
+                }
+            }
+        }
+
+        // 选中元素
+        private void SelectElement(FrameworkElement element)
+        {
+            currentSelectedElement = element;
+            isElementSelected = true;
+            
+            // 根据元素类型显示不同的选择工具栏
+            if (element is Image)
+            {
+                // 显示图片选择工具栏并设置位置
+                if (BorderImageSelectionControl != null)
+                {
+                    // 计算工具栏位置
+                    UpdateImageSelectionToolbarPosition(element);
+                    BorderImageSelectionControl.Visibility = Visibility.Visible;
+                }
+                
+                // 隐藏笔画选择工具栏
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+                }
+            }
+            else
+            {
+                // 显示笔画选择工具栏
+                if (BorderStrokeSelectionControl != null)
+                {
+                    BorderStrokeSelectionControl.Visibility = Visibility.Visible;
+                }
+                
+                // 隐藏图片选择工具栏
+                if (BorderImageSelectionControl != null)
+                {
+                    BorderImageSelectionControl.Visibility = Visibility.Collapsed;
+                }
+            }
+            
+            // 确保选择框不显示，避免蓝色边框
+            if (GridInkCanvasSelectionCover != null)
+            {
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            }
+            
+            // 禁用InkCanvas的选择功能，去除控制点
+            if (inkCanvas != null)
+            {
+                // 清除当前选择
+                inkCanvas.Select(new StrokeCollection());
+                // 设置编辑模式为非选择模式
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            }
+        }
+
+        // 取消选中元素
+        private void UnselectElement(FrameworkElement element)
+        {
+            // 去除选中效果
+            isElementSelected = false;
+            
+            // 隐藏所有选择工具栏
+            if (BorderImageSelectionControl != null)
+            {
+                BorderImageSelectionControl.Visibility = Visibility.Collapsed;
+            }
+            
+            if (BorderStrokeSelectionControl != null)
+            {
+                BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
+            }
+            
+            // 确保选择框隐藏
+            if (GridInkCanvasSelectionCover != null)
+            {
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            }
+            
+            // 恢复InkCanvas的编辑模式
+            if (inkCanvas != null)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+            }
+        }
+
+        // 应用矩阵变换到元素
+        private void ApplyElementMatrixTransform(FrameworkElement element, Matrix matrix)
+        {
+            if (element.RenderTransform is TransformGroup transformGroup)
+            {
+                // 创建MatrixTransform
+                var matrixTransform = new MatrixTransform(matrix);
+                
+                // 将MatrixTransform添加到TransformGroup
+                transformGroup.Children.Add(matrixTransform);
+            }
+        }
+
+        // 滚轮缩放的核心机制
+        private void ApplyWheelScaleTransform(FrameworkElement element, MouseWheelEventArgs e)
+        {
+            try
+            {
+                // 根据滚轮方向确定缩放比例（向上1.1倍，向下0.9倍）
+                double scaleFactor = e.Delta > 0 ? 1.1 : 0.9;
+                
+                // 计算选中元素的中心点作为缩放中心
+                var elementCenter = new Point(element.ActualWidth / 2, element.ActualHeight / 2);
+                
+                // 创建 Matrix 对象并应用 ScaleAt 变换
+                var matrix = new Matrix();
+                matrix.ScaleAt(scaleFactor, scaleFactor, elementCenter.X, elementCenter.Y);
+                
+                // 对选中的图片元素调用 ApplyElementMatrixTransform
+                ApplyElementMatrixTransform(element, matrix);
+                
+                // 对选中的笔画应用 Transform 方法（如果有选中的笔画）
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+                
+                
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"滚轮缩放失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 矩阵变换的完整实现
+        private void ApplyMatrixTransformToElement(FrameworkElement element, Matrix matrix, bool saveHistory = true)
+        {
+            try
+            {
+                // 获取元素的 RenderTransform，如果不存在则创建新的 TransformGroup
+                TransformGroup transformGroup = element.RenderTransform as TransformGroup;
+                if (transformGroup == null)
+                {
+                    transformGroup = new TransformGroup();
+                    element.RenderTransform = transformGroup;
+                }
+
+                // 保存初始变换状态用于历史记录
+                var initialTransform = transformGroup.Clone() as TransformGroup;
+                
+                // 创建新的 TransformGroup 并添加 MatrixTransform
+                var newTransformGroup = new TransformGroup();
+                newTransformGroup.Children.Add(new MatrixTransform(matrix));
+                
+                // 将新的变换组添加到现有的变换组中
+                transformGroup.Children.Add(newTransformGroup);
+                
+                // 如果启用了历史记录，提交变换历史
+                if (saveHistory)
+                {
+                    CommitTransformHistory(element, initialTransform, transformGroup);
+                }
+                
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"矩阵变换失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 鼠标拖动的完整实现机制
+        private void ApplyMouseDragTransform(FrameworkElement element, Point currentPoint, Point startPoint)
+        {
+            try
+            {
+                // 计算鼠标移动的位移向量
+                var delta = currentPoint - startPoint;
+                
+                // 创建 Matrix 对象并应用 Translate 变换
+                var matrix = new Matrix();
+                matrix.Translate(delta.X, delta.Y);
+                
+                // 对选中的图片元素应用矩阵变换
+                ApplyMatrixTransformToElement(element, matrix, false);
+                
+                // 对选中的笔画应用变换
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+                
+                // 更新选择框的位置（如果有选择框）
+                UpdateSelectionBorderPosition(delta);
+                
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"鼠标拖动失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 更新选择框位置
+        private void UpdateSelectionBorderPosition(Vector delta)
+        {
+            try
+            {
+                // 这里可以添加更新选择框位置的逻辑
+                // 例如更新 BorderStrokeSelectionControl 的位置
+                if (BorderStrokeSelectionControl != null)
+                {
+                    var currentMargin = BorderStrokeSelectionControl.Margin;
+                    BorderStrokeSelectionControl.Margin = new Thickness(
+                        currentMargin.Left + delta.X,
+                        currentMargin.Top + delta.Y,
+                        currentMargin.Right,
+                        currentMargin.Bottom
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新选择框位置失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 提交变换历史
+        private void CommitTransformHistory(FrameworkElement element, TransformGroup initialTransform, TransformGroup finalTransform)
+        {
+            try
+            {
+                // 这里可以添加提交变换历史到时间机器的逻辑
+                // 例如记录变换前后的状态
+                LogHelper.WriteLogToFile($"变换历史已记录: 元素={element.Name}");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"提交变换历史失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 触摸拖动的完整实现
+        private void ApplyTouchManipulationTransform(FrameworkElement element, ManipulationDeltaEventArgs e)
+        {
+            try
+            {
+                var md = e.DeltaManipulation;
+                var matrix = new Matrix();
+
+                // 支持单指拖动和多指手势
+                // 可以同时进行平移、旋转和缩放
+                
+                // 通过 ManipulationDelta 获取手势变化信息
+                var translation = md.Translation;
+                var rotation = md.Rotation;
+                var scale = md.Scale;
+
+                // 应用平移
+                if (translation.X != 0 || translation.Y != 0)
+                {
+                    matrix.Translate(translation.X, translation.Y);
+                }
+
+                // 支持两指缩放和旋转操作
+                if (e.Manipulators.Count() >= 2)
+                {
+                    var center = e.ManipulationOrigin;
+                    
+                    // 应用缩放
+                    if (scale.X != 1.0 || scale.Y != 1.0)
+                    {
+                        matrix.ScaleAt(scale.X, scale.Y, center.X, center.Y);
+                    }
+                    
+                    // 应用旋转
+                    if (rotation != 0)
+                    {
+                        matrix.RotateAt(rotation, center.X, center.Y);
+                    }
+                }
+
+                // 应用变换到元素
+                ApplyMatrixTransformToElement(element, matrix, false);
+                
+                // 应用变换到选中的笔画
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+                
+                
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"触摸操作失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -114,10 +624,6 @@ namespace Ink_Canvas
                     InkCanvas.SetLeft(mediaElement, 0);
                     InkCanvas.SetTop(mediaElement, 0);
                     inkCanvas.Children.Add(mediaElement);
-
-                    // 添加鼠标事件处理，使媒体元素可以被选择
-                    mediaElement.MouseDown += UIElement_MouseDown;
-                    mediaElement.IsManipulationEnabled = true;
 
                     mediaElement.LoadedBehavior = MediaState.Manual;
                     mediaElement.UnloadedBehavior = MediaState.Manual;
@@ -222,9 +728,9 @@ namespace Ink_Canvas
         /// 克隆图片
         /// </summary>
         /// <param name="image">要克隆的图片</param>
-        private void CloneImage(Image image)
+        private Image CloneImage(Image image)
         {
-            if (image == null) return;
+            if (image == null) return null;
 
             try
             {
@@ -242,16 +748,8 @@ namespace Ink_Canvas
                 InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
                 InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
 
-                // 添加鼠标事件处理，使图片可以被选择
-                clonedImage.MouseDown += UIElement_MouseDown;
-                clonedImage.IsManipulationEnabled = true;
-
                 // 添加到画布
                 inkCanvas.Children.Add(clonedImage);
-
-                // 选择新克隆的图片
-                DeselectUIElement();
-                SelectUIElement(clonedImage);
 
                 // 提交到时间机器以支持撤销
                 timeMachine.CommitElementInsertHistory(clonedImage);
@@ -261,6 +759,8 @@ namespace Ink_Canvas
                 // 记录错误但不中断程序
                 System.Diagnostics.Debug.WriteLine($"克隆图片时发生错误: {ex.Message}");
             }
+
+            return null;
         }
 
         /// <summary>
@@ -287,19 +787,11 @@ namespace Ink_Canvas
                 InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
                 InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
 
-                // 添加鼠标事件处理，使图片可以被选择
-                clonedImage.MouseDown += UIElement_MouseDown;
-                clonedImage.IsManipulationEnabled = true;
-
                 // 创建新页面
                 BtnWhiteBoardAdd_Click(null, null);
 
                 // 添加到新页面的画布
                 inkCanvas.Children.Add(clonedImage);
-
-                // 选择新克隆的图片
-                DeselectUIElement();
-                SelectUIElement(clonedImage);
 
                 // 提交到时间机器以支持撤销
                 timeMachine.CommitElementInsertHistory(clonedImage);
@@ -379,9 +871,6 @@ namespace Ink_Canvas
                 {
                     inkCanvas.Children.Remove(image);
 
-                    // 取消选择
-                    DeselectUIElement();
-
                     // 提交到时间机器以支持撤销
                     timeMachine.CommitElementRemoveHistory(image);
                 }
@@ -397,32 +886,349 @@ namespace Ink_Canvas
 
         private void CenterAndScaleElement(FrameworkElement element)
         {
-            double maxWidth = SystemParameters.PrimaryScreenWidth / 2;
-            double maxHeight = SystemParameters.PrimaryScreenHeight / 2;
+            try
+            {
+                // 确保元素已加载且有有效尺寸
+                if (element == null || element.ActualWidth <= 0 || element.ActualHeight <= 0)
+                {
+                    // 如果元素尺寸无效，等待加载完成后再处理
+                    element.Loaded += (sender, e) =>
+                    {
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            CenterAndScaleElement(element);
+                        }), System.Windows.Threading.DispatcherPriority.Loaded);
+                    };
+                    return;
+                }
 
-            double scaleX = maxWidth / element.Width;
-            double scaleY = maxHeight / element.Height;
-            double scale = Math.Min(scaleX, scaleY);
+                // 获取画布的实际尺寸
+                double canvasWidth = inkCanvas.ActualWidth;
+                double canvasHeight = inkCanvas.ActualHeight;
 
-            // 直接设置元素的大小，而不使用RenderTransform
-            double newWidth = element.Width * scale;
-            double newHeight = element.Height * scale;
+                // 如果画布尺寸为0，使用窗口尺寸作为备选
+                if (canvasWidth <= 0 || canvasHeight <= 0)
+                {
+                    canvasWidth = this.ActualWidth;
+                    canvasHeight = this.ActualHeight;
+                }
 
-            element.Width = newWidth;
-            element.Height = newHeight;
+                // 如果仍然为0，使用屏幕尺寸
+                if (canvasWidth <= 0 || canvasHeight <= 0)
+                {
+                    canvasWidth = SystemParameters.PrimaryScreenWidth;
+                    canvasHeight = SystemParameters.PrimaryScreenHeight;
+                }
 
-            // 计算居中位置
-            double canvasWidth = inkCanvas.ActualWidth;
-            double canvasHeight = inkCanvas.ActualHeight;
-            double centerX = (canvasWidth - newWidth) / 2;
-            double centerY = (canvasHeight - newHeight) / 2;
+                // 计算最大允许尺寸（画布的70%）
+                double maxWidth = canvasWidth * 0.7;
+                double maxHeight = canvasHeight * 0.7;
 
-            // 直接设置位置，而不使用RenderTransform
-            InkCanvas.SetLeft(element, centerX);
-            InkCanvas.SetTop(element, centerY);
+                // 获取元素的当前尺寸
+                double elementWidth = element.ActualWidth;
+                double elementHeight = element.ActualHeight;
 
-            // 清除任何现有的RenderTransform
-            element.RenderTransform = Transform.Identity;
+                // 计算缩放比例
+                double scaleX = maxWidth / elementWidth;
+                double scaleY = maxHeight / elementHeight;
+                double scale = Math.Min(scaleX, scaleY);
+
+                // 如果元素本身比最大尺寸小，不进行缩放
+                if (scale > 1.0)
+                {
+                    scale = 1.0;
+                }
+
+                // 计算新的尺寸
+                double newWidth = elementWidth * scale;
+                double newHeight = elementHeight * scale;
+
+                // 设置元素尺寸
+                element.Width = newWidth;
+                element.Height = newHeight;
+
+                // 计算居中位置
+                double centerX = (canvasWidth - newWidth) / 2;
+                double centerY = (canvasHeight - newHeight) / 2;
+
+                // 确保位置不为负数
+                centerX = Math.Max(0, centerX);
+                centerY = Math.Max(0, centerY);
+
+                // 设置位置
+                InkCanvas.SetLeft(element, centerX);
+                InkCanvas.SetTop(element, centerY);
+
+                // 保持TransformGroup，不清除RenderTransform
+                // 这样可以保持滚轮缩放和拖动功能
+                if (element.RenderTransform == null || element.RenderTransform == Transform.Identity)
+                {
+                    // 只有在没有TransformGroup时才创建
+                    InitializeElementTransform(element);
+                }
+
+                LogHelper.WriteLogToFile($"元素居中完成: 位置({centerX}, {centerY}), 尺寸({newWidth}x{newHeight})");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"元素居中失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
+
+        // 初始化InkCanvas选择设置
+        private void InitializeInkCanvasSelectionSettings()
+        {
+            if (inkCanvas != null)
+            {
+                // 清除当前选择，避免显示控制点
+                inkCanvas.Select(new StrokeCollection());
+                // 设置编辑模式为非选择模式
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+            }
+        }
+
+        // 更新图片选择工具栏位置
+        private void UpdateImageSelectionToolbarPosition(FrameworkElement element)
+        {
+            try
+            {
+                if (BorderImageSelectionControl == null || element == null) return;
+
+                // 获取元素在画布中的位置
+                double elementLeft = InkCanvas.GetLeft(element);
+                double elementTop = InkCanvas.GetTop(element);
+                double elementWidth = element.ActualWidth;
+                double elementHeight = element.ActualHeight;
+
+                // 如果元素位置未设置，使用默认值
+                if (double.IsNaN(elementLeft)) elementLeft = 0;
+                if (double.IsNaN(elementTop)) elementTop = 0;
+
+                // 计算工具栏位置（显示在图片下方）
+                double toolbarLeft = elementLeft + (elementWidth / 2) - (BorderImageSelectionControl.ActualWidth / 2);
+                double toolbarTop = elementTop + elementHeight + 10; // 图片下方10像素
+
+                // 确保工具栏不超出画布边界
+                double maxLeft = inkCanvas.ActualWidth - BorderImageSelectionControl.ActualWidth;
+                double maxTop = inkCanvas.ActualHeight - BorderImageSelectionControl.ActualHeight;
+
+                toolbarLeft = Math.Max(0, Math.Min(toolbarLeft, maxLeft));
+                toolbarTop = Math.Max(0, Math.Min(toolbarTop, maxTop));
+
+                // 设置工具栏位置
+                BorderImageSelectionControl.Margin = new Thickness(toolbarLeft, toolbarTop, 0, 0);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新图片选择工具栏位置失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #region Image Selection Toolbar Event Handlers
+
+        // 图片克隆功能
+        private void BorderImageClone_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement is Image originalImage)
+                {
+                    // 创建克隆图片
+                    Image clonedImage = CloneImage(originalImage);
+                    
+                    // 添加到画布
+                    inkCanvas.Children.Add(clonedImage);
+                    
+                    // 初始化变换
+                    InitializeElementTransform(clonedImage);
+                    
+                    // 绑定事件
+                    BindElementEvents(clonedImage);
+                    
+                    // 记录历史
+                    timeMachine.CommitElementInsertHistory(clonedImage);
+                    
+                    LogHelper.WriteLogToFile($"图片克隆完成: {clonedImage.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片克隆失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片克隆到新页面
+        private void BorderImageCloneToNewBoard_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement is Image originalImage)
+                {
+                    // 创建克隆图片
+                    Image clonedImage = CloneImage(originalImage);
+                    
+                    // 这里可以添加切换到新页面的逻辑
+                    // 暂时先添加到当前页面
+                    inkCanvas.Children.Add(clonedImage);
+                    
+                    // 初始化变换
+                    InitializeElementTransform(clonedImage);
+                    
+                    // 绑定事件
+                    BindElementEvents(clonedImage);
+                    
+                    // 记录历史
+                    timeMachine.CommitElementInsertHistory(clonedImage);
+                    
+                    LogHelper.WriteLogToFile($"图片克隆到新页面完成: {clonedImage.Name}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片克隆到新页面失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片左旋转
+        private void BorderImageRotateLeft_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    ApplyRotateTransform(currentSelectedElement, -45);
+                    LogHelper.WriteLogToFile($"图片左旋转完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片左旋转失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片右旋转
+        private void BorderImageRotateRight_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    ApplyRotateTransform(currentSelectedElement, 45);
+                    LogHelper.WriteLogToFile($"图片右旋转完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片右旋转失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片缩放减小
+        private void GridImageScaleDecrease_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
+                    ApplyScaleTransform(currentSelectedElement, 0.9, elementCenter);
+                    LogHelper.WriteLogToFile($"图片缩放减小完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片缩放减小失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片缩放增大
+        private void GridImageScaleIncrease_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
+                    ApplyScaleTransform(currentSelectedElement, 1.1, elementCenter);
+                    LogHelper.WriteLogToFile($"图片缩放增大完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片缩放增大失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片删除
+        private void BorderImageDelete_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement != null)
+                {
+                    // 记录删除历史
+                    timeMachine.CommitElementRemoveHistory(currentSelectedElement);
+                    
+                    // 从画布中移除
+                    inkCanvas.Children.Remove(currentSelectedElement);
+                    
+                    // 清除选中状态
+                    UnselectElement(currentSelectedElement);
+                    currentSelectedElement = null;
+                    
+                    LogHelper.WriteLogToFile($"图片删除完成");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片删除失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 克隆图片的辅助方法
+        private Image CreateClonedImage(Image originalImage)
+        {
+            try
+            {
+                Image clonedImage = new Image();
+                
+                // 复制图片源
+                if (originalImage.Source is BitmapSource bitmapSource)
+                {
+                    clonedImage.Source = bitmapSource;
+                }
+                
+                // 复制属性
+                clonedImage.Width = originalImage.Width;
+                clonedImage.Height = originalImage.Height;
+                clonedImage.Stretch = originalImage.Stretch;
+                clonedImage.StretchDirection = originalImage.StretchDirection;
+                
+                // 复制位置
+                double left = InkCanvas.GetLeft(originalImage);
+                double top = InkCanvas.GetTop(originalImage);
+                InkCanvas.SetLeft(clonedImage, left + 20); // 稍微偏移位置
+                InkCanvas.SetTop(clonedImage, top + 20);
+                
+                // 复制变换
+                if (originalImage.RenderTransform is TransformGroup originalTransformGroup)
+                {
+                    clonedImage.RenderTransform = originalTransformGroup.Clone();
+                }
+                
+                // 设置名称
+                string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                clonedImage.Name = timestamp;
+                
+                return clonedImage;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"克隆图片失败: {ex.Message}", LogHelper.LogType.Error);
+                return null;
+            }
+        }
+
+        #endregion
     }
 }

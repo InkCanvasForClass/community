@@ -13,9 +13,9 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Threading;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
+using Cursors = System.Windows.Input.Cursors;
 using HorizontalAlignment = System.Windows.HorizontalAlignment;
 using Image = System.Windows.Controls.Image;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
@@ -238,6 +238,9 @@ namespace Ink_Canvas
             BoardBorderLeftPageListView.Visibility = Visibility.Collapsed;
             BoardBorderRightPageListView.Visibility = Visibility.Collapsed;
             BoardImageOptionsPanel.Visibility = Visibility.Collapsed;
+            // 添加隐藏图形工具的二级菜单面板
+            BorderDrawShape.Visibility = Visibility.Collapsed;
+            BoardBorderDrawShape.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -2501,8 +2504,6 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
 
-                    DeselectUIElement();
-
                     // 在PPT模式下隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -2550,9 +2551,6 @@ namespace Ink_Canvas
                         AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                         AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
 
-                        // 取消任何UI元素的选择
-                        DeselectUIElement();
-
                         // 在PPT模式下隐藏手势面板和手势按钮
                         AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                         AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -2592,9 +2590,6 @@ namespace Ink_Canvas
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardLeftSide);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardCenterSide);
                         AnimationsHelper.ShowWithSlideFromBottomAndFade(BlackboardRightSide);
-
-                        // 取消任何UI元素的选择
-                        DeselectUIElement();
 
                         SaveStrokes(true);
                         ClearStrokes(true);
@@ -2776,17 +2771,20 @@ namespace Ink_Canvas
 
         private void InsertImageOptions_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            // Hide other sub-panels first
-            HideSubPanelsImmediately();
-
-            // Show the image options panel
-            if (BoardImageOptionsPanel.Visibility == Visibility.Collapsed)
+            // Check if the image options panel is currently visible
+            bool isImagePanelVisible = BoardImageOptionsPanel.Visibility == Visibility.Visible;
+            
+            // Toggle the image options panel
+            if (isImagePanelVisible)
             {
-                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardImageOptionsPanel);
+                // Panel was visible, so hide it with animation
+                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
             }
             else
             {
-                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
+                // Panel was hidden, so hide other panels and show this one
+                HideSubPanelsImmediately();
+                AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardImageOptionsPanel);
             }
         }
 
@@ -2803,8 +2801,8 @@ namespace Ink_Canvas
             // Wait a bit for the panel to hide
             await Task.Delay(100);
 
-            // Capture screenshot and copy to clipboard
-            await CaptureScreenshotToClipboard();
+            // Capture screenshot and insert to canvas
+            await CaptureScreenshotAndInsert();
         }
 
         private async void ImageOptionSelectFile_MouseUp(object sender, MouseButtonEventArgs e)
@@ -2826,12 +2824,116 @@ namespace Ink_Canvas
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     image.Name = timestamp;
 
+                    // 初始化TransformGroup
+                    if (image is FrameworkElement element)
+                    {
+                        var transformGroup = new TransformGroup();
+                        transformGroup.Children.Add(new ScaleTransform(1, 1));
+                        transformGroup.Children.Add(new TranslateTransform(0, 0));
+                        transformGroup.Children.Add(new RotateTransform(0));
+                        element.RenderTransform = transformGroup;
+                    }
+
                     CenterAndScaleElement(image);
+                    
+                    // 设置图片属性，避免被InkCanvas选择系统处理
+                    image.IsHitTestVisible = true;
+                    image.Focusable = false;
+                    
+                    // 初始化InkCanvas选择设置
+                    if (inkCanvas != null)
+                    {
+                        // 清除当前选择，避免显示控制点
+                        inkCanvas.Select(new StrokeCollection());
+                        // 同时通过图片的IsHitTestVisible和Focusable属性来避免InkCanvas选择系统的干扰
+                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    }
+                    
                     inkCanvas.Children.Add(image);
 
-                    // 添加鼠标事件处理，使图片可以被选择
-                    image.MouseDown += UIElement_MouseDown;
-                    image.IsManipulationEnabled = true;
+                    // 绑定事件处理器
+                    if (image is FrameworkElement elementForEvents)
+                    {
+                        // 鼠标事件
+                        elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                        elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+                        elementForEvents.MouseMove += Element_MouseMove;
+                        elementForEvents.MouseWheel += Element_MouseWheel;
+
+                        // 触摸事件
+                        elementForEvents.IsManipulationEnabled = true;
+                        elementForEvents.ManipulationDelta += Element_ManipulationDelta;
+                        elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
+
+                        // 设置光标
+                        elementForEvents.Cursor = Cursors.Hand;
+                    }
+
+                    timeMachine.CommitElementInsertHistory(image);
+                }
+            }
+        }
+
+        // 新增：插入图片方法
+        private async void InsertImage_MouseUp_New(object sender, MouseButtonEventArgs e)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif"
+            };
+            if (dialog.ShowDialog() == true)
+            {
+                string filePath = dialog.FileName;
+                Image image = await CreateAndCompressImageAsync(filePath);
+                if (image != null)
+                {
+                    string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                    image.Name = timestamp;
+
+                    // 初始化TransformGroup
+                    if (image is FrameworkElement element)
+                    {
+                        var transformGroup = new TransformGroup();
+                        transformGroup.Children.Add(new ScaleTransform(1, 1));
+                        transformGroup.Children.Add(new TranslateTransform(0, 0));
+                        transformGroup.Children.Add(new RotateTransform(0));
+                        element.RenderTransform = transformGroup;
+                    }
+
+                    CenterAndScaleElement(image);
+                    
+                    // 设置图片属性，避免被InkCanvas选择系统处理
+                    image.IsHitTestVisible = true;
+                    image.Focusable = false;
+                    
+                    // 初始化InkCanvas选择设置
+                    if (inkCanvas != null)
+                    {
+                        // 清除当前选择，避免显示控制点
+                        inkCanvas.Select(new StrokeCollection());
+                        // 设置编辑模式为非选择模式
+                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    }
+                    
+                    inkCanvas.Children.Add(image);
+
+                    // 绑定事件处理器
+                    if (image is FrameworkElement elementForEvents)
+                    {
+                        // 鼠标事件
+                        elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                        elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+                        elementForEvents.MouseMove += Element_MouseMove;
+                        elementForEvents.MouseWheel += Element_MouseWheel;
+
+                        // 触摸事件
+                        elementForEvents.IsManipulationEnabled = true;
+                        elementForEvents.ManipulationDelta += Element_ManipulationDelta;
+                        elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
+
+                        // 设置光标
+                        elementForEvents.Cursor = Cursors.Hand;
+                    }
 
                     timeMachine.CommitElementInsertHistory(image);
                 }
@@ -2854,12 +2956,50 @@ namespace Ink_Canvas
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                     image.Name = timestamp;
 
+                    // 初始化TransformGroup
+                    if (image is FrameworkElement element)
+                    {
+                        var transformGroup = new TransformGroup();
+                        transformGroup.Children.Add(new ScaleTransform(1, 1));
+                        transformGroup.Children.Add(new TranslateTransform(0, 0));
+                        transformGroup.Children.Add(new RotateTransform(0));
+                        element.RenderTransform = transformGroup;
+                    }
+
                     CenterAndScaleElement(image);
+                    
+                    // 设置图片属性，避免被InkCanvas选择系统处理
+                    image.IsHitTestVisible = true;
+                    image.Focusable = false;
+                    
+                    // 初始化InkCanvas选择设置
+                    if (inkCanvas != null)
+                    {
+                        // 清除当前选择，避免显示控制点
+                        inkCanvas.Select(new StrokeCollection());
+                        // 设置编辑模式为非选择模式
+                        inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    }
+                    
                     inkCanvas.Children.Add(image);
 
-                    // 添加鼠标事件处理，使图片可以被选择
-                    image.MouseDown += UIElement_MouseDown;
-                    image.IsManipulationEnabled = true;
+                    // 绑定事件处理器
+                    if (image is FrameworkElement elementForEvents)
+                    {
+                        // 鼠标事件
+                        elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                        elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+                        elementForEvents.MouseMove += Element_MouseMove;
+                        elementForEvents.MouseWheel += Element_MouseWheel;
+
+                        // 触摸事件
+                        elementForEvents.IsManipulationEnabled = true;
+                        elementForEvents.ManipulationDelta += Element_ManipulationDelta;
+                        elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
+
+                        // 设置光标
+                        elementForEvents.Cursor = Cursors.Hand;
+                    }
 
                     timeMachine.CommitElementInsertHistory(image);
                 }
@@ -2971,13 +3111,13 @@ namespace Ink_Canvas
                     quickColorPaletteMode = "single";
                 }
 
-                // 获取实际按钮宽度，如果获取不到则使用默认值
-                double cursorWidth = Cursor_Icon?.ActualWidth > 0 ? Cursor_Icon.ActualWidth : buttonWidth;
-                double penWidth = Pen_Icon?.ActualWidth > 0 ? Pen_Icon.ActualWidth : buttonWidth;
-                double deleteWidth = SymbolIconDelete?.ActualWidth > 0 ? SymbolIconDelete.ActualWidth : buttonWidth;
-                double eraserWidth = Eraser_Icon?.ActualWidth > 0 ? Eraser_Icon.ActualWidth : buttonWidth;
-                double eraserByStrokesWidth = EraserByStrokes_Icon?.ActualWidth > 0 ? EraserByStrokes_Icon.ActualWidth : buttonWidth;
-                double selectWidth = SymbolIconSelect?.ActualWidth > 0 ? SymbolIconSelect.ActualWidth : buttonWidth;
+                // 获取实际按钮宽度，如果获取不到则使用默认值，同时考虑按钮的可见性
+                double cursorWidth = (Cursor_Icon?.Visibility == Visibility.Visible && Cursor_Icon?.ActualWidth > 0) ? Cursor_Icon.ActualWidth : 0;
+                double penWidth = (Pen_Icon?.Visibility == Visibility.Visible && Pen_Icon?.ActualWidth > 0) ? Pen_Icon.ActualWidth : 0;
+                double deleteWidth = (SymbolIconDelete?.Visibility == Visibility.Visible && SymbolIconDelete?.ActualWidth > 0) ? SymbolIconDelete.ActualWidth : 0;
+                double eraserWidth = (Eraser_Icon?.Visibility == Visibility.Visible && Eraser_Icon?.ActualWidth > 0) ? Eraser_Icon.ActualWidth : 0;
+                double eraserByStrokesWidth = (EraserByStrokes_Icon?.Visibility == Visibility.Visible && EraserByStrokes_Icon?.ActualWidth > 0) ? EraserByStrokes_Icon.ActualWidth : 0;
+                double selectWidth = (SymbolIconSelect?.Visibility == Visibility.Visible && SymbolIconSelect?.ActualWidth > 0) ? SymbolIconSelect.ActualWidth : 0;
 
                 // 获取高光的实际宽度
                 double actualHighlightWidth = FloatingbarSelectionBG.ActualWidth > 0 ? FloatingbarSelectionBG.ActualWidth : highlightWidth;
@@ -3072,6 +3212,60 @@ namespace Ink_Canvas
                 FloatingbarSelectionBG.Visibility = Visibility.Hidden;
                 System.Windows.Controls.Canvas.SetLeft(FloatingbarSelectionBG, 0);
             }
+        }
+
+        /// <summary>
+        /// 获取当前选中的模式
+        /// </summary>
+        /// <returns>当前选中的模式名称</returns>
+        public string GetCurrentSelectedMode()
+        {
+            try
+            {
+                // 检查当前编辑模式
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+                {
+                    return "select";
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                {
+                    // 检查是否是荧光笔模式
+                    if (drawingAttributes != null && drawingAttributes.IsHighlighter)
+                    {
+                        return "color";
+                    }
+                    else
+                    {
+                        return "pen";
+                    }
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                {
+                    // 检查是面积擦还是线擦
+                    if (Eraser_Icon != null && Eraser_Icon.Visibility == Visibility.Visible)
+                    {
+                        return "eraser";
+                    }
+                    else if (EraserByStrokes_Icon != null && EraserByStrokes_Icon.Visibility == Visibility.Visible)
+                    {
+                        return "eraserByStrokes";
+                    }
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                {
+                    return "cursor";
+                }
+                else if (drawingShapeMode != 0)
+                {
+                    return "shape";
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取当前选中模式失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            
+            return string.Empty;
         }
 
         #endregion

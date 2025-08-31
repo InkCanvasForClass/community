@@ -3,8 +3,10 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
+using System.Windows.Media; 
 
 namespace Ink_Canvas
 {
@@ -129,6 +131,16 @@ namespace Ink_Canvas
                 string timestamp = "img_clipboard_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                 image.Name = timestamp;
 
+                // 初始化TransformGroup
+                if (image is FrameworkElement element)
+                {
+                    var transformGroup = new TransformGroup();
+                    transformGroup.Children.Add(new ScaleTransform(1, 1));
+                    transformGroup.Children.Add(new TranslateTransform(0, 0));
+                    transformGroup.Children.Add(new RotateTransform(0));
+                    element.RenderTransform = transformGroup;
+                }
+
                 // 设置位置
                 if (position.HasValue)
                 {
@@ -142,12 +154,40 @@ namespace Ink_Canvas
                     CenterAndScaleElement(image);
                 }
 
+                // 设置图片属性，避免被InkCanvas选择系统处理
+                image.IsHitTestVisible = true;
+                image.Focusable = false;
+                
+                // 初始化InkCanvas选择设置
+                if (inkCanvas != null)
+                {
+                    // 清除当前选择，避免显示控制点
+                    inkCanvas.Select(new StrokeCollection());
+                    // 设置编辑模式为Ink模式，这样可以保持图片的交互功能
+                    // 同时通过图片的IsHitTestVisible和Focusable属性来避免InkCanvas选择系统的干扰
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                }
+
                 // 添加到画布
                 inkCanvas.Children.Add(image);
 
-                // 添加鼠标事件处理
-                image.MouseDown += UIElement_MouseDown;
-                image.IsManipulationEnabled = true;
+                // 绑定事件处理器
+                if (image is FrameworkElement elementForEvents)
+                {
+                    // 鼠标事件
+                    elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                    elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+                    elementForEvents.MouseMove += Element_MouseMove;
+                    elementForEvents.MouseWheel += Element_MouseWheel;
+
+                    // 触摸事件
+                    elementForEvents.IsManipulationEnabled = true;
+                    elementForEvents.ManipulationDelta += Element_ManipulationDelta;
+                    elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
+
+                    // 设置光标
+                    elementForEvents.Cursor = Cursors.Hand;
+                }
 
                 // 提交到历史记录
                 timeMachine.CommitElementInsertHistory(image);

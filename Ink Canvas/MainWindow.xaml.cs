@@ -237,8 +237,8 @@ namespace Ink_Canvas
             ApplyAlwaysOnTop();
             
             // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
-            this.Activated += Window_Activated;
-            this.Deactivated += Window_Deactivated;
+            Activated += Window_Activated;
+            Deactivated += Window_Deactivated;
             
             // 为浮动栏按钮添加触摸事件支持
             AddTouchSupportToFloatingBarButtons();
@@ -509,7 +509,7 @@ namespace Ink_Canvas
             ApplyAlwaysOnTop();
 
             // 初始化UIElement选择系统
-            InitializeUIElementSelection();
+
 
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
@@ -1003,19 +1003,7 @@ namespace Ink_Canvas
                 // 如果点击的不是图片或其他UI元素，则取消选择
                 if (!(hitTest is Image) && !(hitTest is MediaElement))
                 {
-                    // 检查是否点击在已选择的UI元素上
-                    bool clickedOnSelectedElement = false;
-                    if (selectedUIElement != null)
-                    {
-                        var elementBounds = GetUIElementBounds(selectedUIElement);
-                        var clickPoint = e.GetPosition(inkCanvas);
-                        clickedOnSelectedElement = elementBounds.Contains(clickPoint);
-                    }
-
-                    if (!clickedOnSelectedElement)
-                    {
-                        DeselectUIElement();
-                    }
+                    
                 }
             }
         }
@@ -1372,7 +1360,7 @@ namespace Ink_Canvas
                         // 直接设置滚动位置，不使用动画
                         SettingsPanelScrollViewer.ScrollToVerticalOffset(targetPosition);
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         // 如果出现异常，恢复到原来的滚动位置
                         SettingsPanelScrollViewer.ScrollToVerticalOffset(originalOffset);
@@ -1911,7 +1899,7 @@ namespace Ink_Canvas
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ApplyAlwaysOnTop();
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }), DispatcherPriority.Loaded);
             }
         }
         
@@ -1927,83 +1915,11 @@ namespace Ink_Canvas
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ApplyAlwaysOnTop();
-                }), System.Windows.Threading.DispatcherPriority.Loaded);
+                }), DispatcherPriority.Loaded);
             }
         }
 
-        #region Image Toolbar Event Handlers
 
-        private void BorderImageClone_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                CloneImage(image);
-            }
-        }
-
-        private void BorderImageCloneToNewBoard_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                CloneImageToNewBoard(image);
-            }
-        }
-
-        private void BorderImageRotateLeft_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                RotateImage(image, -90);
-            }
-        }
-
-        private void BorderImageRotateRight_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                RotateImage(image, 90);
-            }
-        }
-
-        private void GridImageScaleIncrease_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                ScaleImage(image, 1.25);
-            }
-        }
-
-        private void GridImageScaleDecrease_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                ScaleImage(image, 0.8);
-            }
-        }
-
-        private void BorderImageDelete_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (lastBorderMouseDownObject != sender) return;
-
-            if (selectedUIElement is Image image)
-            {
-                DeleteImage(image);
-            }
-        }
-
-        #endregion
 
         #region 全局快捷键管理
         /// <summary>
@@ -2114,7 +2030,10 @@ namespace Ink_Canvas
             try
             {
                 Settings.Canvas.InkFadeTime = (int)e.NewValue;
-                _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                if (_inkFadeManager != null)
+                {
+                    _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                }
                 LogHelper.WriteLogToFile($"墨迹渐隐时间已更新为 {Settings.Canvas.InkFadeTime}ms", LogHelper.LogType.Event);
             }
             catch (Exception ex)
@@ -2187,7 +2106,7 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 如果直接发送失败，回退到原来的方法
                 if (isPrevious)
