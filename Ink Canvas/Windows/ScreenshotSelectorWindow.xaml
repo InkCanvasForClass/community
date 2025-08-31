@@ -18,12 +18,14 @@
         <!-- 半透明遮罩 -->
         <Rectangle Name="OverlayRectangle"
                    Fill="Black"
-                   Opacity="0.3" />
+                   Opacity="0.3"
+                   IsHitTestVisible="False" />
 
         <!-- 透明选择区域遮罩 - 使用正确的几何体操作 -->
         <Rectangle Name="TransparentSelectionMask"
                    Fill="Black"
                    Opacity="0.3"
+                   IsHitTestVisible="False"
                    Visibility="Collapsed">
             <Rectangle.Clip>
                 <CombinedGeometry GeometryCombineMode="Exclude">
@@ -43,8 +45,14 @@
             <Rectangle Name="SelectionRectangle"
                        Stroke="White"
                        StrokeThickness="1"
-                       Fill="Transparent"
-                       Visibility="Collapsed" />
+                       Fill="#01FFFFFF"
+                       Visibility="Collapsed"
+                       IsHitTestVisible="True"
+                       Panel.ZIndex="1001"
+                       MouseLeftButtonDown="SelectionRectangle_MouseLeftButtonDown"
+                       MouseLeftButtonUp="SelectionRectangle_MouseLeftButtonUp"
+                       MouseMove="SelectionRectangle_MouseMove"
+                       Cursor="SizeAll" />
 
             <!-- 任意形状选择模式 -->
             <Path Name="SelectionPath"
