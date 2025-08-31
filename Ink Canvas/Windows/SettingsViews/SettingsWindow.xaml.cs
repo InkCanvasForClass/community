@@ -384,27 +384,7 @@ namespace Ink_Canvas.Windows {
         }
 
         private void MenuButton_Click(object sender, MouseButtonEventArgs e) {
-            // 切换侧边栏的收纳和展开状态
-            _isSidebarCollapsed = !_isSidebarCollapsed;
-            
-            if (_isSidebarCollapsed) {
-                // 收纳侧边栏
-                SidebarBorder.Width = 0;
-                MainContentGrid.Margin = new Thickness(0, 48, 0, 0);
-                TopbarGrid.Margin = new Thickness(0, 0, 0, 0);
-            } else {
-                // 展开侧边栏
-                SidebarBorder.Width = 250;
-                MainContentGrid.Margin = new Thickness(250, 48, 0, 0);
-                TopbarGrid.Margin = new Thickness(250, 0, 0, 0);
-            }
+            // 菜单功能 - 可以显示上下文菜单或选项菜单
         }
-
-        private bool _isSidebarCollapsed;
-
-        public Grid[] SettingsPanes;
-        public ScrollViewer[] SettingsPaneScrollViewers;
-        public string[] SettingsPaneTitles;
-        public string[] SettingsPaneNames;
     }
 }

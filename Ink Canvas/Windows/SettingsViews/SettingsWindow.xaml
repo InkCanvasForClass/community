@@ -496,7 +496,7 @@
         <Border Background="#fafafa" CornerRadius="7" BorderBrush="#3584e4" BorderThickness="2" Margin="8">
             <Grid>
                 <!--Sidebar-->
-                <Border Name="SidebarBorder" Width="250" Background="#ebebeb" BorderBrush="#e1e1e1" CornerRadius="7,0,0,7" BorderThickness="0,0,2,0" HorizontalAlignment="Left">
+                <Border Width="250" Background="#ebebeb" BorderBrush="#e1e1e1" CornerRadius="7,0,0,7" BorderThickness="0,0,2,0" HorizontalAlignment="Left">
                     <Grid>
                         <Grid Height="48" VerticalAlignment="Top">
                             <Border CornerRadius="8" Background="#d9d9d9" Width="34" Height="34" Margin="8,0,0,0" HorizontalAlignment="Left" MouseLeftButtonDown="SearchButton_Click" Cursor="Hand">
@@ -553,15 +553,13 @@
                         </ItemsControl>
                     </Grid>
                 </Border>
-                <!--Main Content Area-->
-                <Grid x:Name="MainContentGrid" Margin="250,48,0,0">
-                    <!--AboutPanel-->
-                    <Grid Visibility="Collapsed" Name="AboutPane">
-                        <settingsViews:AboutPanel x:Name="SettingsAboutPanel"/>
-                    </Grid>
+                <!--AboutPanel-->
+                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="AboutPane">
+                    <settingsViews:AboutPanel x:Name="SettingsAboutPanel"/>
+                </Grid>
 
-                    <!--CanvasAndInkPanel-->
-                    <Grid Visibility="Visible" Name="CanvasAndInkPane">
+                <!--CanvasAndInkPanel-->
+                <Grid Margin="250,48,0,0" Visibility="Visible" Name="CanvasAndInkPane">
                     <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="CanvasAndInkScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
                         <StackPanel Margin="60,12,60,24">
                             <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
@@ -3517,7 +3515,7 @@
                 </Grid>
 
                 <!--Topbar-->
-                <Grid Height="48" VerticalAlignment="Top" Margin="250,0,0,0" x:Name="TopbarGrid">
+                <Grid Height="48" VerticalAlignment="Top" Margin="250,0,0,0">
                     <Border Height="48" CornerRadius="0,6,0,0" Background="#fafafa">
                         <Border.Clip>
                             <RectangleGeometry Rect="0,0,640,56"/>
@@ -3543,7 +3541,7 @@
                         </Image>
                     </Border>
                 </Grid>
-            </Grid></Grid>
+            </Grid>
         </Border>
     </Grid>
 </Window>
