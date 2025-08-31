@@ -250,6 +250,11 @@ namespace Ink_Canvas.Windows {
         public string _selectedSidebarItemName = "";
         public ObservableCollection<SidebarItem> SidebarItems = new ObservableCollection<SidebarItem>();
 
+        public Grid[] SettingsPanes;
+        public ScrollViewer[] SettingsPaneScrollViewers;
+        public string[] SettingsPaneTitles;
+        public string[] SettingsPaneNames;
+
         public void UpdateSidebarItemsSelection() {
             foreach (var si in SidebarItems) {
                 si.Selected = si.Name == _selectedSidebarItemName;
