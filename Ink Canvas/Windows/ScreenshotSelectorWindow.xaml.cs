@@ -807,7 +807,6 @@ namespace Ink_Canvas
             {
                 ReleaseMouseCapture();
             }
-<<<<<<< HEAD
             
             // 释放选择矩形的鼠标捕获
             if (SelectionRectangle.IsMouseCaptured)
@@ -815,9 +814,6 @@ namespace Ink_Canvas
                 SelectionRectangle.ReleaseMouseCapture();
             }
             
-=======
-
->>>>>>> ff086e497c2dc751d72f3a6d72ce5d883b297672
             // 重置选择区域
             _currentSelection = new Rect();
             SelectedArea = null;
