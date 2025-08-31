@@ -96,16 +96,7 @@ namespace Ink_Canvas.Windows {
                 IconSource = FindResource("PowerPointIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
-                Type = SidebarItemType.Item,
-                Title = "插件和脚本",
-                Name = "ExtensionsItem",
-                IconSource = FindResource("ExtensionsIcon") as DrawingImage,
-                Selected = false,
-            });
-            SidebarItems.Add(new SidebarItem() {
-                Type = SidebarItemType.Separator
-            });
+
             SidebarItems.Add(new SidebarItem() {
                 Type = SidebarItemType.Item,
                 Title = "自动化行为",
@@ -159,7 +150,6 @@ namespace Ink_Canvas.Windows {
 
             SettingsPanes = new Grid[] {
                 AboutPane,
-                ExtensionsPane,
                 CanvasAndInkPane,
                 GesturesPane,
                 StartupPane,
@@ -230,10 +220,7 @@ namespace Ink_Canvas.Windows {
             SettingsAboutPanel.IsTopBarNeedNoShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0;
         }
 
-        public Grid[] SettingsPanes = new Grid[] { };
-        public ScrollViewer[] SettingsPaneScrollViewers = new ScrollViewer[] { };
-        public string[] SettingsPaneTitles = new string[] { };
-        public string[] SettingsPaneNames = new string[] { };
+
 
         public enum SidebarItemType {
             Item,
@@ -271,14 +258,19 @@ namespace Ink_Canvas.Windows {
             CollectionViewSource.GetDefaultView(SidebarItems).Refresh();
 
             AboutPane.Visibility = _selectedSidebarItemName == "AboutItem" ? Visibility.Visible : Visibility.Collapsed;
-            ExtensionsPane.Visibility = _selectedSidebarItemName == "ExtensionsItem" ? Visibility.Visible : Visibility.Collapsed;
             CanvasAndInkPane.Visibility = _selectedSidebarItemName == "CanvasAndInkItem" ? Visibility.Visible : Visibility.Collapsed;
             GesturesPane.Visibility = _selectedSidebarItemName == "GesturesItem" ? Visibility.Visible : Visibility.Collapsed;
             StartupPane.Visibility = _selectedSidebarItemName == "StartupItem" ? Visibility.Visible : Visibility.Collapsed;
-            AppearancePane.Visibility = _selectedSidebarItemName == "AppearanceItem" ? Visibility.Visible : Visibility.Collapsed;
+            ThemePane.Visibility = _selectedSidebarItemName == "ThemeItem" ? Visibility.Visible : Visibility.Collapsed;
+            ShortcutsPane.Visibility = _selectedSidebarItemName == "ShortcutsItem" ? Visibility.Visible : Visibility.Collapsed;
+            CrashActionPane.Visibility = _selectedSidebarItemName == "CrashActionItem" ? Visibility.Visible : Visibility.Collapsed;
             InkRecognitionPane.Visibility = _selectedSidebarItemName == "InkRecognitionItem" ? Visibility.Visible : Visibility.Collapsed;
             AutomationPane.Visibility = _selectedSidebarItemName == "AutomationItem" ? Visibility.Visible : Visibility.Collapsed;
             PowerPointPane.Visibility = _selectedSidebarItemName == "PowerPointItem" ? Visibility.Visible : Visibility.Collapsed;
+            LuckyRandomPane.Visibility = _selectedSidebarItemName == "LuckyRandomItem" ? Visibility.Visible : Visibility.Collapsed;
+            StoragePane.Visibility = _selectedSidebarItemName == "StorageItem" ? Visibility.Visible : Visibility.Collapsed;
+            SnapshotPane.Visibility = _selectedSidebarItemName == "SnapshotItem" ? Visibility.Visible : Visibility.Collapsed;
+            AdvancedPane.Visibility = _selectedSidebarItemName == "AdvancedItem" ? Visibility.Visible : Visibility.Collapsed;
             foreach (var sv in SettingsPaneScrollViewers) {
                 sv.ScrollToTop();
             }
@@ -386,5 +378,33 @@ namespace Ink_Canvas.Windows {
         private void CloseButton_Click(object sender, MouseButtonEventArgs e) {
             Close();
         }
+
+        private void SearchButton_Click(object sender, MouseButtonEventArgs e) {
+            // 搜索功能 - 可以显示搜索框或搜索对话框
+        }
+
+        private void MenuButton_Click(object sender, MouseButtonEventArgs e) {
+            // 切换侧边栏的收纳和展开状态
+            _isSidebarCollapsed = !_isSidebarCollapsed;
+            
+            if (_isSidebarCollapsed) {
+                // 收纳侧边栏
+                SidebarBorder.Width = 0;
+                MainContentGrid.Margin = new Thickness(0, 48, 0, 0);
+                TopbarGrid.Margin = new Thickness(0, 0, 0, 0);
+            } else {
+                // 展开侧边栏
+                SidebarBorder.Width = 250;
+                MainContentGrid.Margin = new Thickness(250, 48, 0, 0);
+                TopbarGrid.Margin = new Thickness(250, 0, 0, 0);
+            }
+        }
+
+        private bool _isSidebarCollapsed;
+
+        public Grid[] SettingsPanes;
+        public ScrollViewer[] SettingsPaneScrollViewers;
+        public string[] SettingsPaneTitles;
+        public string[] SettingsPaneNames;
     }
 }

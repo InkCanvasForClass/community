@@ -496,10 +496,10 @@
         <Border Background="#fafafa" CornerRadius="7" BorderBrush="#3584e4" BorderThickness="2" Margin="8">
             <Grid>
                 <!--Sidebar-->
-                <Border Width="250" Background="#ebebeb" BorderBrush="#e1e1e1" CornerRadius="7,0,0,7" BorderThickness="0,0,2,0" HorizontalAlignment="Left">
+                <Border Name="SidebarBorder" Width="250" Background="#ebebeb" BorderBrush="#e1e1e1" CornerRadius="7,0,0,7" BorderThickness="0,0,2,0" HorizontalAlignment="Left">
                     <Grid>
                         <Grid Height="48" VerticalAlignment="Top">
-                            <Border CornerRadius="8" Background="#d9d9d9" Width="34" Height="34" Margin="8,0,0,0" HorizontalAlignment="Left">
+                            <Border CornerRadius="8" Background="#d9d9d9" Width="34" Height="34" Margin="8,0,0,0" HorizontalAlignment="Left" MouseLeftButtonDown="SearchButton_Click" Cursor="Hand">
                                 <Image Width="16" Height="16">
                                     <Image.Source>
                                         <DrawingImage>
@@ -513,7 +513,7 @@
                                 </Image>
                             </Border>
                             <TextBlock FontSize="15" Text="软件设置" Foreground="#2e3436" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center"/>
-                            <Border CornerRadius="8" Background="#d9d9d9" Width="34" Height="34" Margin="0,0,8,0" HorizontalAlignment="Right">
+                            <Border CornerRadius="8" Background="#d9d9d9" Width="34" Height="34" Margin="0,0,8,0" HorizontalAlignment="Right" MouseLeftButtonDown="MenuButton_Click" Cursor="Hand">
                                 <Image Width="16" Height="16">
                                     <Image.Source>
                                         <DrawingImage>
@@ -553,20 +553,15 @@
                         </ItemsControl>
                     </Grid>
                 </Border>
-                <!--AboutPanel-->
-                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="AboutPane">
-                    <settingsViews:AboutPanel x:Name="SettingsAboutPanel"/>
-                </Grid>
-                <!--ExtensionsPanel-->
-                <Grid Margin="250,48,0,0" Visibility="Collapsed" Name="ExtensionsPane">
-                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <Image Width="300" Source="../Resources/Illustrations/wait-a-moment.png" HorizontalAlignment="Center"/>
-                        <TextBlock FontSize="20" FontWeight="UltraBold" Text="扩展和脚本系统还没写好" Foreground="#09090b" HorizontalAlignment="Center" Margin="0,24,0,0"/>
-                        <TextBlock FontSize="13" Text="稍安勿躁，已经新建文件夹了" Foreground="#71717a" HorizontalAlignment="Center" Margin="0,6,0,0"/>
-                    </StackPanel>
-                </Grid>
-                <!--CanvasAndInkPanel-->
-                <Grid Margin="250,48,0,0" Visibility="Visible" Name="CanvasAndInkPane">
+                <!--Main Content Area-->
+                <Grid x:Name="MainContentGrid" Margin="250,48,0,0">
+                    <!--AboutPanel-->
+                    <Grid Visibility="Collapsed" Name="AboutPane">
+                        <settingsViews:AboutPanel x:Name="SettingsAboutPanel"/>
+                    </Grid>
+
+                    <!--CanvasAndInkPanel-->
+                    <Grid Visibility="Visible" Name="CanvasAndInkPane">
                     <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="CanvasAndInkScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
                         <StackPanel Margin="60,12,60,24">
                             <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
@@ -3522,7 +3517,7 @@
                 </Grid>
 
                 <!--Topbar-->
-                <Grid Height="48" VerticalAlignment="Top" Margin="250,0,0,0">
+                <Grid Height="48" VerticalAlignment="Top" Margin="250,0,0,0" x:Name="TopbarGrid">
                     <Border Height="48" CornerRadius="0,6,0,0" Background="#fafafa">
                         <Border.Clip>
                             <RectangleGeometry Rect="0,0,640,56"/>
@@ -3548,7 +3543,7 @@
                         </Image>
                     </Border>
                 </Grid>
-            </Grid>
+            </Grid></Grid>
         </Border>
     </Grid>
 </Window>
