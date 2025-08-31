@@ -349,14 +349,7 @@ namespace Ink_Canvas.Helpers
             [JsonProperty("averageSessionSeconds")]
             public double AverageSessionSeconds { get; set; }
 
-            // 保留旧字段以保持向后兼容性（已弃用）
-            [JsonProperty("totalUsageMinutes")]
-            [Obsolete("已弃用，请使用 TotalUsageSeconds")]
-            public long TotalUsageMinutes { get; set; }
 
-            [JsonProperty("averageSessionMinutes")]
-            [Obsolete("已弃用，请使用 AverageSessionSeconds")]
-            public double AverageSessionMinutes { get; set; }
 
             [JsonProperty("lastUpdateCheck")]
             public DateTime LastUpdateCheck { get; set; }
@@ -386,53 +379,6 @@ namespace Ink_Canvas.Helpers
             [JsonProperty("lastWeekUsageSeconds")]
             public long LastWeekUsageSeconds { get; set; }
 
-            // 保留旧字段以保持向后兼容性（已弃用）
-            [JsonProperty("weeklyUsageMinutes")]
-            [Obsolete("已弃用，请使用 WeeklyUsageSeconds")]
-            public long WeeklyUsageMinutes { get; set; }
-
-            [JsonProperty("lastWeekUsageMinutes")]
-            [Obsolete("已弃用，请使用 LastWeekUsageSeconds")]
-            public long LastWeekUsageMinutes { get; set; }
-
-            /// <summary>
-            /// 数据迁移：从分钟精度迁移到秒级精度
-            /// </summary>
-            public void MigrateToSecondsPrecision()
-            {
-                try
-                {
-                    // 如果新字段为空但旧字段有数据，进行迁移
-                    if (TotalUsageSeconds == 0 && TotalUsageSeconds > 0)
-                    {
-                        TotalUsageSeconds = TotalUsageSeconds * 60;
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移总使用时长: {TotalUsageSeconds}分钟 -> {TotalUsageSeconds}秒");
-                    }
-
-                    if (AverageSessionSeconds == 0 && AverageSessionSeconds > 0)
-                    {
-                        AverageSessionSeconds = AverageSessionSeconds * 60;
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移平均会话时长: {AverageSessionSeconds}分钟 -> {AverageSessionSeconds}秒");
-                    }
-
-                    if (WeeklyUsageSeconds == 0 && WeeklyUsageSeconds > 0)
-                    {
-                        WeeklyUsageSeconds = WeeklyUsageSeconds * 60;
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移每周使用时长: {WeeklyUsageSeconds}分钟 -> {WeeklyUsageSeconds}秒");
-                    }
-
-                    if (LastWeekUsageSeconds == 0 && LastWeekUsageSeconds > 0)
-                    {
-                        LastWeekUsageSeconds = LastWeekUsageSeconds * 60;
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 迁移上周使用时长: {LastWeekUsageSeconds}分钟 -> {LastWeekUsageSeconds}秒");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 数据迁移失败: {ex.Message}", LogHelper.LogType.Error);
-                }
-            }
-
             /// <summary>
             /// 检查并重置每周统计数据（秒级精度）
             /// </summary>
@@ -448,12 +394,8 @@ namespace Ink_Canvas.Helpers
                     LastWeekLaunchCount = WeeklyLaunchCount;
                     LastWeekUsageSeconds = WeeklyUsageSeconds;
 
-                    // 同时更新旧字段以保持兼容性
-                    LastWeekUsageSeconds = LastWeekUsageSeconds / 60;
-
                     // 重置本周数据
                     WeeklyLaunchCount = 0;
-                    WeeklyUsageSeconds = 0;
                     WeeklyUsageSeconds = 0;
                     WeekStartDate = currentWeekStart;
 
@@ -487,8 +429,6 @@ namespace Ink_Canvas.Helpers
             {
                 CheckAndResetWeeklyStats();
                 WeeklyUsageSeconds += seconds;
-                // 同时更新旧字段以保持兼容性
-                WeeklyUsageSeconds = WeeklyUsageSeconds / 60;
             }
         }
 
@@ -586,9 +526,6 @@ namespace Ink_Canvas.Helpers
                 {
                     var stats = LoadUsageStats();
 
-                    // 执行数据迁移（如果需要）
-                    stats.MigrateToSecondsPrecision();
-
                     // 计算本次会话时长（秒级精度）
                     long sessionSeconds = 0;
                     if (stats.LastLaunchTime != DateTime.MinValue)
@@ -599,8 +536,7 @@ namespace Ink_Canvas.Helpers
                         // 更新秒级精度数据
                         stats.TotalUsageSeconds += sessionSeconds;
 
-                        // 同时更新旧字段以保持兼容性
-                        stats.TotalUsageSeconds = stats.TotalUsageSeconds / 60;
+
 
                         // 记录每周使用时长（秒级精度）
                         stats.RecordWeeklyUsage(sessionSeconds);
@@ -609,8 +545,7 @@ namespace Ink_Canvas.Helpers
                         if (stats.LaunchCount > 0)
                         {
                             stats.AverageSessionSeconds = (double)stats.TotalUsageSeconds / stats.LaunchCount;
-                            // 同时更新旧字段以保持兼容性
-                            stats.AverageSessionSeconds = stats.AverageSessionSeconds / 60;
+
                         }
                     }
 
@@ -648,21 +583,13 @@ namespace Ink_Canvas.Helpers
                 var currentWeekLaunches = stats.WeeklyLaunchCount;
                 var currentWeekSeconds = stats.WeeklyUsageSeconds;
 
-                // 如果秒级数据为空但分钟数据存在，进行转换
-                if (currentWeekSeconds == 0 && stats.WeeklyUsageSeconds > 0)
-                {
-                    currentWeekSeconds = stats.WeeklyUsageSeconds * 60;
-                }
+
 
                 // 如果本周数据不足，参考上周数据
                 var weeklyLaunches = currentWeekLaunches > 0 ? currentWeekLaunches : stats.LastWeekLaunchCount;
                 var weeklySeconds = currentWeekSeconds > 0 ? currentWeekSeconds : stats.LastWeekUsageSeconds;
 
-                // 如果秒级数据仍为空，使用分钟数据转换
-                if (weeklySeconds == 0 && stats.LastWeekUsageSeconds > 0)
-                {
-                    weeklySeconds = stats.LastWeekUsageSeconds * 60;
-                }
+
 
                 // 综合评分系统（0-100分）
                 var frequencyScore = CalculateFrequencyScoreWithWeeklyData(stats, daysSinceLastUse, weeklyLaunches, weeklySeconds);
@@ -730,7 +657,7 @@ namespace Ink_Canvas.Helpers
             else if (weeklySeconds >= 3600) score += 5;      // 1-2小时：轻度使用
 
             // 历史使用深度评分（10分）- 反映用户的长期使用习惯（秒级精度）
-            var totalSeconds = stats.TotalUsageSeconds > 0 ? stats.TotalUsageSeconds : stats.TotalUsageSeconds * 60;
+            var totalSeconds = stats.TotalUsageSeconds;
             if (totalSeconds >= 180000) score += 10;    // 50小时以上：资深用户
             else if (totalSeconds >= 72000) score += 7; // 20-50小时：中等用户
             else if (totalSeconds >= 18000) score += 4;  // 5-20小时：新手用户
@@ -791,25 +718,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 获取使用统计信息（兼容性方法 - 分钟精度）
-        /// </summary>
-        [Obsolete("请使用 GetUsageStats() 获取秒级精度数据")]
-        public static (int launchCount, long totalMinutes, double avgSessionMinutes, UpdatePriority priority) GetUsageStatsInMinutes()
-        {
-            try
-            {
-                var stats = LoadUsageStats();
-                var totalMinutes = stats.TotalUsageSeconds / 60;
-                var avgMinutes = stats.AverageSessionSeconds / 60;
-                return (stats.LaunchCount, totalMinutes, avgMinutes, stats.UpdatePriority);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 获取使用统计失败: {ex.Message}", LogHelper.LogType.Error);
-                return (0, 0, 0, UpdatePriority.Medium);
-            }
-        }
+
 
         /// <summary>
         /// 加载使用统计 
@@ -822,26 +731,27 @@ namespace Ink_Canvas.Helpers
                 var stats = LoadUsageStatsFromFile(UsageStatsFilePath);
                 if (stats != null)
                 {
-                    // 执行数据迁移（如果需要）
-                    stats.MigrateToSecondsPrecision();
                     return stats;
                 }
 
-                // 2. 尝试从备份文件加载
+                // 2. 主文件无法读取，尝试从备份文件恢复
+                LogHelper.WriteLogToFile("DeviceIdentifier | 主文件无法读取，尝试从备份文件恢复");
+                if (RestoreUsageStatsFromBackup())
+                {
+                    // 恢复成功后重新尝试加载主文件
+                    stats = LoadUsageStatsFromFile(UsageStatsFilePath);
+                    if (stats != null)
+                    {
+                        LogHelper.WriteLogToFile("DeviceIdentifier | 从备份文件成功恢复主文件");
+                        return stats;
+                    }
+                }
+
+                // 3. 如果备份恢复也失败，尝试直接加载备份文件
                 stats = LoadUsageStatsFromFile(UsageStatsBackupPath);
                 if (stats != null)
                 {
-                    LogHelper.WriteLogToFile("DeviceIdentifier | 从备份文件恢复使用统计");
-                    stats.MigrateToSecondsPrecision();
-                    // 尝试恢复主文件
-                    try
-                    {
-                        SaveUsageStatsToFile(UsageStatsFilePath, stats);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 恢复主文件失败: {ex.Message}", LogHelper.LogType.Warning);
-                    }
+                    LogHelper.WriteLogToFile("DeviceIdentifier | 直接使用备份文件数据");
                     return stats;
                 }
 
@@ -853,8 +763,8 @@ namespace Ink_Canvas.Helpers
                 DeviceId = DeviceId,
                 LastLaunchTime = DateTime.Now,
                 LaunchCount = 0,
-                TotalUsageSeconds = 0, // 保持兼容性
-                AverageSessionSeconds = 0, // 保持兼容性
+                TotalUsageSeconds = 0,
+                AverageSessionSeconds = 0,
                 LastUpdateCheck = DateTime.MinValue,
                 UpdatePriority = UpdatePriority.Medium,
                 UsageFrequency = UsageFrequency.Medium
@@ -913,21 +823,7 @@ namespace Ink_Canvas.Helpers
                         return stats;
                     }
                     
-                    // 如果解密失败，尝试作为普通JSON文件读取（向后兼容）
-                    try
-                    {
-                        string json = File.ReadAllText(filePath);
-                        var plainStats = JsonConvert.DeserializeObject<UsageStats>(json);
-                        if (plainStats != null && !string.IsNullOrEmpty(plainStats.DeviceId))
-                        {
-                            LogHelper.WriteLogToFile($"DeviceIdentifier | 从普通JSON文件加载使用统计: {filePath}");
-                            return plainStats;
-                        }
-                    }
-                    catch
-                    {
-                        // 忽略JSON解析错误
-                    }
+
                 }
             }
             catch (Exception ex)
@@ -997,7 +893,7 @@ namespace Ink_Canvas.Helpers
             return null;
         }
 
-                /// <summary>
+        /// <summary>
         /// 保存使用统计到文件（加密）
         /// </summary>
         private static void SaveUsageStatsToFile(string filePath, UsageStats stats)
@@ -1062,45 +958,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 记录更新检查失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-
-        /// <summary>
-        /// 验证使用统计数据的完整性
-        /// </summary>
-        public static bool ValidateUsageStatsIntegrity()
-        {
-            try
-            {
-                // 检查主文件
-                if (File.Exists(UsageStatsFilePath))
-                {
-                    var mainStats = LoadUsageStatsFromFile(UsageStatsFilePath);
-                    if (mainStats != null && mainStats.DeviceId == DeviceId)
-                    {
-                        LogHelper.WriteLogToFile("DeviceIdentifier | 主文件数据完整性验证通过");
-                        return true;
-                    }
-                }
-
-                // 检查备份文件
-                if (File.Exists(UsageStatsBackupPath))
-                {
-                    var backupStats = LoadUsageStatsFromFile(UsageStatsBackupPath);
-                    if (backupStats != null && backupStats.DeviceId == DeviceId)
-                    {
-                        LogHelper.WriteLogToFile("DeviceIdentifier | 备份文件数据完整性验证通过");
-                        return true;
-                    }
-                }
-
-                LogHelper.WriteLogToFile("DeviceIdentifier | 数据完整性验证失败", LogHelper.LogType.Warning);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 数据完整性验证失败: {ex.Message}", LogHelper.LogType.Error);
-                return false;
-            }
-        }
+        
 
         /// <summary>
         /// 从备份文件恢复使用统计数据
@@ -1429,26 +1287,6 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        /// <summary>
-        /// 检查是否应该进行版本修复（不受分级策略影响）
-        /// </summary>
-        /// <param name="currentVersion">当前版本</param>
-        /// <param name="availableVersion">可用版本</param>
-        /// <returns>是否需要版本修复</returns>
-        public static bool ShouldPerformVersionFix(string currentVersion, string availableVersion)
-        {
-            try
-            {
-                // 版本修复功能不受使用频率分级策略影响，始终允许
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 版本修复检查 - 当前版本: {currentVersion}, 可用版本: {availableVersion}, 结果: 允许");
-                return true;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"DeviceIdentifier | 版本修复检查失败: {ex.Message}", LogHelper.LogType.Error);
-                return true; // 出错时默认允许
-            }
-        }
 
 
         /// <summary>

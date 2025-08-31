@@ -108,8 +108,6 @@ namespace Ink_Canvas
         {
             if (sender is FrameworkElement element)
             {
-
-                
                 // 取消之前选中的元素
                 if (currentSelectedElement != null && currentSelectedElement != element)
                 {
