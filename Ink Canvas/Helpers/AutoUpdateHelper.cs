@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,8 +17,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace Ink_Canvas.Helpers
 {
@@ -1238,7 +1238,7 @@ namespace Ink_Canvas.Helpers
                 // 查找解压后的主程序文件
                 string newAppPath = null;
                 string[] possibleExeNames = { "InkCanvasForClass.exe", "Ink Canvas.exe", "InkCanvas.exe" };
-                
+
                 foreach (string exeName in possibleExeNames)
                 {
                     string testPath = Path.Combine(extractPath, exeName);
@@ -1260,12 +1260,12 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 准备启动新版本进程: {newAppPath}");
-                    
+
                     // 启动新版本进程（以更新模式）
                     string arguments = $"--update-mode --old-process-id={currentProcessId} --extract-path=\"{extractPath}\" --target-path=\"{currentAppDir}\" --is-silence={isInSilence}";
-                    
+
                     LogHelper.WriteLogToFile($"AutoUpdate | 启动新进程的命令行: {newAppPath} {arguments}");
-                    
+
                     ProcessStartInfo startInfo = new ProcessStartInfo
                     {
                         FileName = newAppPath,
@@ -1276,10 +1276,10 @@ namespace Ink_Canvas.Helpers
 
                     Process.Start(startInfo);
                     LogHelper.WriteLogToFile("AutoUpdate | 新版本进程启动命令已执行");
-                    
+
                     // 等待一小段时间确保新进程启动
                     Thread.Sleep(2000);
-                    
+
                     // 关闭当前旧软件进程
                     LogHelper.WriteLogToFile("AutoUpdate | 关闭当前旧软件进程");
                     App.IsAppExitByUser = true;
@@ -1312,7 +1312,7 @@ namespace Ink_Canvas.Helpers
                 if (args.Contains("--update-mode"))
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 检测到更新模式启动");
-                    
+
                     // 解析命令行参数
                     int oldProcessId = -1;
                     string extractPath = null;
@@ -1326,7 +1326,7 @@ namespace Ink_Canvas.Helpers
                     {
                         string arg = args[i];
                         LogHelper.WriteLogToFile($"AutoUpdate | 处理参数 {i}: {arg}");
-                        
+
                         if (arg.StartsWith("--old-process-id="))
                         {
                             string processIdStr = arg.Substring("--old-process-id=".Length);
@@ -1365,7 +1365,7 @@ namespace Ink_Canvas.Helpers
                         // 启动更新任务
                         Task.Run(async () => await PerformUpdate(oldProcessId, extractPath, targetPath, isSilence));
                         return true; // 返回true表示是更新模式
-                }
+                    }
 
                     LogHelper.WriteLogToFile($"AutoUpdate | 参数验证失败 - 老进程ID: {oldProcessId}, 解压路径: {extractPath}, 目标路径: {targetPath}", LogHelper.LogType.Error);
                     return false;
@@ -1437,7 +1437,7 @@ namespace Ink_Canvas.Helpers
 
                 // 复制文件到目标目录
                 LogHelper.WriteLogToFile($"AutoUpdate | 开始复制文件从 {extractPath} 到 {targetPath}");
-                
+
                 try
                 {
                     // 使用递归复制方法，支持重试机制
@@ -1445,11 +1445,11 @@ namespace Ink_Canvas.Helpers
                     if (copySuccess)
                     {
                         LogHelper.WriteLogToFile("AutoUpdate | 文件复制完成");
-                }
-                else
-                {
+                    }
+                    else
+                    {
                         LogHelper.WriteLogToFile("AutoUpdate | 文件复制失败，部分文件可能无法覆盖", LogHelper.LogType.Error);
-                        
+
                         if (!isSilence)
                         {
                             MessageBox.Show("更新失败：部分文件无法覆盖，可能是文件正在使用中。\n请关闭所有相关程序后重试。", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1460,7 +1460,7 @@ namespace Ink_Canvas.Helpers
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 文件复制失败: {ex.Message}", LogHelper.LogType.Error);
-                    
+
                     if (!isSilence)
                     {
                         MessageBox.Show($"更新失败：文件复制时出错\n{ex.Message}", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1472,7 +1472,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     LogHelper.WriteLogToFile("AutoUpdate | 清理临时文件");
-                    
+
                     // 删除解压目录
                     if (Directory.Exists(extractPath))
                     {
@@ -1503,23 +1503,23 @@ namespace Ink_Canvas.Helpers
 
                 LogHelper.WriteLogToFile("AutoUpdate | 更新操作完成");
 
-                                // 启动更新后的应用程序
+                // 启动更新后的应用程序
                 string newAppPath = Path.Combine(targetPath, "InkCanvasForClass.exe");
                 if (File.Exists(newAppPath))
                 {
                     try
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 准备启动更新后的应用程序: {newAppPath}");
-                        
+
                         // 获取当前更新进程ID
                         int currentUpdateProcessId = Process.GetCurrentProcess().Id;
                         LogHelper.WriteLogToFile($"AutoUpdate | 当前更新进程ID: {currentUpdateProcessId}");
-                        
+
                         // 创建一个临时标记文件，用于新进程检测更新状态
                         string updateMarkerFile = Path.Combine(targetPath, "update_in_progress.tmp");
                         File.WriteAllText(updateMarkerFile, currentUpdateProcessId.ToString());
                         LogHelper.WriteLogToFile($"AutoUpdate | 创建更新标记文件: {updateMarkerFile}");
-                        
+
                         // 启动更新后的应用程序（标记为最终应用，不受相同进程影响）
                         ProcessStartInfo startInfo = new ProcessStartInfo
                         {
@@ -1528,24 +1528,24 @@ namespace Ink_Canvas.Helpers
                             WorkingDirectory = targetPath,
                             UseShellExecute = false
                         };
-                        
+
                         Process newProcess = Process.Start(startInfo);
                         LogHelper.WriteLogToFile($"AutoUpdate | 最终应用程序启动成功，PID: {newProcess?.Id}，已标记为最终应用");
-                        
+
                         // 等待一小段时间确保最终应用程序启动
                         Thread.Sleep(2000);
-                        
+
                         // 结束当前更新进程
                         LogHelper.WriteLogToFile("AutoUpdate | 更新流程完成，结束更新进程");
-                        
+
                         // 强制结束当前更新进程
                         try
                         {
                             LogHelper.WriteLogToFile("AutoUpdate | 强制结束更新进程");
-                            
+
                             // 标记为应用主动退出，避免看门狗重启
                             App.IsAppExitByUser = true;
-                            
+
                             // 写入退出信号文件，确保看门狗不会重启
                             try
                             {
@@ -1557,7 +1557,7 @@ namespace Ink_Canvas.Helpers
                             {
                                 LogHelper.WriteLogToFile($"AutoUpdate | 写入看门狗退出信号文件失败: {ex.Message}", LogHelper.LogType.Warning);
                             }
- 
+
                             Environment.Exit(0);
                         }
                         catch (Exception ex)
@@ -1569,7 +1569,7 @@ namespace Ink_Canvas.Helpers
                     catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 启动更新后的应用程序失败: {ex.Message}", LogHelper.LogType.Error);
-                        
+
                         if (!isSilence)
                         {
                             MessageBox.Show($"更新完成，但启动应用程序失败：{ex.Message}\n请手动启动应用程序。", "启动失败", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -1579,7 +1579,7 @@ namespace Ink_Canvas.Helpers
                 else
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 更新后的应用程序文件不存在: {newAppPath}", LogHelper.LogType.Error);
-                    
+
                     if (!isSilence)
                     {
                         MessageBox.Show($"更新完成，但未找到应用程序文件：{newAppPath}\n请检查更新是否成功。", "文件缺失", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1589,7 +1589,7 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | 执行更新操作时出错: {ex.Message}", LogHelper.LogType.Error);
-                
+
                 if (!isSilence)
                 {
                     MessageBox.Show($"更新失败：{ex.Message}", "更新失败", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1615,7 +1615,7 @@ namespace Ink_Canvas.Helpers
             {
                 string targetFilePath = Path.Combine(destinationDir, file.Name);
                 bool fileCopied = false;
-                
+
                 // 重试机制，最多重试3次
                 for (int retry = 0; retry < 3; retry++)
                 {
@@ -1638,7 +1638,7 @@ namespace Ink_Canvas.Helpers
                                 }
                             }
                         }
-                        
+
                         await Task.Run(() => file.CopyTo(targetFilePath));
                         fileCopied = true;
                         break;
@@ -1646,14 +1646,14 @@ namespace Ink_Canvas.Helpers
                     catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"AutoUpdate | 复制文件失败 (重试 {retry + 1}/3) {file.FullName} -> {targetFilePath}: {ex.Message}", LogHelper.LogType.Warning);
-                        
+
                         if (retry < 2)
                         {
                             Thread.Sleep(1000); // 等待1秒后重试
                         }
                     }
                 }
-                
+
                 if (!fileCopied)
                 {
                     allFilesCopied = false;
@@ -1698,7 +1698,7 @@ namespace Ink_Canvas.Helpers
                     {
                         File.Delete(targetFilePath);
                     }
-                    
+
                     await Task.Run(() => file.CopyTo(targetFilePath));
                 }
                 catch (Exception ex)
@@ -1866,7 +1866,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 执行安装，静默模式
-                InstallNewVersionApp(remoteVersion, true);  
+                InstallNewVersionApp(remoteVersion, true);
                 App.IsAppExitByUser = true;
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -1996,7 +1996,7 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
                 LogHelper.WriteLogToFile($"AutoUpdate | 手动安装版本: {version}");
-                InstallNewVersionApp(version, true);  
+                InstallNewVersionApp(version, true);
                 App.IsAppExitByUser = true;
                 Application.Current.Dispatcher.Invoke(() =>
                 {

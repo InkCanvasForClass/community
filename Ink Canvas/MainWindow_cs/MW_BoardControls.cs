@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -6,7 +7,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Media;
-using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -140,7 +140,7 @@ namespace Ink_Canvas
                     inkCanvas.EditingMode = previousEditingMode;
                     currentSelectedElement = null;
                 }
-                
+
                 var targetIndex = isBackupMain ? 0 : CurrentWhiteboardIndex;
 
                 // 先清空当前画布的墨迹
@@ -253,7 +253,7 @@ namespace Ink_Canvas
                 BtnWhiteBoardAdd_Click(sender, e);
                 return;
             }
-            
+
             // 隐藏图片选择工具栏
             if (currentSelectedElement != null)
             {
@@ -280,7 +280,7 @@ namespace Ink_Canvas
             if (WhiteboardTotalCount >= 99) return;
             if (Settings.Automation.IsAutoSaveStrokesAtClear &&
                 inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) SaveScreenShot(true);
-            
+
             // 隐藏图片选择工具栏
             if (currentSelectedElement != null)
             {
@@ -291,7 +291,7 @@ namespace Ink_Canvas
                 inkCanvas.EditingMode = previousEditingMode;
                 currentSelectedElement = null;
             }
-            
+
             SaveStrokes();
             ClearStrokes(true);
 
@@ -330,7 +330,7 @@ namespace Ink_Canvas
                 inkCanvas.EditingMode = previousEditingMode;
                 currentSelectedElement = null;
             }
-            
+
             ClearStrokes(true);
 
             if (CurrentWhiteboardIndex != WhiteboardTotalCount)

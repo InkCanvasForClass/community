@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -8,8 +10,6 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
 using MessageBox = System.Windows.MessageBox;
 using Point = System.Windows.Point;
 
@@ -178,12 +178,12 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(1);
             lastMouseDownSender = null;
-            
+
             // 先保存长按状态，避免被CancelSingleFingerDragMode重置
             bool wasLongPressed = isLongPressSelected;
-            
+
             CancelSingleFingerDragMode();
-            
+
             if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
@@ -200,12 +200,12 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(8);
             lastMouseDownSender = null;
-            
+
             // 先保存长按状态，避免被CancelSingleFingerDragMode重置
             bool wasLongPressed = isLongPressSelected;
-            
+
             CancelSingleFingerDragMode();
-            
+
             if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
@@ -222,12 +222,12 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(18);
             lastMouseDownSender = null;
-            
+
             // 先保存长按状态，避免被CancelSingleFingerDragMode重置
             bool wasLongPressed = isLongPressSelected;
-            
+
             CancelSingleFingerDragMode();
-            
+
             if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
@@ -244,12 +244,12 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(2);
             lastMouseDownSender = null;
-            
+
             // 先保存长按状态，避免被CancelSingleFingerDragMode重置
             bool wasLongPressed = isLongPressSelected;
-            
+
             CancelSingleFingerDragMode();
-            
+
             if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
@@ -266,12 +266,12 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(15);
             lastMouseDownSender = null;
-            
+
             // 先保存长按状态，避免被CancelSingleFingerDragMode重置
             bool wasLongPressed = isLongPressSelected;
-            
+
             CancelSingleFingerDragMode();
-            
+
             if (wasLongPressed)
             {
                 if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
@@ -484,7 +484,7 @@ namespace Ink_Canvas
             {
                 // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                
+
                 if (isWaitUntilNextTouchDown && dec.Count > 1) return;
                 if (dec.Count > 1)
                 {
@@ -512,7 +512,7 @@ namespace Ink_Canvas
                     }
                     return;
                 }
-                
+
                 // 修复：双曲线绘制时，第二笔应该基于第一笔的起点，而不是触摸实时位置
                 Point touchPoint = e.GetTouchPoint(inkCanvas).Position;
                 if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
@@ -526,7 +526,7 @@ namespace Ink_Canvas
                     // 其他情况正常处理
                     MouseTouchMove(touchPoint);
                 }
-                
+
                 return; // 处理完几何绘制后直接返回，不执行后面的代码
             }
 
@@ -890,7 +890,7 @@ namespace Ink_Canvas
 
                     lastTempStroke = stroke;
                     inkCanvas.Strokes.Add(stroke);
-                    
+
                     // 如果启用了圆心标记功能，则绘制圆心
                     if (Settings.Canvas.ShowCircleCenter)
                     {
@@ -995,7 +995,7 @@ namespace Ink_Canvas
 
                     lastTempStrokeCollection = strokes;
                     inkCanvas.Strokes.Add(strokes);
-                    
+
                     // 如果启用了圆心标记功能，则绘制圆心
                     if (Settings.Canvas.ShowCircleCenter)
                     {
@@ -1021,7 +1021,7 @@ namespace Ink_Canvas
                                 new Point(endP.X, 2 * iniP.Y - endP.Y)));
                         drawMultiStepShapeSpecialParameter3 = k;
                         drawMultiStepShapeSpecialStrokeCollection = strokes;
-                        
+
                         // 修复：第一笔绘制的辅助线应该立即显示在画布上
                         try
                         {
@@ -1120,10 +1120,10 @@ namespace Ink_Canvas
                     {
                         // 删除第二笔的临时笔画
                         inkCanvas.Strokes.Remove(lastTempStrokeCollection);
-                        
+
                         // 创建包含辅助线和双曲线的完整笔画集合
                         var completeStrokes = new StrokeCollection();
-                        
+
                         // 添加第一笔的辅助线
                         if (drawMultiStepShapeSpecialStrokeCollection != null && drawMultiStepShapeSpecialStrokeCollection.Count > 0)
                         {
@@ -1132,13 +1132,13 @@ namespace Ink_Canvas
                                 completeStrokes.Add(stroke1.Clone());
                             }
                         }
-                        
+
                         // 添加第二笔的双曲线
                         foreach (var stroke1 in strokes)
                         {
                             completeStrokes.Add(stroke1.Clone());
                         }
-                        
+
                         lastTempStrokeCollection = completeStrokes;
                         inkCanvas.Strokes.Add(completeStrokes);
                     }
@@ -1523,7 +1523,7 @@ namespace Ink_Canvas
 
             return pointList;
         }
-        
+
         private StrokeCollection GenerateDashedLineEllipseStrokeCollection(Point st, Point ed, bool isDrawTop = true,
             bool isDrawBottom = true)
         {
@@ -1671,14 +1671,14 @@ namespace Ink_Canvas
             var mousePoint = e.GetPosition(this);
             var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
                 new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
-            
+
             // 如果鼠标点击发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收鼠标事件
             if (floatingBarBounds.Contains(mousePoint))
             {
                 // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收鼠标事件
                 return;
             }
-            
+
             inkCanvas.CaptureMouse();
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
@@ -1968,7 +1968,7 @@ namespace Ink_Canvas
                 }
             }
         }
-        
+
         private void EnterShapeDrawingMode(int mode)
         {
             forceEraser = true;
@@ -1988,7 +1988,7 @@ namespace Ink_Canvas
             {
                 // 创建一个点作为圆心标记
                 var centerSize = 0.5; // 圆心标记的大小
-                
+
                 // 创建一个小圆作为圆心标记
                 var circlePoints = new List<Point>();
                 for (double angle = 0; angle <= 2 * Math.PI; angle += 0.1)
@@ -1998,18 +1998,18 @@ namespace Ink_Canvas
                         centerPoint.Y + centerSize * Math.Sin(angle)
                     ));
                 }
-                
+
                 // 绘制圆心点
                 var point = new StylusPointCollection(circlePoints);
                 var stroke = new Stroke(point)
                 {
                     DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                 };
-                
+
                 // 设置圆心点的样式
                 stroke.DrawingAttributes.Width = 2.0;
                 stroke.DrawingAttributes.Height = 2.0;
-                
+
                 // 添加到画布
                 inkCanvas.Strokes.Add(stroke);
             }

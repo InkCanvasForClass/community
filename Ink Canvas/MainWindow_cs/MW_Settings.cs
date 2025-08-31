@@ -1,3 +1,7 @@
+using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using Newtonsoft.Json;
+using OSVersionExtension;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -10,10 +14,6 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Hardcodet.Wpf.TaskbarNotification;
-using Ink_Canvas.Helpers;
-using Newtonsoft.Json;
-using OSVersionExtension;
 using Application = System.Windows.Application;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
@@ -984,7 +984,7 @@ namespace Ink_Canvas
 
             PPTBtnPreviewRSTransform.Y = -(Settings.PowerPointSettings.PPTRSButtonPosition * 0.5);
             PPTBtnPreviewLSTransform.Y = -(Settings.PowerPointSettings.PPTLSButtonPosition * 0.5);
-            
+
             PPTBtnPreviewLBTransform.X = -(Settings.PowerPointSettings.PPTLBButtonPosition * 0.5);
             PPTBtnPreviewRBTransform.X = -(Settings.PowerPointSettings.PPTRBButtonPosition * 0.5);
         }
@@ -1918,7 +1918,7 @@ namespace Ink_Canvas
             Settings.Appearance.ViewboxFloatingBarOpacityValue = 1.0;
             Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue = 1.0;
             Settings.Appearance.EnableTrayIcon = true;
-        
+
             // 浮动栏按钮显示控制默认值
             Settings.Appearance.IsShowShapeButton = true;
             Settings.Appearance.IsShowUndoButton = true;
@@ -1929,8 +1929,8 @@ namespace Ink_Canvas
             Settings.Appearance.IsShowLassoSelectButton = true;
             Settings.Appearance.IsShowClearAndMouseButton = true;
             Settings.Appearance.IsShowQuickColorPalette = false;
-            Settings.Appearance.QuickColorPaletteDisplayMode = 1; 
-            Settings.Appearance.EraserDisplayOption = 0; 
+            Settings.Appearance.QuickColorPaletteDisplayMode = 1;
+            Settings.Appearance.EraserDisplayOption = 0;
 
             Settings.Automation.IsAutoFoldInEasiNote = true;
             Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno = true;
@@ -2032,7 +2032,7 @@ namespace Ink_Canvas
                 LoadSettings();
                 isLoaded = true;
 
-                ToggleSwitchRunAtStartup.IsOn = false; 
+                ToggleSwitchRunAtStartup.IsOn = false;
             }
             catch { }
 
@@ -2488,7 +2488,7 @@ namespace Ink_Canvas
             UpdateFloatingBarButtonsVisibility();
             SaveSettingsToFile();
         }
-        
+
         private void CheckBoxShowLassoSelectButton_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2577,33 +2577,33 @@ namespace Ink_Canvas
                 // 形状按钮
                 if (ShapeDrawFloatingBarBtn != null)
                     ShapeDrawFloatingBarBtn.Visibility = Settings.Appearance.IsShowShapeButton ? Visibility.Visible : Visibility.Collapsed;
-                
+
                 // 撤销按钮
                 if (SymbolIconUndo != null)
                     SymbolIconUndo.Visibility = Settings.Appearance.IsShowUndoButton ? Visibility.Visible : Visibility.Collapsed;
-                
+
                 // 重做按钮
                 if (SymbolIconRedo != null)
                     SymbolIconRedo.Visibility = Settings.Appearance.IsShowRedoButton ? Visibility.Visible : Visibility.Collapsed;
-                
+
                 // 清空按钮
                 if (SymbolIconDelete != null)
                     SymbolIconDelete.Visibility = Settings.Appearance.IsShowClearButton ? Visibility.Visible : Visibility.Collapsed;
-                
+
                 // 白板按钮
                 if (WhiteboardFloatingBarBtn != null)
                     WhiteboardFloatingBarBtn.Visibility = Settings.Appearance.IsShowWhiteboardButton ? Visibility.Visible : Visibility.Collapsed;
-                
+
                 // 隐藏按钮
                 if (Fold_Icon != null)
                     Fold_Icon.Visibility = Settings.Appearance.IsShowHideButton ? Visibility.Visible : Visibility.Collapsed;
-                
-                                // 快捷调色盘
+
+                // 快捷调色盘
                 if (QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
                 {
                     bool shouldShow = Settings.Appearance.IsShowQuickColorPalette && inkCanvas.EditingMode == InkCanvasEditingMode.Ink;
                     bool wasVisible = QuickColorPalettePanel.Visibility == Visibility.Visible || QuickColorPaletteSingleRowPanel.Visibility == Visibility.Visible;
-                    
+
                     if (shouldShow)
                     {
                         // 根据显示模式选择显示哪个面板
@@ -2625,7 +2625,7 @@ namespace Ink_Canvas
                         QuickColorPalettePanel.Visibility = Visibility.Collapsed;
                         QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
                     }
-                    
+
                     // 如果快捷调色盘的可见性发生变化，重新计算浮动栏位置
                     if (wasVisible != shouldShow && !isFloatingBarFolded)
                     {
@@ -2647,15 +2647,15 @@ namespace Ink_Canvas
                         }
                     }
                 }
-                
+
                 // 套索选择按钮
                 if (SymbolIconSelect != null)
                     SymbolIconSelect.Visibility = Settings.Appearance.IsShowLassoSelectButton ? Visibility.Visible : Visibility.Collapsed;
-                
+
                 // 清并鼠按钮
                 if (CursorWithDelFloatingBarBtn != null)
                     CursorWithDelFloatingBarBtn.Visibility = Settings.Appearance.IsShowClearAndMouseButton ? Visibility.Visible : Visibility.Collapsed;
-                
+
                 // 橡皮按钮显示控制
                 if (Eraser_Icon != null && EraserByStrokes_Icon != null)
                 {
@@ -2679,7 +2679,7 @@ namespace Ink_Canvas
                             break;
                     }
                 }
-                
+
                 // 在按钮可见性更新后，重新计算当前高光位置
                 // 延迟执行以确保UI更新完成
                 Dispatcher.BeginInvoke(new Action(async () =>
@@ -2688,14 +2688,14 @@ namespace Ink_Canvas
                     {
                         // 等待UI完全更新
                         await Task.Delay(100);
-                        
+
                         // 获取当前选中的模式并重新设置高光位置
                         string selectedToolMode = GetCurrentSelectedMode();
                         if (!string.IsNullOrEmpty(selectedToolMode))
                         {
                             SetFloatingBarHighlightPosition(selectedToolMode);
                         }
-                        
+
                         // 重新计算浮动栏位置，因为按钮可见性变化会影响浮动栏宽度
                         if (!isFloatingBarFolded && currentMode == 0) // 新增：只在屏幕模式下重新计算浮动栏位置
                         {

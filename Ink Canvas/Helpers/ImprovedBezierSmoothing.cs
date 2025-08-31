@@ -28,13 +28,13 @@ namespace Ink_Canvas.Helpers
                 return originalStroke;
 
             var originalPoints = originalStroke.StylusPoints.ToArray();
-            
+
             // 预处理：去除噪声点
             var cleanedPoints = RemoveNoisePoints(originalPoints);
-            
+
             // 使用改进的贝塞尔曲线拟合
             var smoothedPoints = ApplyCubicBezierSmoothing(cleanedPoints);
-            
+
             // 后处理：重采样和优化
             var finalPoints = PostProcessPoints(smoothedPoints);
 
@@ -61,7 +61,7 @@ namespace Ink_Canvas.Helpers
                 var next = points[i + 1];
 
                 // 计算到前一个点的距离
-                double distToPrev = Math.Sqrt((curr.X - prev.X) * (curr.X - prev.X) + 
+                double distToPrev = Math.Sqrt((curr.X - prev.X) * (curr.X - prev.X) +
                                             (curr.Y - prev.Y) * (curr.Y - prev.Y));
 
                 // 如果距离太近，跳过这个点
@@ -148,7 +148,7 @@ namespace Ink_Canvas.Helpers
             // 计算控制点距离
             double dist1 = CalculateDistance(p0, p1);
             double dist2 = CalculateDistance(p2, p3);
-            
+
             double controlDist1 = dist1 * _config.CurveTension;
             double controlDist2 = dist2 * _config.CurveTension;
 
@@ -322,4 +322,4 @@ namespace Ink_Canvas.Helpers
             return result.ToArray();
         }
     }
-} 
+}

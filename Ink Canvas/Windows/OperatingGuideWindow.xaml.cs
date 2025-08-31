@@ -1,6 +1,6 @@
-﻿using System.Windows;
+﻿using Ink_Canvas.Helpers;
+using System.Windows;
 using System.Windows.Input;
-using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
