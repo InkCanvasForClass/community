@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.PowerPoint;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -7,7 +8,6 @@ using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Windows.Threading;
-using Microsoft.Office.Interop.PowerPoint;
 using Application = System.Windows.Application;
 using Timer = System.Timers.Timer;
 
@@ -219,7 +219,7 @@ namespace Ink_Canvas.Helpers
                 {
                     _lastSlideShowState = currentSlideShowState;
                     SlideShowStateChanged?.Invoke(currentSlideShowState);
-                    
+
                     if (!currentSlideShowState)
                     {
                         LogHelper.WriteLogToFile("检测到PPT放映已结束", LogHelper.LogType.Trace);

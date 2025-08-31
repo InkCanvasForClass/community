@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers
 {
@@ -758,26 +758,26 @@ namespace Ink_Canvas.Helpers
 
 
                 // 如果所有文件都不存在或损坏，返回新的统计对象
-            var newStats = new UsageStats
-            {
-                DeviceId = DeviceId,
-                LastLaunchTime = DateTime.Now,
-                LaunchCount = 0,
-                TotalUsageSeconds = 0,
-                AverageSessionSeconds = 0,
-                LastUpdateCheck = DateTime.MinValue,
-                UpdatePriority = UpdatePriority.Medium,
-                UsageFrequency = UsageFrequency.Medium
-            };
+                var newStats = new UsageStats
+                {
+                    DeviceId = DeviceId,
+                    LastLaunchTime = DateTime.Now,
+                    LaunchCount = 0,
+                    TotalUsageSeconds = 0,
+                    AverageSessionSeconds = 0,
+                    LastUpdateCheck = DateTime.MinValue,
+                    UpdatePriority = UpdatePriority.Medium,
+                    UsageFrequency = UsageFrequency.Medium
+                };
 
                 // 保存新统计到文件
                 SaveUsageStatsToFile(UsageStatsFilePath, newStats);
-            return newStats;
+                return newStats;
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 加载使用统计失败: {ex.Message}", LogHelper.LogType.Error);
-                
+
                 // 返回默认统计对象
                 return new UsageStats
                 {
@@ -800,7 +800,7 @@ namespace Ink_Canvas.Helpers
         {
             // 保存到主文件
             SaveUsageStatsToFile(UsageStatsFilePath, stats);
-            
+
             // 保存到备份文件
             SaveUsageStatsToFile(UsageStatsBackupPath, stats);
         }
@@ -822,7 +822,7 @@ namespace Ink_Canvas.Helpers
                     {
                         return stats;
                     }
-                    
+
 
                 }
             }
@@ -843,31 +843,31 @@ namespace Ink_Canvas.Helpers
                 if (File.Exists(filePath))
                 {
                     byte[] encryptedData = File.ReadAllBytes(filePath);
-                    
+
                     if (encryptedData.Length < 32) // SHA256校验和长度为32字节
                     {
                         LogHelper.WriteLogToFile($"DeviceIdentifier | 加密文件格式错误: {filePath}", LogHelper.LogType.Error);
                         return null;
                     }
-                    
+
                     // 提取校验和和加密数据
                     byte[] checksum = new byte[32];
                     byte[] data = new byte[encryptedData.Length - 32];
                     Array.Copy(encryptedData, 0, checksum, 0, 32);
                     Array.Copy(encryptedData, 32, data, 0, data.Length);
-                    
+
                     // 使用SHA256生成解密密钥
                     using (var sha256 = SHA256.Create())
                     {
                         byte[] keyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(DeviceId + "ICC_Usage_Stats_Salt"));
-                        
+
                         // XOR解密
                         byte[] decryptedData = new byte[data.Length];
                         for (int i = 0; i < data.Length; i++)
                         {
                             decryptedData[i] = (byte)(data[i] ^ keyBytes[i % keyBytes.Length]);
                         }
-                        
+
                         // 验证校验和
                         byte[] computedChecksum = sha256.ComputeHash(decryptedData);
                         if (!checksum.SequenceEqual(computedChecksum))
@@ -875,7 +875,7 @@ namespace Ink_Canvas.Helpers
                             LogHelper.WriteLogToFile($"DeviceIdentifier | 加密文件校验和验证失败: {filePath}", LogHelper.LogType.Error);
                             return null;
                         }
-                        
+
                         string json = Encoding.UTF8.GetString(decryptedData);
                         var stats = JsonConvert.DeserializeObject<UsageStats>(json);
                         if (stats != null && !string.IsNullOrEmpty(stats.DeviceId))
@@ -909,27 +909,27 @@ namespace Ink_Canvas.Helpers
 
                 string json = JsonConvert.SerializeObject(stats, Formatting.Indented);
                 byte[] data = Encoding.UTF8.GetBytes(json);
-                
+
                 // 使用SHA256生成加密密钥（基于设备ID）
                 using (var sha256 = SHA256.Create())
                 {
                     byte[] keyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(DeviceId + "ICC_Usage_Stats_Salt"));
-                    
+
                     // 简单的XOR加密
                     byte[] encryptedData = new byte[data.Length];
                     for (int i = 0; i < data.Length; i++)
                     {
                         encryptedData[i] = (byte)(data[i] ^ keyBytes[i % keyBytes.Length]);
                     }
-                    
+
                     // 添加SHA256校验和
                     byte[] checksum = sha256.ComputeHash(data);
                     byte[] finalData = new byte[checksum.Length + encryptedData.Length];
                     checksum.CopyTo(finalData, 0);
                     encryptedData.CopyTo(finalData, checksum.Length);
-                    
+
                     File.WriteAllBytes(filePath, finalData);
-                    
+
                     LogHelper.WriteLogToFile($"DeviceIdentifier | 加密使用统计已保存到: {filePath}");
                 }
             }
@@ -958,7 +958,7 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 记录更新检查失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
 
         /// <summary>
         /// 从备份文件恢复使用统计数据
@@ -997,7 +997,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var status = new List<string>();
-                
+
                 // 检查主文件
                 if (File.Exists(UsageStatsFilePath))
                 {
@@ -1339,7 +1339,7 @@ namespace Ink_Canvas.Helpers
 
             return descriptions.Count > 0 ? string.Join(", ", descriptions) : "普通用户";
         }
-        
+
         /// <summary>
         /// 关机时保存使用时间数据
         /// </summary>
@@ -1360,7 +1360,7 @@ namespace Ink_Canvas.Helpers
                 // 2. 计算本次会话时长（防止异常值）
                 TimeSpan sessionDuration = DateTime.Now - App.appStartTime;
                 long sessionSeconds = Math.Max(0, (long)sessionDuration.TotalSeconds);
-                
+
                 // 防止异常大的会话时长（超过24小时）
                 if (sessionSeconds > 86400)
                 {
@@ -1373,10 +1373,10 @@ namespace Ink_Canvas.Helpers
                 stats.LaunchCount++;
                 stats.AverageSessionSeconds = stats.TotalUsageSeconds / (double)Math.Max(1, stats.LaunchCount);
                 stats.LastLaunchTime = DateTime.Now;
-                
+
                 // 4. 保存数据
                 SaveUsageStats(stats);
-                
+
                 LogHelper.WriteLogToFile("DeviceIdentifier | 关机保存完成");
             }
             catch (Exception ex)

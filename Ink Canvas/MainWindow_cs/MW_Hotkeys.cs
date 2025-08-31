@@ -8,7 +8,7 @@ namespace Ink_Canvas
         private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (StackPanelPPTControls.Visibility != Visibility.Visible || currentMode != 0) return;
-            
+
             // 直接发送翻页请求到PPT放映软件，不通过软件处理
             if (e.Delta >= 120)
             {

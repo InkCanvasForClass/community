@@ -12,22 +12,22 @@ namespace Ink_Canvas.Helpers
         public double SmoothingStrength { get; set; } = 0.4;
         public double ResampleInterval { get; set; } = 2.5;
         public int InterpolationSteps { get; set; } = 12;
-        
+
         // 贝塞尔曲线参数
         public bool UseAdaptiveInterpolation { get; set; } = true;
         public double CurveTension { get; set; } = 0.3;
         public double MinCurvatureThreshold { get; set; } = 0.1;
         public double MaxCurvatureThreshold { get; set; } = 0.8;
-        
+
         // 性能参数
         public bool UseHardwareAcceleration { get; set; } = true;
         public bool UseAsyncProcessing { get; set; } = true;
         public int MaxConcurrentTasks { get; set; } = Environment.ProcessorCount;
         public int MaxPointsPerStroke { get; set; } = 10000;
-        
+
         // 质量设置
         public SmoothingQuality Quality { get; set; } = SmoothingQuality.Balanced;
-        
+
         public enum SmoothingQuality
         {
             Performance,    // 性能优先
@@ -49,7 +49,7 @@ namespace Ink_Canvas.Helpers
         public static InkSmoothingConfig FromSettings()
         {
             var config = new InkSmoothingConfig();
-            
+
             try
             {
                 // 尝试从MainWindow.Settings加载配置（兼容性）
@@ -66,7 +66,7 @@ namespace Ink_Canvas.Helpers
             {
                 Debug.WriteLine($"加载平滑配置失败: {ex.Message}");
             }
-            
+
             return config;
         }
 
@@ -85,7 +85,7 @@ namespace Ink_Canvas.Helpers
                     CurveTension = 0.2;
                     MaxConcurrentTasks = Math.Max(1, Environment.ProcessorCount / 2);
                     break;
-                    
+
                 case SmoothingQuality.Balanced:
                     SmoothingStrength = 0.4;
                     ResampleInterval = 2.5;
@@ -94,7 +94,7 @@ namespace Ink_Canvas.Helpers
                     CurveTension = 0.3;
                     MaxConcurrentTasks = Environment.ProcessorCount;
                     break;
-                    
+
                 case SmoothingQuality.Quality:
                     SmoothingStrength = 0.6;
                     ResampleInterval = 1.5;
@@ -120,7 +120,7 @@ namespace Ink_Canvas.Helpers
                     MainWindow.Settings.Canvas.UseHardwareAcceleration = UseHardwareAcceleration;
                     MainWindow.Settings.Canvas.UseAsyncInkSmoothing = UseAsyncProcessing;
                     MainWindow.Settings.Canvas.MaxConcurrentSmoothingTasks = MaxConcurrentTasks;
-                    
+
                 }
             }
             catch (Exception ex)
@@ -152,4 +152,4 @@ namespace Ink_Canvas.Helpers
                    $"张力: {CurveTension:F2}, 硬件加速: {UseHardwareAcceleration}";
         }
     }
-} 
+}

@@ -1,11 +1,11 @@
+using Newtonsoft.Json;
+using NHotkey.Wpf;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows.Input;
-using Newtonsoft.Json;
-using NHotkey.Wpf;
 
 namespace Ink_Canvas.Helpers
 {
@@ -19,7 +19,7 @@ namespace Ink_Canvas.Helpers
         private readonly MainWindow _mainWindow;
         private bool _isDisposed;
         private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
-        
+
         // 配置文件路径
         private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "HotkeyConfig.json");
         #endregion
@@ -227,7 +227,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 开始注册默认快捷键集合
-                
+
                 // 基本操作快捷键
                 RegisterHotkey("Undo", Key.Z, ModifierKeys.Control, () => _mainWindow.SymbolIconUndo_MouseUp(null, null));
                 RegisterHotkey("Redo", Key.Y, ModifierKeys.Control, () => _mainWindow.SymbolIconRedo_MouseUp(null, null));
@@ -272,14 +272,14 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 开始从配置文件加载快捷键设置
-                
+
                 // 检查是否应该注册快捷键
                 if (!_hotkeysShouldBeRegistered)
                 {
                     // 当前状态不允许注册快捷键，跳过加载
                     return;
                 }
-                
+
                 // 尝试从配置文件加载
                 if (LoadHotkeysFromConfigFile())
                 {
@@ -319,7 +319,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 LogHelper.WriteLogToFile("开始保存快捷键配置到配置文件", LogHelper.LogType.Event);
-                
+
                 if (SaveHotkeysToConfigFile())
                 {
                     LogHelper.WriteLogToFile("快捷键配置已成功保存到配置文件", LogHelper.LogType.Event);
@@ -347,7 +347,7 @@ namespace Ink_Canvas.Helpers
                 {
                     _hotkeysShouldBeRegistered = true;
                     LogHelper.WriteLogToFile("启用快捷键注册功能");
-                    
+
                     // 立即加载快捷键设置
                     LoadHotkeysFromSettings();
                 }
@@ -376,7 +376,7 @@ namespace Ink_Canvas.Helpers
                 {
                     _hotkeysShouldBeRegistered = false;
                     LogHelper.WriteLogToFile("禁用快捷键注册功能");
-                    
+
                     // 注销所有快捷键
                     UnregisterAllHotkeys();
                 }
@@ -438,20 +438,20 @@ namespace Ink_Canvas.Helpers
 
                 // 获取原有的动作
                 var originalAction = _registeredHotkeys[hotkeyName].Action;
-                
+
                 // 注销原有快捷键
                 UnregisterHotkey(hotkeyName);
-                
+
                 // 注册新的快捷键
                 var success = RegisterHotkey(hotkeyName, key, modifiers, originalAction);
-                
+
                 if (success)
                 {
                     LogHelper.WriteLogToFile($"成功更新快捷键 {hotkeyName}: {modifiers}+{key}", LogHelper.LogType.Event);
                     // 自动保存配置
                     SaveHotkeysToSettings();
                 }
-                
+
                 return success;
             }
             catch (Exception ex)
@@ -472,17 +472,17 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 通过反射访问主窗口的penType字段
-                var penTypeField = _mainWindow.GetType().GetField("penType", 
+                var penTypeField = _mainWindow.GetType().GetField("penType",
                     BindingFlags.NonPublic | BindingFlags.Instance);
-                
+
                 if (penTypeField != null)
                 {
                     penTypeField.SetValue(_mainWindow, penTypeIndex);
-                    
+
                     // 调用CheckPenTypeUIState方法更新UI状态
-                    var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState", 
+                    var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState",
                         BindingFlags.NonPublic | BindingFlags.Instance);
-                    
+
                     if (checkPenTypeMethod != null)
                     {
                         checkPenTypeMethod.Invoke(_mainWindow, null);
@@ -604,7 +604,7 @@ namespace Ink_Canvas.Helpers
                 {
                     Formatting = Formatting.Indented
                 };
-                
+
                 string jsonContent = JsonConvert.SerializeObject(config, settings);
 
                 // 直接写入原文件，覆盖原有内容
@@ -688,9 +688,9 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 通过反射访问主窗口的FloatingbarSelectionBG字段
-                var floatingbarSelectionBGField = _mainWindow.GetType().GetField("FloatingbarSelectionBG", 
+                var floatingbarSelectionBGField = _mainWindow.GetType().GetField("FloatingbarSelectionBG",
                     BindingFlags.NonPublic | BindingFlags.Instance);
-                
+
                 if (floatingbarSelectionBGField != null)
                 {
                     var floatingbarSelectionBG = floatingbarSelectionBGField.GetValue(_mainWindow);
@@ -707,7 +707,7 @@ namespace Ink_Canvas.Helpers
                                 return true; // 返回true表示应该注销快捷键
                             }
                         }
-                        
+
                         // 通过反射访问Canvas.GetLeft方法来获取高光位置
                         var canvasType = Type.GetType("System.Windows.Controls.Canvas, PresentationFramework");
                         if (canvasType != null)
@@ -719,7 +719,7 @@ namespace Ink_Canvas.Helpers
                                 if (leftPosition != null)
                                 {
                                     var position = Convert.ToDouble(leftPosition);
-                                    
+
                                     // 根据高光位置判断当前选中的工具
                                     // 位置计算基于SetFloatingBarHighlightPosition方法中的逻辑
                                     bool isMouseMode;
@@ -739,20 +739,20 @@ namespace Ink_Canvas.Helpers
                                     {
                                         isMouseMode = false;
                                     }
-                                    
+
                                     return isMouseMode;
                                 }
                             }
                         }
                     }
                 }
-                
+
                 // 如果无法获取高光状态，则回退到inkCanvas.EditingMode判断
-                
+
                 // 通过反射访问主窗口的inkCanvas字段
-                var inkCanvasField = _mainWindow.GetType().GetField("inkCanvas", 
+                var inkCanvasField = _mainWindow.GetType().GetField("inkCanvas",
                     BindingFlags.NonPublic | BindingFlags.Instance);
-                
+
                 if (inkCanvasField != null)
                 {
                     var inkCanvas = inkCanvasField.GetValue(_mainWindow);
@@ -768,23 +768,23 @@ namespace Ink_Canvas.Helpers
                                 // 检查是否为批注模式
                                 var isInkMode = editingMode.ToString().Contains("Ink");
                                 var isSelectMode = editingMode.ToString().Contains("Select");
-                                
+
                                 // 如果是批注模式或选择模式，则应该注册快捷键（返回false）
                                 // 如果是橡皮擦模式或其他模式，则不应该注册快捷键（返回true）
                                 var shouldNotRegisterHotkeys = !isInkMode && !isSelectMode;
-                                
+
                                 return shouldNotRegisterHotkeys;
                             }
                         }
                     }
                 }
-                
+
                 // 如果无法获取任何状态信息，则回退到原来的判断逻辑
-                
+
                 // 通过反射访问主窗口的currentMode字段（作为最后的备用方案）
-                var currentModeField = _mainWindow.GetType().GetField("currentMode", 
+                var currentModeField = _mainWindow.GetType().GetField("currentMode",
                     BindingFlags.NonPublic | BindingFlags.Instance);
-                
+
                 if (currentModeField != null)
                 {
                     var currentMode = currentModeField.GetValue(_mainWindow);
@@ -798,7 +798,7 @@ namespace Ink_Canvas.Helpers
                         return isSelectMode;
                     }
                 }
-                
+
                 return false; // 默认允许快捷键
             }
             catch (Exception ex)
@@ -816,7 +816,7 @@ namespace Ink_Canvas.Helpers
         {
             if (!_isDisposed)
             {
-                
+
                 _isDisposed = true;
             }
         }
@@ -861,4 +861,4 @@ namespace Ink_Canvas.Helpers
         }
         #endregion
     }
-} 
+}

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Windows;
@@ -6,7 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -193,13 +193,13 @@ namespace Ink_Canvas
                                 // 检查图片是否有位置信息，如果没有则应用居中
                                 double left = InkCanvas.GetLeft(img);
                                 double top = InkCanvas.GetTop(img);
-                                
+
                                 if (double.IsNaN(left) || double.IsNaN(top))
                                 {
                                     // 图片没有位置信息，应用居中
                                     CenterAndScaleElement(img);
                                 }
-                                
+
                                 // 重新绑定事件处理器
                                 BindElementEvents(img);
                             }
@@ -208,13 +208,13 @@ namespace Ink_Canvas
                                 // 检查媒体元素是否有位置信息，如果没有则应用居中
                                 double left = InkCanvas.GetLeft(media);
                                 double top = InkCanvas.GetTop(media);
-                                
+
                                 if (double.IsNaN(left) || double.IsNaN(top))
                                 {
                                     // 媒体元素没有位置信息，应用居中
                                     CenterAndScaleElement(media);
                                 }
-                                
+
                                 // 重新绑定事件处理器
                                 BindElementEvents(media);
                             }

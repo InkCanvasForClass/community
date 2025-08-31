@@ -1,3 +1,5 @@
+using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -5,8 +7,6 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher;
-using Newtonsoft.Json;
 
 namespace Ink_Canvas.Helpers.Plugins.BuiltIn
 {

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
@@ -8,7 +9,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -28,7 +28,7 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardCenterSide);
                     AnimationsHelper.HideWithSlideAndFade(BlackboardRightSide);
-                    
+
                     // 在PPT模式下隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
@@ -423,7 +423,7 @@ namespace Ink_Canvas
             }
 
             // 更新快捷调色盘选择指示器
-            if (penType == 0) 
+            if (penType == 0)
             {
                 UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
             }
@@ -601,7 +601,7 @@ namespace Ink_Canvas
             drawingAttributes.Height = Settings.Canvas.HighlighterWidth;
             drawingAttributes.StylusTip = StylusTip.Rectangle;
             drawingAttributes.IsHighlighter = true;
-            
+
             // 确保荧光笔模式切换后正确更新颜色和快捷调色板指示器
             ColorSwitchCheck();
         }

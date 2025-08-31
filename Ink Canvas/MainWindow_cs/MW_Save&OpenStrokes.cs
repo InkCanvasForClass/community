@@ -1,3 +1,5 @@
+using Ink_Canvas.Helpers;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,8 +14,6 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Ink_Canvas.Helpers;
-using Newtonsoft.Json;
 using Color = System.Drawing.Color;
 using File = System.IO.File;
 using Image = System.Windows.Controls.Image;

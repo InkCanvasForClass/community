@@ -554,4 +554,4 @@ namespace Ink_Canvas.Helpers.Plugins
         /// </summary>
         Error
     }
-} 
+}

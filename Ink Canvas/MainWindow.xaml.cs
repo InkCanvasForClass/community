@@ -1,3 +1,9 @@
+using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers.Plugins;
+using Ink_Canvas.Windows;
+using iNKORE.UI.WPF.Modern;
+using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -16,12 +22,6 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Ink_Canvas.Helpers;
-using Ink_Canvas.Helpers.Plugins;
-using Ink_Canvas.Windows;
-using iNKORE.UI.WPF.Modern;
-using iNKORE.UI.WPF.Modern.Controls;
-using Microsoft.Win32;
 using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Button = System.Windows.Controls.Button;
@@ -42,7 +42,7 @@ namespace Ink_Canvas
         private int currentPageIndex;
         private System.Windows.Controls.Canvas currentCanvas;
         private AutoUpdateHelper.UpdateLineGroup AvailableLatestLineGroup;
-        
+
         // 全局快捷键管理器
         private GlobalHotkeyManager _globalHotkeyManager;
 
@@ -239,11 +239,11 @@ namespace Ink_Canvas
             // 初始化窗口置顶开关
             ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
             ApplyAlwaysOnTop();
-            
+
             // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
             Activated += Window_Activated;
             Deactivated += Window_Deactivated;
-            
+
             // 为浮动栏按钮添加触摸事件支持
             AddTouchSupportToFloatingBarButtons();
         }
@@ -517,7 +517,7 @@ namespace Ink_Canvas
 
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
-            
+
             // 初始化全局快捷键管理器
             InitializeGlobalHotkeyManager();
 
@@ -657,7 +657,7 @@ namespace Ink_Canvas
             // 清理剪贴板监控
             CleanupClipboardMonitoring();
             ClipboardNotification.Stop();
-            
+
             // 清理全局快捷键管理器
             if (_globalHotkeyManager != null)
             {
@@ -1685,7 +1685,7 @@ namespace Ink_Canvas
         [DllImport("kernel32.dll")]
         private static extern uint GetCurrentProcessId();
 
-        
+
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
         private const int WS_EX_TOPMOST = 0x00000008;
@@ -1724,16 +1724,16 @@ namespace Ink_Canvas
                 {
                     // 先设置WPF的Topmost属性
                     Topmost = true;
-                    
+
                     // 使用更强的Win32 API调用来确保置顶
                     // 1. 设置窗口样式为置顶
                     int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
                     SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-                    
+
                     // 2. 使用SetWindowPos确保窗口在最顶层
-                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, 
+                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-                    
+
                     // 3. 如果启用了无焦点模式，需要特殊处理
                     if (Settings.Advanced.IsNoFocusMode)
                     {
@@ -1750,18 +1750,18 @@ namespace Ink_Canvas
                 {
                     // 取消置顶时
                     // 1. 先使用Win32 API取消置顶
-                    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, 
+                    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-                    
+
                     // 2. 移除置顶窗口样式
                     int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
                     SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
-                    
+
                     // 3. 停止置顶维护定时器
                     StopTopmostMaintenance();
-                    
+
                     // 注意：这里不直接设置Topmost，让其他代码根据模式决定
-                    
+
                     // 添加调试日志
                     LogHelper.WriteLogToFile("应用窗口置顶: 取消置顶", LogHelper.LogType.Trace);
                 }
@@ -1778,14 +1778,14 @@ namespace Ink_Canvas
         private void StartTopmostMaintenance()
         {
             if (isTopmostMaintenanceEnabled) return;
-            
+
             if (topmostMaintenanceTimer == null)
             {
                 topmostMaintenanceTimer = new DispatcherTimer();
                 topmostMaintenanceTimer.Interval = TimeSpan.FromMilliseconds(500); // 每500ms检查一次
                 topmostMaintenanceTimer.Tick += TopmostMaintenanceTimer_Tick;
             }
-            
+
             topmostMaintenanceTimer.Start();
             isTopmostMaintenanceEnabled = true;
             LogHelper.WriteLogToFile("启动置顶维护定时器", LogHelper.LogType.Trace);
@@ -1833,17 +1833,17 @@ namespace Ink_Canvas
                     // 检查前景窗口是否是当前应用程序的子窗口
                     var foregroundWindowProcessId = GetWindowThreadProcessId(foregroundWindow, out uint processId);
                     var currentProcessId = GetCurrentProcessId();
-                    
+
                     if (processId == currentProcessId)
                     {
                         // 如果有子窗口在前景，暂停置顶维护
                         return;
                     }
-                    
+
                     // 如果窗口不在最顶层且没有子窗口，重新设置置顶
-                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, 
+                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-                    
+
                     // 确保窗口样式正确
                     int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
                     if ((exStyle & WS_EX_TOPMOST) == 0)
@@ -1888,7 +1888,7 @@ namespace Ink_Canvas
             Settings.Advanced.IsNoFocusMode = toggle != null && toggle.IsOn;
             SaveSettingsToFile();
             ApplyNoFocusMode();
-            
+
             // 如果启用了窗口置顶，需要重新应用置顶设置以处理无焦点模式的变化
             if (Settings.Advanced.IsAlwaysOnTop)
             {
@@ -1904,7 +1904,7 @@ namespace Ink_Canvas
             SaveSettingsToFile();
             ApplyAlwaysOnTop();
         }
-        
+
         private void Window_Activated(object sender, EventArgs e)
         {
             // 窗口激活时，如果启用了置顶功能，重新应用置顶设置
@@ -1917,7 +1917,7 @@ namespace Ink_Canvas
                 }), DispatcherPriority.Loaded);
             }
         }
-        
+
         /// <summary>
         /// 窗口失去焦点时的处理
         /// </summary>
@@ -2016,7 +2016,7 @@ namespace Ink_Canvas
             {
                 Settings.Canvas.EnableInkFade = ToggleSwitchEnableInkFade.IsOn;
                 _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
-                
+
                 // 同步批注子面板中的开关状态
                 if (ToggleSwitchInkFadeInPanel != null)
                 {
@@ -2028,7 +2028,7 @@ namespace Ink_Canvas
                 {
                     ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
                 }
-                
+
                 LogHelper.WriteLogToFile($"墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
@@ -2068,7 +2068,7 @@ namespace Ink_Canvas
             {
                 Settings.Canvas.EnableInkFade = ToggleSwitchInkFadeInPanel.IsOn;
                 _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
-                
+
                 // 同步设置面板中的开关状态
                 if (ToggleSwitchEnableInkFade != null)
                 {
@@ -2080,7 +2080,7 @@ namespace Ink_Canvas
                 {
                     ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
                 }
-                
+
                 LogHelper.WriteLogToFile($"批注子面板中墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
@@ -2102,21 +2102,21 @@ namespace Ink_Canvas
                 // 查找PPT放映窗口并发送按键
                 var pptWindows = Process.GetProcessesByName("POWERPNT");
                 var wpsWindows = Process.GetProcessesByName("wpp");
-                
+
                 foreach (var process in pptWindows.Concat(wpsWindows))
                 {
                     if (process.MainWindowHandle != IntPtr.Zero)
                     {
                         // 激活PPT窗口
                         SetForegroundWindow(process.MainWindowHandle);
-                        
+
                         // 发送翻页按键消息
                         int keyCode = isPrevious ? 0x21 : 0x22; // VK_PRIOR : VK_NEXT
-                        
+
                         // 发送按键按下和释放消息
                         PostMessage(process.MainWindowHandle, 0x0100, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYDOWN
                         PostMessage(process.MainWindowHandle, 0x0101, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYUP
-                        
+
                         break;
                     }
                 }
@@ -2208,19 +2208,19 @@ namespace Ink_Canvas
             {
                 // 执行模式切换
                 inkCanvas.EditingMode = newMode;
-                
+
                 // 根据模式确定是否为鼠标模式（无工具模式）
                 bool isMouseMode = newMode == InkCanvasEditingMode.None;
-                
+
                 // 更新快捷键状态
                 if (_globalHotkeyManager != null)
                 {
                     _globalHotkeyManager.UpdateHotkeyStateForToolMode(isMouseMode);
                 }
-                
+
                 // 执行额外的操作（如果有）
                 additionalActions?.Invoke();
-                
+
                 LogHelper.WriteLogToFile($"工具模式已切换到: {newMode}, 鼠标模式: {isMouseMode}", LogHelper.LogType.Trace);
             }
             catch (Exception ex)

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using Microsoft.Win32;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -10,8 +12,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Ink_Canvas.Helpers;
-using Microsoft.Win32;
 
 namespace Ink_Canvas
 {
@@ -42,10 +42,10 @@ namespace Ink_Canvas
                     // 设置图片属性，避免被InkCanvas选择系统处理
                     image.IsHitTestVisible = true;
                     image.Focusable = false;
-                    
+
                     // 初始化InkCanvas选择设置
                     InitializeInkCanvasSelectionSettings();
-                    
+
                     // 先添加到画布
                     inkCanvas.Children.Add(image);
 
@@ -62,7 +62,7 @@ namespace Ink_Canvas
 
                             // 最后绑定事件处理器
                             BindElementEvents(image);
-                            
+
                             LogHelper.WriteLogToFile($"图片插入完成: {image.Name}");
                         }), DispatcherPriority.Loaded);
                     };
@@ -98,7 +98,7 @@ namespace Ink_Canvas
 
             // 设置光标
             element.Cursor = Cursors.Hand;
-            
+
             // 禁用InkCanvas对图片的选择处理
             element.IsHitTestVisible = true;
             element.Focusable = false;
@@ -121,7 +121,7 @@ namespace Ink_Canvas
 
                 // 选中当前元素
                 SelectElement(element);
-                
+
                 // 开始拖动
                 isDragging = true;
                 dragStartPoint = e.GetPosition(inkCanvas);
@@ -151,7 +151,7 @@ namespace Ink_Canvas
             if (sender is FrameworkElement element && isDragging && element.IsMouseCaptured)
             {
                 var currentPoint = e.GetPosition(inkCanvas);
-                
+
                 // 使用鼠标拖动的完整实现机制
                 ApplyMouseDragTransform(element, currentPoint, dragStartPoint);
 
@@ -172,7 +172,7 @@ namespace Ink_Canvas
             if (sender is FrameworkElement element)
             {
 
-                
+
                 // 使用滚轮缩放的核心机制
                 ApplyWheelScaleTransform(element, e);
 
@@ -264,7 +264,7 @@ namespace Ink_Canvas
         private void SelectElement(FrameworkElement element)
         {
             currentSelectedElement = element;
-            
+
             // 根据元素类型显示不同的选择工具栏
             if (element is Image)
             {
@@ -275,7 +275,7 @@ namespace Ink_Canvas
                     UpdateImageSelectionToolbarPosition(element);
                     BorderImageSelectionControl.Visibility = Visibility.Visible;
                 }
-                
+
                 // 隐藏笔画选择工具栏
                 if (BorderStrokeSelectionControl != null)
                 {
@@ -289,20 +289,20 @@ namespace Ink_Canvas
                 {
                     BorderStrokeSelectionControl.Visibility = Visibility.Visible;
                 }
-                
+
                 // 隐藏图片选择工具栏
                 if (BorderImageSelectionControl != null)
                 {
                     BorderImageSelectionControl.Visibility = Visibility.Collapsed;
                 }
             }
-            
+
             // 确保选择框不显示，避免蓝色边框
             if (GridInkCanvasSelectionCover != null)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
-            
+
             // 禁用InkCanvas的选择功能，去除控制点
             if (inkCanvas != null)
             {
@@ -317,24 +317,24 @@ namespace Ink_Canvas
         private void UnselectElement(FrameworkElement element)
         {
             // 去除选中效果
-            
+
             // 隐藏所有选择工具栏
             if (BorderImageSelectionControl != null)
             {
                 BorderImageSelectionControl.Visibility = Visibility.Collapsed;
             }
-            
+
             if (BorderStrokeSelectionControl != null)
             {
                 BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
             }
-            
+
             // 确保选择框隐藏
             if (GridInkCanvasSelectionCover != null)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
-            
+
 
         }
 
@@ -345,7 +345,7 @@ namespace Ink_Canvas
             {
                 // 创建MatrixTransform
                 var matrixTransform = new MatrixTransform(matrix);
-                
+
                 // 将MatrixTransform添加到TransformGroup
                 transformGroup.Children.Add(matrixTransform);
             }
@@ -358,25 +358,25 @@ namespace Ink_Canvas
             {
                 // 根据滚轮方向确定缩放比例（向上1.1倍，向下0.9倍）
                 double scaleFactor = e.Delta > 0 ? 1.1 : 0.9;
-                
+
                 // 计算选中元素的中心点作为缩放中心
                 var elementCenter = new Point(element.ActualWidth / 2, element.ActualHeight / 2);
-                
+
                 // 创建 Matrix 对象并应用 ScaleAt 变换
                 var matrix = new Matrix();
                 matrix.ScaleAt(scaleFactor, scaleFactor, elementCenter.X, elementCenter.Y);
-                
+
                 // 对选中的图片元素调用 ApplyElementMatrixTransform
                 ApplyElementMatrixTransform(element, matrix);
-                
+
                 // 对选中的笔画应用 Transform 方法（如果有选中的笔画）
                 var selectedStrokes = inkCanvas.GetSelectedStrokes();
                 foreach (var stroke in selectedStrokes)
                 {
                     stroke.Transform(matrix, false);
                 }
-                
-                
+
+
             }
             catch (Exception ex)
             {
@@ -399,20 +399,20 @@ namespace Ink_Canvas
 
                 // 保存初始变换状态用于历史记录
                 var initialTransform = transformGroup.Clone();
-                
+
                 // 创建新的 TransformGroup 并添加 MatrixTransform
                 var newTransformGroup = new TransformGroup();
                 newTransformGroup.Children.Add(new MatrixTransform(matrix));
-                
+
                 // 将新的变换组添加到现有的变换组中
                 transformGroup.Children.Add(newTransformGroup);
-                
+
                 // 如果启用了历史记录，提交变换历史
                 if (saveHistory)
                 {
                     CommitTransformHistory(element, initialTransform, transformGroup);
                 }
-                
+
 
             }
             catch (Exception ex)
@@ -428,24 +428,24 @@ namespace Ink_Canvas
             {
                 // 计算鼠标移动的位移向量
                 var delta = currentPoint - startPoint;
-                
+
                 // 创建 Matrix 对象并应用 Translate 变换
                 var matrix = new Matrix();
                 matrix.Translate(delta.X, delta.Y);
-                
+
                 // 对选中的图片元素应用矩阵变换
                 ApplyMatrixTransformToElement(element, matrix, false);
-                
+
                 // 对选中的笔画应用变换
                 var selectedStrokes = inkCanvas.GetSelectedStrokes();
                 foreach (var stroke in selectedStrokes)
                 {
                     stroke.Transform(matrix, false);
                 }
-                
+
                 // 更新选择框的位置（如果有选择框）
                 UpdateSelectionBorderPosition(delta);
-                
+
 
             }
             catch (Exception ex)
@@ -503,7 +503,7 @@ namespace Ink_Canvas
 
                 // 支持单指拖动和多指手势
                 // 可以同时进行平移、旋转和缩放
-                
+
                 // 通过 ManipulationDelta 获取手势变化信息
                 var translation = md.Translation;
                 var rotation = md.Rotation;
@@ -519,13 +519,13 @@ namespace Ink_Canvas
                 if (e.Manipulators.Count() >= 2)
                 {
                     var center = e.ManipulationOrigin;
-                    
+
                     // 应用缩放
                     if (scale.X != 1.0 || scale.Y != 1.0)
                     {
                         matrix.ScaleAt(scale.X, scale.Y, center.X, center.Y);
                     }
-                    
+
                     // 应用旋转
                     if (rotation != 0)
                     {
@@ -535,15 +535,15 @@ namespace Ink_Canvas
 
                 // 应用变换到元素
                 ApplyMatrixTransformToElement(element, matrix, false);
-                
+
                 // 应用变换到选中的笔画
                 var selectedStrokes = inkCanvas.GetSelectedStrokes();
                 foreach (var stroke in selectedStrokes)
                 {
                     stroke.Transform(matrix, false);
                 }
-                
-                
+
+
             }
             catch (Exception ex)
             {
@@ -1087,19 +1087,19 @@ namespace Ink_Canvas
                 {
                     // 创建克隆图片
                     Image clonedImage = CloneImage(originalImage);
-                    
+
                     // 添加到画布
                     inkCanvas.Children.Add(clonedImage);
-                    
+
                     // 初始化变换
                     InitializeElementTransform(clonedImage);
-                    
+
                     // 绑定事件
                     BindElementEvents(clonedImage);
-                    
+
                     // 记录历史
                     timeMachine.CommitElementInsertHistory(clonedImage);
-                    
+
                     LogHelper.WriteLogToFile($"图片克隆完成: {clonedImage.Name}");
                 }
             }
@@ -1118,10 +1118,10 @@ namespace Ink_Canvas
                 {
                     // 创建新页面
                     BtnWhiteBoardAdd_Click(null, null);
-                    
+
                     // 创建克隆图片（不添加到当前画布，因为已经创建了新页面）
                     Image clonedImage = CreateClonedImage(originalImage);
-                    
+
                     if (clonedImage != null)
                     {
                         // 设置图片属性，避免被InkCanvas选择系统处理
@@ -1139,7 +1139,7 @@ namespace Ink_Canvas
 
                         // 记录历史
                         timeMachine.CommitElementInsertHistory(clonedImage);
-                        
+
                         LogHelper.WriteLogToFile($"图片克隆到新页面完成: {clonedImage.Name}");
                     }
                 }
@@ -1158,13 +1158,13 @@ namespace Ink_Canvas
                 if (currentSelectedElement != null)
                 {
                     ApplyRotateTransform(currentSelectedElement, -45);
-                    
+
                     // 更新工具栏位置
                     if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
                     {
                         UpdateImageSelectionToolbarPosition(currentSelectedElement);
                     }
-                    
+
                     LogHelper.WriteLogToFile("图片左旋转完成");
                 }
             }
@@ -1182,13 +1182,13 @@ namespace Ink_Canvas
                 if (currentSelectedElement != null)
                 {
                     ApplyRotateTransform(currentSelectedElement, 45);
-                    
+
                     // 更新工具栏位置
                     if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
                     {
                         UpdateImageSelectionToolbarPosition(currentSelectedElement);
                     }
-                    
+
                     LogHelper.WriteLogToFile("图片右旋转完成");
                 }
             }
@@ -1207,13 +1207,13 @@ namespace Ink_Canvas
                 {
                     var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
                     ApplyScaleTransform(currentSelectedElement, 0.9, elementCenter);
-                    
+
                     // 更新工具栏位置
                     if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
                     {
                         UpdateImageSelectionToolbarPosition(currentSelectedElement);
                     }
-                    
+
                     LogHelper.WriteLogToFile("图片缩放减小完成");
                 }
             }
@@ -1229,23 +1229,23 @@ namespace Ink_Canvas
             try
             {
                 if (currentSelectedElement != null)
-            {
-                var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
-                ApplyScaleTransform(currentSelectedElement, 1.1, elementCenter);
-                
-                // 更新工具栏位置
-                if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
                 {
-                    UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    var elementCenter = new Point(currentSelectedElement.ActualWidth / 2, currentSelectedElement.ActualHeight / 2);
+                    ApplyScaleTransform(currentSelectedElement, 1.1, elementCenter);
+
+                    // 更新工具栏位置
+                    if (currentSelectedElement is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
+                    {
+                        UpdateImageSelectionToolbarPosition(currentSelectedElement);
+                    }
+
+                    LogHelper.WriteLogToFile("图片缩放增大完成");
                 }
-                
-                LogHelper.WriteLogToFile("图片缩放增大完成");
             }
-        }
-        catch (Exception ex)
-        {
-            LogHelper.WriteLogToFile($"图片缩放增大失败: {ex.Message}", LogHelper.LogType.Error);
-        }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片缩放增大失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         // 图片删除
@@ -1257,20 +1257,20 @@ namespace Ink_Canvas
                 {
                     // 保存删除前的编辑模式
                     var previousEditingMode = inkCanvas.EditingMode;
-                    
+
                     // 记录删除历史
                     timeMachine.CommitElementRemoveHistory(currentSelectedElement);
-                    
+
                     // 从画布中移除
                     inkCanvas.Children.Remove(currentSelectedElement);
-                    
+
                     // 清除选中状态
                     UnselectElement(currentSelectedElement);
                     currentSelectedElement = null;
-                    
+
                     // 恢复到删除前的编辑模式
                     inkCanvas.EditingMode = previousEditingMode;
-                    
+
                     LogHelper.WriteLogToFile($"图片删除完成，已恢复到编辑模式: {previousEditingMode}");
                 }
             }
@@ -1286,35 +1286,35 @@ namespace Ink_Canvas
             try
             {
                 Image clonedImage = new Image();
-                
+
                 // 复制图片源
                 if (originalImage.Source is BitmapSource bitmapSource)
                 {
                     clonedImage.Source = bitmapSource;
                 }
-                
+
                 // 复制属性
                 clonedImage.Width = originalImage.Width;
                 clonedImage.Height = originalImage.Height;
                 clonedImage.Stretch = originalImage.Stretch;
                 clonedImage.StretchDirection = originalImage.StretchDirection;
-                
+
                 // 复制位置（在新页面中居中显示）
                 double left = InkCanvas.GetLeft(originalImage);
                 double top = InkCanvas.GetTop(originalImage);
                 InkCanvas.SetLeft(clonedImage, left + 20); // 稍微偏移位置
                 InkCanvas.SetTop(clonedImage, top + 20);
-                
+
                 // 复制变换
                 if (originalImage.RenderTransform is TransformGroup originalTransformGroup)
                 {
                     clonedImage.RenderTransform = originalTransformGroup.Clone();
                 }
-                
+
                 // 设置名称
                 string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
                 clonedImage.Name = timestamp;
-                
+
                 return clonedImage;
             }
             catch (Exception ex)

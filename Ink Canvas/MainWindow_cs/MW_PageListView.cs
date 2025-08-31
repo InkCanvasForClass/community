@@ -1,10 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using Ink_Canvas.Helpers;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
-using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -96,7 +96,7 @@ namespace Ink_Canvas
                         inkCanvas.EditingMode = previousEditingMode;
                         currentSelectedElement = null;
                     }
-                    
+
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;
@@ -129,7 +129,7 @@ namespace Ink_Canvas
                         inkCanvas.EditingMode = previousEditingMode;
                         currentSelectedElement = null;
                     }
-                    
+
                     SaveStrokes();
                     ClearStrokes(true);
                     CurrentWhiteboardIndex = index + 1;

@@ -157,7 +157,7 @@ namespace Ink_Canvas.Helpers
                 {
                     // 检查是否应该显示PPT按钮
                     // 不仅要检查按钮设置，还要确保确实在PPT放映模式下
-                    bool shouldShowButtons = ShowPPTButton && 
+                    bool shouldShowButtons = ShowPPTButton &&
                                           _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                                           _mainWindow.PPTManager?.IsInSlideShow == true;
 
