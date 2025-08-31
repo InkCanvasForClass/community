@@ -141,19 +141,6 @@ namespace Ink_Canvas
                     element.RenderTransform = transformGroup;
                 }
 
-                // 设置位置
-                if (position.HasValue)
-                {
-                    // 在指定位置居中显示
-                    InkCanvas.SetLeft(image, position.Value.X - image.Width / 2);
-                    InkCanvas.SetTop(image, position.Value.Y - image.Height / 2);
-                }
-                else
-                {
-                    // 使用与文件选择相同的居中和缩放逻辑
-                    CenterAndScaleElement(image);
-                }
-
                 // 设置图片属性，避免被InkCanvas选择系统处理
                 image.IsHitTestVisible = true;
                 image.Focusable = false;
@@ -171,23 +158,42 @@ namespace Ink_Canvas
                 // 添加到画布
                 inkCanvas.Children.Add(image);
 
-                // 绑定事件处理器
-                if (image is FrameworkElement elementForEvents)
+                // 等待图片加载完成后再进行居中处理
+                image.Loaded += (sender, e) =>
                 {
-                    // 鼠标事件
-                    elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
-                    elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
-                    elementForEvents.MouseMove += Element_MouseMove;
-                    elementForEvents.MouseWheel += Element_MouseWheel;
+                    // 确保在UI线程中执行
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        // 先进行缩放居中处理
+                        CenterAndScaleElement(image);
+                        
+                        // 如果有指定位置，调整到指定位置
+                        if (position.HasValue)
+                        {
+                            // 在指定位置居中显示
+                            InkCanvas.SetLeft(image, position.Value.X - image.Width / 2);
+                            InkCanvas.SetTop(image, position.Value.Y - image.Height / 2);
+                        }
+                        
+                        // 绑定事件处理器
+                        if (image is FrameworkElement elementForEvents)
+                        {
+                            // 鼠标事件
+                            elementForEvents.MouseLeftButtonDown += Element_MouseLeftButtonDown;
+                            elementForEvents.MouseLeftButtonUp += Element_MouseLeftButtonUp;
+                            elementForEvents.MouseMove += Element_MouseMove;
+                            elementForEvents.MouseWheel += Element_MouseWheel;
 
-                    // 触摸事件
-                    elementForEvents.IsManipulationEnabled = true;
-                    elementForEvents.ManipulationDelta += Element_ManipulationDelta;
-                    elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
+                            // 触摸事件
+                            elementForEvents.IsManipulationEnabled = true;
+                            elementForEvents.ManipulationDelta += Element_ManipulationDelta;
+                            elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
 
-                    // 设置光标
-                    elementForEvents.Cursor = Cursors.Hand;
-                }
+                            // 设置光标
+                            elementForEvents.Cursor = Cursors.Hand;
+                        }
+                    }), System.Windows.Threading.DispatcherPriority.Loaded);
+                };
 
                 // 提交到历史记录
                 timeMachine.CommitElementInsertHistory(image);
