@@ -140,43 +140,26 @@ namespace Ink_Canvas
 
         private void RectangleModeButton_Click(object sender, RoutedEventArgs e)
         {
+            // 重置所有选择状态
+            ResetSelectionState();
+            
             _isFreehandMode = false;
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             HintText.Text = "拖拽鼠标选择矩形区域";
-
-            // 清除自由绘制的内容
-            _freehandPoints.Clear();
-            _freehandPolyline.Points.Clear();
-            _freehandPolyline.Visibility = Visibility.Collapsed;
-            SelectionPath.Visibility = Visibility.Collapsed;
-            SelectionRectangle.Visibility = Visibility.Collapsed;
-            ControlPointsCanvas.Visibility = Visibility.Collapsed;
-            SizeInfoBorder.Visibility = Visibility.Collapsed;
-            
-            // 重置遮罩
-            TransparentSelectionMask.Visibility = Visibility.Collapsed;
-            OverlayRectangle.Visibility = Visibility.Visible;
+            HintText.Visibility = Visibility.Visible;
         }
 
         private void FreehandModeButton_Click(object sender, RoutedEventArgs e)
         {
+            // 重置所有选择状态
+            ResetSelectionState();
+            
             _isFreehandMode = true;
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             HintText.Text = "按住鼠标左键绘制任意形状，松开直接截图";
-
-            // 清除矩形选择的内容
-            SelectionRectangle.Visibility = Visibility.Collapsed;
-            ControlPointsCanvas.Visibility = Visibility.Collapsed;
-            SizeInfoBorder.Visibility = Visibility.Collapsed;
-            _freehandPolyline.Visibility = Visibility.Collapsed;
-            _freehandPoints.Clear();
-            _freehandPolyline.Points.Clear();
-            
-            // 重置遮罩
-            TransparentSelectionMask.Visibility = Visibility.Collapsed;
-            OverlayRectangle.Visibility = Visibility.Visible;
+            HintText.Visibility = Visibility.Visible;
         }
 
         private void ConfirmButton_Click(object sender, RoutedEventArgs e)
@@ -213,8 +196,17 @@ namespace Ink_Canvas
                 return;
             }
 
-            if (_isAdjusting) return; // 如果正在调整，忽略新的选择
+            // 如果正在调整，忽略新的选择
+            if (_isAdjusting) return;
 
+            // 如果正在选择，先重置状态
+            if (_isSelecting)
+            {
+                _isSelecting = false;
+                ReleaseMouseCapture();
+            }
+
+            // 开始新的选择
             _isSelecting = true;
             _startPoint = e.GetPosition(this);
             _currentPoint = _startPoint;
@@ -700,6 +692,42 @@ namespace Ink_Canvas
             var dy = point.Y - yy;
 
             return Math.Sqrt(dx * dx + dy * dy);
+        }
+
+        private void ResetSelectionState()
+        {
+            // 重置所有选择相关的状态
+            _isSelecting = false;
+            _isAdjusting = false;
+            _isMoving = false;
+            _activeControlPoint = ControlPointType.None;
+            
+            // 清除自由绘制的内容
+            _freehandPoints.Clear();
+            _freehandPolyline.Points.Clear();
+            _freehandPolyline.Visibility = Visibility.Collapsed;
+            
+            // 清除矩形选择的内容
+            SelectionRectangle.Visibility = Visibility.Collapsed;
+            ControlPointsCanvas.Visibility = Visibility.Collapsed;
+            SizeInfoBorder.Visibility = Visibility.Collapsed;
+            SelectionPath.Visibility = Visibility.Collapsed;
+            AdjustModeHint.Visibility = Visibility.Collapsed;
+            
+            // 重置遮罩
+            TransparentSelectionMask.Visibility = Visibility.Collapsed;
+            OverlayRectangle.Visibility = Visibility.Visible;
+            
+            // 释放鼠标捕获
+            if (IsMouseCaptured)
+            {
+                ReleaseMouseCapture();
+            }
+            
+            // 重置选择区域
+            _currentSelection = new Rect();
+            SelectedArea = null;
+            SelectedPath = null;
         }
     }
 }
