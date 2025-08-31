@@ -320,8 +320,12 @@ namespace Ink_Canvas
                 InkCanvas.SetLeft(image, centerX);
                 InkCanvas.SetTop(image, centerY);
 
-                // 清除任何现有的RenderTransform
-                image.RenderTransform = Transform.Identity;
+                // 这样可以保持滚轮缩放和拖动功能
+                if (image.RenderTransform == null || image.RenderTransform == Transform.Identity)
+                {
+                    // 只有在没有TransformGroup时才创建
+                    InitializeScreenshotTransform(image);
+                }
 
                 LogHelper.WriteLogToFile($"截图居中完成: 位置({centerX}, {centerY}), 尺寸({newWidth}x{newHeight})");
             }
