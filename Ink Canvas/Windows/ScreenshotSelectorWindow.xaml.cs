@@ -191,7 +191,8 @@ namespace Ink_Canvas
                 hitElement is Separator ||
                 hitElement.Name == "SizeInfoBorder" ||
                 hitElement.Name == "HintText" ||
-                hitElement.Name == "AdjustModeHint"))
+                hitElement.Name == "AdjustModeHint" ||
+                hitElement.Name == "SelectionRectangle"))
             {
                 return;
             }
@@ -243,6 +244,12 @@ namespace Ink_Canvas
 
         private void Window_MouseMove(object sender, MouseEventArgs e)
         {
+            // 如果正在调整模式且正在移动，不处理窗口级别的鼠标移动
+            if (_isAdjusting && _isMoving)
+            {
+                return;
+            }
+
             if (_isSelecting)
             {
                 _currentPoint = e.GetPosition(this);
@@ -266,6 +273,12 @@ namespace Ink_Canvas
 
         private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
+            // 如果正在调整模式且正在移动，不处理窗口级别的鼠标释放
+            if (_isAdjusting && _isMoving)
+            {
+                return;
+            }
+
             if (_isSelecting)
             {
                 _isSelecting = false;
@@ -456,6 +469,12 @@ namespace Ink_Canvas
 
         private void ShowControlPoints()
         {
+            // 确保选择矩形在调整模式下可见
+            SelectionRectangle.Visibility = Visibility.Visible;
+            // 设置选择矩形的Z-index，确保它能够接收鼠标事件
+            WpfCanvas.SetZIndex(SelectionRectangle, 1001);
+            // 确保选择矩形能够接收鼠标事件
+            SelectionRectangle.IsHitTestVisible = true;
             ControlPointsCanvas.Visibility = Visibility.Visible;
             UpdateControlPointsPosition();
         }
@@ -500,6 +519,12 @@ namespace Ink_Canvas
             WpfCanvas.SetTop(SelectionRectangle, rect.Y);
             SelectionRectangle.Width = rect.Width;
             SelectionRectangle.Height = rect.Height;
+            
+            // 在选择过程中，禁用选择矩形的鼠标事件，避免干扰选择操作
+            if (_isSelecting)
+            {
+                SelectionRectangle.IsHitTestVisible = false;
+            }
 
             // 更新透明选择区域遮罩
             UpdateTransparentSelectionMask(rect);
@@ -527,7 +552,7 @@ namespace Ink_Canvas
                 TransparentSelectionMask.Visibility = Visibility.Visible;
                 OverlayRectangle.Visibility = Visibility.Collapsed;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 如果几何体操作失败，回退到原始遮罩
                 TransparentSelectionMask.Visibility = Visibility.Collapsed;
@@ -544,6 +569,13 @@ namespace Ink_Canvas
             WpfCanvas.SetTop(SelectionRectangle, rect.Y);
             SelectionRectangle.Width = rect.Width;
             SelectionRectangle.Height = rect.Height;
+            
+            // 确保选择矩形在调整模式下能够接收鼠标事件
+            if (_isAdjusting)
+            {
+                SelectionRectangle.IsHitTestVisible = true;
+                WpfCanvas.SetZIndex(SelectionRectangle, 1001);
+            }
 
             // 更新透明选择区域遮罩
             UpdateTransparentSelectionMask(rect);
@@ -694,6 +726,66 @@ namespace Ink_Canvas
             return Math.Sqrt(dx * dx + dy * dy);
         }
 
+        private void SelectionRectangle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (!_isAdjusting) return;
+
+            _isMoving = true;
+            _activeControlPoint = ControlPointType.Move;
+            _lastMousePosition = e.GetPosition(this);
+            
+            // 捕获鼠标到选择矩形
+            SelectionRectangle.CaptureMouse();
+            e.Handled = true;
+        }
+
+        private void SelectionRectangle_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_isAdjusting || !_isMoving || _activeControlPoint != ControlPointType.Move) return;
+
+            try
+            {
+                var currentPosition = e.GetPosition(this);
+                var delta = currentPosition - _lastMousePosition;
+
+                // 移动整个选择区域
+                var newRect = _currentSelection;
+                newRect.X += delta.X;
+                newRect.Y += delta.Y;
+
+                // 确保选择区域不会移出屏幕边界
+                var screenBounds = new Rect(0, 0, ActualWidth, ActualHeight);
+                if (newRect.Left < 0) newRect.X = 0;
+                if (newRect.Top < 0) newRect.Y = 0;
+                if (newRect.Right > screenBounds.Right) newRect.X = screenBounds.Right - newRect.Width;
+                if (newRect.Bottom > screenBounds.Bottom) newRect.Y = screenBounds.Bottom - newRect.Height;
+
+                _currentSelection = newRect;
+                UpdateSelectionDisplay();
+
+                _lastMousePosition = currentPosition;
+                e.Handled = true;
+            }
+            catch (Exception)
+            {
+                // 如果出现异常，停止移动
+                _isMoving = false;
+                _activeControlPoint = ControlPointType.None;
+                SelectionRectangle.ReleaseMouseCapture();
+            }
+        }
+
+        private void SelectionRectangle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (_isMoving && _activeControlPoint == ControlPointType.Move)
+            {
+                _isMoving = false;
+                _activeControlPoint = ControlPointType.None;
+                SelectionRectangle.ReleaseMouseCapture();
+                e.Handled = true;
+            }
+        }
+
         private void ResetSelectionState()
         {
             // 重置所有选择相关的状态
@@ -709,6 +801,7 @@ namespace Ink_Canvas
             
             // 清除矩形选择的内容
             SelectionRectangle.Visibility = Visibility.Collapsed;
+            SelectionRectangle.IsHitTestVisible = false;
             ControlPointsCanvas.Visibility = Visibility.Collapsed;
             SizeInfoBorder.Visibility = Visibility.Collapsed;
             SelectionPath.Visibility = Visibility.Collapsed;
@@ -722,6 +815,12 @@ namespace Ink_Canvas
             if (IsMouseCaptured)
             {
                 ReleaseMouseCapture();
+            }
+            
+            // 释放选择矩形的鼠标捕获
+            if (SelectionRectangle.IsMouseCaptured)
+            {
+                SelectionRectangle.ReleaseMouseCapture();
             }
             
             // 重置选择区域

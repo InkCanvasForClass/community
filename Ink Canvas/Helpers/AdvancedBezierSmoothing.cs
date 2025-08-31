@@ -128,7 +128,7 @@ namespace Ink_Canvas.Helpers
             if (points.Length < 4) return points;
 
             var result = new List<StylusPoint>();
-            
+
             // 添加第一个点
             result.Add(points[0]);
 
@@ -142,9 +142,9 @@ namespace Ink_Canvas.Helpers
 
                 // 计算改进的控制点
                 var controlPoints = CalculateImprovedControlPoints(p0, p1, p2, p3);
-                
+
                 // 限制插值步数，避免点数爆炸
-                int steps = Math.Min(UseAdaptiveInterpolation ? 
+                int steps = Math.Min(UseAdaptiveInterpolation ?
                     CalculateAdaptiveSteps(p0, p1, p2, p3) : InterpolationSteps, 16);
 
                 // 生成贝塞尔曲线点，但跳过第一个点避免重复
@@ -179,7 +179,7 @@ namespace Ink_Canvas.Helpers
             // 计算控制点距离（基于点间距离）
             double dist1 = Math.Sqrt((p1.X - p0.X) * (p1.X - p0.X) + (p1.Y - p0.Y) * (p1.Y - p0.Y));
             double dist2 = Math.Sqrt((p3.X - p2.X) * (p3.X - p2.X) + (p3.Y - p2.Y) * (p3.Y - p2.Y));
-            
+
             double controlDist1 = dist1 * CurveTension;
             double controlDist2 = dist2 * CurveTension;
 
@@ -214,7 +214,7 @@ namespace Ink_Canvas.Helpers
             // 基于长度和曲率计算步数
             int baseSteps = Math.Max(8, Math.Min(20, (int)(totalLength / 10)));
             int curvatureSteps = (int)(curvature * 10);
-            
+
             return Math.Max(InterpolationSteps, Math.Min(24, baseSteps + curvatureSteps));
         }
 

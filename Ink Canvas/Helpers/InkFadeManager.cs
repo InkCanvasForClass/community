@@ -63,7 +63,7 @@ namespace Ink_Canvas.Helpers
         /// <param name="endPoint">抬笔点</param>
         public void AddFadingStroke(Stroke stroke, Point startPoint, Point endPoint)
         {
-            if (!IsEnabled || stroke == null) 
+            if (!IsEnabled || stroke == null)
             {
                 return;
             }
@@ -238,12 +238,12 @@ namespace Ink_Canvas.Helpers
         public void UpdateFadeTime(int fadeTime)
         {
             FadeTime = fadeTime;
-            
+
             foreach (var kvp in _fadeTimers)
             {
                 var stroke = kvp.Key;
                 var timer = kvp.Value;
-                
+
                 timer.Stop();
                 timer.Interval = TimeSpan.FromMilliseconds(FadeTime);
                 timer.Start();
@@ -283,14 +283,14 @@ namespace Ink_Canvas.Helpers
             {
                 // 创建路径几何，使用墨迹的实际位置
                 var geometry = stroke.GetGeometry();
-                if (geometry == null) 
+                if (geometry == null)
                 {
                     return null;
                 }
 
                 // 获取绘画属性
                 var drawingAttribs = stroke.DrawingAttributes;
-                
+
                 // 创建路径元素，确保使用正确的绘画属性
                 var path = new Path
                 {
@@ -302,7 +302,7 @@ namespace Ink_Canvas.Helpers
                     StrokeLineJoin = PenLineJoin.Round,
                     Fill = drawingAttribs.IsHighlighter ? new SolidColorBrush(drawingAttribs.Color) : null, // 高亮笔需要填充
                     Opacity = 0.95, // 初始透明度更高，显得更自然
-                    
+
                     // 优化渲染质量
                     UseLayoutRounding = false,
                     SnapsToDevicePixels = false
@@ -312,19 +312,19 @@ namespace Ink_Canvas.Helpers
                 if (drawingAttribs.IsHighlighter)
                 {
                     path.Opacity = 0.4; // 高亮笔初始透明度更低，更符合荧光笔特性
-                    
+
                     // 为高亮笔添加特殊的混合效果
                     // 使用更柔和的笔触样式
                     path.StrokeStartLineCap = PenLineCap.Flat;
                     path.StrokeEndLineCap = PenLineCap.Flat;
                     path.StrokeLineJoin = PenLineJoin.Miter;
-                    
-                                         // 高亮笔通常需要更宽的笔触来覆盖下面的内容
-                     if (drawingAttribs.Width < 20)
-                     {
-                         path.StrokeThickness = Math.Max(drawingAttribs.Width * 1.5, 20);
-                     }
-                 }
+
+                    // 高亮笔通常需要更宽的笔触来覆盖下面的内容
+                    if (drawingAttribs.Width < 20)
+                    {
+                        path.StrokeThickness = Math.Max(drawingAttribs.Width * 1.5, 20);
+                    }
+                }
 
                 // 不设置任何变换，保持墨迹原有粗细
                 var bounds = geometry.Bounds;
@@ -356,7 +356,7 @@ namespace Ink_Canvas.Helpers
                     // 获取当前透明度和判断是否为高亮笔
                     var currentOpacity = visual.Opacity;
                     var isHighlighter = stroke.DrawingAttributes.IsHighlighter;
-                    
+
                     // 根据墨迹类型选择不同的动画效果
                     if (isHighlighter)
                     {
@@ -439,19 +439,19 @@ namespace Ink_Canvas.Helpers
             {
                 var stylusPoints = stroke.StylusPoints;
                 var totalPoints = stylusPoints.Count;
-                
+
                 // 分段算法 - 确保所有墨迹都有足够的动画效果
                 var strokeLength = CalculateStrokeLength(stylusPoints);
                 var segmentCount = CalculateOptimalSegmentCount(totalPoints, strokeLength);
-                
+
                 // 强制最小分段数量，确保短墨迹也有动画效果
                 segmentCount = Math.Max(segmentCount, 4);
-                
+
                 var pointsPerSegment = Math.Max(1, totalPoints / segmentCount);
 
                 // 隐藏原始视觉元素
                 originalVisual.Visibility = Visibility.Hidden;
-                
+
                 var segments = new List<UIElement>();
                 var parent = _mainWindow.inkCanvas?.Parent as Panel;
                 if (parent == null)
@@ -465,7 +465,7 @@ namespace Ink_Canvas.Helpers
                 {
                     var startIndex = i * pointsPerSegment;
                     var endIndex = (i == segmentCount - 1) ? totalPoints - 1 : (i + 1) * pointsPerSegment;
-                    
+
                     // 确保有足够的点来创建分段，对于短墨迹特殊处理
                     if (endIndex <= startIndex && totalPoints > 1)
                     {
@@ -473,12 +473,12 @@ namespace Ink_Canvas.Helpers
                         startIndex = i;
                         endIndex = Math.Min(i + 1, totalPoints - 1);
                     }
-                    
+
                     // 为每个分段添加重叠，确保连接处平滑
                     var overlap = Math.Max(1, pointsPerSegment / 6); // 15%的重叠，平衡平滑与速度
                     var actualStartIndex = Math.Max(0, startIndex - overlap);
                     var actualEndIndex = Math.Min(totalPoints - 1, endIndex + overlap);
-                    
+
                     var segment = CreateStrokeSegment(stroke, actualStartIndex, actualEndIndex, opacity);
                     if (segment != null)
                     {
@@ -576,10 +576,10 @@ namespace Ink_Canvas.Helpers
                 for (int i = 0; i < segments.Count; i++)
                 {
                     var segment = segments[i];
-                    
+
                     // 使用预计算的动画曲线获取延迟时间
                     var delay = animationCurve[i];
-                    
+
                     // 使用定时器延迟启动每个分段的动画
                     var timer = new DispatcherTimer
                     {
@@ -595,7 +595,7 @@ namespace Ink_Canvas.Helpers
                             lock (completedSegments)
                             {
                                 completedSegments.Add(segment);
-                                
+
                                 // 检查是否所有分段都完成了
                                 if (completedSegments.Count >= totalSegments)
                                 {
@@ -676,7 +676,7 @@ namespace Ink_Canvas.Helpers
             {
                 // 移除所有分段
                 var parent = _mainWindow.inkCanvas?.Parent as Panel;
-                
+
                 foreach (var segment in segments)
                 {
                     if (parent != null && parent.Children.Contains(segment))
@@ -729,7 +729,7 @@ namespace Ink_Canvas.Helpers
         private double CalculateStrokeLength(StylusPointCollection points)
         {
             if (points.Count < 2) return 0;
-            
+
             double totalLength = 0;
             for (int i = 1; i < points.Count; i++)
             {
@@ -749,22 +749,22 @@ namespace Ink_Canvas.Helpers
             const double PIXELS_PER_SEGMENT = 12.0; // 每段适中长度，平衡效果与速度
             const int MIN_SEGMENTS = 5; // 适当的最小分段数，确保动画效果
             const int MAX_SEGMENTS = 100; // 适中的最大分段数，平衡性能与效果
-            
+
             // 根据长度计算基础分段数
             var lengthBasedSegments = Math.Max(MIN_SEGMENTS, (int)(strokeLength / PIXELS_PER_SEGMENT));
-            
+
             // 根据点密度调整，平衡效果与速度
             var density = pointCount > 0 ? strokeLength / pointCount : 1;
             var densityFactor = Math.Max(0.4, Math.Min(2.5, density / 1.8));
-            
+
             var finalSegments = (int)(lengthBasedSegments * densityFactor);
-            
+
             // 对于短墨迹，确保至少有4个分段
             if (pointCount <= 5)
             {
                 finalSegments = Math.Max(finalSegments, 4);
             }
-            
+
             // 限制在合理范围内
             return Math.Min(MAX_SEGMENTS, Math.Max(MIN_SEGMENTS, finalSegments));
         }
@@ -778,7 +778,7 @@ namespace Ink_Canvas.Helpers
             var baseDuration = totalDuration / Math.Max(segmentCount, 1);
             var minDuration = 150; // 每段最少150ms，确保动画完整显示
             var maxDuration = 500; // 每段最多500ms，平衡速度与完整性
-            
+
             return Math.Max(minDuration, Math.Min(maxDuration, baseDuration));
         }
 
@@ -788,17 +788,17 @@ namespace Ink_Canvas.Helpers
         private int[] CreateAppleStyleAnimationCurve(int segmentCount, int totalDuration)
         {
             var curve = new int[segmentCount];
-            
+
             // 平衡速度与完整性，确保动画有足够时间播放
             var availableTime = totalDuration * 0.6; // 使用60%的总时间，给动画留足够缓冲
             var delayBetweenSegments = Math.Max(60, availableTime / Math.Max(segmentCount, 1));
-            
+
             for (int i = 0; i < segmentCount; i++)
             {
                 // 线性延迟，确保每个分段都有足够时间
                 curve[i] = (int)(i * delayBetweenSegments);
             }
-            
+
             return curve;
         }
 
@@ -829,4 +829,4 @@ namespace Ink_Canvas.Helpers
         }
         #endregion
     }
-} 
+}

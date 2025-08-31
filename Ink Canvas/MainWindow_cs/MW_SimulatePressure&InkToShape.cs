@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using Ink_Canvas.Helpers;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -62,13 +62,13 @@ namespace Ink_Canvas
                 // 获取墨迹的起点和终点
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
                 var endPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint() : new Point();
-                
+
                 // 从InkCanvas中移除墨迹，因为我们要用渐隐管理器来管理它
                 if (inkCanvas.Strokes.Contains(e.Stroke))
                 {
                     inkCanvas.Strokes.Remove(e.Stroke);
                 }
-                
+
                 // 添加到墨迹渐隐管理器
                 if (_inkFadeManager != null)
                 {
@@ -78,11 +78,11 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile("StrokeCollected: 墨迹渐隐管理器为空，无法添加墨迹", LogHelper.LogType.Error);
                 }
-                
+
                 // 墨迹渐隐模式下不参与墨迹纠正和其他处理，直接返回
                 return;
             }
-            
+
             // 标记是否进行了直线拉直
             bool wasStraightened = false;
 

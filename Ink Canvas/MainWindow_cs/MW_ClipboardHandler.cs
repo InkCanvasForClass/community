@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -9,7 +10,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Ink_Canvas.Helpers;
 using Clipboard = System.Windows.Clipboard;
 using ContextMenu = System.Windows.Controls.ContextMenu;
 using Cursors = System.Windows.Input.Cursors;
@@ -151,7 +151,7 @@ namespace Ink_Canvas
                 // 设置图片属性，避免被InkCanvas选择系统处理
                 image.IsHitTestVisible = true;
                 image.Focusable = false;
-                
+
                 // 初始化InkCanvas选择设置
                 if (inkCanvas != null)
                 {
@@ -173,7 +173,7 @@ namespace Ink_Canvas
                     {
                         // 先进行缩放居中处理
                         CenterAndScaleElement(image);
-                        
+
                         // 如果有指定位置，调整到指定位置
                         if (position.HasValue)
                         {
@@ -181,7 +181,7 @@ namespace Ink_Canvas
                             InkCanvas.SetLeft(image, position.Value.X - image.Width / 2);
                             InkCanvas.SetTop(image, position.Value.Y - image.Height / 2);
                         }
-                        
+
                         // 绑定事件处理器
                         if (image is FrameworkElement elementForEvents)
                         {

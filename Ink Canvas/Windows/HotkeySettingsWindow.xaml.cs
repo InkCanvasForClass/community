@@ -1,10 +1,10 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas.Windows
 {
@@ -30,15 +30,15 @@ namespace Ink_Canvas.Windows
             // 隐藏主窗口的设置页面
             HideMainWindowSettings();
             InitializeHotkeyItems();
-            
+
             // 延迟加载快捷键，确保快捷键管理器已完全初始化
-            Loaded += (s, e) => 
+            Loaded += (s, e) =>
             {
                 try
                 {
                     // 不启用快捷键注册功能，只读取配置文件中的快捷键信息用于显示
                     // 这样用户可以看到配置文件中保存的快捷键，但不会自动注册
-                    
+
                     // 加载当前快捷键（包括配置文件中的）
                     LoadCurrentHotkeys();
                     SetupEventHandlers();
@@ -60,62 +60,62 @@ namespace Ink_Canvas.Windows
             try
             {
                 LogHelper.WriteLogToFile("开始初始化快捷键项");
-                
+
                 // 初始化快捷键项并设置HotkeyName
                 _hotkeyItems["Undo"] = UndoHotkey;
                 UndoHotkey.HotkeyName = "Undo";
-                
+
                 _hotkeyItems["Redo"] = RedoHotkey;
                 RedoHotkey.HotkeyName = "Redo";
-                
+
                 _hotkeyItems["Clear"] = ClearHotkey;
                 ClearHotkey.HotkeyName = "Clear";
-                
+
                 _hotkeyItems["Paste"] = PasteHotkey;
                 PasteHotkey.HotkeyName = "Paste";
-                
+
                 _hotkeyItems["SelectTool"] = SelectToolHotkey;
                 SelectToolHotkey.HotkeyName = "SelectTool";
-                
+
                 _hotkeyItems["DrawTool"] = DrawToolHotkey;
                 DrawToolHotkey.HotkeyName = "DrawTool";
-                
+
                 _hotkeyItems["EraserTool"] = EraserToolHotkey;
                 EraserToolHotkey.HotkeyName = "EraserTool";
-                
+
                 _hotkeyItems["BlackboardTool"] = BlackboardToolHotkey;
                 BlackboardToolHotkey.HotkeyName = "BlackboardTool";
-                
+
                 _hotkeyItems["QuitDrawTool"] = QuitDrawToolHotkey;
                 QuitDrawToolHotkey.HotkeyName = "QuitDrawTool";
-                
+
                 _hotkeyItems["Pen1"] = Pen1Hotkey;
                 Pen1Hotkey.HotkeyName = "Pen1";
-                
+
                 _hotkeyItems["Pen2"] = Pen2Hotkey;
                 Pen2Hotkey.HotkeyName = "Pen2";
-                
+
                 _hotkeyItems["Pen3"] = Pen3Hotkey;
                 Pen3Hotkey.HotkeyName = "Pen3";
-                
+
                 _hotkeyItems["Pen4"] = Pen4Hotkey;
                 Pen4Hotkey.HotkeyName = "Pen4";
-                
+
                 _hotkeyItems["Pen5"] = Pen5Hotkey;
                 Pen5Hotkey.HotkeyName = "Pen5";
-                
+
                 _hotkeyItems["DrawLine"] = DrawLineHotkey;
                 DrawLineHotkey.HotkeyName = "DrawLine";
-                
+
                 _hotkeyItems["Screenshot"] = ScreenshotHotkey;
                 ScreenshotHotkey.HotkeyName = "Screenshot";
-                
+
                 _hotkeyItems["Hide"] = HideHotkey;
                 HideHotkey.HotkeyName = "Hide";
-                
+
                 _hotkeyItems["Exit"] = ExitHotkey;
                 ExitHotkey.HotkeyName = "Exit";
-                
+
                 LogHelper.WriteLogToFile($"成功初始化 {_hotkeyItems.Count} 个快捷键项");
             }
             catch (Exception ex)
@@ -131,7 +131,7 @@ namespace Ink_Canvas.Windows
                 // 首先尝试从配置文件获取快捷键信息
                 var configHotkeys = _hotkeyManager.GetHotkeysFromConfigFile();
                 LogHelper.WriteLogToFile($"配置文件中的快捷键数量: {configHotkeys.Count}");
-                
+
                 // 显示配置文件中的快捷键
                 foreach (var hotkey in configHotkeys)
                 {
@@ -141,7 +141,7 @@ namespace Ink_Canvas.Windows
                         LogHelper.WriteLogToFile($"从配置文件设置快捷键项: {hotkey.Name} -> {hotkey.Modifiers}+{hotkey.Key}");
                     }
                 }
-                
+
                 // 为没有快捷键的项目设置默认显示值（仅用于UI显示，不实际注册）
                 foreach (var kvp in _hotkeyItems)
                 {
@@ -246,11 +246,11 @@ namespace Ink_Canvas.Windows
             try
             {
                 LogHelper.WriteLogToFile($"收到快捷键变更事件: {e.HotkeyName} -> {e.Modifiers}+{e.Key}");
-                
+
                 // 检查快捷键冲突
                 if (IsHotkeyConflict(e.Key, e.Modifiers, e.HotkeyName))
                 {
-                    MessageBox.Show($"快捷键 {e.Modifiers}+{e.Key} 已被其他功能使用，请选择其他组合。", 
+                    MessageBox.Show($"快捷键 {e.Modifiers}+{e.Key} 已被其他功能使用，请选择其他组合。",
                                   "快捷键冲突", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
@@ -270,14 +270,14 @@ namespace Ink_Canvas.Windows
             var registeredHotkeys = _hotkeyManager.GetRegisteredHotkeys();
             foreach (var hotkey in registeredHotkeys)
             {
-                if (hotkey.Name != excludeHotkeyName && 
-                    hotkey.Key == key && 
+                if (hotkey.Name != excludeHotkeyName &&
+                    hotkey.Key == key &&
                     hotkey.Modifiers == modifiers)
                 {
                     return true;
                 }
             }
-            
+
             // 检查是否与默认快捷键冲突（如果当前快捷键项还没有注册）
             if (excludeHotkeyName != null && _hotkeyItems.TryGetValue(excludeHotkeyName, out var currentItem))
             {
@@ -299,7 +299,7 @@ namespace Ink_Canvas.Windows
                     }
                 }
             }
-            
+
             return false;
         }
 
@@ -308,30 +308,30 @@ namespace Ink_Canvas.Windows
             try
             {
                 LogHelper.WriteLogToFile($"开始更新快捷键: {hotkeyName} -> {modifiers}+{key}");
-                
+
                 // 先注销原有的快捷键（如果存在）
                 _hotkeyManager.UnregisterHotkey(hotkeyName);
                 LogHelper.WriteLogToFile($"已注销原有快捷键: {hotkeyName}");
-                
+
                 // 根据快捷键名称获取对应的动作
                 var action = GetActionForHotkey(hotkeyName);
                 if (action != null)
                 {
                     LogHelper.WriteLogToFile($"找到快捷键动作: {hotkeyName}");
-                    
+
                     // 直接注册新的快捷键
                     if (_hotkeyManager.RegisterHotkey(hotkeyName, key, modifiers, action))
                     {
                         LogHelper.WriteLogToFile($"成功注册新快捷键: {hotkeyName} -> {modifiers}+{key}");
-                        
+
                         // 立即保存到配置文件
                         _hotkeyManager.SaveHotkeysToSettings();
                         LogHelper.WriteLogToFile("已保存快捷键配置");
-                        
+
                         // 更新UI显示
                         LoadCurrentHotkeys();
                         LogHelper.WriteLogToFile("已更新UI显示");
-                        
+
                         LogHelper.WriteLogToFile($"快捷键 {hotkeyName} 已更新为 {modifiers}+{key} 并保存", LogHelper.LogType.Event);
                     }
                     else
@@ -404,17 +404,17 @@ namespace Ink_Canvas.Windows
             try
             {
                 // 通过反射访问主窗口的penType字段
-                var penTypeField = _mainWindow.GetType().GetField("penType", 
+                var penTypeField = _mainWindow.GetType().GetField("penType",
                     BindingFlags.NonPublic | BindingFlags.Instance);
-                
+
                 if (penTypeField != null)
                 {
                     penTypeField.SetValue(_mainWindow, penTypeIndex);
-                    
+
                     // 调用CheckPenTypeUIState方法更新UI状态
-                    var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState", 
+                    var checkPenTypeMethod = _mainWindow.GetType().GetMethod("CheckPenTypeUIState",
                         BindingFlags.NonPublic | BindingFlags.Instance);
-                    
+
                     if (checkPenTypeMethod != null)
                     {
                         checkPenTypeMethod.Invoke(_mainWindow, null);
@@ -437,18 +437,18 @@ namespace Ink_Canvas.Windows
             try
             {
                 // 通过反射访问主窗口的设置面板
-                var settingsBorder = _mainWindow.GetType().GetField("BorderSettings", 
+                var settingsBorder = _mainWindow.GetType().GetField("BorderSettings",
                     BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-                
+
                 if (settingsBorder != null)
                 {
                     settingsBorder.Visibility = Visibility.Collapsed;
                 }
 
                 // 隐藏设置蒙版
-                var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask", 
+                var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask",
                     BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-                
+
                 if (settingsMask != null)
                 {
                     settingsMask.Visibility = Visibility.Collapsed;
@@ -468,18 +468,18 @@ namespace Ink_Canvas.Windows
             try
             {
                 // 通过反射访问主窗口的设置面板
-                var settingsBorder = _mainWindow.GetType().GetField("BorderSettings", 
+                var settingsBorder = _mainWindow.GetType().GetField("BorderSettings",
                     BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-                
+
                 if (settingsBorder != null)
                 {
                     settingsBorder.Visibility = Visibility.Visible;
                 }
 
                 // 显示设置蒙版
-                var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask", 
+                var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask",
                     BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-                
+
                 if (settingsMask != null)
                 {
                     settingsMask.Visibility = Visibility.Visible;
@@ -513,22 +513,22 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                var result = MessageBox.Show("确定要重置所有快捷键为默认设置吗？", 
+                var result = MessageBox.Show("确定要重置所有快捷键为默认设置吗？",
                                            "确认重置", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
                     // 先注销所有现有快捷键
                     _hotkeyManager.UnregisterAllHotkeys();
-                    
+
                     // 重置为默认快捷键
                     _hotkeyManager.RegisterDefaultHotkeys();
-                    
+
                     // 立即保存到配置文件
                     _hotkeyManager.SaveHotkeysToSettings();
-                    
+
                     // 更新UI显示
                     LoadCurrentHotkeys();
-                    
+
                     MessageBox.Show("快捷键已重置为默认设置。", "重置完成", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
@@ -545,7 +545,7 @@ namespace Ink_Canvas.Windows
             {
                 // 保存快捷键配置
                 _hotkeyManager.SaveHotkeysToSettings();
-                
+
                 MessageBox.Show("快捷键设置已保存。", "保存成功", MessageBoxButton.OK, MessageBoxImage.Information);
                 Close();
             }
@@ -569,4 +569,4 @@ namespace Ink_Canvas.Windows
         public ModifierKeys Modifiers { get; set; }
     }
     #endregion
-} 
+}

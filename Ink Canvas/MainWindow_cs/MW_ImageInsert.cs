@@ -1,3 +1,4 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -11,7 +12,6 @@ using System.Windows.Forms;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Ink_Canvas.Helpers;
 using Application = System.Windows.Application;
 using Color = System.Drawing.Color;
 using Cursors = System.Windows.Input.Cursors;
@@ -190,11 +190,11 @@ namespace Ink_Canvas
 
                 // 初始化TransformGroup
                 InitializeScreenshotTransform(image);
-                
+
                 // 设置截图属性，避免被InkCanvas选择系统处理
                 image.IsHitTestVisible = true;
                 image.Focusable = false;
-                
+
                 // 初始化InkCanvas选择设置
                 InitializeInkCanvasSelectionSettings();
 
@@ -251,7 +251,7 @@ namespace Ink_Canvas
 
             // 设置光标
             image.Cursor = Cursors.Hand;
-            
+
             // 禁用InkCanvas对截图的选择处理
             image.IsHitTestVisible = true;
             image.Focusable = false;
@@ -360,13 +360,13 @@ namespace Ink_Canvas
 
                 // 创建结果位图，确保支持透明度
                 var resultBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb);
-                
+
                 // 首先将整个位图设置为透明
                 using (var resultGraphics = Graphics.FromImage(resultBitmap))
                 {
                     // 清除位图，设置为完全透明
                     resultGraphics.Clear(Color.Transparent);
-                    
+
                     // 设置高质量渲染
                     resultGraphics.SmoothingMode = SmoothingMode.AntiAlias;
                     resultGraphics.CompositingQuality = CompositingQuality.HighQuality;
@@ -406,7 +406,7 @@ namespace Ink_Canvas
 
                             // 在裁剪区域内绘制原始图像
                             resultGraphics.DrawImage(bitmap, 0, 0);
-                            
+
                             // 重置裁剪区域，确保后续操作不受影响
                             resultGraphics.ResetClip();
                         }
@@ -466,4 +466,4 @@ namespace Ink_Canvas
             return 1.0; // 默认DPI
         }
     }
-} 
+}

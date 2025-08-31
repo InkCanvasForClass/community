@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using iNKORE.UI.WPF.Modern.Controls;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -305,18 +305,18 @@ namespace Ink_Canvas
         private void inkCanvas_SelectionChanged(object sender, EventArgs e)
         {
             if (isProgramChangeStrokeSelection) return;
-            
+
             // 检查是否有图片元素被选中
             var selectedElements = inkCanvas.GetSelectedElements();
             bool hasImageElement = selectedElements.Any(element => element is Image);
-            
+
             // 如果有图片元素被选中，不显示选择框
             if (hasImageElement)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 return;
             }
-            
+
             if (inkCanvas.GetSelectedStrokes().Count == 0)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
@@ -520,7 +520,7 @@ namespace Ink_Canvas
         }
 
         #region UIElement Selection and Resize
-        
+
         private Rect GetUIElementBounds(UIElement element)
         {
             if (element is FrameworkElement fe)

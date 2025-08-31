@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using Newtonsoft.Json;
+using OSVersionExtension;
+using System;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -6,10 +10,6 @@ using System.Windows.Ink;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Hardcodet.Wpf.TaskbarNotification;
-using Ink_Canvas.Helpers;
-using Newtonsoft.Json;
-using OSVersionExtension;
 using File = System.IO.File;
 using OperatingSystem = OSVersionExtension.OperatingSystem;
 
@@ -327,10 +327,10 @@ namespace Ink_Canvas
                 CheckBoxShowClearAndMouseButton.IsChecked = Settings.Appearance.IsShowClearAndMouseButton;
                 ComboBoxEraserDisplayOption.SelectedIndex = Settings.Appearance.EraserDisplayOption;
                 ComboBoxQuickColorPaletteDisplayMode.SelectedIndex = Settings.Appearance.QuickColorPaletteDisplayMode;
-                
+
                 // 初始化快捷调色盘指示器
                 UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
-                
+
                 // 应用浮动栏按钮可见性设置
                 UpdateFloatingBarButtonsVisibility();
 

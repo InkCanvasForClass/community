@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern;
+using Microsoft.Office.Core;
+using Microsoft.Office.Interop.PowerPoint;
+using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -8,10 +12,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern;
-using Microsoft.Office.Core;
-using Microsoft.Office.Interop.PowerPoint;
 using Application = System.Windows.Application;
 using File = System.IO.File;
 using MessageBox = System.Windows.MessageBox;
@@ -265,13 +265,13 @@ namespace Ink_Canvas
                 {
                     // 在初始化墨迹管理器之前，先清理画布上的所有墨迹
                     ClearStrokes(true);
-                    
+
                     // 清理备份历史记录，防止旧演示文稿的墨迹影响新演示文稿
                     if (TimeMachineHistories != null && TimeMachineHistories.Length > 0)
                     {
                         TimeMachineHistories[0] = null;
                     }
-                    
+
                     // 初始化墨迹管理器
                     _pptInkManager?.InitializePresentation(pres);
 
@@ -291,7 +291,7 @@ namespace Ink_Canvas
                     }
 
                     _pptUIManager?.UpdateConnectionStatus(true);
-                    
+
                     LogHelper.WriteLogToFile($"已打开新演示文稿: {pres.Name}，墨迹状态已清理", LogHelper.LogType.Event);
                 });
             }

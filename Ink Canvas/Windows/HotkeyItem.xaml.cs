@@ -33,7 +33,7 @@ namespace Ink_Canvas.Windows
 
         public string DefaultKey { get; set; }
         public string DefaultModifiers { get; set; }
-        
+
         /// <summary>
         /// 快捷键名称（用于标识，如"Undo"）
         /// </summary>
@@ -94,10 +94,10 @@ namespace Ink_Canvas.Windows
         {
             BtnSetHotkey.Content = "请按键...";
             BtnSetHotkey.Background = Brushes.Orange;
-            
+
             // 设置焦点以捕获键盘事件
             Focus();
-            
+
             // 添加键盘事件处理器
             KeyDown += HotkeyItem_KeyDown;
             KeyUp += HotkeyItem_KeyUp;
@@ -107,7 +107,7 @@ namespace Ink_Canvas.Windows
         {
             BtnSetHotkey.Content = "设置";
             BtnSetHotkey.Background = Brushes.DodgerBlue;
-            
+
             // 移除键盘事件处理器
             KeyDown -= HotkeyItem_KeyDown;
             KeyUp -= HotkeyItem_KeyUp;
@@ -116,7 +116,7 @@ namespace Ink_Canvas.Windows
         private void HotkeyItem_KeyDown(object sender, KeyEventArgs e)
         {
             e.Handled = true;
-            
+
             // 忽略某些特殊键
             if (e.Key == Key.LeftShift || e.Key == Key.RightShift ||
                 e.Key == Key.LeftCtrl || e.Key == Key.RightCtrl ||
@@ -140,10 +140,10 @@ namespace Ink_Canvas.Windows
             // 设置新的快捷键
             var oldKey = _currentKey;
             var oldModifiers = _currentModifiers;
-            
+
             _currentKey = e.Key;
             _currentModifiers = modifiers;
-            
+
             UpdateHotkeyDisplay();
             StopHotkeyCapture();
 
@@ -169,4 +169,4 @@ namespace Ink_Canvas.Windows
         }
         #endregion
     }
-} 
+}

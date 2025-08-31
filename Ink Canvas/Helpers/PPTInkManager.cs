@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.Office.Interop.PowerPoint;
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Ink;
-using Microsoft.Office.Interop.PowerPoint;
 
 namespace Ink_Canvas.Helpers
 {
@@ -57,11 +57,11 @@ namespace Ink_Canvas.Helpers
                 {
                     // 完全清理之前的墨迹状态
                     ClearAllStrokes();
-                    
+
                     // 重置墨迹锁定状态
                     _inkLockUntil = DateTime.MinValue;
                     _lockedSlideIndex = -1;
-                    
+
                     // 生成演示文稿唯一标识符
                     _currentPresentationId = GeneratePresentationId(presentation);
 
@@ -164,7 +164,7 @@ namespace Ink_Canvas.Helpers
                     {
                         // 确定要保存的页面索引
                         int saveToSlideIndex = _lockedSlideIndex > 0 ? _lockedSlideIndex : slideIndex;
-                        
+
                         // 确保页面索引有效
                         if (saveToSlideIndex > 0 && saveToSlideIndex < _memoryStreams.Length)
                         {
@@ -179,7 +179,7 @@ namespace Ink_Canvas.Helpers
                     // 加载新页面的墨迹
                     var newStrokes = LoadSlideStrokes(slideIndex);
                     LogHelper.WriteLogToFile($"已切换到第{slideIndex}页，加载墨迹数量: {newStrokes.Count}", LogHelper.LogType.Trace);
-                    
+
                     return newStrokes;
                 }
                 catch (Exception ex)

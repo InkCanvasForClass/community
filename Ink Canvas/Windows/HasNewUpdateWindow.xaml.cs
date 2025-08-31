@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using MdXaml;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,9 +13,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using MdXaml;
 
 namespace Ink_Canvas
 {
@@ -340,7 +340,7 @@ namespace Ink_Canvas
                 downloadUrl = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
             }
             LogHelper.WriteLogToFile($"AutoUpdate | 开始安装版本: {version}");
-            AutoUpdateHelper.InstallNewVersionApp(version, true);  
+            AutoUpdateHelper.InstallNewVersionApp(version, true);
             App.IsAppExitByUser = true;
             Application.Current.Dispatcher.Invoke(() =>
             {

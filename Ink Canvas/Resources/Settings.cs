@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
 
 namespace Ink_Canvas
 {
@@ -93,14 +93,14 @@ namespace Ink_Canvas
         [JsonProperty("clearCanvasAlsoClearImages")]
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
-        public bool ShowCircleCenter { get; set; } 
+        public bool ShowCircleCenter { get; set; }
 
         // 墨迹渐隐功能设置
         [JsonProperty("enableInkFade")]
         public bool EnableInkFade { get; set; } // 是否启用墨迹渐隐功能
         [JsonProperty("inkFadeTime")]
         public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
-        
+
     }
 
     public enum OptionalOperation
@@ -152,7 +152,7 @@ namespace Ink_Canvas
         [JsonProperty("skippedVersion")]
         public string SkippedVersion { get; set; } = "";
         [JsonProperty("isEnableNibMode")]
-        public bool IsEnableNibMode { get; set; } 
+        public bool IsEnableNibMode { get; set; }
         [JsonProperty("isFoldAtStartup")]
         public bool IsFoldAtStartup { get; set; }
         [JsonProperty("crashAction")]
@@ -205,7 +205,7 @@ namespace Ink_Canvas
         public bool IsShowModeFingerToggleSwitch { get; set; } = true;
         [JsonProperty("theme")]
         public int Theme { get; set; }
-        
+
         // 浮动栏按钮显示控制
         [JsonProperty("isShowShapeButton")]
         public bool IsShowShapeButton { get; set; } = true;
@@ -218,7 +218,7 @@ namespace Ink_Canvas
         [JsonProperty("isShowWhiteboardButton")]
         public bool IsShowWhiteboardButton { get; set; } = true;
         [JsonProperty("isShowHideButton")]
-        public bool IsShowHideButton { get; set; } = true;     
+        public bool IsShowHideButton { get; set; } = true;
         [JsonProperty("isShowLassoSelectButton")]
         public bool IsShowLassoSelectButton { get; set; } = true;
         [JsonProperty("isShowClearAndMouseButton")]
@@ -226,12 +226,12 @@ namespace Ink_Canvas
 
         [JsonProperty("eraserDisplayOption")]
         public int EraserDisplayOption { get; set; }
-        
+
         [JsonProperty("isShowQuickColorPalette")]
         public bool IsShowQuickColorPalette { get; set; }
-        
+
         [JsonProperty("quickColorPaletteDisplayMode")]
-        public int QuickColorPaletteDisplayMode { get; set; } = 1; 
+        public int QuickColorPaletteDisplayMode { get; set; } = 1;
 
     }
 

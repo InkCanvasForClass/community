@@ -89,4 +89,4 @@ namespace Ink_Canvas.Helpers.Plugins
             base.Cleanup();
         }
     }
-} 
+}

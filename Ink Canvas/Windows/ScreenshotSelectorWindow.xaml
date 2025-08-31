@@ -43,8 +43,13 @@
             <Rectangle Name="SelectionRectangle"
                        Stroke="White"
                        StrokeThickness="1"
-                       Fill="Transparent"
-                       Visibility="Collapsed" />
+                       Fill="#01000000"
+                       Visibility="Collapsed"
+                       Panel.ZIndex="1001"
+                       MouseLeftButtonDown="SelectionRectangle_MouseLeftButtonDown"
+                       MouseLeftButtonUp="SelectionRectangle_MouseLeftButtonUp"
+                       MouseMove="SelectionRectangle_MouseMove"
+                       Cursor="SizeAll" />
 
             <!-- 任意形状选择模式 -->
             <Path Name="SelectionPath"
@@ -83,14 +88,14 @@
             </Border>
         </Canvas>
 
-        <!-- 顶部工具栏 -->
+        <!-- 底部工具栏 -->
         <Border Background="#1a1a1a" 
                 Opacity="0.95"
                 CornerRadius="8"
                 Padding="12,8"
                 HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Margin="0,20,0,0"
+                VerticalAlignment="Bottom"
+                Margin="0,0,0,80"
                 Panel.ZIndex="1000">
             <StackPanel Orientation="Horizontal">
                 <!-- 模式切换按钮 -->
@@ -164,7 +169,7 @@
                 Padding="16,10"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
-                Margin="0,0,0,20"
+                Margin="0,0,0,140"
                 Visibility="Collapsed"
                 Panel.ZIndex="1000">
             <TextBlock Text="拖拽控制点调整选择区域，或拖拽边框移动位置"

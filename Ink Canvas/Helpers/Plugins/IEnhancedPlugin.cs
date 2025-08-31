@@ -45,4 +45,4 @@ namespace Ink_Canvas.Helpers.Plugins
         /// </summary>
         void OnConfigurationChanged();
     }
-} 
+}

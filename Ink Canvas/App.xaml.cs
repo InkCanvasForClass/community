@@ -1,3 +1,8 @@
+using Hardcodet.Wpf.TaskbarNotification;
+using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
+using Microsoft.Win32;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -13,11 +18,6 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
-using Hardcodet.Wpf.TaskbarNotification;
-using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
-using Microsoft.Win32;
-using Newtonsoft.Json;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using Timer = System.Threading.Timer;
@@ -80,7 +80,7 @@ namespace Ink_Canvas
             args = Environment.GetCommandLineArgs();
             bool isUpdateMode = args.Contains("--update-mode");
             bool isFinalApp = args.Contains("--final-app");
-            
+
             if (CrashAction == CrashActionType.SilentRestart && !isUpdateMode && !isFinalApp)
             {
                 StartWatchdogIfNeeded();
@@ -465,16 +465,16 @@ namespace Ink_Canvas
         {
             // 初始化应用启动时间
             appStartTime = DateTime.Now;
-            
+
             /*if (!StoreHelper.IsStoreApp) */
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
-            
+
             // 检查是否为最终应用启动（更新后的应用）
             bool isFinalApp = e.Args.Contains("--final-app");
             bool skipMutexCheck = e.Args.Contains("--skip-mutex-check");
-            
+
             // 记录最终应用启动状态
             if (isFinalApp)
             {
@@ -499,7 +499,7 @@ namespace Ink_Canvas
 
             // 处理更新模式启动
             bool isUpdateMode = AutoUpdateHelper.HandleUpdateModeStartup(e.Args);
-            
+
             // 如果是更新模式，不显示主窗口但保持应用运行
             if (isUpdateMode)
             {
@@ -510,10 +510,10 @@ namespace Ink_Canvas
             // 检查是否存在更新标记文件
             string updateMarkerFile = Path.Combine(RootPath, "update_in_progress.tmp");
             bool isUpdateInProgress = false;
-            
+
             // 检查是否以更新模式启动
             isUpdateMode = e.Args.Contains("--update-mode");
-            
+
             // 如果是最终应用启动，立即清理更新标记文件
             if (isFinalApp)
             {
@@ -530,7 +530,7 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"App | 清理更新标记文件失败: {ex.Message}", LogHelper.LogType.Warning);
                 }
             }
-            
+
             // 如果不是最终应用启动，才检查更新标记文件
             if (!isFinalApp && File.Exists(updateMarkerFile))
             {
@@ -540,7 +540,7 @@ namespace Ink_Canvas
                     if (int.TryParse(updateProcessIdStr, out int updateProcessId))
                     {
                         LogHelper.WriteLogToFile($"App | 检测到更新标记文件，更新进程ID: {updateProcessId}");
-                        
+
                         // 检查更新进程是否还在运行
                         try
                         {
@@ -549,18 +549,18 @@ namespace Ink_Canvas
                             {
                                 LogHelper.WriteLogToFile("App | 更新进程仍在运行，等待更新完成");
                                 isUpdateInProgress = true;
-                                
+
                                 // 等待更新进程完成
                                 int waitCount = 0;
                                 const int maxWaitCount = 10; // 减少等待时间到10秒
-                                
+
                                 while (waitCount < maxWaitCount && !updateProcess.HasExited)
                                 {
                                     Thread.Sleep(500); // 减少等待间隔到500ms
                                     waitCount++;
                                     LogHelper.WriteLogToFile($"App | 等待更新进程完成... ({waitCount}/{maxWaitCount})");
                                 }
-                                
+
                                 if (updateProcess.HasExited)
                                 {
                                     LogHelper.WriteLogToFile("App | 更新进程已结束");
@@ -592,7 +592,7 @@ namespace Ink_Canvas
                         {
                             LogHelper.WriteLogToFile("App | 更新进程已不存在");
                         }
-                        
+
                         // 无论更新进程是否还在运行，都清理标记文件
                         try
                         {
@@ -633,7 +633,28 @@ namespace Ink_Canvas
                 if (!ret && !e.Args.Contains("-m")) //-m multiple
                 {
                     LogHelper.NewLog("Detected existing instance");
-                    MessageBox.Show("已有一个程序实例正在运行");
+                    
+                    // 检查是否有.icstk文件参数
+                    string icstkFile = FileAssociationManager.GetIcstkFileFromArgs(e.Args);
+                    if (!string.IsNullOrEmpty(icstkFile))
+                    {
+                        LogHelper.WriteLogToFile($"检测到已运行实例，尝试通过IPC发送文件: {icstkFile}", LogHelper.LogType.Event);
+                        
+                        // 尝试通过IPC发送文件路径给已运行实例
+                        if (FileAssociationManager.TrySendFileToExistingInstance(icstkFile))
+                        {
+                            LogHelper.WriteLogToFile("文件路径已通过IPC发送给已运行实例", LogHelper.LogType.Event);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("通过IPC发送文件路径失败", LogHelper.LogType.Warning);
+                        }
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("检测到已运行实例，但无文件参数", LogHelper.LogType.Event);
+                    }
+                    
                     LogHelper.NewLog("Ink Canvas automatically closed");
                     IsAppExitByUser = true; // 多开时标记为用户主动退出
                     // 写入退出信号，确保看门狗不会重启
@@ -668,11 +689,11 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile("App | 更新过程中，跳过重复运行检测");
                 }
-                
+
                 // 在特殊模式下，创建一个临时的Mutex以避免其他检查出错
                 string mutexName = isFinalApp ? "InkCanvasForClass CE Final" : "InkCanvasForClass CE Update";
                 mutex = new Mutex(true, mutexName, out bool tempRet);
-                
+
                 // 额外等待一小段时间确保更新进程完全退出
                 Thread.Sleep(1000);
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
@@ -681,11 +702,34 @@ namespace Ink_Canvas
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
 
             StartArgs = e.Args;
-            
+
             // 在非更新模式下创建主窗口
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
             mainWindow.Show();
+
+            // 新增：注册.icstk文件关联
+            try
+            {
+                LogHelper.WriteLogToFile("开始注册.icstk文件关联");
+                FileAssociationManager.RegisterFileAssociation();
+                FileAssociationManager.ShowFileAssociationStatus();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"注册文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 新增：启动IPC监听器
+            try
+            {
+                LogHelper.WriteLogToFile("启动IPC监听器");
+                FileAssociationManager.StartIpcListener();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动IPC监听器时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
 
             // 新增：Office注册表检测
             try
