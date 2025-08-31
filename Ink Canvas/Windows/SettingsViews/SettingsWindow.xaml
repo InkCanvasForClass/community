@@ -569,7 +569,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="使用更加明显的画笔光标" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="绘制时将使用系统默认的鼠标指针样式" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="UseObviousCursor">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -583,7 +583,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="退出批注模式后隐藏墨迹" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="切换到鼠标模式时隐藏现有墨迹（不是删除）" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="HideInkWhenExitAnnotationMode">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -597,7 +597,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="禁用模拟笔锋" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="禁用模拟笔锋有助于提升性能" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="DisablePenPressure">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -625,7 +625,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="AllowTransparency 使用黑色背景" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="使用不透明度为1的黑色背景阻止鼠标事件穿透" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="UseBlackBackgroundForTransparency">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -642,7 +642,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="保留双曲线渐近线" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="祖传代码导致的Bug，等待修复" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="KeepHyperbolaAsymptote">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -656,7 +656,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="使用墨迹擦" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="将擦除整条墨迹而非墨迹的一部分" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="UseInkEraser">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -670,19 +670,19 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="板擦橡皮大小" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="EraserSize_VerySmall">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="很小"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="EraserSize_Small">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="小"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="EraserSize_Default">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="默认"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="EraserSize_Large">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="大"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="EraserSize_VeryLarge">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="很大"/>
                                             </Border>
                                         </StackPanel>
@@ -712,22 +712,22 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="默认背景色" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
-                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="DefaultBackgroundColor_GrayBlack">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="灰黑"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="DefaultBackgroundColor_GreenBlack">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="黑板绿"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="DefaultBackgroundColor_White">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="白色"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="DefaultBackgroundColor_BlueBlack">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="蓝黑"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="DefaultBackgroundColor_EyeProtection">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="护眼色"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="DefaultBackgroundColor_PureBlack">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="纯黑"/>
                                             </Border>
                                         </StackPanel>
@@ -738,13 +738,13 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="默认稿纸格式" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
-                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="DefaultPaperFormat_None">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="无"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="DefaultPaperFormat_Dots">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="点"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="DefaultPaperFormat_Grid">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="网格"/>
                                             </Border>
                                         </StackPanel>
@@ -755,7 +755,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="创建新页时始终使用默认背景色" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="使用默认背景色而不是当前页的背景色" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="UseDefaultBackgroundColorForNewPage">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -1849,7 +1849,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="启用墨迹转形状" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="基于微软的清朝老库IACore实现" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="EnableInkToShape">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -1866,9 +1866,9 @@
                                         <Grid Height="54" VerticalAlignment="Top">
                                             <StackPanel Orientation="Vertical" Margin="18,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left">
                                                 <TextBlock Foreground="#2e3436" FontSize="14.5" Text="墨迹识别范围" HorizontalAlignment="Left"/>
-                                                <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="允许哪些墨迹自动识别并转换为标准形状" HorizontalAlignment="Left"/>
-                                            </StackPanel>
-                                            <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                                                                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="允许哪些墨迹自动识别并转换为标准形状" HorizontalAlignment="Left"/>
+                                        </StackPanel>
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="InkRecognitionRange">
                                                 <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                     <Border.Effect>
                                                         <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -1898,7 +1898,7 @@
                                                         <TextBlock Foreground="#2e3436" FontSize="14.5" Text="识别四边形" HorizontalAlignment="Left"/>
                                                         <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="矩形/平四/菱形/梯形等" HorizontalAlignment="Left"/>
                                                     </StackPanel>
-                                                    <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,18,0" Padding="3,0">
+                                                    <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,18,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="RecognizeQuadrilateral">
                                                         <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                             <Border.Effect>
                                                                 <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -1920,7 +1920,7 @@
                                                         <TextBlock Foreground="#2e3436" FontSize="14.5" Text="识别三角形" HorizontalAlignment="Left"/>
                                                         <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="等腰/直角/等边等三角形" HorizontalAlignment="Left"/>
                                                     </StackPanel>
-                                                    <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,18,0" Padding="3,0">
+                                                    <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,18,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="RecognizeTriangle">
                                                         <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                             <Border.Effect>
                                                                 <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -1942,7 +1942,7 @@
                                                         <TextBlock Foreground="#2e3436" FontSize="14.5" Text="识别圆形" HorizontalAlignment="Left"/>
                                                         <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="椭圆和正圆形" HorizontalAlignment="Left"/>
                                                     </StackPanel>
-                                                    <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,18,0" Padding="3,0">
+                                                    <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,18,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="RecognizeCircle">
                                                         <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                             <Border.Effect>
                                                                 <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -1964,7 +1964,7 @@
                                                         <TextBlock Foreground="#2e3436" FontSize="14.5" Text="识别直线" HorizontalAlignment="Left"/>
                                                         <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="检测手绘直线并拉直" HorizontalAlignment="Left"/>
                                                     </StackPanel>
-                                                    <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,18,0" Padding="3,0">
+                                                    <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,18,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="RecognizeLine">
                                                         <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                             <Border.Effect>
                                                                 <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -1982,10 +1982,10 @@
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="指定墨迹被识别后转换成什么类型进行渲染" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="InkRecognitionBehavior_Ink">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="墨迹"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="InkRecognitionBehavior_Shape">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="形状"/>
                                             </Border>
                                         </StackPanel>
@@ -2010,7 +2010,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="同心圆识别矫正" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="绘制圆中圆时识别为同心圆绘制并纠正位置关系" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="ConcentricCircleCorrection">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -2034,7 +2034,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="启用自动收纳" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="当检测到指定应用活动时自动收纳 ICC 到屏幕侧边" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="EnableAutoHide">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -2048,7 +2048,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="启用自动查杀" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="检测到指定软件运行时直接把它嘎掉" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="EnableAutoKill">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -2062,7 +2062,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="启用桌面画板悬浮窗杀手" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="查杀各大白板软件的桌面悬浮窗并用 icc 代替" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="EnableWhiteboardKiller">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -2569,7 +2569,7 @@
                                                 <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="启用基于 COM 接口的 PPT 交互功能" HorizontalAlignment="Left"/>
                                             </StackPanel>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="EnablePowerPointCom">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -2586,7 +2586,7 @@
                                                 <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="不建议使用 WPS，纯纯就一个垃圾软件" HorizontalAlignment="Left"/>
                                             </StackPanel>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="EnableWpsCom">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -2609,7 +2609,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="启用 VSTO 支持" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="VSTO 可缓解 Office 和 WPS 的 COM 接口冲突问题" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="EnableVsto">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -3246,13 +3246,13 @@
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="选择应用程序的主题" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
-                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="Theme_Light">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="浅色"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="Theme_Dark">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="深色"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="Theme_System">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="跟随系统"/>
                                             </Border>
                                         </StackPanel>
@@ -3264,10 +3264,10 @@
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="选择应用程序的语言" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
-                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="Language_Chinese">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="简体中文"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="Language_English">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="English"/>
                                             </Border>
                                         </StackPanel>
@@ -3332,7 +3332,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="崩溃时自动重启" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="应用程序崩溃时自动重启" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="AutoRestartOnCrash">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -3346,7 +3346,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="发送崩溃报告" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="自动发送崩溃报告以帮助改进应用程序" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#3584e4" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="SendCrashReport">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Right" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -3371,7 +3371,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="启用幸运随机功能" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="启用一些随机的有趣功能" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="EnableLuckyRandom">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -3411,13 +3411,13 @@
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="设置自动保存的时间间隔" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="AutoSaveInterval_30Seconds">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="30秒"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="AutoSaveInterval_1Minute">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="1分钟"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="AutoSaveInterval_5Minutes">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="5分钟"/>
                                             </Border>
                                         </StackPanel>
@@ -3440,13 +3440,13 @@
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="设置截图的图像质量" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="ScreenshotQuality_Low">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="低"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="ScreenshotQuality_Medium">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="中"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="ScreenshotQuality_High">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="高"/>
                                             </Border>
                                         </StackPanel>
@@ -3458,13 +3458,13 @@
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="选择截图的文件格式" HorizontalAlignment="Left"/>
                                         </StackPanel>
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0">
-                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1">
+                                            <Border Padding="13,7" CornerRadius="8" Background="#e1e1e1" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="ScreenshotFormat_PNG">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="PNG"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="ScreenshotFormat_JPEG">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="JPEG"/>
                                             </Border>
-                                            <Border Padding="13,7" CornerRadius="8">
+                                            <Border Padding="13,7" CornerRadius="8" MouseLeftButtonDown="OptionButton_Click" Cursor="Hand" Tag="ScreenshotFormat_BMP">
                                                 <TextBlock Foreground="#2e3436" FontSize="14" Text="BMP"/>
                                             </Border>
                                         </StackPanel>
@@ -3486,7 +3486,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="调试模式" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="启用调试模式以获取详细的错误信息" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="DebugMode">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
@@ -3500,7 +3500,7 @@
                                             <TextBlock Foreground="#2e3436" FontSize="14.5" Text="性能监控" HorizontalAlignment="Left"/>
                                             <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="显示性能监控信息" HorizontalAlignment="Left"/>
                                         </StackPanel>
-                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0">
+                                        <Border Width="48" Height="25" Background="#e1e1e1" VerticalAlignment="Center" HorizontalAlignment="Right" CornerRadius="12" Margin="0,0,15,0" Padding="3,0" MouseLeftButtonDown="ToggleSwitch_Click" Cursor="Hand" Tag="PerformanceMonitoring">
                                             <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
                                                 <Border.Effect>
                                                     <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"></DropShadowEffect>
