@@ -1003,7 +1003,11 @@ namespace Ink_Canvas
                 // 如果当前有选中的元素，取消选中状态
                 if (currentSelectedElement != null)
                 {
+                    // 保存当前编辑模式
+                    var previousEditingMode = inkCanvas.EditingMode;
                     UnselectElement(currentSelectedElement);
+                    // 恢复编辑模式
+                    inkCanvas.EditingMode = previousEditingMode;
                     currentSelectedElement = null;
                 }
             }

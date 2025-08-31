@@ -110,7 +110,11 @@ namespace Ink_Canvas
                 // 取消之前选中的元素
                 if (currentSelectedElement != null && currentSelectedElement != element)
                 {
+                    // 保存当前编辑模式
+                    var previousEditingMode = inkCanvas.EditingMode;
                     UnselectElement(currentSelectedElement);
+                    // 恢复编辑模式
+                    inkCanvas.EditingMode = previousEditingMode;
                 }
 
                 // 选中当前元素
@@ -323,11 +327,7 @@ namespace Ink_Canvas
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
             
-            // 恢复InkCanvas的编辑模式
-            if (inkCanvas != null)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-            }
+
         }
 
         // 应用矩阵变换到元素
@@ -1179,6 +1179,9 @@ namespace Ink_Canvas
             {
                 if (currentSelectedElement != null)
                 {
+                    // 保存删除前的编辑模式
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    
                     // 记录删除历史
                     timeMachine.CommitElementRemoveHistory(currentSelectedElement);
                     
@@ -1189,7 +1192,10 @@ namespace Ink_Canvas
                     UnselectElement(currentSelectedElement);
                     currentSelectedElement = null;
                     
-                    LogHelper.WriteLogToFile($"图片删除完成");
+                    // 恢复到删除前的编辑模式
+                    inkCanvas.EditingMode = previousEditingMode;
+                    
+                    LogHelper.WriteLogToFile($"图片删除完成，已恢复到编辑模式: {previousEditingMode}");
                 }
             }
             catch (Exception ex)

@@ -89,7 +89,11 @@ namespace Ink_Canvas
                     // 隐藏图片选择工具栏
                     if (currentSelectedElement != null)
                     {
+                        // 保存当前编辑模式
+                        var previousEditingMode = inkCanvas.EditingMode;
                         UnselectElement(currentSelectedElement);
+                        // 恢复编辑模式
+                        inkCanvas.EditingMode = previousEditingMode;
                         currentSelectedElement = null;
                     }
                     
@@ -118,7 +122,11 @@ namespace Ink_Canvas
                     // 隐藏图片选择工具栏
                     if (currentSelectedElement != null)
                     {
+                        // 保存当前编辑模式
+                        var previousEditingMode = inkCanvas.EditingMode;
                         UnselectElement(currentSelectedElement);
+                        // 恢复编辑模式
+                        inkCanvas.EditingMode = previousEditingMode;
                         currentSelectedElement = null;
                     }
                     
