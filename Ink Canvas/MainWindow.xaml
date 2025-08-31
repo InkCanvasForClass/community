@@ -531,6 +531,21 @@
                                     </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                             </Border>
+                            <GroupBox Name="GroupBoxNewSettings">
+                                <GroupBox.Header>
+                                    <TextBlock Margin="0,12,0,0" Text="新设置窗口" FontWeight="Bold" Foreground="#fafafa"
+                                               FontSize="26" />
+                                </GroupBox.Header>
+                                <ui:SimpleStackPanel Spacing="6" Margin="0,10,0,0">
+                                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" Foreground="#fafafa">
+                                        打开新的设置窗口，提供更丰富的设置选项和更好的用户体验。
+                                    </TextBlock>
+                                    <Button x:Name="BtnOpenNewSettings" Content="打开新设置窗口" 
+                                            HorizontalAlignment="Left" Click="BtnOpenNewSettings_Click" 
+                                            Padding="15,5" Margin="0,10,0,0"/>
+                                </ui:SimpleStackPanel>
+                            </GroupBox>
+                            
                             <GroupBox Name="GroupBoxPlugins">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="插件管理" FontWeight="Bold" Foreground="#fafafa"

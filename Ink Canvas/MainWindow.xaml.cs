@@ -1592,6 +1592,22 @@ namespace Ink_Canvas
         }
         #endregion 插件???
 
+        #region 新设置窗口
+
+        // 添加打开新设置窗口按钮点击事件
+        private void BtnOpenNewSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (isOpeningOrHidingSettingsPane) return;
+            HideSubPanels();
+            {
+                var settingsWindow = new SettingsWindow();
+                settingsWindow.Owner = this;
+                settingsWindow.ShowDialog();
+            }
+        }
+
+        #endregion 新设置窗口
+
         // 在MainWindow类中添加：
         private void ApplyCurrentEraserShape()
         {
