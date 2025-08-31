@@ -197,11 +197,14 @@ namespace Ink_Canvas
                 val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
             ViewboxFloatingBarScaleTransform.ScaleY =
                 val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
-            // auto align
-            if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                ViewboxFloatingBarMarginAnimation(60);
-            else
-                ViewboxFloatingBarMarginAnimation(100, true);
+            // auto align - 新增：只在屏幕模式下重新计算浮动栏位置
+            if (currentMode == 0)
+            {
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                    ViewboxFloatingBarMarginAnimation(60);
+                else
+                    ViewboxFloatingBarMarginAnimation(100, true);
+            }
         }
 
         private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
@@ -2687,14 +2690,14 @@ namespace Ink_Canvas
                         await Task.Delay(100);
                         
                         // 获取当前选中的模式并重新设置高光位置
-                        string currentMode = GetCurrentSelectedMode();
-                        if (!string.IsNullOrEmpty(currentMode))
+                        string selectedToolMode = GetCurrentSelectedMode();
+                        if (!string.IsNullOrEmpty(selectedToolMode))
                         {
-                            SetFloatingBarHighlightPosition(currentMode);
+                            SetFloatingBarHighlightPosition(selectedToolMode);
                         }
                         
                         // 重新计算浮动栏位置，因为按钮可见性变化会影响浮动栏宽度
-                        if (!isFloatingBarFolded)
+                        if (!isFloatingBarFolded && currentMode == 0) // 新增：只在屏幕模式下重新计算浮动栏位置
                         {
                             if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                             {

@@ -282,15 +282,14 @@ namespace Ink_Canvas
                 if (_isFreehandMode)
                 {
                     // 自由绘制模式：一笔完成，直接截图
-                    if (_freehandPoints.Count > 3) // 确保有足够的点
+                    if (_freehandPoints.Count > 1) // 只要有点就可以截图
                     {
                         // 创建路径的副本，避免修改原始列表
                         var pathPoints = new List<Point>(_freehandPoints);
                         
-                        // 确保路径闭合（如果最后一个点不是起始点，则添加起始点）
-                        if (pathPoints.Count > 0 && 
-                            (Math.Abs(pathPoints[pathPoints.Count - 1].X - _startPoint.X) > 15 || 
-                             Math.Abs(pathPoints[pathPoints.Count - 1].Y - _startPoint.Y) > 15))
+                        // 简化路径处理，不强制闭合
+                        // 如果路径没有闭合，自动添加起始点
+                        if (pathPoints.Count > 0)
                         {
                             pathPoints.Add(_startPoint);
                         }
@@ -305,7 +304,7 @@ namespace Ink_Canvas
                         var bounds = CalculatePathBounds(optimizedPath);
                         
                         // 确保边界矩形有效
-                        if (bounds.Width > 1 && bounds.Height > 1)
+                        if (bounds.Width >= 0 && bounds.Height >= 0)
                         {
                             var dpiScale = GetDpiScale();
                             var virtualScreen = SystemInformation.VirtualScreen;
@@ -654,8 +653,8 @@ namespace Ink_Canvas
                 // 计算当前点到前后两点连线的距离
                 var distance = DistanceToLine(current, prev, next);
 
-                // 如果距离大于阈值，保留这个点
-                if (distance > 2.0)
+                // 进一步降低阈值，保留更多点，确保路径质量
+                if (distance > 0.1) // 从0.5降低到0.1
                 {
                     optimized.Add(current);
                 }

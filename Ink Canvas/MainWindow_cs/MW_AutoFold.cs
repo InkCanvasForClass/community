@@ -269,10 +269,14 @@ namespace Ink_Canvas
                     if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
                 }
 
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                    ViewboxFloatingBarMarginAnimation(60);
-                else
-                    ViewboxFloatingBarMarginAnimation(100, true);
+                // 新增：只在屏幕模式下显示浮动栏
+                if (currentMode == 0)
+                {
+                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                        ViewboxFloatingBarMarginAnimation(60);
+                    else
+                        ViewboxFloatingBarMarginAnimation(100, true);
+                }
                 SidePannelMarginAnimation(-50, !unfoldFloatingBarByUser);
             });
 

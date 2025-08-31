@@ -1298,6 +1298,12 @@ namespace Ink_Canvas
         public async void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false)
         {
+            // 新增：在白板模式下不执行浮动栏动画
+            if (currentMode == 1)
+            {
+                return;
+            }
+
             if (MarginFromEdge == 60) MarginFromEdge = 55;
             await Dispatcher.InvokeAsync(() =>
             {
@@ -1417,6 +1423,12 @@ namespace Ink_Canvas
 
         public async void PureViewboxFloatingBarMarginAnimationInDesktopMode()
         {
+            // 新增：在白板模式下不执行浮动栏动画
+            if (currentMode == 1)
+            {
+                return;
+            }
+
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
@@ -1493,6 +1505,12 @@ namespace Ink_Canvas
 
         public async void PureViewboxFloatingBarMarginAnimationInPPTMode()
         {
+            // 新增：在白板模式下不执行浮动栏动画
+            if (currentMode == 1)
+            {
+                return;
+            }
+
             await Dispatcher.InvokeAsync(() =>
             {
                 ViewboxFloatingBar.Visibility = Visibility.Visible;
