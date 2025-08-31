@@ -526,6 +526,9 @@ namespace Ink_Canvas
 
             // 处理命令行参数中的文件路径
             HandleCommandLineFileOpen();
+
+            // 初始化文件关联状态显示
+            InitializeFileAssociationStatus();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -2128,6 +2131,33 @@ namespace Ink_Canvas
             }
         }
         #endregion
+
+        /// <summary>
+        /// 初始化文件关联状态显示
+        /// </summary>
+        private void InitializeFileAssociationStatus()
+        {
+            try
+            {
+                bool isRegistered = FileAssociationManager.IsFileAssociationRegistered();
+                if (isRegistered)
+                {
+                    TextBlockFileAssociationStatus.Text = "✓ .icstk文件关联已注册";
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
+                }
+                else
+                {
+                    TextBlockFileAssociationStatus.Text = "✗ .icstk文件关联未注册";
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
+                }
+            }
+            catch (Exception ex)
+            {
+                TextBlockFileAssociationStatus.Text = "✗ 检查文件关联状态时出错";
+                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
+                LogHelper.WriteLogToFile($"初始化文件关联状态显示时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
 
         /// <summary>
         /// 处理命令行参数中的文件路径

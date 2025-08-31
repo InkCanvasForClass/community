@@ -3080,5 +3080,85 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        #region 文件关联管理
+
+        private void BtnUnregisterFileAssociation_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                bool success = FileAssociationManager.UnregisterFileAssociation();
+                if (success)
+                {
+                    TextBlockFileAssociationStatus.Text = "✓ 文件关联已成功取消";
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
+                    ShowNotification("文件关联已取消");
+                }
+                else
+                {
+                    TextBlockFileAssociationStatus.Text = "✗ 取消文件关联失败，可能需要管理员权限";
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
+                    ShowNotification("取消文件关联失败");
+                }
+            }
+            catch (Exception ex)
+            {
+                TextBlockFileAssociationStatus.Text = $"✗ 取消文件关联时出错: {ex.Message}";
+                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
+                LogHelper.WriteLogToFile($"取消文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void BtnCheckFileAssociation_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                bool isRegistered = FileAssociationManager.IsFileAssociationRegistered();
+                if (isRegistered)
+                {
+                    TextBlockFileAssociationStatus.Text = "✓ .icstk文件关联已注册";
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
+                }
+                else
+                {
+                    TextBlockFileAssociationStatus.Text = "✗ .icstk文件关联未注册";
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
+                }
+            }
+            catch (Exception ex)
+            {
+                TextBlockFileAssociationStatus.Text = $"✗ 检查文件关联状态时出错: {ex.Message}";
+                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
+                LogHelper.WriteLogToFile($"检查文件关联状态时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void BtnRegisterFileAssociation_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                bool success = FileAssociationManager.RegisterFileAssociation();
+                if (success)
+                {
+                    TextBlockFileAssociationStatus.Text = "✓ 文件关联已成功注册";
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightGreen);
+                    ShowNotification("文件关联已注册");
+                }
+                else
+                {
+                    TextBlockFileAssociationStatus.Text = "✗ 注册文件关联失败，可能需要管理员权限";
+                    TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
+                    ShowNotification("注册文件关联失败");
+                }
+            }
+            catch (Exception ex)
+            {
+                TextBlockFileAssociationStatus.Text = $"✗ 注册文件关联时出错: {ex.Message}";
+                TextBlockFileAssociationStatus.Foreground = new SolidColorBrush(Colors.LightCoral);
+                LogHelper.WriteLogToFile($"注册文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #endregion
+
     }
 }
