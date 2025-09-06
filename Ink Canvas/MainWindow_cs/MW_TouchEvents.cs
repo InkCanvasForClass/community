@@ -369,7 +369,8 @@ namespace Ink_Canvas
             }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
             {
-                // 套索选状态下只return，保证套索选可用
+                // 套索选状态下不直接return，允许触摸事件继续处理
+                dec.Add(e.TouchDevice.Id);
                 return;
             }
             // 修复：几何绘制模式下完全禁止触摸轨迹收集
@@ -864,7 +865,34 @@ namespace Ink_Canvas
                 return;
             // 三指及以上禁止缩放
             bool disableScale = dec.Count >= 3;
-            if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
+            
+            // 修复：允许单指拖动选中的墨迹，即使禁用了多指手势
+            if (isInMultiTouchMode) return;
+            
+            // 如果是单指拖动选中的墨迹，允许处理
+            if (dec.Count == 1 && inkCanvas.GetSelectedStrokes().Count > 0)
+            {
+                var md = e.DeltaManipulation;
+                var trans = md.Translation; // 获得位移矢量
+                
+                if (trans.X != 0 || trans.Y != 0)
+                {
+                    var m = new Matrix();
+                    m.Translate(trans.X, trans.Y); // 移动
+                    
+                    var strokes = inkCanvas.GetSelectedStrokes();
+                    foreach (var stroke in strokes)
+                    {
+                        stroke.Transform(m, false);
+                    }
+                    
+                    // 更新选择框位置
+                    updateBorderStrokeSelectionControlLocation();
+                }
+                return;
+            }
+            
+            if (!Settings.Gesture.IsEnableTwoFingerGesture) return;
             if ((dec.Count >= 2 && (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
                                     StackPanelPPTControls.Visibility != Visibility.Visible ||
                                     StackPanelPPTButtons.Visibility == Visibility.Collapsed)) ||

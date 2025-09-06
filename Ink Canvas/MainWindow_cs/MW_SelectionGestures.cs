@@ -8,6 +8,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Ink_Canvas.Helpers;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -533,8 +534,9 @@ namespace Ink_Canvas
                     updateBorderStrokeSelectionControlLocation();
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"墨迹ManipulationDelta错误: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -552,24 +554,33 @@ namespace Ink_Canvas
             if (inkCanvas.GetSelectedStrokes().Count > 0 && dec.Count == 1)
             {
                 var currentTouchPoint = e.GetTouchPoint(inkCanvas).Position;
-                var delta = currentTouchPoint - lastTouchPointOnGridInkCanvasCover;
                 
-                // 创建变换矩阵
-                var matrix = new Matrix();
-                matrix.Translate(delta.X, delta.Y);
-                
-                // 对选中的墨迹应用变换
-                var selectedStrokes = inkCanvas.GetSelectedStrokes();
-                foreach (var stroke in selectedStrokes)
+                // 检查是否有有效的起始触摸点
+                if (lastTouchPointOnGridInkCanvasCover != new Point(0, 0))
                 {
-                    stroke.Transform(matrix, false);
+                    var delta = currentTouchPoint - lastTouchPointOnGridInkCanvasCover;
+                    
+                    // 只有当移动距离足够大时才进行拖动（避免微小移动造成的抖动）
+                    if (Math.Abs(delta.X) > 1 || Math.Abs(delta.Y) > 1)
+                    {
+                        // 创建变换矩阵
+                        var matrix = new Matrix();
+                        matrix.Translate(delta.X, delta.Y);
+                        
+                        // 对选中的墨迹应用变换
+                        var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                        foreach (var stroke in selectedStrokes)
+                        {
+                            stroke.Transform(matrix, false);
+                        }
+                        
+                        // 更新选中栏位置
+                        updateBorderStrokeSelectionControlLocation();
+                        
+                        // 更新最后触摸点
+                        lastTouchPointOnGridInkCanvasCover = currentTouchPoint;
+                    }
                 }
-                
-                // 更新选中栏位置
-                updateBorderStrokeSelectionControlLocation();
-                
-                // 更新最后触摸点
-                lastTouchPointOnGridInkCanvasCover = currentTouchPoint;
             }
         }
 
@@ -579,24 +590,33 @@ namespace Ink_Canvas
             if (inkCanvas.GetSelectedStrokes().Count > 0 && dec.Count == 1)
             {
                 var currentTouchPoint = e.GetTouchPoint(inkCanvas).Position;
-                var delta = currentTouchPoint - lastTouchPointOnGridInkCanvasCover;
                 
-                // 创建变换矩阵
-                var matrix = new Matrix();
-                matrix.Translate(delta.X, delta.Y);
-                
-                // 对选中的墨迹应用变换
-                var selectedStrokes = inkCanvas.GetSelectedStrokes();
-                foreach (var stroke in selectedStrokes)
+                // 检查是否有有效的起始触摸点
+                if (lastTouchPointOnGridInkCanvasCover != new Point(0, 0))
                 {
-                    stroke.Transform(matrix, false);
+                    var delta = currentTouchPoint - lastTouchPointOnGridInkCanvasCover;
+                    
+                    // 只有当移动距离足够大时才进行拖动（避免微小移动造成的抖动）
+                    if (Math.Abs(delta.X) > 1 || Math.Abs(delta.Y) > 1)
+                    {
+                        // 创建变换矩阵
+                        var matrix = new Matrix();
+                        matrix.Translate(delta.X, delta.Y);
+                        
+                        // 对选中的墨迹应用变换
+                        var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                        foreach (var stroke in selectedStrokes)
+                        {
+                            stroke.Transform(matrix, false);
+                        }
+                        
+                        // 更新选中栏位置
+                        updateBorderStrokeSelectionControlLocation();
+                        
+                        // 更新最后触摸点
+                        lastTouchPointOnGridInkCanvasCover = currentTouchPoint;
+                    }
                 }
-                
-                // 更新选中栏位置
-                updateBorderStrokeSelectionControlLocation();
-                
-                // 更新最后触摸点
-                lastTouchPointOnGridInkCanvasCover = currentTouchPoint;
             }
         }
 
@@ -625,8 +645,8 @@ namespace Ink_Canvas
                         touchPosition.Y >= selectionBounds.Top && 
                         touchPosition.Y <= selectionBounds.Bottom)
                     {
-                        // 只有在选择框边界内才允许拖动
-                        // 触摸拖动状态已通过TouchMove事件处理
+                    // 只有在选择框边界内才允许拖动
+                    // 触摸拖动状态已通过TouchMove事件处理
                     }
                     else
                     {
@@ -661,13 +681,32 @@ namespace Ink_Canvas
         {
             dec.Remove(e.TouchDevice.Id);
             if (dec.Count >= 1) return;
+            
+            // 重置触摸状态
+            lastTouchPointOnGridInkCanvasCover = new Point(0, 0);
             isProgramChangeStrokeSelection = false;
-            if (lastTouchPointOnGridInkCanvasCover == e.GetTouchPoint(null).Position)
+            
+            // 检查是否有点击（没有移动）
+            var currentTouchPoint = e.GetTouchPoint(null).Position;
+            if (Math.Abs(currentTouchPoint.X - centerPoint.X) < 5 && Math.Abs(currentTouchPoint.Y - centerPoint.Y) < 5)
             {
-                if (!(lastTouchPointOnGridInkCanvasCover.X < inkCanvas.GetSelectionBounds().Left) &&
-                    !(lastTouchPointOnGridInkCanvasCover.Y < inkCanvas.GetSelectionBounds().Top) &&
-                    !(lastTouchPointOnGridInkCanvasCover.X > inkCanvas.GetSelectionBounds().Right) &&
-                    !(lastTouchPointOnGridInkCanvasCover.Y > inkCanvas.GetSelectionBounds().Bottom)) return;
+                // 点击在选择框内，保持选择状态
+                if (inkCanvas.GetSelectedStrokes().Count > 0)
+                {
+                    var selectionBounds = inkCanvas.GetSelectionBounds();
+                    if (currentTouchPoint.X >= selectionBounds.Left && 
+                        currentTouchPoint.X <= selectionBounds.Right && 
+                        currentTouchPoint.Y >= selectionBounds.Top && 
+                        currentTouchPoint.Y <= selectionBounds.Bottom)
+                    {
+                        // 点击在选择框内，保持选择
+                        GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
+                        StrokesSelectionClone = new StrokeCollection();
+                        return;
+                    }
+                }
+                
+                // 点击在选择框外，取消选择
                 inkCanvas.Select(new StrokeCollection());
                 StrokesSelectionClone = new StrokeCollection();
             }
@@ -681,6 +720,7 @@ namespace Ink_Canvas
                 GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
                 StrokesSelectionClone = new StrokeCollection();
             }
+            
         }
 
         private void LassoSelect_Click(object sender, RoutedEventArgs e)
