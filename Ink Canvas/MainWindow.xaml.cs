@@ -2178,7 +2178,7 @@ namespace Ink_Canvas
             {
                 if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow)
                 {
-                    // 如果启用了PPT放映模式显示手势按钮，则显示手势按钮（在PPT模式下不依赖手势功能是否启用）
+                    // 如果启用了PPT放映模式显示手势按钮，则检查是否在批注模式下显示手势按钮
                     CheckEnableTwoFingerGestureBtnVisibility(true);
                 }
                 else
@@ -2320,6 +2320,12 @@ namespace Ink_Canvas
                 if (_globalHotkeyManager != null)
                 {
                     _globalHotkeyManager.UpdateHotkeyStateForToolMode(isMouseMode);
+                }
+
+                // 在PPT放映模式下，工具模式切换时需要更新手势按钮的显示状态
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                {
+                    UpdateGestureButtonVisibilityInPPTMode();
                 }
 
                 // 执行额外的操作（如果有）
