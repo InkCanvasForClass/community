@@ -30,12 +30,12 @@ namespace Ink_Canvas
             if (WindowState == WindowState.Normal)
             {
                 WindowState = WindowState.Maximized;
-                FontIconFullscreen.Glyph = "&#xE73F;";
+                FontIconFullscreen.Text = "&#xE73F;";
             }
             else
             {
                 WindowState = WindowState.Normal;
-                FontIconFullscreen.Glyph = "&#xE740;";
+                FontIconFullscreen.Text = "&#xE740;";
             }
         }
 

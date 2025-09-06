@@ -290,7 +290,7 @@ namespace Ink_Canvas
                     ViewboxFloatingBar.UpdateLayout();
                     
                     // 等待一小段时间让布局完全更新
-                    await Task.Delay(50);
+                    Task.Delay(50);
                     
                     // 再次强制更新布局
                     ViewboxFloatingBar.UpdateLayout();
