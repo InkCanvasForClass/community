@@ -56,32 +56,31 @@ jobs:
 
       - name: 计算 SHA256 值
         run: |
-          echo "开始计算SHA256校验值..."
-          cd release
-          echo "" > SHA256SUMS.txt
-          for /r %%f in (*) do (
-            if not "%%~nxf"=="SHA256SUMS.txt" (
-              echo "计算 %%~nxf 的SHA256值..."
-              certutil -hashfile "%%f" SHA256 | findstr /v "CertUtil" | findstr /v "SHA256" >> SHA256SUMS.txt
-            )
-          )
-          echo "SHA256校验值计算完成："
-          type SHA256SUMS.txt
+          Write-Host "开始计算SHA256校验值..."
+          Set-Location release
+          "" | Out-File -FilePath SHA256SUMS.txt -Encoding UTF8
+          Get-ChildItem -Recurse -File | Where-Object { $_.Name -ne "SHA256SUMS.txt" } | ForEach-Object {
+            Write-Host "计算 $($_.Name) 的SHA256值..."
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash
+            "$hash  $($_.Name)" | Add-Content -Path SHA256SUMS.txt
+          }
+          Write-Host "SHA256校验值计算完成："
+          Get-Content SHA256SUMS.txt
           
       - name: 验证 SHA256SUMS.txt 文件
         run: |
-          echo "验证SHA256SUMS.txt文件..."
-          cd release
-          if not exist "SHA256SUMS.txt" (
-            echo "错误：在release目录中未找到SHA256SUMS.txt文件"
-            exit /b 1
-          )
-          for %%f in (SHA256SUMS.txt) do if %%~zf==0 (
-            echo "错误：SHA256SUMS.txt文件为空"
-            exit /b 1
-          )
-          echo "SHA256SUMS.txt文件验证通过"
-          cd ..
+          Write-Host "验证SHA256SUMS.txt文件..."
+          Set-Location release
+          if (-not (Test-Path "SHA256SUMS.txt")) {
+            Write-Error "错误：在release目录中未找到SHA256SUMS.txt文件"
+            exit 1
+          }
+          if ((Get-Item "SHA256SUMS.txt").Length -eq 0) {
+            Write-Error "错误：SHA256SUMS.txt文件为空"
+            exit 1
+          }
+          Write-Host "SHA256SUMS.txt文件验证通过"
+          Set-Location ..
 
       - name: 生成 需发布 的表格信息
         run: |
