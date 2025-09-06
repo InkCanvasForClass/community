@@ -71,7 +71,7 @@
                     </Viewbox>
                 </ui:SimpleStackPanel>
             </ScrollViewer>
-            <Viewbox Margin="20,20,20,20" HorizontalAlignment="Right">
+            <Viewbox Visibility="{Binding ElementName=BigViewController, Path=Visibility}" Margin="20,20,20,20" HorizontalAlignment="Right">
                 <ui:SimpleStackPanel Height="180" Orientation="Horizontal">
                     <Border x:Name="BtnFullscreen" MouseUp="BtnFullscreen_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                             Margin="5"
@@ -80,7 +80,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <TextBlock Name="FontIconFullscreen" Text="&#xE740;" Foreground="Black" FontFamily="Segoe MDL2 Assets" FontSize="12" />
+                            <ui:SymbolIcon Name="SymbolIconFullscreen" Symbol="FullScreen" Foreground="Black"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnClose" MouseUp="BtnClose_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -90,7 +90,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <TextBlock Text="&#xE8BB;" Foreground="White" FontFamily="Segoe MDL2 Assets" FontSize="12" />
+                            <ui:SymbolIcon Symbol="Clear"  Foreground="White"/>
                         </Viewbox>
                     </Border>
                 </ui:SimpleStackPanel>

@@ -12,14 +12,7 @@
         Title="Ink Canvas 画板 - 计时器" Height="700" Width="1100">
     <Border Background="#F0F3F9" CornerRadius="10" BorderThickness="1" BorderBrush="#0066BF" Margin="60">
         <Grid>
-            <TextBlock x:Name="TbCurrentTime" MouseDown="BtnMinimal_OnMouseUp" Visibility="Collapsed" FontSize="56" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center" Text="00:00:00">
-                <TextBlock.Style>
-                    <Style TargetType="TextBlock" BasedOn="{x:Null}">
-                        <Setter Property="TextWrapping" Value="NoWrap" />
-                        <Setter Property="TextTrimming" Value="None" />
-                    </Style>
-                </TextBlock.Style>
-            </TextBlock>
+            <TextBlock x:Name="TbCurrentTime" MouseDown="BtnMinimal_OnMouseUp" Visibility="Collapsed" FontSize="56" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <Border MouseMove="WindowDragMove" Visibility="{Binding ElementName=TbCurrentTime, Path=Visibility}" Width="64" Height="15" CornerRadius="8" Background="Gray" Margin="0,0,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
             <Viewbox x:Name="BigViewController" Margin="20,20,20,20">
                 <Grid Height="180" Width="200">
@@ -31,11 +24,23 @@
                                    Margin="0,0,0,0" Visibility="Collapsed"
                                    Foreground="#5B5D5F"
                                    Text="00" FontSize="26"/>
-                        <TextBlock Name="TextControlHour" Text="{Binding ElementName=TextBlockHour, Path=Text}"
-                                   FontFamily="{Binding ElementName=TextBlockHour, Path=FontFamily}"
-                                   Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
-                                   FontSize="{Binding ElementName=TextBlockHour, Path=FontSize}"
-                                   FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        <ItemsControl Name="TextControlHour" ItemsSource="{Binding ElementName=TextBlockHour, Path=Text}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Width="14">
+                                        <TextBlock Text="{Binding}" HorizontalAlignment="Center" FontWeight="SemiBold"
+                                                   Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
+                                                   FontFamily="{Binding ElementName=TextBlockHour, Path=FontFamily}"
+                                                   FontSize="{Binding ElementName=TextBlockHour, Path=FontSize}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <Grid Name="GridAdjustHour" Visibility="Visible" Margin="-29,-30,0,-30" Width="29">
                             <ui:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_1">
@@ -66,11 +71,23 @@
                                    Margin="0,0,0,0" Visibility="Collapsed"
                                    Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
                                    Text="01" FontSize="26"/>
-                        <TextBlock Name="TextControlMinute" Text="{Binding ElementName=TextBlockMinute, Path=Text}"
-                                   FontFamily="{Binding ElementName=TextBlockMinute, Path=FontFamily}"
-                                   Foreground="{Binding ElementName=TextBlockMinute, Path=Foreground}"
-                                   FontSize="{Binding ElementName=TextBlockMinute, Path=FontSize}"
-                                   FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        <ItemsControl Name="TextControlMinute" ItemsSource="{Binding ElementName=TextBlockMinute, Path=Text}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Width="14">
+                                        <TextBlock Text="{Binding}" HorizontalAlignment="Center" FontWeight="SemiBold"
+                                                   Foreground="{Binding ElementName=TextBlockMinute, Path=Foreground}"
+                                                   FontFamily="{Binding ElementName=TextBlockMinute, Path=FontFamily}"
+                                                   FontSize="{Binding ElementName=TextBlockMinute, Path=FontSize}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <Grid Visibility="{Binding ElementName=GridAdjustHour, Path=Visibility}" Margin="-29,-30,0,-30" Width="29">
                             <ui:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_5">
@@ -113,11 +130,23 @@
                                    Margin="0,0,0,0" Visibility="Collapsed"
                                    Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
                                    Text="00" FontSize="26"/>
-                        <TextBlock Name="TextControlSecond" Text="{Binding ElementName=TextBlockSecond, Path=Text}"
-                                   FontFamily="{Binding ElementName=TextBlockSecond, Path=FontFamily}"
-                                   Foreground="{Binding ElementName=TextBlockSecond, Path=Foreground}"
-                                   FontSize="{Binding ElementName=TextBlockSecond, Path=FontSize}"
-                                   FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        <ItemsControl Name="TextControlSecond" ItemsSource="{Binding ElementName=TextBlockSecond, Path=Text}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Width="14">
+                                        <TextBlock Text="{Binding}" HorizontalAlignment="Center" FontWeight="SemiBold"
+                                               Foreground="{Binding ElementName=TextBlockSecond, Path=Foreground}"
+                                               FontFamily="{Binding ElementName=TextBlockSecond, Path=FontFamily}"
+                                               FontSize="{Binding ElementName=TextBlockSecond, Path=FontSize}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
                         <Grid Margin="-96.8,0,0,0" Width="96.8" Background="Transparent" MouseUp="Grid_MouseUp"/>
                         <Grid Visibility="{Binding ElementName=GridAdjustHour, Path=Visibility}" Margin="-29,-30,0,-30" Width="29">
                             <ui:SimpleStackPanel Spacing="2">
@@ -150,12 +179,12 @@
                         <Grid>
                             <Border x:Name="BtnStart" MouseUp="BtnStart_MouseUp" Background="#0066BF" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5">
-                                    <ui:FontIcon Name="FontIconStart" Glyph="&#xE768;" Foreground="White"/>
+                                    <ui:SymbolIcon Name="SymbolIconStart" Symbol="Play" Foreground="White"/>
                                 </Viewbox>
                             </Border>
                             <Border x:Name="BtnStartCover" Visibility="Collapsed" Background="#BFBFBF" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5">
-                                    <ui:FontIcon Glyph="{Binding ElementName=FontIconStart, Path=Glyph}" Foreground="White"/>
+                                    <ui:SymbolIcon Symbol="{Binding ElementName=SymbolIconStart, Path=Symbol}" Foreground="White"/>
                                 </Viewbox>
                             </Border>
                         </Grid>
@@ -165,12 +194,12 @@
                                     <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.15" BlurRadius="3"/>
                                 </Border.Effect>
                                 <Viewbox Margin="5.5">
-                                    <ui:FontIcon Glyph="&#xE72C;" Foreground="Black"/>
+                                    <ui:SymbolIcon Symbol="Refresh" Foreground="Black"/>
                                 </Viewbox>
                             </Border>
                             <Border x:Name="BtnResetCover" Background="#F3F5F9" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5.5">
-                                    <ui:FontIcon Glyph="&#xE72C;" Foreground="#9D9D9E"/>
+                                    <ui:SymbolIcon Symbol="Refresh" Foreground="#9D9D9E"/>
                                 </Viewbox>
                             </Border>
                         </Grid>
@@ -186,7 +215,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <TextBlock Name="FontIconMinimal" Text="&#xE7B3;" Foreground="Black" FontFamily="Segoe MDL2 Assets" FontSize="12" />
+                            <ui:SymbolIcon Name="SymbolIconMinimal" Symbol="HideBcc" Foreground="Black"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnFullscreen" MouseUp="BtnFullscreen_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -196,7 +225,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <TextBlock Name="FontIconFullscreen" Text="&#xE740;" Foreground="Black" FontFamily="Segoe MDL2 Assets" FontSize="12" />
+                            <ui:SymbolIcon Name="SymbolIconFullscreen" Symbol="FullScreen" Foreground="Black"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnClose" MouseUp="BtnClose_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -206,7 +235,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <TextBlock Text="&#xE8BB;" Foreground="White" FontFamily="Segoe MDL2 Assets" FontSize="12" />
+                            <ui:SymbolIcon Symbol="Clear"  Foreground="White"/>
                         </Viewbox>
                     </Border>
                 </ui:SimpleStackPanel>

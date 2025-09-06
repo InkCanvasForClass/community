@@ -1,16 +1,11 @@
 ﻿using Ink_Canvas.Helpers;
 using System;
-using System.ComponentModel;
 using System.Media;
 using System.Timers;
 using System.Windows;
-using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using Application = System.Windows.Application;
-using MouseEventArgs = System.Windows.Input.MouseEventArgs;
-using Timer = System.Timers.Timer;
 
 namespace Ink_Canvas
 {
@@ -56,7 +51,7 @@ namespace Ink_Canvas
                     TextBlockSecond.Text = "00";
                     timer.Stop();
                     isTimerRunning = false;
-                    FontIconStart.Glyph = "&#xE768;";
+                    SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                     BtnStartCover.Visibility = Visibility.Visible;
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                     BorderStopTime.Visibility = Visibility.Collapsed;
@@ -75,23 +70,23 @@ namespace Ink_Canvas
 
         SoundPlayer player = new SoundPlayer();
 
-        int hour;
+        int hour = 0;
         int minute = 1;
-        int second;
+        int second = 0;
         int totalSeconds = 60;
 
         DateTime startTime = DateTime.Now;
         DateTime pauseTime = DateTime.Now;
 
-        bool isTimerRunning;
-        bool isPaused;
+        bool isTimerRunning = false;
+        bool isPaused = false;
 
         Timer timer = new Timer();
 
         private void Grid_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (isTimerRunning) return;
-            if (ProcessBarTime.Visibility == Visibility.Visible && !isTimerRunning)
+            if (ProcessBarTime.Visibility == Visibility.Visible && isTimerRunning == false)
             {
                 ProcessBarTime.Visibility = Visibility.Collapsed;
                 GridAdjustHour.Visibility = Visibility.Visible;
@@ -207,12 +202,12 @@ namespace Ink_Canvas
             if (WindowState == WindowState.Normal)
             {
                 WindowState = WindowState.Maximized;
-                FontIconFullscreen.Text = "&#xE73F;";
+                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.BackToWindow;
             }
             else
             {
                 WindowState = WindowState.Normal;
-                FontIconFullscreen.Text = "&#xE740;";
+                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.FullScreen;
             }
         }
 
@@ -227,6 +222,7 @@ namespace Ink_Canvas
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                return;
             }
             else if (isTimerRunning && isPaused)
             {
@@ -237,7 +233,7 @@ namespace Ink_Canvas
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                FontIconStart.Glyph = "&#xE768;";
+                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 isTimerRunning = false;
                 timer.Stop();
                 isPaused = false;
@@ -287,7 +283,7 @@ namespace Ink_Canvas
                 startTime += DateTime.Now - pauseTime;
                 ProcessBarTime.IsPaused = false;
                 TextBlockHour.Foreground = Brushes.Black;
-                FontIconStart.Glyph = "&#xE769;";
+                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 isPaused = false;
                 timer.Start();
                 UpdateStopTime();
@@ -299,7 +295,7 @@ namespace Ink_Canvas
                 pauseTime = DateTime.Now;
                 ProcessBarTime.IsPaused = true;
                 TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                FontIconStart.Glyph = "&#xE768;";
+                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 isPaused = true;
                 timer.Stop();
@@ -311,7 +307,7 @@ namespace Ink_Canvas
                 totalSeconds = ((hour * 60) + minute) * 60 + second;
                 ProcessBarTime.IsPaused = false;
                 TextBlockHour.Foreground = Brushes.Black;
-                FontIconStart.Glyph = "&#xE769;";
+                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 BtnResetCover.Visibility = Visibility.Collapsed;
 
                 if (totalSeconds <= 10)
@@ -339,7 +335,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void Window_Closing(object sender, CancelEventArgs e)
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             isTimerRunning = false;
         }
@@ -349,7 +345,7 @@ namespace Ink_Canvas
             Close();
         }
 
-        private bool _isInCompact;
+        private bool _isInCompact = false;
 
         private void BtnMinimal_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -363,13 +359,12 @@ namespace Ink_Canvas
                 // Set to center
                 double dpiScaleX = 1, dpiScaleY = 1;
                 PresentationSource source = PresentationSource.FromVisual(this);
-                if (source != null)
-                {
+                if (source != null) {
                     dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
                     dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
                 }
                 IntPtr windowHandle = new WindowInteropHelper(this).Handle;
-                Screen screen = Screen.FromHandle(windowHandle);
+                System.Windows.Forms.Screen screen = System.Windows.Forms.Screen.FromHandle(windowHandle);
                 double screenWidth = screen.Bounds.Width / dpiScaleX, screenHeight = screen.Bounds.Height / dpiScaleY;
                 Left = (screenWidth / 2) - (Width / 2);
                 Top = (screenHeight / 2) - (Height / 2);
