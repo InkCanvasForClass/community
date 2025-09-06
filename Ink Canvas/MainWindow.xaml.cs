@@ -2299,61 +2299,44 @@ namespace Ink_Canvas
             // 启用触摸和手写笔支持
             slider.IsManipulationEnabled = true;
 
-            // 添加触摸事件
-            slider.TouchDown += Slider_TouchDown;
-            slider.TouchMove += Slider_TouchMove;
-            slider.TouchUp += Slider_TouchUp;
+            // 添加触摸事件 - 使用更简单直接的方法
+            slider.TouchDown += (s, e) => HandleSliderTouch(s, e, slider);
+            slider.TouchMove += (s, e) => HandleSliderTouch(s, e, slider);
+            slider.TouchUp += (s, e) => HandleSliderTouchEnd(s, e, slider);
 
             // 添加手写笔事件
-            slider.StylusDown += Slider_StylusDown;
-            slider.StylusMove += Slider_StylusMove;
-            slider.StylusUp += Slider_StylusUp;
-
-            // 添加操作事件（用于更精确的触摸控制）
-            slider.ManipulationStarted += Slider_ManipulationStarted;
-            slider.ManipulationDelta += Slider_ManipulationDelta;
-            slider.ManipulationCompleted += Slider_ManipulationCompleted;
+            slider.StylusDown += (s, e) => HandleSliderStylus(s, e, slider);
+            slider.StylusMove += (s, e) => HandleSliderStylus(s, e, slider);
+            slider.StylusUp += (s, e) => HandleSliderStylusEnd(s, e, slider);
         }
 
         /// <summary>
-        /// 滑块触摸按下事件处理
+        /// 处理滑块触摸事件（按下和移动）
         /// </summary>
-        private void Slider_TouchDown(object sender, TouchEventArgs e)
+        private void HandleSliderTouch(object sender, TouchEventArgs e, Slider slider)
         {
-            var slider = sender as Slider;
             if (slider == null) return;
 
             // 捕获触摸设备
-            slider.CaptureTouch(e.TouchDevice);
-            
+            if (e.RoutedEvent == UIElement.TouchDownEvent)
+            {
+                slider.CaptureTouch(e.TouchDevice);
+            }
+
             // 计算触摸位置对应的滑块值
             var touchPoint = e.GetTouchPoint(slider);
-            UpdateSliderValueFromPosition(slider, touchPoint.Position);
+            
+            // 使用更精确的位置计算方法
+            UpdateSliderValueFromPositionImproved(slider, touchPoint.Position);
             
             e.Handled = true;
         }
 
         /// <summary>
-        /// 滑块触摸移动事件处理
+        /// 处理滑块触摸结束事件
         /// </summary>
-        private void Slider_TouchMove(object sender, TouchEventArgs e)
+        private void HandleSliderTouchEnd(object sender, TouchEventArgs e, Slider slider)
         {
-            var slider = sender as Slider;
-            if (slider == null) return;
-
-            // 计算触摸位置对应的滑块值
-            var touchPoint = e.GetTouchPoint(slider);
-            UpdateSliderValueFromPosition(slider, touchPoint.Position);
-            
-            e.Handled = true;
-        }
-
-        /// <summary>
-        /// 滑块触摸释放事件处理
-        /// </summary>
-        private void Slider_TouchUp(object sender, TouchEventArgs e)
-        {
-            var slider = sender as Slider;
             if (slider == null) return;
 
             // 释放触摸捕获
@@ -2363,50 +2346,33 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 滑块手写笔按下事件处理
+        /// 处理滑块手写笔事件（按下和移动）
         /// </summary>
-        private void Slider_StylusDown(object sender, StylusDownEventArgs e)
+        private void HandleSliderStylus(object sender, StylusEventArgs e, Slider slider)
         {
-            var slider = sender as Slider;
             if (slider == null) return;
 
             // 捕获手写笔设备
-            slider.CaptureStylus();
-            
+            if (e.RoutedEvent == UIElement.StylusDownEvent)
+            {
+                slider.CaptureStylus();
+            }
+
             // 计算手写笔位置对应的滑块值
             var stylusPoint = e.GetStylusPoints(slider);
             if (stylusPoint.Count > 0)
             {
-                UpdateSliderValueFromPosition(slider, stylusPoint[0].ToPoint());
+                UpdateSliderValueFromPositionImproved(slider, stylusPoint[0].ToPoint());
             }
             
             e.Handled = true;
         }
 
         /// <summary>
-        /// 滑块手写笔移动事件处理
+        /// 处理滑块手写笔结束事件
         /// </summary>
-        private void Slider_StylusMove(object sender, StylusEventArgs e)
+        private void HandleSliderStylusEnd(object sender, StylusEventArgs e, Slider slider)
         {
-            var slider = sender as Slider;
-            if (slider == null || !slider.IsStylusCaptured) return;
-
-            // 计算手写笔位置对应的滑块值
-            var stylusPoint = e.GetStylusPoints(slider);
-            if (stylusPoint.Count > 0)
-            {
-                UpdateSliderValueFromPosition(slider, stylusPoint[0].ToPoint());
-            }
-            
-            e.Handled = true;
-        }
-
-        /// <summary>
-        /// 滑块手写笔释放事件处理
-        /// </summary>
-        private void Slider_StylusUp(object sender, StylusEventArgs e)
-        {
-            var slider = sender as Slider;
             if (slider == null) return;
 
             // 释放手写笔捕获
@@ -2416,44 +2382,75 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 滑块操作开始事件处理
+        /// 根据触摸/手写笔位置更新滑块值（改进版本）
         /// </summary>
-        private void Slider_ManipulationStarted(object sender, ManipulationStartedEventArgs e)
+        /// <param name="slider">滑块控件</param>
+        /// <param name="position">触摸/手写笔位置</param>
+        private void UpdateSliderValueFromPositionImproved(Slider slider, Point position)
         {
-            var slider = sender as Slider;
             if (slider == null) return;
 
-            e.Handled = true;
+            try
+            {
+                // 获取滑块的轨道元素
+                var track = slider.Template.FindName("PART_Track", slider) as Track;
+                if (track == null)
+                {
+                    // 如果找不到轨道，使用简单方法
+                    UpdateSliderValueFromPosition(slider, position);
+                    return;
+                }
+
+                // 获取轨道的实际边界
+                var trackBounds = track.TransformToAncestor(slider).TransformBounds(new Rect(0, 0, track.ActualWidth, track.ActualHeight));
+                
+                double relativePosition = 0;
+                
+                if (slider.Orientation == System.Windows.Controls.Orientation.Horizontal)
+                {
+                    // 水平滑块
+                    if (trackBounds.Width > 0)
+                    {
+                        // 计算相对于轨道的相对位置
+                        var relativeX = position.X - trackBounds.X;
+                        relativePosition = Math.Max(0, Math.Min(1, relativeX / trackBounds.Width));
+                    }
+                }
+                else
+                {
+                    // 垂直滑块
+                    if (trackBounds.Height > 0)
+                    {
+                        // 计算相对于轨道的相对位置
+                        var relativeY = position.Y - trackBounds.Y;
+                        relativePosition = Math.Max(0, Math.Min(1, relativeY / trackBounds.Height));
+                    }
+                }
+
+                // 计算新的滑块值
+                var newValue = slider.Minimum + relativePosition * (slider.Maximum - slider.Minimum);
+                
+                // 如果启用了吸附到刻度，则调整到最近的刻度
+                if (slider.IsSnapToTickEnabled && slider.TickFrequency > 0)
+                {
+                    var tickCount = (int)((slider.Maximum - slider.Minimum) / slider.TickFrequency);
+                    var tickIndex = (int)Math.Round(relativePosition * tickCount);
+                    newValue = slider.Minimum + tickIndex * slider.TickFrequency;
+                }
+
+                // 更新滑块值
+                slider.Value = Math.Max(slider.Minimum, Math.Min(slider.Maximum, newValue));
+            }
+            catch (Exception ex)
+            {
+                // 如果改进方法失败，回退到简单方法
+                UpdateSliderValueFromPosition(slider, position);
+                LogHelper.WriteLogToFile($"更新滑块值时出错，使用回退方法: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
-        /// 滑块操作变化事件处理
-        /// </summary>
-        private void Slider_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
-        {
-            var slider = sender as Slider;
-            if (slider == null) return;
-
-            // 计算操作位置对应的滑块值
-            var manipulationOrigin = e.ManipulationOrigin;
-            UpdateSliderValueFromPosition(slider, manipulationOrigin);
-            
-            e.Handled = true;
-        }
-
-        /// <summary>
-        /// 滑块操作完成事件处理
-        /// </summary>
-        private void Slider_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
-        {
-            var slider = sender as Slider;
-            if (slider == null) return;
-
-            e.Handled = true;
-        }
-
-        /// <summary>
-        /// 根据触摸/手写笔位置更新滑块值
+        /// 根据触摸/手写笔位置更新滑块值（简单版本）
         /// </summary>
         /// <param name="slider">滑块控件</param>
         /// <param name="position">触摸/手写笔位置</param>
@@ -2463,36 +2460,33 @@ namespace Ink_Canvas
 
             try
             {
-                // 计算滑块轨道的位置和长度
-                var track = slider.Template.FindName("PART_Track", slider) as Track;
-                if (track == null) return;
-
-                var thumb = track.Thumb;
-                if (thumb == null) return;
-
-                // 获取滑块轨道的实际渲染位置
-                track.Arrange(new Rect(track.DesiredSize));
-                thumb.Arrange(new Rect(thumb.DesiredSize));
-
-                // 计算相对位置（0-1之间）
+                // 使用更简单直接的方法计算滑块值
                 double relativePosition = 0;
                 
                 if (slider.Orientation == System.Windows.Controls.Orientation.Horizontal)
                 {
-                    // 水平滑块
-                    var trackWidth = track.ActualWidth;
-                    if (trackWidth > 0)
+                    // 水平滑块 - 使用滑块的实际宽度
+                    var sliderWidth = slider.ActualWidth;
+                    if (sliderWidth > 0)
                     {
-                        relativePosition = Math.Max(0, Math.Min(1, position.X / trackWidth));
+                        // 考虑滑块的边距和拇指大小
+                        var thumbSize = 20; // 假设拇指大小约为20像素
+                        var effectiveWidth = sliderWidth - thumbSize;
+                        var adjustedX = position.X - thumbSize / 2;
+                        relativePosition = Math.Max(0, Math.Min(1, adjustedX / effectiveWidth));
                     }
                 }
                 else
                 {
-                    // 垂直滑块
-                    var trackHeight = track.ActualHeight;
-                    if (trackHeight > 0)
+                    // 垂直滑块 - 使用滑块的实际高度
+                    var sliderHeight = slider.ActualHeight;
+                    if (sliderHeight > 0)
                     {
-                        relativePosition = Math.Max(0, Math.Min(1, position.Y / trackHeight));
+                        // 考虑滑块的边距和拇指大小
+                        var thumbSize = 20; // 假设拇指大小约为20像素
+                        var effectiveHeight = sliderHeight - thumbSize;
+                        var adjustedY = position.Y - thumbSize / 2;
+                        relativePosition = Math.Max(0, Math.Min(1, adjustedY / effectiveHeight));
                     }
                 }
 

@@ -894,8 +894,13 @@ namespace Ink_Canvas.Windows {
                 var trackWidth = customSlider.TrackBorder.ActualWidth;
                 if (trackWidth <= 0) return;
 
-                // 计算相对位置（0-1之间）
-                var relativePosition = Math.Max(0, Math.Min(1, position.X / trackWidth));
+                // 考虑拇指大小，计算有效轨道长度
+                var thumbSize = 21; // 根据XAML中的Width="21"
+                var effectiveWidth = trackWidth - thumbSize;
+                
+                // 计算相对位置（0-1之间），考虑拇指大小
+                var adjustedX = position.X - thumbSize / 2;
+                var relativePosition = Math.Max(0, Math.Min(1, adjustedX / effectiveWidth));
 
                 // 更新滑块位置
                 var thumbTransform = customSlider.ThumbImage.RenderTransform as TranslateTransform;
@@ -906,7 +911,7 @@ namespace Ink_Canvas.Windows {
                 }
 
                 // 计算新的滑块位置
-                var newX = relativePosition * trackWidth;
+                var newX = relativePosition * effectiveWidth;
                 thumbTransform.X = newX;
 
                 // 更新值显示Border的宽度
