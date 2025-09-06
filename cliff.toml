@@ -1,4 +1,4 @@
-# git-cliff configuration file
+# git-cliff configuration file - 详细版本
 # https://git-cliff.org/docs/configuration
 
 [changelog]
@@ -15,7 +15,11 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group | upper_first }}
 {% for commit in commits %}
-- {{ commit.message | upper_first }}{% if commit.scope %} *({{ commit.scope }})*{% endif %}{% if commit.breaking %} **BREAKING:** {{ commit.breaking_description }}{% endif %}
+- **{{ commit.message | upper_first }}**{% if commit.scope %} *({{ commit.scope }})*{% endif %}{% if commit.breaking %} **BREAKING:** {{ commit.breaking_description }}{% endif %}
+  - 👤 **提交者**: {{ commit.author.name }}
+  - 🕒 **提交时间**: {{ commit.timestamp | date(format="%Y-%m-%d %H:%M:%S") }}
+  - 🔗 **提交哈希**: [{{ commit.id | truncate(length=7, end="") }}](https://github.com/InkCanvasForClass/community/commit/{{ commit.id }})
+  - 📝 **完整消息**: {{ commit.message }}
 {% endfor %}
 {% endfor %}
 """
@@ -27,19 +31,48 @@ footer = ""
 [git]
 # parse the commits using this regex
 commit_parsers = [
-    { message = "^feat", group = "Features" },
-    { message = "^fix", group = "Bug Fixes" },
-    { message = "^docs", group = "Documentation" },
-    { message = "^style", group = "Styling" },
-    { message = "^refactor", group = "Code Refactoring" },
-    { message = "^perf", group = "Performance" },
-    { message = "^test", group = "Tests" },
-    { message = "^build", group = "Build System" },
-    { message = "^ci", group = "Continuous Integration" },
-    { message = "^chore", group = "Chores" },
-    { message = "^revert", group = "Reverts" },
-    { message = "^merge", group = "Merges" },
-    { message = "^.*", group = "Other" },
+    # 带作用域的提交
+    { message = "^feat\\((.+)\\)", group = "✨ Features", scope = "$1" },
+    { message = "^fix\\((.+)\\)", group = "🐛 Bug Fixes", scope = "$1" },
+    { message = "^docs\\((.+)\\)", group = "📚 Documentation", scope = "$1" },
+    { message = "^style\\((.+)\\)", group = "💄 Styling", scope = "$1" },
+    { message = "^refactor\\((.+)\\)", group = "♻️ Code Refactoring", scope = "$1" },
+    { message = "^perf\\((.+)\\)", group = "⚡ Performance", scope = "$1" },
+    { message = "^test\\((.+)\\)", group = "🧪 Tests", scope = "$1" },
+    { message = "^build\\((.+)\\)", group = "🔨 Build System", scope = "$1" },
+    { message = "^ci\\((.+)\\)", group = "👷 Continuous Integration", scope = "$1" },
+    { message = "^chore\\((.+)\\)", group = "🔧 Chores", scope = "$1" },
+    { message = "^revert\\((.+)\\)", group = "⏪ Reverts", scope = "$1" },
+    { message = "^merge\\((.+)\\)", group = "🔀 Merges", scope = "$1" },
+    { message = "^hotfix\\((.+)\\)", group = "🚨 Hotfixes", scope = "$1" },
+    { message = "^security\\((.+)\\)", group = "🔒 Security", scope = "$1" },
+    { message = "^ui\\((.+)\\)", group = "🎨 UI/UX", scope = "$1" },
+    { message = "^api\\((.+)\\)", group = "🔌 API", scope = "$1" },
+    { message = "^config\\((.+)\\)", group = "⚙️ Configuration", scope = "$1" },
+    { message = "^deps\\((.+)\\)", group = "📦 Dependencies", scope = "$1" },
+    
+    # 不带作用域的提交
+    { message = "^feat", group = "✨ Features" },
+    { message = "^fix", group = "🐛 Bug Fixes" },
+    { message = "^docs", group = "📚 Documentation" },
+    { message = "^style", group = "💄 Styling" },
+    { message = "^refactor", group = "♻️ Code Refactoring" },
+    { message = "^perf", group = "⚡ Performance" },
+    { message = "^test", group = "🧪 Tests" },
+    { message = "^build", group = "🔨 Build System" },
+    { message = "^ci", group = "👷 Continuous Integration" },
+    { message = "^chore", group = "🔧 Chores" },
+    { message = "^revert", group = "⏪ Reverts" },
+    { message = "^merge", group = "🔀 Merges" },
+    { message = "^hotfix", group = "🚨 Hotfixes" },
+    { message = "^security", group = "🔒 Security" },
+    { message = "^ui", group = "🎨 UI/UX" },
+    { message = "^api", group = "🔌 API" },
+    { message = "^config", group = "⚙️ Configuration" },
+    { message = "^deps", group = "📦 Dependencies" },
+    
+    # 其他提交
+    { message = "^.*", group = "📋 Other" },
 ]
 # protect breaking changes from being skipped due to matching a previous commit
 protect_breaking_commits = false

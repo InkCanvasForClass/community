@@ -27,7 +27,14 @@ jobs:
       - name: 生成 changelog
         id: generate-changelog
         run: |
-          git-cliff --output CHANGELOG.md
+          # 检查是否存在详细配置文件
+          if (Test-Path "cliff-detailed.toml") {
+            Write-Host "使用详细 changelog 配置"
+            git-cliff --config cliff-detailed.toml --output CHANGELOG.md
+          } else {
+            Write-Host "使用默认 changelog 配置"
+            git-cliff --output CHANGELOG.md
+          }
 
       - name: Setup MSbuild
         uses: microsoft/setup-msbuild@v2
@@ -45,14 +52,27 @@ jobs:
 
       - name: 准备发布文件
         run: |
-          echo "准备发布目录..."
-          mkdir -p release
+          Write-Host "准备发布目录..."
+          New-Item -ItemType Directory -Path "release" -Force
           
-          # 复制构建产物到发布目录
-          xcopy "Ink Canvas\bin\Any CPU\Release\net472\*" "release\" /E /I /Y
+          # 复制构建产物到临时目录
+          $tempDir = "temp-build"
+          New-Item -ItemType Directory -Path $tempDir -Force
+          xcopy "Ink Canvas\bin\Any CPU\Release\net472\*" "$tempDir\" /E /I /Y
           
-          echo "构建产物整理完成"
-          dir release
+          Write-Host "构建产物整理完成"
+          Get-ChildItem $tempDir
+          
+          # 创建压缩包
+          $zipName = "InkCanvasForClass.CE.$env:GITHUB_REF_NAME.zip"
+          Write-Host "创建压缩包: $zipName"
+          Compress-Archive -Path "$tempDir\*" -DestinationPath "release\$zipName" -Force
+          
+          # 清理临时目录
+          Remove-Item -Path $tempDir -Recurse -Force
+          
+          Write-Host "发布文件准备完成"
+          Get-ChildItem release
 
       - name: 计算 SHA256 值
         run: |
@@ -91,7 +111,8 @@ jobs:
           "**国内 下载链接**" | Add-Content -Path ..\CHANGELOG.md
           "| 平台/打包方式 | 支持架构 | 完整版 |" | Add-Content -Path ..\CHANGELOG.md
           "| --- | --- | --- |" | Add-Content -Path ..\CHANGELOG.md
-          "| Windows | Any CPU | [下载](https://icc.bliemhax.com) |" | Add-Content -Path ..\CHANGELOG.md
+          "| Windows (inkeys) | Any CPU | [下载 $env:GITHUB_REF_NAME](https://iccce.inkeys.top/Release/InkCanvasForClass.CE.$env:GITHUB_REF_NAME.zip) |" | Add-Content -Path ..\CHANGELOG.md
+          "| Windows (智教联盟) | Any CPU | [下载 $env:GITHUB_REF_NAME](https://get.smart-teach.cn/d/Ningbo-S3/shared/jiangling/community/InkCanvasForClass.CE.$env:GITHUB_REF_NAME.zip) |" | Add-Content -Path ..\CHANGELOG.md
           "" | Add-Content -Path ..\CHANGELOG.md
           "**Github 镜像 下载链接**" | Add-Content -Path ..\CHANGELOG.md
           "| 镜像源 | 平台/打包方式 | 支持架构 | 完整版 |" | Add-Content -Path ..\CHANGELOG.md
@@ -131,7 +152,7 @@ jobs:
           draft: false
           prerelease: ${{ env.is_beta == 'true' }}
           tag_name: ${{ github.ref_name }}
-          name: Ink Canvas CE 新版本 - ${{ github.ref_name }}
+          name: Ink Canvas For Class CE 新版本 - ${{ github.ref_name }}
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
