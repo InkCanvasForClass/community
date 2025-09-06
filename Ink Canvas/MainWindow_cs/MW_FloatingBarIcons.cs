@@ -30,6 +30,8 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        // 添加当前模式的缓存，避免依赖可能过时的inkCanvas.EditingMode状态
+        private string _currentToolMode = "cursor";
 
         #region "手勢"按鈕
 
@@ -812,6 +814,10 @@ namespace Ink_Canvas
             if (sender == SymbolIconSelect && lastBorderMouseDownObject != SymbolIconSelect) return;
 
             BtnSelect_Click(null, null);
+            
+            // 更新模式缓存
+            UpdateCurrentToolMode("select");
+            
             HideSubPanels("select");
 
         }
@@ -1716,6 +1722,9 @@ namespace Ink_Canvas
             // 使用集中化的工具模式切换方法，确保快捷键状态正确更新
             // 鼠标模式下应该禁用快捷键以放行键盘操作
             SetCurrentToolMode(InkCanvasEditingMode.None);
+            
+            // 更新模式缓存，确保后续的模式检测正确
+            UpdateCurrentToolMode("cursor");
 
             // 修复：在浮动栏收起状态下，仍然需要设置按钮高亮状态
             // 这样在浮动栏展开时能正确显示高光
@@ -1845,6 +1854,9 @@ namespace Ink_Canvas
             {
                 // 使用集中化的工具模式切换方法
                 SetCurrentToolMode(InkCanvasEditingMode.Ink);
+                
+                // 更新模式缓存
+                UpdateCurrentToolMode("pen");
 
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
@@ -1879,6 +1891,9 @@ namespace Ink_Canvas
                 CheckEnableTwoFingerGestureBtnVisibility(true);
                 // 使用集中化的工具模式切换方法
                 SetCurrentToolMode(InkCanvasEditingMode.Ink);
+                
+                // 更新模式缓存
+                UpdateCurrentToolMode("pen");
 
                 // 在批注模式下显示快捷调色盘（如果设置中启用了）
                 if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
@@ -2001,6 +2016,9 @@ namespace Ink_Canvas
                     }
                     // 使用集中化的工具模式切换方法
                     SetCurrentToolMode(InkCanvasEditingMode.Ink);
+                    
+                    // 更新模式缓存
+                    UpdateCurrentToolMode("pen");
 
                     // 修复：从线擦切换到批注时，保持之前的笔类型状态
                     forceEraser = false;
@@ -2062,6 +2080,10 @@ namespace Ink_Canvas
             // 使用新的高级橡皮擦系统
             // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.EraseByPoint);
+            
+            // 更新模式缓存
+            UpdateCurrentToolMode("eraser");
+            
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
@@ -2102,6 +2124,10 @@ namespace Ink_Canvas
             // 使用新的高级橡皮擦系统
             // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.EraseByPoint);
+            
+            // 更新模式缓存
+            UpdateCurrentToolMode("eraser");
+            
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
@@ -2140,6 +2166,10 @@ namespace Ink_Canvas
             inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
             // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.EraseByStroke);
+            
+            // 更新模式缓存
+            UpdateCurrentToolMode("eraserByStrokes");
+            
             drawingShapeMode = 0;
 
             // 修复：切换到线擦时，保存当前的笔类型状态，而不是强制重置
@@ -3398,7 +3428,13 @@ namespace Ink_Canvas
         {
             try
             {
-                // 检查当前编辑模式
+                // 优先使用缓存的模式，避免在浮动栏刷新时返回过时的模式信息
+                if (!string.IsNullOrEmpty(_currentToolMode))
+                {
+                    return _currentToolMode;
+                }
+
+                // 如果缓存为空，则从inkCanvas状态推断模式
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
                 {
                     return "select";
@@ -3442,7 +3478,17 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"获取当前选中模式失败: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            return string.Empty;
+            return "cursor"; // 默认返回鼠标模式
+        }
+
+        /// <summary>
+        /// 更新当前工具模式缓存
+        /// </summary>
+        /// <param name="mode">模式名称</param>
+        private void UpdateCurrentToolMode(string mode)
+        {
+            _currentToolMode = mode;
+            LogHelper.WriteLogToFile($"更新工具模式缓存: {mode}", LogHelper.LogType.Trace);
         }
 
         #endregion

@@ -107,6 +107,10 @@ namespace Ink_Canvas
                 else if (sender == ImageDrawArrow || sender == BoardImageDrawArrow)
                     drawingShapeMode = 2;
                 else if (sender == ImageDrawParallelLine || sender == BoardImageDrawParallelLine) drawingShapeMode = 15;
+                
+                // 更新模式缓存
+                UpdateCurrentToolMode("shape");
+                
                 isLongPressSelected = true;
                 if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
             }
