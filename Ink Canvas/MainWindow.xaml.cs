@@ -1618,6 +1618,7 @@ namespace Ink_Canvas
             {
                 var settingsWindow = new SettingsWindow();
                 settingsWindow.Owner = this;
+                settingsWindow.Topmost = true; // 确保设置窗口始终在主窗口之上，避免下拉框被遮挡
                 settingsWindow.ShowDialog();
             }
         }

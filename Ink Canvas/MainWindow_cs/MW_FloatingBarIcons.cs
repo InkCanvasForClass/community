@@ -675,27 +675,12 @@ namespace Ink_Canvas
                     RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     LogHelper.WriteLogToFile($"隐藏PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
-                // 修复PPT放映时点击白板按钮后翻页按钮不显示的问题
-                // 只有在确实在放映模式下且页数有效时才强制显示翻页按钮
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && 
-                    PPTManager?.IsInSlideShow == true && 
-                    PPTManager?.SlidesCount > 0)
+                
+                // 使用PPT UI管理器来正确更新翻页按钮显示状态，确保遵循用户设置
+                if (_pptUIManager != null)
                 {
-                    // 强制显示PPT翻页按钮
-                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Visible;
-                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Visible;
-                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Visible;
-                    RightSidePanelForPPTNavigation.Visibility = Visibility.Visible;
-                    LogHelper.WriteLogToFile($"强制显示PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
-                }
-                else
-                {
-                    // 如果条件不满足，确保隐藏翻页按钮
-                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                    RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                    LogHelper.WriteLogToFile($"隐藏PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
+                    _pptUIManager.UpdateNavigationPanelsVisibility();
+                    LogHelper.WriteLogToFile($"使用PPT UI管理器更新翻页按钮显示状态", LogHelper.LogType.Trace);
                 }
 
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
