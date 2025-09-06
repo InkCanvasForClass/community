@@ -350,10 +350,9 @@ namespace Ink_Canvas
                 {
                     BorderSettings.Visibility = Visibility.Collapsed;
                     isOpeningOrHidingSettingsPane = false;
-                    // 在设置面板完全关闭后，恢复无焦点模式设置
-                    if (wasNoFocusModeBeforeSettings)
+                    // 在设置面板完全关闭后，根据当前设置恢复无焦点模式
+                    if (Settings.Advanced.IsNoFocusMode)
                     {
-                        Settings.Advanced.IsNoFocusMode = true;
                         ApplyNoFocusMode();
                     }
                 };
