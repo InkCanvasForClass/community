@@ -513,7 +513,7 @@ namespace Ink_Canvas.Helpers
                             // 尝试获取当前版本的发布时间
                             DateTime? currentVersionReleaseTime = await GetVersionReleaseTime(localVersion, channel);
 
-                            bool shouldPush = DeviceIdentifier.ShouldPushUpdate(apiVersion, releaseTime, true, currentVersionReleaseTime); // 明确标记为自动更新
+                            bool shouldPush = DeviceIdentifier.ShouldPushUpdate(apiVersion, releaseTime, true, currentVersionReleaseTime, localVersion); // 明确标记为自动更新
                             if (!shouldPush)
                             {
                                 var priority = DeviceIdentifier.GetUpdatePriority();
@@ -569,7 +569,7 @@ namespace Ink_Canvas.Helpers
                                 // 尝试获取当前版本的发布时间
                                 DateTime? currentVersionReleaseTime = await GetVersionReleaseTime(localVersion, channel);
 
-                                bool shouldPush = DeviceIdentifier.ShouldPushUpdate(remoteVersion, DateTime.Now, true, currentVersionReleaseTime); // 明确标记为自动更新
+                                bool shouldPush = DeviceIdentifier.ShouldPushUpdate(remoteVersion, DateTime.Now, true, currentVersionReleaseTime, localVersion); // 明确标记为自动更新
                                 if (!shouldPush)
                                 {
                                     var priority = DeviceIdentifier.GetUpdatePriority();
