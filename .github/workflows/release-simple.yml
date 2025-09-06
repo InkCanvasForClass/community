@@ -21,11 +21,13 @@ jobs:
 
       - name: 设置 git-cliff
         uses: kenji-miyake/setup-git-cliff@v1
+        with:
+          version: latest
 
       - name: 生成 changelog
         id: generate-changelog
         run: |
-          git cliff
+          git-cliff --output CHANGELOG.md
 
       - name: Setup MSbuild
         uses: microsoft/setup-msbuild@v2
