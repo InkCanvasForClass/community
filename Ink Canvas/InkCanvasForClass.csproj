@@ -24,8 +24,12 @@
     <BootstrapperEnabled>false</BootstrapperEnabled>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
-    <Configurations>Release;x86 Debug;Debug</Configurations>
-    <Platforms>AnyCPU;x86</Platforms>
+    <Configurations>Debug;Release;x86 Debug</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>embedded</DebugType>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <Prefer32Bit>True</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86 Debug|AnyCPU'">
     <DebugType>embedded</DebugType>
