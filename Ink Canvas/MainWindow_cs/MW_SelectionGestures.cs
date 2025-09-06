@@ -262,13 +262,31 @@ namespace Ink_Canvas
         {
             isGridInkCanvasSelectionCoverMouseDown = true;
             
-            // 立即开始墨迹拖动
+            // 检查是否有选中的墨迹
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
-                isStrokeDragging = true;
-                strokeDragStartPoint = e.GetPosition(inkCanvas);
-                GridInkCanvasSelectionCover.CaptureMouse();
-                GridInkCanvasSelectionCover.Cursor = Cursors.SizeAll;
+                // 获取鼠标点击位置
+                var clickPoint = e.GetPosition(inkCanvas);
+                var selectionBounds = inkCanvas.GetSelectionBounds();
+                
+                // 检查点击位置是否在选择框边界内
+                if (clickPoint.X >= selectionBounds.Left && 
+                    clickPoint.X <= selectionBounds.Right && 
+                    clickPoint.Y >= selectionBounds.Top && 
+                    clickPoint.Y <= selectionBounds.Bottom)
+                {
+                    // 只有在选择框边界内才允许拖动
+                    isStrokeDragging = true;
+                    strokeDragStartPoint = clickPoint;
+                    GridInkCanvasSelectionCover.CaptureMouse();
+                    GridInkCanvasSelectionCover.Cursor = Cursors.SizeAll;
+                }
+                else
+                {
+                    // 点击在选择框外，取消选择
+                    inkCanvas.Select(new StrokeCollection());
+                    GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                }
             }
         }
 
@@ -515,6 +533,31 @@ namespace Ink_Canvas
                 var touchPoint = e.GetTouchPoint(null);
                 centerPoint = touchPoint.Position;
                 lastTouchPointOnGridInkCanvasCover = touchPoint.Position;
+
+                // 检查是否有选中的墨迹
+                if (inkCanvas.GetSelectedStrokes().Count > 0)
+                {
+                    // 获取触摸点位置
+                    var touchPosition = e.GetTouchPoint(inkCanvas).Position;
+                    var selectionBounds = inkCanvas.GetSelectionBounds();
+                    
+                    // 检查触摸位置是否在选择框边界内
+                    if (touchPosition.X >= selectionBounds.Left && 
+                        touchPosition.X <= selectionBounds.Right && 
+                        touchPosition.Y >= selectionBounds.Top && 
+                        touchPosition.Y <= selectionBounds.Bottom)
+                    {
+                        // 只有在选择框边界内才允许拖动
+                        // 这里可以添加触摸拖动的逻辑
+                    }
+                    else
+                    {
+                        // 触摸在选择框外，取消选择
+                        inkCanvas.Select(new StrokeCollection());
+                        GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                        return;
+                    }
+                }
 
                 if (isStrokeSelectionCloneOn)
                 {
