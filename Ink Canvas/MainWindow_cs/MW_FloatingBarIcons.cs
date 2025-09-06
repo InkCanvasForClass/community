@@ -350,6 +350,12 @@ namespace Ink_Canvas
                 {
                     BorderSettings.Visibility = Visibility.Collapsed;
                     isOpeningOrHidingSettingsPane = false;
+                    // 在设置面板完全关闭后，恢复无焦点模式设置
+                    if (wasNoFocusModeBeforeSettings)
+                    {
+                        Settings.Advanced.IsNoFocusMode = true;
+                        ApplyNoFocusMode();
+                    }
                 };
 
                 BorderSettings.Visibility = Visibility.Visible;
@@ -2574,6 +2580,7 @@ namespace Ink_Canvas
         }
 
         private bool isOpeningOrHidingSettingsPane;
+        private bool wasNoFocusModeBeforeSettings;
 
         private void BtnSettings_Click(object sender, RoutedEventArgs e)
         {
@@ -2583,6 +2590,14 @@ namespace Ink_Canvas
             }
             else
             {
+                // 临时禁用无焦点模式以避免下拉选项被遮挡
+                wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
+                if (wasNoFocusModeBeforeSettings)
+                {
+                    Settings.Advanced.IsNoFocusMode = false;
+                    ApplyNoFocusMode();
+                }
+
                 // 设置蒙版为可点击，并添加半透明背景
                 BorderSettingsMask.IsHitTestVisible = true;
                 BorderSettingsMask.Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
