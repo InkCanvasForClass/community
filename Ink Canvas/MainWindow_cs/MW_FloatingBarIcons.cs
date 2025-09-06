@@ -650,7 +650,10 @@ namespace Ink_Canvas
                 //关闭黑板
                 HideSubPanelsImmediately();
 
-                if (StackPanelPPTControls.Visibility == Visibility.Visible)
+                // 只有在PPT放映模式下才显示翻页按钮
+                if (StackPanelPPTControls.Visibility == Visibility.Visible && 
+                    BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                    PPTManager?.IsInSlideShow == true)
                 {
                     var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                     var dopsc = dops.ToCharArray();
@@ -659,8 +662,17 @@ namespace Ink_Canvas
                     if (dopsc[2] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
                     if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
                 }
+                else
+                {
+                    // 如果不在放映模式，隐藏所有翻页按钮
+                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                }
                 // 修复PPT放映时点击白板按钮后翻页按钮不显示的问题
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                // 只有在确实在放映模式下才强制显示翻页按钮
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && PPTManager?.IsInSlideShow == true)
                 {
                     // 强制显示PPT翻页按钮
                     LeftBottomPanelForPPTNavigation.Visibility = Visibility.Visible;

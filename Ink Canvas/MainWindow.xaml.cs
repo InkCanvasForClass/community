@@ -296,7 +296,10 @@ namespace Ink_Canvas
             {
                 foreach (var gest in gestures)
                     //Trace.WriteLine(string.Format("Gesture: {0}, Confidence: {1}", gest.ApplicationGesture, gest.RecognitionConfidence));
-                    if (StackPanelPPTControls.Visibility == Visibility.Visible)
+                    // 只有在PPT放映模式下才响应翻页手势
+                    if (StackPanelPPTControls.Visibility == Visibility.Visible && 
+                        BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                        PPTManager?.IsInSlideShow == true)
                     {
                         if (gest.ApplicationGesture == ApplicationGesture.Left)
                         {
