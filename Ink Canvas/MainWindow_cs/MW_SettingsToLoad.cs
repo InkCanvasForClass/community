@@ -256,6 +256,10 @@ namespace Ink_Canvas
                 _taskbar.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
 
                 ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
+                
+                // 初始化浮动栏透明度滑块值
+                ViewboxFloatingBarOpacityValueSlider.Value = Settings.Appearance.ViewboxFloatingBarOpacityValue;
+                ViewboxFloatingBarOpacityInPPTValueSlider.Value = Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue;
 
                 if (Settings.Appearance.EnableViewboxBlackBoardScaleTransform) // 画板 UI 缩放 80%
                 {
