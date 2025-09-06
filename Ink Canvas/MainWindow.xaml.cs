@@ -2028,52 +2028,30 @@ namespace Ink_Canvas
                     return;
                 }
                 
+                // 暂时隐藏设置面板
+                BorderSettings.Visibility = Visibility.Hidden;
+                BorderSettingsMask.Visibility = Visibility.Hidden;
+                
                 // 创建快捷键设置窗口
                 var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
                 
-                // 确保窗口在显示前获得正确的焦点和置顶状态
-                hotkeySettingsWindow.Loaded += (s, e) =>
-                {
-                    try
-                    {
-                        // 确保窗口获得焦点
-                        hotkeySettingsWindow.Activate();
-                        hotkeySettingsWindow.Focus();
-                        
-                        // 如果主窗口处于置顶状态，临时调整子窗口的置顶状态
-                        if (Settings.Advanced.IsAlwaysOnTop)
-                        {
-                            // 临时设置子窗口为置顶，确保它在主窗口之上
-                            hotkeySettingsWindow.Topmost = true;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"设置快捷键设置窗口焦点时出错: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                };
-                
-                // 窗口关闭时恢复置顶状态
+                // 设置窗口关闭事件，用于在快捷键设置窗口关闭后恢复设置面板
                 hotkeySettingsWindow.Closed += (s, e) =>
                 {
-                    try
-                    {
-                        // 恢复主窗口的置顶状态
-                        if (Settings.Advanced.IsAlwaysOnTop)
-                        {
-                            ApplyAlwaysOnTop();
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"恢复主窗口置顶状态时出错: {ex.Message}", LogHelper.LogType.Error);
-                    }
+                    // 恢复设置面板显示
+                    BorderSettings.Visibility = Visibility.Visible;
+                    BorderSettingsMask.Visibility = Visibility.Visible;
                 };
                 
+                // 显示快捷键设置窗口
                 hotkeySettingsWindow.ShowDialog();
             }
             catch (Exception ex)
             {
+                // 确保在发生错误时也恢复设置面板显示
+                BorderSettings.Visibility = Visibility.Visible;
+                BorderSettingsMask.Visibility = Visibility.Visible;
+                
                 LogHelper.WriteLogToFile($"打开快捷键设置窗口时出错: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show($"打开快捷键设置窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }

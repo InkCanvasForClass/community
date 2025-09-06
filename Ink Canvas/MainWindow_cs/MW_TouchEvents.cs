@@ -468,45 +468,55 @@ namespace Ink_Canvas
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
             dec.Add(e.TouchDevice.Id);
 
-            // Palm Eraser 逻辑 - 优化：改进手掌判定条件，提高精度
+            // Palm Eraser 逻辑 - 优化：改进手掌判定条件，使用设备提供的触摸面积信息
             if (Settings.Canvas.EnablePalmEraser && dec.Count >= 2 && !isPalmEraserActive && !palmEraserTouchDownHandled)
             {
-                var bounds = e.GetTouchPoint(inkCanvas).Bounds;
+                touchPoint = e.GetTouchPoint(inkCanvas);
+                var size = touchPoint.Size; // 使用设备提供的触摸面积信息
+                var bounds = touchPoint.Bounds; // 保留bounds用于宽高比计算
 
                 // 根据敏感度设置调整判定参数
-                double palmThreshold;
+                double palmAreaThreshold; // 改为面积阈值
                 double aspectRatioThreshold;
                 int minTouchPoints;
 
                 switch (Settings.Canvas.PalmEraserSensitivity)
                 {
                     case 0: // 低敏感度 - 更严格的判定
-                        palmThreshold = 80;
+                        palmAreaThreshold = 6400; // 80*80的面积
                         aspectRatioThreshold = 0.4;
                         minTouchPoints = 4;
                         break;
                     case 1: // 中敏感度 - 平衡的判定
-                        palmThreshold = 60;
+                        palmAreaThreshold = 3600; // 60*60的面积
                         aspectRatioThreshold = 0.3;
                         minTouchPoints = 3;
                         break;
                     case 2: // 高敏感度 - 较宽松的判定
                     default:
-                        palmThreshold = 50;
+                        palmAreaThreshold = 2500; // 50*50的面积
                         aspectRatioThreshold = 0.25;
                         minTouchPoints = 2;
                         break;
                 }
 
-                // 计算宽高比
+                // 计算触摸面积（使用设备提供的Size）
+                double touchArea = size.Width * size.Height;
+                
+                // 计算宽高比（使用Bounds确保准确性）
                 double aspectRatio = Math.Min(bounds.Width, bounds.Height) / Math.Max(bounds.Width, bounds.Height);
 
-                // 更严格的手掌判定条件
-                bool isLargeTouch = bounds.Width >= palmThreshold && bounds.Height >= palmThreshold;
+                // 改进的手掌判定条件：使用面积而不是单独的宽高
+                bool isLargeTouch = touchArea >= palmAreaThreshold;
                 bool isPalmLikeShape = aspectRatio >= aspectRatioThreshold;
                 bool hasMultipleTouchPoints = dec.Count >= minTouchPoints;
+                
+                // 新增：额外的判定条件提高准确性
+                bool isReasonableSize = size.Width >= 20 && size.Height >= 20 && size.Width <= 200 && size.Height <= 200; // 合理的触摸尺寸范围
+                bool isNotTooElongated = aspectRatio >= 0.2; // 避免过于细长的触摸（可能是手指）
+                bool hasEnoughArea = touchArea >= 400; // 最小面积要求，避免小面积误判
 
-                if (isLargeTouch && isPalmLikeShape && hasMultipleTouchPoints)
+                if (isLargeTouch && isPalmLikeShape && hasMultipleTouchPoints && isReasonableSize && isNotTooElongated && hasEnoughArea)
                 {
                     // 记录当前编辑模式和高光状态
                     palmEraserLastEditingMode = inkCanvas.EditingMode;
@@ -529,7 +539,7 @@ namespace Ink_Canvas
                     StartPalmEraserRecoveryTimer();
 
                     // 记录日志
-                    LogHelper.WriteLogToFile($"Palm eraser activated - Sensitivity: {Settings.Canvas.PalmEraserSensitivity}, Touch bounds: {bounds.Width}x{bounds.Height}, Aspect ratio: {aspectRatio:F2}, Touch points: {dec.Count}");
+                    LogHelper.WriteLogToFile($"Palm eraser activated - Sensitivity: {Settings.Canvas.PalmEraserSensitivity}, Touch area: {touchArea:F0}, Size: {size.Width}x{size.Height}, Bounds: {bounds.Width}x{bounds.Height}, Aspect ratio: {aspectRatio:F2}, Touch points: {dec.Count}, Reasonable size: {isReasonableSize}, Not elongated: {isNotTooElongated}, Enough area: {hasEnoughArea}");
                 }
             }
 
@@ -602,6 +612,8 @@ namespace Ink_Canvas
             // 当所有手掌擦触摸点都抬起时，恢复原编辑模式
             if (isPalmEraserActive && palmEraserTouchIds.Count == 0)
             {
+                LogHelper.WriteLogToFile($"Palm eraser recovery triggered - Touch points remaining: {palmEraserTouchIds.Count}, dec.Count: {dec.Count}");
+                
                 // 恢复高光状态
                 drawingAttributes.IsHighlighter = palmEraserLastIsHighlighter;
 
@@ -764,6 +776,37 @@ namespace Ink_Canvas
                     // 修复：确保手掌擦除后触摸事件能正常响应
                     if (isPalmEraserActive)
                     {
+                        LogHelper.WriteLogToFile("Palm eraser force recovery - all touch points cleared");
+                        
+                        // 恢复高光状态
+                        drawingAttributes.IsHighlighter = palmEraserLastIsHighlighter;
+                        
+                        // 恢复编辑模式
+                        try
+                        {
+                            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                            {
+                                switch (palmEraserLastEditingMode)
+                                {
+                                    case InkCanvasEditingMode.Ink:
+                                        PenIcon_Click(null, null);
+                                        break;
+                                    case InkCanvasEditingMode.Select:
+                                        SymbolIconSelect_MouseUp(null, null);
+                                        break;
+                                    default:
+                                        inkCanvas.EditingMode = palmEraserLastEditingMode;
+                                        break;
+                                }
+                                LogHelper.WriteLogToFile($"Palm eraser force recovered to mode: {palmEraserLastEditingMode}");
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"Palm eraser force recovery failed: {ex.Message}, forcing to Ink mode", LogHelper.LogType.Error);
+                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        }
+                        
                         // 如果手掌擦还在激活状态但触摸点已清空，强制重置状态
                         isPalmEraserActive = false;
                         palmEraserTouchDownHandled = false;
@@ -773,6 +816,11 @@ namespace Ink_Canvas
 
                         ViewboxFloatingBar.IsHitTestVisible = true;
                         BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                        
+                        // 停止恢复定时器
+                        StopPalmEraserRecoveryTimer();
+                        
+                        LogHelper.WriteLogToFile("Palm eraser force recovery completed");
                     }
                 }
             }

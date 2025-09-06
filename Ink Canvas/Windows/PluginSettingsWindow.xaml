@@ -9,6 +9,8 @@
         Title="插件管理" Height="550" Width="800"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
         Background="#F9F9F9">
     
     <Window.Resources>
@@ -27,7 +29,8 @@
         </Grid.RowDefinitions>
         
         <!-- 标题栏 -->
-        <Border Grid.Row="0" Background="{DynamicResource SystemAccentColorLight1}" Height="60">
+        <Border Grid.Row="0" Background="{DynamicResource SystemAccentColorLight1}" Height="60" 
+                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Grid>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
                     <TextBlock Text="插件管理" FontSize="22" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>

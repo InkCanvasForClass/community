@@ -6,185 +6,194 @@
         xmlns:local="clr-namespace:Ink_Canvas.Windows"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         ui:ThemeManager.RequestedTheme="Light" 
-        Background="Transparent" 
+        Background="#F9F9F9"
         AllowsTransparency="True"
         mc:Ignorable="d" 
         WindowStyle="None" 
         WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize"
         Title="快捷键设置" 
         Height="600" 
         Width="800">
     
-    <Border Background="#F0F3F9" CornerRadius="10" BorderThickness="1" BorderBrush="#0066BF" Margin="10">
-        <Grid>
-            <!-- 标题栏 -->
-            <Border Height="50" Background="#0066BF" CornerRadius="10,10,0,0" VerticalAlignment="Top">
-                <Grid>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 标题栏 -->
+        <Border Grid.Row="0" Background="#3B82F6" Height="60" 
+                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+            <Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
                     <TextBlock Text="快捷键设置" 
                                Foreground="White" 
-                               FontSize="18" 
-                               FontWeight="Bold" 
-                               VerticalAlignment="Center" 
-                               HorizontalAlignment="Center"/>
-                    <Button x:Name="BtnClose" 
-                            Content="✕" 
-                            Width="30" 
-                            Height="30" 
-                            Background="Transparent" 
-                            Foreground="White" 
-                            FontSize="14" 
-                            HorizontalAlignment="Right" 
-                            Margin="0,0,30,0"
-                            Click="BtnClose_Click"/>
-                </Grid>
-            </Border>
+                               FontSize="22" 
+                               FontWeight="SemiBold" 
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                <Button x:Name="BtnClose" 
+                        Content="&#xE8BB;" 
+                        FontFamily="Segoe MDL2 Assets"
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Center" 
+                        Margin="0,0,20,0"
+                        Background="Transparent" 
+                        BorderThickness="0" 
+                        FontSize="16" 
+                        Foreground="White"
+                        Click="BtnClose_Click"/>
+            </Grid>
+        </Border>
 
-            <!-- 内容区域 -->
-            <ScrollViewer Margin="0,50,0,0" VerticalScrollBarVisibility="Auto">
-                <ui:SimpleStackPanel Margin="20">
-                    <!-- 说明文字 -->
-                    <TextBlock Text="在这里可以自定义全局快捷键设置。全局快捷键在任何情况下都能生效，即使应用程序不在焦点状态。"
-                               TextWrapping="Wrap" 
-                               Margin="0,0,0,20" 
-                               Foreground="#666666"/>
+        <!-- 主内容区 -->
+        <ScrollViewer Grid.Row="1" Margin="20" VerticalScrollBarVisibility="Auto">
+            <ui:SimpleStackPanel Margin="20">
+                <!-- 说明文字 -->
+                <TextBlock Text="在这里可以自定义全局快捷键设置。全局快捷键在任何情况下都能生效，即使应用程序不在焦点状态。"
+                           TextWrapping="Wrap" 
+                           Margin="0,0,0,20" 
+                           Foreground="#666666"/>
 
-                    <!-- 鼠标模式快捷键设置 -->
-                    <GroupBox Header="鼠标模式设置" Margin="0,0,0,20">
+                <!-- 鼠标模式快捷键设置 -->
+                <GroupBox Header="鼠标模式设置" Margin="0,0,0,20">
+                    <ui:SimpleStackPanel>
+                        <ui:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <ui:ToggleSwitch x:Name="ToggleSwitchEnableHotkeysInMouseMode" 
+                                            Header="在鼠标模式下启用快捷键" 
+                                            Margin="0,0,10,0"
+                                            Width="200"/>
+                        </ui:SimpleStackPanel>
+                        <TextBlock Text="开启后，即使在鼠标模式下快捷键也会生效" 
+                                   Foreground="#666666" 
+                                   VerticalAlignment="Center"
+                                   TextWrapping="Wrap"/>
+                    </ui:SimpleStackPanel>
+                </GroupBox>
+
+                <!-- 快捷键列表 -->
+                <ui:SimpleStackPanel x:Name="HotkeyList" Margin="0,0,0,20">
+                    <!-- 基本操作 -->
+                    <GroupBox Header="基本操作" Margin="0,0,0,15">
                         <ui:SimpleStackPanel>
-                            <ui:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableHotkeysInMouseMode" 
-                                                Header="在鼠标模式下启用快捷键" 
-                                                Margin="0,0,10,0"
-                                                Width="200"/>
-                            </ui:SimpleStackPanel>
-                            <TextBlock Text="开启后，即使在鼠标模式下快捷键也会生效" 
-                                       Foreground="#666666" 
-                                       VerticalAlignment="Center"
-                                       TextWrapping="Wrap"/>
+                            <local:HotkeyItem x:Name="UndoHotkey" 
+                                              Title="撤销" 
+                                              Description="撤销上一步操作"
+                                              DefaultKey="Z" 
+                                              DefaultModifiers="Control"/>
+                            <local:HotkeyItem x:Name="RedoHotkey" 
+                                              Title="重做" 
+                                              Description="重做上一步操作"
+                                              DefaultKey="Y" 
+                                              DefaultModifiers="Control"/>
+                            <local:HotkeyItem x:Name="ClearHotkey" 
+                                              Title="清空" 
+                                              Description="清空当前画板内容"
+                                              DefaultKey="E" 
+                                              DefaultModifiers="Control"/>
+                            <local:HotkeyItem x:Name="PasteHotkey" 
+                                              Title="粘贴" 
+                                              Description="粘贴剪贴板内容"
+                                              DefaultKey="V" 
+                                              DefaultModifiers="Control"/>
                         </ui:SimpleStackPanel>
                     </GroupBox>
 
-                    <!-- 快捷键列表 -->
-                    <ui:SimpleStackPanel x:Name="HotkeyList" Margin="0,0,0,20">
-                        <!-- 基本操作 -->
-                        <GroupBox Header="基本操作" Margin="0,0,0,15">
-                            <ui:SimpleStackPanel>
-                                <local:HotkeyItem x:Name="UndoHotkey" 
-                                                  Title="撤销" 
-                                                  Description="撤销上一步操作"
-                                                  DefaultKey="Z" 
-                                                  DefaultModifiers="Control"/>
-                                <local:HotkeyItem x:Name="RedoHotkey" 
-                                                  Title="重做" 
-                                                  Description="重做上一步操作"
-                                                  DefaultKey="Y" 
-                                                  DefaultModifiers="Control"/>
-                                <local:HotkeyItem x:Name="ClearHotkey" 
-                                                  Title="清空" 
-                                                  Description="清空当前画板内容"
-                                                  DefaultKey="E" 
-                                                  DefaultModifiers="Control"/>
-                                <local:HotkeyItem x:Name="PasteHotkey" 
-                                                  Title="粘贴" 
-                                                  Description="粘贴剪贴板内容"
-                                                  DefaultKey="V" 
-                                                  DefaultModifiers="Control"/>
-                            </ui:SimpleStackPanel>
-                        </GroupBox>
+                    <!-- 工具切换 -->
+                    <GroupBox Header="工具切换" Margin="0,0,0,15">
+                        <ui:SimpleStackPanel>
+                            <local:HotkeyItem x:Name="SelectToolHotkey" 
+                                              Title="选择工具" 
+                                              Description="切换到选择工具"
+                                              DefaultKey="S" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="DrawToolHotkey" 
+                                              Title="绘图工具" 
+                                              Description="切换到绘图工具"
+                                              DefaultKey="D" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="EraserToolHotkey" 
+                                              Title="橡皮擦工具" 
+                                              Description="切换到橡皮擦工具"
+                                              DefaultKey="E" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="BlackboardToolHotkey" 
+                                              Title="黑板工具" 
+                                              Description="切换到黑板工具"
+                                              DefaultKey="B" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="QuitDrawToolHotkey" 
+                                              Title="退出绘图/白板" 
+                                              Description="退出绘图模式或白板模式"
+                                              DefaultKey="Q" 
+                                              DefaultModifiers="Alt"/>
+                        </ui:SimpleStackPanel>
+                    </GroupBox>
 
-                        <!-- 工具切换 -->
-                        <GroupBox Header="工具切换" Margin="0,0,0,15">
-                            <ui:SimpleStackPanel>
-                                <local:HotkeyItem x:Name="SelectToolHotkey" 
-                                                  Title="选择工具" 
-                                                  Description="切换到选择工具"
-                                                  DefaultKey="S" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="DrawToolHotkey" 
-                                                  Title="绘图工具" 
-                                                  Description="切换到绘图工具"
-                                                  DefaultKey="D" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="EraserToolHotkey" 
-                                                  Title="橡皮擦工具" 
-                                                  Description="切换到橡皮擦工具"
-                                                  DefaultKey="E" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="BlackboardToolHotkey" 
-                                                  Title="黑板工具" 
-                                                  Description="切换到黑板工具"
-                                                  DefaultKey="B" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="QuitDrawToolHotkey" 
-                                                  Title="退出绘图/白板" 
-                                                  Description="退出绘图模式或白板模式"
-                                                  DefaultKey="Q" 
-                                                  DefaultModifiers="Alt"/>
-                            </ui:SimpleStackPanel>
-                        </GroupBox>
+                    <!-- 画笔设置 -->
+                    <GroupBox Header="画笔设置" Margin="0,0,0,15">
+                        <ui:SimpleStackPanel>
+                            <local:HotkeyItem x:Name="Pen1Hotkey" 
+                                              Title="画笔1" 
+                                              Description="选择画笔1"
+                                              DefaultKey="D1" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="Pen2Hotkey" 
+                                              Title="画笔2" 
+                                              Description="选择画笔2"
+                                              DefaultKey="D2" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="Pen3Hotkey" 
+                                              Title="画笔3" 
+                                              Description="选择画笔3"
+                                              DefaultKey="D3" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="Pen4Hotkey" 
+                                              Title="画笔4" 
+                                              Description="选择画笔4"
+                                              DefaultKey="D4" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="Pen5Hotkey" 
+                                              Title="画笔5" 
+                                              Description="选择画笔5"
+                                              DefaultKey="D5" 
+                                              DefaultModifiers="Alt"/>
+                        </ui:SimpleStackPanel>
+                    </GroupBox>
 
-                        <!-- 画笔设置 -->
-                        <GroupBox Header="画笔设置" Margin="0,0,0,15">
-                            <ui:SimpleStackPanel>
-                                <local:HotkeyItem x:Name="Pen1Hotkey" 
-                                                  Title="画笔1" 
-                                                  Description="选择画笔1"
-                                                  DefaultKey="D1" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="Pen2Hotkey" 
-                                                  Title="画笔2" 
-                                                  Description="选择画笔2"
-                                                  DefaultKey="D2" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="Pen3Hotkey" 
-                                                  Title="画笔3" 
-                                                  Description="选择画笔3"
-                                                  DefaultKey="D3" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="Pen4Hotkey" 
-                                                  Title="画笔4" 
-                                                  Description="选择画笔4"
-                                                  DefaultKey="D4" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="Pen5Hotkey" 
-                                                  Title="画笔5" 
-                                                  Description="选择画笔5"
-                                                  DefaultKey="D5" 
-                                                  DefaultModifiers="Alt"/>
-                            </ui:SimpleStackPanel>
-                        </GroupBox>
-
-                        <!-- 功能快捷键 -->
-                        <GroupBox Header="功能快捷键" Margin="0,0,0,15">
-                            <ui:SimpleStackPanel>
-                                <local:HotkeyItem x:Name="DrawLineHotkey" 
-                                                  Title="绘制直线" 
-                                                  Description="绘制直线工具"
-                                                  DefaultKey="L" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="ScreenshotHotkey" 
-                                                  Title="截图" 
-                                                  Description="保存屏幕截图到桌面"
-                                                  DefaultKey="C" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="HideHotkey" 
-                                                  Title="隐藏" 
-                                                  Description="隐藏应用程序"
-                                                  DefaultKey="V" 
-                                                  DefaultModifiers="Alt"/>
-                                <local:HotkeyItem x:Name="ExitHotkey" 
-                                                  Title="退出" 
-                                                  Description="退出当前模式或应用程序"
-                                                  DefaultKey="Escape" 
-                                                  DefaultModifiers="None"/>
-                            </ui:SimpleStackPanel>
-                        </GroupBox>
-                    </ui:SimpleStackPanel>
-                </ui:SimpleStackPanel>
+                    <!-- 功能快捷键 -->
+                    <GroupBox Header="功能快捷键" Margin="0,0,0,15">
+                        <ui:SimpleStackPanel>
+                            <local:HotkeyItem x:Name="DrawLineHotkey" 
+                                              Title="绘制直线" 
+                                              Description="绘制直线工具"
+                                              DefaultKey="L" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="ScreenshotHotkey" 
+                                              Title="截图" 
+                                              Description="保存屏幕截图到桌面"
+                                              DefaultKey="C" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="HideHotkey" 
+                                              Title="隐藏" 
+                                              Description="隐藏应用程序"
+                                              DefaultKey="V" 
+                                              DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="ExitHotkey" 
+                                              Title="退出" 
+                                              Description="退出当前模式或应用程序"
+                                              DefaultKey="Escape" 
+                                              DefaultModifiers="None"/>
+                        </ui:SimpleStackPanel>
+                    </GroupBox>
+                </ui:SimpleStackPanel></ui:SimpleStackPanel>
             </ScrollViewer>
 
-            <!-- 底部按钮 -->
-            <Border Height="60" Background="#F8F9FA" CornerRadius="0,0,10,10" VerticalAlignment="Bottom">
+        <!-- 底部操作栏 -->
+        <Border Grid.Row="2" Background="#F0F0F0" Height="60">
+            <Grid>
                 <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0">
                     <Button x:Name="BtnResetToDefault" 
                             Content="重置为默认" 
@@ -196,11 +205,11 @@
                             Content="保存设置" 
                             Width="100" 
                             Height="35" 
-                            Background="#0066BF" 
+                            Background="#3B82F6" 
                             Foreground="White"
                             Click="BtnSave_Click"/>
                 </ui:SimpleStackPanel>
-            </Border>
-        </Grid>
-    </Border>
+            </Grid>
+        </Border>
+    </Grid>
 </Window> 

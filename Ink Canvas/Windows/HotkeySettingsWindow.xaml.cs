@@ -27,11 +27,8 @@ namespace Ink_Canvas.Windows
             _hotkeyManager = hotkeyManager;
             _hotkeyItems = new Dictionary<string, HotkeyItem>();
 
-            // 设置窗口属性以避免与主窗口置顶维护冲突
+            // 设置窗口属性
             SetupWindowProperties();
-            
-            // 隐藏主窗口的设置页面
-            HideMainWindowSettings();
             InitializeHotkeyItems();
 
             // 延迟加载快捷键，确保快捷键管理器已完全初始化
@@ -62,21 +59,17 @@ namespace Ink_Canvas.Windows
 
         #region Private Methods
         /// <summary>
-        /// 设置窗口属性以避免与主窗口置顶维护冲突
+        /// 设置窗口属性
         /// </summary>
         private void SetupWindowProperties()
         {
             try
             {
-                // 设置为模态窗口，确保它始终在主窗口之上
-                // 但不设置Topmost，避免与主窗口的置顶维护机制冲突
-                this.Owner = _mainWindow;
-                
                 // 设置窗口启动位置为屏幕中心
                 this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 
                 // 确保窗口在显示时获得焦点
-                this.ShowInTaskbar = false;
+                this.ShowInTaskbar = true;
                 
                 LogHelper.WriteLogToFile("快捷键设置窗口属性已设置");
             }
@@ -520,69 +513,6 @@ namespace Ink_Canvas.Windows
         }
         #endregion
 
-        #region MainWindow Settings Management
-        /// <summary>
-        /// 隐藏主窗口的设置页面
-        /// </summary>
-        private void HideMainWindowSettings()
-        {
-            try
-            {
-                // 通过反射访问主窗口的设置面板
-                var settingsBorder = _mainWindow.GetType().GetField("BorderSettings",
-                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-
-                if (settingsBorder != null)
-                {
-                    settingsBorder.Visibility = Visibility.Collapsed;
-                }
-
-                // 隐藏设置蒙版
-                var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask",
-                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-
-                if (settingsMask != null)
-                {
-                    settingsMask.Visibility = Visibility.Collapsed;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"隐藏主窗口设置页面时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 显示主窗口的设置页面
-        /// </summary>
-        private void ShowMainWindowSettings()
-        {
-            try
-            {
-                // 通过反射访问主窗口的设置面板
-                var settingsBorder = _mainWindow.GetType().GetField("BorderSettings",
-                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-
-                if (settingsBorder != null)
-                {
-                    settingsBorder.Visibility = Visibility.Visible;
-                }
-
-                // 显示设置蒙版
-                var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask",
-                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-
-                if (settingsMask != null)
-                {
-                    settingsMask.Visibility = Visibility.Visible;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"显示主窗口设置页面时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-        #endregion
 
         #region Window Event Handlers
         /// <summary>
@@ -592,13 +522,7 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                // 重置窗口置顶状态，避免影响主窗口
-                this.Topmost = false;
-                
-                // 恢复主窗口设置页面的显示
-                ShowMainWindowSettings();
-                
-                LogHelper.WriteLogToFile("快捷键设置窗口已关闭，置顶状态已重置");
+                LogHelper.WriteLogToFile("快捷键设置窗口已关闭");
             }
             catch (Exception ex)
             {
@@ -611,6 +535,30 @@ namespace Ink_Canvas.Windows
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        /// <summary>
+        /// 标题栏拖拽事件
+        /// </summary>
+        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                // 双击标题栏切换最大化状态
+                if (WindowState == WindowState.Maximized)
+                {
+                    WindowState = WindowState.Normal;
+                }
+                else
+                {
+                    WindowState = WindowState.Maximized;
+                }
+            }
+            else
+            {
+                // 拖拽窗口
+                DragMove();
+            }
         }
 
         private void BtnResetToDefault_Click(object sender, RoutedEventArgs e)
