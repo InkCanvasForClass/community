@@ -2026,8 +2026,49 @@ namespace Ink_Canvas
                     MessageBox.Show("快捷键管理器尚未初始化，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
+                
+                // 创建快捷键设置窗口
                 var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
-                hotkeySettingsWindow.Owner = this;
+                
+                // 确保窗口在显示前获得正确的焦点和置顶状态
+                hotkeySettingsWindow.Loaded += (s, e) =>
+                {
+                    try
+                    {
+                        // 确保窗口获得焦点
+                        hotkeySettingsWindow.Activate();
+                        hotkeySettingsWindow.Focus();
+                        
+                        // 如果主窗口处于置顶状态，临时调整子窗口的置顶状态
+                        if (Settings.Advanced.IsAlwaysOnTop)
+                        {
+                            // 临时设置子窗口为置顶，确保它在主窗口之上
+                            hotkeySettingsWindow.Topmost = true;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"设置快捷键设置窗口焦点时出错: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                };
+                
+                // 窗口关闭时恢复置顶状态
+                hotkeySettingsWindow.Closed += (s, e) =>
+                {
+                    try
+                    {
+                        // 恢复主窗口的置顶状态
+                        if (Settings.Advanced.IsAlwaysOnTop)
+                        {
+                            ApplyAlwaysOnTop();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"恢复主窗口置顶状态时出错: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                };
+                
                 hotkeySettingsWindow.ShowDialog();
             }
             catch (Exception ex)

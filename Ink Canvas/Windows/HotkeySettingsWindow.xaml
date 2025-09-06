@@ -6,7 +6,6 @@
         xmlns:local="clr-namespace:Ink_Canvas.Windows"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         ui:ThemeManager.RequestedTheme="Light" 
-        Topmost="True" 
         Background="Transparent" 
         AllowsTransparency="True"
         mc:Ignorable="d" 

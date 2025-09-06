@@ -27,6 +27,9 @@ namespace Ink_Canvas.Windows
             _hotkeyManager = hotkeyManager;
             _hotkeyItems = new Dictionary<string, HotkeyItem>();
 
+            // 设置窗口属性以避免与主窗口置顶维护冲突
+            SetupWindowProperties();
+            
             // 隐藏主窗口的设置页面
             HideMainWindowSettings();
             InitializeHotkeyItems();
@@ -58,6 +61,31 @@ namespace Ink_Canvas.Windows
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// 设置窗口属性以避免与主窗口置顶维护冲突
+        /// </summary>
+        private void SetupWindowProperties()
+        {
+            try
+            {
+                // 设置为模态窗口，确保它始终在主窗口之上
+                // 但不设置Topmost，避免与主窗口的置顶维护机制冲突
+                this.Owner = _mainWindow;
+                
+                // 设置窗口启动位置为屏幕中心
+                this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                
+                // 确保窗口在显示时获得焦点
+                this.ShowInTaskbar = false;
+                
+                LogHelper.WriteLogToFile("快捷键设置窗口属性已设置");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"设置快捷键设置窗口属性时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         private void InitializeHotkeyItems()
         {
             try
@@ -562,8 +590,20 @@ namespace Ink_Canvas.Windows
         /// </summary>
         private void HotkeySettingsWindow_Closed(object sender, EventArgs e)
         {
-            // 恢复主窗口设置页面的显示
-            ShowMainWindowSettings();
+            try
+            {
+                // 重置窗口置顶状态，避免影响主窗口
+                this.Topmost = false;
+                
+                // 恢复主窗口设置页面的显示
+                ShowMainWindowSettings();
+                
+                LogHelper.WriteLogToFile("快捷键设置窗口已关闭，置顶状态已重置");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"快捷键设置窗口关闭时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
         #endregion
 
