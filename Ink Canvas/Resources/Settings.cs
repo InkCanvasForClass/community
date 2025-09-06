@@ -498,6 +498,9 @@ namespace Ink_Canvas
         [JsonProperty("isEnableAvoidFullScreenHelper")]
         public bool IsEnableAvoidFullScreenHelper { get; set; }
 
+        [JsonProperty("enableHotkeysInMouseMode")]
+        public bool EnableHotkeysInMouseMode { get; set; } = false; 
+
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;
 

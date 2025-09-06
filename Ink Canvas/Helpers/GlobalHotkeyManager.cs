@@ -3,6 +3,7 @@ using NHotkey.Wpf;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Input;
@@ -19,6 +20,7 @@ namespace Ink_Canvas.Helpers
         private readonly MainWindow _mainWindow;
         private bool _isDisposed;
         private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
+        private bool _enableHotkeysInMouseMode = false; // 是否在鼠标模式下启用快捷键
 
         // 配置文件路径
         private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "HotkeyConfig.json");
@@ -402,9 +404,19 @@ namespace Ink_Canvas.Helpers
             {
                 if (isMouseMode)
                 {
-                    // 鼠标模式下禁用快捷键，让键盘操作放行
-                    DisableHotkeyRegistration();
-                    LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作");
+                    // 鼠标模式下根据设置决定是否禁用快捷键
+                    if (_enableHotkeysInMouseMode)
+                    {
+                        // 如果启用了鼠标模式快捷键，则保持快捷键注册
+                        EnableHotkeyRegistration();
+                        LogHelper.WriteLogToFile("切换到鼠标模式，但保持快捷键启用（用户设置）");
+                    }
+                    else
+                    {
+                        // 如果未启用鼠标模式快捷键，则禁用快捷键以放行键盘操作
+                        DisableHotkeyRegistration();
+                        LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作");
+                    }
                 }
                 else
                 {
@@ -808,6 +820,251 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        /// <summary>
+        /// 设置是否在鼠标模式下启用快捷键
+        /// </summary>
+        /// <param name="enable">是否启用</param>
+        public void SetEnableHotkeysInMouseMode(bool enable)
+        {
+            try
+            {
+                _enableHotkeysInMouseMode = enable;
+                
+                // 保存到主设置配置文件
+                SaveMouseModeHotkeySettingToMainConfig();
+                
+                LogHelper.WriteLogToFile($"设置鼠标模式快捷键开关: {enable}");
+                
+                // 立即应用设置，如果当前是鼠标模式则重新更新状态
+                var isCurrentlyMouseMode = IsInSelectMode();
+                if (isCurrentlyMouseMode)
+                {
+                    UpdateHotkeyStateForToolMode(true);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"设置鼠标模式快捷键开关时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 获取是否在鼠标模式下启用快捷键
+        /// </summary>
+        /// <returns>是否启用</returns>
+        public bool GetEnableHotkeysInMouseMode()
+        {
+            try
+            {
+                // 从主设置配置文件加载设置
+                LoadMouseModeHotkeySettingFromMainConfig();
+                return _enableHotkeysInMouseMode;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取鼠标模式快捷键开关时出错: {ex.Message}", LogHelper.LogType.Error);
+                return false; // 默认关闭
+            }
+        }
+
+        /// <summary>
+        /// 从主设置配置文件加载鼠标模式快捷键设置
+        /// </summary>
+        private void LoadMouseModeHotkeySettingFromMainConfig()
+        {
+            try
+            {
+                // 通过反射访问主窗口的Settings属性
+                var settingsProperty = _mainWindow.GetType().GetProperty("Settings", BindingFlags.Public | BindingFlags.Instance);
+                if (settingsProperty != null)
+                {
+                    var settings = settingsProperty.GetValue(_mainWindow);
+                    if (settings != null)
+                    {
+                        // 获取Advanced属性
+                        var advancedProperty = settings.GetType().GetProperty("Advanced");
+                        if (advancedProperty != null)
+                        {
+                            var advanced = advancedProperty.GetValue(settings);
+                            if (advanced != null)
+                            {
+                                // 获取EnableHotkeysInMouseMode属性
+                                var enableHotkeysProperty = advanced.GetType().GetProperty("EnableHotkeysInMouseMode");
+                                if (enableHotkeysProperty != null)
+                                {
+                                    var value = enableHotkeysProperty.GetValue(advanced);
+                                    if (value is bool boolValue)
+                                    {
+                                        _enableHotkeysInMouseMode = boolValue;
+                                        LogHelper.WriteLogToFile($"从主设置配置文件加载鼠标模式快捷键设置: {_enableHotkeysInMouseMode}");
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // 如果无法从主设置加载，使用默认值
+                _enableHotkeysInMouseMode = false;
+                LogHelper.WriteLogToFile("无法从主设置配置文件加载鼠标模式快捷键设置，使用默认值: false");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从主设置配置文件加载鼠标模式快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
+                _enableHotkeysInMouseMode = false; // 默认关闭
+            }
+        }
+
+        /// <summary>
+        /// 从配置文件加载鼠标模式快捷键设置（旧方法，保留兼容性）
+        /// </summary>
+        private void LoadMouseModeHotkeySetting()
+        {
+            try
+            {
+                if (!File.Exists(HotkeyConfigFile))
+                {
+                    _enableHotkeysInMouseMode = false; // 默认关闭
+                    return;
+                }
+
+                var json = File.ReadAllText(HotkeyConfigFile, Encoding.UTF8);
+                var config = JsonConvert.DeserializeObject<HotkeyConfig>(json);
+                
+                if (config != null)
+                {
+                    // 查找鼠标模式快捷键设置
+                    var mouseModeSetting = config.Hotkeys?.FirstOrDefault(h => h.Name == "EnableHotkeysInMouseMode");
+                    if (mouseModeSetting != null)
+                    {
+                        _enableHotkeysInMouseMode = mouseModeSetting.EnableHotkeysInMouseMode;
+                        LogHelper.WriteLogToFile($"从配置文件加载鼠标模式快捷键设置: {_enableHotkeysInMouseMode}");
+                    }
+                    else
+                    {
+                        _enableHotkeysInMouseMode = false; // 默认关闭
+                    }
+                }
+                else
+                {
+                    _enableHotkeysInMouseMode = false; // 默认关闭
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从配置文件加载鼠标模式快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
+                _enableHotkeysInMouseMode = false; // 默认关闭
+            }
+        }
+
+        /// <summary>
+        /// 保存鼠标模式快捷键设置到主设置配置文件
+        /// </summary>
+        private void SaveMouseModeHotkeySettingToMainConfig()
+        {
+            try
+            {
+                // 通过反射访问主窗口的Settings属性
+                var settingsProperty = _mainWindow.GetType().GetProperty("Settings", BindingFlags.Public | BindingFlags.Instance);
+                if (settingsProperty != null)
+                {
+                    var settings = settingsProperty.GetValue(_mainWindow);
+                    if (settings != null)
+                    {
+                        // 获取Advanced属性
+                        var advancedProperty = settings.GetType().GetProperty("Advanced");
+                        if (advancedProperty != null)
+                        {
+                            var advanced = advancedProperty.GetValue(settings);
+                            if (advanced != null)
+                            {
+                                // 设置EnableHotkeysInMouseMode属性
+                                var enableHotkeysProperty = advanced.GetType().GetProperty("EnableHotkeysInMouseMode");
+                                if (enableHotkeysProperty != null)
+                                {
+                                    enableHotkeysProperty.SetValue(advanced, _enableHotkeysInMouseMode);
+                                    
+                                    // 触发主窗口的保存设置方法
+                                    var saveSettingsMethod = _mainWindow.GetType().GetMethod("SaveSettings", BindingFlags.NonPublic | BindingFlags.Instance);
+                                    if (saveSettingsMethod != null)
+                                    {
+                                        saveSettingsMethod.Invoke(_mainWindow, null);
+                                        LogHelper.WriteLogToFile($"保存鼠标模式快捷键设置到主设置配置文件: {_enableHotkeysInMouseMode}");
+                                    }
+                                    else
+                                    {
+                                        LogHelper.WriteLogToFile("无法找到SaveSettings方法", LogHelper.LogType.Warning);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存鼠标模式快捷键设置到主设置配置文件时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 保存鼠标模式快捷键设置到配置文件（旧方法，保留兼容性）
+        /// </summary>
+        private void SaveMouseModeHotkeySetting()
+        {
+            try
+            {
+                HotkeyConfig config;
+                
+                if (File.Exists(HotkeyConfigFile))
+                {
+                    var json = File.ReadAllText(HotkeyConfigFile, Encoding.UTF8);
+                    config = JsonConvert.DeserializeObject<HotkeyConfig>(json) ?? new HotkeyConfig();
+                }
+                else
+                {
+                    config = new HotkeyConfig();
+                }
+
+                // 确保Hotkeys列表存在
+                if (config.Hotkeys == null)
+                {
+                    config.Hotkeys = new List<HotkeyConfigItem>();
+                }
+
+                // 查找或创建鼠标模式快捷键设置项
+                var mouseModeSetting = config.Hotkeys.FirstOrDefault(h => h.Name == "EnableHotkeysInMouseMode");
+                if (mouseModeSetting == null)
+                {
+                    mouseModeSetting = new HotkeyConfigItem
+                    {
+                        Name = "EnableHotkeysInMouseMode",
+                        EnableHotkeysInMouseMode = _enableHotkeysInMouseMode
+                    };
+                    config.Hotkeys.Add(mouseModeSetting);
+                }
+                else
+                {
+                    mouseModeSetting.EnableHotkeysInMouseMode = _enableHotkeysInMouseMode;
+                }
+
+                // 更新配置信息
+                config.Version = "1.0";
+                config.LastModified = DateTime.Now;
+
+                // 保存到文件
+                var jsonString = JsonConvert.SerializeObject(config, Formatting.Indented);
+                File.WriteAllText(HotkeyConfigFile, jsonString, Encoding.UTF8);
+                
+                LogHelper.WriteLogToFile($"保存鼠标模式快捷键设置到配置文件: {_enableHotkeysInMouseMode}");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存鼠标模式快捷键设置到配置文件时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
 
         #endregion
 
@@ -858,6 +1115,7 @@ namespace Ink_Canvas.Helpers
             public string Name { get; set; }
             public Key Key { get; set; }
             public ModifierKeys Modifiers { get; set; }
+            public bool EnableHotkeysInMouseMode { get; set; }
         }
         #endregion
     }
