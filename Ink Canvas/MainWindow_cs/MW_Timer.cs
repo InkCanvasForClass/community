@@ -240,8 +240,18 @@ namespace Ink_Canvas
                             ShowNotification("“鸿合屏幕书写”已自动关闭");
                             if (Settings.Automation.IsAutoKillHiteAnnotation && Settings.Automation.IsAutoEnterAnnotationAfterKillHite)
                             {
-                                // 自动进入批注状态
-                                PenIcon_Click(null, null);
+                                // 检查是否处于收纳状态，如果是则先展开浮动栏
+                                if (isFloatingBarFolded)
+                                {
+                                    // 先展开浮动栏，然后进入批注状态
+                                    // UnFoldFloatingBar 方法内部会根据设置自动进入批注模式
+                                    UnFoldFloatingBar(null);
+                                }
+                                else
+                                {
+                                    // 如果已经展开，直接进入批注状态
+                                    PenIcon_Click(null, null);
+                                }
                             }
                         });
                     }
