@@ -25,6 +25,8 @@ namespace Ink_Canvas
         public Startup Startup { get; set; } = new Startup();
         [JsonProperty("randSettings")]
         public RandSettings RandSettings { get; set; } = new RandSettings();
+        [JsonProperty("modeSettings")]
+        public ModeSettings ModeSettings { get; set; } = new ModeSettings();
     }
 
     public class Canvas
@@ -583,5 +585,11 @@ namespace Ink_Canvas
 
         // 用于JSON序列化
         public CustomFloatingBarIcon() { }
+    }
+
+    public class ModeSettings
+    {
+        [JsonProperty("isPPTOnlyMode")]
+        public bool IsPPTOnlyMode { get; set; } = false; // 是否为仅PPT模式，默认为false（正常模式）
     }
 }

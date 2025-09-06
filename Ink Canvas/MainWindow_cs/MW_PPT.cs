@@ -585,6 +585,9 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile("PPT放映状态变化：退出放映模式", LogHelper.LogType.Trace);
                     }
+
+                    // 检查主窗口可见性（用于仅PPT模式）
+                    CheckMainWindowVisibility();
                 });
             }
             catch (Exception ex)

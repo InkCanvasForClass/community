@@ -786,6 +786,17 @@ namespace Ink_Canvas
                 ToggleSwitchDirectCallCiRand.IsOn = Settings.RandSettings.DirectCallCiRand;
             }
 
+            // ModeSettings
+            if (Settings.ModeSettings != null)
+            {
+                ToggleSwitchMode.IsOn = Settings.ModeSettings.IsPPTOnlyMode;
+            }
+            else
+            {
+                Settings.ModeSettings = new ModeSettings();
+                ToggleSwitchMode.IsOn = false;
+            }
+
             // Automation
             if (Settings.Automation != null)
             {

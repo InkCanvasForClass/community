@@ -542,6 +542,9 @@ namespace Ink_Canvas
 
             // 初始化文件关联状态显示
             InitializeFileAssociationStatus();
+
+            // 检查模式设置并应用
+            CheckMainWindowVisibility();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -2602,6 +2605,79 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新滑块值时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #endregion
+
+        #region 模式切换相关
+
+        /// <summary>
+        /// 模式切换开关事件处理
+        /// </summary>
+        private void ToggleSwitchMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+                if (toggle != null)
+                {
+                    Settings.ModeSettings.IsPPTOnlyMode = toggle.IsOn;
+                    
+                    // 如果切换到仅PPT模式，立即隐藏主窗口
+                    if (Settings.ModeSettings.IsPPTOnlyMode)
+                    {
+                        Hide();
+                        LogHelper.WriteLogToFile("已切换到仅PPT模式，主窗口已隐藏", LogHelper.LogType.Event);
+                    }
+                    else
+                    {
+                        // 如果切换到正常模式，显示主窗口
+                        Show();
+                        LogHelper.WriteLogToFile("已切换到正常模式，主窗口已显示", LogHelper.LogType.Event);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换模式时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 检查是否应该显示主窗口（基于PPT模式和PPT放映状态）
+        /// </summary>
+        private void CheckMainWindowVisibility()
+        {
+            try
+            {
+                if (Settings.ModeSettings.IsPPTOnlyMode)
+                {
+                    // 仅PPT模式下，只有在PPT放映时才显示
+                    bool isInSlideShow = BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
+                    if (isInSlideShow && !IsVisible)
+                    {
+                        Show();
+                        LogHelper.WriteLogToFile("PPT放映开始，显示主窗口（仅PPT模式）", LogHelper.LogType.Trace);
+                    }
+                    else if (!isInSlideShow && IsVisible)
+                    {
+                        Hide();
+                        LogHelper.WriteLogToFile("PPT放映结束，隐藏主窗口（仅PPT模式）", LogHelper.LogType.Trace);
+                    }
+                }
+                else
+                {
+                    // 正常模式下，确保主窗口可见
+                    if (!IsVisible)
+                    {
+                        Show();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查主窗口可见性时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

@@ -1610,11 +1610,23 @@ namespace Ink_Canvas.Helpers
                 Directory.CreateDirectory(destinationDir);
             }
 
+            // 定义需要覆盖的文件列表（仅覆盖主程序和配置文件）
+            string[] filesToOverwrite = { "InkCanvasForClass.exe", "InkCanvasForClass.exe.config" };
+
             // 复制文件
             foreach (FileInfo file in dir.GetFiles())
             {
+                // 只覆盖指定的文件，跳过其他文件
+                if (!filesToOverwrite.Contains(file.Name))
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过文件（不在覆盖列表中）: {file.Name}");
+                    continue;
+                }
+
                 string targetFilePath = Path.Combine(destinationDir, file.Name);
                 bool fileCopied = false;
+
+                LogHelper.WriteLogToFile($"AutoUpdate | 开始覆盖文件: {file.Name}");
 
                 // 重试机制，最多重试3次
                 for (int retry = 0; retry < 3; retry++)
@@ -1641,6 +1653,7 @@ namespace Ink_Canvas.Helpers
 
                         await Task.Run(() => file.CopyTo(targetFilePath));
                         fileCopied = true;
+                        LogHelper.WriteLogToFile($"AutoUpdate | 文件覆盖成功: {file.Name}");
                         break;
                     }
                     catch (Exception ex)
@@ -1687,12 +1700,24 @@ namespace Ink_Canvas.Helpers
                 Directory.CreateDirectory(destinationDir);
             }
 
+            // 定义需要覆盖的文件列表（仅覆盖主程序和配置文件）
+            string[] filesToOverwrite = { "InkCanvasForClass.exe", "InkCanvasForClass.exe.config" };
+
             // 复制文件
             foreach (FileInfo file in dir.GetFiles())
             {
+                // 只覆盖指定的文件，跳过其他文件
+                if (!filesToOverwrite.Contains(file.Name))
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过文件（不在覆盖列表中）: {file.Name}");
+                    continue;
+                }
+
                 string targetFilePath = Path.Combine(destinationDir, file.Name);
                 try
                 {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 开始覆盖文件: {file.Name}");
+
                     // 如果目标文件存在且正在使用，先删除
                     if (File.Exists(targetFilePath))
                     {
@@ -1700,6 +1725,7 @@ namespace Ink_Canvas.Helpers
                     }
 
                     await Task.Run(() => file.CopyTo(targetFilePath));
+                    LogHelper.WriteLogToFile($"AutoUpdate | 文件覆盖成功: {file.Name}");
                 }
                 catch (Exception ex)
                 {
