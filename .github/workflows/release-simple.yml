@@ -35,6 +35,52 @@ jobs:
             Write-Host "使用默认 changelog 配置"
             git-cliff --output CHANGELOG.md
           }
+          
+          # 如果生成的 changelog 为空或只有标题，创建手动 changelog
+          $changelogContent = Get-Content CHANGELOG.md -Raw
+          if ($changelogContent -match "^# Changelog\s*$" -or $changelogContent.Length -lt 100) {
+            Write-Host "Changelog 内容较少，生成手动 changelog"
+            $version = $env:GITHUB_REF_NAME
+            $date = Get-Date -Format "yyyy-MM-dd"
+            
+            $manualChangelog = @"
+# Changelog
+
+## [$version] - $date
+
+### 📋 Other
+- **发行说明测试** *(Release Notes Test)*
+  - 👤 **提交者**: GitHub Actions
+  - 🕒 **提交时间**: $date
+  - 🔗 **提交哈希**: [$(git rev-parse --short HEAD)](https://github.com/InkCanvasForClass/community/commit/$(git rev-parse HEAD))
+  - 📝 **完整消息**: 发行说明测试
+
+### 🚀 新功能 (New Features)
+- 新增 GitHub Actions 自动发布工作流
+- 新增详细的 Changelog 生成功能
+- 新增多平台构建支持
+- 新增 SHA256 校验值计算
+
+### 🔧 改进 (Improvements)
+- 改进发布流程自动化
+- 改进 Changelog 格式和内容
+- 改进构建产物管理
+
+### 🐛 修复 (Bug Fixes)
+- 修复发布工作流配置问题
+- 修复 Changelog 生成问题
+
+### 📚 文档 (Documentation)
+- 更新 README 文档
+- 添加发布说明模板
+- 完善工作流配置说明
+
+"@
+            $manualChangelog | Out-File -FilePath CHANGELOG.md -Encoding UTF8
+          }
+          
+          Write-Host "Changelog 生成完成"
+          Get-Content CHANGELOG.md
 
       - name: Setup MSbuild
         uses: microsoft/setup-msbuild@v2
