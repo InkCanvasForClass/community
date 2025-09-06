@@ -10,7 +10,7 @@
             <Style TargetType="ui:ScrollViewerEx">
                 <EventSetter Event="PreviewMouseWheel" Handler="ScrollViewer_PreviewMouseWheel"/>
             </Style>
-            <ContextMenu Opened="SysTrayMenu_Opened" x:Shared="false" x:Key="SysTrayMenu" Padding="6" ui:ThemeManager.RequestedTheme="Light">
+            <ContextMenu Opened="SysTrayMenu_Opened" Closed="SysTrayMenu_Closed" x:Shared="false" x:Key="SysTrayMenu" Padding="6" ui:ThemeManager.RequestedTheme="Light">
                 <MenuItem IsCheckable="True" IsChecked="False" Checked="HideICCMainWindowTrayIconMenuItem_Checked" Unchecked="HideICCMainWindowTrayIconMenuItem_UnChecked" Name="HideICCMainWindowTrayIconMenuItem">
                     <MenuItem.Header>
                         <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">

@@ -6,6 +6,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
@@ -324,6 +325,13 @@ namespace Ink_Canvas.Helpers
                     {
                         path.StrokeThickness = Math.Max(drawingAttribs.Width * 1.5, 20);
                     }
+
+                    // 为高亮笔添加轻微的模糊效果，使渐隐更加自然
+                    path.Effect = new BlurEffect
+                    {
+                        Radius = 0.5, // 轻微的模糊效果
+                        KernelType = KernelType.Gaussian
+                    };
                 }
 
                 // 不设置任何变换，保持墨迹原有粗细
@@ -390,13 +398,65 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 统一渐隐动画 - 整个墨迹作为一个整体进行渐隐，与擦除效果一致
+        /// </summary>
+        private void StartUnifiedFadeAnimation(UIElement visual, Stroke stroke, double currentOpacity, int duration)
+        {
+            try
+            {
+                // 创建透明度动画，模拟擦除时的效果
+                var fadeAnimation = new DoubleAnimation
+                {
+                    From = currentOpacity,
+                    To = 0.0,
+                    Duration = TimeSpan.FromMilliseconds(duration),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+                };
+
+                // 如果是高亮笔，添加轻微的缩放效果，使渐隐更加自然
+                if (stroke.DrawingAttributes.IsHighlighter)
+                {
+                    // 创建轻微的缩放动画，模拟墨迹"蒸发"的效果
+                    var scaleAnimation = new DoubleAnimation
+                    {
+                        From = 1.0,
+                        To = 0.95, // 轻微缩小，增加自然感
+                        Duration = TimeSpan.FromMilliseconds(duration),
+                        EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+                    };
+
+                    // 创建缩放变换
+                    var scaleTransform = new ScaleTransform();
+                    visual.RenderTransform = scaleTransform;
+                    visual.RenderTransformOrigin = new Point(0.5, 0.5);
+
+                    // 应用缩放动画
+                    scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation);
+                    scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation);
+                }
+
+                // 添加动画完成事件
+                fadeAnimation.Completed += (sender, e) => OnAnimationCompleted(visual, stroke);
+
+                // 应用透明度动画
+                visual.BeginAnimation(UIElement.OpacityProperty, fadeAnimation);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"统一渐隐动画失败: {ex}", LogHelper.LogType.Error);
+                OnAnimationCompleted(visual, stroke);
+            }
+        }
+
+        /// <summary>
         /// 开始高亮笔的渐隐动画
         /// </summary>
         private void StartHighlighterFadeAnimation(UIElement visual, Stroke stroke, double currentOpacity)
         {
             try
             {
-                StartProgressiveFadeAnimation(visual, stroke, currentOpacity, (int)(AnimationDuration * 1.5));
+                // 高亮笔使用统一的渐隐动画，与擦除效果一致
+                StartUnifiedFadeAnimation(visual, stroke, currentOpacity, (int)(AnimationDuration * 1.2));
             }
             catch (Exception ex)
             {

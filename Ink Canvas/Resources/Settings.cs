@@ -25,6 +25,8 @@ namespace Ink_Canvas
         public Startup Startup { get; set; } = new Startup();
         [JsonProperty("randSettings")]
         public RandSettings RandSettings { get; set; } = new RandSettings();
+        [JsonProperty("modeSettings")]
+        public ModeSettings ModeSettings { get; set; } = new ModeSettings();
     }
 
     public class Canvas
@@ -89,7 +91,7 @@ namespace Ink_Canvas
         [JsonProperty("enablePalmEraser")]
         public bool EnablePalmEraser { get; set; } = true;
         [JsonProperty("palmEraserSensitivity")]
-        public int PalmEraserSensitivity { get; set; } = 2; // 0-低敏感度, 1-中敏感度, 2-高敏感度
+        public int PalmEraserSensitivity { get; set; } = 0; // 0-低敏感度, 1-中敏感度, 2-高敏感度
         [JsonProperty("clearCanvasAlsoClearImages")]
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
@@ -233,6 +235,9 @@ namespace Ink_Canvas
         [JsonProperty("quickColorPaletteDisplayMode")]
         public int QuickColorPaletteDisplayMode { get; set; } = 1;
 
+        [JsonProperty("enableHotkeysInMouseMode")]
+        public bool EnableHotkeysInMouseMode { get; set; } = false;
+
     }
 
     public class PowerPointSettings
@@ -304,6 +309,10 @@ namespace Ink_Canvas
         public bool EnableWppProcessKill { get; set; } = true;
         [JsonProperty("isAlwaysGoToFirstPageOnReenter")]
         public bool IsAlwaysGoToFirstPageOnReenter { get; set; }
+        [JsonProperty("enablePowerPointEnhancement")]
+        public bool EnablePowerPointEnhancement { get; set; } = false;
+        [JsonProperty("showGestureButtonInSlideShow")]
+        public bool ShowGestureButtonInSlideShow { get; set; } = false;
     }
 
     public class Automation
@@ -576,5 +585,11 @@ namespace Ink_Canvas
 
         // 用于JSON序列化
         public CustomFloatingBarIcon() { }
+    }
+
+    public class ModeSettings
+    {
+        [JsonProperty("isPPTOnlyMode")]
+        public bool IsPPTOnlyMode { get; set; } = false; // 是否为仅PPT模式，默认为false（正常模式）
     }
 }

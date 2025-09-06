@@ -868,7 +868,7 @@ namespace Ink_Canvas.Helpers
                             decryptedData[i] = (byte)(data[i] ^ keyBytes[i % keyBytes.Length]);
                         }
 
-                        // 验证校验和
+                        // 验证校验
                         byte[] computedChecksum = sha256.ComputeHash(decryptedData);
                         if (!checksum.SequenceEqual(computedChecksum))
                         {
@@ -893,8 +893,9 @@ namespace Ink_Canvas.Helpers
             return null;
         }
 
+
         /// <summary>
-        /// 保存使用统计到文件（加密）
+        /// 保存使用统计到文件
         /// </summary>
         private static void SaveUsageStatsToFile(string filePath, UsageStats stats)
         {
@@ -1054,7 +1055,7 @@ namespace Ink_Canvas.Helpers
         /// <param name="isAutoUpdate">是否为自动更新检查（默认true，false表示版本修复）</param>
         /// <param name="currentVersionReleaseTime">当前版本发布时间</param>
         /// <returns>是否应该推送更新</returns>
-        public static bool ShouldPushUpdate(string updateVersion, DateTime releaseTime, bool isAutoUpdate = true, DateTime? currentVersionReleaseTime = null)
+        public static bool ShouldPushUpdate(string updateVersion, DateTime releaseTime, bool isAutoUpdate = true, DateTime? currentVersionReleaseTime = null, string localVersion = null)
         {
             try
             {
@@ -1084,6 +1085,25 @@ namespace Ink_Canvas.Helpers
                 {
                     // 如果没有当前版本发布时间，回退到使用新版本发布时间到现在的天数
                     daysBetweenVersions = (DateTime.Now - releaseTime).TotalDays;
+                }
+
+                // 当无法获取版本发布时间时，判断版本号差异
+                if (!currentVersionReleaseTime.HasValue && !string.IsNullOrEmpty(localVersion))
+                {
+                    int versionDiff = CalculateVersionGenerationDifference(localVersion, updateVersion);
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 无法获取版本发布时间，使用版本号差异判断 - 本地版本: {localVersion}, 远程版本: {updateVersion}, 代数差异: {versionDiff}");
+                    
+                    // 当版本号代数差异大于3时自动更新
+                    if (versionDiff > 3)
+                    {
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 版本号代数差异({versionDiff})大于3，自动更新");
+                        return true;
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 版本号代数差异({versionDiff})不大于3，暂不更新");
+                        return false;
+                    }
                 }
 
                 // 计算最近活跃度（最后一次使用距今的天数）
@@ -1262,6 +1282,77 @@ namespace Ink_Canvas.Helpers
 
                 default:
                     return daysBetweenVersions >= 7;
+            }
+        }
+
+        /// <summary>
+        /// 计算版本号代数差异
+        /// </summary>
+        /// <param name="localVersion">本地版本号</param>
+        /// <param name="remoteVersion">远程版本号</param>
+        /// <returns>版本号代数差异，如果无法计算则返回0</returns>
+        private static int CalculateVersionGenerationDifference(string localVersion, string remoteVersion)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(localVersion) || string.IsNullOrEmpty(remoteVersion))
+                    return 0;
+
+                // 移除可能的前缀（如 "v"）
+                var cleanLocal = localVersion.TrimStart('v', 'V');
+                var cleanRemote = remoteVersion.TrimStart('v', 'V');
+
+                // 解析版本号 (格式: X.X.X.X)
+                var localParts = cleanLocal.Split('.');
+                var remoteParts = cleanRemote.Split('.');
+
+                if (localParts.Length < 4 || remoteParts.Length < 4)
+                    return 0;
+
+                // 解析四个版本号部分
+                if (int.TryParse(localParts[0], out int localMajor) &&
+                    int.TryParse(localParts[1], out int localMinor) &&
+                    int.TryParse(localParts[2], out int localBuild) &&
+                    int.TryParse(localParts[3], out int localRevision) &&
+                    int.TryParse(remoteParts[0], out int remoteMajor) &&
+                    int.TryParse(remoteParts[1], out int remoteMinor) &&
+                    int.TryParse(remoteParts[2], out int remoteBuild) &&
+                    int.TryParse(remoteParts[3], out int remoteRevision))
+                {
+                    // 计算代数差异：主版本号差异 * 1000 + 次版本号差异 * 100 + 构建号差异 * 10 + 修订号差异
+                    int majorDiff = remoteMajor - localMajor;
+                    int minorDiff = remoteMinor - localMinor;
+                    int buildDiff = remoteBuild - localBuild;
+                    int revisionDiff = remoteRevision - localRevision;
+
+                    // 如果主版本号不同，则代数差异很大
+                    if (majorDiff != 0)
+                    {
+                        return majorDiff * 1000 + minorDiff * 100 + buildDiff * 10 + revisionDiff;
+                    }
+
+                    // 如果次版本号不同，则代数差异中等
+                    if (minorDiff != 0)
+                    {
+                        return minorDiff * 100 + buildDiff * 10 + revisionDiff;
+                    }
+
+                    // 如果构建号不同，则代数差异较小
+                    if (buildDiff != 0)
+                    {
+                        return buildDiff * 10 + revisionDiff;
+                    }
+
+                    // 只有修订号不同，代数差异最小
+                    return revisionDiff;
+                }
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 计算版本号代数差异失败: {ex.Message}", LogHelper.LogType.Warning);
+                return 0;
             }
         }
 

@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +14,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using Cursors = System.Windows.Input.Cursors;
@@ -28,6 +30,8 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        // 添加当前模式的缓存，避免依赖可能过时的inkCanvas.EditingMode状态
+        private string _currentToolMode = "cursor";
 
         #region "手勢"按鈕
 
@@ -126,10 +130,18 @@ namespace Ink_Canvas
         /// </summary>
         private void CheckEnableTwoFingerGestureBtnVisibility(bool isVisible)
         {
-            // 在PPT模式下始终隐藏手势按钮
+            // 在PPT模式下根据设置决定是否显示手势按钮
             if (currentMode == 0 || BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
             {
-                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                // 如果启用了PPT放映模式显示手势按钮，则显示手势按钮（在PPT模式下不依赖手势功能是否启用）
+                if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow && isVisible)
+                {
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                }
                 return;
             }
 
@@ -346,6 +358,11 @@ namespace Ink_Canvas
                 {
                     BorderSettings.Visibility = Visibility.Collapsed;
                     isOpeningOrHidingSettingsPane = false;
+                    // 在设置面板完全关闭后，根据当前设置恢复无焦点模式
+                    if (Settings.Advanced.IsNoFocusMode)
+                    {
+                        ApplyNoFocusMode();
+                    }
                 };
 
                 BorderSettings.Visibility = Visibility.Visible;
@@ -650,7 +667,11 @@ namespace Ink_Canvas
                 //关闭黑板
                 HideSubPanelsImmediately();
 
-                if (StackPanelPPTControls.Visibility == Visibility.Visible)
+                // 只有在PPT放映模式下且页数有效时才显示翻页按钮
+                if (StackPanelPPTControls.Visibility == Visibility.Visible && 
+                    BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                    PPTManager?.IsInSlideShow == true &&
+                    PPTManager?.SlidesCount > 0)
                 {
                     var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                     var dopsc = dops.ToCharArray();
@@ -658,15 +679,23 @@ namespace Ink_Canvas
                     if (dopsc[1] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
                     if (dopsc[2] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
                     if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
+                    LogHelper.WriteLogToFile($"显示PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
-                // 修复PPT放映时点击白板按钮后翻页按钮不显示的问题
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                else
                 {
-                    // 强制显示PPT翻页按钮
-                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Visible;
-                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Visible;
-                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Visible;
-                    RightSidePanelForPPTNavigation.Visibility = Visibility.Visible;
+                    // 如果不在放映模式或页数无效，隐藏所有翻页按钮
+                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LogHelper.WriteLogToFile($"隐藏PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
+                }
+                
+                // 使用PPT UI管理器来正确更新翻页按钮显示状态，确保遵循用户设置
+                if (_pptUIManager != null)
+                {
+                    _pptUIManager.UpdateNavigationPanelsVisibility();
+                    LogHelper.WriteLogToFile($"使用PPT UI管理器更新翻页按钮显示状态", LogHelper.LogType.Trace);
                 }
 
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
@@ -798,6 +827,10 @@ namespace Ink_Canvas
             if (sender == SymbolIconSelect && lastBorderMouseDownObject != SymbolIconSelect) return;
 
             BtnSelect_Click(null, null);
+            
+            // 更新模式缓存
+            UpdateCurrentToolMode("select");
+            
             HideSubPanels("select");
 
         }
@@ -932,7 +965,47 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            new RandWindow(Settings).Show();
+            var randWindow = new RandWindow(Settings);
+            randWindow.Show();
+            
+            // 使用延迟确保窗口完全显示后再强制置顶
+            randWindow.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    // 强制激活窗口
+                    randWindow.Activate();
+                    randWindow.Focus();
+                    
+                    // 设置置顶
+                    randWindow.Topmost = true;
+                    
+                    // 使用Win32 API强制置顶
+                    var hwnd = new WindowInteropHelper(randWindow).Handle;
+                    if (hwnd != IntPtr.Zero)
+                    {
+                        const int WS_EX_TOPMOST = 0x00000008;
+                        const int GWL_EXSTYLE = -20;
+                        const int SWP_NOMOVE = 0x0002;
+                        const int SWP_NOSIZE = 0x0001;
+                        const int SWP_SHOWWINDOW = 0x0040;
+                        const int SWP_NOOWNERZORDER = 0x0200;
+                        var HWND_TOPMOST = new IntPtr(-1);
+
+                        // 设置窗口样式为置顶
+                        int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+
+                        // 强制置顶
+                        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"强制置顶RandWindow失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }), DispatcherPriority.Loaded);
         }
 
         public void CheckEraserTypeTab()
@@ -1329,7 +1402,31 @@ namespace Ink_Canvas
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                // 使用更可靠的方法获取浮动栏宽度
+                double baseWidth = ViewboxFloatingBar.ActualWidth;
+                
+                // 如果ActualWidth为0，尝试使用DesiredSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
+                }
+                
+                // 如果仍然为0，使用RenderSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
+                }
+                
+                // 如果所有方法都失败，使用一个基于内容的估算值
+                if (baseWidth <= 0)
+                {
+                    // 根据浮动栏内容估算宽度
+                    baseWidth = 200; // 最小宽度
+                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+                }
+                
+                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -1450,7 +1547,31 @@ namespace Ink_Canvas
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                // 使用更可靠的方法获取浮动栏宽度
+                double baseWidth = ViewboxFloatingBar.ActualWidth;
+                
+                // 如果ActualWidth为0，尝试使用DesiredSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
+                }
+                
+                // 如果仍然为0，使用RenderSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
+                }
+                
+                // 如果所有方法都失败，使用一个基于内容的估算值
+                if (baseWidth <= 0)
+                {
+                    // 根据浮动栏内容估算宽度
+                    baseWidth = 200; // 最小宽度
+                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+                }
+                
+                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -1532,7 +1653,31 @@ namespace Ink_Canvas
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                // 使用更可靠的方法获取浮动栏宽度
+                double baseWidth = ViewboxFloatingBar.ActualWidth;
+                
+                // 如果ActualWidth为0，尝试使用DesiredSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
+                }
+                
+                // 如果仍然为0，使用RenderSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
+                }
+                
+                // 如果所有方法都失败，使用一个基于内容的估算值
+                if (baseWidth <= 0)
+                {
+                    // 根据浮动栏内容估算宽度
+                    baseWidth = 200; // 最小宽度
+                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+                }
+                
+                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -1587,12 +1732,16 @@ namespace Ink_Canvas
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();
 
-            // 隱藏高亮
-            HideFloatingBarHighlight();
-
             // 使用集中化的工具模式切换方法，确保快捷键状态正确更新
             // 鼠标模式下应该禁用快捷键以放行键盘操作
             SetCurrentToolMode(InkCanvasEditingMode.None);
+            
+            // 更新模式缓存，确保后续的模式检测正确
+            UpdateCurrentToolMode("cursor");
+
+            // 修复：在浮动栏收起状态下，仍然需要设置按钮高亮状态
+            // 这样在浮动栏展开时能正确显示高光
+            SetFloatingBarHighlightPosition("cursor");
 
             // 切换前自动截图保存墨迹
             if (inkCanvas.Strokes.Count > 0 &&
@@ -1718,6 +1867,9 @@ namespace Ink_Canvas
             {
                 // 使用集中化的工具模式切换方法
                 SetCurrentToolMode(InkCanvasEditingMode.Ink);
+                
+                // 更新模式缓存
+                UpdateCurrentToolMode("pen");
 
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
@@ -1752,6 +1904,9 @@ namespace Ink_Canvas
                 CheckEnableTwoFingerGestureBtnVisibility(true);
                 // 使用集中化的工具模式切换方法
                 SetCurrentToolMode(InkCanvasEditingMode.Ink);
+                
+                // 更新模式缓存
+                UpdateCurrentToolMode("pen");
 
                 // 在批注模式下显示快捷调色盘（如果设置中启用了）
                 if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
@@ -1874,6 +2029,9 @@ namespace Ink_Canvas
                     }
                     // 使用集中化的工具模式切换方法
                     SetCurrentToolMode(InkCanvasEditingMode.Ink);
+                    
+                    // 更新模式缓存
+                    UpdateCurrentToolMode("pen");
 
                     // 修复：从线擦切换到批注时，保持之前的笔类型状态
                     forceEraser = false;
@@ -1935,6 +2093,10 @@ namespace Ink_Canvas
             // 使用新的高级橡皮擦系统
             // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.EraseByPoint);
+            
+            // 更新模式缓存
+            UpdateCurrentToolMode("eraser");
+            
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
@@ -1975,6 +2137,10 @@ namespace Ink_Canvas
             // 使用新的高级橡皮擦系统
             // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.EraseByPoint);
+            
+            // 更新模式缓存
+            UpdateCurrentToolMode("eraser");
+            
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
@@ -2013,6 +2179,10 @@ namespace Ink_Canvas
             inkCanvas.EraserShape = new EllipseStylusShape(5, 5);
             // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.EraseByStroke);
+            
+            // 更新模式缓存
+            UpdateCurrentToolMode("eraserByStrokes");
+            
             drawingShapeMode = 0;
 
             // 修复：切换到线擦时，保存当前的笔类型状态，而不是强制重置
@@ -2417,6 +2587,7 @@ namespace Ink_Canvas
         }
 
         private bool isOpeningOrHidingSettingsPane;
+        private bool wasNoFocusModeBeforeSettings;
 
         private void BtnSettings_Click(object sender, RoutedEventArgs e)
         {
@@ -2426,6 +2597,14 @@ namespace Ink_Canvas
             }
             else
             {
+                // 临时禁用无焦点模式以避免下拉选项被遮挡
+                wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
+                if (wasNoFocusModeBeforeSettings)
+                {
+                    Settings.Advanced.IsNoFocusMode = false;
+                    ApplyNoFocusMode();
+                }
+
                 // 设置蒙版为可点击，并添加半透明背景
                 BorderSettingsMask.IsHitTestVisible = true;
                 BorderSettingsMask.Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
@@ -3132,6 +3311,15 @@ namespace Ink_Canvas
             {
                 if (FloatingbarSelectionBG == null) return;
 
+                // 检查浮动栏是否处于收起状态
+                if (isFloatingBarFolded || (BorderFloatingBarMainControls != null && BorderFloatingBarMainControls.Visibility == Visibility.Collapsed))
+                {
+                    // 在收起状态下，仍然需要设置高光位置，但可能需要调整计算方式
+                    // 这里先隐藏高光，等浮动栏展开时再显示
+                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
+                    return;
+                }
+
                 double position = 0;
                 double buttonWidth = 28; // 每个按钮的默认宽度
                 double highlightWidth = 28; // 高光的默认宽度
@@ -3262,7 +3450,13 @@ namespace Ink_Canvas
         {
             try
             {
-                // 检查当前编辑模式
+                // 优先使用缓存的模式，避免在浮动栏刷新时返回过时的模式信息
+                if (!string.IsNullOrEmpty(_currentToolMode))
+                {
+                    return _currentToolMode;
+                }
+
+                // 如果缓存为空，则从inkCanvas状态推断模式
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
                 {
                     return "select";
@@ -3306,7 +3500,17 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"获取当前选中模式失败: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            return string.Empty;
+            return "cursor"; // 默认返回鼠标模式
+        }
+
+        /// <summary>
+        /// 更新当前工具模式缓存
+        /// </summary>
+        /// <param name="mode">模式名称</param>
+        private void UpdateCurrentToolMode(string mode)
+        {
+            _currentToolMode = mode;
+            LogHelper.WriteLogToFile($"更新工具模式缓存: {mode}", LogHelper.LogType.Trace);
         }
 
         #endregion

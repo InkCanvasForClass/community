@@ -16,6 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Forms;
 using System.Windows.Ink;
 using System.Windows.Input;
@@ -246,6 +247,9 @@ namespace Ink_Canvas
 
             // 为浮动栏按钮添加触摸事件支持
             AddTouchSupportToFloatingBarButtons();
+            
+            // 为滑块控件添加触摸事件支持
+            AddTouchSupportToSliders();
         }
 
 
@@ -296,7 +300,10 @@ namespace Ink_Canvas
             {
                 foreach (var gest in gestures)
                     //Trace.WriteLine(string.Format("Gesture: {0}, Confidence: {1}", gest.ApplicationGesture, gest.RecognitionConfidence));
-                    if (StackPanelPPTControls.Visibility == Visibility.Visible)
+                    // 只有在PPT放映模式下才响应翻页手势
+                    if (StackPanelPPTControls.Visibility == Visibility.Visible && 
+                        BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                        PPTManager?.IsInSlideShow == true)
                     {
                         if (gest.ApplicationGesture == ApplicationGesture.Left)
                         {
@@ -435,6 +442,12 @@ namespace Ink_Canvas
                 StartPPTMonitoring();
             }
 
+            // 如果启用PowerPoint联动增强功能，启动进程守护
+            if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
+            {
+                StartPowerPointProcessMonitoring();
+            }
+
             // HasNewUpdateWindow hasNewUpdateWindow = new HasNewUpdateWindow();
             if (Environment.Is64BitProcess) GroupBoxInkRecognition.Visibility = Visibility.Collapsed;
 
@@ -529,6 +542,9 @@ namespace Ink_Canvas
 
             // 初始化文件关联状态显示
             InitializeFileAssociationStatus();
+
+            // 检查模式设置并应用
+            CheckMainWindowVisibility();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -674,6 +690,9 @@ namespace Ink_Canvas
 
             // 停止置顶维护定时器
             StopTopmostMaintenance();
+
+            // 从Z-Order管理器中移除主窗口
+            WindowZOrderManager.UnregisterWindow(this);
 
             LogHelper.WriteLogToFile("Ink Canvas closed", LogHelper.LogType.Event);
 
@@ -1592,6 +1611,22 @@ namespace Ink_Canvas
         }
         #endregion 插件???
 
+        #region 新设置窗口
+
+        // 添加打开新设置窗口按钮点击事件
+        private void BtnOpenNewSettings_Click(object sender, RoutedEventArgs e)
+        {
+            if (isOpeningOrHidingSettingsPane) return;
+            HideSubPanels();
+            {
+                var settingsWindow = new SettingsWindow();
+                settingsWindow.Owner = this;
+                settingsWindow.ShowDialog();
+            }
+        }
+
+        #endregion 新设置窗口
+
         // 在MainWindow类中添加：
         private void ApplyCurrentEraserShape()
         {
@@ -1826,7 +1861,7 @@ namespace Ink_Canvas
                     return;
                 }
 
-                // 检查是否有子窗口打开（模态对话框）
+                // 检查是否有子窗口在前景
                 var foregroundWindow = GetForegroundWindow();
                 if (foregroundWindow != hwnd)
                 {
@@ -1994,12 +2029,31 @@ namespace Ink_Canvas
                     MessageBox.Show("快捷键管理器尚未初始化，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
+                
+                // 暂时隐藏设置面板
+                BorderSettings.Visibility = Visibility.Hidden;
+                BorderSettingsMask.Visibility = Visibility.Hidden;
+                
+                // 创建快捷键设置窗口
                 var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
-                hotkeySettingsWindow.Owner = this;
+                
+                // 设置窗口关闭事件，用于在快捷键设置窗口关闭后恢复设置面板
+                hotkeySettingsWindow.Closed += (s, e) =>
+                {
+                    // 恢复设置面板显示
+                    BorderSettings.Visibility = Visibility.Visible;
+                    BorderSettingsMask.Visibility = Visibility.Visible;
+                };
+                
+                // 显示快捷键设置窗口
                 hotkeySettingsWindow.ShowDialog();
             }
             catch (Exception ex)
             {
+                // 确保在发生错误时也恢复设置面板显示
+                BorderSettings.Visibility = Visibility.Visible;
+                BorderSettingsMask.Visibility = Visibility.Visible;
+                
                 LogHelper.WriteLogToFile($"打开快捷键设置窗口时出错: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show($"打开快捷键设置窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -2086,6 +2140,56 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"批注子面板中切换墨迹渐隐功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// PPT放映模式显示手势按钮开关切换事件处理
+        /// </summary>
+        private void ToggleSwitchShowGestureButtonInSlideShow_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!isLoaded) return;
+                var toggle = sender as ToggleSwitch;
+                Settings.PowerPointSettings.ShowGestureButtonInSlideShow = toggle != null && toggle.IsOn;
+                SaveSettingsToFile();
+                
+                // 如果当前在PPT放映模式，需要立即更新手势按钮的显示状态
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                {
+                    UpdateGestureButtonVisibilityInPPTMode();
+                }
+                
+                LogHelper.WriteLogToFile($"PPT放映模式显示手势按钮已{(Settings.PowerPointSettings.ShowGestureButtonInSlideShow ? "启用" : "禁用")}", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换PPT放映模式显示手势按钮时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 更新PPT模式下手势按钮的显示状态
+        /// </summary>
+        private void UpdateGestureButtonVisibilityInPPTMode()
+        {
+            try
+            {
+                if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow)
+                {
+                    // 如果启用了PPT放映模式显示手势按钮，则显示手势按钮（在PPT模式下不依赖手势功能是否启用）
+                    CheckEnableTwoFingerGestureBtnVisibility(true);
+                }
+                else
+                {
+                    // 如果禁用了PPT放映模式显示手势按钮，则隐藏手势按钮
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新PPT模式下手势按钮显示状态时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
         #endregion
@@ -2228,5 +2332,355 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"设置工具模式时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
+
+        #region 滑块触摸支持
+
+        /// <summary>
+        /// 为所有滑块控件添加触摸和手写笔事件支持
+        /// </summary>
+        private void AddTouchSupportToSliders()
+        {
+            try
+            {
+                // 获取所有滑块控件并添加触摸支持
+                var sliders = new List<Slider>
+                {
+                    InkFadeTimeSlider,
+                    AutoStraightenLineThresholdSlider,
+                    LineStraightenSensitivitySlider,
+                    LineEndpointSnappingThresholdSlider,
+                    ViewboxFloatingBarScaleTransformValueSlider,
+                    ViewboxFloatingBarOpacityValueSlider,
+                    ViewboxFloatingBarOpacityInPPTValueSlider,
+                    PPTButtonLeftPositionValueSlider,
+                    PPTButtonRightPositionValueSlider,
+                    PPTButtonLBPositionValueSlider,
+                    PPTButtonRBPositionValueSlider,
+                    TouchMultiplierSlider,
+                    NibModeBoundsWidthSlider,
+                    FingerModeBoundsWidthSlider,
+                    SideControlMinimumAutomationSlider,
+                    RandWindowOnceCloseLatencySlider,
+                    RandWindowOnceMaxStudentsSlider,
+                    BoardInkWidthSlider,
+                    BoardInkAlphaSlider,
+                    BoardHighlighterWidthSlider,
+                    InkWidthSlider,
+                    InkAlphaSlider,
+                    HighlighterWidthSlider
+                };
+
+                foreach (var slider in sliders)
+                {
+                    if (slider != null)
+                    {
+                        AddTouchSupportToSlider(slider);
+                    }
+                }
+
+                LogHelper.WriteLogToFile("已为所有滑块控件添加触摸支持", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"添加滑块触摸支持时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 为单个滑块控件添加触摸和手写笔事件支持
+        /// </summary>
+        /// <param name="slider">要添加触摸支持的滑块控件</param>
+        private void AddTouchSupportToSlider(Slider slider)
+        {
+            if (slider == null) return;
+
+            // 启用触摸和手写笔支持
+            slider.IsManipulationEnabled = true;
+
+            // 添加触摸事件 - 使用更简单直接的方法
+            slider.TouchDown += (s, e) => HandleSliderTouch(s, e, slider);
+            slider.TouchMove += (s, e) => HandleSliderTouch(s, e, slider);
+            slider.TouchUp += (s, e) => HandleSliderTouchEnd(s, e, slider);
+
+            // 添加手写笔事件
+            slider.StylusDown += (s, e) => HandleSliderStylus(s, e, slider);
+            slider.StylusMove += (s, e) => HandleSliderStylus(s, e, slider);
+            slider.StylusUp += (s, e) => HandleSliderStylusEnd(s, e, slider);
+        }
+
+        /// <summary>
+        /// 处理滑块触摸事件（按下和移动）
+        /// </summary>
+        private void HandleSliderTouch(object sender, TouchEventArgs e, Slider slider)
+        {
+            if (slider == null) return;
+
+            // 捕获触摸设备
+            if (e.RoutedEvent == UIElement.TouchDownEvent)
+            {
+                slider.CaptureTouch(e.TouchDevice);
+            }
+
+            // 计算触摸位置对应的滑块值
+            var touchPoint = e.GetTouchPoint(slider);
+            
+            // 使用更精确的位置计算方法
+            UpdateSliderValueFromPositionImproved(slider, touchPoint.Position);
+            
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 处理滑块触摸结束事件
+        /// </summary>
+        private void HandleSliderTouchEnd(object sender, TouchEventArgs e, Slider slider)
+        {
+            if (slider == null) return;
+
+            // 释放触摸捕获
+            slider.ReleaseTouchCapture(e.TouchDevice);
+            
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 处理滑块手写笔事件（按下和移动）
+        /// </summary>
+        private void HandleSliderStylus(object sender, StylusEventArgs e, Slider slider)
+        {
+            if (slider == null) return;
+
+            // 捕获手写笔设备
+            if (e.RoutedEvent == UIElement.StylusDownEvent)
+            {
+                slider.CaptureStylus();
+            }
+
+            // 计算手写笔位置对应的滑块值
+            var stylusPoint = e.GetStylusPoints(slider);
+            if (stylusPoint.Count > 0)
+            {
+                UpdateSliderValueFromPositionImproved(slider, stylusPoint[0].ToPoint());
+            }
+            
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 处理滑块手写笔结束事件
+        /// </summary>
+        private void HandleSliderStylusEnd(object sender, StylusEventArgs e, Slider slider)
+        {
+            if (slider == null) return;
+
+            // 释放手写笔捕获
+            slider.ReleaseStylusCapture();
+            
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 根据触摸/手写笔位置更新滑块值（改进版本）
+        /// </summary>
+        /// <param name="slider">滑块控件</param>
+        /// <param name="position">触摸/手写笔位置</param>
+        private void UpdateSliderValueFromPositionImproved(Slider slider, Point position)
+        {
+            if (slider == null) return;
+
+            try
+            {
+                // 获取滑块的轨道元素
+                var track = slider.Template.FindName("PART_Track", slider) as Track;
+                if (track == null)
+                {
+                    // 如果找不到轨道，使用简单方法
+                    UpdateSliderValueFromPosition(slider, position);
+                    return;
+                }
+
+                // 获取轨道的实际边界
+                var trackBounds = track.TransformToAncestor(slider).TransformBounds(new Rect(0, 0, track.ActualWidth, track.ActualHeight));
+                
+                double relativePosition = 0;
+                
+                if (slider.Orientation == System.Windows.Controls.Orientation.Horizontal)
+                {
+                    // 水平滑块
+                    if (trackBounds.Width > 0)
+                    {
+                        // 计算相对于轨道的相对位置
+                        var relativeX = position.X - trackBounds.X;
+                        relativePosition = Math.Max(0, Math.Min(1, relativeX / trackBounds.Width));
+                    }
+                }
+                else
+                {
+                    // 垂直滑块
+                    if (trackBounds.Height > 0)
+                    {
+                        // 计算相对于轨道的相对位置
+                        var relativeY = position.Y - trackBounds.Y;
+                        relativePosition = Math.Max(0, Math.Min(1, relativeY / trackBounds.Height));
+                    }
+                }
+
+                // 计算新的滑块值
+                var newValue = slider.Minimum + relativePosition * (slider.Maximum - slider.Minimum);
+                
+                // 如果启用了吸附到刻度，则调整到最近的刻度
+                if (slider.IsSnapToTickEnabled && slider.TickFrequency > 0)
+                {
+                    var tickCount = (int)((slider.Maximum - slider.Minimum) / slider.TickFrequency);
+                    var tickIndex = (int)Math.Round(relativePosition * tickCount);
+                    newValue = slider.Minimum + tickIndex * slider.TickFrequency;
+                }
+
+                // 更新滑块值
+                slider.Value = Math.Max(slider.Minimum, Math.Min(slider.Maximum, newValue));
+            }
+            catch (Exception ex)
+            {
+                // 如果改进方法失败，回退到简单方法
+                UpdateSliderValueFromPosition(slider, position);
+                LogHelper.WriteLogToFile($"更新滑块值时出错，使用回退方法: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 根据触摸/手写笔位置更新滑块值（简单版本）
+        /// </summary>
+        /// <param name="slider">滑块控件</param>
+        /// <param name="position">触摸/手写笔位置</param>
+        private void UpdateSliderValueFromPosition(Slider slider, Point position)
+        {
+            if (slider == null) return;
+
+            try
+            {
+                // 使用更简单直接的方法计算滑块值
+                double relativePosition = 0;
+                
+                if (slider.Orientation == System.Windows.Controls.Orientation.Horizontal)
+                {
+                    // 水平滑块 - 使用滑块的实际宽度
+                    var sliderWidth = slider.ActualWidth;
+                    if (sliderWidth > 0)
+                    {
+                        // 考虑滑块的边距和拇指大小
+                        var thumbSize = 20; // 假设拇指大小约为20像素
+                        var effectiveWidth = sliderWidth - thumbSize;
+                        var adjustedX = position.X - thumbSize / 2;
+                        relativePosition = Math.Max(0, Math.Min(1, adjustedX / effectiveWidth));
+                    }
+                }
+                else
+                {
+                    // 垂直滑块 - 使用滑块的实际高度
+                    var sliderHeight = slider.ActualHeight;
+                    if (sliderHeight > 0)
+                    {
+                        // 考虑滑块的边距和拇指大小
+                        var thumbSize = 20; // 假设拇指大小约为20像素
+                        var effectiveHeight = sliderHeight - thumbSize;
+                        var adjustedY = position.Y - thumbSize / 2;
+                        relativePosition = Math.Max(0, Math.Min(1, adjustedY / effectiveHeight));
+                    }
+                }
+
+                // 计算新的滑块值
+                var newValue = slider.Minimum + relativePosition * (slider.Maximum - slider.Minimum);
+                
+                // 如果启用了吸附到刻度，则调整到最近的刻度
+                if (slider.IsSnapToTickEnabled && slider.TickFrequency > 0)
+                {
+                    var tickCount = (int)((slider.Maximum - slider.Minimum) / slider.TickFrequency);
+                    var tickIndex = (int)Math.Round(relativePosition * tickCount);
+                    newValue = slider.Minimum + tickIndex * slider.TickFrequency;
+                }
+
+                // 更新滑块值
+                slider.Value = Math.Max(slider.Minimum, Math.Min(slider.Maximum, newValue));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新滑块值时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #endregion
+
+        #region 模式切换相关
+
+        /// <summary>
+        /// 模式切换开关事件处理
+        /// </summary>
+        private void ToggleSwitchMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+                if (toggle != null)
+                {
+                    Settings.ModeSettings.IsPPTOnlyMode = toggle.IsOn;
+                    
+                    // 如果切换到仅PPT模式，立即隐藏主窗口
+                    if (Settings.ModeSettings.IsPPTOnlyMode)
+                    {
+                        Hide();
+                        LogHelper.WriteLogToFile("已切换到仅PPT模式，主窗口已隐藏", LogHelper.LogType.Event);
+                    }
+                    else
+                    {
+                        // 如果切换到正常模式，显示主窗口
+                        Show();
+                        LogHelper.WriteLogToFile("已切换到正常模式，主窗口已显示", LogHelper.LogType.Event);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换模式时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 检查是否应该显示主窗口（基于PPT模式和PPT放映状态）
+        /// </summary>
+        private void CheckMainWindowVisibility()
+        {
+            try
+            {
+                if (Settings.ModeSettings.IsPPTOnlyMode)
+                {
+                    // 仅PPT模式下，只有在PPT放映时才显示
+                    bool isInSlideShow = BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
+                    if (isInSlideShow && !IsVisible)
+                    {
+                        Show();
+                        LogHelper.WriteLogToFile("PPT放映开始，显示主窗口（仅PPT模式）", LogHelper.LogType.Trace);
+                    }
+                    else if (!isInSlideShow && IsVisible)
+                    {
+                        Hide();
+                        LogHelper.WriteLogToFile("PPT放映结束，隐藏主窗口（仅PPT模式）", LogHelper.LogType.Trace);
+                    }
+                }
+                else
+                {
+                    // 正常模式下，确保主窗口可见
+                    if (!IsVisible)
+                    {
+                        Show();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查主窗口可见性时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #endregion
     }
 }

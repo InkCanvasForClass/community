@@ -25,22 +25,17 @@ namespace Ink_Canvas
             if (e.LeftButton == MouseButtonState.Pressed) DragMove();
         }
 
-        private void BtnFullscreen_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (WindowState == WindowState.Normal)
-            {
+        private void BtnFullscreen_MouseUp(object sender, MouseButtonEventArgs e) {
+            if (WindowState == WindowState.Normal) {
                 WindowState = WindowState.Maximized;
-                FontIconFullscreen.Glyph = "&#xE73F;";
-            }
-            else
-            {
+                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.BackToWindow;
+            } else {
                 WindowState = WindowState.Normal;
-                FontIconFullscreen.Glyph = "&#xE740;";
+                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.FullScreen;
             }
         }
 
-        private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e)
-        {
+        private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e) {
             e.Handled = true;
         }
     }

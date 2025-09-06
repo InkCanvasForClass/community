@@ -256,6 +256,10 @@ namespace Ink_Canvas
                 _taskbar.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
 
                 ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
+                
+                // 初始化浮动栏透明度滑块值
+                ViewboxFloatingBarOpacityValueSlider.Value = Settings.Appearance.ViewboxFloatingBarOpacityValue;
+                ViewboxFloatingBarOpacityInPPTValueSlider.Value = Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue;
 
                 if (Settings.Appearance.EnableViewboxBlackBoardScaleTransform) // 画板 UI 缩放 80%
                 {
@@ -454,6 +458,8 @@ namespace Ink_Canvas
                 ToggleSwitchNotifyAutoPlayPresentation.IsOn = Settings.PowerPointSettings.IsNotifyAutoPlayPresentation;
 
                 ToggleSwitchSupportWPS.IsOn = Settings.PowerPointSettings.IsSupportWPS;
+
+                ToggleSwitchPowerPointEnhancement.IsOn = Settings.PowerPointSettings.EnablePowerPointEnhancement;
 
                 ToggleSwitchAutoSaveScreenShotInPowerPoint.IsOn =
                     Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
@@ -778,6 +784,17 @@ namespace Ink_Canvas
                 RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
                 ToggleSwitchDirectCallCiRand.IsOn = Settings.RandSettings.DirectCallCiRand;
+            }
+
+            // ModeSettings
+            if (Settings.ModeSettings != null)
+            {
+                ToggleSwitchMode.IsOn = Settings.ModeSettings.IsPPTOnlyMode;
+            }
+            else
+            {
+                Settings.ModeSettings = new ModeSettings();
+                ToggleSwitchMode.IsOn = false;
             }
 
             // Automation

@@ -624,6 +624,30 @@ namespace Ink_Canvas.Windows
             // 直接关闭窗口，窗口关闭事件会处理配置保存
             Close();
         }
+
+        /// <summary>
+        /// 标题栏拖拽事件
+        /// </summary>
+        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                // 双击标题栏切换最大化状态
+                if (WindowState == WindowState.Maximized)
+                {
+                    WindowState = WindowState.Normal;
+                }
+                else
+                {
+                    WindowState = WindowState.Maximized;
+                }
+            }
+            else
+            {
+                // 拖拽窗口
+                DragMove();
+            }
+        }
     }
 
     /// <summary>

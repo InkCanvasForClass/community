@@ -27,8 +27,8 @@ namespace Ink_Canvas.Windows
             _hotkeyManager = hotkeyManager;
             _hotkeyItems = new Dictionary<string, HotkeyItem>();
 
-            // 隐藏主窗口的设置页面
-            HideMainWindowSettings();
+            // 设置窗口属性
+            SetupWindowProperties();
             InitializeHotkeyItems();
 
             // 延迟加载快捷键，确保快捷键管理器已完全初始化
@@ -42,6 +42,9 @@ namespace Ink_Canvas.Windows
                     // 加载当前快捷键（包括配置文件中的）
                     LoadCurrentHotkeys();
                     SetupEventHandlers();
+                    
+                    // 初始化鼠标模式快捷键设置
+                    InitializeMouseModeSettings();
                 }
                 catch (Exception ex)
                 {
@@ -55,6 +58,27 @@ namespace Ink_Canvas.Windows
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// 设置窗口属性
+        /// </summary>
+        private void SetupWindowProperties()
+        {
+            try
+            {
+                // 设置窗口启动位置为屏幕中心
+                this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                
+                // 确保窗口在显示时获得焦点
+                this.ShowInTaskbar = true;
+                
+                LogHelper.WriteLogToFile("快捷键设置窗口属性已设置");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"设置快捷键设置窗口属性时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         private void InitializeHotkeyItems()
         {
             try
@@ -238,6 +262,67 @@ namespace Ink_Canvas.Windows
             foreach (var hotkeyItem in _hotkeyItems.Values)
             {
                 hotkeyItem.HotkeyChanged += OnHotkeyChanged;
+            }
+        }
+
+        /// <summary>
+        /// 初始化鼠标模式快捷键设置
+        /// </summary>
+        private void InitializeMouseModeSettings()
+        {
+            try
+            {
+                // 设置开关的初始状态
+                ToggleSwitchEnableHotkeysInMouseMode.IsOn = MainWindow.Settings.Appearance.EnableHotkeysInMouseMode;
+                
+                // 绑定开关变化事件
+                ToggleSwitchEnableHotkeysInMouseMode.Toggled += OnMouseModeHotkeyToggleChanged;
+                
+                LogHelper.WriteLogToFile($"鼠标模式快捷键设置已初始化: {MainWindow.Settings.Appearance.EnableHotkeysInMouseMode}");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化鼠标模式快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 鼠标模式快捷键开关变化事件处理
+        /// </summary>
+        private void OnMouseModeHotkeyToggleChanged(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 更新设置
+                MainWindow.Settings.Appearance.EnableHotkeysInMouseMode = ToggleSwitchEnableHotkeysInMouseMode.IsOn;
+                
+                // 立即保存设置
+                MainWindow.SaveSettingsToFile();
+                
+                // 如果快捷键管理器存在，立即更新快捷键状态
+                if (_hotkeyManager != null)
+                {
+                    // 检查当前是否处于鼠标模式
+                    bool isCurrentlyMouseMode = _mainWindow.inkCanvas.EditingMode == InkCanvasEditingMode.None;
+                    
+                    // 如果当前处于鼠标模式且关闭了开关，立即禁用快捷键
+                    if (isCurrentlyMouseMode && !ToggleSwitchEnableHotkeysInMouseMode.IsOn)
+                    {
+                        _hotkeyManager.DisableHotkeyRegistration();
+                        LogHelper.WriteLogToFile("在鼠标模式下关闭快捷键开关，立即禁用快捷键");
+                    }
+                    else
+                    {
+                        // 其他情况正常更新快捷键状态
+                        _hotkeyManager.UpdateHotkeyStateForToolMode(isCurrentlyMouseMode);
+                    }
+                }
+                
+                LogHelper.WriteLogToFile($"鼠标模式快捷键设置已更新: {MainWindow.Settings.Appearance.EnableHotkeysInMouseMode}", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新鼠标模式快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -428,69 +513,6 @@ namespace Ink_Canvas.Windows
         }
         #endregion
 
-        #region MainWindow Settings Management
-        /// <summary>
-        /// 隐藏主窗口的设置页面
-        /// </summary>
-        private void HideMainWindowSettings()
-        {
-            try
-            {
-                // 通过反射访问主窗口的设置面板
-                var settingsBorder = _mainWindow.GetType().GetField("BorderSettings",
-                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-
-                if (settingsBorder != null)
-                {
-                    settingsBorder.Visibility = Visibility.Collapsed;
-                }
-
-                // 隐藏设置蒙版
-                var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask",
-                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-
-                if (settingsMask != null)
-                {
-                    settingsMask.Visibility = Visibility.Collapsed;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"隐藏主窗口设置页面时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 显示主窗口的设置页面
-        /// </summary>
-        private void ShowMainWindowSettings()
-        {
-            try
-            {
-                // 通过反射访问主窗口的设置面板
-                var settingsBorder = _mainWindow.GetType().GetField("BorderSettings",
-                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-
-                if (settingsBorder != null)
-                {
-                    settingsBorder.Visibility = Visibility.Visible;
-                }
-
-                // 显示设置蒙版
-                var settingsMask = _mainWindow.GetType().GetField("BorderSettingsMask",
-                    BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(_mainWindow) as Border;
-
-                if (settingsMask != null)
-                {
-                    settingsMask.Visibility = Visibility.Visible;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"显示主窗口设置页面时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-        #endregion
 
         #region Window Event Handlers
         /// <summary>
@@ -498,8 +520,14 @@ namespace Ink_Canvas.Windows
         /// </summary>
         private void HotkeySettingsWindow_Closed(object sender, EventArgs e)
         {
-            // 恢复主窗口设置页面的显示
-            ShowMainWindowSettings();
+            try
+            {
+                LogHelper.WriteLogToFile("快捷键设置窗口已关闭");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"快捷键设置窗口关闭时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
         #endregion
 
@@ -507,6 +535,30 @@ namespace Ink_Canvas.Windows
         private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        /// <summary>
+        /// 标题栏拖拽事件
+        /// </summary>
+        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                // 双击标题栏切换最大化状态
+                if (WindowState == WindowState.Maximized)
+                {
+                    WindowState = WindowState.Normal;
+                }
+                else
+                {
+                    WindowState = WindowState.Maximized;
+                }
+            }
+            else
+            {
+                // 拖拽窗口
+                DragMove();
+            }
         }
 
         private void BtnResetToDefault_Click(object sender, RoutedEventArgs e)

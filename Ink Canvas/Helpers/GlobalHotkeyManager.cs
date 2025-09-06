@@ -402,9 +402,19 @@ namespace Ink_Canvas.Helpers
             {
                 if (isMouseMode)
                 {
-                    // 鼠标模式下禁用快捷键，让键盘操作放行
-                    DisableHotkeyRegistration();
-                    LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作");
+                    // 检查设置中是否允许在鼠标模式下启用快捷键
+                    if (MainWindow.Settings.Appearance.EnableHotkeysInMouseMode)
+                    {
+                        // 如果设置允许，则在鼠标模式下也启用快捷键
+                        EnableHotkeyRegistration();
+                        LogHelper.WriteLogToFile("切换到鼠标模式，但根据设置保持快捷键启用");
+                    }
+                    else
+                    {
+                        // 鼠标模式下禁用快捷键，让键盘操作放行
+                        DisableHotkeyRegistration();
+                        LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作");
+                    }
                 }
                 else
                 {

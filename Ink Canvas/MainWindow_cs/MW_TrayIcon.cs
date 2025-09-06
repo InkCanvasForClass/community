@@ -30,6 +30,12 @@ namespace Ink_Canvas
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded)
             {
+                // 在无焦点模式下，暂时取消主窗口置顶，让系统菜单能够正常显示
+                if (Ink_Canvas.MainWindow.Settings.Advanced.IsAlwaysOnTop && Ink_Canvas.MainWindow.Settings.Advanced.IsNoFocusMode)
+                {
+                    mainWin.Topmost = false;
+                }
+
                 // 判斷是否在收納模式中
                 if (mainWin.isFloatingBarFolded)
                 {
@@ -53,6 +59,19 @@ namespace Ink_Canvas
                         ResetFloatingBarPositionTrayIconMenuItem.Opacity = 1;
                     }
 
+                }
+            }
+        }
+
+        private void SysTrayMenu_Closed(object sender, RoutedEventArgs e)
+        {
+            var mainWin = (MainWindow)Current.MainWindow;
+            if (mainWin.IsLoaded)
+            {
+                // 菜单关闭后，恢复主窗口的置顶状态
+                if (Ink_Canvas.MainWindow.Settings.Advanced.IsAlwaysOnTop && Ink_Canvas.MainWindow.Settings.Advanced.IsNoFocusMode)
+                {
+                    mainWin.Topmost = true;
                 }
             }
         }

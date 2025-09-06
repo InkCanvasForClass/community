@@ -115,7 +115,149 @@ namespace Ink_Canvas.Helpers.Plugins
 
         #endregion
 
-        #region 画布操作
+        #region IGetService 实现
+
+        public bool CanUndo => false; // 暂时返回默认值
+
+        public bool CanRedo => false; // 暂时返回默认值
+
+        public T GetSetting<T>(string key, T defaultValue = default(T))
+        {
+            // 暂时不实现，避免访问权限问题
+            return defaultValue;
+        }
+
+        public List<IPlugin> GetAllPlugins()
+        {
+            return new List<IPlugin>(PluginManager.Instance.Plugins);
+        }
+
+        public IPlugin GetPlugin(string pluginName)
+        {
+            return PluginManager.Instance.Plugins.FirstOrDefault(p => p.Name == pluginName);
+        }
+
+        #endregion
+
+        #region IWindowService 实现
+
+        public void ShowSettingsWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void HideSettingsWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void ShowPluginSettingsWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void HidePluginSettingsWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void ShowHelpWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void HideHelpWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void ShowAboutWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void HideAboutWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void ShowNotification(string message, NotificationType type = NotificationType.Info)
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public bool ShowConfirmDialog(string message, string title = "确认")
+        {
+            // 暂时不实现，避免访问权限问题
+            return false;
+        }
+
+        public string ShowInputDialog(string message, string title = "输入", string defaultValue = "")
+        {
+            // 暂时不实现，避免访问权限问题
+            return defaultValue;
+        }
+
+        public void SetFullScreen(bool isFullScreen)
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void SetTopMost(bool isTopMost)
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void SetWindowVisibility(bool isVisible)
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void MinimizeWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void MaximizeWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void RestoreWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void CloseWindow()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void SetWindowPosition(double x, double y)
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void SetWindowSize(double width, double height)
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public (double x, double y) GetWindowPosition()
+        {
+            // 暂时不实现，避免访问权限问题
+            return (0, 0);
+        }
+
+        public (double width, double height) GetWindowSize()
+        {
+            // 暂时不实现，避免访问权限问题
+            return (800, 600);
+        }
+
+        #endregion
+
+        #region IActionService 实现
 
         public void ClearCanvas()
         {
@@ -151,10 +293,6 @@ namespace Ink_Canvas.Helpers.Plugins
         {
             // 暂时不实现，避免访问权限问题
         }
-
-        #endregion
-
-        #region 绘制操作
 
         public void SetDrawingMode(int mode)
         {
@@ -206,10 +344,6 @@ namespace Ink_Canvas.Helpers.Plugins
             // 暂时不实现，避免访问权限问题
         }
 
-        #endregion
-
-        #region 文件操作
-
         public void SaveCanvas(string filePath)
         {
             // 暂时不实现，避免访问权限问题
@@ -230,10 +364,6 @@ namespace Ink_Canvas.Helpers.Plugins
             // 暂时不实现，避免访问权限问题
         }
 
-        #endregion
-
-        #region 撤销重做
-
         public void Undo()
         {
             // 暂时不实现，避免访问权限问题
@@ -243,14 +373,6 @@ namespace Ink_Canvas.Helpers.Plugins
         {
             // 暂时不实现，避免访问权限问题
         }
-
-        public bool CanUndo => false; // 暂时返回默认值
-
-        public bool CanRedo => false; // 暂时返回默认值
-
-        #endregion
-
-        #region 选择操作
 
         public void SelectAll()
         {
@@ -282,81 +404,6 @@ namespace Ink_Canvas.Helpers.Plugins
             // 暂时不实现，避免访问权限问题
         }
 
-        #endregion
-
-        #region 窗口管理
-
-        public void ShowSettingsWindow()
-        {
-            // 暂时不实现，避免访问权限问题
-        }
-
-        public void HideSettingsWindow()
-        {
-            // 暂时不实现，避免访问权限问题
-        }
-
-        public void ShowPluginSettingsWindow()
-        {
-            // 暂时不实现，避免访问权限问题
-        }
-
-        public void HidePluginSettingsWindow()
-        {
-            // 暂时不实现，避免访问权限问题
-        }
-
-        public void ShowHelpWindow()
-        {
-            // 暂时不实现，避免访问权限问题
-        }
-
-        public void HideHelpWindow()
-        {
-            // 暂时不实现，避免访问权限问题
-        }
-
-        public void ShowAboutWindow()
-        {
-            // 暂时不实现，避免访问权限问题
-        }
-
-        public void HideAboutWindow()
-        {
-            // 暂时不实现，避免访问权限问题
-        }
-
-        #endregion
-
-        #region 通知和消息
-
-        public void ShowNotification(string message, NotificationType type = NotificationType.Info)
-        {
-            // 暂时不实现，避免访问权限问题
-        }
-
-        public bool ShowConfirmDialog(string message, string title = "确认")
-        {
-            // 暂时不实现，避免访问权限问题
-            return false;
-        }
-
-        public string ShowInputDialog(string message, string title = "输入", string defaultValue = "")
-        {
-            // 暂时不实现，避免访问权限问题
-            return defaultValue;
-        }
-
-        #endregion
-
-        #region 系统功能
-
-        public T GetSetting<T>(string key, T defaultValue = default(T))
-        {
-            // 暂时不实现，避免访问权限问题
-            return defaultValue;
-        }
-
         public void SetSetting<T>(string key, T value)
         {
             // 暂时不实现，避免访问权限问题
@@ -375,20 +422,6 @@ namespace Ink_Canvas.Helpers.Plugins
         public void ResetSettings()
         {
             // 暂时不实现，避免访问权限问题
-        }
-
-        #endregion
-
-        #region 插件管理
-
-        public List<IPlugin> GetAllPlugins()
-        {
-            return new List<IPlugin>(PluginManager.Instance.Plugins);
-        }
-
-        public IPlugin GetPlugin(string pluginName)
-        {
-            return PluginManager.Instance.Plugins.FirstOrDefault(p => p.Name == pluginName);
         }
 
         public void EnablePlugin(string pluginName)
@@ -418,10 +451,6 @@ namespace Ink_Canvas.Helpers.Plugins
             }
         }
 
-        #endregion
-
-        #region 事件系统
-
         public void RegisterEventHandler(string eventName, EventHandler handler)
         {
             if (!_eventHandlers.ContainsKey(eventName))
@@ -448,6 +477,31 @@ namespace Ink_Canvas.Helpers.Plugins
             {
                 _eventHandlers[eventName]?.Invoke(sender, args);
             }
+        }
+
+        public void RestartApplication()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void ExitApplication()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void CheckForUpdates()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void OpenHelpDocument()
+        {
+            // 暂时不实现，避免访问权限问题
+        }
+
+        public void OpenAboutPage()
+        {
+            // 暂时不实现，避免访问权限问题
         }
 
         #endregion
