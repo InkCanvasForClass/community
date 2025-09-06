@@ -71,7 +71,7 @@
                     </Viewbox>
                 </ui:SimpleStackPanel>
             </ScrollViewer>
-            <Viewbox Visibility="{Binding ElementName=BigViewController, Path=Visibility}" Margin="20,20,20,20" HorizontalAlignment="Right">
+            <Viewbox Margin="20,20,20,20" HorizontalAlignment="Right">
                 <ui:SimpleStackPanel Height="180" Orientation="Horizontal">
                     <Border x:Name="BtnFullscreen" MouseUp="BtnFullscreen_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                             Margin="5"

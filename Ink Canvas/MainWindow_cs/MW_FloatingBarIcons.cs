@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,6 +14,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using Application = System.Windows.Application;
 using Button = System.Windows.Controls.Button;
 using Cursors = System.Windows.Input.Cursors;
@@ -946,10 +948,45 @@ namespace Ink_Canvas
 
             var randWindow = new RandWindow(Settings);
             randWindow.Show();
-            // 确保窗口显示后立即置顶
-            randWindow.Activate();
-            randWindow.Topmost = true;
-            randWindow.Focus();
+            
+            // 使用延迟确保窗口完全显示后再强制置顶
+            randWindow.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                try
+                {
+                    // 强制激活窗口
+                    randWindow.Activate();
+                    randWindow.Focus();
+                    
+                    // 设置置顶
+                    randWindow.Topmost = true;
+                    
+                    // 使用Win32 API强制置顶
+                    var hwnd = new WindowInteropHelper(randWindow).Handle;
+                    if (hwnd != IntPtr.Zero)
+                    {
+                        const int WS_EX_TOPMOST = 0x00000008;
+                        const int GWL_EXSTYLE = -20;
+                        const int SWP_NOMOVE = 0x0002;
+                        const int SWP_NOSIZE = 0x0001;
+                        const int SWP_SHOWWINDOW = 0x0040;
+                        const int SWP_NOOWNERZORDER = 0x0200;
+                        var HWND_TOPMOST = new IntPtr(-1);
+
+                        // 设置窗口样式为置顶
+                        int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+
+                        // 强制置顶
+                        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"强制置顶RandWindow失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }), DispatcherPriority.Loaded);
         }
 
         public void CheckEraserTypeTab()
@@ -1346,7 +1383,9 @@ namespace Ink_Canvas
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                // 确保获取到正确的浮动栏宽度，如果ActualWidth为0则使用DesiredSize
+                double baseWidth = ViewboxFloatingBar.ActualWidth > 0 ? ViewboxFloatingBar.ActualWidth : ViewboxFloatingBar.DesiredSize.Width;
+                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -1467,7 +1506,9 @@ namespace Ink_Canvas
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                // 确保获取到正确的浮动栏宽度，如果ActualWidth为0则使用DesiredSize
+                double baseWidth = ViewboxFloatingBar.ActualWidth > 0 ? ViewboxFloatingBar.ActualWidth : ViewboxFloatingBar.DesiredSize.Width;
+                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -1549,7 +1590,9 @@ namespace Ink_Canvas
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                double floatingBarWidth = ViewboxFloatingBar.ActualWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                // 确保获取到正确的浮动栏宽度，如果ActualWidth为0则使用DesiredSize
+                double baseWidth = ViewboxFloatingBar.ActualWidth > 0 ? ViewboxFloatingBar.ActualWidth : ViewboxFloatingBar.DesiredSize.Width;
+                double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||

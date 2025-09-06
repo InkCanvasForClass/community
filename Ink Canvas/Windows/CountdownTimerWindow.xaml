@@ -24,23 +24,11 @@
                                    Margin="0,0,0,0" Visibility="Collapsed"
                                    Foreground="#5B5D5F"
                                    Text="00" FontSize="26"/>
-                        <ItemsControl Name="TextControlHour" ItemsSource="{Binding ElementName=TextBlockHour, Path=Text}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Width="14">
-                                        <TextBlock Text="{Binding}" HorizontalAlignment="Center" FontWeight="SemiBold"
-                                                   Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
-                                                   FontFamily="{Binding ElementName=TextBlockHour, Path=FontFamily}"
-                                                   FontSize="{Binding ElementName=TextBlockHour, Path=FontSize}"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBlock Name="TextControlHour" Text="{Binding ElementName=TextBlockHour, Path=Text}"
+                                   FontFamily="{Binding ElementName=TextBlockHour, Path=FontFamily}"
+                                   Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
+                                   FontSize="{Binding ElementName=TextBlockHour, Path=FontSize}"
+                                   FontWeight="SemiBold" HorizontalAlignment="Center"/>
                         <Grid Name="GridAdjustHour" Visibility="Visible" Margin="-29,-30,0,-30" Width="29">
                             <ui:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_1">
@@ -71,23 +59,11 @@
                                    Margin="0,0,0,0" Visibility="Collapsed"
                                    Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
                                    Text="01" FontSize="26"/>
-                        <ItemsControl Name="TextControlMinute" ItemsSource="{Binding ElementName=TextBlockMinute, Path=Text}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Width="14">
-                                        <TextBlock Text="{Binding}" HorizontalAlignment="Center" FontWeight="SemiBold"
-                                                   Foreground="{Binding ElementName=TextBlockMinute, Path=Foreground}"
-                                                   FontFamily="{Binding ElementName=TextBlockMinute, Path=FontFamily}"
-                                                   FontSize="{Binding ElementName=TextBlockMinute, Path=FontSize}"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBlock Name="TextControlMinute" Text="{Binding ElementName=TextBlockMinute, Path=Text}"
+                                   FontFamily="{Binding ElementName=TextBlockMinute, Path=FontFamily}"
+                                   Foreground="{Binding ElementName=TextBlockMinute, Path=Foreground}"
+                                   FontSize="{Binding ElementName=TextBlockMinute, Path=FontSize}"
+                                   FontWeight="SemiBold" HorizontalAlignment="Center"/>
                         <Grid Visibility="{Binding ElementName=GridAdjustHour, Path=Visibility}" Margin="-29,-30,0,-30" Width="29">
                             <ui:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_5">
@@ -130,23 +106,11 @@
                                    Margin="0,0,0,0" Visibility="Collapsed"
                                    Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
                                    Text="00" FontSize="26"/>
-                        <ItemsControl Name="TextControlSecond" ItemsSource="{Binding ElementName=TextBlockSecond, Path=Text}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Width="14">
-                                        <TextBlock Text="{Binding}" HorizontalAlignment="Center" FontWeight="SemiBold"
-                                               Foreground="{Binding ElementName=TextBlockSecond, Path=Foreground}"
-                                               FontFamily="{Binding ElementName=TextBlockSecond, Path=FontFamily}"
-                                               FontSize="{Binding ElementName=TextBlockSecond, Path=FontSize}"/>
-                                    </Grid>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBlock Name="TextControlSecond" Text="{Binding ElementName=TextBlockSecond, Path=Text}"
+                                   FontFamily="{Binding ElementName=TextBlockSecond, Path=FontFamily}"
+                                   Foreground="{Binding ElementName=TextBlockSecond, Path=Foreground}"
+                                   FontSize="{Binding ElementName=TextBlockSecond, Path=FontSize}"
+                                   FontWeight="SemiBold" HorizontalAlignment="Center"/>
                         <Grid Margin="-96.8,0,0,0" Width="96.8" Background="Transparent" MouseUp="Grid_MouseUp"/>
                         <Grid Visibility="{Binding ElementName=GridAdjustHour, Path=Visibility}" Margin="-29,-30,0,-30" Width="29">
                             <ui:SimpleStackPanel Spacing="2">

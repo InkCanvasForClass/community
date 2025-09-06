@@ -81,10 +81,19 @@ namespace Ink_Canvas.Helpers
                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Collapsed;
                         _mainWindow.BtnPPTSlideShowEnd.Visibility = Visibility.Visible;
 
+                        // 只有在页数有效时才更新页码显示
                         if (currentSlide > 0 && totalSlides > 0)
                         {
                             _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
                             _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
+                            LogHelper.WriteLogToFile($"更新PPT页码显示: {currentSlide}/{totalSlides}", LogHelper.LogType.Trace);
+                        }
+                        else
+                        {
+                            // 页数无效时清空页码显示
+                            _mainWindow.PPTBtnPageNow.Text = "?";
+                            _mainWindow.PPTBtnPageTotal.Text = "/ ?";
+                            LogHelper.WriteLogToFile($"PPT页数无效，清空页码显示: 当前页={currentSlide}, 总页数={totalSlides}", LogHelper.LogType.Warning);
                         }
 
                         UpdateNavigationPanelsVisibility();
@@ -113,8 +122,20 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
-                    _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
+                    // 只有在页数有效时才更新页码显示
+                    if (currentSlide > 0 && totalSlides > 0)
+                    {
+                        _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
+                        _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
+                        LogHelper.WriteLogToFile($"更新PPT页码显示: {currentSlide}/{totalSlides}", LogHelper.LogType.Trace);
+                    }
+                    else
+                    {
+                        // 页数无效时清空页码显示
+                        _mainWindow.PPTBtnPageNow.Text = "?";
+                        _mainWindow.PPTBtnPageTotal.Text = "/ ?";
+                        LogHelper.WriteLogToFile($"PPT页数无效，清空页码显示: 当前页={currentSlide}, 总页数={totalSlides}", LogHelper.LogType.Warning);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -156,16 +177,24 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     // 检查是否应该显示PPT按钮
-                    // 不仅要检查按钮设置，还要确保确实在PPT放映模式下
+                    // 不仅要检查按钮设置，还要确保确实在PPT放映模式下且页数有效
+                    bool isInSlideShow = _mainWindow.PPTManager?.IsInSlideShow == true;
+                    int slidesCount = _mainWindow.PPTManager?.SlidesCount ?? 0;
+                    bool hasValidPageCount = slidesCount > 0;
+                    
                     bool shouldShowButtons = ShowPPTButton &&
                                           _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
-                                          _mainWindow.PPTManager?.IsInSlideShow == true;
+                                          isInSlideShow &&
+                                          hasValidPageCount;
 
                     if (!shouldShowButtons)
                     {
                         HideAllNavigationPanels();
+                        LogHelper.WriteLogToFile($"隐藏PPT导航面板 - 放映状态: {isInSlideShow}, 页数: {slidesCount}, 按钮设置: {ShowPPTButton}", LogHelper.LogType.Trace);
                         return;
                     }
+
+                    LogHelper.WriteLogToFile($"显示PPT导航面板 - 放映状态: {isInSlideShow}, 页数: {slidesCount}", LogHelper.LogType.Trace);
 
                     // 设置侧边按钮位置
                     _mainWindow.LeftSidePanelForPPTNavigation.Margin = new Thickness(0, 0, 0, PPTLSButtonPosition * 2);

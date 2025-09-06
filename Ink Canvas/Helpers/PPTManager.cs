@@ -70,7 +70,32 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     if (PPTApplication == null || !Marshal.IsComObject(PPTApplication)) return false;
-                    return PPTApplication.SlideShowWindows?.Count > 0;
+                    
+                    // 检查是否有放映窗口
+                    var slideShowWindows = PPTApplication.SlideShowWindows;
+                    if (slideShowWindows == null || slideShowWindows.Count == 0) return false;
+                    
+                    // 验证放映窗口是否真正有效
+                    try
+                    {
+                        var slideShowWindow = slideShowWindows[1];
+                        if (slideShowWindow == null) return false;
+                        
+                        // 尝试访问放映窗口的属性来验证其有效性
+                        var _ = slideShowWindow.View;
+                        return true;
+                    }
+                    catch (COMException comEx)
+                    {
+                        var hr = (uint)comEx.HResult;
+                        if (hr == 0x8001010E || hr == 0x80004005)
+                        {
+                            // COM对象已失效，触发断开连接
+                            DisconnectFromPPT();
+                        }
+                        LogHelper.WriteLogToFile($"验证PPT放映窗口失败: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
+                        return false;
+                    }
                 }
                 catch (COMException comEx)
                 {
@@ -80,10 +105,12 @@ namespace Ink_Canvas.Helpers
                         // COM对象已失效，触发断开连接
                         DisconnectFromPPT();
                     }
+                    LogHelper.WriteLogToFile($"检查PPT放映状态失败: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
                     return false;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"检查PPT放映状态时发生意外错误: {ex}", LogHelper.LogType.Warning);
                     return false;
                 }
             }
@@ -452,7 +479,30 @@ namespace Ink_Canvas.Helpers
                         {
                             CurrentPresentation = activePresentation;
                             CurrentSlides = CurrentPresentation.Slides;
-                            SlidesCount = CurrentSlides.Count;
+                            
+                            // 验证页数读取是否成功
+                            try
+                            {
+                                var slideCount = CurrentSlides.Count;
+                                if (slideCount > 0)
+                                {
+                                    SlidesCount = slideCount;
+                                    LogHelper.WriteLogToFile($"成功读取PPT页数: {slideCount}", LogHelper.LogType.Trace);
+                                }
+                                else
+                                {
+                                    // 页数为0，可能是空演示文稿或读取失败
+                                    SlidesCount = 0;
+                                    LogHelper.WriteLogToFile("PPT演示文稿页数为0，可能为空演示文稿", LogHelper.LogType.Warning);
+                                }
+                            }
+                            catch (COMException comEx)
+                            {
+                                // 页数读取失败
+                                var hr = (uint)comEx.HResult;
+                                SlidesCount = 0;
+                                LogHelper.WriteLogToFile($"读取PPT页数失败: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
+                            }
 
                             // 获取当前幻灯片
                             try

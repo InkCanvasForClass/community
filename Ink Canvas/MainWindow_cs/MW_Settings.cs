@@ -197,14 +197,22 @@ namespace Ink_Canvas
                 val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
             ViewboxFloatingBarScaleTransform.ScaleY =
                 val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
-            // auto align - 新增：只在屏幕模式下重新计算浮动栏位置
-            if (currentMode == 0)
+            
+            // 等待UI更新后再重新计算浮动栏位置，确保居中计算准确
+            Dispatcher.BeginInvoke(new Action(() =>
             {
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
-                    ViewboxFloatingBarMarginAnimation(60);
-                else
-                    ViewboxFloatingBarMarginAnimation(100, true);
-            }
+                // 强制更新布局以确保ActualWidth正确
+                ViewboxFloatingBar.UpdateLayout();
+                
+                // auto align - 新增：只在屏幕模式下重新计算浮动栏位置
+                if (currentMode == 0)
+                {
+                    if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                        ViewboxFloatingBarMarginAnimation(60);
+                    else
+                        ViewboxFloatingBarMarginAnimation(100, true);
+                }
+            }), DispatcherPriority.Render);
         }
 
         private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
