@@ -122,14 +122,34 @@ namespace Ink_Canvas
             nowTimeVM.nowTime = DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
         }
 
-        // 修改TimerDisplayTime_ElapsedAsync方法中的时间格式
+        // 修改TimerDisplayTime_ElapsedAsync方法中的时间格式，实现校验制
         private async Task TimerDisplayTime_ElapsedAsync()
         {
-            DateTime now = await GetNetworkTimeAsync();
+            DateTime localTime = DateTime.Now;
+            DateTime displayTime = localTime; // 默认使用本地时间
+            
+            try
+            {
+                DateTime networkTime = await GetNetworkTimeAsync();
+                
+                // 计算时间差
+                TimeSpan timeDifference = networkTime - localTime;
+                double timeDifferenceMinutes = Math.Abs(timeDifference.TotalMinutes);
+                
+                // 如果网络时间与本地时间相差不超过1分钟，则使用本地时间
+                // 否则使用网络时间
+                displayTime = timeDifferenceMinutes <= 1.0 ? localTime : networkTime;
+            }
+            catch
+            {
+                // 网络时间获取失败时，使用本地时间
+                displayTime = localTime;
+            }
+            
             // 只更新时间，日期由原有逻辑定时更新即可
             Dispatcher.Invoke(() =>
             {
-                nowTimeVM.nowTime = now.ToString("tt hh'时'mm'分'ss'秒'");
+                nowTimeVM.nowTime = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
             });
         }
 
