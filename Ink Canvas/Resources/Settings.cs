@@ -304,6 +304,8 @@ namespace Ink_Canvas
         public bool EnableWppProcessKill { get; set; } = true;
         [JsonProperty("isAlwaysGoToFirstPageOnReenter")]
         public bool IsAlwaysGoToFirstPageOnReenter { get; set; }
+        [JsonProperty("enablePowerPointEnhancement")]
+        public bool EnablePowerPointEnhancement { get; set; } = false;
     }
 
     public class Automation

@@ -459,6 +459,8 @@ namespace Ink_Canvas
 
                 ToggleSwitchSupportWPS.IsOn = Settings.PowerPointSettings.IsSupportWPS;
 
+                ToggleSwitchPowerPointEnhancement.IsOn = Settings.PowerPointSettings.EnablePowerPointEnhancement;
+
                 ToggleSwitchAutoSaveScreenShotInPowerPoint.IsOn =
                     Settings.PowerPointSettings.IsAutoSaveScreenShotInPowerPoint;
                 ToggleSwitchEnableWppProcessKill.IsOn = Settings.PowerPointSettings.EnableWppProcessKill;

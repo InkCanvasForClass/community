@@ -868,7 +868,7 @@ namespace Ink_Canvas.Helpers
                             decryptedData[i] = (byte)(data[i] ^ keyBytes[i % keyBytes.Length]);
                         }
 
-                        // 验证校验和
+                        // 验证校验
                         byte[] computedChecksum = sha256.ComputeHash(decryptedData);
                         if (!checksum.SequenceEqual(computedChecksum))
                         {

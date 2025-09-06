@@ -3,6 +3,7 @@ using iNKORE.UI.WPF.Modern;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -84,6 +85,10 @@ namespace Ink_Canvas
         private bool _isLongPressNext = true; // true为下一页，false为上一页
         private const int LongPressDelay = 500; // 长按延迟时间（毫秒）
         private const int LongPressInterval = 15; // 长按翻页间隔（毫秒）
+
+        // PowerPoint应用程序守护相关字段
+        private DispatcherTimer _powerPointProcessMonitorTimer;
+        private const int ProcessMonitorInterval = 5000; // 应用程序监控间隔（毫秒）
         #endregion
 
         #region PPT Managers
@@ -159,6 +164,246 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("PPT监控已停止", LogHelper.LogType.Event);
         }
 
+        #region PowerPoint Application Management
+        /// <summary>
+        /// 启动PowerPoint应用程序守护
+        /// </summary>
+        private void StartPowerPointProcessMonitoring()
+        {
+            try
+            {
+                if (!Settings.PowerPointSettings.EnablePowerPointEnhancement) return;
+
+                // 创建PowerPoint应用程序实例
+                CreatePowerPointApplication();
+
+                // 启动应用程序监控定时器
+                if (_powerPointProcessMonitorTimer == null)
+                {
+                    _powerPointProcessMonitorTimer = new DispatcherTimer();
+                    _powerPointProcessMonitorTimer.Interval = TimeSpan.FromMilliseconds(ProcessMonitorInterval);
+                    _powerPointProcessMonitorTimer.Tick += OnPowerPointApplicationMonitorTick;
+                }
+                _powerPointProcessMonitorTimer.Start();
+
+                LogHelper.WriteLogToFile("PowerPoint应用程序守护已启动", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动PowerPoint应用程序守护失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 停止PowerPoint应用程序守护
+        /// </summary>
+        private void StopPowerPointProcessMonitoring()
+        {
+            try
+            {
+                // 停止应用程序监控定时器
+                _powerPointProcessMonitorTimer?.Stop();
+
+                // 关闭PowerPoint应用程序
+                ClosePowerPointApplication();
+
+                LogHelper.WriteLogToFile("PowerPoint应用程序守护已停止", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"停止PowerPoint应用程序守护失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 创建PowerPoint应用程序实例
+        /// </summary>
+        private void CreatePowerPointApplication()
+        {
+            try
+            {
+                // 如果应用程序已存在且有效，则不重复创建
+                if (pptApplication != null && IsPowerPointApplicationValid())
+                {
+                    return;
+                }
+
+                // 创建新的PowerPoint应用程序实例
+                pptApplication = new Microsoft.Office.Interop.PowerPoint.Application();
+                
+                // 设置为不可见，作为后台进程
+                pptApplication.Visible = Microsoft.Office.Core.MsoTriState.msoFalse;
+                
+                // 设置应用程序属性
+                pptApplication.WindowState = Microsoft.Office.Interop.PowerPoint.PpWindowState.ppWindowMinimized;
+
+                // 直接设置PPTManager的PPTApplication属性，绕过COM注册问题
+                Task.Delay(1000).ContinueWith(_ =>
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        try
+                        {
+                            // 直接设置PPTManager的PowerPoint应用程序实例
+                            if (_pptManager != null)
+                            {
+                                // 使用反射或直接访问来设置PPTManager的PPTApplication
+                                SetPPTManagerApplication(pptApplication);
+                                LogHelper.WriteLogToFile("已直接设置PPTManager的PowerPoint应用程序实例", LogHelper.LogType.Event);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"设置PPTManager的PowerPoint应用程序实例失败: {ex}", LogHelper.LogType.Error);
+                        }
+                    });
+                });
+
+                LogHelper.WriteLogToFile("PowerPoint应用程序实例已创建", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"创建PowerPoint应用程序实例失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 设置PPTManager的PowerPoint应用程序实例
+        /// </summary>
+        private void SetPPTManagerApplication(Microsoft.Office.Interop.PowerPoint.Application app)
+        {
+            try
+            {
+                if (_pptManager == null) return;
+
+                // 使用反射调用PPTManager的ConnectToPPT方法
+                var pptManagerType = _pptManager.GetType();
+                var connectMethod = pptManagerType.GetMethod("ConnectToPPT", 
+                    System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                
+                if (connectMethod != null)
+                {
+                    connectMethod.Invoke(_pptManager, new object[] { app });
+                    LogHelper.WriteLogToFile("通过ConnectToPPT方法设置PowerPoint应用程序实例", LogHelper.LogType.Event);
+                }
+                else
+                {
+                    // 如果无法通过反射调用，尝试直接设置属性
+                    var pptApplicationProperty = pptManagerType.GetProperty("PPTApplication", 
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                    
+                    if (pptApplicationProperty != null && pptApplicationProperty.CanWrite)
+                    {
+                        pptApplicationProperty.SetValue(_pptManager, app);
+                        LogHelper.WriteLogToFile("通过属性设置PPTManager的PowerPoint应用程序实例", LogHelper.LogType.Event);
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("无法设置PPTManager的PowerPoint应用程序实例", LogHelper.LogType.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"设置PPTManager的PowerPoint应用程序实例失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 检查PowerPoint应用程序是否有效
+        /// </summary>
+        private bool IsPowerPointApplicationValid()
+        {
+            try
+            {
+                if (pptApplication == null) return false;
+                if (!Marshal.IsComObject(pptApplication)) return false;
+                
+                // 尝试访问一个简单的属性来验证连接是否有效
+                var _ = pptApplication.Name;
+                return true;
+            }
+            catch (COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                // 如果COM对象已失效，返回false
+                if (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706B5)
+                {
+                    return false;
+                }
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 关闭PowerPoint应用程序
+        /// </summary>
+        private void ClosePowerPointApplication()
+        {
+            try
+            {
+                if (pptApplication != null)
+                {
+                    // 关闭所有打开的演示文稿
+                    if (pptApplication.Presentations.Count > 0)
+                    {
+                        for (int i = pptApplication.Presentations.Count; i >= 1; i--)
+                        {
+                            try
+                            {
+                                pptApplication.Presentations[i].Close();
+                            }
+                            catch { }
+                        }
+                    }
+
+                    // 退出PowerPoint应用程序
+                    pptApplication.Quit();
+                    
+                    // 释放COM对象
+                    Marshal.ReleaseComObject(pptApplication);
+                    pptApplication = null;
+                }
+                
+                LogHelper.WriteLogToFile("PowerPoint应用程序已关闭", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"关闭PowerPoint应用程序失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// PowerPoint应用程序监控定时器事件
+        /// </summary>
+        private void OnPowerPointApplicationMonitorTick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!Settings.PowerPointSettings.EnablePowerPointEnhancement)
+                {
+                    StopPowerPointProcessMonitoring();
+                    return;
+                }
+
+                // 检查应用程序是否还在运行
+                if (!IsPowerPointApplicationValid())
+                {
+                    LogHelper.WriteLogToFile("检测到PowerPoint应用程序已失效，重新创建", LogHelper.LogType.Event);
+                    CreatePowerPointApplication();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"PowerPoint应用程序监控异常: {ex}", LogHelper.LogType.Error);
+            }
+        }
+        #endregion
+
         private void DisposePPTManagers()
         {
             try
@@ -170,6 +415,11 @@ namespace Ink_Canvas
                 _pptManager = null;
                 _pptInkManager = null;
                 _pptUIManager = null;
+
+                // 清理PowerPoint进程守护
+                StopPowerPointProcessMonitoring();
+                _powerPointProcessMonitorTimer = null;
+
                 LogHelper.WriteLogToFile("PPT管理器已释放", LogHelper.LogType.Event);
             }
             catch (Exception ex)
@@ -795,11 +1045,51 @@ namespace Ink_Canvas
             }
         }
 
+        private void ToggleSwitchPowerPointEnhancement_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            
+            Settings.PowerPointSettings.EnablePowerPointEnhancement = ToggleSwitchPowerPointEnhancement.IsOn;
+            
+            // 与WPS支持互斥
+            if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
+            {
+                Settings.PowerPointSettings.IsSupportWPS = false;
+                ToggleSwitchSupportWPS.IsOn = false;
+                
+                // 更新PPT管理器的WPS支持设置
+                if (_pptManager != null)
+                {
+                    _pptManager.IsSupportWPS = false;
+                }
+            }
+            
+            SaveSettingsToFile();
+            
+            // 启动或停止PowerPoint进程守护
+            if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
+            {
+                StartPowerPointProcessMonitoring();
+            }
+            else
+            {
+                StopPowerPointProcessMonitoring();
+            }
+        }
+
         private void ToggleSwitchSupportWPS_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
 
             Settings.PowerPointSettings.IsSupportWPS = ToggleSwitchSupportWPS.IsOn;
+            
+            // 与PowerPoint联动增强互斥
+            if (Settings.PowerPointSettings.IsSupportWPS)
+            {
+                Settings.PowerPointSettings.EnablePowerPointEnhancement = false;
+                ToggleSwitchPowerPointEnhancement.IsOn = false;
+                StopPowerPointProcessMonitoring();
+            }
 
             // 更新PPT管理器的WPS支持设置
             if (_pptManager != null)

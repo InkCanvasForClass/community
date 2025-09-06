@@ -438,6 +438,12 @@ namespace Ink_Canvas
                 StartPPTMonitoring();
             }
 
+            // 如果启用PowerPoint联动增强功能，启动进程守护
+            if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
+            {
+                StartPowerPointProcessMonitoring();
+            }
+
             // HasNewUpdateWindow hasNewUpdateWindow = new HasNewUpdateWindow();
             if (Environment.Is64BitProcess) GroupBoxInkRecognition.Visibility = Visibility.Collapsed;
 
