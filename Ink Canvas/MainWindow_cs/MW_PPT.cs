@@ -82,7 +82,7 @@ namespace Ink_Canvas
         // 长按翻页相关字段
         private DispatcherTimer _longPressTimer;
         private bool _isLongPressNext = true; // true为下一页，false为上一页
-        private const int LongPressDelay = 15; // 长按延迟时间（毫秒）
+        private const int LongPressDelay = 500; // 长按延迟时间（毫秒）
         private const int LongPressInterval = 15; // 长按翻页间隔（毫秒）
         #endregion
 
