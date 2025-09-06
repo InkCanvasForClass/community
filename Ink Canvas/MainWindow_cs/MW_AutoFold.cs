@@ -307,6 +307,27 @@ namespace Ink_Canvas
                 SidePannelMarginAnimation(-50, !unfoldFloatingBarByUser);
             });
 
+            // 修复：在浮动栏展开后，重新设置按钮高亮状态
+            await Dispatcher.InvokeAsync(async () =>
+            {
+                try
+                {
+                    // 等待UI完全更新
+                    await Task.Delay(100);
+                    
+                    // 获取当前选中的模式并重新设置高光位置
+                    string selectedToolMode = GetCurrentSelectedMode();
+                    if (!string.IsNullOrEmpty(selectedToolMode))
+                    {
+                        SetFloatingBarHighlightPosition(selectedToolMode);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"浮动栏展开后重新设置按钮高亮状态失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            });
+
             isFloatingBarChangingHideMode = false;
         }
 

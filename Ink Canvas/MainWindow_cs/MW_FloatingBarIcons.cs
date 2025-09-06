@@ -1713,12 +1713,13 @@ namespace Ink_Canvas
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();
 
-            // 隱藏高亮
-            HideFloatingBarHighlight();
-
             // 使用集中化的工具模式切换方法，确保快捷键状态正确更新
             // 鼠标模式下应该禁用快捷键以放行键盘操作
             SetCurrentToolMode(InkCanvasEditingMode.None);
+
+            // 修复：在浮动栏收起状态下，仍然需要设置按钮高亮状态
+            // 这样在浮动栏展开时能正确显示高光
+            SetFloatingBarHighlightPosition("cursor");
 
             // 切换前自动截图保存墨迹
             if (inkCanvas.Strokes.Count > 0 &&
@@ -3257,6 +3258,15 @@ namespace Ink_Canvas
             try
             {
                 if (FloatingbarSelectionBG == null) return;
+
+                // 检查浮动栏是否处于收起状态
+                if (isFloatingBarFolded || (BorderFloatingBarMainControls != null && BorderFloatingBarMainControls.Visibility == Visibility.Collapsed))
+                {
+                    // 在收起状态下，仍然需要设置高光位置，但可能需要调整计算方式
+                    // 这里先隐藏高光，等浮动栏展开时再显示
+                    FloatingbarSelectionBG.Visibility = Visibility.Hidden;
+                    return;
+                }
 
                 double position = 0;
                 double buttonWidth = 28; // 每个按钮的默认宽度
