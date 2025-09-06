@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -257,6 +258,12 @@ namespace Ink_Canvas
         private bool isStrokeDragging = false;
         private Point strokeDragStartPoint;
         private StrokeCollection StrokesSelectionClone = new StrokeCollection();
+        
+        // 选择框和选择点相关变量
+        private bool isResizing = false;
+        private string currentResizeHandle = "";
+        private Point resizeStartPoint;
+        private Rect originalSelectionBounds;
 
         private void GridInkCanvasSelectionCover_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -397,11 +404,12 @@ namespace Ink_Canvas
                     }
                 }
                 
-                // 显示墨迹选择栏
+                // 显示墨迹选择栏和选择框
                 GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
                 BorderStrokeSelectionClone.Background = Brushes.Transparent;
                 isStrokeSelectionCloneOn = false;
                 updateBorderStrokeSelectionControlLocation();
+                UpdateSelectionDisplay();
                 return;
             }
 
@@ -413,6 +421,7 @@ namespace Ink_Canvas
             if (hasImageElement)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                HideSelectionDisplay();
                 return;
             }
 
@@ -420,11 +429,13 @@ namespace Ink_Canvas
             if (currentSelectedElement != null && currentSelectedElement is Image)
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                HideSelectionDisplay();
                 return;
             }
 
             // 没有选中任何内容，隐藏选择框
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            HideSelectionDisplay();
         }
 
 
@@ -734,7 +745,170 @@ namespace Ink_Canvas
 
             return new Rect(0, 0, 0, 0);
         }
+
+        #endregion
+
+        #region Selection Display and Resize Handles
+
+        private void UpdateSelectionDisplay()
+        {
+            if (inkCanvas.GetSelectedStrokes().Count == 0)
+            {
+                HideSelectionDisplay();
+                return;
+            }
+
+            var selectionBounds = inkCanvas.GetSelectionBounds();
+            
+            // 更新选择框
+            SelectionRectangle.Visibility = Visibility.Visible;
+            SelectionRectangle.Margin = new Thickness(selectionBounds.Left, selectionBounds.Top, 0, 0);
+            SelectionRectangle.Width = selectionBounds.Width;
+            SelectionRectangle.Height = selectionBounds.Height;
+
+            // 更新选择点位置
+            UpdateSelectionHandles(selectionBounds);
+            SelectionHandlesCanvas.Visibility = Visibility.Visible;
+        }
+
+        private void HideSelectionDisplay()
+        {
+            SelectionRectangle.Visibility = Visibility.Collapsed;
+            SelectionHandlesCanvas.Visibility = Visibility.Collapsed;
+        }
+
+        private void UpdateSelectionHandles(Rect bounds)
+        {
+            // 四个角选择点
+            TopLeftHandle.Margin = new Thickness(bounds.Left - 4, bounds.Top - 4, 0, 0);
+            TopRightHandle.Margin = new Thickness(bounds.Right - 4, bounds.Top - 4, 0, 0);
+            BottomLeftHandle.Margin = new Thickness(bounds.Left - 4, bounds.Bottom - 4, 0, 0);
+            BottomRightHandle.Margin = new Thickness(bounds.Right - 4, bounds.Bottom - 4, 0, 0);
+
+            // 四个边选择点
+            TopHandle.Margin = new Thickness(bounds.Left + bounds.Width / 2 - 4, bounds.Top - 4, 0, 0);
+            BottomHandle.Margin = new Thickness(bounds.Left + bounds.Width / 2 - 4, bounds.Bottom - 4, 0, 0);
+            LeftHandle.Margin = new Thickness(bounds.Left - 4, bounds.Top + bounds.Height / 2 - 4, 0, 0);
+            RightHandle.Margin = new Thickness(bounds.Right - 4, bounds.Top + bounds.Height / 2 - 4, 0, 0);
+        }
+
+        private void SelectionHandle_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Rectangle handle)
+            {
+                isResizing = true;
+                currentResizeHandle = handle.Name;
+                resizeStartPoint = e.GetPosition(inkCanvas);
+                originalSelectionBounds = inkCanvas.GetSelectionBounds();
+                handle.CaptureMouse();
+                e.Handled = true;
+            }
+        }
+
+        private void SelectionHandle_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!isResizing || !(sender is Rectangle handle)) return;
+
+            var currentPoint = e.GetPosition(inkCanvas);
+            var delta = new Point(currentPoint.X - resizeStartPoint.X, currentPoint.Y - resizeStartPoint.Y);
+
+            var newBounds = CalculateNewBounds(originalSelectionBounds, delta, currentResizeHandle);
+            
+            // 应用新的边界到选中的墨迹
+            ApplyBoundsToStrokes(newBounds);
+            
+            // 更新选择框显示
+            UpdateSelectionDisplay();
+        }
+
+        private void SelectionHandle_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Rectangle handle)
+            {
+                isResizing = false;
+                currentResizeHandle = "";
+                handle.ReleaseMouseCapture();
+                e.Handled = true;
+            }
+        }
+
+        private Rect CalculateNewBounds(Rect originalBounds, Point delta, string handleName)
+        {
+            var newBounds = originalBounds;
+
+            switch (handleName)
+            {
+                case "TopLeftHandle":
+                    newBounds.X = originalBounds.X + delta.X;
+                    newBounds.Y = originalBounds.Y + delta.Y;
+                    newBounds.Width = originalBounds.Width - delta.X;
+                    newBounds.Height = originalBounds.Height - delta.Y;
+                    break;
+                case "TopRightHandle":
+                    newBounds.Y = originalBounds.Y + delta.Y;
+                    newBounds.Width = originalBounds.Width + delta.X;
+                    newBounds.Height = originalBounds.Height - delta.Y;
+                    break;
+                case "BottomLeftHandle":
+                    newBounds.X = originalBounds.X + delta.X;
+                    newBounds.Width = originalBounds.Width - delta.X;
+                    newBounds.Height = originalBounds.Height + delta.Y;
+                    break;
+                case "BottomRightHandle":
+                    newBounds.Width = originalBounds.Width + delta.X;
+                    newBounds.Height = originalBounds.Height + delta.Y;
+                    break;
+                case "TopHandle":
+                    newBounds.Y = originalBounds.Y + delta.Y;
+                    newBounds.Height = originalBounds.Height - delta.Y;
+                    break;
+                case "BottomHandle":
+                    newBounds.Height = originalBounds.Height + delta.Y;
+                    break;
+                case "LeftHandle":
+                    newBounds.X = originalBounds.X + delta.X;
+                    newBounds.Width = originalBounds.Width - delta.X;
+                    break;
+                case "RightHandle":
+                    newBounds.Width = originalBounds.Width + delta.X;
+                    break;
+            }
+
+            // 确保最小尺寸
+            if (newBounds.Width < 10) newBounds.Width = 10;
+            if (newBounds.Height < 10) newBounds.Height = 10;
+
+            return newBounds;
+        }
+
+        private void ApplyBoundsToStrokes(Rect newBounds)
+        {
+            var selectedStrokes = inkCanvas.GetSelectedStrokes();
+            if (selectedStrokes.Count == 0) return;
+
+            var originalBounds = inkCanvas.GetSelectionBounds();
+            
+            // 计算缩放比例
+            var scaleX = newBounds.Width / originalBounds.Width;
+            var scaleY = newBounds.Height / originalBounds.Height;
+            
+            // 计算平移量
+            var translateX = newBounds.X - originalBounds.X;
+            var translateY = newBounds.Y - originalBounds.Y;
+
+            // 创建变换矩阵
+            var matrix = new Matrix();
+            matrix.Translate(translateX, translateY);
+            matrix.ScaleAt(scaleX, scaleY, originalBounds.X + originalBounds.Width / 2, originalBounds.Y + originalBounds.Height / 2);
+
+            // 应用变换到选中的墨迹
+            foreach (var stroke in selectedStrokes)
+            {
+                stroke.Transform(matrix, false);
+            }
+        }
+
+        #endregion
     }
 }
 
-#endregion

@@ -3424,7 +3424,42 @@
             TouchDown="GridInkCanvasSelectionCover_TouchDown"
             TouchUp="GridInkCanvasSelectionCover_TouchUp"
             TouchMove="GridInkCanvasSelectionCover_TouchMove"
-                  Background="#01FFFFFF" Opacity="0.01" Visibility="Visible" Margin="1,0,-1,0" />
+                  Background="#01FFFFFF" Opacity="0.01" Visibility="Visible" Margin="1,0,-1,0">
+                
+                <!-- 选择框 -->
+                <Rectangle Name="SelectionRectangle"
+                           Stroke="Blue"
+                           StrokeThickness="2"
+                           StrokeDashArray="5,5"
+                           Fill="Transparent"
+                           Visibility="Collapsed"
+                           IsHitTestVisible="False"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top" />
+                
+                <!-- 选择点容器 -->
+                <Canvas Name="SelectionHandlesCanvas" Visibility="Collapsed">
+                    <!-- 四个角选择点 -->
+                    <Rectangle Name="TopLeftHandle" Width="8" Height="8" Fill="LightBlue" Stroke="Blue" StrokeThickness="1" 
+                               Cursor="SizeNWSE" MouseDown="SelectionHandle_MouseDown" MouseMove="SelectionHandle_MouseMove" MouseUp="SelectionHandle_MouseUp" />
+                    <Rectangle Name="TopRightHandle" Width="8" Height="8" Fill="LightBlue" Stroke="Blue" StrokeThickness="1" 
+                               Cursor="SizeNESW" MouseDown="SelectionHandle_MouseDown" MouseMove="SelectionHandle_MouseMove" MouseUp="SelectionHandle_MouseUp" />
+                    <Rectangle Name="BottomLeftHandle" Width="8" Height="8" Fill="LightBlue" Stroke="Blue" StrokeThickness="1" 
+                               Cursor="SizeNESW" MouseDown="SelectionHandle_MouseDown" MouseMove="SelectionHandle_MouseMove" MouseUp="SelectionHandle_MouseUp" />
+                    <Rectangle Name="BottomRightHandle" Width="8" Height="8" Fill="LightBlue" Stroke="Blue" StrokeThickness="1" 
+                               Cursor="SizeNWSE" MouseDown="SelectionHandle_MouseDown" MouseMove="SelectionHandle_MouseMove" MouseUp="SelectionHandle_MouseUp" />
+                    
+                    <!-- 四个边选择点 -->
+                    <Rectangle Name="TopHandle" Width="8" Height="8" Fill="LightBlue" Stroke="Blue" StrokeThickness="1" 
+                               Cursor="SizeNS" MouseDown="SelectionHandle_MouseDown" MouseMove="SelectionHandle_MouseMove" MouseUp="SelectionHandle_MouseUp" />
+                    <Rectangle Name="BottomHandle" Width="8" Height="8" Fill="LightBlue" Stroke="Blue" StrokeThickness="1" 
+                               Cursor="SizeNS" MouseDown="SelectionHandle_MouseDown" MouseMove="SelectionHandle_MouseMove" MouseUp="SelectionHandle_MouseUp" />
+                    <Rectangle Name="LeftHandle" Width="8" Height="8" Fill="LightBlue" Stroke="Blue" StrokeThickness="1" 
+                               Cursor="SizeWE" MouseDown="SelectionHandle_MouseDown" MouseMove="SelectionHandle_MouseMove" MouseUp="SelectionHandle_MouseUp" />
+                    <Rectangle Name="RightHandle" Width="8" Height="8" Fill="LightBlue" Stroke="Blue" StrokeThickness="1" 
+                               Cursor="SizeWE" MouseDown="SelectionHandle_MouseDown" MouseMove="SelectionHandle_MouseMove" MouseUp="SelectionHandle_MouseUp" />
+                </Canvas>
+            </Grid>
             <Border Name="BorderStrokeSelectionControl"
                     HorizontalAlignment="Left" VerticalAlignment="Top" Margin="800,900,0,0"
                     CornerRadius="5" Height="80"
