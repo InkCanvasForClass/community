@@ -66,10 +66,10 @@ namespace Ink_Canvas.Windows
             try
             {
                 // 设置窗口启动位置为屏幕中心
-                this.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                WindowStartupLocation = WindowStartupLocation.CenterScreen;
                 
                 // 确保窗口在显示时获得焦点
-                this.ShowInTaskbar = true;
+                ShowInTaskbar = true;
                 
                 LogHelper.WriteLogToFile("快捷键设置窗口属性已设置");
             }
@@ -540,7 +540,7 @@ namespace Ink_Canvas.Windows
         /// <summary>
         /// 标题栏拖拽事件
         /// </summary>
-        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
             {

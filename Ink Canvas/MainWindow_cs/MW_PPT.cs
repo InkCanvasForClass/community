@@ -232,10 +232,10 @@ namespace Ink_Canvas
                 pptApplication = new Microsoft.Office.Interop.PowerPoint.Application();
                 
                 // 设置为不可见，作为后台进程
-                pptApplication.Visible = Microsoft.Office.Core.MsoTriState.msoFalse;
+                pptApplication.Visible = MsoTriState.msoFalse;
                 
                 // 设置应用程序属性
-                pptApplication.WindowState = Microsoft.Office.Interop.PowerPoint.PpWindowState.ppWindowMinimized;
+                pptApplication.WindowState = PpWindowState.ppWindowMinimized;
 
                 // 直接设置PPTManager的PPTApplication属性，绕过COM注册问题
                 Task.Delay(1000).ContinueWith(_ =>

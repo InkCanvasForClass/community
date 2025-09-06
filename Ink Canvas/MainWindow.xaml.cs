@@ -2416,7 +2416,7 @@ namespace Ink_Canvas
             if (slider == null) return;
 
             // 捕获触摸设备
-            if (e.RoutedEvent == UIElement.TouchDownEvent)
+            if (e.RoutedEvent == TouchDownEvent)
             {
                 slider.CaptureTouch(e.TouchDevice);
             }
@@ -2451,7 +2451,7 @@ namespace Ink_Canvas
             if (slider == null) return;
 
             // 捕获手写笔设备
-            if (e.RoutedEvent == UIElement.StylusDownEvent)
+            if (e.RoutedEvent == StylusDownEvent)
             {
                 slider.CaptureStylus();
             }
@@ -2619,7 +2619,7 @@ namespace Ink_Canvas
         {
             try
             {
-                var toggle = sender as iNKORE.UI.WPF.Modern.Controls.ToggleSwitch;
+                var toggle = sender as ToggleSwitch;
                 if (toggle != null)
                 {
                     Settings.ModeSettings.IsPPTOnlyMode = toggle.IsOn;

@@ -237,14 +237,14 @@ namespace Ink_Canvas.Windows {
             public ImageSource IconSource { get; set; }
             public bool Selected { get; set; }
             public Visibility _spVisibility {
-                get => this.Type == SidebarItemType.Separator ? Visibility.Visible : Visibility.Collapsed;
+                get => Type == SidebarItemType.Separator ? Visibility.Visible : Visibility.Collapsed;
             }
             public Visibility _siVisibility {
-                get => this.Type == SidebarItemType.Item ? Visibility.Visible : Visibility.Collapsed;
+                get => Type == SidebarItemType.Item ? Visibility.Visible : Visibility.Collapsed;
             }
 
             public SolidColorBrush _siBackground {
-                get => this.Selected
+                get => Selected
                     ? new SolidColorBrush(Color.FromRgb(217, 217, 217))
                     : new SolidColorBrush(Colors.Transparent);
             }
@@ -622,7 +622,7 @@ namespace Ink_Canvas.Windows {
             catch (Exception ex)
             {
                 // 记录错误但不影响程序运行
-                System.Diagnostics.Debug.WriteLine($"添加自定义滑块触摸支持时出错: {ex.Message}");
+                Debug.WriteLine($"添加自定义滑块触摸支持时出错: {ex.Message}");
             }
         }
 
@@ -930,7 +930,7 @@ namespace Ink_Canvas.Windows {
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"更新自定义滑块值时出错: {ex.Message}");
+                Debug.WriteLine($"更新自定义滑块值时出错: {ex.Message}");
             }
         }
 

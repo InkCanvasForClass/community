@@ -750,6 +750,10 @@ namespace Ink_Canvas
                     {
                         overlay.CaptureMouse();
                         StartAdvancedEraserOperation(sender);
+                        
+                        // 处理单点擦除
+                        var position = e.GetPosition((UIElement)FindName("inkCanvas"));
+                        UpdateAdvancedEraserPosition(sender, position);
                     }
                 };
 
@@ -787,6 +791,10 @@ namespace Ink_Canvas
                             overlay.CaptureStylus();
                         }
                         StartAdvancedEraserOperation(sender);
+                        
+                        // 处理单点擦除
+                        var position = e.GetPosition((UIElement)FindName("inkCanvas"));
+                        UpdateAdvancedEraserPosition(sender, position);
                     }
                 };
 

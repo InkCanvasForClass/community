@@ -121,7 +121,7 @@ namespace Ink_Canvas
             if (RandMaxPeopleOneTime != -1 && TotalCount >= RandMaxPeopleOneTime) return;
             TotalCount++;
             LabelNumberCount.Text = TotalCount.ToString();
-            SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.People;
+            SymbolIconStart.Symbol = Symbol.People;
             BorderBtnAdd.Opacity = 1;
             BorderBtnMinus.Opacity = 1;
         }
@@ -133,7 +133,7 @@ namespace Ink_Canvas
             LabelNumberCount.Text = TotalCount.ToString();
             if (TotalCount == 1)
             {
-                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Contact;
+                SymbolIconStart.Symbol = Symbol.Contact;
             }
         }
 

@@ -43,7 +43,7 @@ namespace Ink_Canvas.Windows.SettingsViews {
             }
 
             // 关于页面构建时间
-            var buildTime = FileBuildTimeHelper.GetBuildDateTime(System.Reflection.Assembly.GetExecutingAssembly());
+            var buildTime = FileBuildTimeHelper.GetBuildDateTime(Assembly.GetExecutingAssembly());
             if (buildTime != null) {
                 var bt = ((DateTimeOffset)buildTime).LocalDateTime;
                 var m = bt.Month.ToString().PadLeft(2, '0');
@@ -69,7 +69,7 @@ namespace Ink_Canvas.Windows.SettingsViews {
         }
 
         public static class TouchTabletDetectHelper {
-            [System.Runtime.InteropServices.DllImport("user32.dll")]
+            [DllImport("user32.dll")]
             public static extern int GetSystemMetrics(int nIndex);
 
             public static bool IsTouchEnabled()
@@ -84,9 +84,9 @@ namespace Ink_Canvas.Windows.SettingsViews {
             {
                 public USBDeviceInfo(string deviceID, string pnpDeviceID, string description)
                 {
-                    this.DeviceID = deviceID;
-                    this.PnpDeviceID = pnpDeviceID;
-                    this.Description = description;
+                    DeviceID = deviceID;
+                    PnpDeviceID = pnpDeviceID;
+                    Description = description;
                 }
                 public string DeviceID { get; private set; }
                 public string PnpDeviceID { get; private set; }
