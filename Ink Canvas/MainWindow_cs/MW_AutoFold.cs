@@ -259,7 +259,11 @@ namespace Ink_Canvas
                     PenIcon_Click(null, null);
                 }
 
-                if (StackPanelPPTControls.Visibility == Visibility.Visible)
+                // 只有在PPT放映模式下且页数有效时才显示翻页按钮
+                if (StackPanelPPTControls.Visibility == Visibility.Visible && 
+                    BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
+                    PPTManager?.IsInSlideShow == true &&
+                    PPTManager?.SlidesCount > 0)
                 {
                     var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                     var dopsc = dops.ToCharArray();
@@ -267,11 +271,34 @@ namespace Ink_Canvas
                     if (dopsc[1] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
                     if (dopsc[2] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
                     if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
+                    LogHelper.WriteLogToFile($"从收纳模式恢复时显示PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
+                }
+                else
+                {
+                    // 如果条件不满足，确保隐藏翻页按钮
+                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LogHelper.WriteLogToFile($"从收纳模式恢复时隐藏PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
 
                 // 新增：只在屏幕模式下显示浮动栏
                 if (currentMode == 0)
                 {
+                    // 强制更新布局以确保ActualWidth正确
+                    ViewboxFloatingBar.UpdateLayout();
+                    
+                    // 等待一小段时间让布局完全更新
+                    await Task.Delay(50);
+                    
+                    // 再次强制更新布局
+                    ViewboxFloatingBar.UpdateLayout();
+                    
+                    // 强制重新测量和排列
+                    ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
+                    
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                         ViewboxFloatingBarMarginAnimation(60);
                     else

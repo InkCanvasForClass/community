@@ -199,10 +199,20 @@ namespace Ink_Canvas
                 val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
             
             // 等待UI更新后再重新计算浮动栏位置，确保居中计算准确
-            Dispatcher.BeginInvoke(new Action(() =>
+            Dispatcher.BeginInvoke(new Action(async () =>
             {
                 // 强制更新布局以确保ActualWidth正确
                 ViewboxFloatingBar.UpdateLayout();
+                
+                // 等待一小段时间让布局完全更新
+                await Task.Delay(100);
+                
+                // 再次强制更新布局
+                ViewboxFloatingBar.UpdateLayout();
+                
+                // 强制重新测量和排列
+                ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
                 
                 // auto align - 新增：只在屏幕模式下重新计算浮动栏位置
                 if (currentMode == 0)

@@ -652,10 +652,11 @@ namespace Ink_Canvas
                 //关闭黑板
                 HideSubPanelsImmediately();
 
-                // 只有在PPT放映模式下才显示翻页按钮
+                // 只有在PPT放映模式下且页数有效时才显示翻页按钮
                 if (StackPanelPPTControls.Visibility == Visibility.Visible && 
                     BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
-                    PPTManager?.IsInSlideShow == true)
+                    PPTManager?.IsInSlideShow == true &&
+                    PPTManager?.SlidesCount > 0)
                 {
                     var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                     var dopsc = dops.ToCharArray();
@@ -663,24 +664,38 @@ namespace Ink_Canvas
                     if (dopsc[1] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
                     if (dopsc[2] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
                     if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
+                    LogHelper.WriteLogToFile($"显示PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
                 else
                 {
-                    // 如果不在放映模式，隐藏所有翻页按钮
+                    // 如果不在放映模式或页数无效，隐藏所有翻页按钮
                     LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LogHelper.WriteLogToFile($"隐藏PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
                 // 修复PPT放映时点击白板按钮后翻页按钮不显示的问题
-                // 只有在确实在放映模式下才强制显示翻页按钮
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && PPTManager?.IsInSlideShow == true)
+                // 只有在确实在放映模式下且页数有效时才强制显示翻页按钮
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible && 
+                    PPTManager?.IsInSlideShow == true && 
+                    PPTManager?.SlidesCount > 0)
                 {
                     // 强制显示PPT翻页按钮
                     LeftBottomPanelForPPTNavigation.Visibility = Visibility.Visible;
                     RightBottomPanelForPPTNavigation.Visibility = Visibility.Visible;
                     LeftSidePanelForPPTNavigation.Visibility = Visibility.Visible;
                     RightSidePanelForPPTNavigation.Visibility = Visibility.Visible;
+                    LogHelper.WriteLogToFile($"强制显示PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
+                }
+                else
+                {
+                    // 如果条件不满足，确保隐藏翻页按钮
+                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    LogHelper.WriteLogToFile($"隐藏PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
 
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
@@ -1383,9 +1398,33 @@ namespace Ink_Canvas
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                // 确保获取到正确的浮动栏宽度，如果ActualWidth为0则使用DesiredSize
-                double baseWidth = ViewboxFloatingBar.ActualWidth > 0 ? ViewboxFloatingBar.ActualWidth : ViewboxFloatingBar.DesiredSize.Width;
+                // 使用更可靠的方法获取浮动栏宽度
+                double baseWidth = ViewboxFloatingBar.ActualWidth;
+                
+                // 如果ActualWidth为0，尝试使用DesiredSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
+                }
+                
+                // 如果仍然为0，使用RenderSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
+                }
+                
+                // 如果所有方法都失败，使用一个基于内容的估算值
+                if (baseWidth <= 0)
+                {
+                    // 根据浮动栏内容估算宽度
+                    baseWidth = 200; // 最小宽度
+                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+                }
+                
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                
+                // 添加调试日志
+                LogHelper.WriteLogToFile($"浮动栏居中计算 - ActualWidth: {ViewboxFloatingBar.ActualWidth}, DesiredSize.Width: {ViewboxFloatingBar.DesiredSize.Width}, RenderSize.Width: {ViewboxFloatingBar.RenderSize.Width}, baseWidth: {baseWidth}, ScaleX: {ViewboxFloatingBarScaleTransform.ScaleX}, floatingBarWidth: {floatingBarWidth}, screenWidth: {screenWidth}");
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -1506,9 +1545,33 @@ namespace Ink_Canvas
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                // 确保获取到正确的浮动栏宽度，如果ActualWidth为0则使用DesiredSize
-                double baseWidth = ViewboxFloatingBar.ActualWidth > 0 ? ViewboxFloatingBar.ActualWidth : ViewboxFloatingBar.DesiredSize.Width;
+                // 使用更可靠的方法获取浮动栏宽度
+                double baseWidth = ViewboxFloatingBar.ActualWidth;
+                
+                // 如果ActualWidth为0，尝试使用DesiredSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
+                }
+                
+                // 如果仍然为0，使用RenderSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
+                }
+                
+                // 如果所有方法都失败，使用一个基于内容的估算值
+                if (baseWidth <= 0)
+                {
+                    // 根据浮动栏内容估算宽度
+                    baseWidth = 200; // 最小宽度
+                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+                }
+                
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                
+                // 添加调试日志
+                LogHelper.WriteLogToFile($"浮动栏居中计算 - ActualWidth: {ViewboxFloatingBar.ActualWidth}, DesiredSize.Width: {ViewboxFloatingBar.DesiredSize.Width}, RenderSize.Width: {ViewboxFloatingBar.RenderSize.Width}, baseWidth: {baseWidth}, ScaleX: {ViewboxFloatingBarScaleTransform.ScaleX}, floatingBarWidth: {floatingBarWidth}, screenWidth: {screenWidth}");
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -1590,9 +1653,33 @@ namespace Ink_Canvas
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
                 // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                // 确保获取到正确的浮动栏宽度，如果ActualWidth为0则使用DesiredSize
-                double baseWidth = ViewboxFloatingBar.ActualWidth > 0 ? ViewboxFloatingBar.ActualWidth : ViewboxFloatingBar.DesiredSize.Width;
+                // 使用更可靠的方法获取浮动栏宽度
+                double baseWidth = ViewboxFloatingBar.ActualWidth;
+                
+                // 如果ActualWidth为0，尝试使用DesiredSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.DesiredSize.Width;
+                }
+                
+                // 如果仍然为0，使用RenderSize
+                if (baseWidth <= 0)
+                {
+                    baseWidth = ViewboxFloatingBar.RenderSize.Width;
+                }
+                
+                // 如果所有方法都失败，使用一个基于内容的估算值
+                if (baseWidth <= 0)
+                {
+                    // 根据浮动栏内容估算宽度
+                    baseWidth = 200; // 最小宽度
+                    LogHelper.WriteLogToFile($"浮动栏宽度无法获取，使用估算值: {baseWidth}");
+                }
+                
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
+                
+                // 添加调试日志
+                LogHelper.WriteLogToFile($"浮动栏居中计算 - ActualWidth: {ViewboxFloatingBar.ActualWidth}, DesiredSize.Width: {ViewboxFloatingBar.DesiredSize.Width}, RenderSize.Width: {ViewboxFloatingBar.RenderSize.Width}, baseWidth: {baseWidth}, ScaleX: {ViewboxFloatingBarScaleTransform.ScaleX}, floatingBarWidth: {floatingBarWidth}, screenWidth: {screenWidth}");
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
