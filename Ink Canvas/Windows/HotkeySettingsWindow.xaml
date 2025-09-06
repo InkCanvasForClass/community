@@ -52,14 +52,16 @@
                     <!-- 鼠标模式快捷键设置 -->
                     <GroupBox Header="鼠标模式设置" Margin="0,0,0,20">
                         <ui:SimpleStackPanel>
-                            <ui:ToggleSwitch x:Name="EnableHotkeysInMouseModeToggle"
-                                            Header="在鼠标模式下启用快捷键"
-                                            Margin="0,0,0,10"/>
-                            <TextBlock Text="开启后，即使在鼠标模式（选择模式）下，快捷键仍然有效。关闭后，鼠标模式下将禁用快捷键以放行键盘操作。"
-                                       TextWrapping="Wrap" 
-                                       Margin="0,0,0,10" 
-                                       Foreground="#666666"
-                                       FontSize="12"/>
+                            <ui:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableHotkeysInMouseMode" 
+                                                Header="在鼠标模式下启用快捷键" 
+                                                Margin="0,0,10,0"
+                                                Width="200"/>
+                            </ui:SimpleStackPanel>
+                            <TextBlock Text="开启后，即使在鼠标模式下快捷键也会生效" 
+                                       Foreground="#666666" 
+                                       VerticalAlignment="Center"
+                                       TextWrapping="Wrap"/>
                         </ui:SimpleStackPanel>
                     </GroupBox>
 

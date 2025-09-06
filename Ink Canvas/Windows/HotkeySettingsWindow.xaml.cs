@@ -42,6 +42,9 @@ namespace Ink_Canvas.Windows
                     // 加载当前快捷键（包括配置文件中的）
                     LoadCurrentHotkeys();
                     SetupEventHandlers();
+                    
+                    // 初始化鼠标模式快捷键设置
+                    InitializeMouseModeSettings();
                 }
                 catch (Exception ex)
                 {
@@ -153,9 +156,6 @@ namespace Ink_Canvas.Windows
                         LogHelper.WriteLogToFile($"设置默认显示值: {hotkeyItem.HotkeyName}");
                     }
                 }
-
-                // 加载鼠标模式快捷键设置
-                LoadMouseModeHotkeySetting();
             }
             catch (Exception ex)
             {
@@ -242,9 +242,56 @@ namespace Ink_Canvas.Windows
             {
                 hotkeyItem.HotkeyChanged += OnHotkeyChanged;
             }
+        }
 
-            // 为鼠标模式快捷键开关设置事件处理器
-            EnableHotkeysInMouseModeToggle.Toggled += EnableHotkeysInMouseModeToggle_Toggled;
+        /// <summary>
+        /// 初始化鼠标模式快捷键设置
+        /// </summary>
+        private void InitializeMouseModeSettings()
+        {
+            try
+            {
+                // 设置开关的初始状态
+                ToggleSwitchEnableHotkeysInMouseMode.IsOn = MainWindow.Settings.Appearance.EnableHotkeysInMouseMode;
+                
+                // 绑定开关变化事件
+                ToggleSwitchEnableHotkeysInMouseMode.Toggled += OnMouseModeHotkeyToggleChanged;
+                
+                LogHelper.WriteLogToFile($"鼠标模式快捷键设置已初始化: {MainWindow.Settings.Appearance.EnableHotkeysInMouseMode}");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化鼠标模式快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 鼠标模式快捷键开关变化事件处理
+        /// </summary>
+        private void OnMouseModeHotkeyToggleChanged(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 更新设置
+                MainWindow.Settings.Appearance.EnableHotkeysInMouseMode = ToggleSwitchEnableHotkeysInMouseMode.IsOn;
+                
+                // 立即保存设置
+                MainWindow.SaveSettingsToFile();
+                
+                // 如果快捷键管理器存在，立即更新快捷键状态
+                if (_hotkeyManager != null)
+                {
+                    // 检查当前是否处于鼠标模式
+                    bool isCurrentlyMouseMode = _mainWindow.inkCanvas.EditingMode == InkCanvasEditingMode.None;
+                    _hotkeyManager.UpdateHotkeyStateForToolMode(isCurrentlyMouseMode);
+                }
+                
+                LogHelper.WriteLogToFile($"鼠标模式快捷键设置已更新: {MainWindow.Settings.Appearance.EnableHotkeysInMouseMode}", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新鼠标模式快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void OnHotkeyChanged(object sender, HotkeyChangedEventArgs e)
@@ -559,44 +606,6 @@ namespace Ink_Canvas.Windows
             {
                 LogHelper.WriteLogToFile($"保存快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show($"保存快捷键设置时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        /// <summary>
-        /// 鼠标模式快捷键开关切换事件
-        /// </summary>
-        private void EnableHotkeysInMouseModeToggle_Toggled(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var isEnabled = EnableHotkeysInMouseModeToggle.IsOn;
-                LogHelper.WriteLogToFile($"鼠标模式快捷键开关状态变更: {isEnabled}");
-                
-                // 立即更新快捷键管理器的设置
-                _hotkeyManager.SetEnableHotkeysInMouseMode(isEnabled);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"处理鼠标模式快捷键开关切换时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 加载鼠标模式快捷键设置
-        /// </summary>
-        private void LoadMouseModeHotkeySetting()
-        {
-            try
-            {
-                var isEnabled = _hotkeyManager.GetEnableHotkeysInMouseMode();
-                EnableHotkeysInMouseModeToggle.IsOn = isEnabled;
-                LogHelper.WriteLogToFile($"从主设置配置文件加载鼠标模式快捷键设置: {isEnabled}");
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"加载鼠标模式快捷键设置时出错: {ex.Message}", LogHelper.LogType.Error);
-                // 默认关闭
-                EnableHotkeysInMouseModeToggle.IsOn = false;
             }
         }
         #endregion
