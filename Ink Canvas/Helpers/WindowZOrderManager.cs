@@ -155,6 +155,22 @@ namespace Ink_Canvas.Helpers
                 {
                     // 更新创建时间，使其成为最新的窗口
                     windowInfo.CreatedTime = DateTime.Now;
+                    
+                    // 立即将窗口置顶
+                    var hwnd = new WindowInteropHelper(window).Handle;
+                    if (hwnd != IntPtr.Zero)
+                    {
+                        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                        
+                        // 确保窗口样式正确
+                        int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                        if ((exStyle & WS_EX_TOPMOST) == 0)
+                        {
+                            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+                        }
+                    }
+                    
                     ApplyZOrder();
                 }
             }
@@ -165,64 +181,12 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private static void ApplyZOrder()
         {
-            // 按创建时间排序，最新的窗口在最后
-            var sortedWindows = _windowStack
-                .Where(w => IsWindow(w.Handle) && IsWindowVisible(w.Handle) && !IsIconic(w.Handle))
-                .OrderBy(w => w.CreatedTime)
-                .ToList();
-
-            if (sortedWindows.Count == 0) return;
-
-            // 获取主窗口（第一个注册的窗口）
-            var mainWindow = sortedWindows.FirstOrDefault();
-            if (mainWindow == null) return;
-
-            // 如果主窗口需要置顶且启用了无焦点模式
-            if (mainWindow.IsTopmost && mainWindow.IsNoFocusMode)
+            // 简化逻辑：直接设置所有窗口为置顶，让Windows系统自然处理层级
+            foreach (var windowInfo in _windowStack.ToList())
             {
-                // 检查是否有子窗口在前景
-                var foregroundWindow = GetForegroundWindow();
-                var hasChildWindowInForeground = false;
-
-                if (foregroundWindow != mainWindow.Handle)
+                if (windowInfo.IsTopmost && IsWindow(windowInfo.Handle) && IsWindowVisible(windowInfo.Handle) && !IsIconic(windowInfo.Handle))
                 {
-                    var foregroundWindowProcessId = GetWindowThreadProcessId(foregroundWindow, out uint processId);
-                    var currentProcessId = GetCurrentProcessId();
-
-                    if (processId == currentProcessId)
-                    {
-                        // 检查前景窗口是否在我们的窗口列表中
-                        var foregroundWindowInfo = sortedWindows.FirstOrDefault(w => w.Handle == foregroundWindow);
-                        if (foregroundWindowInfo != null)
-                        {
-                            hasChildWindowInForeground = true;
-                        }
-                    }
-                }
-
-                if (!hasChildWindowInForeground)
-                {
-                    // 没有子窗口在前景，主窗口置顶
-                    SetWindowPos(mainWindow.Handle, HWND_TOPMOST, 0, 0, 0, 0,
-                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-                    // 确保主窗口样式正确
-                    int exStyle = GetWindowLong(mainWindow.Handle, GWL_EXSTYLE);
-                    if ((exStyle & WS_EX_TOPMOST) == 0)
-                    {
-                        SetWindowLong(mainWindow.Handle, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-                    }
-                }
-            }
-
-            // 处理其他窗口的层级
-            for (int i = 1; i < sortedWindows.Count; i++)
-            {
-                var windowInfo = sortedWindows[i];
-                
-                // 子窗口应该置顶于主窗口
-                if (windowInfo.IsTopmost)
-                {
+                    // 设置窗口为置顶
                     SetWindowPos(windowInfo.Handle, HWND_TOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
 
@@ -271,6 +235,29 @@ namespace Ink_Canvas.Helpers
             lock (_lockObject)
             {
                 return _windowStack.Count;
+            }
+        }
+
+        /// <summary>
+        /// 强制刷新所有窗口的置顶状态
+        /// </summary>
+        public static void ForceRefreshAllWindows()
+        {
+            lock (_lockObject)
+            {
+                foreach (var windowInfo in _windowStack.ToList())
+                {
+                    if (windowInfo.IsTopmost && IsWindow(windowInfo.Handle))
+                    {
+                        // 强制设置窗口为置顶
+                        SetWindowPos(windowInfo.Handle, HWND_TOPMOST, 0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+
+                        // 确保窗口样式正确
+                        int exStyle = GetWindowLong(windowInfo.Handle, GWL_EXSTYLE);
+                        SetWindowLong(windowInfo.Handle, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+                    }
+                }
             }
         }
     }

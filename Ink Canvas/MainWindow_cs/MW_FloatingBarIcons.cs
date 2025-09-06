@@ -944,7 +944,11 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            new RandWindow(Settings).Show();
+            var randWindow = new RandWindow(Settings);
+            randWindow.Show();
+            // 确保窗口显示后立即置顶
+            randWindow.Activate();
+            WindowZOrderManager.BringToTop(randWindow);
         }
 
         public void CheckEraserTypeTab()

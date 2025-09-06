@@ -833,18 +833,66 @@ namespace Ink_Canvas.Helpers
                 // 归一化方向向量
                 direction.Normalize();
 
-                // 使用OpacityMask创建更自然的擦除效果
-                var maskBrush = CreateEraseMaskBrush(stroke, strokeStart, strokeEnd, 1.0);
-                visual.OpacityMask = maskBrush;
-
-                // 创建擦除动画 - 使用定时器来更新遮罩
-                StartEraseMaskAnimation(visual, stroke, strokeStart, strokeEnd, duration);
+                // 创建精确的擦除动画 - 使用PathGeometry来避免变形
+                CreatePreciseEraseAnimation(visual, stroke, bounds, strokeStart, strokeEnd, direction, length, duration);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"连续渐隐动画失败: {ex}", LogHelper.LogType.Error);
                 // 失败时回退到简单动画
                 StartSimpleFadeAnimation(visual, stroke, currentOpacity, duration);
+            }
+        }
+
+        /// <summary>
+        /// 创建精确的擦除动画 - 使用动态裁剪区域避免墨迹移动
+        /// </summary>
+        private void CreatePreciseEraseAnimation(UIElement visual, Stroke stroke, Rect bounds, Point strokeStart, Point strokeEnd, Vector direction, double length, int duration)
+        {
+            try
+            {
+                // 计算擦除方向上的移动距离
+                var totalDistance = Math.Sqrt(Math.Pow(strokeEnd.X - strokeStart.X, 2) + Math.Pow(strokeEnd.Y - strokeStart.Y, 2));
+                
+                if (totalDistance == 0)
+                {
+                    // 如果墨迹没有长度，使用简单渐隐
+                    StartSimpleFadeAnimation(visual, stroke, visual.Opacity, duration);
+                    return;
+                }
+
+                // 创建动态裁剪区域 - 从完整墨迹开始，逐渐缩小
+                var clipGeometry = new RectangleGeometry
+                {
+                    Rect = bounds
+                };
+
+                visual.Clip = clipGeometry;
+
+                // 创建擦除动画 - 裁剪区域从起点向终点移动并缩小
+                // 使用更自然的擦除效果：从起点开始，逐渐向终点移动
+                var eraseAnimation = new RectAnimation
+                {
+                    From = bounds, // 从完整边界开始
+                    To = new Rect(strokeEnd.X, strokeEnd.Y, 0, bounds.Height), // 到终点位置，宽度为0
+                    Duration = TimeSpan.FromMilliseconds(duration),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+                };
+
+                // 添加动画完成事件
+                eraseAnimation.Completed += (sender, e) =>
+                {
+                    OnAnimationCompleted(visual, stroke);
+                };
+
+                // 开始动画
+                clipGeometry.BeginAnimation(RectangleGeometry.RectProperty, eraseAnimation);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"精确擦除动画失败: {ex}", LogHelper.LogType.Error);
+                // 失败时回退到简单动画
+                StartSimpleFadeAnimation(visual, stroke, visual.Opacity, duration);
             }
         }
 

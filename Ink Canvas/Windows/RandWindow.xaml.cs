@@ -35,6 +35,9 @@ namespace Ink_Canvas
             
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
+            
+            // 添加窗口显示事件处理
+            Loaded += RandWindow_Loaded;
         }
 
         private void LoadBackground(Settings settings)
@@ -86,6 +89,9 @@ namespace Ink_Canvas
             
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
+            
+            // 添加窗口显示事件处理
+            Loaded += RandWindow_Loaded;
 
             new Thread(() =>
             {
@@ -347,6 +353,15 @@ namespace Ink_Canvas
             {
                 MessageBox.Show("无法调用外部点名：" + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// 窗口加载事件处理
+        /// </summary>
+        private void RandWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 窗口加载完成后，立即将其置顶
+            WindowZOrderManager.BringToTop(this);
         }
 
         /// <summary>

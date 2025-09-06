@@ -218,6 +218,9 @@ namespace Ink_Canvas.Windows {
 
             _selectedSidebarItemName = "CanvasAndInkItem";
             UpdateSidebarItemsSelection();
+            
+            // 为自定义滑块控件添加触摸支持
+            AddTouchSupportToCustomSliders();
         }
 
 
@@ -594,5 +597,350 @@ namespace Ink_Canvas.Windows {
                 }
             }
         }
+
+        #region 自定义滑块触摸支持
+
+        /// <summary>
+        /// 为自定义滑块控件添加触摸和手写笔事件支持
+        /// </summary>
+        private void AddTouchSupportToCustomSliders()
+        {
+            try
+            {
+                // 延迟执行，确保UI元素已加载
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    // 查找所有自定义滑块控件并添加触摸支持
+                    AddTouchSupportToCustomSliderInPane(CanvasAndInkPane);
+                    AddTouchSupportToCustomSliderInPane(ThemePane);
+                    AddTouchSupportToCustomSliderInPane(PowerPointPane);
+                    AddTouchSupportToCustomSliderInPane(AutomationPane);
+                    AddTouchSupportToCustomSliderInPane(LuckyRandomPane);
+                    AddTouchSupportToCustomSliderInPane(AdvancedPane);
+                }), System.Windows.Threading.DispatcherPriority.Loaded);
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不影响程序运行
+                System.Diagnostics.Debug.WriteLine($"添加自定义滑块触摸支持时出错: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 为指定面板中的自定义滑块控件添加触摸支持
+        /// </summary>
+        /// <param name="pane">面板控件</param>
+        private void AddTouchSupportToCustomSliderInPane(Grid pane)
+        {
+            if (pane == null) return;
+
+            // 查找面板中的所有自定义滑块控件
+            var customSliders = FindCustomSlidersInPanel(pane);
+            
+            foreach (var slider in customSliders)
+            {
+                AddTouchSupportToCustomSlider(slider);
+            }
+        }
+
+        /// <summary>
+        /// 在面板中查找自定义滑块控件
+        /// </summary>
+        /// <param name="panel">面板控件</param>
+        /// <returns>自定义滑块控件列表</returns>
+        private List<CustomSliderInfo> FindCustomSlidersInPanel(DependencyObject panel)
+        {
+            var customSliders = new List<CustomSliderInfo>();
+            
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(panel); i++)
+            {
+                var child = VisualTreeHelper.GetChild(panel, i);
+                
+                // 检查是否是自定义滑块控件（包含GnomeSliderThumb图片的Grid）
+                if (child is Grid grid)
+                {
+                    var customSlider = FindCustomSliderInGrid(grid);
+                    if (customSlider != null)
+                    {
+                        customSliders.Add(customSlider);
+                    }
+                }
+                
+                // 递归查找子元素
+                customSliders.AddRange(FindCustomSlidersInPanel(child));
+            }
+            
+            return customSliders;
+        }
+
+        /// <summary>
+        /// 在Grid中查找自定义滑块控件
+        /// </summary>
+        /// <param name="grid">Grid控件</param>
+        /// <returns>自定义滑块信息</returns>
+        private CustomSliderInfo FindCustomSliderInGrid(Grid grid)
+        {
+            // 查找包含GnomeSliderThumb图片的Grid
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(grid); i++)
+            {
+                var child = VisualTreeHelper.GetChild(grid, i);
+                
+                if (child is Image image && image.Source != null)
+                {
+                    var sourceName = image.Source.ToString();
+                    if (sourceName.Contains("GnomeSliderThumb"))
+                    {
+                        // 找到滑块控件，创建自定义滑块信息
+                        var customSlider = new CustomSliderInfo
+                        {
+                            Container = grid,
+                            ThumbImage = image,
+                            TrackBorder = FindTrackBorderInGrid(grid),
+                            ValueBorder = FindValueBorderInGrid(grid)
+                        };
+                        
+                        return customSlider;
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        /// <summary>
+        /// 在Grid中查找轨道Border
+        /// </summary>
+        /// <param name="grid">Grid控件</param>
+        /// <returns>轨道Border</returns>
+        private Border FindTrackBorderInGrid(Grid grid)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(grid); i++)
+            {
+                var child = VisualTreeHelper.GetChild(grid, i);
+                
+                if (child is Border border && border.Background != null)
+                {
+                    var brush = border.Background as SolidColorBrush;
+                    if (brush != null && brush.Color.ToString() == "#FFDEDEDE")
+                    {
+                        return border;
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        /// <summary>
+        /// 在Grid中查找值显示Border
+        /// </summary>
+        /// <param name="grid">Grid控件</param>
+        /// <returns>值显示Border</returns>
+        private Border FindValueBorderInGrid(Grid grid)
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(grid); i++)
+            {
+                var child = VisualTreeHelper.GetChild(grid, i);
+                
+                if (child is Border border && border.Background != null)
+                {
+                    var brush = border.Background as SolidColorBrush;
+                    if (brush != null && brush.Color.ToString() == "#FF3584E4")
+                    {
+                        return border;
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        /// <summary>
+        /// 为自定义滑块控件添加触摸支持
+        /// </summary>
+        /// <param name="customSlider">自定义滑块信息</param>
+        private void AddTouchSupportToCustomSlider(CustomSliderInfo customSlider)
+        {
+            if (customSlider?.Container == null) return;
+
+            // 启用触摸和手写笔支持
+            customSlider.Container.IsManipulationEnabled = true;
+
+            // 添加触摸事件
+            customSlider.Container.TouchDown += (s, e) => CustomSlider_TouchDown(s, e, customSlider);
+            customSlider.Container.TouchMove += (s, e) => CustomSlider_TouchMove(s, e, customSlider);
+            customSlider.Container.TouchUp += (s, e) => CustomSlider_TouchUp(s, e, customSlider);
+
+            // 添加手写笔事件
+            customSlider.Container.StylusDown += (s, e) => CustomSlider_StylusDown(s, e, customSlider);
+            customSlider.Container.StylusMove += (s, e) => CustomSlider_StylusMove(s, e, customSlider);
+            customSlider.Container.StylusUp += (s, e) => CustomSlider_StylusUp(s, e, customSlider);
+
+            // 添加操作事件
+            customSlider.Container.ManipulationStarted += (s, e) => CustomSlider_ManipulationStarted(s, e, customSlider);
+            customSlider.Container.ManipulationDelta += (s, e) => CustomSlider_ManipulationDelta(s, e, customSlider);
+            customSlider.Container.ManipulationCompleted += (s, e) => CustomSlider_ManipulationCompleted(s, e, customSlider);
+        }
+
+        /// <summary>
+        /// 自定义滑块触摸按下事件处理
+        /// </summary>
+        private void CustomSlider_TouchDown(object sender, TouchEventArgs e, CustomSliderInfo customSlider)
+        {
+            customSlider.Container.CaptureTouch(e.TouchDevice);
+            customSlider.IsTouchCaptured = true;
+            var touchPoint = e.GetTouchPoint(customSlider.Container);
+            UpdateCustomSliderValueFromPosition(customSlider, touchPoint.Position);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 自定义滑块触摸移动事件处理
+        /// </summary>
+        private void CustomSlider_TouchMove(object sender, TouchEventArgs e, CustomSliderInfo customSlider)
+        {
+            // 检查是否有触摸捕获
+            if (!customSlider.IsTouchCaptured) return;
+            var touchPoint = e.GetTouchPoint(customSlider.Container);
+            UpdateCustomSliderValueFromPosition(customSlider, touchPoint.Position);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 自定义滑块触摸释放事件处理
+        /// </summary>
+        private void CustomSlider_TouchUp(object sender, TouchEventArgs e, CustomSliderInfo customSlider)
+        {
+            customSlider.Container.ReleaseTouchCapture(e.TouchDevice);
+            customSlider.IsTouchCaptured = false;
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 自定义滑块手写笔按下事件处理
+        /// </summary>
+        private void CustomSlider_StylusDown(object sender, StylusDownEventArgs e, CustomSliderInfo customSlider)
+        {
+            customSlider.Container.CaptureStylus();
+            var stylusPoint = e.GetStylusPoints(customSlider.Container);
+            if (stylusPoint.Count > 0)
+            {
+                UpdateCustomSliderValueFromPosition(customSlider, stylusPoint[0].ToPoint());
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 自定义滑块手写笔移动事件处理
+        /// </summary>
+        private void CustomSlider_StylusMove(object sender, StylusEventArgs e, CustomSliderInfo customSlider)
+        {
+            if (!customSlider.Container.IsStylusCaptured) return;
+            var stylusPoint = e.GetStylusPoints(customSlider.Container);
+            if (stylusPoint.Count > 0)
+            {
+                UpdateCustomSliderValueFromPosition(customSlider, stylusPoint[0].ToPoint());
+            }
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 自定义滑块手写笔释放事件处理
+        /// </summary>
+        private void CustomSlider_StylusUp(object sender, StylusEventArgs e, CustomSliderInfo customSlider)
+        {
+            customSlider.Container.ReleaseStylusCapture();
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 自定义滑块操作开始事件处理
+        /// </summary>
+        private void CustomSlider_ManipulationStarted(object sender, ManipulationStartedEventArgs e, CustomSliderInfo customSlider)
+        {
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 自定义滑块操作变化事件处理
+        /// </summary>
+        private void CustomSlider_ManipulationDelta(object sender, ManipulationDeltaEventArgs e, CustomSliderInfo customSlider)
+        {
+            var manipulationOrigin = e.ManipulationOrigin;
+            UpdateCustomSliderValueFromPosition(customSlider, manipulationOrigin);
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 自定义滑块操作完成事件处理
+        /// </summary>
+        private void CustomSlider_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e, CustomSliderInfo customSlider)
+        {
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// 根据触摸/手写笔位置更新自定义滑块值
+        /// </summary>
+        /// <param name="customSlider">自定义滑块信息</param>
+        /// <param name="position">触摸/手写笔位置</param>
+        private void UpdateCustomSliderValueFromPosition(CustomSliderInfo customSlider, Point position)
+        {
+            if (customSlider?.TrackBorder == null || customSlider.ThumbImage == null) return;
+
+            try
+            {
+                // 计算滑块轨道的实际位置和长度
+                var trackWidth = customSlider.TrackBorder.ActualWidth;
+                if (trackWidth <= 0) return;
+
+                // 计算相对位置（0-1之间）
+                var relativePosition = Math.Max(0, Math.Min(1, position.X / trackWidth));
+
+                // 更新滑块位置
+                var thumbTransform = customSlider.ThumbImage.RenderTransform as TranslateTransform;
+                if (thumbTransform == null)
+                {
+                    thumbTransform = new TranslateTransform();
+                    customSlider.ThumbImage.RenderTransform = thumbTransform;
+                }
+
+                // 计算新的滑块位置
+                var newX = relativePosition * trackWidth;
+                thumbTransform.X = newX;
+
+                // 更新值显示Border的宽度
+                if (customSlider.ValueBorder != null)
+                {
+                    var valueWidth = relativePosition * trackWidth;
+                    customSlider.ValueBorder.Width = Math.Max(0, valueWidth);
+                    
+                    // 调整值显示Border的位置
+                    var valueMargin = customSlider.ValueBorder.Margin;
+                    customSlider.ValueBorder.Margin = new Thickness(0, valueMargin.Top, trackWidth - valueWidth, valueMargin.Bottom);
+                }
+
+                // 这里可以根据需要添加值变化事件处理
+                // 例如：OnCustomSliderValueChanged(customSlider, relativePosition);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"更新自定义滑块值时出错: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 自定义滑块信息类
+        /// </summary>
+        private class CustomSliderInfo
+        {
+            public Grid Container { get; set; }
+            public Image ThumbImage { get; set; }
+            public Border TrackBorder { get; set; }
+            public Border ValueBorder { get; set; }
+            public bool IsTouchCaptured { get; set; } = false;
+        }
+
+        #endregion
     }
 }
