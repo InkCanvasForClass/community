@@ -294,6 +294,17 @@ namespace Ink_Canvas
         private bool foldFloatingBarByUser, // 保持收纳操作不受自动收纳的控制
             unfoldFloatingBarByUser; // 允许用户在希沃软件内进行展开操作
 
+        /// <summary>
+        /// 检测是否为批注窗口（窗口标题为空且高度小于500像素）
+        /// </summary>
+        /// <returns>如果是批注窗口返回true，否则返回false</returns>
+        private bool IsAnnotationWindow()
+        {
+            var windowTitle = ForegroundWindowInfo.WindowTitle();
+            var windowRect = ForegroundWindowInfo.WindowRect();
+            return windowTitle.Length == 0 && windowRect.Height < 500;
+        }
+
         private void timerCheckAutoFold_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (isFloatingBarChangingHideMode) return;
@@ -336,7 +347,17 @@ namespace Ink_Canvas
                            ForegroundWindowInfo.WindowRect().Height >= SystemParameters.WorkArea.Height - 16 &&
                            ForegroundWindowInfo.WindowRect().Width >= SystemParameters.WorkArea.Width - 16)
                 {
-                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    // 检测到批注窗口时保持收纳状态
+                    if (IsAnnotationWindow())
+                    {
+                        // 批注窗口打开时，如果当前是展开状态则收纳
+                        if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
+                    else
+                    {
+                        // 非批注窗口时正常处理
+                        if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
                     // EasiNote5C
                 }
                 else if (Settings.Automation.IsAutoFoldInEasiNote5C && windowProcessName == "EasiNote5C" &&
@@ -355,14 +376,34 @@ namespace Ink_Canvas
                            ForegroundWindowInfo.WindowRect().Height >= SystemParameters.WorkArea.Height - 16 &&
                            ForegroundWindowInfo.WindowRect().Width >= SystemParameters.WorkArea.Width - 16)
                 {
-                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    // 检测到批注窗口时保持收纳状态
+                    if (IsAnnotationWindow())
+                    {
+                        // 批注窗口打开时，如果当前是展开状态则收纳
+                        if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
+                    else
+                    {
+                        // 非批注窗口时正常处理
+                        if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
                     // HiteTouchPro
                 }
                 else if (Settings.Automation.IsAutoFoldInHiteTouchPro && windowProcessName == "HiteTouchPro" &&
                            ForegroundWindowInfo.WindowRect().Height >= SystemParameters.WorkArea.Height - 16 &&
                            ForegroundWindowInfo.WindowRect().Width >= SystemParameters.WorkArea.Width - 16)
                 {
-                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    // 检测到批注窗口时保持收纳状态
+                    if (IsAnnotationWindow())
+                    {
+                        // 批注窗口打开时，如果当前是展开状态则收纳
+                        if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
+                    else
+                    {
+                        // 非批注窗口时正常处理
+                        if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
                     // WxBoardMain
                 }
                 else if (Settings.Automation.IsAutoFoldInWxBoardMain && windowProcessName == "WxBoardMain" &&
@@ -389,7 +430,17 @@ namespace Ink_Canvas
                            ForegroundWindowInfo.WindowRect().Height >= SystemParameters.WorkArea.Height - 16 &&
                            ForegroundWindowInfo.WindowRect().Width >= SystemParameters.WorkArea.Width - 16)
                 {
-                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    // 检测到批注窗口时保持收纳状态
+                    if (IsAnnotationWindow())
+                    {
+                        // 批注窗口打开时，如果当前是展开状态则收纳
+                        if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
+                    else
+                    {
+                        // 非批注窗口时正常处理
+                        if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
                     // AdmoxWhiteboard
                 }
                 else if (Settings.Automation.IsAutoFoldInAdmoxWhiteboard && windowProcessName == "Amdox.WhiteBoard" &&
