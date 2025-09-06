@@ -3412,6 +3412,7 @@
         <Grid Visibility="{Binding ElementName=inkCanvas, Path=Visibility}">
             <Grid Name="GridInkCanvasSelectionCover"
                   MouseDown="GridInkCanvasSelectionCover_MouseDown"
+                  MouseMove="GridInkCanvasSelectionCover_MouseMove"
                   MouseUp="GridInkCanvasSelectionCover_MouseUp"
                   IsManipulationEnabled="True"
                   ManipulationStarting="GridInkCanvasSelectionCover_ManipulationStarting"

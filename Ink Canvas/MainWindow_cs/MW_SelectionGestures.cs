@@ -254,18 +254,77 @@ namespace Ink_Canvas
         #endregion
 
         private bool isGridInkCanvasSelectionCoverMouseDown;
+        private bool isStrokeDragging = false;
+        private Point strokeDragStartPoint;
         private StrokeCollection StrokesSelectionClone = new StrokeCollection();
 
         private void GridInkCanvasSelectionCover_MouseDown(object sender, MouseButtonEventArgs e)
         {
             isGridInkCanvasSelectionCoverMouseDown = true;
+            
+            // 立即开始墨迹拖动
+            if (inkCanvas.GetSelectedStrokes().Count > 0)
+            {
+                isStrokeDragging = true;
+                strokeDragStartPoint = e.GetPosition(inkCanvas);
+                GridInkCanvasSelectionCover.CaptureMouse();
+                GridInkCanvasSelectionCover.Cursor = Cursors.SizeAll;
+            }
+        }
+
+        private void GridInkCanvasSelectionCover_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!isGridInkCanvasSelectionCoverMouseDown) return;
+            
+            // 如果正在拖动墨迹，执行拖动操作
+            if (isStrokeDragging && GridInkCanvasSelectionCover.IsMouseCaptured)
+            {
+                var currentPoint = e.GetPosition(inkCanvas);
+                var delta = currentPoint - strokeDragStartPoint;
+                
+                // 创建变换矩阵
+                var matrix = new Matrix();
+                matrix.Translate(delta.X, delta.Y);
+                
+                // 对选中的墨迹应用变换
+                var selectedStrokes = inkCanvas.GetSelectedStrokes();
+                foreach (var stroke in selectedStrokes)
+                {
+                    stroke.Transform(matrix, false);
+                }
+                
+                // 更新选中栏位置
+                updateBorderStrokeSelectionControlLocation();
+                
+                // 更新起始点
+                strokeDragStartPoint = currentPoint;
+            }
+            else if (inkCanvas.GetSelectedStrokes().Count > 0)
+            {
+                // 当鼠标在选中区域移动时，更新墨迹选中栏位置
+                updateBorderStrokeSelectionControlLocation();
+            }
         }
 
         private void GridInkCanvasSelectionCover_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (!isGridInkCanvasSelectionCoverMouseDown) return;
+            
+            // 结束墨迹拖动
+            if (isStrokeDragging)
+            {
+                isStrokeDragging = false;
+                GridInkCanvasSelectionCover.ReleaseMouseCapture();
+                GridInkCanvasSelectionCover.Cursor = Cursors.Arrow;
+            }
+            
             isGridInkCanvasSelectionCoverMouseDown = false;
-            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            
+            // 只有在没有选中墨迹时才隐藏选中栏
+            if (inkCanvas.GetSelectedStrokes().Count == 0)
+            {
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void BtnSelect_Click(object sender, RoutedEventArgs e)
