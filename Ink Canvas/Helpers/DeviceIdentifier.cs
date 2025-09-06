@@ -856,21 +856,33 @@ namespace Ink_Canvas.Helpers
                     Array.Copy(encryptedData, 0, checksum, 0, 32);
                     Array.Copy(encryptedData, 32, data, 0, data.Length);
 
-                    // 首先尝试使用新的固定密钥解密
-                    var stats = TryDecryptWithKey(data, checksum, "ICC_Usage_Stats_Fixed_Key_2024", filePath);
-                    if (stats != null)
+                    // 使用SHA256生成解密密钥
+                    using (var sha256 = SHA256.Create())
                     {
-                        return stats;
-                    }
+                        byte[] keyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(DeviceId + "ICC_Usage_Stats_Salt"));
 
-                    // 如果新密钥失败，尝试使用旧的设备ID密钥（向后兼容）
-                    stats = TryDecryptWithKey(data, checksum, DeviceId + "ICC_Usage_Stats_Salt", filePath);
-                    if (stats != null)
-                    {
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 使用旧密钥成功解密，将使用新密钥重新保存: {filePath}");
-                        // 使用新密钥重新保存，确保下次使用新密钥
-                        SaveUsageStatsToFile(filePath, stats);
-                        return stats;
+                        // XOR解密
+                        byte[] decryptedData = new byte[data.Length];
+                        for (int i = 0; i < data.Length; i++)
+                        {
+                            decryptedData[i] = (byte)(data[i] ^ keyBytes[i % keyBytes.Length]);
+                        }
+
+                        // 验证校验
+                        byte[] computedChecksum = sha256.ComputeHash(decryptedData);
+                        if (!checksum.SequenceEqual(computedChecksum))
+                        {
+                            LogHelper.WriteLogToFile($"DeviceIdentifier | 加密文件校验和验证失败: {filePath}", LogHelper.LogType.Error);
+                            return null;
+                        }
+
+                        string json = Encoding.UTF8.GetString(decryptedData);
+                        var stats = JsonConvert.DeserializeObject<UsageStats>(json);
+                        if (stats != null && !string.IsNullOrEmpty(stats.DeviceId))
+                        {
+                            LogHelper.WriteLogToFile($"DeviceIdentifier | 从加密文件成功加载使用统计: {filePath}");
+                            return stats;
+                        }
                     }
                 }
             }
@@ -881,49 +893,9 @@ namespace Ink_Canvas.Helpers
             return null;
         }
 
-        /// <summary>
-        /// 尝试使用指定密钥解密数据
-        /// </summary>
-        private static UsageStats TryDecryptWithKey(byte[] data, byte[] checksum, string keyString, string filePath)
-        {
-            try
-            {
-                using (var sha256 = SHA256.Create())
-                {
-                    byte[] keyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(keyString));
-
-                    // XOR解密
-                    byte[] decryptedData = new byte[data.Length];
-                    for (int i = 0; i < data.Length; i++)
-                    {
-                        decryptedData[i] = (byte)(data[i] ^ keyBytes[i % keyBytes.Length]);
-                    }
-
-                    // 验证校验
-                    byte[] computedChecksum = sha256.ComputeHash(decryptedData);
-                    if (!checksum.SequenceEqual(computedChecksum))
-                    {
-                        return null; // 校验失败，不是这个密钥
-                    }
-
-                    string json = Encoding.UTF8.GetString(decryptedData);
-                    var stats = JsonConvert.DeserializeObject<UsageStats>(json);
-                    if (stats != null && !string.IsNullOrEmpty(stats.DeviceId))
-                    {
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 使用密钥成功解密使用统计: {filePath}");
-                        return stats;
-                    }
-                }
-            }
-            catch
-            {
-                // 解密失败，返回null
-            }
-            return null;
-        }
 
         /// <summary>
-        /// 保存使用统计到文件（使用固定密钥加密）
+        /// 保存使用统计到文件
         /// </summary>
         private static void SaveUsageStatsToFile(string filePath, UsageStats stats)
         {
@@ -939,11 +911,10 @@ namespace Ink_Canvas.Helpers
                 string json = JsonConvert.SerializeObject(stats, Formatting.Indented);
                 byte[] data = Encoding.UTF8.GetBytes(json);
 
-                // 使用固定密钥进行加密，不依赖设备ID
+                // 使用SHA256生成加密密钥（基于设备ID）
                 using (var sha256 = SHA256.Create())
                 {
-                    // 使用固定的应用程序密钥，确保跨设备更新时数据不会丢失
-                    byte[] keyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes("ICC_Usage_Stats_Fixed_Key_2024"));
+                    byte[] keyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(DeviceId + "ICC_Usage_Stats_Salt"));
 
                     // 简单的XOR加密
                     byte[] encryptedData = new byte[data.Length];
@@ -960,7 +931,7 @@ namespace Ink_Canvas.Helpers
 
                     File.WriteAllBytes(filePath, finalData);
 
-                    LogHelper.WriteLogToFile($"DeviceIdentifier | 使用固定密钥加密使用统计已保存到: {filePath}");
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 加密使用统计已保存到: {filePath}");
                 }
             }
             catch (Exception ex)
