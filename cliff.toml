@@ -1,0 +1,57 @@
+# git-cliff configuration file
+# https://git-cliff.org/docs/configuration
+
+[changelog]
+# changelog header
+header = "# Changelog\n\n"
+# template for the changelog body
+# https://keats.github.io/tera/docs/#introduction
+body = """
+{% if version %}\
+## [{{ version }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}\
+## [Unreleased]
+{% endif %}\
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group | upper_first }}
+{% for commit in commits %}
+- {{ commit.message | upper_first }}{% if commit.scope %} *({{ commit.scope }})*{% endif %}{% if commit.breaking %} **BREAKING:** {{ commit.breaking_description }}{% endif %}
+{% endfor %}
+{% endfor %}
+"""
+
+# template for the changelog footer
+footer = ""
+
+# git-cliff internal behavior
+[git]
+# parse the commits using this regex
+commit_parsers = [
+    { message = "^feat", group = "Features" },
+    { message = "^fix", group = "Bug Fixes" },
+    { message = "^docs", group = "Documentation" },
+    { message = "^style", group = "Styling" },
+    { message = "^refactor", group = "Code Refactoring" },
+    { message = "^perf", group = "Performance" },
+    { message = "^test", group = "Tests" },
+    { message = "^build", group = "Build System" },
+    { message = "^ci", group = "Continuous Integration" },
+    { message = "^chore", group = "Chores" },
+    { message = "^revert", group = "Reverts" },
+    { message = "^merge", group = "Merges" },
+    { message = "^.*", group = "Other" },
+]
+# protect breaking changes from being skipped due to matching a previous commit
+protect_breaking_commits = false
+# filter out the commits that are not matched by commit parsers
+filter_commits = false
+# glob pattern for matching tags
+tag_pattern = "v[0-9]*"
+# regex for skipping tags
+skip_tags = "^v0\\.1\\.0$"
+# regex for ignoring tags
+ignore_tags = ""
+# sort the tags topologically
+topo_order = false
+# sort the commits inside sections by date
+sort_commits = "newest"

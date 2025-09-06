@@ -1,0 +1,135 @@
+name: 生成 Changelog 并发布版本
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    name: 构建并发布版本
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置 git-cliff
+        uses: kenji-miyake/setup-git-cliff@v1
+
+      - name: 生成 changelog
+        id: generate-changelog
+        run: |
+          git cliff
+
+      - name: Setup MSbuild
+        uses: microsoft/setup-msbuild@v2
+   
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v2.0.1
+        
+      - name: Restore NuGet Packages
+        run: nuget restore "Ink Canvas.sln"
+
+      - name: Build the Solution
+        run: |
+          msbuild -t:restore /p:GitFlow="Github Action"
+          msbuild /p:platform="Any CPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj"
+
+      - name: 准备发布文件
+        run: |
+          echo "准备发布目录..."
+          mkdir -p release
+          
+          # 复制构建产物到发布目录
+          xcopy "Ink Canvas\bin\Any CPU\Release\net472\*" "release\" /E /I /Y
+          
+          echo "构建产物整理完成"
+          dir release
+
+      - name: 计算 SHA256 值
+        run: |
+          echo "开始计算SHA256校验值..."
+          cd release
+          echo "" > SHA256SUMS.txt
+          for /r %%f in (*) do (
+            if not "%%~nxf"=="SHA256SUMS.txt" (
+              echo "计算 %%~nxf 的SHA256值..."
+              certutil -hashfile "%%f" SHA256 | findstr /v "CertUtil" | findstr /v "SHA256" >> SHA256SUMS.txt
+            )
+          )
+          echo "SHA256校验值计算完成："
+          type SHA256SUMS.txt
+          
+      - name: 验证 SHA256SUMS.txt 文件
+        run: |
+          echo "验证SHA256SUMS.txt文件..."
+          cd release
+          if not exist "SHA256SUMS.txt" (
+            echo "错误：在release目录中未找到SHA256SUMS.txt文件"
+            exit /b 1
+          )
+          for %%f in (SHA256SUMS.txt) do if %%~zf==0 (
+            echo "错误：SHA256SUMS.txt文件为空"
+            exit /b 1
+          )
+          echo "SHA256SUMS.txt文件验证通过"
+          cd ..
+
+      - name: 生成 需发布 的表格信息
+        run: |
+          cd release
+          echo. >> ..\CHANGELOG.md
+          echo Full Changelog: [1.7.9.0...%GITHUB_REF_NAME%](https://github.com/InkCanvasForClass/community/compare/1.7.9.0...%GITHUB_REF_NAME%) >> ..\CHANGELOG.md
+          echo. >> ..\CHANGELOG.md
+          echo **国内 下载链接** >> ..\CHANGELOG.md
+          echo ^| 平台/打包方式 ^| 支持架构 ^| 完整版 ^| >> ..\CHANGELOG.md
+          echo ^| --- ^| --- ^| --- ^| >> ..\CHANGELOG.md
+          echo ^| Windows ^| Any CPU ^| [下载](https://icc.bliemhax.com) ^| >> ..\CHANGELOG.md
+          echo. >> ..\CHANGELOG.md
+          echo **Github 镜像 下载链接** >> ..\CHANGELOG.md
+          echo ^| 镜像源 ^| 平台/打包方式 ^| 支持架构 ^| 完整版 ^| >> ..\CHANGELOG.md
+          echo ^| --- ^| --- ^| --- ^| --- ^| >> ..\CHANGELOG.md
+          echo ^| ghfast.top ^| Windows 目录模式 ^| Any CPU ^| [下载 %GITHUB_REF_NAME%](https://ghfast.top/https://github.com/InkCanvasForClass/community/releases/download/%GITHUB_REF_NAME%/InkCanvasForClass.CE.%GITHUB_REF_NAME%.zip) ^| >> ..\CHANGELOG.md
+          echo ^| gh-proxy.com ^| Windows 目录模式 ^| Any CPU ^| [下载 %GITHUB_REF_NAME%](https://gh-proxy.com/https://github.com/InkCanvasForClass/community/releases/download/%GITHUB_REF_NAME%/InkCanvasForClass.CE.%GITHUB_REF_NAME%.zip) ^| >> ..\CHANGELOG.md
+          echo ^| bgithub.xyz ^| Windows 目录模式 ^| Any CPU ^| [下载 %GITHUB_REF_NAME%](https://bgithub.xyz/InkCanvasForClass/community/releases/download/%GITHUB_REF_NAME%/InkCanvasForClass.CE.%GITHUB_REF_NAME%.zip) ^| >> ..\CHANGELOG.md
+          echo ^| kkgithub.com ^| Windows 目录模式 ^| Any CPU ^| [下载 %GITHUB_REF_NAME%](https://kkgithub.com/InkCanvasForClass/community/releases/download/%GITHUB_REF_NAME%/InkCanvasForClass.CE.%GITHUB_REF_NAME%.zip) ^| >> ..\CHANGELOG.md
+          echo. >> ..\CHANGELOG.md
+          echo **SHA256 校验值-请核对下载的文件的SHA256值是否正确** >> ..\CHANGELOG.md
+          echo ^| 文件名 ^| SHA256 值 ^| >> ..\CHANGELOG.md
+          echo ^| --- ^| --- ^| >> ..\CHANGELOG.md
+          for /f "tokens=1,2" %%a in (SHA256SUMS.txt) do (
+            echo ^| %%b ^| %%a ^| >> ..\CHANGELOG.md
+          )
+          del SHA256SUMS.txt
+          cd ..
+            
+      - name: 确定发布类型
+        id: release-type
+        run: |
+          if "%GITHUB_REF%" == *"beta"* (
+            echo is_beta=true >> %GITHUB_ENV%
+          ) else if "%GITHUB_REF%" == *"alpha"* (
+            echo is_beta=true >> %GITHUB_ENV%
+          ) else (
+            echo is_beta=false >> %GITHUB_ENV%
+          )
+
+      - name: 发布
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: release/*
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: ${{ env.is_beta == 'true' }}
+          tag_name: ${{ github.ref_name }}
+          name: Ink Canvas CE 新版本 - ${{ github.ref_name }}
+          fail_on_unmatched_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
