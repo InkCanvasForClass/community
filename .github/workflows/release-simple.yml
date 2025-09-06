@@ -84,42 +84,43 @@ jobs:
 
       - name: 生成 需发布 的表格信息
         run: |
-          cd release
-          echo. >> ..\CHANGELOG.md
-          echo Full Changelog: [1.7.9.0...%GITHUB_REF_NAME%](https://github.com/InkCanvasForClass/community/compare/1.7.9.0...%GITHUB_REF_NAME%) >> ..\CHANGELOG.md
-          echo. >> ..\CHANGELOG.md
-          echo **国内 下载链接** >> ..\CHANGELOG.md
-          echo ^| 平台/打包方式 ^| 支持架构 ^| 完整版 ^| >> ..\CHANGELOG.md
-          echo ^| --- ^| --- ^| --- ^| >> ..\CHANGELOG.md
-          echo ^| Windows ^| Any CPU ^| [下载](https://icc.bliemhax.com) ^| >> ..\CHANGELOG.md
-          echo. >> ..\CHANGELOG.md
-          echo **Github 镜像 下载链接** >> ..\CHANGELOG.md
-          echo ^| 镜像源 ^| 平台/打包方式 ^| 支持架构 ^| 完整版 ^| >> ..\CHANGELOG.md
-          echo ^| --- ^| --- ^| --- ^| --- ^| >> ..\CHANGELOG.md
-          echo ^| ghfast.top ^| Windows 目录模式 ^| Any CPU ^| [下载 %GITHUB_REF_NAME%](https://ghfast.top/https://github.com/InkCanvasForClass/community/releases/download/%GITHUB_REF_NAME%/InkCanvasForClass.CE.%GITHUB_REF_NAME%.zip) ^| >> ..\CHANGELOG.md
-          echo ^| gh-proxy.com ^| Windows 目录模式 ^| Any CPU ^| [下载 %GITHUB_REF_NAME%](https://gh-proxy.com/https://github.com/InkCanvasForClass/community/releases/download/%GITHUB_REF_NAME%/InkCanvasForClass.CE.%GITHUB_REF_NAME%.zip) ^| >> ..\CHANGELOG.md
-          echo ^| bgithub.xyz ^| Windows 目录模式 ^| Any CPU ^| [下载 %GITHUB_REF_NAME%](https://bgithub.xyz/InkCanvasForClass/community/releases/download/%GITHUB_REF_NAME%/InkCanvasForClass.CE.%GITHUB_REF_NAME%.zip) ^| >> ..\CHANGELOG.md
-          echo ^| kkgithub.com ^| Windows 目录模式 ^| Any CPU ^| [下载 %GITHUB_REF_NAME%](https://kkgithub.com/InkCanvasForClass/community/releases/download/%GITHUB_REF_NAME%/InkCanvasForClass.CE.%GITHUB_REF_NAME%.zip) ^| >> ..\CHANGELOG.md
-          echo. >> ..\CHANGELOG.md
-          echo **SHA256 校验值-请核对下载的文件的SHA256值是否正确** >> ..\CHANGELOG.md
-          echo ^| 文件名 ^| SHA256 值 ^| >> ..\CHANGELOG.md
-          echo ^| --- ^| --- ^| >> ..\CHANGELOG.md
-          for /f "tokens=1,2" %%a in (SHA256SUMS.txt) do (
-            echo ^| %%b ^| %%a ^| >> ..\CHANGELOG.md
-          )
-          del SHA256SUMS.txt
-          cd ..
+          Set-Location release
+          "" | Add-Content -Path ..\CHANGELOG.md
+          "Full Changelog: [1.7.9.0...$env:GITHUB_REF_NAME](https://github.com/InkCanvasForClass/community/compare/1.7.9.0...$env:GITHUB_REF_NAME)" | Add-Content -Path ..\CHANGELOG.md
+          "" | Add-Content -Path ..\CHANGELOG.md
+          "**国内 下载链接**" | Add-Content -Path ..\CHANGELOG.md
+          "| 平台/打包方式 | 支持架构 | 完整版 |" | Add-Content -Path ..\CHANGELOG.md
+          "| --- | --- | --- |" | Add-Content -Path ..\CHANGELOG.md
+          "| Windows | Any CPU | [下载](https://icc.bliemhax.com) |" | Add-Content -Path ..\CHANGELOG.md
+          "" | Add-Content -Path ..\CHANGELOG.md
+          "**Github 镜像 下载链接**" | Add-Content -Path ..\CHANGELOG.md
+          "| 镜像源 | 平台/打包方式 | 支持架构 | 完整版 |" | Add-Content -Path ..\CHANGELOG.md
+          "| --- | --- | --- | --- |" | Add-Content -Path ..\CHANGELOG.md
+          "| ghfast.top | Windows 目录模式 | Any CPU | [下载 $env:GITHUB_REF_NAME](https://ghfast.top/https://github.com/InkCanvasForClass/community/releases/download/$env:GITHUB_REF_NAME/InkCanvasForClass.CE.$env:GITHUB_REF_NAME.zip) |" | Add-Content -Path ..\CHANGELOG.md
+          "| gh-proxy.com | Windows 目录模式 | Any CPU | [下载 $env:GITHUB_REF_NAME](https://gh-proxy.com/https://github.com/InkCanvasForClass/community/releases/download/$env:GITHUB_REF_NAME/InkCanvasForClass.CE.$env:GITHUB_REF_NAME.zip) |" | Add-Content -Path ..\CHANGELOG.md
+          "| bgithub.xyz | Windows 目录模式 | Any CPU | [下载 $env:GITHUB_REF_NAME](https://bgithub.xyz/InkCanvasForClass/community/releases/download/$env:GITHUB_REF_NAME/InkCanvasForClass.CE.$env:GITHUB_REF_NAME.zip) |" | Add-Content -Path ..\CHANGELOG.md
+          "| kkgithub.com | Windows 目录模式 | Any CPU | [下载 $env:GITHUB_REF_NAME](https://kkgithub.com/InkCanvasForClass/community/releases/download/$env:GITHUB_REF_NAME/InkCanvasForClass.CE.$env:GITHUB_REF_NAME.zip) |" | Add-Content -Path ..\CHANGELOG.md
+          "" | Add-Content -Path ..\CHANGELOG.md
+          "**SHA256 校验值-请核对下载的文件的SHA256值是否正确**" | Add-Content -Path ..\CHANGELOG.md
+          "| 文件名 | SHA256 值 |" | Add-Content -Path ..\CHANGELOG.md
+          "| --- | --- |" | Add-Content -Path ..\CHANGELOG.md
+          Get-Content SHA256SUMS.txt | ForEach-Object {
+            $parts = $_ -split '\s+', 2
+            if ($parts.Length -eq 2) {
+              "| $($parts[1]) | $($parts[0]) |" | Add-Content -Path ..\CHANGELOG.md
+            }
+          }
+          Remove-Item SHA256SUMS.txt
+          Set-Location ..
             
       - name: 确定发布类型
         id: release-type
         run: |
-          if "%GITHUB_REF%" == *"beta"* (
-            echo is_beta=true >> %GITHUB_ENV%
-          ) else if "%GITHUB_REF%" == *"alpha"* (
-            echo is_beta=true >> %GITHUB_ENV%
-          ) else (
-            echo is_beta=false >> %GITHUB_ENV%
-          )
+          if ($env:GITHUB_REF -like "*beta*" -or $env:GITHUB_REF -like "*alpha*") {
+            Write-Output "is_beta=true" >> $env:GITHUB_ENV
+          } else {
+            Write-Output "is_beta=false" >> $env:GITHUB_ENV
+          }
 
       - name: 发布
         uses: softprops/action-gh-release@v2
