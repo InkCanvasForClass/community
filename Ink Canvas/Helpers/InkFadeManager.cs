@@ -381,7 +381,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                StartProgressiveFadeAnimation(visual, stroke, currentOpacity, AnimationDuration);
+                // 对于普通墨迹也使用连续渐隐动画
+                StartContinuousFadeAnimation(visual, stroke, currentOpacity, AnimationDuration);
             }
             catch (Exception ex)
             {
@@ -396,7 +397,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                StartProgressiveFadeAnimation(visual, stroke, currentOpacity, (int)(AnimationDuration * 1.5));
+                // 使用连续渐隐动画而不是分段动画
+                StartContinuousFadeAnimation(visual, stroke, currentOpacity, (int)(AnimationDuration * 1.5));
             }
             catch (Exception ex)
             {
@@ -800,6 +802,50 @@ namespace Ink_Canvas.Helpers
             }
 
             return curve;
+        }
+
+        /// <summary>
+        /// 连续渐隐动画 - 模拟橡皮擦擦除效果
+        /// </summary>
+        private void StartContinuousFadeAnimation(UIElement visual, Stroke stroke, double currentOpacity, int duration)
+        {
+            try
+            {
+                // 获取墨迹的边界
+                var geometry = stroke.GetGeometry();
+                if (geometry == null) return;
+
+                var bounds = geometry.Bounds;
+                var strokeStart = stroke.StylusPoints[0].ToPoint();
+                var strokeEnd = stroke.StylusPoints[stroke.StylusPoints.Count - 1].ToPoint();
+
+                // 计算墨迹的方向向量
+                var direction = new Vector(strokeEnd.X - strokeStart.X, strokeEnd.Y - strokeStart.Y);
+                var length = direction.Length;
+                
+                if (length == 0)
+                {
+                    // 如果墨迹没有方向（单点），使用简单渐隐
+                    StartSimpleFadeAnimation(visual, stroke, currentOpacity, duration);
+                    return;
+                }
+
+                // 归一化方向向量
+                direction.Normalize();
+
+                // 使用OpacityMask创建更自然的擦除效果
+                var maskBrush = CreateEraseMaskBrush(stroke, strokeStart, strokeEnd, 1.0);
+                visual.OpacityMask = maskBrush;
+
+                // 创建擦除动画 - 使用定时器来更新遮罩
+                StartEraseMaskAnimation(visual, stroke, strokeStart, strokeEnd, duration);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"连续渐隐动画失败: {ex}", LogHelper.LogType.Error);
+                // 失败时回退到简单动画
+                StartSimpleFadeAnimation(visual, stroke, currentOpacity, duration);
+            }
         }
 
         /// <summary>

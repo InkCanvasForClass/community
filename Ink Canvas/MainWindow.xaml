@@ -978,7 +978,7 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围0.05-2.0，越小要求越严格，弯曲的线条越不容易被拉直；值越大越容易识别为直线。高精度模式下，每隔10像素取一个计数点，获取更准确的平均值用于判断。" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <TextBlock Text="# 开启后，当绘制的直线超过设定长度阈值时，将自动调整为完美直线。灵敏度范围0.05-2.0，越小要求越严格，越弯曲的线条越不容易被拉直；值越大越容易识别为直线。高精度模式下，每隔10像素取一个计数点，获取更准确的平均值用于判断。" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">

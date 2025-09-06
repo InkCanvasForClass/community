@@ -30,6 +30,13 @@ namespace Ink_Canvas
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded)
             {
+                // 通知Z-Order管理器有系统菜单打开
+                // 这会导致主窗口暂时取消置顶，让系统菜单能够正常显示
+                if (Ink_Canvas.MainWindow.Settings.Advanced.IsAlwaysOnTop && Ink_Canvas.MainWindow.Settings.Advanced.IsNoFocusMode)
+                {
+                    WindowZOrderManager.SetWindowTopmost(mainWin, false);
+                }
+
                 // 判斷是否在收納模式中
                 if (mainWin.isFloatingBarFolded)
                 {
@@ -53,6 +60,19 @@ namespace Ink_Canvas
                         ResetFloatingBarPositionTrayIconMenuItem.Opacity = 1;
                     }
 
+                }
+            }
+        }
+
+        private void SysTrayMenu_Closed(object sender, RoutedEventArgs e)
+        {
+            var mainWin = (MainWindow)Current.MainWindow;
+            if (mainWin.IsLoaded)
+            {
+                // 菜单关闭后，恢复主窗口的置顶状态
+                if (Ink_Canvas.MainWindow.Settings.Advanced.IsAlwaysOnTop && Ink_Canvas.MainWindow.Settings.Advanced.IsNoFocusMode)
+                {
+                    WindowZOrderManager.SetWindowTopmost(mainWin, true);
                 }
             }
         }

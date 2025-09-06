@@ -29,6 +29,12 @@ namespace Ink_Canvas
 
             // 加载背景
             LoadBackground(settings);
+
+            // 注册到Z-Order管理器，确保窗口能够正确置顶
+            WindowZOrderManager.RegisterWindow(this, true, false);
+            
+            // 添加窗口关闭事件处理
+            Closed += RandWindow_Closed;
         }
 
         private void LoadBackground(Settings settings)
@@ -74,6 +80,12 @@ namespace Ink_Canvas
 
             // 加载背景
             LoadBackground(settings);
+
+            // 注册到Z-Order管理器，确保窗口能够正确置顶
+            WindowZOrderManager.RegisterWindow(this, true, false);
+            
+            // 添加窗口关闭事件处理
+            Closed += RandWindow_Closed;
 
             new Thread(() =>
             {
@@ -335,6 +347,15 @@ namespace Ink_Canvas
             {
                 MessageBox.Show("无法调用外部点名：" + ex.Message);
             }
+        }
+
+        /// <summary>
+        /// 窗口关闭事件处理
+        /// </summary>
+        private void RandWindow_Closed(object sender, EventArgs e)
+        {
+            // 从Z-Order管理器中移除窗口
+            WindowZOrderManager.UnregisterWindow(this);
         }
     }
 }
