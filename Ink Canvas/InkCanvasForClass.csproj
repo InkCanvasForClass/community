@@ -252,6 +252,7 @@
     <Resource Include="Resources\DeveloperAvatars\kengwang.png" />
     <Resource Include="Resources\DeveloperAvatars\STBBRD.png" />
     <Resource Include="Resources\DeveloperAvatars\WXRIW.png" />
+    <Resource Include="Resources\DeveloperAvatars\PrefacedCorg.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-png\down.png" />
