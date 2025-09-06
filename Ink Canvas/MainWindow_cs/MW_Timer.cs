@@ -312,6 +312,44 @@ namespace Ink_Canvas
         {
             var windowTitle = ForegroundWindowInfo.WindowTitle();
             var windowRect = ForegroundWindowInfo.WindowRect();
+            var windowProcessName = ForegroundWindowInfo.ProcessName();
+            
+            // 检测希沃白板五的批注面板
+            // 希沃白板五的批注面板通常具有以下特征：
+            // 1. 窗口标题为空或包含特定关键词
+            // 2. 窗口高度较小（批注工具栏）
+            // 3. 窗口宽度适中（工具栏宽度）
+            if (windowProcessName == "BoardService" || windowProcessName == "seewoPincoTeacher")
+            {
+                // 检测希沃白板五的批注工具栏
+                // 批注工具栏通常高度在50-200像素之间，宽度在200-800像素之间
+                if (windowRect.Height >= 50 && windowRect.Height <= 200 && 
+                    windowRect.Width >= 200 && windowRect.Width <= 800)
+                {
+                    return true;
+                }
+                
+                // 检测希沃白板五的二级菜单面板
+                // 二级菜单面板通常高度在100-400像素之间，宽度在150-400像素之间
+                if (windowRect.Height >= 100 && windowRect.Height <= 400 && 
+                    windowRect.Width >= 150 && windowRect.Width <= 400)
+                {
+                    return true;
+                }
+            }
+            
+            // 检测鸿合软件的批注面板
+            if (windowProcessName == "HiteCamera" || windowProcessName == "HiteTouchPro" || windowProcessName == "HiteLightBoard")
+            {
+                // 鸿合软件的批注面板特征
+                if (windowRect.Height >= 50 && windowRect.Height <= 300 && 
+                    windowRect.Width >= 200 && windowRect.Width <= 600)
+                {
+                    return true;
+                }
+            }
+            
+            // 原有的检测逻辑（保持向后兼容）
             return windowTitle.Length == 0 && windowRect.Height < 500;
         }
 
@@ -379,7 +417,17 @@ namespace Ink_Canvas
                 }
                 else if (Settings.Automation.IsAutoFoldInSeewoPincoTeacher && (windowProcessName == "BoardService" || windowProcessName == "seewoPincoTeacher"))
                 {
-                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    // 检测到希沃白板五的批注窗口时保持收纳状态
+                    if (IsAnnotationWindow())
+                    {
+                        // 批注窗口打开时，如果当前是展开状态则收纳
+                        if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
+                    else
+                    {
+                        // 非批注窗口时正常处理
+                        if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
                     // HiteCamera
                 }
                 else if (Settings.Automation.IsAutoFoldInHiteCamera && windowProcessName == "HiteCamera" &&
