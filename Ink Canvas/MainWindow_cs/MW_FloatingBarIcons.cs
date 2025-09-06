@@ -130,10 +130,18 @@ namespace Ink_Canvas
         /// </summary>
         private void CheckEnableTwoFingerGestureBtnVisibility(bool isVisible)
         {
-            // 在PPT模式下始终隐藏手势按钮
+            // 在PPT模式下根据设置决定是否显示手势按钮
             if (currentMode == 0 || BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
             {
-                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                // 如果启用了PPT放映模式显示手势按钮，则显示手势按钮（在PPT模式下不依赖手势功能是否启用）
+                if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow && isVisible)
+                {
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                }
                 return;
             }
 

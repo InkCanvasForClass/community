@@ -309,6 +309,8 @@ namespace Ink_Canvas
         public bool IsAlwaysGoToFirstPageOnReenter { get; set; }
         [JsonProperty("enablePowerPointEnhancement")]
         public bool EnablePowerPointEnhancement { get; set; } = false;
+        [JsonProperty("showGestureButtonInSlideShow")]
+        public bool ShowGestureButtonInSlideShow { get; set; } = false;
     }
 
     public class Automation

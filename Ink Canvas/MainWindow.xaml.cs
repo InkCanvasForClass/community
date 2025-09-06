@@ -2139,6 +2139,56 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"批注子面板中切换墨迹渐隐功能时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
+
+        /// <summary>
+        /// PPT放映模式显示手势按钮开关切换事件处理
+        /// </summary>
+        private void ToggleSwitchShowGestureButtonInSlideShow_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!isLoaded) return;
+                var toggle = sender as ToggleSwitch;
+                Settings.PowerPointSettings.ShowGestureButtonInSlideShow = toggle != null && toggle.IsOn;
+                SaveSettingsToFile();
+                
+                // 如果当前在PPT放映模式，需要立即更新手势按钮的显示状态
+                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
+                {
+                    UpdateGestureButtonVisibilityInPPTMode();
+                }
+                
+                LogHelper.WriteLogToFile($"PPT放映模式显示手势按钮已{(Settings.PowerPointSettings.ShowGestureButtonInSlideShow ? "启用" : "禁用")}", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换PPT放映模式显示手势按钮时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 更新PPT模式下手势按钮的显示状态
+        /// </summary>
+        private void UpdateGestureButtonVisibilityInPPTMode()
+        {
+            try
+            {
+                if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow)
+                {
+                    // 如果启用了PPT放映模式显示手势按钮，则显示手势按钮（在PPT模式下不依赖手势功能是否启用）
+                    CheckEnableTwoFingerGestureBtnVisibility(true);
+                }
+                else
+                {
+                    // 如果禁用了PPT放映模式显示手势按钮，则隐藏手势按钮
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新PPT模式下手势按钮显示状态时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
         #endregion
 
         #region PPT翻页直接传递

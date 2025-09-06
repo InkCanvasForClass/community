@@ -643,10 +643,24 @@ namespace Ink_Canvas
 
                     BorderFloatingBarMainControls.Visibility = Visibility.Visible;
 
-                    // 在PPT模式下隐藏手势面板和手势按钮
+                    // 在PPT模式下根据设置决定是否隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    
+                    // 根据设置决定是否在PPT放映模式下显示手势按钮
+                    if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow)
+                    {
+                        // 如果启用了PPT放映模式显示手势按钮，则显示手势按钮
+                        if (Settings.Gesture.IsEnableTwoFingerGesture)
+                        {
+                            CheckEnableTwoFingerGestureBtnVisibility(true);
+                        }
+                    }
+                    else
+                    {
+                        // 如果禁用了PPT放映模式显示手势按钮，则隐藏手势按钮
+                        EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    }
 
                     if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
                         !Settings.Automation.IsAutoFoldInPPTSlideShow)
