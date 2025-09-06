@@ -283,7 +283,18 @@ namespace Ink_Canvas.Windows
                 {
                     // 检查当前是否处于鼠标模式
                     bool isCurrentlyMouseMode = _mainWindow.inkCanvas.EditingMode == InkCanvasEditingMode.None;
-                    _hotkeyManager.UpdateHotkeyStateForToolMode(isCurrentlyMouseMode);
+                    
+                    // 如果当前处于鼠标模式且关闭了开关，立即禁用快捷键
+                    if (isCurrentlyMouseMode && !ToggleSwitchEnableHotkeysInMouseMode.IsOn)
+                    {
+                        _hotkeyManager.DisableHotkeyRegistration();
+                        LogHelper.WriteLogToFile("在鼠标模式下关闭快捷键开关，立即禁用快捷键");
+                    }
+                    else
+                    {
+                        // 其他情况正常更新快捷键状态
+                        _hotkeyManager.UpdateHotkeyStateForToolMode(isCurrentlyMouseMode);
+                    }
                 }
                 
                 LogHelper.WriteLogToFile($"鼠标模式快捷键设置已更新: {MainWindow.Settings.Appearance.EnableHotkeysInMouseMode}", LogHelper.LogType.Event);
