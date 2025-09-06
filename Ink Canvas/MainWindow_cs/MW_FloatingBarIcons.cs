@@ -1423,8 +1423,6 @@ namespace Ink_Canvas
                 
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
                 
-                // 添加调试日志
-                LogHelper.WriteLogToFile($"浮动栏居中计算 - ActualWidth: {ViewboxFloatingBar.ActualWidth}, DesiredSize.Width: {ViewboxFloatingBar.DesiredSize.Width}, RenderSize.Width: {ViewboxFloatingBar.RenderSize.Width}, baseWidth: {baseWidth}, ScaleX: {ViewboxFloatingBarScaleTransform.ScaleX}, floatingBarWidth: {floatingBarWidth}, screenWidth: {screenWidth}");
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -1570,8 +1568,6 @@ namespace Ink_Canvas
                 
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
                 
-                // 添加调试日志
-                LogHelper.WriteLogToFile($"浮动栏居中计算 - ActualWidth: {ViewboxFloatingBar.ActualWidth}, DesiredSize.Width: {ViewboxFloatingBar.DesiredSize.Width}, RenderSize.Width: {ViewboxFloatingBar.RenderSize.Width}, baseWidth: {baseWidth}, ScaleX: {ViewboxFloatingBarScaleTransform.ScaleX}, floatingBarWidth: {floatingBarWidth}, screenWidth: {screenWidth}");
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
@@ -1678,8 +1674,6 @@ namespace Ink_Canvas
                 
                 double floatingBarWidth = baseWidth * ViewboxFloatingBarScaleTransform.ScaleX;
                 
-                // 添加调试日志
-                LogHelper.WriteLogToFile($"浮动栏居中计算 - ActualWidth: {ViewboxFloatingBar.ActualWidth}, DesiredSize.Width: {ViewboxFloatingBar.DesiredSize.Width}, RenderSize.Width: {ViewboxFloatingBar.RenderSize.Width}, baseWidth: {baseWidth}, ScaleX: {ViewboxFloatingBarScaleTransform.ScaleX}, floatingBarWidth: {floatingBarWidth}, screenWidth: {screenWidth}");
 
                 // 如果快捷调色盘显示，确保有足够空间
                 if ((QuickColorPalettePanel != null && QuickColorPalettePanel.Visibility == Visibility.Visible) ||
