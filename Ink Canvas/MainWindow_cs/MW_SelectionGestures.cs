@@ -875,48 +875,55 @@ namespace Ink_Canvas
         private Rect CalculateNewBounds(Rect originalBounds, Point delta, string handleName)
         {
             var newBounds = originalBounds;
+            double newWidth = originalBounds.Width;
+            double newHeight = originalBounds.Height;
+            double newX = originalBounds.X;
+            double newY = originalBounds.Y;
 
             switch (handleName)
             {
                 case "TopLeftHandle":
-                    newBounds.X = originalBounds.X + delta.X;
-                    newBounds.Y = originalBounds.Y + delta.Y;
-                    newBounds.Width = originalBounds.Width - delta.X;
-                    newBounds.Height = originalBounds.Height - delta.Y;
+                    newX = originalBounds.X + delta.X;
+                    newY = originalBounds.Y + delta.Y;
+                    newWidth = originalBounds.Width - delta.X;
+                    newHeight = originalBounds.Height - delta.Y;
                     break;
                 case "TopRightHandle":
-                    newBounds.Y = originalBounds.Y + delta.Y;
-                    newBounds.Width = originalBounds.Width + delta.X;
-                    newBounds.Height = originalBounds.Height - delta.Y;
+                    newY = originalBounds.Y + delta.Y;
+                    newWidth = originalBounds.Width + delta.X;
+                    newHeight = originalBounds.Height - delta.Y;
                     break;
                 case "BottomLeftHandle":
-                    newBounds.X = originalBounds.X + delta.X;
-                    newBounds.Width = originalBounds.Width - delta.X;
-                    newBounds.Height = originalBounds.Height + delta.Y;
+                    newX = originalBounds.X + delta.X;
+                    newWidth = originalBounds.Width - delta.X;
+                    newHeight = originalBounds.Height + delta.Y;
                     break;
                 case "BottomRightHandle":
-                    newBounds.Width = originalBounds.Width + delta.X;
-                    newBounds.Height = originalBounds.Height + delta.Y;
+                    newWidth = originalBounds.Width + delta.X;
+                    newHeight = originalBounds.Height + delta.Y;
                     break;
                 case "TopHandle":
-                    newBounds.Y = originalBounds.Y + delta.Y;
-                    newBounds.Height = originalBounds.Height - delta.Y;
+                    newY = originalBounds.Y + delta.Y;
+                    newHeight = originalBounds.Height - delta.Y;
                     break;
                 case "BottomHandle":
-                    newBounds.Height = originalBounds.Height + delta.Y;
+                    newHeight = originalBounds.Height + delta.Y;
                     break;
                 case "LeftHandle":
-                    newBounds.X = originalBounds.X + delta.X;
-                    newBounds.Width = originalBounds.Width - delta.X;
+                    newX = originalBounds.X + delta.X;
+                    newWidth = originalBounds.Width - delta.X;
                     break;
                 case "RightHandle":
-                    newBounds.Width = originalBounds.Width + delta.X;
+                    newWidth = originalBounds.Width + delta.X;
                     break;
             }
 
-            // 确保最小尺寸
-            if (newBounds.Width < 10) newBounds.Width = 10;
-            if (newBounds.Height < 10) newBounds.Height = 10;
+            // 确保最小尺寸和正值
+            if (newWidth < 10) newWidth = 10;
+            if (newHeight < 10) newHeight = 10;
+
+            // 创建新的Rect，确保所有值都是有效的
+            newBounds = new Rect(newX, newY, newWidth, newHeight);
 
             return newBounds;
         }
