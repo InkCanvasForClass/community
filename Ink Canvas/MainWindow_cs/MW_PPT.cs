@@ -448,6 +448,8 @@ namespace Ink_Canvas
             if (!Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn) return;
 
             _isLongPressNext = isNext;
+            // 重置定时器间隔为初始延迟时间，确保每次长按检测都从正确的延迟开始
+            _longPressTimer.Interval = TimeSpan.FromMilliseconds(LongPressDelay);
             _longPressTimer?.Start();
         }
 
