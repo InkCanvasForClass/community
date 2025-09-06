@@ -1851,6 +1851,13 @@ namespace Ink_Canvas
                 ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
             if (sender == Pen_Icon && lastBorderMouseDownObject != Pen_Icon) return;
 
+            // 如果当前有选中的图片元素，先取消选中
+            if (currentSelectedElement != null)
+            {
+                UnselectElement(currentSelectedElement);
+                currentSelectedElement = null;
+            }
+
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();
 
@@ -3099,6 +3106,11 @@ namespace Ink_Canvas
                     }
 
                     timeMachine.CommitElementInsertHistory(image);
+
+                    // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                    SetCurrentToolMode(InkCanvasEditingMode.Select);
+                    UpdateCurrentToolMode("select");
+                    HideSubPanels("select");
                 }
             }
         }
@@ -3165,6 +3177,11 @@ namespace Ink_Canvas
                     }
 
                     timeMachine.CommitElementInsertHistory(image);
+
+                    // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                    SetCurrentToolMode(InkCanvasEditingMode.Select);
+                    UpdateCurrentToolMode("select");
+                    HideSubPanels("select");
                 }
             }
         }
@@ -3231,6 +3248,11 @@ namespace Ink_Canvas
                     }
 
                     timeMachine.CommitElementInsertHistory(image);
+
+                    // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                    SetCurrentToolMode(InkCanvasEditingMode.Select);
+                    UpdateCurrentToolMode("select");
+                    HideSubPanels("select");
                 }
             }
         }

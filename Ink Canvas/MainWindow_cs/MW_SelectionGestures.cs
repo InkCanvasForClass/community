@@ -336,7 +336,7 @@ namespace Ink_Canvas
         {
             var borderLeft = (inkCanvas.GetSelectionBounds().Left + inkCanvas.GetSelectionBounds().Right -
                               BorderStrokeSelectionControlWidth) / 2;
-            var borderTop = inkCanvas.GetSelectionBounds().Bottom + 1;
+            var borderTop = inkCanvas.GetSelectionBounds().Bottom + 10; // 在墨迹下方10像素处显示
             if (borderLeft < 0) borderLeft = 0;
             if (borderTop < 0) borderTop = 0;
             if (Width - borderLeft < BorderStrokeSelectionControlWidth || double.IsNaN(borderLeft))
@@ -344,7 +344,14 @@ namespace Ink_Canvas
             if (Height - borderTop < BorderStrokeSelectionControlHeight || double.IsNaN(borderTop))
                 borderTop = Height - BorderStrokeSelectionControlHeight;
 
-            if (borderTop > 60) borderTop -= 60;
+            // 确保墨迹选中栏始终显示在墨迹下方
+            // 如果选中栏会超出屏幕底部，则显示在墨迹上方
+            if (borderTop + BorderStrokeSelectionControlHeight > Height)
+            {
+                borderTop = inkCanvas.GetSelectionBounds().Top - BorderStrokeSelectionControlHeight - 10;
+                if (borderTop < 0) borderTop = 10; // 如果上方也没有空间，则显示在顶部
+            }
+
             BorderStrokeSelectionControl.Margin = new Thickness(borderLeft, borderTop, 0, 0);
         }
 

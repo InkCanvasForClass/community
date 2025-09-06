@@ -68,6 +68,11 @@ namespace Ink_Canvas
                     };
 
                     timeMachine.CommitElementInsertHistory(image);
+
+                    // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                    SetCurrentToolMode(InkCanvasEditingMode.Select);
+                    UpdateCurrentToolMode("select");
+                    HideSubPanels("select");
                 }
             }
         }

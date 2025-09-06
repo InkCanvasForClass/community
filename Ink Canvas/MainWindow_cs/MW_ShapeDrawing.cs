@@ -118,6 +118,13 @@ namespace Ink_Canvas
 
         private void BtnPen_Click(object sender, RoutedEventArgs e)
         {
+            // 如果当前有选中的图片元素，先取消选中
+            if (currentSelectedElement != null)
+            {
+                UnselectElement(currentSelectedElement);
+                currentSelectedElement = null;
+            }
+
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();
 

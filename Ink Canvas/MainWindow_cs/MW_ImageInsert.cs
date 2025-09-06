@@ -216,6 +216,11 @@ namespace Ink_Canvas
                 // 提交历史记录
                 timeMachine.CommitElementInsertHistory(image);
 
+                // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                SetCurrentToolMode(InkCanvasEditingMode.Select);
+                UpdateCurrentToolMode("select");
+                HideSubPanels("select");
+
                 ShowNotification("截图已插入到画布");
             }
             catch (Exception ex)
