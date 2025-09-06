@@ -6,6 +6,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Effects;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
@@ -324,6 +325,13 @@ namespace Ink_Canvas.Helpers
                     {
                         path.StrokeThickness = Math.Max(drawingAttribs.Width * 1.5, 20);
                     }
+
+                    // 为高亮笔添加轻微的模糊效果，使渐隐更加自然
+                    path.Effect = new BlurEffect
+                    {
+                        Radius = 0.5, // 轻微的模糊效果
+                        KernelType = KernelType.Gaussian
+                    };
                 }
 
                 // 不设置任何变换，保持墨迹原有粗细
@@ -381,12 +389,62 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                // 对于普通墨迹也使用连续渐隐动画
-                StartContinuousFadeAnimation(visual, stroke, currentOpacity, AnimationDuration);
+                StartProgressiveFadeAnimation(visual, stroke, currentOpacity, AnimationDuration);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"开始普通墨迹渐隐动画失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 统一渐隐动画 - 整个墨迹作为一个整体进行渐隐，与擦除效果一致
+        /// </summary>
+        private void StartUnifiedFadeAnimation(UIElement visual, Stroke stroke, double currentOpacity, int duration)
+        {
+            try
+            {
+                // 创建透明度动画，模拟擦除时的效果
+                var fadeAnimation = new DoubleAnimation
+                {
+                    From = currentOpacity,
+                    To = 0.0,
+                    Duration = TimeSpan.FromMilliseconds(duration),
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
+                };
+
+                // 如果是高亮笔，添加轻微的缩放效果，使渐隐更加自然
+                if (stroke.DrawingAttributes.IsHighlighter)
+                {
+                    // 创建轻微的缩放动画，模拟墨迹"蒸发"的效果
+                    var scaleAnimation = new DoubleAnimation
+                    {
+                        From = 1.0,
+                        To = 0.95, // 轻微缩小，增加自然感
+                        Duration = TimeSpan.FromMilliseconds(duration),
+                        EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseIn }
+                    };
+
+                    // 创建缩放变换
+                    var scaleTransform = new ScaleTransform();
+                    visual.RenderTransform = scaleTransform;
+                    visual.RenderTransformOrigin = new Point(0.5, 0.5);
+
+                    // 应用缩放动画
+                    scaleTransform.BeginAnimation(ScaleTransform.ScaleXProperty, scaleAnimation);
+                    scaleTransform.BeginAnimation(ScaleTransform.ScaleYProperty, scaleAnimation);
+                }
+
+                // 添加动画完成事件
+                fadeAnimation.Completed += (sender, e) => OnAnimationCompleted(visual, stroke);
+
+                // 应用透明度动画
+                visual.BeginAnimation(UIElement.OpacityProperty, fadeAnimation);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"统一渐隐动画失败: {ex}", LogHelper.LogType.Error);
+                OnAnimationCompleted(visual, stroke);
             }
         }
 
@@ -397,8 +455,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                // 使用连续渐隐动画而不是分段动画
-                StartContinuousFadeAnimation(visual, stroke, currentOpacity, (int)(AnimationDuration * 1.5));
+                // 高亮笔使用统一的渐隐动画，与擦除效果一致
+                StartUnifiedFadeAnimation(visual, stroke, currentOpacity, (int)(AnimationDuration * 1.2));
             }
             catch (Exception ex)
             {
@@ -802,98 +860,6 @@ namespace Ink_Canvas.Helpers
             }
 
             return curve;
-        }
-
-        /// <summary>
-        /// 连续渐隐动画 - 模拟橡皮擦擦除效果
-        /// </summary>
-        private void StartContinuousFadeAnimation(UIElement visual, Stroke stroke, double currentOpacity, int duration)
-        {
-            try
-            {
-                // 获取墨迹的边界
-                var geometry = stroke.GetGeometry();
-                if (geometry == null) return;
-
-                var bounds = geometry.Bounds;
-                var strokeStart = stroke.StylusPoints[0].ToPoint();
-                var strokeEnd = stroke.StylusPoints[stroke.StylusPoints.Count - 1].ToPoint();
-
-                // 计算墨迹的方向向量
-                var direction = new Vector(strokeEnd.X - strokeStart.X, strokeEnd.Y - strokeStart.Y);
-                var length = direction.Length;
-                
-                if (length == 0)
-                {
-                    // 如果墨迹没有方向（单点），使用简单渐隐
-                    StartSimpleFadeAnimation(visual, stroke, currentOpacity, duration);
-                    return;
-                }
-
-                // 归一化方向向量
-                direction.Normalize();
-
-                // 创建精确的擦除动画 - 使用PathGeometry来避免变形
-                CreatePreciseEraseAnimation(visual, stroke, bounds, strokeStart, strokeEnd, direction, length, duration);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"连续渐隐动画失败: {ex}", LogHelper.LogType.Error);
-                // 失败时回退到简单动画
-                StartSimpleFadeAnimation(visual, stroke, currentOpacity, duration);
-            }
-        }
-
-        /// <summary>
-        /// 创建精确的擦除动画 - 使用动态裁剪区域避免墨迹移动
-        /// </summary>
-        private void CreatePreciseEraseAnimation(UIElement visual, Stroke stroke, Rect bounds, Point strokeStart, Point strokeEnd, Vector direction, double length, int duration)
-        {
-            try
-            {
-                // 计算擦除方向上的移动距离
-                var totalDistance = Math.Sqrt(Math.Pow(strokeEnd.X - strokeStart.X, 2) + Math.Pow(strokeEnd.Y - strokeStart.Y, 2));
-                
-                if (totalDistance == 0)
-                {
-                    // 如果墨迹没有长度，使用简单渐隐
-                    StartSimpleFadeAnimation(visual, stroke, visual.Opacity, duration);
-                    return;
-                }
-
-                // 创建动态裁剪区域 - 从完整墨迹开始，逐渐缩小
-                var clipGeometry = new RectangleGeometry
-                {
-                    Rect = bounds
-                };
-
-                visual.Clip = clipGeometry;
-
-                // 创建擦除动画 - 裁剪区域从起点向终点移动并缩小
-                // 使用更自然的擦除效果：从起点开始，逐渐向终点移动
-                var eraseAnimation = new RectAnimation
-                {
-                    From = bounds, // 从完整边界开始
-                    To = new Rect(strokeEnd.X, strokeEnd.Y, 0, bounds.Height), // 到终点位置，宽度为0
-                    Duration = TimeSpan.FromMilliseconds(duration),
-                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseInOut }
-                };
-
-                // 添加动画完成事件
-                eraseAnimation.Completed += (sender, e) =>
-                {
-                    OnAnimationCompleted(visual, stroke);
-                };
-
-                // 开始动画
-                clipGeometry.BeginAnimation(RectangleGeometry.RectProperty, eraseAnimation);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"精确擦除动画失败: {ex}", LogHelper.LogType.Error);
-                // 失败时回退到简单动画
-                StartSimpleFadeAnimation(visual, stroke, visual.Opacity, duration);
-            }
         }
 
         /// <summary>

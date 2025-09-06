@@ -148,31 +148,30 @@ namespace Ink_Canvas.Helpers
         {
             if (window == null) return;
 
-            lock (_lockObject)
+            try
             {
-                var windowInfo = _windowStack.FirstOrDefault(w => w.Window == window);
-                if (windowInfo != null)
-                {
-                    // 更新创建时间，使其成为最新的窗口
-                    windowInfo.CreatedTime = DateTime.Now;
-                    
-                    // 立即将窗口置顶
-                    var hwnd = new WindowInteropHelper(window).Handle;
-                    if (hwnd != IntPtr.Zero)
-                    {
-                        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-                        
-                        // 确保窗口样式正确
-                        int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                        if ((exStyle & WS_EX_TOPMOST) == 0)
-                        {
-                            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-                        }
-                    }
-                    
-                    ApplyZOrder();
-                }
+                var hwnd = new WindowInteropHelper(window).Handle;
+                if (hwnd == IntPtr.Zero) return;
+
+                // 使用更直接的方法：先激活窗口，再置顶
+                window.Activate();
+                window.Focus();
+                
+                // 设置窗口为置顶
+                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+
+                // 确保窗口样式正确
+                int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+
+                // 再次确保置顶
+                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BringToTop失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

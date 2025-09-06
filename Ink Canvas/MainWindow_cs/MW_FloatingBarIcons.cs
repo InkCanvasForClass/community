@@ -948,7 +948,8 @@ namespace Ink_Canvas
             randWindow.Show();
             // 确保窗口显示后立即置顶
             randWindow.Activate();
-            WindowZOrderManager.BringToTop(randWindow);
+            randWindow.Topmost = true;
+            randWindow.Focus();
         }
 
         public void CheckEraserTypeTab()

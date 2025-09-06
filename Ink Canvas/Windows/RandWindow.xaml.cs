@@ -30,14 +30,11 @@ namespace Ink_Canvas
             // 加载背景
             LoadBackground(settings);
 
-            // 注册到Z-Order管理器，确保窗口能够正确置顶
-            WindowZOrderManager.RegisterWindow(this, true, false);
+            // 设置窗口为置顶
+            Topmost = true;
             
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
-            
-            // 添加窗口显示事件处理
-            Loaded += RandWindow_Loaded;
         }
 
         private void LoadBackground(Settings settings)
@@ -84,14 +81,11 @@ namespace Ink_Canvas
             // 加载背景
             LoadBackground(settings);
 
-            // 注册到Z-Order管理器，确保窗口能够正确置顶
-            WindowZOrderManager.RegisterWindow(this, true, false);
+            // 设置窗口为置顶
+            Topmost = true;
             
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
-            
-            // 添加窗口显示事件处理
-            Loaded += RandWindow_Loaded;
 
             new Thread(() =>
             {
@@ -356,21 +350,12 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 窗口加载事件处理
-        /// </summary>
-        private void RandWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            // 窗口加载完成后，立即将其置顶
-            WindowZOrderManager.BringToTop(this);
-        }
-
-        /// <summary>
         /// 窗口关闭事件处理
         /// </summary>
         private void RandWindow_Closed(object sender, EventArgs e)
         {
-            // 从Z-Order管理器中移除窗口
-            WindowZOrderManager.UnregisterWindow(this);
+            // 窗口关闭时的清理工作
+            // 这里可以添加必要的清理代码
         }
     }
 }

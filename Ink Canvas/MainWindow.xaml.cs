@@ -1751,18 +1751,22 @@ namespace Ink_Canvas
         {
             try
             {
+                var hwnd = new WindowInteropHelper(this).Handle;
                 if (Settings.Advanced.IsAlwaysOnTop)
                 {
-                    // 注册到Z-Order管理器
-                    WindowZOrderManager.RegisterWindow(this, true, Settings.Advanced.IsNoFocusMode);
-                    
                     // 先设置WPF的Topmost属性
                     Topmost = true;
 
-                    // 立即应用置顶
-                    WindowZOrderManager.BringToTop(this);
+                    // 使用更强的Win32 API调用来确保置顶
+                    // 1. 设置窗口样式为置顶
+                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                    SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
 
-                    // 如果启用了无焦点模式，需要特殊处理
+                    // 2. 使用SetWindowPos确保窗口在最顶层
+                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+
+                    // 3. 如果启用了无焦点模式，需要特殊处理
                     if (Settings.Advanced.IsNoFocusMode)
                     {
                         // 启动置顶维护定时器
@@ -1777,9 +1781,15 @@ namespace Ink_Canvas
                 else
                 {
                     // 取消置顶时
-                    WindowZOrderManager.SetWindowTopmost(this, false);
-                    
-                    // 停止置顶维护定时器
+                    // 1. 先使用Win32 API取消置顶
+                    SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+
+                    // 2. 移除置顶窗口样式
+                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                    SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
+
+                    // 3. 停止置顶维护定时器
                     StopTopmostMaintenance();
 
                     // 注意：这里不直接设置Topmost，让其他代码根据模式决定
@@ -1848,14 +1858,30 @@ namespace Ink_Canvas
                     return;
                 }
 
-                // 清理无效的窗口记录
-                WindowZOrderManager.CleanupInvalidWindows();
-
                 // 检查是否有子窗口在前景
-                if (!WindowZOrderManager.HasChildWindowInForeground())
+                var foregroundWindow = GetForegroundWindow();
+                if (foregroundWindow != hwnd)
                 {
-                    // 没有子窗口在前景，强制刷新所有窗口的置顶状态
-                    WindowZOrderManager.ForceRefreshAllWindows();
+                    // 检查前景窗口是否是当前应用程序的子窗口
+                    var foregroundWindowProcessId = GetWindowThreadProcessId(foregroundWindow, out uint processId);
+                    var currentProcessId = GetCurrentProcessId();
+
+                    if (processId == currentProcessId)
+                    {
+                        // 如果有子窗口在前景，暂停置顶维护
+                        return;
+                    }
+
+                    // 如果窗口不在最顶层且没有子窗口，重新设置置顶
+                    SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                        SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+
+                    // 确保窗口样式正确
+                    int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                    if ((exStyle & WS_EX_TOPMOST) == 0)
+                    {
+                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+                    }
                 }
             }
             catch (Exception ex)
