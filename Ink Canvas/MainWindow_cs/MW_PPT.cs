@@ -3,7 +3,6 @@ using iNKORE.UI.WPF.Modern;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;

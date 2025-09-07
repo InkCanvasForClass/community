@@ -1,5 +1,3 @@
-using System;
-
 namespace Ink_Canvas.Helpers.Plugins
 {
     /// <summary>
