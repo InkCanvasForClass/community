@@ -229,10 +229,10 @@ namespace Ink_Canvas
 
                 // 创建新的PowerPoint应用程序实例
                 pptApplication = new Microsoft.Office.Interop.PowerPoint.Application();
-                
+
                 // 设置为不可见，作为后台进程
                 pptApplication.Visible = MsoTriState.msoFalse;
-                
+
                 // 设置应用程序属性
                 pptApplication.WindowState = PpWindowState.ppWindowMinimized;
 
@@ -277,9 +277,9 @@ namespace Ink_Canvas
 
                 // 使用反射调用PPTManager的ConnectToPPT方法
                 var pptManagerType = _pptManager.GetType();
-                var connectMethod = pptManagerType.GetMethod("ConnectToPPT", 
+                var connectMethod = pptManagerType.GetMethod("ConnectToPPT",
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                
+
                 if (connectMethod != null)
                 {
                     connectMethod.Invoke(_pptManager, new object[] { app });
@@ -288,9 +288,9 @@ namespace Ink_Canvas
                 else
                 {
                     // 如果无法通过反射调用，尝试直接设置属性
-                    var pptApplicationProperty = pptManagerType.GetProperty("PPTApplication", 
+                    var pptApplicationProperty = pptManagerType.GetProperty("PPTApplication",
                         System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-                    
+
                     if (pptApplicationProperty != null && pptApplicationProperty.CanWrite)
                     {
                         pptApplicationProperty.SetValue(_pptManager, app);
@@ -317,7 +317,7 @@ namespace Ink_Canvas
             {
                 if (pptApplication == null) return false;
                 if (!Marshal.IsComObject(pptApplication)) return false;
-                
+
                 // 尝试访问一个简单的属性来验证连接是否有效
                 var _ = pptApplication.Name;
                 return true;
@@ -362,12 +362,12 @@ namespace Ink_Canvas
 
                     // 退出PowerPoint应用程序
                     pptApplication.Quit();
-                    
+
                     // 释放COM对象
                     Marshal.ReleaseComObject(pptApplication);
                     pptApplication = null;
                 }
-                
+
                 LogHelper.WriteLogToFile("PowerPoint应用程序已关闭", LogHelper.LogType.Event);
             }
             catch (Exception ex)
@@ -650,7 +650,7 @@ namespace Ink_Canvas
                     // 在PPT模式下根据设置决定是否隐藏手势面板和手势按钮
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-                    
+
                     // 根据设置决定是否在PPT放映模式下显示手势按钮
                     if (Settings.PowerPointSettings.ShowGestureButtonInSlideShow)
                     {
@@ -1066,24 +1066,24 @@ namespace Ink_Canvas
         private void ToggleSwitchPowerPointEnhancement_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            
+
             Settings.PowerPointSettings.EnablePowerPointEnhancement = ToggleSwitchPowerPointEnhancement.IsOn;
-            
+
             // 与WPS支持互斥
             if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
             {
                 Settings.PowerPointSettings.IsSupportWPS = false;
                 ToggleSwitchSupportWPS.IsOn = false;
-                
+
                 // 更新PPT管理器的WPS支持设置
                 if (_pptManager != null)
                 {
                     _pptManager.IsSupportWPS = false;
                 }
             }
-            
+
             SaveSettingsToFile();
-            
+
             // 启动或停止PowerPoint进程守护
             if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
             {
@@ -1100,7 +1100,7 @@ namespace Ink_Canvas
             if (!isLoaded) return;
 
             Settings.PowerPointSettings.IsSupportWPS = ToggleSwitchSupportWPS.IsOn;
-            
+
             // 与PowerPoint联动增强互斥
             if (Settings.PowerPointSettings.IsSupportWPS)
             {

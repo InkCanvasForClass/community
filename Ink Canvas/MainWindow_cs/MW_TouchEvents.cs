@@ -503,7 +503,7 @@ namespace Ink_Canvas
 
                 // 计算触摸面积（使用设备提供的Size）
                 double touchArea = size.Width * size.Height;
-                
+
                 // 计算宽高比（使用Bounds确保准确性）
                 double aspectRatio = Math.Min(bounds.Width, bounds.Height) / Math.Max(bounds.Width, bounds.Height);
 
@@ -511,7 +511,7 @@ namespace Ink_Canvas
                 bool isLargeTouch = touchArea >= palmAreaThreshold;
                 bool isPalmLikeShape = aspectRatio >= aspectRatioThreshold;
                 bool hasMultipleTouchPoints = dec.Count >= minTouchPoints;
-                
+
                 // 新增：额外的判定条件提高准确性
                 bool isReasonableSize = size.Width >= 20 && size.Height >= 20 && size.Width <= 200 && size.Height <= 200; // 合理的触摸尺寸范围
                 bool isNotTooElongated = aspectRatio >= 0.2; // 避免过于细长的触摸（可能是手指）
@@ -614,7 +614,7 @@ namespace Ink_Canvas
             if (isPalmEraserActive && palmEraserTouchIds.Count == 0)
             {
                 LogHelper.WriteLogToFile($"Palm eraser recovery triggered - Touch points remaining: {palmEraserTouchIds.Count}, dec.Count: {dec.Count}");
-                
+
                 // 恢复高光状态
                 drawingAttributes.IsHighlighter = palmEraserLastIsHighlighter;
 
@@ -778,10 +778,10 @@ namespace Ink_Canvas
                     if (isPalmEraserActive)
                     {
                         LogHelper.WriteLogToFile("Palm eraser force recovery - all touch points cleared");
-                        
+
                         // 恢复高光状态
                         drawingAttributes.IsHighlighter = palmEraserLastIsHighlighter;
-                        
+
                         // 恢复编辑模式
                         try
                         {
@@ -807,7 +807,7 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile($"Palm eraser force recovery failed: {ex.Message}, forcing to Ink mode", LogHelper.LogType.Error);
                             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                         }
-                        
+
                         // 如果手掌擦还在激活状态但触摸点已清空，强制重置状态
                         isPalmEraserActive = false;
                         palmEraserTouchDownHandled = false;
@@ -817,10 +817,10 @@ namespace Ink_Canvas
 
                         ViewboxFloatingBar.IsHitTestVisible = true;
                         BlackboardUIGridForInkReplay.IsHitTestVisible = true;
-                        
+
                         // 停止恢复定时器
                         StopPalmEraserRecoveryTimer();
-                        
+
                         LogHelper.WriteLogToFile("Palm eraser force recovery completed");
                     }
                 }
@@ -865,33 +865,33 @@ namespace Ink_Canvas
                 return;
             // 三指及以上禁止缩放
             bool disableScale = dec.Count >= 3;
-            
+
             // 修复：允许单指拖动选中的墨迹，即使禁用了多指手势
             if (isInMultiTouchMode) return;
-            
+
             // 如果是单指拖动选中的墨迹，允许处理
             if (dec.Count == 1 && inkCanvas.GetSelectedStrokes().Count > 0)
             {
                 var md = e.DeltaManipulation;
                 var trans = md.Translation; // 获得位移矢量
-                
+
                 if (trans.X != 0 || trans.Y != 0)
                 {
                     var m = new Matrix();
                     m.Translate(trans.X, trans.Y); // 移动
-                    
+
                     var strokes = inkCanvas.GetSelectedStrokes();
                     foreach (var stroke in strokes)
                     {
                         stroke.Transform(m, false);
                     }
-                    
+
                     // 更新选择框位置
                     updateBorderStrokeSelectionControlLocation();
                 }
                 return;
             }
-            
+
             if (!Settings.Gesture.IsEnableTwoFingerGesture) return;
             if ((dec.Count >= 2 && (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
                                     StackPanelPPTControls.Visibility != Visibility.Visible ||

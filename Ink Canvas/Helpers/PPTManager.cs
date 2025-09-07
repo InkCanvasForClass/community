@@ -70,17 +70,17 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     if (PPTApplication == null || !Marshal.IsComObject(PPTApplication)) return false;
-                    
+
                     // 检查是否有放映窗口
                     var slideShowWindows = PPTApplication.SlideShowWindows;
                     if (slideShowWindows == null || slideShowWindows.Count == 0) return false;
-                    
+
                     // 验证放映窗口是否真正有效
                     try
                     {
                         var slideShowWindow = slideShowWindows[1];
                         if (slideShowWindow == null) return false;
-                        
+
                         // 尝试访问放映窗口的属性来验证其有效性
                         var _ = slideShowWindow.View;
                         return true;
@@ -479,7 +479,7 @@ namespace Ink_Canvas.Helpers
                         {
                             CurrentPresentation = activePresentation;
                             CurrentSlides = CurrentPresentation.Slides;
-                            
+
                             // 验证页数读取是否成功
                             try
                             {

@@ -633,13 +633,13 @@ namespace Ink_Canvas
                 if (!ret && !e.Args.Contains("-m")) //-m multiple
                 {
                     LogHelper.NewLog("Detected existing instance");
-                    
+
                     // 检查是否有.icstk文件参数
                     string icstkFile = FileAssociationManager.GetIcstkFileFromArgs(e.Args);
                     if (!string.IsNullOrEmpty(icstkFile))
                     {
                         LogHelper.WriteLogToFile($"检测到已运行实例，尝试通过IPC发送文件: {icstkFile}", LogHelper.LogType.Event);
-                        
+
                         // 尝试通过IPC发送文件路径给已运行实例
                         if (FileAssociationManager.TrySendFileToExistingInstance(icstkFile))
                         {
@@ -654,7 +654,7 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile("检测到已运行实例，但无文件参数", LogHelper.LogType.Event);
                     }
-                    
+
                     LogHelper.NewLog("Ink Canvas automatically closed");
                     IsAppExitByUser = true; // 多开时标记为用户主动退出
                     // 写入退出信号，确保看门狗不会重启

@@ -2,11 +2,15 @@
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace Ink_Canvas.Windows.SettingsViews {
-    public partial class AppearancePanel : UserControl {
-        public AppearancePanel() {
+namespace Ink_Canvas.Windows.SettingsViews
+{
+    public partial class AppearancePanel : UserControl
+    {
+        public AppearancePanel()
+        {
             InitializeComponent();
-            BaseView.SettingsPanels.Add(new SettingsViewPanel() {
+            BaseView.SettingsPanels.Add(new SettingsViewPanel()
+            {
                 Title = "新版设置测试",
                 Items = new ObservableCollection<SettingsItem>(new SettingsItem[] {
                     new SettingsItem() {
@@ -55,7 +59,8 @@ namespace Ink_Canvas.Windows.SettingsViews {
                     },
                 })
             });
-            BaseView.SettingsPanels[0].Items[5].OnToggleSwitchToggled += (sender, args) => {
+            BaseView.SettingsPanels[0].Items[5].OnToggleSwitchToggled += (sender, args) =>
+            {
                 var item = (SettingsItem)sender;
                 BaseView.SettingsPanels[0].Items[4].ToggleSwitchEnabled = item.ToggleSwitchToggled;
             };

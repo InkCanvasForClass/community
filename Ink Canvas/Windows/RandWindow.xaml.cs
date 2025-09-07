@@ -36,10 +36,10 @@ namespace Ink_Canvas
 
             // 设置窗口为置顶
             Topmost = true;
-            
+
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
-            
+
             // 添加窗口显示事件处理，确保置顶
             Loaded += RandWindow_Loaded;
         }
@@ -90,10 +90,10 @@ namespace Ink_Canvas
 
             // 设置窗口为置顶
             Topmost = true;
-            
+
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
-            
+
             // 添加窗口显示事件处理，确保置顶
             Loaded += RandWindow_Loaded;
 
@@ -372,10 +372,10 @@ namespace Ink_Canvas
                     // 强制激活窗口
                     Activate();
                     Focus();
-                    
+
                     // 设置置顶
                     Topmost = true;
-                    
+
                     // 使用Win32 API强制置顶
                     var hwnd = new WindowInteropHelper(this).Handle;
                     if (hwnd != IntPtr.Zero)

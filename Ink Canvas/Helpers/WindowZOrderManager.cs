@@ -156,7 +156,7 @@ namespace Ink_Canvas.Helpers
                 // 使用更直接的方法：先激活窗口，再置顶
                 window.Activate();
                 window.Focus();
-                
+
                 // 设置窗口为置顶
                 SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                     SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);

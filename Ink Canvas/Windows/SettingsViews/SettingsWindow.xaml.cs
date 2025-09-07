@@ -1,4 +1,5 @@
-﻿using System;
+﻿using iNKORE.UI.WPF.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -8,72 +9,84 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using iNKORE.UI.WPF.Helpers;
 
-namespace Ink_Canvas.Windows {
-    public partial class SettingsWindow : Window {
+namespace Ink_Canvas.Windows
+{
+    public partial class SettingsWindow : Window
+    {
 
-        public SettingsWindow() {
+        public SettingsWindow()
+        {
             InitializeComponent();
 
             // 初始化侧边栏项目
             SidebarItemsControl.ItemsSource = SidebarItems;
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "启动时行为",
                 Name = "StartupItem",
                 IconSource = FindResource("StartupIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "画板和墨迹",
                 Name = "CanvasAndInkItem",
                 IconSource = FindResource("CanvasAndInkIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "手势操作",
                 Name = "GesturesItem",
                 IconSource = FindResource("GesturesIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "墨迹纠正",
                 Name = "InkRecognitionItem",
                 IconSource = FindResource("InkRecognitionIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Separator
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "个性化设置",
                 Name = "ThemeItem",
                 IconSource = FindResource("AppearanceIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "快捷键设置",
                 Name = "ShortcutsItem",
                 IconSource = FindResource("AppearanceIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "崩溃处理",
                 Name = "CrashActionItem",
                 IconSource = FindResource("AppearanceIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Separator
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "PowerPoint 支持",
                 Name = "PowerPointItem",
@@ -81,48 +94,56 @@ namespace Ink_Canvas.Windows {
                 Selected = false,
             });
 
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "自动化行为",
                 Name = "AutomationItem",
                 IconSource = FindResource("AutomationIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "随机点名",
                 Name = "LuckyRandomItem",
                 IconSource = FindResource("LuckyRandomIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Separator
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "存储空间",
                 Name = "StorageItem",
                 IconSource = FindResource("StorageIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "截图和屏幕捕捉",
                 Name = "SnapshotItem",
                 IconSource = FindResource("SnapshotIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Separator
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "高级选项",
                 Name = "AdvancedItem",
                 IconSource = FindResource("AdvancedIcon") as DrawingImage,
                 Selected = false,
             });
-            SidebarItems.Add(new SidebarItem() {
+            SidebarItems.Add(new SidebarItem()
+            {
                 Type = SidebarItemType.Item,
                 Title = "关于 InkCanvasForClass",
                 Name = "AboutItem",
@@ -202,32 +223,37 @@ namespace Ink_Canvas.Windows {
 
             _selectedSidebarItemName = "CanvasAndInkItem";
             UpdateSidebarItemsSelection();
-            
+
             // 为自定义滑块控件添加触摸支持
             AddTouchSupportToCustomSliders();
         }
 
 
 
-        public enum SidebarItemType {
+        public enum SidebarItemType
+        {
             Item,
             Separator
         }
 
-        public class SidebarItem {
+        public class SidebarItem
+        {
             public SidebarItemType Type { get; set; }
             public string Title { get; set; }
             public string Name { get; set; }
             public ImageSource IconSource { get; set; }
             public bool Selected { get; set; }
-            public Visibility _spVisibility {
+            public Visibility _spVisibility
+            {
                 get => Type == SidebarItemType.Separator ? Visibility.Visible : Visibility.Collapsed;
             }
-            public Visibility _siVisibility {
+            public Visibility _siVisibility
+            {
                 get => Type == SidebarItemType.Item ? Visibility.Visible : Visibility.Collapsed;
             }
 
-            public SolidColorBrush _siBackground {
+            public SolidColorBrush _siBackground
+            {
                 get => Selected
                     ? new SolidColorBrush(Color.FromRgb(217, 217, 217))
                     : new SolidColorBrush(Colors.Transparent);
@@ -242,10 +268,13 @@ namespace Ink_Canvas.Windows {
         public string[] SettingsPaneTitles;
         public string[] SettingsPaneNames;
 
-        public void UpdateSidebarItemsSelection() {
-            foreach (var si in SidebarItems) {
+        public void UpdateSidebarItemsSelection()
+        {
+            foreach (var si in SidebarItems)
+            {
                 si.Selected = si.Name == _selectedSidebarItemName;
-                if (si.Selected && SettingsWindowTitle != null) {
+                if (si.Selected && SettingsWindowTitle != null)
+                {
                     SettingsWindowTitle.Text = si.Title;
                 }
             }
@@ -265,45 +294,57 @@ namespace Ink_Canvas.Windows {
             if (StoragePane != null) StoragePane.Visibility = _selectedSidebarItemName == "StorageItem" ? Visibility.Visible : Visibility.Collapsed;
             if (SnapshotPane != null) SnapshotPane.Visibility = _selectedSidebarItemName == "SnapshotItem" ? Visibility.Visible : Visibility.Collapsed;
             if (AdvancedPane != null) AdvancedPane.Visibility = _selectedSidebarItemName == "AdvancedItem" ? Visibility.Visible : Visibility.Collapsed;
-            if (SettingsPaneScrollViewers != null) {
-                foreach (var sv in SettingsPaneScrollViewers) {
-                    if (sv != null) {
+            if (SettingsPaneScrollViewers != null)
+            {
+                foreach (var sv in SettingsPaneScrollViewers)
+                {
+                    if (sv != null)
+                    {
                         sv.ScrollToTop();
                     }
                 }
             }
         }
 
-        private void ScrollViewerEx_ScrollChanged(object sender, ScrollChangedEventArgs e) {
+        private void ScrollViewerEx_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
             var scrollViewer = (ScrollViewer)sender;
-            if (scrollViewer.VerticalOffset >= 10) {
+            if (scrollViewer.VerticalOffset >= 10)
+            {
                 DropShadowEffectTopBar.Opacity = 0.25;
-            } else {
+            }
+            else
+            {
                 DropShadowEffectTopBar.Opacity = 0;
             }
         }
 
-        private void ScrollBar_Scroll(object sender, RoutedEventArgs e) {
+        private void ScrollBar_Scroll(object sender, RoutedEventArgs e)
+        {
             var scrollbar = (ScrollBar)sender;
             var scrollviewer = scrollbar.FindAscendant<ScrollViewer>();
             if (scrollviewer != null) scrollviewer.ScrollToVerticalOffset(scrollbar.Track.Value);
         }
 
-        private void ScrollBarTrack_MouseEnter(object sender, MouseEventArgs e) {
+        private void ScrollBarTrack_MouseEnter(object sender, MouseEventArgs e)
+        {
             var border = (Border)sender;
-            if (border.Child is Track track) {
+            if (border.Child is Track track)
+            {
                 track.Width = 16;
                 track.Margin = new Thickness(0, 0, -2, 0);
                 var scrollbar = track.FindAscendant<ScrollBar>();
                 if (scrollbar != null) scrollbar.Width = 16;
                 var grid = track.FindAscendant<Grid>();
-                if (grid.FindDescendantByName("ScrollBarBorderTrackBackground") is Border backgroundBorder) {
+                if (grid.FindDescendantByName("ScrollBarBorderTrackBackground") is Border backgroundBorder)
+                {
                     backgroundBorder.Width = 8;
                     backgroundBorder.CornerRadius = new CornerRadius(4);
                     backgroundBorder.Opacity = 1;
                 }
-                var thumb = track.Thumb.Template.FindName("ScrollbarThumbEx", track.Thumb) ;
-                if (thumb != null) {
+                var thumb = track.Thumb.Template.FindName("ScrollbarThumbEx", track.Thumb);
+                if (thumb != null)
+                {
                     var _thumb = thumb as Border;
                     _thumb.CornerRadius = new CornerRadius(4);
                     _thumb.Width = 8;
@@ -313,23 +354,27 @@ namespace Ink_Canvas.Windows {
             }
         }
 
-        private void ScrollBarTrack_MouseLeave(object sender, MouseEventArgs e) {
+        private void ScrollBarTrack_MouseLeave(object sender, MouseEventArgs e)
+        {
             var border = (Border)sender;
             border.Background = new SolidColorBrush(Colors.Transparent);
             border.CornerRadius = new CornerRadius(0);
-            if (border.Child is Track track) {
+            if (border.Child is Track track)
+            {
                 track.Width = 6;
                 track.Margin = new Thickness(0, 0, 0, 0);
                 var scrollbar = track.FindAscendant<ScrollBar>();
                 if (scrollbar != null) scrollbar.Width = 6;
                 var grid = track.FindAscendant<Grid>();
-                if (grid.FindDescendantByName("ScrollBarBorderTrackBackground") is Border backgroundBorder) {
+                if (grid.FindDescendantByName("ScrollBarBorderTrackBackground") is Border backgroundBorder)
+                {
                     backgroundBorder.Width = 3;
                     backgroundBorder.CornerRadius = new CornerRadius(1.5);
                     backgroundBorder.Opacity = 0;
                 }
-                var thumb = track.Thumb.Template.FindName("ScrollbarThumbEx", track.Thumb) ;
-                if (thumb != null) {
+                var thumb = track.Thumb.Template.FindName("ScrollbarThumbEx", track.Thumb);
+                if (thumb != null)
+                {
                     var _thumb = thumb as Border;
                     _thumb.CornerRadius = new CornerRadius(1.5);
                     _thumb.Width = 3;
@@ -339,76 +384,90 @@ namespace Ink_Canvas.Windows {
             }
         }
 
-        private void ScrollbarThumb_MouseDown(object sender, MouseButtonEventArgs e) {
+        private void ScrollbarThumb_MouseDown(object sender, MouseButtonEventArgs e)
+        {
             var thumb = (Thumb)sender;
-            var border = thumb.Template.FindName("ScrollbarThumbEx",thumb);
+            var border = thumb.Template.FindName("ScrollbarThumbEx", thumb);
             ((Border)border).Background = new SolidColorBrush(Color.FromRgb(95, 95, 95));
         }
 
-        private void ScrollbarThumb_MouseUp(object sender, MouseButtonEventArgs e) {
+        private void ScrollbarThumb_MouseUp(object sender, MouseButtonEventArgs e)
+        {
             var thumb = (Thumb)sender;
-            var border = thumb.Template.FindName("ScrollbarThumbEx",thumb);
+            var border = thumb.Template.FindName("ScrollbarThumbEx", thumb);
             ((Border)border).Background = new SolidColorBrush(Color.FromRgb(138, 138, 138));
         }
 
         private Border _sidebarItemMouseDownBorder = null;
 
-        private void SidebarItem_MouseDown(object sender, MouseButtonEventArgs e) {
+        private void SidebarItem_MouseDown(object sender, MouseButtonEventArgs e)
+        {
             if (_sidebarItemMouseDownBorder != null || _sidebarItemMouseDownBorder == sender) return;
             _sidebarItemMouseDownBorder = (Border)sender;
             var bd = sender as Border;
             if (bd.FindDescendantByName("MouseFeedbackBorder") is Border feedbackBd) feedbackBd.Opacity = 0.12;
         }
 
-        private void SidebarItem_MouseUp(object sender, MouseButtonEventArgs e) {
+        private void SidebarItem_MouseUp(object sender, MouseButtonEventArgs e)
+        {
             if (_sidebarItemMouseDownBorder == null || _sidebarItemMouseDownBorder != sender) return;
             if (_sidebarItemMouseDownBorder.Tag is SidebarItem data) _selectedSidebarItemName = data.Name;
             SidebarItem_MouseLeave(sender, null);
             UpdateSidebarItemsSelection();
         }
 
-        private void SidebarItem_MouseLeave(object sender, MouseEventArgs e) {
+        private void SidebarItem_MouseLeave(object sender, MouseEventArgs e)
+        {
             if (_sidebarItemMouseDownBorder == null || _sidebarItemMouseDownBorder != sender) return;
             if (_sidebarItemMouseDownBorder.FindDescendantByName("MouseFeedbackBorder") is Border feedbackBd) feedbackBd.Opacity = 0;
             _sidebarItemMouseDownBorder = null;
         }
 
-        private void CloseButton_Click(object sender, MouseButtonEventArgs e) {
+        private void CloseButton_Click(object sender, MouseButtonEventArgs e)
+        {
             Close();
         }
 
-        private void SearchButton_Click(object sender, MouseButtonEventArgs e) {
+        private void SearchButton_Click(object sender, MouseButtonEventArgs e)
+        {
             // 搜索功能 - 可以显示搜索框或搜索对话框
         }
 
-        private void MenuButton_Click(object sender, MouseButtonEventArgs e) {
+        private void MenuButton_Click(object sender, MouseButtonEventArgs e)
+        {
             // 菜单功能 - 可以显示上下文菜单或选项菜单
         }
 
-        private void ToggleSwitch_Click(object sender, MouseButtonEventArgs e) {
+        private void ToggleSwitch_Click(object sender, MouseButtonEventArgs e)
+        {
             var border = sender as Border;
-            if (border != null) {
+            if (border != null)
+            {
                 // 切换开关状态
                 bool isOn = border.Background.ToString() == "#FF3584E4";
                 border.Background = isOn ? new SolidColorBrush(Color.FromRgb(225, 225, 225)) : new SolidColorBrush(Color.FromRgb(53, 132, 228));
-                
+
                 // 切换内部圆点的位置
                 var innerBorder = border.Child as Border;
-                if (innerBorder != null) {
+                if (innerBorder != null)
+                {
                     innerBorder.HorizontalAlignment = isOn ? HorizontalAlignment.Left : HorizontalAlignment.Right;
                 }
 
                 // 根据Tag处理不同的设置项
                 string tag = border.Tag?.ToString();
-                if (!string.IsNullOrEmpty(tag)) {
+                if (!string.IsNullOrEmpty(tag))
+                {
                     HandleSettingChange(tag, !isOn);
                 }
             }
         }
 
-        private void HandleSettingChange(string settingName, bool value) {
+        private void HandleSettingChange(string settingName, bool value)
+        {
             // 根据设置名称处理不同的设置项
-            switch (settingName) {
+            switch (settingName)
+            {
                 case "UseObviousCursor":
                     // 处理使用更加明显的画笔光标设置
                     break;
@@ -496,18 +555,22 @@ namespace Ink_Canvas.Windows {
             }
         }
 
-        private void OptionButton_Click(object sender, MouseButtonEventArgs e) {
+        private void OptionButton_Click(object sender, MouseButtonEventArgs e)
+        {
             var border = sender as Border;
-            if (border != null) {
+            if (border != null)
+            {
                 string tag = border.Tag?.ToString();
-                if (!string.IsNullOrEmpty(tag)) {
+                if (!string.IsNullOrEmpty(tag))
+                {
                     // 清除同组其他按钮的选中状态
                     ClearOtherOptionsInGroup(border, tag);
-                    
+
                     // 设置当前按钮为选中状态
                     border.Background = new SolidColorBrush(Color.FromRgb(225, 225, 225));
                     var textBlock = border.Child as TextBlock;
-                    if (textBlock != null) {
+                    if (textBlock != null)
+                    {
                         textBlock.FontWeight = FontWeights.Bold;
                     }
 
@@ -517,21 +580,27 @@ namespace Ink_Canvas.Windows {
             }
         }
 
-        private void ClearOtherOptionsInGroup(Border currentBorder, string currentTag) {
+        private void ClearOtherOptionsInGroup(Border currentBorder, string currentTag)
+        {
             // 获取当前按钮所在的父容器
             var parent = currentBorder.Parent as StackPanel;
-            if (parent != null) {
+            if (parent != null)
+            {
                 // 获取组名（Tag中下划线前的部分）
                 string groupName = currentTag.Split('_')[0];
-                
+
                 // 清除同组其他按钮的选中状态
-                foreach (var child in parent.Children) {
-                    if (child is Border border && border != currentBorder) {
+                foreach (var child in parent.Children)
+                {
+                    if (child is Border border && border != currentBorder)
+                    {
                         string childTag = border.Tag?.ToString();
-                        if (!string.IsNullOrEmpty(childTag) && childTag.StartsWith(groupName + "_")) {
+                        if (!string.IsNullOrEmpty(childTag) && childTag.StartsWith(groupName + "_"))
+                        {
                             border.Background = new SolidColorBrush(Colors.Transparent);
                             var textBlock = border.Child as TextBlock;
-                            if (textBlock != null) {
+                            if (textBlock != null)
+                            {
                                 textBlock.FontWeight = FontWeights.Normal;
                             }
                         }
@@ -540,14 +609,17 @@ namespace Ink_Canvas.Windows {
             }
         }
 
-        private void HandleOptionChange(string optionTag) {
+        private void HandleOptionChange(string optionTag)
+        {
             // 根据选项标签处理不同的选项变化
             string[] parts = optionTag.Split('_');
-            if (parts.Length >= 2) {
+            if (parts.Length >= 2)
+            {
                 string group = parts[0];
                 string value = parts[1];
-                
-                switch (group) {
+
+                switch (group)
+                {
                     case "EraserSize":
                         // 处理板擦橡皮大小设置
                         break;
@@ -620,7 +692,7 @@ namespace Ink_Canvas.Windows {
 
             // 查找面板中的所有自定义滑块控件
             var customSliders = FindCustomSlidersInPanel(pane);
-            
+
             foreach (var slider in customSliders)
             {
                 AddTouchSupportToCustomSlider(slider);
@@ -635,11 +707,11 @@ namespace Ink_Canvas.Windows {
         private List<CustomSliderInfo> FindCustomSlidersInPanel(DependencyObject panel)
         {
             var customSliders = new List<CustomSliderInfo>();
-            
+
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(panel); i++)
             {
                 var child = VisualTreeHelper.GetChild(panel, i);
-                
+
                 // 检查是否是自定义滑块控件（包含GnomeSliderThumb图片的Grid）
                 if (child is Grid grid)
                 {
@@ -649,11 +721,11 @@ namespace Ink_Canvas.Windows {
                         customSliders.Add(customSlider);
                     }
                 }
-                
+
                 // 递归查找子元素
                 customSliders.AddRange(FindCustomSlidersInPanel(child));
             }
-            
+
             return customSliders;
         }
 
@@ -668,7 +740,7 @@ namespace Ink_Canvas.Windows {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(grid); i++)
             {
                 var child = VisualTreeHelper.GetChild(grid, i);
-                
+
                 if (child is Image image && image.Source != null)
                 {
                     var sourceName = image.Source.ToString();
@@ -682,12 +754,12 @@ namespace Ink_Canvas.Windows {
                             TrackBorder = FindTrackBorderInGrid(grid),
                             ValueBorder = FindValueBorderInGrid(grid)
                         };
-                        
+
                         return customSlider;
                     }
                 }
             }
-            
+
             return null;
         }
 
@@ -701,7 +773,7 @@ namespace Ink_Canvas.Windows {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(grid); i++)
             {
                 var child = VisualTreeHelper.GetChild(grid, i);
-                
+
                 if (child is Border border && border.Background != null)
                 {
                     var brush = border.Background as SolidColorBrush;
@@ -711,7 +783,7 @@ namespace Ink_Canvas.Windows {
                     }
                 }
             }
-            
+
             return null;
         }
 
@@ -725,7 +797,7 @@ namespace Ink_Canvas.Windows {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(grid); i++)
             {
                 var child = VisualTreeHelper.GetChild(grid, i);
-                
+
                 if (child is Border border && border.Background != null)
                 {
                     var brush = border.Background as SolidColorBrush;
@@ -735,7 +807,7 @@ namespace Ink_Canvas.Windows {
                     }
                 }
             }
-            
+
             return null;
         }
 
@@ -881,7 +953,7 @@ namespace Ink_Canvas.Windows {
                 // 考虑拇指大小，计算有效轨道长度
                 var thumbSize = 21; // 根据XAML中的Width="21"
                 var effectiveWidth = trackWidth - thumbSize;
-                
+
                 // 计算相对位置（0-1之间），考虑拇指大小
                 var adjustedX = position.X - thumbSize / 2;
                 var relativePosition = Math.Max(0, Math.Min(1, adjustedX / effectiveWidth));
@@ -903,7 +975,7 @@ namespace Ink_Canvas.Windows {
                 {
                     var valueWidth = relativePosition * trackWidth;
                     customSlider.ValueBorder.Width = Math.Max(0, valueWidth);
-                    
+
                     // 调整值显示Border的位置
                     var valueMargin = customSlider.ValueBorder.Margin;
                     customSlider.ValueBorder.Margin = new Thickness(0, valueMargin.Top, trackWidth - valueWidth, valueMargin.Bottom);

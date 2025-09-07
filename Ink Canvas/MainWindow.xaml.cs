@@ -247,7 +247,7 @@ namespace Ink_Canvas
 
             // 为浮动栏按钮添加触摸事件支持
             AddTouchSupportToFloatingBarButtons();
-            
+
             // 为滑块控件添加触摸事件支持
             AddTouchSupportToSliders();
         }
@@ -301,7 +301,7 @@ namespace Ink_Canvas
                 foreach (var gest in gestures)
                     //Trace.WriteLine(string.Format("Gesture: {0}, Confidence: {1}", gest.ApplicationGesture, gest.RecognitionConfidence));
                     // 只有在PPT放映模式下才响应翻页手势
-                    if (StackPanelPPTControls.Visibility == Visibility.Visible && 
+                    if (StackPanelPPTControls.Visibility == Visibility.Visible &&
                         BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                         PPTManager?.IsInSlideShow == true)
                     {
@@ -1035,7 +1035,7 @@ namespace Ink_Canvas
                     // 取消选中元素
                     UnselectElement(currentSelectedElement);
                     currentSelectedElement = null;
-                    
+
                     // 重置为选择模式，确保用户可以继续选择其他元素
                     SetCurrentToolMode(InkCanvasEditingMode.Select);
                     // 更新模式缓存
@@ -2033,14 +2033,14 @@ namespace Ink_Canvas
                     MessageBox.Show("快捷键管理器尚未初始化，请稍后重试。", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                     return;
                 }
-                
+
                 // 暂时隐藏设置面板
                 BorderSettings.Visibility = Visibility.Hidden;
                 BorderSettingsMask.Visibility = Visibility.Hidden;
-                
+
                 // 创建快捷键设置窗口
                 var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
-                
+
                 // 设置窗口关闭事件，用于在快捷键设置窗口关闭后恢复设置面板
                 hotkeySettingsWindow.Closed += (s, e) =>
                 {
@@ -2048,7 +2048,7 @@ namespace Ink_Canvas
                     BorderSettings.Visibility = Visibility.Visible;
                     BorderSettingsMask.Visibility = Visibility.Visible;
                 };
-                
+
                 // 显示快捷键设置窗口
                 hotkeySettingsWindow.ShowDialog();
             }
@@ -2057,7 +2057,7 @@ namespace Ink_Canvas
                 // 确保在发生错误时也恢复设置面板显示
                 BorderSettings.Visibility = Visibility.Visible;
                 BorderSettingsMask.Visibility = Visibility.Visible;
-                
+
                 LogHelper.WriteLogToFile($"打开快捷键设置窗口时出错: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show($"打开快捷键设置窗口时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -2158,13 +2158,13 @@ namespace Ink_Canvas
                 var toggle = sender as ToggleSwitch;
                 Settings.PowerPointSettings.ShowGestureButtonInSlideShow = toggle != null && toggle.IsOn;
                 SaveSettingsToFile();
-                
+
                 // 如果当前在PPT放映模式，需要立即更新手势按钮的显示状态
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                 {
                     UpdateGestureButtonVisibilityInPPTMode();
                 }
-                
+
                 LogHelper.WriteLogToFile($"PPT放映模式显示手势按钮已{(Settings.PowerPointSettings.ShowGestureButtonInSlideShow ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
@@ -2276,11 +2276,11 @@ namespace Ink_Canvas
             {
                 // 检查启动参数中是否有.icstk文件
                 string icstkFile = FileAssociationManager.GetIcstkFileFromArgs(App.StartArgs);
-                
+
                 if (!string.IsNullOrEmpty(icstkFile))
                 {
                     LogHelper.WriteLogToFile($"检测到命令行参数中的.icstk文件: {icstkFile}", LogHelper.LogType.Event);
-                    
+
                     // 延迟执行，确保UI已完全加载
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -2433,10 +2433,10 @@ namespace Ink_Canvas
 
             // 计算触摸位置对应的滑块值
             var touchPoint = e.GetTouchPoint(slider);
-            
+
             // 使用更精确的位置计算方法
             UpdateSliderValueFromPositionImproved(slider, touchPoint.Position);
-            
+
             e.Handled = true;
         }
 
@@ -2449,7 +2449,7 @@ namespace Ink_Canvas
 
             // 释放触摸捕获
             slider.ReleaseTouchCapture(e.TouchDevice);
-            
+
             e.Handled = true;
         }
 
@@ -2472,7 +2472,7 @@ namespace Ink_Canvas
             {
                 UpdateSliderValueFromPositionImproved(slider, stylusPoint[0].ToPoint());
             }
-            
+
             e.Handled = true;
         }
 
@@ -2485,7 +2485,7 @@ namespace Ink_Canvas
 
             // 释放手写笔捕获
             slider.ReleaseStylusCapture();
-            
+
             e.Handled = true;
         }
 
@@ -2511,9 +2511,9 @@ namespace Ink_Canvas
 
                 // 获取轨道的实际边界
                 var trackBounds = track.TransformToAncestor(slider).TransformBounds(new Rect(0, 0, track.ActualWidth, track.ActualHeight));
-                
+
                 double relativePosition = 0;
-                
+
                 if (slider.Orientation == System.Windows.Controls.Orientation.Horizontal)
                 {
                     // 水平滑块
@@ -2537,7 +2537,7 @@ namespace Ink_Canvas
 
                 // 计算新的滑块值
                 var newValue = slider.Minimum + relativePosition * (slider.Maximum - slider.Minimum);
-                
+
                 // 如果启用了吸附到刻度，则调整到最近的刻度
                 if (slider.IsSnapToTickEnabled && slider.TickFrequency > 0)
                 {
@@ -2570,7 +2570,7 @@ namespace Ink_Canvas
             {
                 // 使用更简单直接的方法计算滑块值
                 double relativePosition = 0;
-                
+
                 if (slider.Orientation == System.Windows.Controls.Orientation.Horizontal)
                 {
                     // 水平滑块 - 使用滑块的实际宽度
@@ -2600,7 +2600,7 @@ namespace Ink_Canvas
 
                 // 计算新的滑块值
                 var newValue = slider.Minimum + relativePosition * (slider.Maximum - slider.Minimum);
-                
+
                 // 如果启用了吸附到刻度，则调整到最近的刻度
                 if (slider.IsSnapToTickEnabled && slider.TickFrequency > 0)
                 {
@@ -2633,7 +2633,7 @@ namespace Ink_Canvas
                 if (toggle != null)
                 {
                     Settings.ModeSettings.IsPPTOnlyMode = toggle.IsOn;
-                    
+
                     // 如果切换到仅PPT模式，立即隐藏主窗口
                     if (Settings.ModeSettings.IsPPTOnlyMode)
                     {

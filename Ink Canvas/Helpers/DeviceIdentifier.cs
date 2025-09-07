@@ -1092,7 +1092,7 @@ namespace Ink_Canvas.Helpers
                 {
                     int versionDiff = CalculateVersionGenerationDifference(localVersion, updateVersion);
                     LogHelper.WriteLogToFile($"DeviceIdentifier | 无法获取版本发布时间，使用版本号差异判断 - 本地版本: {localVersion}, 远程版本: {updateVersion}, 代数差异: {versionDiff}");
-                    
+
                     // 当版本号代数差异大于3时自动更新
                     if (versionDiff > 3)
                     {

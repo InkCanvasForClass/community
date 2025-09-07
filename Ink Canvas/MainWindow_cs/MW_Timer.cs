@@ -127,15 +127,15 @@ namespace Ink_Canvas
         {
             DateTime localTime = DateTime.Now;
             DateTime displayTime = localTime; // 默认使用本地时间
-            
+
             try
             {
                 DateTime networkTime = await GetNetworkTimeAsync();
-                
+
                 // 计算时间差
                 TimeSpan timeDifference = networkTime - localTime;
                 double timeDifferenceMinutes = Math.Abs(timeDifference.TotalMinutes);
-                
+
                 // 如果网络时间与本地时间相差不超过1分钟，则使用本地时间
                 // 否则使用网络时间
                 displayTime = timeDifferenceMinutes <= 1.0 ? localTime : networkTime;
@@ -145,7 +145,7 @@ namespace Ink_Canvas
                 // 网络时间获取失败时，使用本地时间
                 displayTime = localTime;
             }
-            
+
             // 只更新时间，日期由原有逻辑定时更新即可
             Dispatcher.Invoke(() =>
             {
@@ -313,7 +313,7 @@ namespace Ink_Canvas
             var windowTitle = ForegroundWindowInfo.WindowTitle();
             var windowRect = ForegroundWindowInfo.WindowRect();
             var windowProcessName = ForegroundWindowInfo.ProcessName();
-            
+
             // 检测希沃白板五的批注面板
             // 希沃白板五的批注面板通常具有以下特征：
             // 1. 窗口标题为空或包含特定关键词
@@ -323,32 +323,32 @@ namespace Ink_Canvas
             {
                 // 检测希沃白板五的批注工具栏
                 // 批注工具栏通常高度在50-200像素之间，宽度在200-800像素之间
-                if (windowRect.Height >= 50 && windowRect.Height <= 200 && 
+                if (windowRect.Height >= 50 && windowRect.Height <= 200 &&
                     windowRect.Width >= 200 && windowRect.Width <= 800)
                 {
                     return true;
                 }
-                
+
                 // 检测希沃白板五的二级菜单面板
                 // 二级菜单面板通常高度在100-400像素之间，宽度在150-400像素之间
-                if (windowRect.Height >= 100 && windowRect.Height <= 400 && 
+                if (windowRect.Height >= 100 && windowRect.Height <= 400 &&
                     windowRect.Width >= 150 && windowRect.Width <= 400)
                 {
                     return true;
                 }
             }
-            
+
             // 检测鸿合软件的批注面板
             if (windowProcessName == "HiteCamera" || windowProcessName == "HiteTouchPro" || windowProcessName == "HiteLightBoard")
             {
                 // 鸿合软件的批注面板特征
-                if (windowRect.Height >= 50 && windowRect.Height <= 300 && 
+                if (windowRect.Height >= 50 && windowRect.Height <= 300 &&
                     windowRect.Width >= 200 && windowRect.Width <= 600)
                 {
                     return true;
                 }
             }
-            
+
             // 原有的检测逻辑（保持向后兼容）
             return windowTitle.Length == 0 && windowRect.Height < 500;
         }

@@ -181,7 +181,7 @@ namespace Ink_Canvas.Helpers
                     bool isInSlideShow = _mainWindow.PPTManager?.IsInSlideShow == true;
                     int slidesCount = _mainWindow.PPTManager?.SlidesCount ?? 0;
                     bool hasValidPageCount = slidesCount > 0;
-                    
+
                     bool shouldShowButtons = ShowPPTButton &&
                                           _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                                           isInSlideShow &&

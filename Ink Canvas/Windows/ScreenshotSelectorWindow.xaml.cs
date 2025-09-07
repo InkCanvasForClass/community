@@ -81,7 +81,7 @@ namespace Ink_Canvas
         private void BindControlPointEvents()
         {
             // 绑定所有控制点的鼠标事件
-            var controlPoints = new[] 
+            var controlPoints = new[]
             {
                 TopLeftControl, TopRightControl, BottomLeftControl, BottomRightControl,
                 TopControl, BottomControl, LeftControl, RightControl
@@ -92,11 +92,11 @@ namespace Ink_Canvas
                 control.MouseLeftButtonDown += ControlPoint_MouseLeftButtonDown;
                 control.MouseLeftButtonUp += ControlPoint_MouseLeftButtonUp;
                 control.MouseMove += ControlPoint_MouseMove;
-                
+
                 // 确保控制点能够接收鼠标事件
                 control.IsHitTestVisible = true;
                 control.Focusable = false;
-                
+
                 // 设置控制点的Z-index，确保它们在最上层
                 WpfCanvas.SetZIndex(control, 1003);
             }
@@ -142,7 +142,7 @@ namespace Ink_Canvas
         {
             // 重置所有选择状态
             ResetSelectionState();
-            
+
             _isFreehandMode = false;
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
@@ -154,7 +154,7 @@ namespace Ink_Canvas
         {
             // 重置所有选择状态
             ResetSelectionState();
-            
+
             _isFreehandMode = true;
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
@@ -169,7 +169,7 @@ namespace Ink_Canvas
             {
                 return;
             }
-            
+
             ConfirmSelection();
         }
 
@@ -183,10 +183,10 @@ namespace Ink_Canvas
             // 检查是否点击了UI元素，如果是则不处理选择
             var hitElement = e.Source as FrameworkElement;
             if (hitElement != null && (
-                hitElement is Ellipse || 
-                hitElement is System.Windows.Controls.Button || 
-                hitElement is Border || 
-                hitElement is TextBlock || 
+                hitElement is Ellipse ||
+                hitElement is System.Windows.Controls.Button ||
+                hitElement is Border ||
+                hitElement is TextBlock ||
                 hitElement is StackPanel ||
                 hitElement is Separator ||
                 hitElement.Name == "SizeInfoBorder" ||
@@ -222,7 +222,7 @@ namespace Ink_Canvas
                 _freehandPolyline.Points.Clear();
                 _freehandPoints.Add(_startPoint);
                 _freehandPolyline.Points.Add(_startPoint);
-                
+
                 // 确保自由绘制路径可见
                 _freehandPolyline.Visibility = Visibility.Visible;
             }
@@ -259,7 +259,7 @@ namespace Ink_Canvas
                     // 自由绘制模式：添加点到路径
                     _freehandPoints.Add(_currentPoint);
                     _freehandPolyline.Points.Add(_currentPoint);
-                    
+
                     // 确保自由绘制路径可见
                     _freehandPolyline.Visibility = Visibility.Visible;
                 }
@@ -291,7 +291,7 @@ namespace Ink_Canvas
                     {
                         // 创建路径的副本，避免修改原始列表
                         var pathPoints = new List<Point>(_freehandPoints);
-                        
+
                         // 简化路径处理，不强制闭合
                         // 如果路径没有闭合，自动添加起始点
                         if (pathPoints.Count > 0)
@@ -301,13 +301,13 @@ namespace Ink_Canvas
 
                         // 优化路径：移除重复点和过于接近的点，提高路径质量
                         var optimizedPath = OptimizePath(pathPoints);
-                        
+
                         // 保存选择的路径
                         SelectedPath = optimizedPath;
 
                         // 计算边界矩形用于截图
                         var bounds = CalculatePathBounds(optimizedPath);
-                        
+
                         // 确保边界矩形有效
                         if (bounds.Width >= 0 && bounds.Height >= 0)
                         {
@@ -325,7 +325,7 @@ namespace Ink_Canvas
                             return;
                         }
                     }
-                    
+
                     // 如果自由绘制失败，清除路径并继续
                     _freehandPoints.Clear();
                     _freehandPolyline.Points.Clear();
@@ -363,7 +363,7 @@ namespace Ink_Canvas
 
             _isMoving = true;
             _lastMousePosition = e.GetPosition(this);
-            
+
             // 确定当前控制点类型
             var ellipse = sender as Ellipse;
             if (ellipse == TopLeftControl) _activeControlPoint = ControlPointType.TopLeft;
@@ -486,26 +486,26 @@ namespace Ink_Canvas
             // 更新角控制点位置
             WpfCanvas.SetLeft(TopLeftControl, rect.Left - 4);
             WpfCanvas.SetTop(TopLeftControl, rect.Top - 4);
-            
+
             WpfCanvas.SetLeft(TopRightControl, rect.Right - 4);
             WpfCanvas.SetTop(TopRightControl, rect.Top - 4);
-            
+
             WpfCanvas.SetLeft(BottomLeftControl, rect.Left - 4);
             WpfCanvas.SetTop(BottomLeftControl, rect.Bottom - 4);
-            
+
             WpfCanvas.SetLeft(BottomRightControl, rect.Right - 4);
             WpfCanvas.SetTop(BottomRightControl, rect.Bottom - 4);
 
             // 更新边控制点位置
             WpfCanvas.SetLeft(TopControl, rect.Left + rect.Width / 2 - 4);
             WpfCanvas.SetTop(TopControl, rect.Top - 4);
-            
+
             WpfCanvas.SetLeft(BottomControl, rect.Left + rect.Width / 2 - 4);
             WpfCanvas.SetTop(BottomControl, rect.Bottom - 4);
-            
+
             WpfCanvas.SetLeft(LeftControl, rect.Left - 4);
             WpfCanvas.SetTop(LeftControl, rect.Top + rect.Height / 2 - 4);
-            
+
             WpfCanvas.SetLeft(RightControl, rect.Right - 4);
             WpfCanvas.SetTop(RightControl, rect.Top + rect.Height / 2 - 4);
         }
@@ -519,7 +519,7 @@ namespace Ink_Canvas
             WpfCanvas.SetTop(SelectionRectangle, rect.Y);
             SelectionRectangle.Width = rect.Width;
             SelectionRectangle.Height = rect.Height;
-            
+
             // 在选择过程中，禁用选择矩形的鼠标事件，避免干扰选择操作
             if (_isSelecting)
             {
@@ -547,7 +547,7 @@ namespace Ink_Canvas
             {
                 // 更新选择区域的几何体
                 SelectionClipGeometry.Rect = selectionRect;
-                
+
                 // 显示透明遮罩，隐藏原始遮罩
                 TransparentSelectionMask.Visibility = Visibility.Visible;
                 OverlayRectangle.Visibility = Visibility.Collapsed;
@@ -569,7 +569,7 @@ namespace Ink_Canvas
             WpfCanvas.SetTop(SelectionRectangle, rect.Y);
             SelectionRectangle.Width = rect.Width;
             SelectionRectangle.Height = rect.Height;
-            
+
             // 确保选择矩形在调整模式下能够接收鼠标事件
             if (_isAdjusting)
             {
@@ -612,7 +612,7 @@ namespace Ink_Canvas
             {
                 return;
             }
-            
+
             if (_isAdjusting)
             {
                 // 转换为屏幕坐标，考虑DPI缩放
@@ -733,7 +733,7 @@ namespace Ink_Canvas
             _isMoving = true;
             _activeControlPoint = ControlPointType.Move;
             _lastMousePosition = e.GetPosition(this);
-            
+
             // 捕获鼠标到选择矩形
             SelectionRectangle.CaptureMouse();
             e.Handled = true;
@@ -793,12 +793,12 @@ namespace Ink_Canvas
             _isAdjusting = false;
             _isMoving = false;
             _activeControlPoint = ControlPointType.None;
-            
+
             // 清除自由绘制的内容
             _freehandPoints.Clear();
             _freehandPolyline.Points.Clear();
             _freehandPolyline.Visibility = Visibility.Collapsed;
-            
+
             // 清除矩形选择的内容
             SelectionRectangle.Visibility = Visibility.Collapsed;
             SelectionRectangle.IsHitTestVisible = false;
@@ -806,23 +806,23 @@ namespace Ink_Canvas
             SizeInfoBorder.Visibility = Visibility.Collapsed;
             SelectionPath.Visibility = Visibility.Collapsed;
             AdjustModeHint.Visibility = Visibility.Collapsed;
-            
+
             // 重置遮罩
             TransparentSelectionMask.Visibility = Visibility.Collapsed;
             OverlayRectangle.Visibility = Visibility.Visible;
-            
+
             // 释放鼠标捕获
             if (IsMouseCaptured)
             {
                 ReleaseMouseCapture();
             }
-            
+
             // 释放选择矩形的鼠标捕获
             if (SelectionRectangle.IsMouseCaptured)
             {
                 SelectionRectangle.ReleaseMouseCapture();
             }
-            
+
             // 重置选择区域
             _currentSelection = new Rect();
             SelectedArea = null;

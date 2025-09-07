@@ -1,4 +1,5 @@
-﻿using OSVersionExtension;
+﻿using iNKORE.UI.WPF.Helpers;
+using OSVersionExtension;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,31 +14,38 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using iNKORE.UI.WPF.Helpers;
 
-namespace Ink_Canvas.Windows.SettingsViews {
+namespace Ink_Canvas.Windows.SettingsViews
+{
     /// <summary>
     /// AboutPanel.xaml 的交互逻辑
     /// </summary>
-    public partial class AboutPanel : UserControl {
-        public AboutPanel() {
+    public partial class AboutPanel : UserControl
+    {
+        public AboutPanel()
+        {
             InitializeComponent();
 
             // 关于页面图片横幅
-            if (File.Exists(App.RootPath + "icc-about-illustrations.png")) {
-                try {
+            if (File.Exists(App.RootPath + "icc-about-illustrations.png"))
+            {
+                try
+                {
                     CopyrightBannerImage.Visibility = Visibility.Visible;
                     CopyrightBannerImage.Source =
                         new BitmapImage(new Uri($"file://{App.RootPath + "icc-about-illustrations.png"}"));
                 }
                 catch { }
-            } else {
+            }
+            else
+            {
                 CopyrightBannerImage.Visibility = Visibility.Collapsed;
             }
 
             // 关于页面构建时间
             var buildTime = FileBuildTimeHelper.GetBuildDateTime(Assembly.GetExecutingAssembly());
-            if (buildTime != null) {
+            if (buildTime != null)
+            {
                 var bt = ((DateTimeOffset)buildTime).LocalDateTime;
                 var m = bt.Month.ToString().PadLeft(2, '0');
                 var d = bt.Day.ToString().PadLeft(2, '0');
@@ -52,7 +60,8 @@ namespace Ink_Canvas.Windows.SettingsViews {
             AboutSystemVersion.Text = $"{OSVersion.GetOperatingSystem()} {OSVersion.GetOSVersion().Version}";
 
             // 关于页面触摸设备
-            var _t_touch = new Thread(() => {
+            var _t_touch = new Thread(() =>
+            {
                 var touchcount = TouchTabletDetectHelper.GetTouchTabletDevices().Count;
                 var support = TouchTabletDetectHelper.IsTouchEnabled();
                 Dispatcher.BeginInvoke(() =>
@@ -61,7 +70,8 @@ namespace Ink_Canvas.Windows.SettingsViews {
             _t_touch.Start();
         }
 
-        public static class TouchTabletDetectHelper {
+        public static class TouchTabletDetectHelper
+        {
             [DllImport("user32.dll")]
             public static extern int GetSystemMetrics(int nIndex);
 
@@ -92,9 +102,10 @@ namespace Ink_Canvas.Windows.SettingsViews {
 
                 ManagementObjectCollection collection;
                 using (var searcher = new ManagementObjectSearcher(@"Select * From Win32_PnPEntity"))
-                    collection = searcher.Get();      
+                    collection = searcher.Get();
 
-                foreach (var device in collection) {
+                foreach (var device in collection)
+                {
                     var name = new StringBuilder((string)device.GetPropertyValue("Name")).ToString();
                     if (!name.Contains("Pentablet")) continue;
                     devices.Add(new USBDeviceInfo(
@@ -109,7 +120,8 @@ namespace Ink_Canvas.Windows.SettingsViews {
             }
         }
 
-        public static class FileBuildTimeHelper {
+        public static class FileBuildTimeHelper
+        {
             public struct _IMAGE_FILE_HEADER
             {
                 public ushort Machine;
@@ -146,46 +158,55 @@ namespace Ink_Canvas.Windows.SettingsViews {
                         pinnedBuffer.Free();
                     }
                 }
-                else 
+                else
                 {
                     return null;
                 }
             }
         }
 
-        public event EventHandler<RoutedEventArgs> IsTopBarNeedShadowEffect; 
+        public event EventHandler<RoutedEventArgs> IsTopBarNeedShadowEffect;
         public event EventHandler<RoutedEventArgs> IsTopBarNeedNoShadowEffect;
 
-        private void ScrollViewerEx_ScrollChanged(object sender, ScrollChangedEventArgs e) {
+        private void ScrollViewerEx_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
             var scrollViewer = (ScrollViewer)sender;
-            if (scrollViewer.VerticalOffset >= 10) {
+            if (scrollViewer.VerticalOffset >= 10)
+            {
                 IsTopBarNeedShadowEffect?.Invoke(this, new RoutedEventArgs());
-            } else {
+            }
+            else
+            {
                 IsTopBarNeedNoShadowEffect?.Invoke(this, new RoutedEventArgs());
             }
         }
 
-        private void ScrollBar_Scroll(object sender, RoutedEventArgs e) {
+        private void ScrollBar_Scroll(object sender, RoutedEventArgs e)
+        {
             var scrollbar = (ScrollBar)sender;
             var scrollviewer = scrollbar.FindAscendant<ScrollViewer>();
             if (scrollviewer != null) scrollviewer.ScrollToVerticalOffset(scrollbar.Track.Value);
         }
 
-        private void ScrollBarTrack_MouseEnter(object sender, MouseEventArgs e) {
+        private void ScrollBarTrack_MouseEnter(object sender, MouseEventArgs e)
+        {
             var border = (Border)sender;
-            if (border.Child is Track track) {
+            if (border.Child is Track track)
+            {
                 track.Width = 16;
                 track.Margin = new Thickness(0, 0, -2, 0);
                 var scrollbar = track.FindAscendant<ScrollBar>();
                 if (scrollbar != null) scrollbar.Width = 16;
                 var grid = track.FindAscendant<Grid>();
-                if (grid.FindDescendantByName("ScrollBarBorderTrackBackground") is Border backgroundBorder) {
+                if (grid.FindDescendantByName("ScrollBarBorderTrackBackground") is Border backgroundBorder)
+                {
                     backgroundBorder.Width = 8;
                     backgroundBorder.CornerRadius = new CornerRadius(4);
                     backgroundBorder.Opacity = 1;
                 }
-                var thumb = track.Thumb.Template.FindName("ScrollbarThumbEx", track.Thumb) ;
-                if (thumb != null) {
+                var thumb = track.Thumb.Template.FindName("ScrollbarThumbEx", track.Thumb);
+                if (thumb != null)
+                {
                     var _thumb = thumb as Border;
                     _thumb.CornerRadius = new CornerRadius(4);
                     _thumb.Width = 8;
@@ -195,23 +216,27 @@ namespace Ink_Canvas.Windows.SettingsViews {
             }
         }
 
-        private void ScrollBarTrack_MouseLeave(object sender, MouseEventArgs e) {
+        private void ScrollBarTrack_MouseLeave(object sender, MouseEventArgs e)
+        {
             var border = (Border)sender;
             border.Background = new SolidColorBrush(Colors.Transparent);
             border.CornerRadius = new CornerRadius(0);
-            if (border.Child is Track track) {
+            if (border.Child is Track track)
+            {
                 track.Width = 6;
                 track.Margin = new Thickness(0, 0, 0, 0);
                 var scrollbar = track.FindAscendant<ScrollBar>();
                 if (scrollbar != null) scrollbar.Width = 6;
                 var grid = track.FindAscendant<Grid>();
-                if (grid.FindDescendantByName("ScrollBarBorderTrackBackground") is Border backgroundBorder) {
+                if (grid.FindDescendantByName("ScrollBarBorderTrackBackground") is Border backgroundBorder)
+                {
                     backgroundBorder.Width = 3;
                     backgroundBorder.CornerRadius = new CornerRadius(1.5);
                     backgroundBorder.Opacity = 0;
                 }
-                var thumb = track.Thumb.Template.FindName("ScrollbarThumbEx", track.Thumb) ;
-                if (thumb != null) {
+                var thumb = track.Thumb.Template.FindName("ScrollbarThumbEx", track.Thumb);
+                if (thumb != null)
+                {
                     var _thumb = thumb as Border;
                     _thumb.CornerRadius = new CornerRadius(1.5);
                     _thumb.Width = 3;
@@ -221,15 +246,17 @@ namespace Ink_Canvas.Windows.SettingsViews {
             }
         }
 
-        private void ScrollbarThumb_MouseDown(object sender, MouseButtonEventArgs e) {
+        private void ScrollbarThumb_MouseDown(object sender, MouseButtonEventArgs e)
+        {
             var thumb = (Thumb)sender;
-            var border = thumb.Template.FindName("ScrollbarThumbEx",thumb);
+            var border = thumb.Template.FindName("ScrollbarThumbEx", thumb);
             ((Border)border).Background = new SolidColorBrush(Color.FromRgb(95, 95, 95));
         }
 
-        private void ScrollbarThumb_MouseUp(object sender, MouseButtonEventArgs e) {
+        private void ScrollbarThumb_MouseUp(object sender, MouseButtonEventArgs e)
+        {
             var thumb = (Thumb)sender;
-            var border = thumb.Template.FindName("ScrollbarThumbEx",thumb);
+            var border = thumb.Template.FindName("ScrollbarThumbEx", thumb);
             ((Border)border).Background = new SolidColorBrush(Color.FromRgb(138, 138, 138));
         }
     }

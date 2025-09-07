@@ -42,7 +42,7 @@ namespace Ink_Canvas.Windows
                     // 加载当前快捷键（包括配置文件中的）
                     LoadCurrentHotkeys();
                     SetupEventHandlers();
-                    
+
                     // 初始化鼠标模式快捷键设置
                     InitializeMouseModeSettings();
                 }
@@ -67,10 +67,10 @@ namespace Ink_Canvas.Windows
             {
                 // 设置窗口启动位置为屏幕中心
                 WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                
+
                 // 确保窗口在显示时获得焦点
                 ShowInTaskbar = true;
-                
+
                 LogHelper.WriteLogToFile("快捷键设置窗口属性已设置");
             }
             catch (Exception ex)
@@ -274,10 +274,10 @@ namespace Ink_Canvas.Windows
             {
                 // 设置开关的初始状态
                 ToggleSwitchEnableHotkeysInMouseMode.IsOn = MainWindow.Settings.Appearance.EnableHotkeysInMouseMode;
-                
+
                 // 绑定开关变化事件
                 ToggleSwitchEnableHotkeysInMouseMode.Toggled += OnMouseModeHotkeyToggleChanged;
-                
+
                 LogHelper.WriteLogToFile($"鼠标模式快捷键设置已初始化: {MainWindow.Settings.Appearance.EnableHotkeysInMouseMode}");
             }
             catch (Exception ex)
@@ -295,16 +295,16 @@ namespace Ink_Canvas.Windows
             {
                 // 更新设置
                 MainWindow.Settings.Appearance.EnableHotkeysInMouseMode = ToggleSwitchEnableHotkeysInMouseMode.IsOn;
-                
+
                 // 立即保存设置
                 MainWindow.SaveSettingsToFile();
-                
+
                 // 如果快捷键管理器存在，立即更新快捷键状态
                 if (_hotkeyManager != null)
                 {
                     // 检查当前是否处于鼠标模式
                     bool isCurrentlyMouseMode = _mainWindow.inkCanvas.EditingMode == InkCanvasEditingMode.None;
-                    
+
                     // 如果当前处于鼠标模式且关闭了开关，立即禁用快捷键
                     if (isCurrentlyMouseMode && !ToggleSwitchEnableHotkeysInMouseMode.IsOn)
                     {
@@ -317,7 +317,7 @@ namespace Ink_Canvas.Windows
                         _hotkeyManager.UpdateHotkeyStateForToolMode(isCurrentlyMouseMode);
                     }
                 }
-                
+
                 LogHelper.WriteLogToFile($"鼠标模式快捷键设置已更新: {MainWindow.Settings.Appearance.EnableHotkeysInMouseMode}", LogHelper.LogType.Event);
             }
             catch (Exception ex)

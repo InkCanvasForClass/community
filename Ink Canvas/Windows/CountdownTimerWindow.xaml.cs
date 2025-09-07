@@ -359,7 +359,8 @@ namespace Ink_Canvas
                 // Set to center
                 double dpiScaleX = 1, dpiScaleY = 1;
                 PresentationSource source = PresentationSource.FromVisual(this);
-                if (source != null) {
+                if (source != null)
+                {
                     dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
                     dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
                 }

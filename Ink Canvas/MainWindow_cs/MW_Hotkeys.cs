@@ -8,8 +8,8 @@ namespace Ink_Canvas
         private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             // 只有在PPT放映模式下才响应鼠标滚轮翻页
-            if (StackPanelPPTControls.Visibility != Visibility.Visible || 
-                currentMode != 0 || 
+            if (StackPanelPPTControls.Visibility != Visibility.Visible ||
+                currentMode != 0 ||
                 BtnPPTSlideShowEnd.Visibility != Visibility.Visible ||
                 PPTManager?.IsInSlideShow != true) return;
 
@@ -29,8 +29,8 @@ namespace Ink_Canvas
         private void Main_Grid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             // 只有在PPT放映模式下才响应键盘翻页快捷键
-            if (StackPanelPPTControls.Visibility != Visibility.Visible || 
-                currentMode != 0 || 
+            if (StackPanelPPTControls.Visibility != Visibility.Visible ||
+                currentMode != 0 ||
                 BtnPPTSlideShowEnd.Visibility != Visibility.Visible ||
                 PPTManager?.IsInSlideShow != true) return;
 
