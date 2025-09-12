@@ -20,7 +20,7 @@ body:
       label: 需求动机 | Motivation
       description: 为什么需要这个功能？| Why do you need this feature?
     validations:
-      required: false
+      required: true
   - type: textarea
     id: design
     attributes:
