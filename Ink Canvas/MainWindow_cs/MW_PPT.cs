@@ -1133,24 +1133,6 @@ namespace Ink_Canvas
         public static bool IsShowingRestoreHiddenSlidesWindow;
         private static bool IsShowingAutoplaySlidesWindow;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         private void BtnPPTSlidesUp_Click(object sender, RoutedEventArgs e)
         {
             Application.Current.Dispatcher.Invoke(() =>
