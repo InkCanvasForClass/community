@@ -744,7 +744,6 @@ namespace Ink_Canvas
                     // 使用防抖机制处理页面切换
                     HandleSlideSwitchWithDebounce(currentSlide, totalSlides);
 
-                    LogHelper.WriteLogToFile($"幻灯片切换到第{currentSlide}页", LogHelper.LogType.Trace);
                 });
             }
             catch (Exception ex)
@@ -1314,7 +1313,6 @@ namespace Ink_Canvas
                     if (_pptManager?.TryNavigateNext() == true)
                     {
                         // 翻页成功，等待事件处理墨迹切换
-                        LogHelper.WriteLogToFile("成功切换到下一页", LogHelper.LogType.Trace);
                     }
                     else
                     {

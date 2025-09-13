@@ -1,6 +1,7 @@
 ﻿using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Ink;
@@ -71,7 +72,20 @@ namespace Ink_Canvas.Helpers
                     _currentPresentationId = GeneratePresentationId(presentation);
 
                     // 重新初始化内存流数组
-                    var slideCount = presentation.Slides.Count;
+                    int slideCount = 0;
+                    try
+                    {
+                        slideCount = presentation.Slides.Count;
+                    }
+                    catch (COMException comEx)
+                    {
+                        var hr = (uint)comEx.HResult;
+                        if (hr == 0x80048010)
+                        {
+                            return;
+                        }
+                        throw; 
+                    }
                     _memoryStreams = new MemoryStream[slideCount + 2];
 
                     // 如果启用自动保存，尝试加载已保存的墨迹
@@ -122,7 +136,6 @@ namespace Ink_Canvas.Helpers
 
                         if (ms.Length > 0)
                         {
-                            LogHelper.WriteLogToFile($"已保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
                         }
                     }
                 }
@@ -265,7 +278,23 @@ namespace Ink_Canvas.Helpers
 
                     // 保存所有页面的墨迹
                     int savedCount = 0;
-                    for (int i = 1; i <= presentation.Slides.Count && i < _memoryStreams.Length; i++)
+                    int slideCount = 0;
+                    
+                    try
+                    {
+                        slideCount = presentation.Slides.Count;
+                    }
+                    catch (COMException comEx)
+                    {
+                        var hr = (uint)comEx.HResult;
+                        if (hr == 0x80048010) 
+                        {
+                            return;
+                        }
+                        throw; 
+                    }
+                    
+                    for (int i = 1; i <= slideCount && i < _memoryStreams.Length; i++)
                     {
                         if (_memoryStreams[i] != null)
                         {
@@ -281,7 +310,6 @@ namespace Ink_Canvas.Helpers
                                     File.WriteAllBytes(filePath, srcBuf);
                                     savedCount++;
 
-                                    LogHelper.WriteLogToFile($"已保存第{i}页墨迹，大小: {byteLength} bytes", LogHelper.LogType.Trace);
                                 }
                                 else
                                 {

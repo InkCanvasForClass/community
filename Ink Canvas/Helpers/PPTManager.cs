@@ -514,7 +514,6 @@ namespace Ink_Canvas.Helpers
                                 if (slideCount > 0)
                                 {
                                     SlidesCount = slideCount;
-                                    LogHelper.WriteLogToFile($"成功读取PPT页数: {slideCount}", LogHelper.LogType.Trace);
                                 }
                                 else
                                 {
@@ -661,7 +660,6 @@ namespace Ink_Canvas.Helpers
             {
                 UpdateCurrentPresentationInfo();
                 SlideShowNextSlide?.Invoke(wn);
-                LogHelper.WriteLogToFile($"幻灯片切换到第{wn?.View?.CurrentShowPosition}页", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {

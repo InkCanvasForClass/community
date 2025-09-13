@@ -280,6 +280,17 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
+                // 如果配置文件不存在，先创建默认配置文件
+                if (!File.Exists(HotkeyConfigFile))
+                {
+                    LogHelper.WriteLogToFile($"快捷键配置文件不存在: {HotkeyConfigFile}", LogHelper.LogType.Warning);
+                    LogHelper.WriteLogToFile("配置文件不存在，创建默认配置文件并注册默认快捷键");
+                    CreateDefaultConfigFile();
+                    RegisterDefaultHotkeys();
+                    _hotkeysShouldBeRegistered = true;
+                    return;
+                }
+
                 // 尝试从配置文件加载
                 if (LoadHotkeysFromConfigFile())
                 {
@@ -289,19 +300,9 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    // 如果配置文件不存在或加载失败，使用默认快捷键
-                    if (!File.Exists(HotkeyConfigFile))
-                    {
-                        LogHelper.WriteLogToFile("配置文件不存在，注册默认快捷键");
-                        RegisterDefaultHotkeys();
-                        _hotkeysShouldBeRegistered = true;
-                    }
-                    else
-                    {
-                        LogHelper.WriteLogToFile("配置文件存在但加载失败，回退到默认快捷键", LogHelper.LogType.Warning);
-                        RegisterDefaultHotkeys();
-                        _hotkeysShouldBeRegistered = true;
-                    }
+                    LogHelper.WriteLogToFile("配置文件存在但加载失败，回退到默认快捷键", LogHelper.LogType.Warning);
+                    RegisterDefaultHotkeys();
+                    _hotkeysShouldBeRegistered = true;
                 }
             }
             catch (Exception ex)
@@ -499,6 +500,70 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"切换到笔类型{penTypeIndex}时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 创建默认的快捷键配置文件
+        /// </summary>
+        private void CreateDefaultConfigFile()
+        {
+            try
+            {
+                // 确保配置目录存在
+                string configDir = Path.GetDirectoryName(HotkeyConfigFile);
+                if (!Directory.Exists(configDir))
+                {
+                    Directory.CreateDirectory(configDir);
+                }
+
+                // 创建默认配置对象
+                var config = new HotkeyConfig
+                {
+                    Version = "1.0",
+                    LastModified = DateTime.Now,
+                    Hotkeys = new List<HotkeyConfigItem>()
+                };
+
+                // 添加默认快捷键配置
+                config.Hotkeys.AddRange(new[]
+                {
+                    new HotkeyConfigItem { Name = "Undo", Key = Key.Z, Modifiers = ModifierKeys.Control },
+                    new HotkeyConfigItem { Name = "Redo", Key = Key.Y, Modifiers = ModifierKeys.Control },
+                    new HotkeyConfigItem { Name = "Clear", Key = Key.E, Modifiers = ModifierKeys.Control },
+                    new HotkeyConfigItem { Name = "Paste", Key = Key.V, Modifiers = ModifierKeys.Control },
+                    new HotkeyConfigItem { Name = "SelectTool", Key = Key.S, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "DrawTool", Key = Key.D, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "EraserTool", Key = Key.E, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "BlackboardTool", Key = Key.B, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "QuitDrawTool", Key = Key.Q, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "Pen1", Key = Key.D1, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "Pen2", Key = Key.D2, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "Pen3", Key = Key.D3, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "Pen4", Key = Key.D4, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "Pen5", Key = Key.D5, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "DrawLine", Key = Key.L, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "Screenshot", Key = Key.C, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "Hide", Key = Key.V, Modifiers = ModifierKeys.Alt },
+                    new HotkeyConfigItem { Name = "Exit", Key = Key.Escape, Modifiers = ModifierKeys.None }
+                });
+
+                // 序列化为JSON
+                var settings = new JsonSerializerSettings
+                {
+                    Formatting = Formatting.Indented
+                };
+
+                string jsonContent = JsonConvert.SerializeObject(config, settings);
+
+                // 写入配置文件
+                File.WriteAllText(HotkeyConfigFile, jsonContent, Encoding.UTF8);
+
+                LogHelper.WriteLogToFile($"已创建默认快捷键配置文件: {HotkeyConfigFile}", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"创建默认快捷键配置文件时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

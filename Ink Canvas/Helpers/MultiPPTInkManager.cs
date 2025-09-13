@@ -449,7 +449,6 @@ namespace Ink_Canvas.Helpers
                         _currentActivePresentationId = "";
                     }
 
-                    LogHelper.WriteLogToFile($"已移除演示文稿管理器: {presentationId}", LogHelper.LogType.Trace);
                 }
                 catch (COMException comEx)
                 {
