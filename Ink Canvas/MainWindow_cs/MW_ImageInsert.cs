@@ -253,28 +253,9 @@ namespace Ink_Canvas
             try
             {
                 // 验证位图有效性
-                if (bitmap == null)
+                if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
                 {
-                    ShowNotification("截图数据无效");
-                    return;
-                }
-
-                // 添加详细的位图调试信息
-                LogHelper.WriteLogToFile($"InsertScreenshotToCanvas: 开始处理位图");
-                LogHelper.WriteLogToFile($"位图对象类型: {bitmap.GetType().FullName}");
-                LogHelper.WriteLogToFile($"位图对象HashCode: {bitmap.GetHashCode()}");
-                
-                // 检查位图是否已被释放
-                try
-                {
-                    var testWidth = bitmap.Width;
-                    var testHeight = bitmap.Height;
-                    LogHelper.WriteLogToFile($"位图尺寸验证成功: {testWidth}x{testHeight}");
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"位图验证失败: {ex.Message}", LogHelper.LogType.Error);
-                    ShowNotification("截图数据已损坏");
+                    ShowNotification("无效的截图");
                     return;
                 }
 
@@ -339,6 +320,10 @@ namespace Ink_Canvas
                 ShowNotification($"插入截图失败: {ex.Message}");
                 LogHelper.WriteLogToFile($"插入截图失败: {ex.Message}", LogHelper.LogType.Error);
             }
+            finally
+            {
+                bitmap?.Dispose();
+            }
         }
 
         // 将BitmapSource插入到画布（用于摄像头截图）
@@ -346,8 +331,6 @@ namespace Ink_Canvas
         {
             try
             {
-                LogHelper.WriteLogToFile($"InsertBitmapSourceToCanvas: 开始处理BitmapSource");
-
                 // 创建WPF Image控件
                 var image = new Image
                 {
@@ -612,31 +595,11 @@ namespace Ink_Canvas
             {
                 // 验证位图有效性
                 if (bitmap == null)
-                {
-                    LogHelper.WriteLogToFile("位图无效: 位图为null", LogHelper.LogType.Warning);
                     return null;
-                }
 
-                // 尝试访问位图属性，如果失败说明位图已损坏
-                int width, height;
-                try
-                {
-                    width = bitmap.Width;
-                    height = bitmap.Height;
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"位图已损坏，无法访问属性: {ex.Message}", LogHelper.LogType.Error);
+                // 验证位图尺寸
+                if (bitmap.Width <= 0 || bitmap.Height <= 0)
                     return null;
-                }
-
-                if (width <= 0 || height <= 0)
-                {
-                    LogHelper.WriteLogToFile($"位图无效: 尺寸为{width}x{height}", LogHelper.LogType.Warning);
-                    return null;
-                }
-
-                LogHelper.WriteLogToFile($"开始转换位图: 尺寸={width}x{height}, 格式={bitmap.PixelFormat}, DPI={bitmap.HorizontalResolution}x{bitmap.VerticalResolution}");
 
                 // 使用更安全的方法转换位图
                 var bitmapData = bitmap.LockBits(
@@ -646,28 +609,21 @@ namespace Ink_Canvas
 
                 try
                 {
-                    LogHelper.WriteLogToFile($"LockBits成功: Stride={bitmapData.Stride}, Scan0={bitmapData.Scan0}");
-
                     // 根据像素格式选择合适的WPF像素格式
                     System.Windows.Media.PixelFormat wpfPixelFormat;
                     switch (bitmap.PixelFormat)
                     {
                         case PixelFormat.Format24bppRgb:
                             wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
-                            LogHelper.WriteLogToFile("使用Bgr24像素格式");
                             break;
                         case PixelFormat.Format32bppArgb:
                             wpfPixelFormat = System.Windows.Media.PixelFormats.Bgra32;
-                            LogHelper.WriteLogToFile("使用Bgra32像素格式");
                             break;
                         case PixelFormat.Format32bppRgb:
                             wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr32;
-                            LogHelper.WriteLogToFile("使用Bgr32像素格式");
                             break;
                         default:
-                            // 默认使用Bgr24，如果格式不匹配则转换
                             wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
-                            LogHelper.WriteLogToFile($"未知像素格式{bitmap.PixelFormat}，使用默认Bgr24");
                             break;
                     }
 
@@ -683,7 +639,6 @@ namespace Ink_Canvas
                         bitmapData.Stride);
 
                     bitmapSource.Freeze();
-                    LogHelper.WriteLogToFile("位图转换成功");
                     return bitmapSource;
                 }
                 finally
@@ -693,24 +648,20 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"直接转换位图失败: {ex.Message}", LogHelper.LogType.Error);
-                LogHelper.WriteLogToFile($"异常详情: {ex}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"转换位图失败: {ex.Message}", LogHelper.LogType.Error);
                 
                 // 尝试使用备用方法：内存流转换
                 try
                 {
-                    LogHelper.WriteLogToFile("尝试使用内存流方式转换位图", LogHelper.LogType.Info);
                     return ConvertBitmapToBitmapSourceFallback(bitmap);
                 }
                 catch (Exception fallbackEx)
                 {
                     LogHelper.WriteLogToFile($"备用转换方法也失败: {fallbackEx.Message}", LogHelper.LogType.Error);
-                    LogHelper.WriteLogToFile($"备用方法异常详情: {fallbackEx}", LogHelper.LogType.Error);
                     
                     // 最后尝试：使用最简单的转换方法
                     try
                     {
-                        LogHelper.WriteLogToFile("尝试最简单的转换方法", LogHelper.LogType.Info);
                         return ConvertBitmapToBitmapSourceSimple(bitmap);
                     }
                     catch (Exception simpleEx)
@@ -727,41 +678,21 @@ namespace Ink_Canvas
         {
             try
             {
-                LogHelper.WriteLogToFile("开始备用转换方法");
-                
                 // 验证位图有效性
-                if (bitmap == null)
-                {
-                    LogHelper.WriteLogToFile("备用方法：位图为null", LogHelper.LogType.Warning);
+                if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
                     return null;
-                }
-
-                if (bitmap.Width <= 0 || bitmap.Height <= 0)
-                {
-                    LogHelper.WriteLogToFile($"备用方法：位图尺寸无效 {bitmap.Width}x{bitmap.Height}", LogHelper.LogType.Warning);
-                    return null;
-                }
-
-                LogHelper.WriteLogToFile($"备用方法：位图尺寸={bitmap.Width}x{bitmap.Height}, 格式={bitmap.PixelFormat}");
 
                 // 创建一个新的位图，确保格式正确
                 using (var convertedBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format24bppRgb))
                 {
-                    LogHelper.WriteLogToFile("创建转换位图成功");
-                    
                     using (var graphics = Graphics.FromImage(convertedBitmap))
                     {
-                        LogHelper.WriteLogToFile("开始绘制到转换位图");
                         graphics.DrawImage(bitmap, 0, 0);
-                        LogHelper.WriteLogToFile("绘制完成");
                     }
 
                     using (var memory = new MemoryStream())
                     {
-                        LogHelper.WriteLogToFile("开始保存到内存流");
                         convertedBitmap.Save(memory, ImageFormat.Png);
-                        LogHelper.WriteLogToFile($"保存完成，内存流大小={memory.Length}");
-                        
                         memory.Position = 0;
 
                         var bitmapImage = new BitmapImage();
@@ -771,7 +702,6 @@ namespace Ink_Canvas
                         bitmapImage.EndInit();
                         bitmapImage.Freeze();
 
-                        LogHelper.WriteLogToFile("备用转换方法成功");
                         return bitmapImage;
                     }
                 }
@@ -779,7 +709,6 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"备用转换方法失败: {ex.Message}", LogHelper.LogType.Error);
-                LogHelper.WriteLogToFile($"备用方法异常详情: {ex}", LogHelper.LogType.Error);
                 throw;
             }
         }
@@ -789,25 +718,16 @@ namespace Ink_Canvas
         {
             try
             {
-                LogHelper.WriteLogToFile("开始简单转换方法");
-                
                 if (bitmap == null)
-                {
-                    LogHelper.WriteLogToFile("简单方法：位图为null", LogHelper.LogType.Warning);
                     return null;
-                }
-
-                LogHelper.WriteLogToFile($"简单方法：位图尺寸={bitmap.Width}x{bitmap.Height}");
 
                 // 使用最基础的方法：直接保存为PNG然后加载
                 var tempFile = System.IO.Path.GetTempFileName() + ".png";
                 
                 try
                 {
-                    LogHelper.WriteLogToFile($"保存临时文件到: {tempFile}");
                     bitmap.Save(tempFile, ImageFormat.Png);
                     
-                    LogHelper.WriteLogToFile("开始加载临时文件");
                     var bitmapImage = new BitmapImage();
                     bitmapImage.BeginInit();
                     bitmapImage.UriSource = new Uri(tempFile);
@@ -815,7 +735,6 @@ namespace Ink_Canvas
                     bitmapImage.EndInit();
                     bitmapImage.Freeze();
                     
-                    LogHelper.WriteLogToFile("简单转换方法成功");
                     return bitmapImage;
                 }
                 finally
@@ -826,7 +745,6 @@ namespace Ink_Canvas
                         if (System.IO.File.Exists(tempFile))
                         {
                             System.IO.File.Delete(tempFile);
-                            LogHelper.WriteLogToFile("临时文件已删除");
                         }
                     }
                     catch (Exception deleteEx)
@@ -838,7 +756,6 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"简单转换方法失败: {ex.Message}", LogHelper.LogType.Error);
-                LogHelper.WriteLogToFile($"简单方法异常详情: {ex}", LogHelper.LogType.Error);
                 throw;
             }
         }

@@ -12,7 +12,6 @@ using Ink_Canvas.Helpers;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using DrawingRectangle = System.Drawing.Rectangle;
-using DrawingPoint = System.Drawing.Point;
 using WpfPoint = System.Windows.Point;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
@@ -161,10 +160,7 @@ namespace Ink_Canvas
                         {
                             // 验证帧的有效性
                             if (frame.Width <= 0 || frame.Height <= 0)
-                            {
-                                LogHelper.WriteLogToFile($"无效的摄像头帧: {frame.Width}x{frame.Height}", LogHelper.LogType.Warning);
                                 return;
-                            }
 
                             // 创建新的位图，避免Clone的问题
                             var clonedFrame = new Bitmap(frame.Width, frame.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
@@ -217,10 +213,7 @@ namespace Ink_Canvas
             {
                 // 验证位图有效性
                 if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
-                {
-                    LogHelper.WriteLogToFile("位图无效: 空位图或尺寸为0", LogHelper.LogType.Warning);
                     return null;
-                }
 
                 // 使用更安全的方法转换位图
                 var bitmapData = bitmap.LockBits(
@@ -244,7 +237,6 @@ namespace Ink_Canvas
                             wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr32;
                             break;
                         default:
-                            // 默认使用Bgr24，如果格式不匹配则转换
                             wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
                             break;
                     }

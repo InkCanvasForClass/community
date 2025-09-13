@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.IO;
 using System.Linq;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -161,31 +160,17 @@ namespace Ink_Canvas.Helpers
             lock (_frameLock)
             {
                 if (_currentFrame == null)
-                {
-                    LogHelper.WriteLogToFile("GetCurrentFrameAsBitmapSource: _currentFrame为null");
                     return null;
-                }
 
                 try
                 {
-                    LogHelper.WriteLogToFile($"GetCurrentFrameAsBitmapSource: 开始处理帧，类型={_currentFrame.GetType().FullName}");
-                    LogHelper.WriteLogToFile($"GetCurrentFrameAsBitmapSource: 帧HashCode={_currentFrame.GetHashCode()}");
-                    
-                    // 验证当前帧的有效性
-                    var width = _currentFrame.Width;
-                    var height = _currentFrame.Height;
-                    LogHelper.WriteLogToFile($"GetCurrentFrameAsBitmapSource: 当前帧尺寸={width}x{height}");
-                    
                     // 验证位图有效性
-                    if (width <= 0 || height <= 0)
-                    {
-                        LogHelper.WriteLogToFile("当前帧无效: 尺寸为0", LogHelper.LogType.Warning);
+                    if (_currentFrame.Width <= 0 || _currentFrame.Height <= 0)
                         return null;
-                    }
 
                     // 使用更安全的方法转换位图
                     var bitmapData = _currentFrame.LockBits(
-                        new Rectangle(0, 0, width, height),
+                        new Rectangle(0, 0, _currentFrame.Width, _currentFrame.Height),
                         ImageLockMode.ReadOnly,
                         _currentFrame.PixelFormat);
 
@@ -221,7 +206,6 @@ namespace Ink_Canvas.Helpers
                             bitmapData.Stride);
 
                         bitmapSource.Freeze();
-                        LogHelper.WriteLogToFile($"GetCurrentFrameAsBitmapSource: 成功创建BitmapSource");
                         return bitmapSource;
                     }
                     finally
@@ -232,7 +216,6 @@ namespace Ink_Canvas.Helpers
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"转换帧为BitmapSource失败: {ex.Message}", LogHelper.LogType.Error);
-                    LogHelper.WriteLogToFile($"异常详情: {ex}", LogHelper.LogType.Error);
                     return null;
                 }
             }
@@ -246,8 +229,6 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile($"VideoSource_NewFrame: 接收到新帧");
-                
                 lock (_frameLock)
                 {
                     // 释放之前的帧
@@ -255,8 +236,6 @@ namespace Ink_Canvas.Helpers
                     
                     // 创建新的位图，避免Clone的问题
                     var sourceFrame = eventArgs.Frame;
-                    LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧类型={sourceFrame?.GetType().FullName}");
-                    LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧HashCode={sourceFrame?.GetHashCode()}");
                     
                     if (sourceFrame != null)
                     {
@@ -264,7 +243,6 @@ namespace Ink_Canvas.Helpers
                         {
                             var width = sourceFrame.Width;
                             var height = sourceFrame.Height;
-                            LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧尺寸={width}x{height}");
                             
                             if (width > 0 && height > 0)
                             {
@@ -273,23 +251,20 @@ namespace Ink_Canvas.Helpers
                                 {
                                     graphics.DrawImage(sourceFrame, 0, 0);
                                 }
-                                LogHelper.WriteLogToFile($"VideoSource_NewFrame: 成功创建新帧，HashCode={_currentFrame.GetHashCode()}");
                             }
                             else
                             {
-                                LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧尺寸无效");
                                 _currentFrame = null;
                             }
                         }
                         catch (Exception frameEx)
                         {
-                            LogHelper.WriteLogToFile($"VideoSource_NewFrame: 处理源帧失败: {frameEx.Message}", LogHelper.LogType.Error);
+                            LogHelper.WriteLogToFile($"处理源帧失败: {frameEx.Message}", LogHelper.LogType.Error);
                             _currentFrame = null;
                         }
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧为null");
                         _currentFrame = null;
                     }
                 }
