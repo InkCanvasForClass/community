@@ -2762,6 +2762,12 @@ namespace Ink_Canvas
             var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
             try
             {
+                string configsDir = Path.Combine(App.RootPath, "Configs");
+                if (!Directory.Exists(configsDir))
+                {
+                    Directory.CreateDirectory(configsDir);
+                }
+                
                 File.WriteAllText(App.RootPath + settingsFileName, text);
             }
             catch { }

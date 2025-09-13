@@ -21,7 +21,7 @@ namespace Ink_Canvas.Helpers
         private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
 
         // 配置文件路径
-        private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "HotkeyConfig.json");
+        private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "Configs", "HotkeyConfig.json");
         #endregion
 
         #region Constructor
@@ -30,6 +30,9 @@ namespace Ink_Canvas.Helpers
             _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
             _registeredHotkeys = new Dictionary<string, HotkeyInfo>();
             _hotkeysShouldBeRegistered = true; // 启动时注册热键
+            
+            // 启动时确保配置文件存在
+            EnsureConfigFileExists();
         }
         #endregion
 
@@ -497,6 +500,26 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"切换到笔类型{penTypeIndex}时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 确保配置文件存在，如果不存在则创建
+        /// </summary>
+        private void EnsureConfigFileExists()
+        {
+            try
+            {
+                // 如果配置文件不存在，创建默认配置文件
+                if (!File.Exists(HotkeyConfigFile))
+                {
+                    LogHelper.WriteLogToFile($"快捷键配置文件不存在，创建默认配置文件: {HotkeyConfigFile}", LogHelper.LogType.Event);
+                    CreateDefaultConfigFile();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"确保快捷键配置文件存在时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

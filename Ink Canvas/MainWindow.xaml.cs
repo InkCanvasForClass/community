@@ -383,7 +383,7 @@ namespace Ink_Canvas
         #region Definations and Loading
 
         public static Settings Settings = new Settings();
-        public static string settingsFileName = "Settings.json";
+        public static string settingsFileName = Path.Combine("Configs", "Settings.json");
         private bool isLoaded;
         private bool forcePointEraser;
 
@@ -417,7 +417,7 @@ namespace Ink_Canvas
                 }
                 if (needFix)
                 {
-                    string newPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "saves");
+                    string newPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Saves");
                     Settings.Automation.AutoSavedStrokesLocation = newPath;
                     if (!Directory.Exists(newPath))
                         Directory.CreateDirectory(newPath);

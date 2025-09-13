@@ -431,7 +431,7 @@ namespace Ink_Canvas
             try
             {
                 // 优先从 Settings.json 直接读取
-                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
                 if (File.Exists(settingsPath))
                 {
                     var json = File.ReadAllText(settingsPath);
@@ -829,7 +829,7 @@ namespace Ink_Canvas
                             }
 
                             // 备份路径更改为软件根目录下的saves/RegistryBackups文件夹
-                            string backupPath = Path.Combine(RootPath, "saves", "RegistryBackups");
+                            string backupPath = Path.Combine(RootPath, "Saves", "RegistryBackups");
                             LogHelper.WriteLogToFile($"备份路径: {backupPath}");
 
                             if (!Directory.Exists(backupPath))
@@ -1343,7 +1343,7 @@ namespace Ink_Canvas
             try
             {
                 // 准备备份目录
-                string backupPath = Path.Combine(RootPath, "saves", "RegistryBackups");
+                string backupPath = Path.Combine(RootPath, "Saves", "RegistryBackups");
                 if (!Directory.Exists(backupPath))
                 {
                     Directory.CreateDirectory(backupPath);
