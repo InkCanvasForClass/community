@@ -146,6 +146,7 @@ namespace Ink_Canvas
             _isFreehandMode = false;
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             HintText.Text = "拖拽鼠标选择矩形区域";
             HintText.Visibility = Visibility.Visible;
         }
@@ -158,8 +159,24 @@ namespace Ink_Canvas
             _isFreehandMode = true;
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             HintText.Text = "按住鼠标左键绘制任意形状，松开直接截图";
             HintText.Visibility = Visibility.Visible;
+        }
+
+        private void FullScreenButton_Click(object sender, RoutedEventArgs e)
+        {
+            // 重置所有选择状态
+            ResetSelectionState();
+
+            // 设置全屏截图模式
+            _isFreehandMode = false;
+            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
+            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            
+            // 直接执行全屏截图
+            PerformFullScreenCapture();
         }
 
         private void ConfirmButton_Click(object sender, RoutedEventArgs e)
@@ -783,6 +800,30 @@ namespace Ink_Canvas
                 _activeControlPoint = ControlPointType.None;
                 SelectionRectangle.ReleaseMouseCapture();
                 e.Handled = true;
+            }
+        }
+
+        private void PerformFullScreenCapture()
+        {
+            try
+            {
+                // 获取虚拟屏幕边界
+                var virtualScreen = SystemInformation.VirtualScreen;
+                
+                // 设置全屏截图区域
+                SelectedArea = new DrawingRectangle(virtualScreen.X, virtualScreen.Y, virtualScreen.Width, virtualScreen.Height);
+                SelectedPath = null; // 全屏截图不需要路径
+                
+                // 直接关闭窗口并返回结果
+                DialogResult = true;
+                Close();
+            }
+            catch (Exception ex)
+            {
+                // 如果全屏截图失败，记录错误并关闭窗口
+                System.Diagnostics.Debug.WriteLine($"全屏截图失败: {ex.Message}");
+                DialogResult = false;
+                Close();
             }
         }
 

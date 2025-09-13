@@ -117,6 +117,15 @@
                         BorderThickness="0"
                         FontWeight="Medium"
                         Click="FreehandModeButton_Click" />
+                <Button Name="FullScreenButton" 
+                        Content="全屏截图" 
+                        Margin="4,0"
+                        Padding="12,6"
+                        Background="#7c3aed"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="Medium"
+                        Click="FullScreenButton_Click" />
                 
                 <!-- 分隔线 -->
                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" 

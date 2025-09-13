@@ -100,6 +100,46 @@ namespace Ink_Canvas
             }
         }
 
+        // 直接全屏截图并插入到画布
+        private async Task CaptureFullScreenAndInsert()
+        {
+            try
+            {
+                // 隐藏主窗口以避免截图包含窗口本身
+                var originalVisibility = Visibility;
+                Visibility = Visibility.Hidden;
+
+                // 等待窗口隐藏
+                await Task.Delay(200);
+
+                // 获取虚拟屏幕边界
+                var virtualScreen = SystemInformation.VirtualScreen;
+                var fullScreenArea = new Rectangle(virtualScreen.X, virtualScreen.Y, virtualScreen.Width, virtualScreen.Height);
+
+                // 截取全屏
+                using (var fullScreenBitmap = CaptureScreenArea(fullScreenArea))
+                {
+                    if (fullScreenBitmap != null)
+                    {
+                        // 将截图转换为WPF Image并插入到画布
+                        await InsertScreenshotToCanvas(fullScreenBitmap);
+                    }
+                    else
+                    {
+                        ShowNotification("全屏截图失败");
+                    }
+                }
+
+                // 恢复窗口显示
+                Visibility = originalVisibility;
+            }
+            catch (Exception ex)
+            {
+                ShowNotification($"全屏截图失败: {ex.Message}");
+                Visibility = Visibility.Visible;
+            }
+        }
+
         // 显示截图区域选择器
         private async Task<ScreenshotResult?> ShowScreenshotSelector()
         {
