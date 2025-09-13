@@ -164,31 +164,6 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 调试：列出所有可见窗口
-        /// </summary>
-        public void DebugListAllWindows()
-        {
-            if (_interceptor == null) 
-            {
-                LogHelper.WriteLogToFile("拦截器未初始化，无法进行调试", LogHelper.LogType.Warning);
-                return;
-            }
-
-            try
-            {
-                LogHelper.WriteLogToFile("开始调试扫描所有可见窗口...", LogHelper.LogType.Event);
-                
-                // 直接调用扫描方法，在扫描过程中会输出调试信息
-                _interceptor.ScanOnce();
-                
-                LogHelper.WriteLogToFile("调试扫描完成，请查看日志文件获取详细信息", LogHelper.LogType.Event);
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"调试列出窗口失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
         /// <summary>
         /// 恢复所有被拦截的窗口

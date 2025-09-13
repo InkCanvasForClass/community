@@ -2964,29 +2964,9 @@
                                     
                                     <!-- 控制按钮 -->
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,8">
-                                        <Button Name="BtnFloatingWindowInterceptorStart" Content="启动拦截" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorStart_Click"
-                                                Background="#FF28A745" Foreground="White" BorderBrush="#FF1E7E34" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
-                                        <Button Name="BtnFloatingWindowInterceptorStop" Content="停止拦截" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorStop_Click"
-                                                Background="#FFDC3545" Foreground="White" BorderBrush="#FFBD2130" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
-                                        <Button Name="BtnFloatingWindowInterceptorScan" Content="手动扫描" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorScan_Click"
-                                                Background="#FF17A2B8" Foreground="White" BorderBrush="#FF138496" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
                                         <Button Name="BtnFloatingWindowInterceptorRestore" Content="恢复所有窗口" 
                                                 Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorRestore_Click"
                                                 Background="#FF6C757D" Foreground="White" BorderBrush="#FF5A6268" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
-                                        <Button Name="BtnFloatingWindowInterceptorDebug" Content="调试列出窗口" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorDebug_Click"
-                                                Background="#FF6F42C1" Foreground="White" BorderBrush="#FF5A2D91" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
-                                        <Button Name="BtnFloatingWindowInterceptorTest" Content="测试拦截" 
-                                                Padding="12,6" Click="BtnFloatingWindowInterceptorTest_Click"
-                                                Background="#FFE83E8C" Foreground="White" BorderBrush="#FFC2185B" 
                                                 FontFamily="Microsoft YaHei UI" FontSize="12" />
                                     </ui:SimpleStackPanel>
                                     

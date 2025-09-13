@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -79,17 +80,21 @@ namespace Ink_Canvas
                 var isEnabled = Settings.Automation.FloatingWindowInterceptor.IsEnabled;
                 FloatingWindowInterceptorGrid.Visibility = isEnabled ? Visibility.Visible : Visibility.Collapsed;
                 
+                // 计算启用的规则数量
+                var enabledRulesCount = Settings.Automation.FloatingWindowInterceptor.InterceptRules.Where(kvp => kvp.Value).Count();
+                var totalRulesCount = Settings.Automation.FloatingWindowInterceptor.InterceptRules.Count;
+                
                 // 更新状态文本
                 if (_floatingWindowInterceptorManager != null)
                 {
                     var stats = _floatingWindowInterceptorManager.GetStatistics();
                     TextBlockFloatingWindowInterceptorStatus.Text = stats.IsRunning 
-                        ? $"拦截器运行中 - 已启用 {stats.EnabledRules}/{stats.TotalRules} 个规则"
-                        : "拦截器未启动";
+                        ? $"拦截器运行中 - 已启用 {enabledRulesCount}/{totalRulesCount} 个规则"
+                        : $"拦截器未启动 - 已启用 {enabledRulesCount}/{totalRulesCount} 个规则";
                 }
                 else
                 {
-                    TextBlockFloatingWindowInterceptorStatus.Text = "拦截器未初始化";
+                    TextBlockFloatingWindowInterceptorStatus.Text = $"拦截器未初始化 - 已启用 {enabledRulesCount}/{totalRulesCount} 个规则";
                 }
             }
             catch (Exception ex)
@@ -308,6 +313,9 @@ namespace Ink_Canvas
                     Settings.Automation.FloatingWindowInterceptor.InterceptRules[ruleName] = enabled;
                 }
                 
+                // 更新UI显示
+                UpdateFloatingWindowInterceptorUI();
+                
                 SaveSettingsToFile();
             }
             catch (Exception ex)
@@ -316,62 +324,6 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 启动拦截按钮点击
-        /// </summary>
-        private void BtnFloatingWindowInterceptorStart_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_floatingWindowInterceptorManager != null)
-                {
-                    _floatingWindowInterceptorManager.Start();
-                    UpdateFloatingWindowInterceptorUI();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"启动悬浮窗拦截失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 停止拦截按钮点击
-        /// </summary>
-        private void BtnFloatingWindowInterceptorStop_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_floatingWindowInterceptorManager != null)
-                {
-                    _floatingWindowInterceptorManager.Stop();
-                    UpdateFloatingWindowInterceptorUI();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"停止悬浮窗拦截失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 手动扫描按钮点击
-        /// </summary>
-        private void BtnFloatingWindowInterceptorScan_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_floatingWindowInterceptorManager != null)
-                {
-                    _floatingWindowInterceptorManager.ScanOnce();
-                    UpdateFloatingWindowInterceptorUI();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"手动扫描失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
         /// <summary>
         /// 恢复所有窗口按钮点击
@@ -391,73 +343,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"恢复所有窗口失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-
-        /// <summary>
-        /// 调试列出窗口按钮点击
-        /// </summary>
-        private void BtnFloatingWindowInterceptorDebug_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_floatingWindowInterceptorManager != null)
-                {
-                    // 更新状态显示
-                    TextBlockFloatingWindowInterceptorStatus.Text = "正在调试扫描窗口...";
-                    
-                    _floatingWindowInterceptorManager.DebugListAllWindows();
-                    
-                    // 更新状态显示
-                    TextBlockFloatingWindowInterceptorStatus.Text = "调试扫描完成，请查看日志文件";
-                    
-                    LogHelper.WriteLogToFile("用户点击了调试列出窗口按钮", LogHelper.LogType.Event);
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile("拦截器管理器未初始化", LogHelper.LogType.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"调试列出窗口失败: {ex.Message}", LogHelper.LogType.Error);
-                TextBlockFloatingWindowInterceptorStatus.Text = "调试扫描失败";
-            }
-        }
-
-        /// <summary>
-        /// 测试拦截按钮点击
-        /// </summary>
-        private void BtnFloatingWindowInterceptorTest_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_floatingWindowInterceptorManager != null)
-                {
-                    // 更新状态显示
-                    TextBlockFloatingWindowInterceptorStatus.Text = "正在测试拦截功能...";
-                    
-                    // 启用测试规则
-                    _floatingWindowInterceptorManager.SetInterceptRule(FloatingWindowInterceptor.InterceptType.SeewoWhiteboard3Floating, true);
-                    
-                    // 执行一次扫描
-                    _floatingWindowInterceptorManager.ScanOnce();
-                    
-                    // 更新状态显示
-                    TextBlockFloatingWindowInterceptorStatus.Text = "测试拦截完成，请查看日志文件";
-                    
-                    LogHelper.WriteLogToFile("用户点击了测试拦截按钮", LogHelper.LogType.Event);
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile("拦截器管理器未初始化", LogHelper.LogType.Warning);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"测试拦截失败: {ex.Message}", LogHelper.LogType.Error);
-                TextBlockFloatingWindowInterceptorStatus.Text = "测试拦截失败";
-            }
-        }
-
         #endregion
     }
 }

@@ -212,8 +212,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.SeewoWhiteboard5Floating,
                 ProcessName = "EasiNote5",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                WindowTitlePattern = "希沃白板",
+                ClassNamePattern = "EasiNote5",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃白板5 桌面悬浮窗"
@@ -351,7 +351,7 @@ namespace Ink_Canvas.Helpers
                 Description = "希沃桌面 侧栏悬浮窗"
             };
 
-            // 测试规则 - 拦截所有小窗口
+            // 拦截所有小窗口
             _interceptRules[InterceptType.SeewoWhiteboard3Floating] = new InterceptRule
             {
                 Type = InterceptType.SeewoWhiteboard3Floating,
@@ -360,7 +360,7 @@ namespace Ink_Canvas.Helpers
                 ClassNamePattern = "",
                 IsEnabled = false, // 默认关闭，需要手动开启
                 RequiresAdmin = false,
-                Description = "测试规则 - 拦截所有小窗口"
+                Description = "拦截所有小窗口"
             };
         }
 
@@ -495,9 +495,6 @@ namespace Ink_Canvas.Helpers
                 var windowInfo = GetWindowInfo(hWnd);
                 if (windowInfo == null) return true;
 
-                // 输出调试信息到日志
-                LogHelper.WriteLogToFile($"检测到窗口: '{windowInfo.WindowTitle}' | 进程: '{windowInfo.ProcessName}' | 类名: '{windowInfo.ClassName}'", LogHelper.LogType.Event);
-
                 // 检查窗口样式，过滤掉系统窗口和主窗口
                 var exStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
                 var style = GetWindowLong(hWnd, -16); // GWL_STYLE
@@ -505,7 +502,6 @@ namespace Ink_Canvas.Helpers
                 // 跳过工具窗口
                 if ((exStyle & WS_EX_TOOLWINDOW) != 0) 
                 {
-                    LogHelper.WriteLogToFile($"跳过工具窗口: {windowInfo.WindowTitle}", LogHelper.LogType.Event);
                     return true;
                 }
 
@@ -514,7 +510,6 @@ namespace Ink_Canvas.Helpers
                 const uint WS_SYSMENU = 0x00080000;
                 if ((style & WS_CAPTION) != 0 && (style & WS_SYSMENU) != 0)
                 {
-                    LogHelper.WriteLogToFile($"跳过主窗口: {windowInfo.WindowTitle}", LogHelper.LogType.Event);
                     return true;
                 }
 
@@ -526,7 +521,6 @@ namespace Ink_Canvas.Helpers
 
                 if (width > 600 || height > 400)
                 {
-                    LogHelper.WriteLogToFile($"跳过大窗口 ({width}x{height}): {windowInfo.WindowTitle}", LogHelper.LogType.Event);
                     return true;
                 }
 
@@ -537,7 +531,6 @@ namespace Ink_Canvas.Helpers
 
                     if (MatchesRule(windowInfo, rule))
                     {
-                        LogHelper.WriteLogToFile($"匹配规则 '{rule.Description}'，开始拦截窗口: {windowInfo.WindowTitle}", LogHelper.LogType.Event);
                         InterceptWindow(hWnd, rule);
                         break;
                     }
@@ -646,8 +639,6 @@ namespace Ink_Canvas.Helpers
 
                 // 记录拦截的窗口
                 _interceptedWindows[hWnd] = rule.Type;
-
-                LogHelper.WriteLogToFile($"成功拦截窗口: {GetWindowTitle(hWnd)}", LogHelper.LogType.Event);
 
                 // 触发事件
                 WindowIntercepted?.Invoke(this, new WindowInterceptedEventArgs
