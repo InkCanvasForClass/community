@@ -196,7 +196,16 @@ namespace Ink_Canvas
         {
             if (sender is FrameworkElement element)
             {
-                // 使用触摸拖动的完整实现
+                // 检查是否是双指手势
+                if (e.Manipulators.Count() >= 2)
+                {
+                    // 双指手势时，不处理单个元素的手势，让画布级别的手势处理
+                    // 这样可以实现图片与墨迹的同步移动
+                    e.Handled = false;
+                    return;
+                }
+
+                // 单指手势时，使用触摸拖动的完整实现
                 ApplyTouchManipulationTransform(element, e);
 
                 // 如果是图片元素，更新工具栏位置

@@ -1069,12 +1069,15 @@ namespace Ink_Canvas
                             catch { }
                         }
 
-                        ;
+                        // 同时变换画布上的图片元素
+                        TransformCanvasImages(m);
                     }
                     else
                     {
                         foreach (var stroke in inkCanvas.Strokes) stroke.Transform(m, false);
-                        ;
+                        
+                        // 同时变换画布上的图片元素
+                        TransformCanvasImages(m);
                     }
 
                     foreach (var circle in circles)
@@ -1089,6 +1092,86 @@ namespace Ink_Canvas
                         );
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 变换画布上的图片元素，使其与墨迹同步移动
+        /// </summary>
+        private void TransformCanvasImages(Matrix matrix)
+        {
+            try
+            {
+                // 遍历inkCanvas的所有子元素，找到图片元素
+                for (int i = inkCanvas.Children.Count - 1; i >= 0; i--)
+                {
+                    var child = inkCanvas.Children[i];
+                    
+                    if (child is Image image)
+                    {
+                        // 应用矩阵变换到图片
+                        ApplyMatrixTransformToImage(image, matrix);
+                    }
+                    else if (child is MediaElement mediaElement)
+                    {
+                        // 对媒体元素也应用变换
+                        ApplyMatrixTransformToMediaElement(mediaElement, matrix);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"变换画布图片失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 对图片应用矩阵变换
+        /// </summary>
+        private void ApplyMatrixTransformToImage(Image image, Matrix matrix)
+        {
+            try
+            {
+                // 获取图片的RenderTransform，如果不存在则创建新的TransformGroup
+                TransformGroup transformGroup = image.RenderTransform as TransformGroup;
+                if (transformGroup == null)
+                {
+                    transformGroup = new TransformGroup();
+                    image.RenderTransform = transformGroup;
+                }
+
+                // 创建新的MatrixTransform并添加到变换组
+                var matrixTransform = new MatrixTransform(matrix);
+                transformGroup.Children.Add(matrixTransform);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用图片变换失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 对媒体元素应用矩阵变换
+        /// </summary>
+        private void ApplyMatrixTransformToMediaElement(MediaElement mediaElement, Matrix matrix)
+        {
+            try
+            {
+                // 获取媒体元素的RenderTransform，如果不存在则创建新的TransformGroup
+                TransformGroup transformGroup = mediaElement.RenderTransform as TransformGroup;
+                if (transformGroup == null)
+                {
+                    transformGroup = new TransformGroup();
+                    mediaElement.RenderTransform = transformGroup;
+                }
+
+                // 创建新的MatrixTransform并添加到变换组
+                var matrixTransform = new MatrixTransform(matrix);
+                transformGroup.Children.Add(matrixTransform);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用媒体元素变换失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
