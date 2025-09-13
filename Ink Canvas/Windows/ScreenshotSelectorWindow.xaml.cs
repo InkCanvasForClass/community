@@ -55,12 +55,15 @@ namespace Ink_Canvas
             // 绑定控制点事件
             BindControlPointEvents();
 
+            // 初始化按钮状态 
+            InitializeButtonStates();
+
             // 隐藏提示文字的定时器
             var timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(5);
             timer.Tick += (s, e) =>
             {
-                HintText.Visibility = Visibility.Collapsed;
+                HintTextBorder.Visibility = Visibility.Collapsed;
                 timer.Stop();
             };
             timer.Start();
@@ -76,6 +79,13 @@ namespace Ink_Canvas
                 Fill = Brushes.Transparent
             };
             SelectionCanvas.Children.Add(_freehandPolyline);
+        }
+
+        private void InitializeButtonStates()
+        {
+            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
         }
 
         private void BindControlPointEvents()
@@ -148,7 +158,7 @@ namespace Ink_Canvas
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             HintText.Text = "拖拽鼠标选择矩形区域";
-            HintText.Visibility = Visibility.Visible;
+            HintTextBorder.Visibility = Visibility.Visible;
         }
 
         private void FreehandModeButton_Click(object sender, RoutedEventArgs e)
@@ -161,7 +171,7 @@ namespace Ink_Canvas
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             HintText.Text = "按住鼠标左键绘制任意形状，松开直接截图";
-            HintText.Visibility = Visibility.Visible;
+            HintTextBorder.Visibility = Visibility.Visible;
         }
 
         private void FullScreenButton_Click(object sender, RoutedEventArgs e)
@@ -230,7 +240,7 @@ namespace Ink_Canvas
             _currentPoint = _startPoint;
 
             // 隐藏提示文字
-            HintText.Visibility = Visibility.Collapsed;
+            HintTextBorder.Visibility = Visibility.Collapsed;
 
             if (_isFreehandMode)
             {
@@ -358,7 +368,8 @@ namespace Ink_Canvas
                         _currentSelection = rect;
                         _isAdjusting = true;
                         ShowControlPoints();
-                        AdjustModeHint.Visibility = Visibility.Visible;
+                        HintText.Text = "拖拽控制点调整选择区域，或拖拽边框移动位置";
+                        HintTextBorder.Visibility = Visibility.Visible;
                     }
                     else
                     {
@@ -846,7 +857,7 @@ namespace Ink_Canvas
             ControlPointsCanvas.Visibility = Visibility.Collapsed;
             SizeInfoBorder.Visibility = Visibility.Collapsed;
             SelectionPath.Visibility = Visibility.Collapsed;
-            AdjustModeHint.Visibility = Visibility.Collapsed;
+            HintTextBorder.Visibility = Visibility.Collapsed;
 
             // 重置遮罩
             TransparentSelectionMask.Visibility = Visibility.Collapsed;
@@ -868,6 +879,10 @@ namespace Ink_Canvas
             _currentSelection = new Rect();
             SelectedArea = null;
             SelectedPath = null;
+
+            RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
         }
     }
 }

@@ -19,8 +19,6 @@
         <Rectangle Name="OverlayRectangle"
                    Fill="Black"
                    Opacity="0.3" />
-
-        <!-- 透明选择区域遮罩 - 使用正确的几何体操作 -->
         <Rectangle Name="TransparentSelectionMask"
                    Fill="Black"
                    Opacity="0.3"
@@ -103,7 +101,7 @@
                         Content="矩形模式" 
                         Margin="4,0"
                         Padding="12,6"
-                        Background="#2563eb"
+                        Background="#6b7280"
                         Foreground="White"
                         BorderThickness="0"
                         FontWeight="Medium"
@@ -121,7 +119,7 @@
                         Content="全屏截图" 
                         Margin="4,0"
                         Padding="12,6"
-                        Background="#7c3aed"
+                        Background="#6b7280"
                         Foreground="White"
                         BorderThickness="0"
                         FontWeight="Medium"
@@ -154,24 +152,8 @@
             </StackPanel>
         </Border>
 
-        <!-- 提示文字 -->
-        <Border Background="#1a1a1a"
-                Opacity="0.9"
-                CornerRadius="6"
-                Padding="16,10"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Margin="0,80,0,0"
-                Panel.ZIndex="1000">
-            <TextBlock Name="HintText"
-                       Text="拖拽鼠标选择矩形区域，或使用自由绘制模式"
-                       Foreground="White"
-                       FontSize="14"
-                       FontWeight="Medium" />
-        </Border>
-
-        <!-- 调整模式提示 -->
-        <Border Name="AdjustModeHint"
+        <!-- 统一提示文字区域 -->
+        <Border Name="HintTextBorder"
                 Background="#1a1a1a"
                 Opacity="0.9"
                 CornerRadius="6"
@@ -179,9 +161,9 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Bottom"
                 Margin="0,0,0,140"
-                Visibility="Collapsed"
                 Panel.ZIndex="1000">
-            <TextBlock Text="拖拽控制点调整选择区域，或拖拽边框移动位置"
+            <TextBlock Name="HintText"
+                       Text="拖拽鼠标选择矩形区域，或使用自由绘制模式"
                        Foreground="White"
                        FontSize="14"
                        FontWeight="Medium" />
