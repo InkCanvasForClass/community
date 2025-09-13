@@ -375,7 +375,6 @@ namespace Ink_Canvas.Helpers
                 if (_hotkeysShouldBeRegistered)
                 {
                     _hotkeysShouldBeRegistered = false;
-                    LogHelper.WriteLogToFile("禁用快捷键注册功能");
 
                     // 注销所有快捷键
                     UnregisterAllHotkeys();
@@ -413,7 +412,6 @@ namespace Ink_Canvas.Helpers
                     {
                         // 鼠标模式下禁用快捷键，让键盘操作放行
                         DisableHotkeyRegistration();
-                        LogHelper.WriteLogToFile("切换到鼠标模式，禁用快捷键以放行键盘操作");
                     }
                 }
                 else

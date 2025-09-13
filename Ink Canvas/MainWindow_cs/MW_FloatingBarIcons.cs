@@ -704,14 +704,12 @@ namespace Ink_Canvas
                     RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                    LogHelper.WriteLogToFile($"隐藏PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
 
                 // 使用PPT UI管理器来正确更新翻页按钮显示状态，确保遵循用户设置
                 if (_pptUIManager != null)
                 {
                     _pptUIManager.UpdateNavigationPanelsVisibility();
-                    LogHelper.WriteLogToFile($"使用PPT UI管理器更新翻页按钮显示状态", LogHelper.LogType.Trace);
                 }
 
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
