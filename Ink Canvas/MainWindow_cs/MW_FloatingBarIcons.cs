@@ -1096,20 +1096,37 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            // 检查是否启用了直接调用ClassIsland点名功能
+            // 检查是否启用了外部点名功能
             if (Settings.RandSettings.DirectCallCiRand)
             {
                 try
                 {
+                    string protocol = "";
+                    switch (Settings.RandSettings.ExternalCallerType)
+                    {
+                        case 0: // ClassIsland点名
+                            protocol = "classisland://plugins/IslandCaller/Simple/1";
+                            break;
+                        case 1: // SecRandom点名
+                            protocol = "secrandom://direct_extraction";
+                            break;
+                        case 2: // NamePicker点名
+                            protocol = "namepicker://";
+                            break;
+                        default:
+                            protocol = "classisland://plugins/IslandCaller/Simple/1";
+                            break;
+                    }
+
                     Process.Start(new ProcessStartInfo
                     {
-                        FileName = "classisland://plugins/IslandCaller/Simple/1",
+                        FileName = protocol,
                         UseShellExecute = true
                     });
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("无法调用ClassIsland点名：" + ex.Message);
+                    MessageBox.Show("无法调用外部点名：" + ex.Message);
 
                     // 调用失败时回退到默认的随机点名窗口
                     new RandWindow(Settings, true).ShowDialog();

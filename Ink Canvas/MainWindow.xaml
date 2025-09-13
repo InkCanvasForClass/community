@@ -2928,13 +2928,24 @@
                                                          Toggled="ToggleSwitchShowRandomAndSingleDraw_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="直接调用Ci点名"
+                                        <TextBlock Foreground="#fafafa" Text="直接调用外部点名"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent=""
-                                                         Name="ToggleSwitchDirectCallCiRand"
+                                                         Name="ToggleSwitchExternalCaller"
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" 
                                                          FontWeight="Bold" 
-                                                         Toggled="ToggleSwitchDirectCallCiRand_Toggled" />
+                                                         Toggled="ToggleSwitchExternalCaller_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="点名类型"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxExternalCallerType" Width="150" Height="30" 
+                                                  IsEditable="False" IsReadOnly="True" SelectedIndex="0"
+                                                  SelectionChanged="ComboBoxExternalCallerType_SelectionChanged">
+                                            <ComboBoxItem>ClassIsland点名</ComboBoxItem>
+                                            <ComboBoxItem>SecRandom点名</ComboBoxItem>
+                                            <ComboBoxItem>NamePicker点名</ComboBoxItem>
+                                        </ComboBox>
                                     </ui:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />

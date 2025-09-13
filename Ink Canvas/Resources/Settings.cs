@@ -548,6 +548,8 @@ namespace Ink_Canvas
         public bool ShowRandomAndSingleDraw { get; set; } = true;
         [JsonProperty("directCallCiRand")]
         public bool DirectCallCiRand { get; set; }
+        [JsonProperty("externalCallerType")]
+        public int ExternalCallerType { get; set; } = 0; 
         [JsonProperty("selectedBackgroundIndex")]
         public int SelectedBackgroundIndex { get; set; }
         [JsonProperty("customPickNameBackgrounds")]

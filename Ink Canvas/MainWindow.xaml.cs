@@ -38,7 +38,7 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        // 新增：每一页一个Canvas对象
+        // 每一页一个Canvas对象
         private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();
         private int currentPageIndex;
         private System.Windows.Controls.Canvas currentCanvas;

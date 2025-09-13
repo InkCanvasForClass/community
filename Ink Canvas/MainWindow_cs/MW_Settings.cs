@@ -2417,12 +2417,23 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchDirectCallCiRand_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchExternalCaller_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
 
             // 获取开关状态并保存到设置中
-            Settings.RandSettings.DirectCallCiRand = ToggleSwitchDirectCallCiRand.IsOn;
+            Settings.RandSettings.DirectCallCiRand = ToggleSwitchExternalCaller.IsOn;
+
+            // 保存设置到文件
+            SaveSettingsToFile();
+        }
+
+        private void ComboBoxExternalCallerType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            // 获取下拉框选择并保存到设置中
+            Settings.RandSettings.ExternalCallerType = ComboBoxExternalCallerType.SelectedIndex;
 
             // 保存设置到文件
             SaveSettingsToFile();
