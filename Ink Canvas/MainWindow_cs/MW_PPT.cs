@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
@@ -827,6 +828,7 @@ namespace Ink_Canvas
 
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
                             BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                        SetCurrentToolMode(InkCanvasEditingMode.None);
                     }
                     catch (Exception ex)
                     {
@@ -1474,6 +1476,8 @@ namespace Ink_Canvas
                 }
 
                 HideSubPanels("cursor");
+                SetCurrentToolMode(InkCanvasEditingMode.None);
+                
                 await Task.Delay(150);
                 ViewboxFloatingBarMarginAnimation(100, true);
             }
