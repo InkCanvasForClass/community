@@ -698,7 +698,24 @@ namespace Ink_Canvas
 
                     if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
                         !Settings.Automation.IsAutoFoldInPPTSlideShow)
+                    {
                         BtnColorRed_Click(null, null);
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            try
+                            {
+                                if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                                {
+                                    UpdateCurrentToolMode("pen");
+                                    SetFloatingBarHighlightPosition("pen");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"PPT进入批注模式后同步浮动栏高光状态失败: {ex.Message}", LogHelper.LogType.Error);
+                            }
+                        }), DispatcherPriority.Loaded);
+                    }
 
                     isEnteredSlideShowEndEvent = false;
 
