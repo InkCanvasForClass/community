@@ -2632,6 +2632,9 @@ namespace Ink_Canvas
                 if (toggle != null)
                 {
                     Settings.ModeSettings.IsPPTOnlyMode = toggle.IsOn;
+                    
+                    // 保存设置到文件
+                    SaveSettingsToFile();
 
                     // 如果切换到仅PPT模式，立即隐藏主窗口
                     if (Settings.ModeSettings.IsPPTOnlyMode)
