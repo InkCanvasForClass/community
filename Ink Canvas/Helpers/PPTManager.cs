@@ -443,6 +443,55 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"取消PPT事件注册失败: {ex.GetType().Name} - {ex.Message}", LogHelper.LogType.Warning);
                     }
 
+                    // 释放COM对象
+                    try
+                    {
+                        if (Marshal.IsComObject(CurrentSlide))
+                        {
+                            Marshal.ReleaseComObject(CurrentSlide);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"释放CurrentSlide COM对象失败: {ex}", LogHelper.LogType.Warning);
+                    }
+
+                    try
+                    {
+                        if (Marshal.IsComObject(CurrentSlides))
+                        {
+                            Marshal.ReleaseComObject(CurrentSlides);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"释放CurrentSlides COM对象失败: {ex}", LogHelper.LogType.Warning);
+                    }
+
+                    try
+                    {
+                        if (Marshal.IsComObject(CurrentPresentation))
+                        {
+                            Marshal.ReleaseComObject(CurrentPresentation);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"释放CurrentPresentation COM对象失败: {ex}", LogHelper.LogType.Warning);
+                    }
+
+                    try
+                    {
+                        if (Marshal.IsComObject(PPTApplication))
+                        {
+                            Marshal.ReleaseComObject(PPTApplication);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"释放PPTApplication COM对象失败: {ex}", LogHelper.LogType.Warning);
+                    }
+
                     // 清理引用
                     PPTApplication = null;
                     CurrentPresentation = null;

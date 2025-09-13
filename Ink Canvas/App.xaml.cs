@@ -292,6 +292,27 @@ namespace Ink_Canvas
         {
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
+            
+            // 清理PowerPoint进程守护
+            try
+            {
+                // 获取主窗口实例并清理PowerPoint进程守护
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow != null)
+                {
+                    // 通过反射调用StopPowerPointProcessMonitoring方法
+                    var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    method?.Invoke(mainWindow, null);
+                    
+                    WriteCrashLog("PowerPoint进程守护已在系统关机时清理");
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteCrashLog($"清理PowerPoint进程守护失败: {ex.Message}");
+            }
+            
             DeviceIdentifier.SaveUsageStatsOnShutdown();
         }
 
