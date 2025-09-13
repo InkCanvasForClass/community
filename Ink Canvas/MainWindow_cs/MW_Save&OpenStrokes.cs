@@ -542,7 +542,7 @@ namespace Ink_Canvas
                             var strokes = new StrokeCollection(fs);
                             if (strokes.Count > 0)
                             {
-                                _multiPPTInkManager?.SaveCurrentSlideStrokes(pageNumber, strokes);
+                                _multiPPTInkManager?.ForceSaveSlideStrokes(pageNumber, strokes);
                             }
                         }
                     }

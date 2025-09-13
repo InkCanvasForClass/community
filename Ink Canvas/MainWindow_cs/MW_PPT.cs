@@ -130,6 +130,7 @@ namespace Ink_Canvas
                 _multiPPTInkManager = new MultiPPTInkManager();
                 _multiPPTInkManager.IsAutoSaveEnabled = Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
                 _multiPPTInkManager.AutoSaveLocation = Settings.Automation.AutoSavedStrokesLocation;
+                _multiPPTInkManager.PPTManager = _pptManager;
 
                 // 初始化UI管理器
                 _pptUIManager = new PPTUIManager(this);

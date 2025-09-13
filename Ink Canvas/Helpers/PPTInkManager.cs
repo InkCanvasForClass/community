@@ -123,6 +123,37 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 强制保存指定页面的墨迹（忽略锁定状态）
+        /// </summary>
+        public void ForceSaveSlideStrokes(int slideIndex, StrokeCollection strokes)
+        {
+            if (slideIndex <= 0 || strokes == null) return;
+
+            lock (_lockObject)
+            {
+                try
+                {
+                    if (slideIndex < _memoryStreams.Length)
+                    {
+                        var ms = new MemoryStream();
+                        strokes.Save(ms);
+                        ms.Position = 0;
+
+                        // 释放旧的内存流
+                        _memoryStreams[slideIndex]?.Dispose();
+                        _memoryStreams[slideIndex] = ms;
+
+                        LogHelper.WriteLogToFile($"已强制保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"强制保存第{slideIndex}页墨迹失败: {ex}", LogHelper.LogType.Error);
+                }
+            }
+        }
+
+        /// <summary>
         /// 加载指定页面的墨迹
         /// </summary>
         public StrokeCollection LoadSlideStrokes(int slideIndex)
@@ -162,7 +193,7 @@ namespace Ink_Canvas.Helpers
                     // 如果有当前墨迹，先保存到正确的页面
                     if (currentStrokes != null && currentStrokes.Count > 0)
                     {
-                        // 确定要保存的页面索引
+                        // 使用当前锁定的页面索引，如果没有锁定则使用传入的页面索引
                         int saveToSlideIndex = _lockedSlideIndex > 0 ? _lockedSlideIndex : slideIndex;
 
                         // 确保页面索引有效
@@ -170,6 +201,10 @@ namespace Ink_Canvas.Helpers
                         {
                             SaveCurrentSlideStrokes(saveToSlideIndex, currentStrokes);
                             LogHelper.WriteLogToFile($"已保存第{saveToSlideIndex}页墨迹，墨迹数量: {currentStrokes.Count}", LogHelper.LogType.Trace);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile($"页面索引无效，无法保存墨迹: {saveToSlideIndex}", LogHelper.LogType.Warning);
                         }
                     }
 

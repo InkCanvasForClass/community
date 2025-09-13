@@ -17,6 +17,7 @@ namespace Ink_Canvas.Helpers
         #region Properties
         public bool IsAutoSaveEnabled { get; set; } = true;
         public string AutoSaveLocation { get; set; } = "";
+        public PPTManager PPTManager { get; set; }
         #endregion
 
         #region Private Fields
@@ -101,6 +102,23 @@ namespace Ink_Canvas.Helpers
                     
                     if (_presentationManagers.ContainsKey(presentationId))
                     {
+                        // 如果切换的是不同的演示文稿，先保存当前活跃演示文稿的墨迹
+                        if (!string.IsNullOrEmpty(_currentActivePresentationId) && 
+                            _currentActivePresentationId != presentationId)
+                        {
+                            var currentManager = GetCurrentManager();
+                            if (currentManager != null)
+                            {
+                                // 获取当前活跃的演示文稿并保存墨迹
+                                var currentPresentation = GetCurrentActivePresentation();
+                                if (currentPresentation != null)
+                                {
+                                    currentManager.SaveAllStrokesToFile(currentPresentation);
+                                    LogHelper.WriteLogToFile($"已保存当前演示文稿墨迹: {currentPresentation.Name}", LogHelper.LogType.Trace);
+                                }
+                            }
+                        }
+
                         _currentActivePresentationId = presentationId;
                         
                         // 更新最后访问时间
@@ -147,6 +165,30 @@ namespace Ink_Canvas.Helpers
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"保存当前页面墨迹失败: {ex}", LogHelper.LogType.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 强制保存指定页面的墨迹（忽略锁定状态）
+        /// </summary>
+        public void ForceSaveSlideStrokes(int slideIndex, StrokeCollection strokes)
+        {
+            if (slideIndex <= 0 || strokes == null) return;
+
+            lock (_lockObject)
+            {
+                try
+                {
+                    var manager = GetCurrentManager();
+                    if (manager != null)
+                    {
+                        manager.ForceSaveSlideStrokes(slideIndex, strokes);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"强制保存页面墨迹失败: {ex}", LogHelper.LogType.Error);
                 }
             }
         }
@@ -457,6 +499,20 @@ namespace Ink_Canvas.Helpers
             }
 
             return _presentationManagers[_currentActivePresentationId];
+        }
+
+        private Presentation GetCurrentActivePresentation()
+        {
+            try
+            {
+                // 通过PPTManager获取当前活跃的演示文稿
+                return PPTManager?.GetCurrentActivePresentation();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {ex}", LogHelper.LogType.Error);
+                return null;
+            }
         }
 
         private string GeneratePresentationId(Presentation presentation)
