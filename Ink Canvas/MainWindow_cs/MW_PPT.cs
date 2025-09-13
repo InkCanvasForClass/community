@@ -88,6 +88,10 @@ namespace Ink_Canvas
         // PowerPoint应用程序守护相关字段
         private DispatcherTimer _powerPointProcessMonitorTimer;
         private const int ProcessMonitorInterval = 5000; // 应用程序监控间隔（毫秒）
+        
+        // 上次播放位置相关字段
+        private int _lastPlaybackPage = 0;
+        private bool _shouldNavigateToLastPage = false;
         #endregion
 
         #region PPT Managers
@@ -613,10 +617,15 @@ namespace Ink_Canvas
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    // 处理跳转到首页
+                    // 处理跳转到首页或上次播放位置
                     if (Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter)
                     {
                         _pptManager?.TryNavigateToSlide(1);
+                    }
+                    else if (_shouldNavigateToLastPage && _lastPlaybackPage > 0)
+                    {
+                        _pptManager?.TryNavigateToSlide(_lastPlaybackPage);
+                        _shouldNavigateToLastPage = false; // 重置标志位
                     }
 
                     // 更新UI状态
@@ -851,9 +860,10 @@ namespace Ink_Canvas
 
                 if (int.TryParse(File.ReadAllText(positionFile), out var page) && page > 0)
                 {
+                    _lastPlaybackPage = page;
                     new YesOrNoNotificationWindow($"上次播放到了第 {page} 页, 是否立即跳转", () =>
                     {
-                        _pptManager?.TryNavigateToSlide(page);
+                        _shouldNavigateToLastPage = true;
                     }).ShowDialog();
                 }
             }
