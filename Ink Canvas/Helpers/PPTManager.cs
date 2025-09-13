@@ -874,14 +874,86 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        /// <summary>
+        /// 获取当前活跃的演示文稿（用于多窗口墨迹分离）
+        /// </summary>
+        public Presentation GetCurrentActivePresentation()
+        {
+            try
+            {
+                if (!IsConnected || PPTApplication == null) return null;
+                if (!Marshal.IsComObject(PPTApplication)) return null;
+
+                // 如果在放映模式，获取放映窗口的演示文稿
+                if (IsInSlideShow && PPTApplication.SlideShowWindows.Count > 0)
+                {
+                    var slideShowWindow = PPTApplication.SlideShowWindows[1];
+                    if (slideShowWindow?.View != null)
+                    {
+                        return (Presentation)slideShowWindow.View.Slide.Parent;
+                    }
+                }
+
+                // 如果不在放映模式，获取活动窗口的演示文稿
+                if (PPTApplication.ActiveWindow?.Presentation != null)
+                {
+                    return PPTApplication.ActiveWindow.Presentation;
+                }
+
+                // 如果没有活动窗口，返回当前演示文稿
+                return CurrentPresentation;
+            }
+            catch (COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x8001010E || hr == 0x80004005)
+                {
+                    // COM对象已失效，触发断开连接
+                    DisconnectFromPPT();
+                }
+                LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {comEx.Message}", LogHelper.LogType.Warning);
+                return CurrentPresentation;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {ex}", LogHelper.LogType.Error);
+                return CurrentPresentation;
+            }
+        }
+
+        /// <summary>
+        /// 获取当前幻灯片编号
+        /// </summary>
         public int GetCurrentSlideNumber()
         {
             try
             {
-                if (!IsConnected || !IsInSlideShow || PPTApplication == null) return 0;
+                if (!IsConnected || PPTApplication == null) return 0;
                 if (!Marshal.IsComObject(PPTApplication)) return 0;
 
-                return PPTApplication.SlideShowWindows[1]?.View?.CurrentShowPosition ?? 0;
+                // 如果在放映模式，获取放映窗口的当前幻灯片编号
+                if (IsInSlideShow && PPTApplication.SlideShowWindows.Count > 0)
+                {
+                    var slideShowWindow = PPTApplication.SlideShowWindows[1];
+                    if (slideShowWindow?.View != null)
+                    {
+                        return slideShowWindow.View.CurrentShowPosition;
+                    }
+                }
+
+                // 如果不在放映模式，获取活动窗口的当前幻灯片编号
+                if (PPTApplication.ActiveWindow?.Selection?.SlideRange?.SlideNumber > 0)
+                {
+                    return PPTApplication.ActiveWindow.Selection.SlideRange.SlideNumber;
+                }
+
+                // 如果CurrentSlide存在，尝试获取其编号
+                if (CurrentSlide != null && Marshal.IsComObject(CurrentSlide))
+                {
+                    return CurrentSlide.SlideNumber;
+                }
+
+                return 0;
             }
             catch (COMException comEx)
             {

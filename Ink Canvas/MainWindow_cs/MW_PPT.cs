@@ -87,7 +87,7 @@ namespace Ink_Canvas
 
         // PowerPoint应用程序守护相关字段
         private DispatcherTimer _powerPointProcessMonitorTimer;
-        private const int ProcessMonitorInterval = 5000; // 应用程序监控间隔（毫秒）
+        private const int ProcessMonitorInterval = 1000; // 应用程序监控间隔（毫秒）
         
         // 上次播放位置相关字段
         private int _lastPlaybackPage = 0;
@@ -96,7 +96,7 @@ namespace Ink_Canvas
 
         #region PPT Managers
         private PPTManager _pptManager;
-        private PPTInkManager _pptInkManager;
+        private MultiPPTInkManager _multiPPTInkManager;
         private PPTUIManager _pptUIManager;
 
         /// <summary>
@@ -126,10 +126,10 @@ namespace Ink_Canvas
                 _pptManager.PresentationClose += OnPPTPresentationClose;
                 _pptManager.SlideShowStateChanged += OnPPTSlideShowStateChanged;
 
-                // 初始化墨迹管理器
-                _pptInkManager = new PPTInkManager();
-                _pptInkManager.IsAutoSaveEnabled = Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
-                _pptInkManager.AutoSaveLocation = Settings.Automation.AutoSavedStrokesLocation;
+                // 初始化多PPT墨迹管理器
+                _multiPPTInkManager = new MultiPPTInkManager();
+                _multiPPTInkManager.IsAutoSaveEnabled = Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
+                _multiPPTInkManager.AutoSaveLocation = Settings.Automation.AutoSavedStrokesLocation;
 
                 // 初始化UI管理器
                 _pptUIManager = new PPTUIManager(this);
@@ -412,11 +412,11 @@ namespace Ink_Canvas
             try
             {
                 _pptManager?.Dispose();
-                _pptInkManager?.Dispose();
+                _multiPPTInkManager?.Dispose();
                 _longPressTimer?.Stop();
                 _longPressTimer = null;
                 _pptManager = null;
-                _pptInkManager = null;
+                _multiPPTInkManager = null;
                 _pptUIManager = null;
 
                 // 清理PowerPoint进程守护
@@ -502,7 +502,7 @@ namespace Ink_Canvas
                     {
                         LogHelper.WriteLogToFile("PPT连接已断开", LogHelper.LogType.Event);
                         // 清理墨迹管理器
-                        _pptInkManager?.ClearAllStrokes();
+                        _multiPPTInkManager?.ClearAllStrokes();
                     }
                 });
             }
@@ -527,8 +527,8 @@ namespace Ink_Canvas
                         TimeMachineHistories[0] = null;
                     }
 
-                    // 初始化墨迹管理器
-                    _pptInkManager?.InitializePresentation(pres);
+                    // 初始化多PPT墨迹管理器
+                    _multiPPTInkManager?.InitializePresentation(pres);
 
                     // 处理跳转到首页或上次播放页的逻辑
                     HandlePresentationOpenNavigation(pres);
@@ -563,10 +563,10 @@ namespace Ink_Canvas
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     // 保存所有墨迹
-                    _pptInkManager?.SaveAllStrokesToFile(pres);
+                    _multiPPTInkManager?.SaveAllStrokesToFile(pres);
 
-                    // 清理墨迹管理器
-                    _pptInkManager?.ClearAllStrokes();
+                    // 移除演示文稿管理器
+                    _multiPPTInkManager?.RemovePresentation(pres);
 
                     _pptUIManager?.UpdateConnectionStatus(false);
                 });
@@ -617,6 +617,14 @@ namespace Ink_Canvas
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    // 获取当前活跃的演示文稿并切换到对应的墨迹管理器
+                    var activePresentation = _pptManager?.GetCurrentActivePresentation();
+                    if (activePresentation != null)
+                    {
+                        _multiPPTInkManager?.SwitchToPresentation(activePresentation);
+                        LogHelper.WriteLogToFile($"已切换到活跃演示文稿: {activePresentation.Name}", LogHelper.LogType.Trace);
+                    }
+
                     // 处理跳转到首页或上次播放位置
                     if (Settings.PowerPointSettings.IsAlwaysGoToFirstPageOnReenter)
                     {
@@ -709,6 +717,13 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
+                    // 获取当前活跃的演示文稿并确保切换到正确的墨迹管理器
+                    var activePresentation = _pptManager?.GetCurrentActivePresentation();
+                    if (activePresentation != null)
+                    {
+                        _multiPPTInkManager?.SwitchToPresentation(activePresentation);
+                    }
+
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     var totalSlides = _pptManager?.SlidesCount ?? 0;
 
@@ -745,7 +760,7 @@ namespace Ink_Canvas
                 isEnteredSlideShowEndEvent = true;
 
                 // 保存所有墨迹
-                _pptInkManager?.SaveAllStrokesToFile(pres);
+                    _multiPPTInkManager?.SaveAllStrokesToFile(pres);
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
@@ -982,7 +997,7 @@ namespace Ink_Canvas
         {
             try
             {
-                var strokes = _pptInkManager?.LoadSlideStrokes(slideIndex);
+                var strokes = _multiPPTInkManager?.LoadSlideStrokes(slideIndex);
                 if (strokes != null)
                 {
                     inkCanvas.Strokes.Clear();
@@ -999,7 +1014,7 @@ namespace Ink_Canvas
         {
             try
             {
-                var newStrokes = _pptInkManager?.SwitchToSlide(newSlideIndex, inkCanvas.Strokes);
+                var newStrokes = _multiPPTInkManager?.SwitchToSlide(newSlideIndex, inkCanvas.Strokes);
                 if (newStrokes != null)
                 {
                     inkCanvas.Strokes.Clear();
@@ -1007,7 +1022,7 @@ namespace Ink_Canvas
                 }
 
                 // 设置墨迹锁定
-                _pptInkManager?.LockInkForSlide(newSlideIndex);
+                _multiPPTInkManager?.LockInkForSlide(newSlideIndex);
             }
             catch (Exception ex)
             {
@@ -1143,7 +1158,7 @@ namespace Ink_Canvas
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     if (currentSlide > 0)
                     {
-                        _pptInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
+                        _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
                     }
 
                     // 保存截图（如果启用）
@@ -1184,7 +1199,7 @@ namespace Ink_Canvas
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     if (currentSlide > 0)
                     {
-                        _pptInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
+                        _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
                     }
 
                     // 保存截图（如果启用）
@@ -1345,7 +1360,7 @@ namespace Ink_Canvas
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        _pptInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
+                        _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
                         timeMachine.ClearStrokeHistory();
                     });
                 }
