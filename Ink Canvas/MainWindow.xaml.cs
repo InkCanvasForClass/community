@@ -548,6 +548,17 @@ namespace Ink_Canvas
 
             // 检查模式设置并应用
             CheckMainWindowVisibility();
+
+            // 检查是否通过--board参数启动，如果是则自动切换到白板模式
+            if (App.StartWithBoardMode)
+            {
+                LogHelper.WriteLogToFile("检测到--board参数，自动切换到白板模式", LogHelper.LogType.Event);
+                // 延迟执行，确保UI已完全加载
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    SwitchToBoardMode();
+                }), DispatcherPriority.Loaded);
+            }
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -2699,6 +2710,27 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"检查主窗口可见性时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 切换到白板模式（用于--board参数和IPC命令）
+        /// 调用浮动栏上的白板功能
+        /// </summary>
+        public void SwitchToBoardMode()
+        {
+            try
+            {
+                LogHelper.WriteLogToFile("开始切换到白板模式", LogHelper.LogType.Event);
+
+                // 调用浮动栏上的白板功能
+                ImageBlackboard_MouseUp(null, null);
+
+                LogHelper.WriteLogToFile("已成功切换到白板模式", LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换到白板模式时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

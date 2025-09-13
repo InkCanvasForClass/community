@@ -33,7 +33,9 @@ namespace Ink_Canvas
 
         public static string[] StartArgs;
         public static string RootPath = Environment.GetEnvironmentVariable("APPDATA") + "\\Ink Canvas\\";
-
+        
+        // 新增：标记是否通过--board参数启动
+        public static bool StartWithBoardMode = false;
         // 新增：保存看门狗进程对象
         private static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
@@ -495,6 +497,14 @@ namespace Ink_Canvas
             // 检查是否为最终应用启动（更新后的应用）
             bool isFinalApp = e.Args.Contains("--final-app");
             bool skipMutexCheck = e.Args.Contains("--skip-mutex-check");
+            
+            // 检查是否通过--board参数启动
+            bool hasBoardArg = e.Args.Contains("--board");
+            if (hasBoardArg)
+            {
+                StartWithBoardMode = true;
+                LogHelper.WriteLogToFile("App | 检测到--board参数，将直接进入白板模式");
+            }
 
             // 记录最终应用启动状态
             if (isFinalApp)
@@ -669,6 +679,21 @@ namespace Ink_Canvas
                         else
                         {
                             LogHelper.WriteLogToFile("通过IPC发送文件路径失败", LogHelper.LogType.Warning);
+                        }
+                    }
+                    // 检查是否有--board参数
+                    else if (hasBoardArg)
+                    {
+                        LogHelper.WriteLogToFile("检测到已运行实例且有--board参数，尝试通过IPC发送白板模式命令", LogHelper.LogType.Event);
+
+                        // 尝试通过IPC发送白板模式命令给已运行实例
+                        if (FileAssociationManager.TrySendBoardModeCommandToExistingInstance())
+                        {
+                            LogHelper.WriteLogToFile("白板模式命令已通过IPC发送给已运行实例", LogHelper.LogType.Event);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("通过IPC发送白板模式命令失败", LogHelper.LogType.Warning);
                         }
                     }
                     else
