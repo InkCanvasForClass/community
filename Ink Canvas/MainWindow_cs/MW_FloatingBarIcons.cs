@@ -78,6 +78,7 @@ namespace Ink_Canvas
         {
             if (ToggleSwitchEnableMultiTouchMode.IsOn)
             {
+                // 多指书写模式启用时，手势功能被禁用
                 TwoFingerGestureSimpleStackPanel.Opacity = 0.5;
                 TwoFingerGestureSimpleStackPanel.IsHitTestVisible = false;
                 EnableTwoFingerGestureBtn.Source =
@@ -93,9 +94,14 @@ namespace Ink_Canvas
             }
             else
             {
+                // 多指书写模式禁用时，根据实际手势功能状态显示
                 TwoFingerGestureSimpleStackPanel.Opacity = 1;
                 TwoFingerGestureSimpleStackPanel.IsHitTestVisible = true;
-                if (Settings.Gesture.IsEnableTwoFingerGesture)
+                
+                // 检查是否有任何手势功能启用
+                bool hasGestureEnabled = Settings.Gesture.IsEnableTwoFingerGesture;
+                
+                if (hasGestureEnabled)
                 {
                     EnableTwoFingerGestureBtn.Source =
                         new BitmapImage(new Uri("/Resources/new-icons/gesture-enabled.png", UriKind.Relative));
