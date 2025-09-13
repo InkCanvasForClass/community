@@ -808,7 +808,7 @@ namespace Ink_Canvas
                     }
                 });
 
-                await Task.Delay(150);
+                await Task.Delay(100);
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     // 强制重新计算浮动栏位置，确保在退出PPT模式后正确复位

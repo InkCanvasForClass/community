@@ -282,7 +282,7 @@ namespace Ink_Canvas
                     RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 }
 
-                // 新增：只在屏幕模式下显示浮动栏
+                // 新只在屏幕模式下显示浮动栏
                 if (currentMode == 0)
                 {
                     // 强制更新布局以确保ActualWidth正确
