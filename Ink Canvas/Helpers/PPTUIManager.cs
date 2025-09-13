@@ -155,7 +155,6 @@ namespace Ink_Canvas.Helpers
                     {
                         // 如果不在放映模式，隐藏所有导航面板
                         HideAllNavigationPanels();
-                        LogHelper.WriteLogToFile("PPT放映状态变化：隐藏导航面板", LogHelper.LogType.Trace);
                     }
                 }
                 catch (Exception ex)

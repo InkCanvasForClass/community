@@ -249,7 +249,6 @@ namespace Ink_Canvas.Helpers
 
                     if (!currentSlideShowState)
                     {
-                        LogHelper.WriteLogToFile("检测到PPT放映已结束", LogHelper.LogType.Trace);
                     }
                 }
             }
@@ -629,7 +628,6 @@ namespace Ink_Canvas.Helpers
             try
             {
                 PresentationClose?.Invoke(pres);
-                LogHelper.WriteLogToFile($"演示文稿已关闭: {pres?.Name}", LogHelper.LogType.Event);
 
                 // 重新启动连接检查
                 _connectionCheckTimer?.Start();
@@ -646,7 +644,6 @@ namespace Ink_Canvas.Helpers
             {
                 UpdateCurrentPresentationInfo();
                 SlideShowBegin?.Invoke(wn);
-                LogHelper.WriteLogToFile("幻灯片放映开始", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -678,7 +675,6 @@ namespace Ink_Canvas.Helpers
                 }
 
                 SlideShowEnd?.Invoke(pres);
-                LogHelper.WriteLogToFile("幻灯片放映结束", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -1139,7 +1135,7 @@ namespace Ink_Canvas.Helpers
                 _wpsProcessCheckTimer.Dispose();
             }
 
-            // 优化：增加检查间隔到2秒，减少性能开销
+            // 增加检查间隔到2秒，减少性能开销
             _wpsProcessCheckTimer = new Timer(2000);
             _wpsProcessCheckTimer.Elapsed += OnWpsProcessCheckTimerElapsed;
             _wpsProcessCheckTimer.Start();
@@ -1173,7 +1169,7 @@ namespace Ink_Canvas.Helpers
                 }
 
 
-                // 检查前台WPS窗口是否存在（优化版）
+                // 检查前台WPS窗口是否存在
                 bool isForegroundWpsWindowActive = IsForegroundWpsWindowStillActiveOptimized();
 
                 if (isForegroundWpsWindowActive)
@@ -1185,7 +1181,7 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
-                // 优化：多重验证确保准确性
+                // 多重验证确保准确性
                 if (!PerformMultipleWpsWindowChecks())
                 {
                     LogHelper.WriteLogToFile("多重验证显示WPS窗口仍然存在，跳过查杀", LogHelper.LogType.Trace);
@@ -1206,7 +1202,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 优化版的前台WPS窗口检测，减少性能开销
+        /// 前台WPS窗口检测
         /// </summary>
         private bool IsForegroundWpsWindowStillActiveOptimized()
         {
@@ -1232,7 +1228,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"优化版WPS窗口检测失败: {ex}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"WPS窗口检测失败: {ex}", LogHelper.LogType.Error);
                 return false;
             }
         }

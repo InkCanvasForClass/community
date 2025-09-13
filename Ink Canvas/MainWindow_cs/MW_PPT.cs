@@ -602,7 +602,6 @@ namespace Ink_Canvas
 
                     if (!isInSlideShow)
                     {
-                        LogHelper.WriteLogToFile("PPT放映状态变化：退出放映模式", LogHelper.LogType.Trace);
                     }
 
                     // 检查主窗口可见性（用于仅PPT模式）
@@ -636,7 +635,6 @@ namespace Ink_Canvas
                     if (activePresentation != null)
                     {
                         _multiPPTInkManager?.SwitchToPresentation(activePresentation);
-                        LogHelper.WriteLogToFile($"已切换到活跃演示文稿: {activePresentation.Name}", LogHelper.LogType.Trace);
                     }
 
                     // 处理跳转到首页或上次播放位置
@@ -1039,8 +1037,6 @@ namespace Ink_Canvas
                     
                     // 重置锁定状态
                     _multiPPTInkManager?.ResetCurrentPresentationLockState();
-                    
-                    LogHelper.WriteLogToFile($"已重置墨迹管理器锁定状态", LogHelper.LogType.Trace);
                 }
             }
             catch (Exception ex)
@@ -1193,7 +1189,6 @@ namespace Ink_Canvas
 
             Settings.PowerPointSettings.EnablePowerPointEnhancement = ToggleSwitchPowerPointEnhancement.IsOn;
 
-            // 与WPS支持互斥
             if (Settings.PowerPointSettings.EnablePowerPointEnhancement)
             {
                 Settings.PowerPointSettings.IsSupportWPS = false;
@@ -1225,7 +1220,6 @@ namespace Ink_Canvas
 
             Settings.PowerPointSettings.IsSupportWPS = ToggleSwitchSupportWPS.IsOn;
 
-            // 与PowerPoint联动增强互斥
             if (Settings.PowerPointSettings.IsSupportWPS)
             {
                 Settings.PowerPointSettings.EnablePowerPointEnhancement = false;
@@ -1272,7 +1266,6 @@ namespace Ink_Canvas
                     if (_pptManager?.TryNavigatePrevious() == true)
                     {
                         // 翻页成功，等待事件处理墨迹切换
-                        LogHelper.WriteLogToFile("成功切换到上一页", LogHelper.LogType.Trace);
                     }
                     else
                     {
@@ -1466,7 +1459,6 @@ namespace Ink_Canvas
                 // 结束放映
                 if (_pptManager?.TryEndSlideShow() == true)
                 {
-                    LogHelper.WriteLogToFile("成功结束幻灯片放映", LogHelper.LogType.Event);
                 }
                 else
                 {

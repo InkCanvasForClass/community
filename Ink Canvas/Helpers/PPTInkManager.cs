@@ -94,7 +94,6 @@ namespace Ink_Canvas.Helpers
                         LoadSavedStrokes();
                     }
 
-                    LogHelper.WriteLogToFile($"已初始化演示文稿墨迹管理: {presentation.Name}, 幻灯片数量: {slideCount}", LogHelper.LogType.Trace);
                 }
                 catch (Exception ex)
                 {
@@ -192,7 +191,6 @@ namespace Ink_Canvas.Helpers
                     {
                         _memoryStreams[slideIndex].Position = 0;
                         var strokes = new StrokeCollection(_memoryStreams[slideIndex]);
-                        LogHelper.WriteLogToFile($"已加载第{slideIndex}页墨迹，笔画数量: {strokes.Count}", LogHelper.LogType.Trace);
                         return strokes;
                     }
                 }
@@ -236,7 +234,6 @@ namespace Ink_Canvas.Helpers
                     
                     if (newStrokes.Count > 0)
                     {
-                        LogHelper.WriteLogToFile($"已切换到第{slideIndex}页，加载墨迹数量: {newStrokes.Count}", LogHelper.LogType.Trace);
                     }
 
                     return newStrokes;
@@ -328,7 +325,6 @@ namespace Ink_Canvas.Helpers
                         }
                     }
 
-                    LogHelper.WriteLogToFile($"已保存{savedCount}页墨迹到文件", LogHelper.LogType.Event);
                 }
                 catch (Exception ex)
                 {
@@ -375,7 +371,6 @@ namespace Ink_Canvas.Helpers
                         }
                     }
 
-                    LogHelper.WriteLogToFile($"已从文件加载{loadedCount}页墨迹", LogHelper.LogType.Event);
                 }
                 catch (Exception ex)
                 {
@@ -450,7 +445,6 @@ namespace Ink_Canvas.Helpers
                 _lockedSlideIndex = -1;
                 _lastSwitchTime = DateTime.MinValue;
                 _lastSwitchSlideIndex = -1;
-                LogHelper.WriteLogToFile("已重置墨迹锁定状态", LogHelper.LogType.Trace);
             }
         }
         #endregion

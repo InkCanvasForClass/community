@@ -354,9 +354,6 @@ namespace Ink_Canvas.Helpers
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("快捷键注册功能已经启用，重新加载快捷键设置");
-                    // 即使已经启用，也要重新加载快捷键设置以确保快捷键正常工作
-                    LoadHotkeysFromSettings();
                 }
             }
             catch (Exception ex)

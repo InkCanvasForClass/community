@@ -79,7 +79,6 @@ namespace Ink_Canvas.Helpers
                     // 设置为当前活跃的演示文稿
                     _currentActivePresentationId = presentationId;
 
-                    LogHelper.WriteLogToFile($"已初始化多PPT墨迹管理: {presentation.Name}, 幻灯片数量: {presentation.Slides.Count}", LogHelper.LogType.Event);
                 }
                 catch (Exception ex)
                 {
@@ -405,7 +404,6 @@ namespace Ink_Canvas.Helpers
                     if (manager != null)
                     {
                         manager.ResetLockState();
-                        LogHelper.WriteLogToFile("已重置当前演示文稿的墨迹锁定状态", LogHelper.LogType.Trace);
                     }
                 }
                 catch (Exception ex)
