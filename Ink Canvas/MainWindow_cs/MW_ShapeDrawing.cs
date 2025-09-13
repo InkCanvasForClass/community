@@ -10,7 +10,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using MessageBox = System.Windows.MessageBox;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas

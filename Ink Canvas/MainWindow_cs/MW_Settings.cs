@@ -1,5 +1,4 @@
 using Hardcodet.Wpf.TaskbarNotification;
-using iNKORE.UI.WPF.Modern.Controls;
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using OSVersionExtension;

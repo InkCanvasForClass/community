@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
 using File = System.IO.File;
-using MessageBox = System.Windows.MessageBox;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using MouseButtonEventArgs = System.Windows.Input.MouseButtonEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 
