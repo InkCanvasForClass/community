@@ -241,7 +241,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.SeewoPincoSideBarFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoPincoSideBarFloating,
-                ProcessName = "SeewoPinco",
+                ProcessName = "ClassIn",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
@@ -253,7 +253,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.SeewoPincoDrawingFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoPincoDrawingFloating,
-                ProcessName = "SeewoPinco",
+                ProcessName = "ClassIn",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
@@ -289,7 +289,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.HiteAnnotationFloating] = new InterceptRule
             {
                 Type = InterceptType.HiteAnnotationFloating,
-                ProcessName = "HiteAnnotation",
+                ProcessName = "HiteVision",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
@@ -301,7 +301,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.ChangYanFloating] = new InterceptRule
             {
                 Type = InterceptType.ChangYanFloating,
-                ProcessName = "ChangYan",
+                ProcessName = "ClassIn",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
@@ -313,7 +313,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.ChangYanPptFloating] = new InterceptRule
             {
                 Type = InterceptType.ChangYanPptFloating,
-                ProcessName = "ChangYanPPT",
+                ProcessName = "ClassIn",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
