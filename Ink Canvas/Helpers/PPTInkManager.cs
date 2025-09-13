@@ -204,32 +204,6 @@ namespace Ink_Canvas.Helpers
                         return LoadSlideStrokes(slideIndex);
                     }
 
-                    // 如果有当前墨迹，先保存到正确的页面
-                    if (currentStrokes != null && currentStrokes.Count > 0)
-                    {
-                        // 否则使用传入的页面索引，确保墨迹保存到正确的页面
-                        int saveToSlideIndex;
-                        if (_lockedSlideIndex > 0 && DateTime.Now < _inkLockUntil && _lockedSlideIndex != slideIndex)
-                        {
-                            saveToSlideIndex = _lockedSlideIndex;
-                            LogHelper.WriteLogToFile($"使用锁定页面保存墨迹: {saveToSlideIndex} -> {slideIndex}", LogHelper.LogType.Trace);
-                        }
-                        else
-                        {
-                            saveToSlideIndex = slideIndex;
-                        }
-
-                        // 确保页面索引有效
-                        if (saveToSlideIndex > 0 && saveToSlideIndex < _memoryStreams.Length)
-                        {
-                            SaveCurrentSlideStrokes(saveToSlideIndex, currentStrokes);
-                            LogHelper.WriteLogToFile($"已保存第{saveToSlideIndex}页墨迹，墨迹数量: {currentStrokes.Count}", LogHelper.LogType.Trace);
-                        }
-                        else
-                        {
-                            LogHelper.WriteLogToFile($"页面索引无效，无法保存墨迹: {saveToSlideIndex}", LogHelper.LogType.Warning);
-                        }
-                    }
 
                     // 设置墨迹锁定
                     LockInkForSlide(slideIndex);

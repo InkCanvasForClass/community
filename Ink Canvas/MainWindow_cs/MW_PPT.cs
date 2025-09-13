@@ -1096,7 +1096,18 @@ namespace Ink_Canvas
         {
             try
             {
-                var newStrokes = _multiPPTInkManager?.SwitchToSlide(newSlideIndex, inkCanvas.Strokes);
+                // 获取当前页面索引
+                var currentSlideIndex = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                
+                // 如果有当前墨迹且不是第一次切换，先保存到当前页面
+                if (inkCanvas.Strokes.Count > 0 && currentSlideIndex > 0 && currentSlideIndex != newSlideIndex)
+                {
+                    _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlideIndex, inkCanvas.Strokes);
+                    LogHelper.WriteLogToFile($"切换前保存第{currentSlideIndex}页墨迹，墨迹数量: {inkCanvas.Strokes.Count}", LogHelper.LogType.Trace);
+                }
+                
+                // 切换到新页面并加载墨迹
+                var newStrokes = _multiPPTInkManager?.SwitchToSlide(newSlideIndex, null);
                 if (newStrokes != null)
                 {
                     inkCanvas.Strokes.Clear();
