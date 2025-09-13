@@ -796,6 +796,9 @@ namespace Ink_Canvas
                         // 注意：这里只清空索引0的备份，不影响白板页面的墨迹（索引1及以上）
                         TimeMachineHistories[0] = null;
 
+                        // 重置墨迹管理器的锁定状态，防止下次放映时墨迹显示错误
+                        ResetInkManagerLockState();
+
                         // 退出PPT模式时恢复手势面板和手势按钮的显示状态
                         if (Settings.Gesture.IsEnableTwoFingerGesture && ToggleSwitchEnableMultiTouchMode.IsOn)
                         {
@@ -1011,6 +1014,32 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"加载当前页墨迹失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 重置墨迹管理器的锁定状态，防止墨迹显示错误
+        /// </summary>
+        private void ResetInkManagerLockState()
+        {
+            try
+            {
+                // 获取当前活跃的演示文稿
+                var activePresentation = _pptManager?.GetCurrentActivePresentation();
+                if (activePresentation != null)
+                {
+                    // 切换到对应的墨迹管理器
+                    _multiPPTInkManager?.SwitchToPresentation(activePresentation);
+                    
+                    // 重置锁定状态
+                    _multiPPTInkManager?.ResetCurrentPresentationLockState();
+                    
+                    LogHelper.WriteLogToFile($"已重置墨迹管理器锁定状态", LogHelper.LogType.Trace);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"重置墨迹管理器锁定状态失败: {ex}", LogHelper.LogType.Error);
             }
         }
 

@@ -389,6 +389,29 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 重置当前演示文稿的墨迹锁定状态
+        /// </summary>
+        public void ResetCurrentPresentationLockState()
+        {
+            lock (_lockObject)
+            {
+                try
+                {
+                    var manager = GetCurrentManager();
+                    if (manager != null)
+                    {
+                        manager.ResetLockState();
+                        LogHelper.WriteLogToFile("已重置当前演示文稿的墨迹锁定状态", LogHelper.LogType.Trace);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"重置墨迹锁定状态失败: {ex}", LogHelper.LogType.Error);
+                }
+            }
+        }
+
+        /// <summary>
         /// 移除演示文稿管理器
         /// </summary>
         public void RemovePresentation(Presentation presentation)

@@ -207,8 +207,17 @@ namespace Ink_Canvas.Helpers
                     // 如果有当前墨迹，先保存到正确的页面
                     if (currentStrokes != null && currentStrokes.Count > 0)
                     {
-                        // 使用当前锁定的页面索引，如果没有锁定则使用传入的页面索引
-                        int saveToSlideIndex = _lockedSlideIndex > 0 ? _lockedSlideIndex : slideIndex;
+                        // 否则使用传入的页面索引，确保墨迹保存到正确的页面
+                        int saveToSlideIndex;
+                        if (_lockedSlideIndex > 0 && DateTime.Now < _inkLockUntil && _lockedSlideIndex != slideIndex)
+                        {
+                            saveToSlideIndex = _lockedSlideIndex;
+                            LogHelper.WriteLogToFile($"使用锁定页面保存墨迹: {saveToSlideIndex} -> {slideIndex}", LogHelper.LogType.Trace);
+                        }
+                        else
+                        {
+                            saveToSlideIndex = slideIndex;
+                        }
 
                         // 确保页面索引有效
                         if (saveToSlideIndex > 0 && saveToSlideIndex < _memoryStreams.Length)
@@ -406,6 +415,21 @@ namespace Ink_Canvas.Helpers
             if (DateTime.Now < _inkLockUntil) return false;
             if (currentSlideIndex != _lockedSlideIndex && _lockedSlideIndex > 0) return false;
             return true;
+        }
+
+        /// <summary>
+        /// 重置墨迹锁定状态
+        /// </summary>
+        public void ResetLockState()
+        {
+            lock (_lockObject)
+            {
+                _inkLockUntil = DateTime.MinValue;
+                _lockedSlideIndex = -1;
+                _lastSwitchTime = DateTime.MinValue;
+                _lastSwitchSlideIndex = -1;
+                LogHelper.WriteLogToFile("已重置墨迹锁定状态", LogHelper.LogType.Trace);
+            }
         }
         #endregion
 
