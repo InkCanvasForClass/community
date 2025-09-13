@@ -190,11 +190,8 @@ namespace Ink_Canvas.Helpers
                     if (!shouldShowButtons)
                     {
                         HideAllNavigationPanels();
-                        LogHelper.WriteLogToFile($"隐藏PPT导航面板 - 放映状态: {isInSlideShow}, 页数: {slidesCount}, 按钮设置: {ShowPPTButton}", LogHelper.LogType.Trace);
                         return;
                     }
-
-                    LogHelper.WriteLogToFile($"显示PPT导航面板 - 放映状态: {isInSlideShow}, 页数: {slidesCount}", LogHelper.LogType.Trace);
 
                     // 设置侧边按钮位置
                     _mainWindow.LeftSidePanelForPPTNavigation.Margin = new Thickness(0, 0, 0, PPTLSButtonPosition * 2);

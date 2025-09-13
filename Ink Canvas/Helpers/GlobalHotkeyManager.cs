@@ -420,7 +420,6 @@ namespace Ink_Canvas.Helpers
                 {
                     // 非鼠标模式下启用快捷键
                     EnableHotkeyRegistration();
-                    LogHelper.WriteLogToFile("切换到非鼠标模式，启用快捷键");
                 }
             }
             catch (Exception ex)

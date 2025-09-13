@@ -280,7 +280,6 @@ namespace Ink_Canvas
                     RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                    LogHelper.WriteLogToFile($"从收纳模式恢复时隐藏PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
 
                 // 新增：只在屏幕模式下显示浮动栏

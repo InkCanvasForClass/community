@@ -3538,7 +3538,6 @@ namespace Ink_Canvas
         private void UpdateCurrentToolMode(string mode)
         {
             _currentToolMode = mode;
-            LogHelper.WriteLogToFile($"更新工具模式缓存: {mode}", LogHelper.LogType.Trace);
         }
 
         #endregion

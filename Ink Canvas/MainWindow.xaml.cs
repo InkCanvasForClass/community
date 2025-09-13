@@ -2335,7 +2335,6 @@ namespace Ink_Canvas
                 // 执行额外的操作（如果有）
                 additionalActions?.Invoke();
 
-                LogHelper.WriteLogToFile($"工具模式已切换到: {newMode}, 鼠标模式: {isMouseMode}", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {
