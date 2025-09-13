@@ -65,8 +65,11 @@ namespace Ink_Canvas
 
         private Timer timerDisplayTime = new Timer();
         private Timer timerDisplayDate = new Timer();
+        private Timer timerNtpSync = new Timer();
 
         private TimeViewModel nowTimeVM = new TimeViewModel();
+        private DateTime cachedNetworkTime = DateTime.Now;
+        private DateTime lastNtpSyncTime = DateTime.MinValue;
 
         private async Task<DateTime> GetNetworkTimeAsync()
         {
@@ -117,34 +120,60 @@ namespace Ink_Canvas
             timerDisplayDate.Elapsed += TimerDisplayDate_Elapsed;
             timerDisplayDate.Interval = 1000 * 60 * 60 * 1;
             timerDisplayDate.Start();
+            timerNtpSync.Elapsed += async (s, e) => await TimerNtpSync_ElapsedAsync();
+            timerNtpSync.Interval = 1000 * 60 * 60 * 2; // 每2小时同步一次
+            timerNtpSync.Start();
             timerKillProcess.Start();
             nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
             nowTimeVM.nowTime = DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
         }
 
-        // 修改TimerDisplayTime_ElapsedAsync方法中的时间格式，实现校验制
+        // NTP同步定时器事件处理
+        private async Task TimerNtpSync_ElapsedAsync()
+        {
+            try
+            {
+                DateTime networkTime = await GetNetworkTimeAsync();
+                cachedNetworkTime = networkTime;
+                lastNtpSyncTime = DateTime.Now;
+            }
+            catch
+            {
+                // NTP同步失败时，保持使用本地时间
+                cachedNetworkTime = DateTime.Now;
+            }
+        }
+
+        // 修改TimerDisplayTime_ElapsedAsync方法，使用缓存的网络时间
         private async Task TimerDisplayTime_ElapsedAsync()
         {
             DateTime localTime = DateTime.Now;
             DateTime displayTime = localTime; // 默认使用本地时间
 
-            try
+            // 如果还没有进行过NTP同步，或者距离上次同步超过2小时，则进行一次同步
+            if (lastNtpSyncTime == DateTime.MinValue || 
+                (DateTime.Now - lastNtpSyncTime).TotalHours >= 2)
             {
-                DateTime networkTime = await GetNetworkTimeAsync();
-
-                // 计算时间差
-                TimeSpan timeDifference = networkTime - localTime;
-                double timeDifferenceMinutes = Math.Abs(timeDifference.TotalMinutes);
-
-                // 如果网络时间与本地时间相差不超过1分钟，则使用本地时间
-                // 否则使用网络时间
-                displayTime = timeDifferenceMinutes <= 1.0 ? localTime : networkTime;
+                try
+                {
+                    DateTime networkTime = await GetNetworkTimeAsync();
+                    cachedNetworkTime = networkTime;
+                    lastNtpSyncTime = DateTime.Now;
+                }
+                catch
+                {
+                    // 网络时间获取失败时，使用本地时间
+                    cachedNetworkTime = localTime;
+                }
             }
-            catch
-            {
-                // 网络时间获取失败时，使用本地时间
-                displayTime = localTime;
-            }
+
+            // 使用缓存的网络时间进行显示
+            TimeSpan timeDifference = cachedNetworkTime - localTime;
+            double timeDifferenceMinutes = Math.Abs(timeDifference.TotalMinutes);
+
+            // 如果网络时间与本地时间相差不超过3分钟，则使用本地时间
+            // 否则使用网络时间
+            displayTime = timeDifferenceMinutes <= 3.0 ? localTime : cachedNetworkTime;
 
             // 只更新时间，日期由原有逻辑定时更新即可
             Dispatcher.Invoke(() =>
