@@ -154,50 +154,90 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 获取当前帧的Bitmap
-        /// </summary>
-        public Bitmap GetCurrentFrame()
-        {
-            lock (_frameLock)
-            {
-                return _currentFrame?.Clone() as Bitmap;
-            }
-        }
-
-        /// <summary>
-        /// 获取当前帧的BitmapSource（WPF格式）
+        /// 获取当前帧的BitmapSource（WPF格式），直接返回可用的WPF位图
         /// </summary>
         public BitmapSource GetCurrentFrameAsBitmapSource()
         {
             lock (_frameLock)
             {
                 if (_currentFrame == null)
+                {
+                    LogHelper.WriteLogToFile("GetCurrentFrameAsBitmapSource: _currentFrame为null");
                     return null;
+                }
 
                 try
                 {
-                    using (var memory = new MemoryStream())
+                    LogHelper.WriteLogToFile($"GetCurrentFrameAsBitmapSource: 开始处理帧，类型={_currentFrame.GetType().FullName}");
+                    LogHelper.WriteLogToFile($"GetCurrentFrameAsBitmapSource: 帧HashCode={_currentFrame.GetHashCode()}");
+                    
+                    // 验证当前帧的有效性
+                    var width = _currentFrame.Width;
+                    var height = _currentFrame.Height;
+                    LogHelper.WriteLogToFile($"GetCurrentFrameAsBitmapSource: 当前帧尺寸={width}x{height}");
+                    
+                    // 验证位图有效性
+                    if (width <= 0 || height <= 0)
                     {
-                        _currentFrame.Save(memory, ImageFormat.Png);
-                        memory.Position = 0;
+                        LogHelper.WriteLogToFile("当前帧无效: 尺寸为0", LogHelper.LogType.Warning);
+                        return null;
+                    }
 
-                        var bitmapImage = new BitmapImage();
-                        bitmapImage.BeginInit();
-                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                        bitmapImage.StreamSource = memory;
-                        bitmapImage.EndInit();
-                        bitmapImage.Freeze();
+                    // 使用更安全的方法转换位图
+                    var bitmapData = _currentFrame.LockBits(
+                        new Rectangle(0, 0, width, height),
+                        ImageLockMode.ReadOnly,
+                        _currentFrame.PixelFormat);
 
-                        return bitmapImage;
+                    try
+                    {
+                        // 根据像素格式选择合适的WPF像素格式
+                        System.Windows.Media.PixelFormat wpfPixelFormat;
+                        switch (_currentFrame.PixelFormat)
+                        {
+                            case PixelFormat.Format24bppRgb:
+                                wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
+                                break;
+                            case PixelFormat.Format32bppArgb:
+                                wpfPixelFormat = System.Windows.Media.PixelFormats.Bgra32;
+                                break;
+                            case PixelFormat.Format32bppRgb:
+                                wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr32;
+                                break;
+                            default:
+                                wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
+                                break;
+                        }
+
+                        var bitmapSource = System.Windows.Media.Imaging.BitmapSource.Create(
+                            bitmapData.Width,
+                            bitmapData.Height,
+                            _currentFrame.HorizontalResolution,
+                            _currentFrame.VerticalResolution,
+                            wpfPixelFormat,
+                            null,
+                            bitmapData.Scan0,
+                            bitmapData.Stride * bitmapData.Height,
+                            bitmapData.Stride);
+
+                        bitmapSource.Freeze();
+                        LogHelper.WriteLogToFile($"GetCurrentFrameAsBitmapSource: 成功创建BitmapSource");
+                        return bitmapSource;
+                    }
+                    finally
+                    {
+                        _currentFrame.UnlockBits(bitmapData);
                     }
                 }
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"转换帧为BitmapSource失败: {ex.Message}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"异常详情: {ex}", LogHelper.LogType.Error);
                     return null;
                 }
             }
         }
+
 
         /// <summary>
         /// 视频源新帧事件处理
@@ -206,13 +246,52 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                LogHelper.WriteLogToFile($"VideoSource_NewFrame: 接收到新帧");
+                
                 lock (_frameLock)
                 {
                     // 释放之前的帧
                     _currentFrame?.Dispose();
                     
-                    // 克隆新帧
-                    _currentFrame = eventArgs.Frame.Clone() as Bitmap;
+                    // 创建新的位图，避免Clone的问题
+                    var sourceFrame = eventArgs.Frame;
+                    LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧类型={sourceFrame?.GetType().FullName}");
+                    LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧HashCode={sourceFrame?.GetHashCode()}");
+                    
+                    if (sourceFrame != null)
+                    {
+                        try
+                        {
+                            var width = sourceFrame.Width;
+                            var height = sourceFrame.Height;
+                            LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧尺寸={width}x{height}");
+                            
+                            if (width > 0 && height > 0)
+                            {
+                                _currentFrame = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+                                using (var graphics = Graphics.FromImage(_currentFrame))
+                                {
+                                    graphics.DrawImage(sourceFrame, 0, 0);
+                                }
+                                LogHelper.WriteLogToFile($"VideoSource_NewFrame: 成功创建新帧，HashCode={_currentFrame.GetHashCode()}");
+                            }
+                            else
+                            {
+                                LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧尺寸无效");
+                                _currentFrame = null;
+                            }
+                        }
+                        catch (Exception frameEx)
+                        {
+                            LogHelper.WriteLogToFile($"VideoSource_NewFrame: 处理源帧失败: {frameEx.Message}", LogHelper.LogType.Error);
+                            _currentFrame = null;
+                        }
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"VideoSource_NewFrame: 源帧为null");
+                        _currentFrame = null;
+                    }
                 }
 
                 // 在UI线程中触发事件

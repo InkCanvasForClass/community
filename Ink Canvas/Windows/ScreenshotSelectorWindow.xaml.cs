@@ -49,6 +49,7 @@ namespace Ink_Canvas
         public DrawingRectangle? SelectedArea { get; private set; }
         public List<WpfPoint> SelectedPath { get; private set; }
         public Bitmap CameraImage { get; private set; }
+        public System.Windows.Media.Imaging.BitmapSource CameraBitmapSource { get; private set; }
 
         public ScreenshotSelectorWindow()
         {
@@ -156,18 +157,35 @@ namespace Ink_Canvas
                 {
                     if (_isCameraMode && CameraPreviewImage != null && frame != null)
                     {
-                        // 克隆帧以避免在转换过程中被释放
-                        using (var clonedFrame = frame.Clone() as Bitmap)
+                        try
                         {
-                            if (clonedFrame != null)
+                            // 验证帧的有效性
+                            if (frame.Width <= 0 || frame.Height <= 0)
                             {
-                                var bitmapSource = ConvertBitmapToBitmapSource(clonedFrame);
-                                if (bitmapSource != null)
-                                {
-                                    CameraPreviewImage.Source = bitmapSource;
-                                    CameraStatusText.Text = "摄像头已连接";
-                                }
+                                LogHelper.WriteLogToFile($"无效的摄像头帧: {frame.Width}x{frame.Height}", LogHelper.LogType.Warning);
+                                return;
                             }
+
+                            // 创建新的位图，避免Clone的问题
+                            var clonedFrame = new Bitmap(frame.Width, frame.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                            using (var graphics = System.Drawing.Graphics.FromImage(clonedFrame))
+                            {
+                                graphics.DrawImage(frame, 0, 0);
+                            }
+
+                            var bitmapSource = ConvertBitmapToBitmapSource(clonedFrame);
+                            if (bitmapSource != null)
+                            {
+                                CameraPreviewImage.Source = bitmapSource;
+                                CameraStatusText.Text = "摄像头已连接";
+                            }
+                            
+                            // 释放临时位图
+                            clonedFrame.Dispose();
+                        }
+                        catch (Exception frameEx)
+                        {
+                            LogHelper.WriteLogToFile($"处理摄像头帧时出错: {frameEx.Message}", LogHelper.LogType.Error);
                         }
                     }
                 }));
@@ -197,19 +215,57 @@ namespace Ink_Canvas
         {
             try
             {
-                using (var memory = new System.IO.MemoryStream())
+                // 验证位图有效性
+                if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
                 {
-                    bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
-                    memory.Position = 0;
+                    LogHelper.WriteLogToFile("位图无效: 空位图或尺寸为0", LogHelper.LogType.Warning);
+                    return null;
+                }
 
-                    var bitmapImage = new System.Windows.Media.Imaging.BitmapImage();
-                    bitmapImage.BeginInit();
-                    bitmapImage.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
-                    bitmapImage.StreamSource = memory;
-                    bitmapImage.EndInit();
-                    bitmapImage.Freeze();
+                // 使用更安全的方法转换位图
+                var bitmapData = bitmap.LockBits(
+                    new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                    System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                    bitmap.PixelFormat);
 
-                    return bitmapImage;
+                try
+                {
+                    // 根据像素格式选择合适的WPF像素格式
+                    System.Windows.Media.PixelFormat wpfPixelFormat;
+                    switch (bitmap.PixelFormat)
+                    {
+                        case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
+                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
+                            break;
+                        case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
+                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgra32;
+                            break;
+                        case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
+                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr32;
+                            break;
+                        default:
+                            // 默认使用Bgr24，如果格式不匹配则转换
+                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
+                            break;
+                    }
+
+                    var bitmapSource = System.Windows.Media.Imaging.BitmapSource.Create(
+                        bitmapData.Width,
+                        bitmapData.Height,
+                        bitmap.HorizontalResolution,
+                        bitmap.VerticalResolution,
+                        wpfPixelFormat,
+                        null,
+                        bitmapData.Scan0,
+                        bitmapData.Stride * bitmapData.Height,
+                        bitmapData.Stride);
+
+                    bitmapSource.Freeze();
+                    return bitmapSource;
+                }
+                finally
+                {
+                    bitmap.UnlockBits(bitmapData);
                 }
             }
             catch (Exception ex)
@@ -430,12 +486,12 @@ namespace Ink_Canvas
             {
                 if (_cameraService != null && _cameraService.IsCapturing)
                 {
-                    // 获取当前帧
-                    var currentFrame = _cameraService.GetCurrentFrame();
-                    if (currentFrame != null)
+                    // 直接获取BitmapSource，避免Bitmap传递问题
+                    var bitmapSource = _cameraService.GetCurrentFrameAsBitmapSource();
+                    if (bitmapSource != null)
                     {
-                        // 保存摄像头图像
-                        CameraImage = currentFrame.Clone() as Bitmap;
+                        // 保存BitmapSource而不是Bitmap
+                        CameraBitmapSource = bitmapSource;
                         
                         // 停止摄像头预览
                         _cameraService.StopPreview();
