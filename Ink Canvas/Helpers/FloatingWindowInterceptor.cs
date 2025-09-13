@@ -229,7 +229,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.SeewoWhiteboard5CFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoWhiteboard5CFloating,
-                ProcessName = "EasiNote",
+                ProcessName = "EasiNote5C",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
@@ -277,7 +277,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.AiClassFloating] = new InterceptRule
             {
                 Type = InterceptType.AiClassFloating,
-                ProcessName = "AiClass",
+                ProcessName = "ClassIn",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
@@ -325,7 +325,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.IntelligentClassFloating] = new InterceptRule
             {
                 Type = InterceptType.IntelligentClassFloating,
-                ProcessName = "IntelligentClass",
+                ProcessName = "ClassIn",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
@@ -337,7 +337,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.SeewoDesktopAnnotationFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoDesktopAnnotationFloating,
-                ProcessName = "SeewoDesktop",
+                ProcessName = "Seewo",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
@@ -349,7 +349,7 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.SeewoDesktopSideBarFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoDesktopSideBarFloating,
-                ProcessName = "SeewoDesktop",
+                ProcessName = "Seewo",
                 WindowTitlePattern = "",
                 ClassNamePattern = "",
                 IsEnabled = true,
