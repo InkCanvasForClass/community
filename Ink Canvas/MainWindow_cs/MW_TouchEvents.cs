@@ -337,14 +337,11 @@ namespace Ink_Canvas
         {
             try
             {
-
                 var stroke = GetStrokeVisual(e.StylusDevice.Id).Stroke;
 
                 // 正常模式：添加到画布并参与墨迹纠正
-                // 墨迹渐隐功能现在在 StrokeCollected 事件中统一处理所有输入方式
-
                 inkCanvas.Strokes.Add(stroke);
-                await Task.Delay(5); // 避免渲染墨迹完成前预览墨迹被删除导致墨迹闪烁
+                await Task.Delay(5); 
                 inkCanvas.Children.Remove(GetVisualCanvas(e.StylusDevice.Id));
 
                 inkCanvas_StrokeCollected(inkCanvas,

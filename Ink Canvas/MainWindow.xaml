@@ -291,7 +291,7 @@
                                         </Image>
                                     </Button>
                                     
-                                    <!-- 新增：个性化设置 -->
+                                    <!-- 个性化设置 -->
                                     <Button Width="40" Height="40" Margin="0,5,0,0" Style="{StaticResource NavButton}"
                                             Click="NavTheme_Click" Tag="theme" ToolTip="个性化设置">
                                         <Image Width="24" Height="24">
@@ -306,7 +306,7 @@
                                         </Image>
                                     </Button>
                                     
-                                    <!-- 新增：快捷键设置 -->
+                                    <!-- 快捷键设置 -->
                                     <Button Width="40" Height="40" Margin="0,5,0,0" Style="{StaticResource NavButton}"
                                             Click="NavShortcuts_Click" Tag="shortcuts" ToolTip="快捷键设置">
                                         <Image Width="24" Height="24">
@@ -821,7 +821,7 @@
 
                                 </ui:SimpleStackPanel>
                             </GroupBox>
-                            <!-- 新增：崩溃后操作设置 -->
+                            <!-- 崩溃后操作设置 -->
                             <GroupBox>
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="崩溃后操作" FontWeight="Bold" Foreground="#fafafa"

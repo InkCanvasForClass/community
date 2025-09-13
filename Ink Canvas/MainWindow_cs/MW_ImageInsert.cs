@@ -28,9 +28,9 @@ namespace Ink_Canvas
         public Rectangle Area;
         public List<Point> Path;
         public Bitmap CameraImage;
-        public System.Windows.Media.Imaging.BitmapSource CameraBitmapSource;
+        public BitmapSource CameraBitmapSource;
 
-        public ScreenshotResult(Rectangle area, List<Point> path = null, Bitmap cameraImage = null, System.Windows.Media.Imaging.BitmapSource cameraBitmapSource = null)
+        public ScreenshotResult(Rectangle area, List<Point> path = null, Bitmap cameraImage = null, BitmapSource cameraBitmapSource = null)
         {
             Area = area;
             Path = path;
@@ -327,7 +327,7 @@ namespace Ink_Canvas
         }
 
         // 将BitmapSource插入到画布（用于摄像头截图）
-        private async Task InsertBitmapSourceToCanvas(System.Windows.Media.Imaging.BitmapSource bitmapSource)
+        private async Task InsertBitmapSourceToCanvas(BitmapSource bitmapSource)
         {
             try
             {
@@ -614,20 +614,20 @@ namespace Ink_Canvas
                     switch (bitmap.PixelFormat)
                     {
                         case PixelFormat.Format24bppRgb:
-                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
+                            wpfPixelFormat = PixelFormats.Bgr24;
                             break;
                         case PixelFormat.Format32bppArgb:
-                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgra32;
+                            wpfPixelFormat = PixelFormats.Bgra32;
                             break;
                         case PixelFormat.Format32bppRgb:
-                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr32;
+                            wpfPixelFormat = PixelFormats.Bgr32;
                             break;
                         default:
-                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
+                            wpfPixelFormat = PixelFormats.Bgr24;
                             break;
                     }
 
-                    var bitmapSource = System.Windows.Media.Imaging.BitmapSource.Create(
+                    var bitmapSource = BitmapSource.Create(
                         bitmapData.Width,
                         bitmapData.Height,
                         bitmap.HorizontalResolution,
@@ -722,7 +722,7 @@ namespace Ink_Canvas
                     return null;
 
                 // 使用最基础的方法：直接保存为PNG然后加载
-                var tempFile = System.IO.Path.GetTempFileName() + ".png";
+                var tempFile = Path.GetTempFileName() + ".png";
                 
                 try
                 {
@@ -742,9 +742,9 @@ namespace Ink_Canvas
                     // 清理临时文件
                     try
                     {
-                        if (System.IO.File.Exists(tempFile))
+                        if (File.Exists(tempFile))
                         {
-                            System.IO.File.Delete(tempFile);
+                            File.Delete(tempFile);
                         }
                     }
                     catch (Exception deleteEx)

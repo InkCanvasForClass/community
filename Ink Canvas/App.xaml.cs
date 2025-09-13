@@ -299,12 +299,12 @@ namespace Ink_Canvas
             try
             {
                 // 获取主窗口实例并清理PowerPoint进程守护
-                var mainWindow = Application.Current.MainWindow as MainWindow;
+                var mainWindow = Current.MainWindow as MainWindow;
                 if (mainWindow != null)
                 {
                     // 通过反射调用StopPowerPointProcessMonitoring方法
                     var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring", 
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        BindingFlags.NonPublic | BindingFlags.Instance);
                     method?.Invoke(mainWindow, null);
                     
                     WriteCrashLog("PowerPoint进程守护已在系统关机时清理");

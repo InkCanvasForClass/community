@@ -164,7 +164,7 @@ namespace Ink_Canvas
 
                             // 创建新的位图，避免Clone的问题
                             var clonedFrame = new Bitmap(frame.Width, frame.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                            using (var graphics = System.Drawing.Graphics.FromImage(clonedFrame))
+                            using (var graphics = Graphics.FromImage(clonedFrame))
                             {
                                 graphics.DrawImage(frame, 0, 0);
                             }
@@ -224,20 +224,20 @@ namespace Ink_Canvas
                 try
                 {
                     // 根据像素格式选择合适的WPF像素格式
-                    System.Windows.Media.PixelFormat wpfPixelFormat;
+                    PixelFormat wpfPixelFormat;
                     switch (bitmap.PixelFormat)
                     {
                         case System.Drawing.Imaging.PixelFormat.Format24bppRgb:
-                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
+                            wpfPixelFormat = PixelFormats.Bgr24;
                             break;
                         case System.Drawing.Imaging.PixelFormat.Format32bppArgb:
-                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgra32;
+                            wpfPixelFormat = PixelFormats.Bgra32;
                             break;
                         case System.Drawing.Imaging.PixelFormat.Format32bppRgb:
-                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr32;
+                            wpfPixelFormat = PixelFormats.Bgr32;
                             break;
                         default:
-                            wpfPixelFormat = System.Windows.Media.PixelFormats.Bgr24;
+                            wpfPixelFormat = PixelFormats.Bgr24;
                             break;
                     }
 

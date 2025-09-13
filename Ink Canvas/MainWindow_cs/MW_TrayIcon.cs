@@ -222,7 +222,7 @@ namespace Ink_Canvas
                         var menuItem = sender as MenuItem;
                         if (menuItem != null)
                         {
-                            var headerPanel = menuItem.Header as iNKORE.UI.WPF.Modern.Controls.SimpleStackPanel;
+                            var headerPanel = menuItem.Header as SimpleStackPanel;
                             if (headerPanel != null)
                             {
                                 var textBlock = headerPanel.Children[0] as TextBlock;

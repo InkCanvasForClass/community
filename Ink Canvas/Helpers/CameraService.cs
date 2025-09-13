@@ -194,7 +194,7 @@ namespace Ink_Canvas.Helpers
                                 break;
                         }
 
-                        var bitmapSource = System.Windows.Media.Imaging.BitmapSource.Create(
+                        var bitmapSource = BitmapSource.Create(
                             bitmapData.Width,
                             bitmapData.Height,
                             _currentFrame.HorizontalResolution,
