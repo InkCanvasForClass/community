@@ -124,6 +124,15 @@
                         BorderThickness="0"
                         FontWeight="Medium"
                         Click="FullScreenButton_Click" />
+                <Button Name="CameraModeButton" 
+                        Content="摄像头截图" 
+                        Margin="4,0"
+                        Padding="12,6"
+                        Background="#6b7280"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="Medium"
+                        Click="CameraModeButton_Click" />
                 
                 <!-- 分隔线 -->
                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" 
@@ -150,6 +159,68 @@
                         FontWeight="Medium"
                         Click="CancelButton_Click" />
             </StackPanel>
+        </Border>
+
+        <!-- 摄像头预览区域 -->
+        <Border Name="CameraPreviewBorder"
+                Background="#1a1a1a"
+                Opacity="0.95"
+                CornerRadius="8"
+                Padding="8"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="640"
+                Height="480"
+                Visibility="Collapsed"
+                Panel.ZIndex="1000">
+            <Grid>
+                <!-- 摄像头预览画面 -->
+                <Image Name="CameraPreviewImage"
+                       Stretch="Uniform"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center" />
+                
+                <!-- 摄像头控制面板 -->
+                <StackPanel Orientation="Horizontal"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Bottom"
+                           Margin="0,0,0,8">
+                    <!-- 摄像头选择下拉框 -->
+                    <ComboBox Name="CameraSelectionComboBox"
+                             Width="200"
+                             Margin="4,0"
+                             Background="#2d2d2d"
+                             Foreground="White"
+                             BorderBrush="#404040"
+                             SelectionChanged="CameraSelectionComboBox_SelectionChanged" />
+                    
+                    <!-- 切换摄像头按钮 -->
+                    <Button Name="SwitchCameraButton"
+                           Content="切换摄像头"
+                           Margin="4,0"
+                           Padding="8,4"
+                           Background="#3b82f6"
+                           Foreground="White"
+                           BorderThickness="0"
+                           FontWeight="Medium"
+                           Click="SwitchCameraButton_Click" />
+                </StackPanel>
+                
+                <!-- 摄像头状态指示 -->
+                <Border Background="#1a1a1a"
+                       Opacity="0.9"
+                       CornerRadius="4"
+                       Padding="8,4"
+                       HorizontalAlignment="Left"
+                       VerticalAlignment="Top"
+                       Margin="8">
+                    <TextBlock Name="CameraStatusText"
+                              Foreground="White"
+                              FontSize="12"
+                              FontWeight="Medium"
+                              Text="摄像头未连接" />
+                </Border>
+            </Grid>
         </Border>
 
         <!-- 统一提示文字区域 -->

@@ -7,9 +7,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Drawing;
+using Ink_Canvas.Helpers;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using DrawingRectangle = System.Drawing.Rectangle;
+using DrawingPoint = System.Drawing.Point;
+using WpfPoint = System.Windows.Point;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using WpfCanvas = System.Windows.Controls.Canvas;
@@ -22,13 +26,16 @@ namespace Ink_Canvas
         private bool _isFreehandMode;
         private bool _isAdjusting;
         private bool _isMoving;
-        private Point _startPoint;
-        private Point _currentPoint;
-        private Point _lastMousePosition;
-        private List<Point> _freehandPoints;
+        private bool _isCameraMode;
+        private WpfPoint _startPoint;
+        private WpfPoint _currentPoint;
+        private WpfPoint _lastMousePosition;
+        private List<WpfPoint> _freehandPoints;
         private Polyline _freehandPolyline;
         private Rect _currentSelection;
         private ControlPointType _activeControlPoint = ControlPointType.None;
+        private CameraService _cameraService;
+        private Bitmap _capturedCameraImage;
 
         // 控制点类型枚举
         private enum ControlPointType
@@ -40,7 +47,8 @@ namespace Ink_Canvas
         }
 
         public DrawingRectangle? SelectedArea { get; private set; }
-        public List<Point> SelectedPath { get; private set; }
+        public List<WpfPoint> SelectedPath { get; private set; }
+        public Bitmap CameraImage { get; private set; }
 
         public ScreenshotSelectorWindow()
         {
@@ -58,6 +66,9 @@ namespace Ink_Canvas
             // 初始化按钮状态 
             InitializeButtonStates();
 
+            // 初始化摄像头服务
+            InitializeCameraService();
+
             // 隐藏提示文字的定时器
             var timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(5);
@@ -71,7 +82,7 @@ namespace Ink_Canvas
 
         private void InitializeFreehandMode()
         {
-            _freehandPoints = new List<Point>();
+            _freehandPoints = new List<WpfPoint>();
             _freehandPolyline = new Polyline
             {
                 Stroke = Brushes.White,
@@ -86,6 +97,126 @@ namespace Ink_Canvas
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+        }
+
+        private void InitializeCameraService()
+        {
+            try
+            {
+                _cameraService = new CameraService();
+                _cameraService.FrameReceived += CameraService_FrameReceived;
+                _cameraService.ErrorOccurred += CameraService_ErrorOccurred;
+
+                // 初始化摄像头选择下拉框
+                RefreshCameraComboBox();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化摄像头服务失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void RefreshCameraComboBox()
+        {
+            try
+            {
+                CameraSelectionComboBox.Items.Clear();
+                
+                if (_cameraService.HasAvailableCameras())
+                {
+                    var cameraNames = _cameraService.GetCameraNames();
+                    foreach (var name in cameraNames)
+                    {
+                        CameraSelectionComboBox.Items.Add(name);
+                    }
+                    
+                    if (cameraNames.Count > 0)
+                    {
+                        CameraSelectionComboBox.SelectedIndex = 0;
+                    }
+                }
+                else
+                {
+                    CameraSelectionComboBox.Items.Add("未找到摄像头设备");
+                    CameraSelectionComboBox.SelectedIndex = 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新摄像头列表失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void CameraService_FrameReceived(object sender, Bitmap frame)
+        {
+            try
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (_isCameraMode && CameraPreviewImage != null && frame != null)
+                    {
+                        // 克隆帧以避免在转换过程中被释放
+                        using (var clonedFrame = frame.Clone() as Bitmap)
+                        {
+                            if (clonedFrame != null)
+                            {
+                                var bitmapSource = ConvertBitmapToBitmapSource(clonedFrame);
+                                if (bitmapSource != null)
+                                {
+                                    CameraPreviewImage.Source = bitmapSource;
+                                    CameraStatusText.Text = "摄像头已连接";
+                                }
+                            }
+                        }
+                    }
+                }));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理摄像头帧失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void CameraService_ErrorOccurred(object sender, string error)
+        {
+            try
+            {
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    CameraStatusText.Text = $"摄像头错误: {error}";
+                }));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理摄像头错误失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private System.Windows.Media.Imaging.BitmapSource ConvertBitmapToBitmapSource(Bitmap bitmap)
+        {
+            try
+            {
+                using (var memory = new System.IO.MemoryStream())
+                {
+                    bitmap.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                    memory.Position = 0;
+
+                    var bitmapImage = new System.Windows.Media.Imaging.BitmapImage();
+                    bitmapImage.BeginInit();
+                    bitmapImage.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    bitmapImage.StreamSource = memory;
+                    bitmapImage.EndInit();
+                    bitmapImage.Freeze();
+
+                    return bitmapImage;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"转换位图失败: {ex.Message}", LogHelper.LogType.Error);
+                return null;
+            }
         }
 
         private void BindControlPointEvents()
@@ -181,12 +312,98 @@ namespace Ink_Canvas
 
             // 设置全屏截图模式
             _isFreehandMode = false;
+            _isCameraMode = false;
             FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            
+            // 隐藏摄像头预览
+            CameraPreviewBorder.Visibility = Visibility.Collapsed;
             
             // 直接执行全屏截图
             PerformFullScreenCapture();
+        }
+
+        private void CameraModeButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 重置所有选择状态
+                ResetSelectionState();
+
+                // 设置摄像头模式
+                _isFreehandMode = false;
+                _isCameraMode = true;
+                CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
+                RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+                FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+                FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+
+                // 显示摄像头预览
+                CameraPreviewBorder.Visibility = Visibility.Visible;
+                HintText.Text = "摄像头预览模式，点击确认截图按钮进行截图";
+                HintTextBorder.Visibility = Visibility.Visible;
+
+                // 启动摄像头预览
+                if (_cameraService != null && _cameraService.HasAvailableCameras())
+                {
+                    var selectedIndex = CameraSelectionComboBox.SelectedIndex;
+                    if (selectedIndex >= 0 && selectedIndex < _cameraService.GetCameraNames().Count)
+                    {
+                        _cameraService.StartPreview(selectedIndex);
+                    }
+                }
+                else
+                {
+                    CameraStatusText.Text = "未找到摄像头设备";
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动摄像头模式失败: {ex.Message}", LogHelper.LogType.Error);
+                CameraStatusText.Text = $"启动摄像头失败: {ex.Message}";
+            }
+        }
+
+        private void CameraSelectionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (_isCameraMode && _cameraService != null)
+                {
+                    var selectedIndex = CameraSelectionComboBox.SelectedIndex;
+                    if (selectedIndex >= 0 && selectedIndex < _cameraService.GetCameraNames().Count)
+                    {
+                        _cameraService.SwitchCamera(selectedIndex);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换摄像头失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void SwitchCameraButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (_cameraService != null && _cameraService.HasAvailableCameras())
+                {
+                    var cameraNames = _cameraService.GetCameraNames();
+                    if (cameraNames.Count > 1)
+                    {
+                        var currentIndex = CameraSelectionComboBox.SelectedIndex;
+                        var nextIndex = (currentIndex + 1) % cameraNames.Count;
+                        CameraSelectionComboBox.SelectedIndex = nextIndex;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换摄像头失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void ConfirmButton_Click(object sender, RoutedEventArgs e)
@@ -197,7 +414,51 @@ namespace Ink_Canvas
                 return;
             }
 
+            // 在摄像头模式下，执行摄像头截图
+            if (_isCameraMode)
+            {
+                ConfirmCameraCapture();
+                return;
+            }
+
             ConfirmSelection();
+        }
+
+        private void ConfirmCameraCapture()
+        {
+            try
+            {
+                if (_cameraService != null && _cameraService.IsCapturing)
+                {
+                    // 获取当前帧
+                    var currentFrame = _cameraService.GetCurrentFrame();
+                    if (currentFrame != null)
+                    {
+                        // 保存摄像头图像
+                        CameraImage = currentFrame.Clone() as Bitmap;
+                        
+                        // 停止摄像头预览
+                        _cameraService.StopPreview();
+                        
+                        // 设置结果并关闭窗口
+                        DialogResult = true;
+                        Close();
+                    }
+                    else
+                    {
+                        CameraStatusText.Text = "无法获取摄像头画面";
+                    }
+                }
+                else
+                {
+                    CameraStatusText.Text = "摄像头未启动";
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"摄像头截图失败: {ex.Message}", LogHelper.LogType.Error);
+                CameraStatusText.Text = $"摄像头截图失败: {ex.Message}";
+            }
         }
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
@@ -317,7 +578,7 @@ namespace Ink_Canvas
                     if (_freehandPoints.Count > 1) // 只要有点就可以截图
                     {
                         // 创建路径的副本，避免修改原始列表
-                        var pathPoints = new List<Point>(_freehandPoints);
+                        var pathPoints = new List<WpfPoint>(_freehandPoints);
 
                         // 简化路径处理，不强制闭合
                         // 如果路径没有闭合，自动添加起始点
@@ -661,13 +922,20 @@ namespace Ink_Canvas
 
         private void CancelSelection()
         {
+            // 停止摄像头预览
+            if (_cameraService != null)
+            {
+                _cameraService.StopPreview();
+            }
+
             SelectedArea = null;
             SelectedPath = null;
+            CameraImage = null;
             DialogResult = false;
             Close();
         }
 
-        private Rect CalculatePathBounds(List<Point> points)
+        private Rect CalculatePathBounds(List<WpfPoint> points)
         {
             if (points == null || points.Count == 0)
                 return new Rect();
@@ -688,12 +956,12 @@ namespace Ink_Canvas
             return new Rect(minX, minY, maxX - minX, maxY - minY);
         }
 
-        private List<Point> OptimizePath(List<Point> points)
+        private List<WpfPoint> OptimizePath(List<WpfPoint> points)
         {
             if (points == null || points.Count < 3)
                 return points;
 
-            var optimized = new List<Point>();
+            var optimized = new List<WpfPoint>();
             optimized.Add(points[0]);
 
             for (int i = 1; i < points.Count - 1; i++)
@@ -716,7 +984,7 @@ namespace Ink_Canvas
             return optimized;
         }
 
-        private double DistanceToLine(Point point, Point lineStart, Point lineEnd)
+        private double DistanceToLine(WpfPoint point, WpfPoint lineStart, WpfPoint lineEnd)
         {
             var A = point.X - lineStart.X;
             var B = point.Y - lineStart.Y;
@@ -844,7 +1112,14 @@ namespace Ink_Canvas
             _isSelecting = false;
             _isAdjusting = false;
             _isMoving = false;
+            _isCameraMode = false;
             _activeControlPoint = ControlPointType.None;
+
+            // 停止摄像头预览
+            if (_cameraService != null)
+            {
+                _cameraService.StopPreview();
+            }
 
             // 清除自由绘制的内容
             _freehandPoints.Clear();
@@ -858,6 +1133,9 @@ namespace Ink_Canvas
             SizeInfoBorder.Visibility = Visibility.Collapsed;
             SelectionPath.Visibility = Visibility.Collapsed;
             HintTextBorder.Visibility = Visibility.Collapsed;
+
+            // 隐藏摄像头预览
+            CameraPreviewBorder.Visibility = Visibility.Collapsed;
 
             // 重置遮罩
             TransparentSelectionMask.Visibility = Visibility.Collapsed;
@@ -879,10 +1157,38 @@ namespace Ink_Canvas
             _currentSelection = new Rect();
             SelectedArea = null;
             SelectedPath = null;
+            CameraImage = null;
 
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            try
+            {
+                // 清理摄像头资源
+                if (_cameraService != null)
+                {
+                    _cameraService.StopPreview();
+                    _cameraService.Dispose();
+                    _cameraService = null;
+                }
+
+                // 清理摄像头图像
+                _capturedCameraImage?.Dispose();
+                CameraImage?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"清理资源失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                base.OnClosed(e);
+            }
         }
     }
 }

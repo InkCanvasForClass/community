@@ -27,11 +27,13 @@ namespace Ink_Canvas
     {
         public Rectangle Area;
         public List<Point> Path;
+        public Bitmap CameraImage;
 
-        public ScreenshotResult(Rectangle area, List<Point> path = null)
+        public ScreenshotResult(Rectangle area, List<Point> path = null, Bitmap cameraImage = null)
         {
             Area = area;
             Path = path;
+            CameraImage = cameraImage;
         }
     }
 
@@ -55,34 +57,43 @@ namespace Ink_Canvas
                 // 恢复窗口显示
                 Visibility = originalVisibility;
 
-                if (screenshotResult.HasValue && screenshotResult.Value.Area.Width > 0 && screenshotResult.Value.Area.Height > 0)
+                if (screenshotResult.HasValue)
                 {
-                    // 截取选定区域
-                    using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
+                    // 检查是否是摄像头截图
+                    if (screenshotResult.Value.CameraImage != null)
                     {
-                        if (originalBitmap != null)
+                        // 摄像头截图
+                        await InsertScreenshotToCanvas(screenshotResult.Value.CameraImage);
+                    }
+                    else if (screenshotResult.Value.Area.Width > 0 && screenshotResult.Value.Area.Height > 0)
+                    {
+                        // 屏幕截图
+                        using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
                         {
-                            Bitmap finalBitmap = originalBitmap;
-                            bool needDisposeFinalBitmap = false;
-
-                            try
+                            if (originalBitmap != null)
                             {
-                                // 如果有路径信息，应用形状遮罩
-                                if (screenshotResult.Value.Path != null && screenshotResult.Value.Path.Count > 0)
+                                Bitmap finalBitmap = originalBitmap;
+                                bool needDisposeFinalBitmap = false;
+
+                                try
                                 {
-                                    finalBitmap = ApplyShapeMask(originalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
-                                    needDisposeFinalBitmap = true; // 标记需要释放新创建的位图
+                                    // 如果有路径信息，应用形状遮罩
+                                    if (screenshotResult.Value.Path != null && screenshotResult.Value.Path.Count > 0)
+                                    {
+                                        finalBitmap = ApplyShapeMask(originalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
+                                        needDisposeFinalBitmap = true; // 标记需要释放新创建的位图
+                                    }
+
+                                    // 将截图转换为WPF Image并插入到画布
+                                    await InsertScreenshotToCanvas(finalBitmap);
                                 }
-
-                                // 将截图转换为WPF Image并插入到画布
-                                await InsertScreenshotToCanvas(finalBitmap);
-                            }
-                            finally
-                            {
-                                // 如果创建了新的位图，需要释放它
-                                if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
+                                finally
                                 {
-                                    finalBitmap.Dispose();
+                                    // 如果创建了新的位图，需要释放它
+                                    if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
+                                    {
+                                        finalBitmap.Dispose();
+                                    }
                                 }
                             }
                         }
@@ -152,10 +163,22 @@ namespace Ink_Canvas
                     var selectorWindow = new ScreenshotSelectorWindow();
                     if (selectorWindow.ShowDialog() == true)
                     {
-                        result = new ScreenshotResult(
-                            selectorWindow.SelectedArea.Value,
-                            selectorWindow.SelectedPath
-                        );
+                        // 检查是否是摄像头截图
+                        if (selectorWindow.CameraImage != null)
+                        {
+                            result = new ScreenshotResult(
+                                Rectangle.Empty, // 摄像头截图不需要区域
+                                null, // 摄像头截图不需要路径
+                                selectorWindow.CameraImage // 摄像头图像
+                            );
+                        }
+                        else
+                        {
+                            result = new ScreenshotResult(
+                                selectorWindow.SelectedArea.Value,
+                                selectorWindow.SelectedPath
+                            );
+                        }
                     }
                 });
             }

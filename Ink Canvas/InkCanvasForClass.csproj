@@ -158,6 +158,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NHotkey.Wpf" Version="3.0.0" />
     <PackageReference Include="OSVersionExt" Version="3.0.0" />
+  <PackageReference Include="AForge.Video" Version="2.2.5" />
+  <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="IWshRuntimeLibrary">
