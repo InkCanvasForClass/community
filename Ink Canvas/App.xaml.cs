@@ -19,7 +19,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
-using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
+using MessageBox = System.Windows.MessageBox;
 using Timer = System.Threading.Timer;
 
 namespace Ink_Canvas
