@@ -1,4 +1,5 @@
 using Hardcodet.Wpf.TaskbarNotification;
+using iNKORE.UI.WPF.Modern.Controls;
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using OSVersionExtension;
@@ -18,7 +19,7 @@ using Application = System.Windows.Application;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
 using File = System.IO.File;
-using MessageBox = System.Windows.MessageBox;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using OperatingSystem = OSVersionExtension.OperatingSystem;
 using RadioButton = System.Windows.Controls.RadioButton;

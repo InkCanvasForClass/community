@@ -31,7 +31,7 @@ using Cursors = System.Windows.Input.Cursors;
 using DpiChangedEventArgs = System.Windows.DpiChangedEventArgs;
 using File = System.IO.File;
 using GroupBox = System.Windows.Controls.GroupBox;
-using MessageBox = System.Windows.MessageBox;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
