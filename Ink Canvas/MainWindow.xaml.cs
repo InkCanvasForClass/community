@@ -50,6 +50,9 @@ namespace Ink_Canvas
         // 墨迹渐隐管理器
         private InkFadeManager _inkFadeManager;
 
+        // 设置面板相关状态
+        private bool userChangedNoFocusModeInSettings;
+
 
 
         #region Window Initialization
@@ -1932,6 +1935,12 @@ namespace Ink_Canvas
             if (Settings.Advanced.IsAlwaysOnTop)
             {
                 ApplyAlwaysOnTop();
+            }
+
+            // 如果当前在设置面板中，标记用户已修改无焦点模式设置
+            if (BorderSettings.Visibility == Visibility.Visible)
+            {
+                userChangedNoFocusModeInSettings = true;
             }
         }
 

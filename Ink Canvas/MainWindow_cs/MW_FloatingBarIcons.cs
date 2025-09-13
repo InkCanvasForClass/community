@@ -364,11 +364,15 @@ namespace Ink_Canvas
                 {
                     BorderSettings.Visibility = Visibility.Collapsed;
                     isOpeningOrHidingSettingsPane = false;
-                    // 在设置面板完全关闭后，根据当前设置恢复无焦点模式
-                    if (Settings.Advanced.IsNoFocusMode)
+                    // 在设置面板完全关闭后，根据情况恢复无焦点模式状态
+                    if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
                     {
+                        // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
+                        Settings.Advanced.IsNoFocusMode = true;
+                        ToggleSwitchNoFocusMode.IsOn = true; // 同步更新设置面板中的开关状态
                         ApplyNoFocusMode();
                     }
+                    // 如果用户在设置中修改了无焦点模式，则保持用户的修改
                 };
 
                 BorderSettings.Visibility = Visibility.Visible;
@@ -2612,6 +2616,7 @@ namespace Ink_Canvas
             {
                 // 临时禁用无焦点模式以避免下拉选项被遮挡
                 wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
+                userChangedNoFocusModeInSettings = false; // 重置用户修改标志
                 if (wasNoFocusModeBeforeSettings)
                 {
                     Settings.Advanced.IsNoFocusMode = false;
