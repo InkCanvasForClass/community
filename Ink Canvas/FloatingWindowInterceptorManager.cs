@@ -30,7 +30,7 @@ namespace Ink_Canvas
         #region 公共属性
 
         public bool IsEnabled => _interceptor != null && _settings != null && _settings.IsEnabled;
-        public bool IsRunning => _interceptor != null && _isInitialized;
+        public bool IsRunning => _interceptor != null && _interceptor.IsRunning;
 
         #endregion
 

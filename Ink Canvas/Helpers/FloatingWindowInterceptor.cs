@@ -170,6 +170,12 @@ namespace Ink_Canvas.Helpers
 
         #endregion
 
+        #region 公共属性
+
+        public bool IsRunning => _isRunning;
+
+        #endregion
+
         #region 事件
 
         public event EventHandler<WindowInterceptedEventArgs> WindowIntercepted;
@@ -200,8 +206,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.SeewoWhiteboard3Floating,
                 ProcessName = "EasiNote3",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                WindowTitlePattern = "希沃白板",
+                ClassNamePattern = "EasiNote3",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃白板3 桌面悬浮窗"
@@ -388,6 +394,9 @@ namespace Ink_Canvas.Helpers
 
             _isRunning = false;
             _scanTimer.Change(Timeout.Infinite, Timeout.Infinite);
+            
+            // 恢复所有被拦截的窗口
+            RestoreAllWindows();
         }
 
         /// <summary>
