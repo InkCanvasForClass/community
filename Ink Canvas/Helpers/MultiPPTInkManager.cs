@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Ink;
@@ -78,7 +79,7 @@ namespace Ink_Canvas.Helpers
                     // 设置为当前活跃的演示文稿
                     _currentActivePresentationId = presentationId;
 
-                    LogHelper.WriteLogToFile($"已初始化多PPT墨迹管理: {presentation.Name} (ID: {presentationId})", LogHelper.LogType.Event);
+                    LogHelper.WriteLogToFile($"已初始化多PPT墨迹管理: {presentation.Name}, 幻灯片数量: {presentation.Slides.Count}", LogHelper.LogType.Event);
                 }
                 catch (Exception ex)
                 {
@@ -127,7 +128,10 @@ namespace Ink_Canvas.Helpers
                             _presentationInfos[presentationId].LastAccessTime = DateTime.Now;
                         }
 
-                        LogHelper.WriteLogToFile($"已切换到演示文稿: {presentation.Name} (ID: {presentationId})", LogHelper.LogType.Trace);
+                    if (_currentActivePresentationId != presentationId)
+                    {
+                        LogHelper.WriteLogToFile($"已切换到演示文稿: {presentation.Name}", LogHelper.LogType.Trace);
+                    }
                         return true;
                     }
                     else
@@ -445,11 +449,17 @@ namespace Ink_Canvas.Helpers
                         _currentActivePresentationId = "";
                     }
 
-                    LogHelper.WriteLogToFile($"已移除演示文稿管理器: {presentation.Name}", LogHelper.LogType.Trace);
+                    LogHelper.WriteLogToFile($"已移除演示文稿管理器: {presentationId}", LogHelper.LogType.Trace);
                 }
-                catch (Exception ex)
+                catch (COMException comEx)
                 {
-                    LogHelper.WriteLogToFile($"移除演示文稿管理器失败: {ex}", LogHelper.LogType.Error);
+                    var hr = (uint)comEx.HResult;
+                    if (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706BA || hr == 0x800706BE || hr == 0x80048010)
+                    {
+                    }
+                }
+                catch (Exception)
+                {
                 }
             }
         }
@@ -546,14 +556,28 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                // 检查COM对象是否仍然有效
+                if (presentation == null)
+                {
+                    return $"invalid_{DateTime.Now.Ticks}";
+                }
+
                 var presentationPath = presentation.FullName;
                 var fileHash = GetFileHash(presentationPath);
                 var processId = GetProcessId(presentation);
                 return $"{presentation.Name}_{presentation.Slides.Count}_{fileHash}_{processId}";
             }
-            catch (Exception ex)
+            catch (COMException comEx)
             {
-                LogHelper.WriteLogToFile($"生成演示文稿ID失败: {ex}", LogHelper.LogType.Error);
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706BA || hr == 0x800706BE || hr == 0x80048010)
+                {
+                    return $"disconnected_{DateTime.Now.Ticks}";
+                }
+                return $"error_{DateTime.Now.Ticks}";
+            }
+            catch (Exception)
+            {
                 return $"unknown_{DateTime.Now.Ticks}";
             }
         }
@@ -570,9 +594,9 @@ namespace Ink_Canvas.Helpers
                     return BitConverter.ToString(hashBytes).Replace("-", "").Substring(0, 8);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"计算文件哈希值失败: {ex}", LogHelper.LogType.Error);
+                // 所有异常都静默处理，避免日志噪音
                 return "error";
             }
         }
@@ -593,9 +617,18 @@ namespace Ink_Canvas.Helpers
                 }
                 return "unknown";
             }
-            catch (Exception ex)
+            catch (COMException comEx)
             {
-                LogHelper.WriteLogToFile($"获取进程ID失败: {ex}", LogHelper.LogType.Error);
+                // COM对象已失效，这是正常情况，完全静默处理
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706BA || hr == 0x800706BE || hr == 0x80048010)
+                {
+                    return "disconnected";
+                }
+                return "error";
+            }
+            catch (Exception)
+            {
                 return "error";
             }
         }

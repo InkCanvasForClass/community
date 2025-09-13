@@ -222,7 +222,6 @@ namespace Ink_Canvas
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                return;
             }
             else if (isTimerRunning && isPaused)
             {

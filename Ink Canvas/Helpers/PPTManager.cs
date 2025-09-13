@@ -277,16 +277,6 @@ namespace Ink_Canvas.Helpers
             catch (COMException ex)
             {
                 var hr = (uint)ex.HResult;
-                // 忽略常见的PowerPoint连接错误：
-                // 0x800401E3: 操作无法使用
-                // 0x80004005: 未指定错误
-                // 0x800706B5: RPC服务器不可用
-                // 0x8001010E: 应用程序调用一个已为另一线程整理的接口
-                // 0x800401F3: 无效的类字符串（PowerPoint未安装或COM组件未注册）
-                if (hr != 0x800401E3 && hr != 0x80004005 && hr != 0x800706B5 && hr != 0x8001010E && hr != 0x800401F3)
-                {
-                    LogHelper.WriteLogToFile($"连接PowerPoint失败: {ex}", LogHelper.LogType.Warning);
-                }
                 return null;
             }
             catch (InvalidCastException)
@@ -294,9 +284,8 @@ namespace Ink_Canvas.Helpers
                 // COM对象类型转换失败
                 return null;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"连接PowerPoint时发生意外错误: {ex}", LogHelper.LogType.Warning);
                 return null;
             }
         }
@@ -422,12 +411,7 @@ namespace Ink_Canvas.Helpers
                                 }
                                 catch (COMException comEx)
                                 {
-                                    // COM对象已经被释放或在错误的线程中，忽略这些错误
                                     var hr = (uint)comEx.HResult;
-                                    if (hr != 0x8001010E && hr != 0x80004005 && hr != 0x800706B5)
-                                    {
-                                        LogHelper.WriteLogToFile($"取消PPT事件注册COM异常: {comEx}", LogHelper.LogType.Warning);
-                                    }
                                 }
                                 catch (InvalidCastException)
                                 {
@@ -437,10 +421,8 @@ namespace Ink_Canvas.Helpers
                             }, DispatcherPriority.Normal, CancellationToken.None, TimeSpan.FromSeconds(1));
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        // 记录但不抛出异常，确保清理过程能够继续
-                        LogHelper.WriteLogToFile($"取消PPT事件注册失败: {ex.GetType().Name} - {ex.Message}", LogHelper.LogType.Warning);
                     }
 
                     // 释放COM对象
@@ -451,9 +433,8 @@ namespace Ink_Canvas.Helpers
                             Marshal.ReleaseComObject(CurrentSlide);
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        LogHelper.WriteLogToFile($"释放CurrentSlide COM对象失败: {ex}", LogHelper.LogType.Warning);
                     }
 
                     try
@@ -463,9 +444,8 @@ namespace Ink_Canvas.Helpers
                             Marshal.ReleaseComObject(CurrentSlides);
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        LogHelper.WriteLogToFile($"释放CurrentSlides COM对象失败: {ex}", LogHelper.LogType.Warning);
                     }
 
                     try
@@ -475,9 +455,8 @@ namespace Ink_Canvas.Helpers
                             Marshal.ReleaseComObject(CurrentPresentation);
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        LogHelper.WriteLogToFile($"释放CurrentPresentation COM对象失败: {ex}", LogHelper.LogType.Warning);
                     }
 
                     try
@@ -487,9 +466,8 @@ namespace Ink_Canvas.Helpers
                             Marshal.ReleaseComObject(PPTApplication);
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        LogHelper.WriteLogToFile($"释放PPTApplication COM对象失败: {ex}", LogHelper.LogType.Warning);
                     }
 
                     // 清理引用

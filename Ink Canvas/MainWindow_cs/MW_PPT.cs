@@ -578,9 +578,16 @@ namespace Ink_Canvas
                     _pptUIManager?.UpdateConnectionStatus(false);
                 });
             }
-            catch (Exception ex)
+            catch (COMException comEx)
             {
-                LogHelper.WriteLogToFile($"处理演示文稿关闭事件失败: {ex}", LogHelper.LogType.Error);
+                // COM对象已失效，这是正常情况，完全静默处理
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706BA || hr == 0x800706BE || hr == 0x80048010)
+                {
+                }
+            }
+            catch (Exception)
+            {
             }
         }
 

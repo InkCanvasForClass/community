@@ -86,7 +86,6 @@ namespace Ink_Canvas.Helpers
                         {
                             _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
                             _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
-                            LogHelper.WriteLogToFile($"更新PPT页码显示: {currentSlide}/{totalSlides}", LogHelper.LogType.Trace);
                         }
                         else
                         {
@@ -127,7 +126,6 @@ namespace Ink_Canvas.Helpers
                     {
                         _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
                         _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
-                        LogHelper.WriteLogToFile($"更新PPT页码显示: {currentSlide}/{totalSlides}", LogHelper.LogType.Trace);
                     }
                     else
                     {

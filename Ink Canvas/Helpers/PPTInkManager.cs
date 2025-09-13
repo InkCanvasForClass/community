@@ -100,10 +100,13 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    // 检查墨迹锁定
+                    // 检查墨迹锁定 
                     if (!CanWriteInk(slideIndex))
                     {
-                        LogHelper.WriteLogToFile($"墨迹写入被锁定，当前页:{slideIndex}，锁定页:{_lockedSlideIndex}", LogHelper.LogType.Warning);
+                        if (DateTime.Now < _inkLockUntil)
+                        {
+                            LogHelper.WriteLogToFile($"墨迹写入被锁定，当前页:{slideIndex}，锁定页:{_lockedSlideIndex}", LogHelper.LogType.Warning);
+                        }
                         return;
                     }
 
@@ -117,7 +120,10 @@ namespace Ink_Canvas.Helpers
                         _memoryStreams[slideIndex]?.Dispose();
                         _memoryStreams[slideIndex] = ms;
 
-                        LogHelper.WriteLogToFile($"已保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
+                        if (ms.Length > 0)
+                        {
+                            LogHelper.WriteLogToFile($"已保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -215,7 +221,10 @@ namespace Ink_Canvas.Helpers
                     _lastSwitchTime = now;
                     _lastSwitchSlideIndex = slideIndex;
                     
-                    LogHelper.WriteLogToFile($"已切换到第{slideIndex}页，加载墨迹数量: {newStrokes.Count}", LogHelper.LogType.Trace);
+                    if (newStrokes.Count > 0)
+                    {
+                        LogHelper.WriteLogToFile($"已切换到第{slideIndex}页，加载墨迹数量: {newStrokes.Count}", LogHelper.LogType.Trace);
+                    }
 
                     return newStrokes;
                 }
@@ -386,9 +395,20 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public bool CanWriteInk(int currentSlideIndex)
         {
-            if (DateTime.Now < _inkLockUntil) return false;
-            if (currentSlideIndex != _lockedSlideIndex && _lockedSlideIndex > 0) return false;
-            return true;
+            // 如果锁定时间已过，允许写入
+            if (DateTime.Now >= _inkLockUntil)
+            {
+                return true;
+            }
+            
+            // 如果当前页面与锁定页面相同，允许写入（用户在当前页面绘制）
+            if (currentSlideIndex == _lockedSlideIndex)
+            {
+                return true;
+            }
+            
+            // 只有在快速切换且页面不同时才锁定
+            return false;
         }
 
         /// <summary>
