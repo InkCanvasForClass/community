@@ -2966,6 +2966,13 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchKeepFoldAfterSoftwareExit_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Automation.KeepFoldAfterSoftwareExit = ToggleSwitchKeepFoldAfterSoftwareExit.IsOn;
+            SaveSettingsToFile();
+        }
+
         private void ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;

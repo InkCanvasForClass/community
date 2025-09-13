@@ -578,8 +578,18 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    if (isFloatingBarFolded && !foldFloatingBarByUser) UnFoldFloatingBar_MouseUp(new object(), null);
-                    unfoldFloatingBarByUser = false;
+                    // 检查是否启用了软件退出后保持收纳模式
+                    if (Settings.Automation.KeepFoldAfterSoftwareExit)
+                    {
+                        // 如果启用了保持收纳模式，则不自动展开浮动栏
+                        unfoldFloatingBarByUser = false;
+                    }
+                    else
+                    {
+                        // 原有的逻辑：软件退出后自动展开浮动栏
+                        if (isFloatingBarFolded && !foldFloatingBarByUser) UnFoldFloatingBar_MouseUp(new object(), null);
+                        unfoldFloatingBarByUser = false;
+                    }
                 }
             }
             catch { }

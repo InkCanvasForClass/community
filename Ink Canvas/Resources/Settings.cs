@@ -448,6 +448,9 @@ namespace Ink_Canvas
         [JsonProperty("autoDelSavedFilesDaysThreshold")]
         public int AutoDelSavedFilesDaysThreshold = 15;
 
+        [JsonProperty("keepFoldAfterSoftwareExit")]
+        public bool KeepFoldAfterSoftwareExit { get; set; } = false;
+
         [JsonProperty("isSaveFullPageStrokes")]
         public bool IsSaveFullPageStrokes;
 

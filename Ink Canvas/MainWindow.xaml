@@ -2600,6 +2600,15 @@
                                                          FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="软件退出后保持收纳模式"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchKeepFoldAfterSoftwareExit"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchKeepFoldAfterSoftwareExit_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后，执行自动收纳的软件在软件退出后不退出收纳模式，保持收纳状态" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                           StrokeThickness="1" Margin="0,4,0,4" />
                                     <TextBlock Margin="0,0,0,8" Text="自动查杀" FontWeight="Bold" Foreground="#fafafa"
