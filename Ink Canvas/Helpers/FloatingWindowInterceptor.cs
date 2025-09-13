@@ -205,9 +205,9 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.SeewoWhiteboard3Floating] = new InterceptRule
             {
                 Type = InterceptType.SeewoWhiteboard3Floating,
-                ProcessName = "EasiNote3",
-                WindowTitlePattern = "希沃白板",
-                ClassNamePattern = "EasiNote3",
+                ProcessName = "EasiNote",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃白板3 桌面悬浮窗"
@@ -217,9 +217,9 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.SeewoWhiteboard5Floating] = new InterceptRule
             {
                 Type = InterceptType.SeewoWhiteboard5Floating,
-                ProcessName = "EasiNote5",
-                WindowTitlePattern = "希沃白板",
-                ClassNamePattern = "EasiNote5",
+                ProcessName = "EasiNote",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃白板5 桌面悬浮窗"
@@ -229,9 +229,9 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.SeewoWhiteboard5CFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoWhiteboard5CFloating,
-                ProcessName = "EasiNote5C",
-                WindowTitlePattern = "希沃白板",
-                ClassNamePattern = "EasiNote5C",
+                ProcessName = "EasiNote",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃白板5C 桌面悬浮窗"
@@ -242,8 +242,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.SeewoPincoSideBarFloating,
                 ProcessName = "SeewoPinco",
-                WindowTitlePattern = "品课",
-                ClassNamePattern = "SeewoPinco",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃品课教师端 桌面悬浮窗"
@@ -254,8 +254,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.SeewoPincoDrawingFloating,
                 ProcessName = "SeewoPinco",
-                WindowTitlePattern = "画笔",
-                ClassNamePattern = "SeewoPinco",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃品课教师端 画笔悬浮窗（包括PPT控件）"
@@ -266,8 +266,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.SeewoPPTFloating,
                 ProcessName = "SeewoPPT",
-                WindowTitlePattern = "希沃PPT",
-                ClassNamePattern = "SeewoPPT",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃PPT小工具"
@@ -278,8 +278,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.AiClassFloating,
                 ProcessName = "AiClass",
-                WindowTitlePattern = "AiClass",
-                ClassNamePattern = "AiClass",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "AiClass 桌面悬浮窗"
@@ -290,8 +290,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.HiteAnnotationFloating,
                 ProcessName = "HiteAnnotation",
-                WindowTitlePattern = "鸿合",
-                ClassNamePattern = "HiteAnnotation",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "鸿合屏幕书写"
@@ -302,8 +302,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.ChangYanFloating,
                 ProcessName = "ChangYan",
-                WindowTitlePattern = "畅言",
-                ClassNamePattern = "ChangYan",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = true,
                 Description = "畅言智慧课堂 桌面悬浮窗"
@@ -314,8 +314,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.ChangYanPptFloating,
                 ProcessName = "ChangYanPPT",
-                WindowTitlePattern = "畅言PPT",
-                ClassNamePattern = "ChangYanPPT",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = true,
                 Description = "畅言智慧课堂 PPT悬浮窗"
@@ -326,8 +326,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.IntelligentClassFloating,
                 ProcessName = "IntelligentClass",
-                WindowTitlePattern = "天喻",
-                ClassNamePattern = "IntelligentClass",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "天喻教育云互动课堂 桌面悬浮窗（包括PPT控件）"
@@ -338,8 +338,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.SeewoDesktopAnnotationFloating,
                 ProcessName = "SeewoDesktop",
-                WindowTitlePattern = "希沃桌面",
-                ClassNamePattern = "SeewoDesktop",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃桌面 画笔悬浮窗"
@@ -350,24 +350,13 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.SeewoDesktopSideBarFloating,
                 ProcessName = "SeewoDesktop",
-                WindowTitlePattern = "希沃桌面",
-                ClassNamePattern = "SeewoDesktop",
+                WindowTitlePattern = "",
+                ClassNamePattern = "",
                 IsEnabled = true,
                 RequiresAdmin = true,
                 Description = "希沃桌面 侧栏悬浮窗"
             };
 
-            // 拦截所有小窗口
-            _interceptRules[InterceptType.SeewoWhiteboard3Floating] = new InterceptRule
-            {
-                Type = InterceptType.SeewoWhiteboard3Floating,
-                ProcessName = "", // 空字符串表示匹配所有进程
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
-                IsEnabled = false, // 默认关闭，需要手动开启
-                RequiresAdmin = false,
-                Description = "拦截所有小窗口"
-            };
         }
 
         #endregion
@@ -693,8 +682,6 @@ namespace Ink_Canvas.Helpers
                 // 主窗口通常有 WS_CAPTION 和 WS_SYSMENU
                 const uint WS_CAPTION = 0x00C00000;
                 const uint WS_SYSMENU = 0x00080000;
-                const uint WS_MINIMIZEBOX = 0x00020000;
-                const uint WS_MAXIMIZEBOX = 0x00010000;
 
                 if ((style & WS_CAPTION) != 0 && (style & WS_SYSMENU) != 0)
                 {
