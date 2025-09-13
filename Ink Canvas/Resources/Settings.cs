@@ -456,6 +456,42 @@ namespace Ink_Canvas
 
         [JsonProperty("isAutoEnterAnnotationAfterKillHite")]
         public bool IsAutoEnterAnnotationAfterKillHite { get; set; }
+
+        [JsonProperty("floatingWindowInterceptor")]
+        public FloatingWindowInterceptorSettings FloatingWindowInterceptor { get; set; } = new FloatingWindowInterceptorSettings();
+    }
+
+    public class FloatingWindowInterceptorSettings
+    {
+        [JsonProperty("isEnabled")]
+        public bool IsEnabled { get; set; } = false;
+
+        [JsonProperty("scanIntervalMs")]
+        public int ScanIntervalMs { get; set; } = 5000;
+
+        [JsonProperty("interceptRules")]
+        public Dictionary<string, bool> InterceptRules { get; set; } = new Dictionary<string, bool>
+        {
+            { "SeewoWhiteboard3Floating", true },
+            { "SeewoWhiteboard5Floating", true },
+            { "SeewoWhiteboard5CFloating", true },
+            { "SeewoPincoSideBarFloating", true },
+            { "SeewoPincoDrawingFloating", true },
+            { "SeewoPPTFloating", true },
+            { "AiClassFloating", true },
+            { "HiteAnnotationFloating", true },
+            { "ChangYanFloating", true },
+            { "ChangYanPptFloating", true },
+            { "IntelligentClassFloating", true },
+            { "SeewoDesktopAnnotationFloating", true },
+            { "SeewoDesktopSideBarFloating", true }
+        };
+
+        [JsonProperty("autoStart")]
+        public bool AutoStart { get; set; } = false;
+
+        [JsonProperty("showNotifications")]
+        public bool ShowNotifications { get; set; } = true;
     }
 
     public class Advanced

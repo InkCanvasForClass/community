@@ -50,6 +50,9 @@ namespace Ink_Canvas
         // 墨迹渐隐管理器
         private InkFadeManager _inkFadeManager;
 
+        // 悬浮窗拦截管理器
+        private FloatingWindowInterceptorManager _floatingWindowInterceptorManager;
+
         // 设置面板相关状态
         private bool userChangedNoFocusModeInSettings;
 
@@ -533,6 +536,9 @@ namespace Ink_Canvas
 
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
+
+            // 初始化悬浮窗拦截管理器
+            InitializeFloatingWindowInterceptor();
 
             // 初始化全局快捷键管理器
             InitializeGlobalHotkeyManager();

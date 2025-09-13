@@ -2745,6 +2745,255 @@
                                     </ui:SimpleStackPanel>
                                     <TextBlock Name="TextBlockFileAssociationStatus" Text="" 
                                                Foreground="#a1a1aa" FontSize="12" Margin="0,4,0,0" />
+                                    
+                                    <!-- 悬浮窗拦截功能 -->
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
+                                          StrokeThickness="1" Margin="0,8,0,8" />
+                                    <TextBlock Text="悬浮窗拦截" FontWeight="Bold" Foreground="#fafafa"
+                                               FontSize="16" Margin="0,8,0,8" />
+                                    <TextBlock Text="自动检测并隐藏教育软件的悬浮窗，保持桌面整洁" 
+                                               TextWrapping="Wrap" Foreground="#a1a1aa" Margin="0,0,0,8" />
+                                    
+                                    <!-- 主控制开关 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
+                                        <TextBlock Foreground="#fafafa" Text="启用悬浮窗拦截" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchFloatingWindowInterceptorEnabled" IsOn="False"
+                                                         FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchFloatingWindowInterceptorEnabled_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <!-- 拦截规则网格 -->
+                                    <Grid Name="FloatingWindowInterceptorGrid" Margin="4,0" Visibility="Collapsed">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                            <ColumnDefinition />
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- 希沃白板3 -->
+                                        <ui:SimpleStackPanel Grid.Row="0" Grid.Column="0" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/EasiNote3.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="希沃白板3" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchSeewoWhiteboard3Floating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchSeewoWhiteboard3Floating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 希沃白板5 -->
+                                        <ui:SimpleStackPanel Grid.Row="0" Grid.Column="1" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/EasiNote.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="希沃白板5" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchSeewoWhiteboard5Floating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchSeewoWhiteboard5Floating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 希沃白板5C -->
+                                        <ui:SimpleStackPanel Grid.Row="0" Grid.Column="2" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/EasiNote5C.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="希沃白板5C" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchSeewoWhiteboard5CFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchSeewoWhiteboard5CFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 希沃品课 -->
+                                        <ui:SimpleStackPanel Grid.Row="0" Grid.Column="3" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/SeewoPinco.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="希沃品课" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchSeewoPincoSideBarFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchSeewoPincoSideBarFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 希沃品课画笔 -->
+                                        <ui:SimpleStackPanel Grid.Row="1" Grid.Column="0" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/SeewoPinco.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="希沃品课画笔" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchSeewoPincoDrawingFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchSeewoPincoDrawingFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 希沃PPT小工具 -->
+                                        <ui:SimpleStackPanel Grid.Row="1" Grid.Column="1" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/PPTTools.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="希沃PPT小工具" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchSeewoPPTFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchSeewoPPTFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- AiClass -->
+                                        <ui:SimpleStackPanel Grid.Row="1" Grid.Column="2" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/AiClass.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="AiClass" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchAiClassFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchAiClassFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 鸿合屏幕书写 -->
+                                        <ui:SimpleStackPanel Grid.Row="1" Grid.Column="3" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/HiteAnnotation.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="鸿合屏幕书写" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchHiteAnnotationFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchHiteAnnotationFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 畅言智慧课堂 -->
+                                        <ui:SimpleStackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/ChangYan.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="畅言智慧课堂" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchChangYanFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchChangYanFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 畅言PPT -->
+                                        <ui:SimpleStackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/ChangYanPPT.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="畅言PPT" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchChangYanPptFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchChangYanPptFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 天喻教育云 -->
+                                        <ui:SimpleStackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/IntelligentClass.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="天喻教育云" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchIntelligentClassFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchIntelligentClassFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 希沃桌面画笔 -->
+                                        <ui:SimpleStackPanel Grid.Row="2" Grid.Column="3" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/SeewoDesktop.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="希沃桌面画笔" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchSeewoDesktopAnnotationFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchSeewoDesktopAnnotationFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <!-- 希沃桌面侧栏 -->
+                                        <ui:SimpleStackPanel Grid.Row="3" Grid.Column="0" Orientation="Vertical">
+                                            <Image Source="/Resources/Icons-png/SeewoDesktop.png" Margin="0,0,0,4"
+                                                   Width="42" Height="42" HorizontalAlignment="Center" />
+                                            <TextBlock Foreground="#fafafa" Text="希沃桌面侧栏" HorizontalAlignment="Center"
+                                                       FontSize="14" Margin="0,0,0,4" />
+                                            <ui:ToggleSwitch OnContent="" OffContent="" MinWidth="0"
+                                                             HorizontalAlignment="Center"
+                                                             Name="ToggleSwitchSeewoDesktopSideBarFloating" IsOn="True"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchSeewoDesktopSideBarFloating_Toggled"
+                                                             Width="40" />
+                                        </ui:SimpleStackPanel>
+                                    </Grid>
+                                    
+                                    <!-- 控制按钮 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,8">
+                                        <Button Name="BtnFloatingWindowInterceptorStart" Content="启动拦截" 
+                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorStart_Click"
+                                                Background="#FF28A745" Foreground="White" BorderBrush="#FF1E7E34" 
+                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                        <Button Name="BtnFloatingWindowInterceptorStop" Content="停止拦截" 
+                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorStop_Click"
+                                                Background="#FFDC3545" Foreground="White" BorderBrush="#FFBD2130" 
+                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                        <Button Name="BtnFloatingWindowInterceptorScan" Content="手动扫描" 
+                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorScan_Click"
+                                                Background="#FF17A2B8" Foreground="White" BorderBrush="#FF138496" 
+                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                        <Button Name="BtnFloatingWindowInterceptorRestore" Content="恢复所有窗口" 
+                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorRestore_Click"
+                                                Background="#FF6C757D" Foreground="White" BorderBrush="#FF5A6268" 
+                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                        <Button Name="BtnFloatingWindowInterceptorDebug" Content="调试列出窗口" 
+                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorDebug_Click"
+                                                Background="#FF6F42C1" Foreground="White" BorderBrush="#FF5A2D91" 
+                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                        <Button Name="BtnFloatingWindowInterceptorTest" Content="测试拦截" 
+                                                Padding="12,6" Click="BtnFloatingWindowInterceptorTest_Click"
+                                                Background="#FFE83E8C" Foreground="White" BorderBrush="#FFC2185B" 
+                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <!-- 状态信息 -->
+                                    <TextBlock Name="TextBlockFloatingWindowInterceptorStatus" Text="拦截器未启动" 
+                                               Foreground="#a1a1aa" FontSize="12" Margin="0,4,0,0" />
+                                    
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="清屏时自动截图" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
