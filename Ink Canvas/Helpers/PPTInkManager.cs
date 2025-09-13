@@ -456,7 +456,7 @@ namespace Ink_Canvas.Helpers
             {
                 var presentationPath = presentation.FullName;
                 var fileHash = GetFileHash(presentationPath);
-                return $"{presentation.Name}_{presentation.Slides.Count}_{fileHash}";
+                return $"{presentation.Name}_{fileHash}";
             }
             catch (Exception ex)
             {
