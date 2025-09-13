@@ -1815,7 +1815,11 @@ namespace Ink_Canvas
 
                     // 先设为None再设回原来的模式，避免可能的事件冲突
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    // 保存非笔画元素（如图片）
+                    var preservedElements = PreserveNonStrokeElements();
                     inkCanvas.Children.Clear();
+                    // 恢复非笔画元素
+                    RestoreNonStrokeElements(preservedElements);
                     isInMultiTouchMode = true;
 
                     // 恢复到之前的编辑状态

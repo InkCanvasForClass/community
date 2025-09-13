@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Point = System.Windows.Point;
 
@@ -30,7 +31,7 @@ namespace Ink_Canvas
         {
             var preservedElements = new List<UIElement>();
 
-            // 遍历inkCanvas的所有子元素
+            // 遍历inkCanvas的所有子元素，创建副本而不是直接引用
             for (int i = inkCanvas.Children.Count - 1; i >= 0; i--)
             {
                 var child = inkCanvas.Children[i];
@@ -39,11 +40,116 @@ namespace Ink_Canvas
                 if (child is Image || child is MediaElement ||
                     (child is Border border && border.Name != "AdvancedEraserOverlay"))
                 {
-                    preservedElements.Add(child);
+                    // 创建元素的深拷贝，避免直接引用导致的问题
+                    var clonedElement = CloneUIElement(child);
+                    if (clonedElement != null)
+                    {
+                        preservedElements.Add(clonedElement);
+                    }
                 }
             }
 
             return preservedElements;
+        }
+
+        /// <summary>
+        /// 克隆UI元素，创建深拷贝
+        /// </summary>
+        private UIElement CloneUIElement(UIElement originalElement)
+        {
+            try
+            {
+                if (originalElement is Image originalImage)
+                {
+                    var clonedImage = new Image();
+                    
+                    // 复制图片源
+                    if (originalImage.Source is BitmapSource bitmapSource)
+                    {
+                        clonedImage.Source = bitmapSource;
+                    }
+                    
+                    // 复制属性
+                    clonedImage.Width = originalImage.Width;
+                    clonedImage.Height = originalImage.Height;
+                    clonedImage.Stretch = originalImage.Stretch;
+                    clonedImage.StretchDirection = originalImage.StretchDirection;
+                    clonedImage.Name = originalImage.Name;
+                    clonedImage.IsHitTestVisible = originalImage.IsHitTestVisible;
+                    clonedImage.Focusable = originalImage.Focusable;
+                    clonedImage.Cursor = originalImage.Cursor;
+                    clonedImage.IsManipulationEnabled = originalImage.IsManipulationEnabled;
+                    
+                    // 复制位置
+                    InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(originalImage));
+                    InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(originalImage));
+                    
+                    // 复制变换
+                    if (originalImage.RenderTransform != null)
+                    {
+                        clonedImage.RenderTransform = originalImage.RenderTransform.Clone();
+                    }
+                    
+                    return clonedImage;
+                }
+                else if (originalElement is MediaElement originalMedia)
+                {
+                    var clonedMedia = new MediaElement();
+                    
+                    // 复制媒体属性
+                    clonedMedia.Source = originalMedia.Source;
+                    clonedMedia.Width = originalMedia.Width;
+                    clonedMedia.Height = originalMedia.Height;
+                    clonedMedia.Name = originalMedia.Name;
+                    clonedMedia.IsHitTestVisible = originalMedia.IsHitTestVisible;
+                    clonedMedia.Focusable = originalMedia.Focusable;
+                    
+                    // 复制位置
+                    InkCanvas.SetLeft(clonedMedia, InkCanvas.GetLeft(originalMedia));
+                    InkCanvas.SetTop(clonedMedia, InkCanvas.GetTop(originalMedia));
+                    
+                    // 复制变换
+                    if (originalMedia.RenderTransform != null)
+                    {
+                        clonedMedia.RenderTransform = originalMedia.RenderTransform.Clone();
+                    }
+                    
+                    return clonedMedia;
+                }
+                else if (originalElement is Border originalBorder)
+                {
+                    var clonedBorder = new Border();
+                    
+                    // 复制边框属性
+                    clonedBorder.Width = originalBorder.Width;
+                    clonedBorder.Height = originalBorder.Height;
+                    clonedBorder.Name = originalBorder.Name;
+                    clonedBorder.IsHitTestVisible = originalBorder.IsHitTestVisible;
+                    clonedBorder.Focusable = originalBorder.Focusable;
+                    clonedBorder.Background = originalBorder.Background;
+                    clonedBorder.BorderBrush = originalBorder.BorderBrush;
+                    clonedBorder.BorderThickness = originalBorder.BorderThickness;
+                    clonedBorder.CornerRadius = originalBorder.CornerRadius;
+                    
+                    // 复制位置
+                    InkCanvas.SetLeft(clonedBorder, InkCanvas.GetLeft(originalBorder));
+                    InkCanvas.SetTop(clonedBorder, InkCanvas.GetTop(originalBorder));
+                    
+                    // 复制变换
+                    if (originalBorder.RenderTransform != null)
+                    {
+                        clonedBorder.RenderTransform = originalBorder.RenderTransform.Clone();
+                    }
+                    
+                    return clonedBorder;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"克隆UI元素失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            
+            return null;
         }
 
         /// <summary>
@@ -55,10 +161,14 @@ namespace Ink_Canvas
 
             foreach (var element in preservedElements)
             {
-                // 确保元素没有父容器再添加到inkCanvas
-                if (element is FrameworkElement fe && fe.Parent == null)
+                try
                 {
+                    // 由于现在使用的是克隆的元素，不需要检查Parent属性
                     inkCanvas.Children.Add(element);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"恢复非笔画元素失败: {ex.Message}", LogHelper.LogType.Error);
                 }
             }
         }
