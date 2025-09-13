@@ -323,26 +323,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"设置拦截规则失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-
-
-        /// <summary>
-        /// 恢复所有窗口按钮点击
-        /// </summary>
-        private void BtnFloatingWindowInterceptorRestore_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                if (_floatingWindowInterceptorManager != null)
-                {
-                    _floatingWindowInterceptorManager.RestoreAllWindows();
-                    UpdateFloatingWindowInterceptorUI();
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"恢复所有窗口失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
         #endregion
     }
 }

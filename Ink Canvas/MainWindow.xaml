@@ -2961,15 +2961,6 @@
                                                              Width="40" />
                                         </ui:SimpleStackPanel>
                                     </Grid>
-                                    
-                                    <!-- 控制按钮 -->
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,8">
-                                        <Button Name="BtnFloatingWindowInterceptorRestore" Content="恢复所有窗口" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnFloatingWindowInterceptorRestore_Click"
-                                                Background="#FF6C757D" Foreground="White" BorderBrush="#FF5A6268" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
-                                    </ui:SimpleStackPanel>
-                                    
                                     <!-- 状态信息 -->
                                     <TextBlock Name="TextBlockFloatingWindowInterceptorStatus" Text="拦截器未启动" 
                                                Foreground="#a1a1aa" FontSize="12" Margin="0,4,0,0" />
