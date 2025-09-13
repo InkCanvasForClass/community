@@ -467,7 +467,7 @@ namespace Ink_Canvas
         public bool IsEnabled { get; set; } = false;
 
         [JsonProperty("scanIntervalMs")]
-        public int ScanIntervalMs { get; set; } = 5000;
+        public int ScanIntervalMs { get; set; } = 1000;
 
         [JsonProperty("interceptRules")]
         public Dictionary<string, bool> InterceptRules { get; set; } = new Dictionary<string, bool>
