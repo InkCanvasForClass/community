@@ -92,6 +92,12 @@ namespace Ink_Canvas
         // 上次播放位置相关字段
         private int _lastPlaybackPage = 0;
         private bool _shouldNavigateToLastPage = false;
+        
+        // 页面切换防抖机制
+        private DateTime _lastSlideSwitchTime = DateTime.MinValue;
+        private int _pendingSlideIndex = -1;
+        private System.Timers.Timer _slideSwitchDebounceTimer;
+        private const int SlideSwitchDebounceMs = 150; // 防抖延迟150毫秒
         #endregion
 
         #region PPT Managers
@@ -728,11 +734,8 @@ namespace Ink_Canvas
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     var totalSlides = _pptManager?.SlidesCount ?? 0;
 
-                    // 保存上一页墨迹并加载当前页墨迹
-                    SwitchSlideInk(currentSlide);
-
-                    // 更新UI
-                    _pptUIManager?.UpdateCurrentSlideNumber(currentSlide, totalSlides);
+                    // 使用防抖机制处理页面切换
+                    HandleSlideSwitchWithDebounce(currentSlide, totalSlides);
 
                     LogHelper.WriteLogToFile($"幻灯片切换到第{currentSlide}页", LogHelper.LogType.Trace);
                 });
@@ -1008,6 +1011,55 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"加载当前页墨迹失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 使用防抖机制处理页面切换
+        /// </summary>
+        private void HandleSlideSwitchWithDebounce(int currentSlide, int totalSlides)
+        {
+            try
+            {
+                var now = DateTime.Now;
+                
+                // 如果距离上次切换时间太短，使用防抖机制
+                if (now - _lastSlideSwitchTime < TimeSpan.FromMilliseconds(SlideSwitchDebounceMs))
+                {
+                    _pendingSlideIndex = currentSlide;
+                    
+                    // 停止之前的定时器
+                    _slideSwitchDebounceTimer?.Stop();
+                    
+                    // 创建新的定时器
+                    _slideSwitchDebounceTimer = new System.Timers.Timer(SlideSwitchDebounceMs);
+                    _slideSwitchDebounceTimer.Elapsed += (sender, e) =>
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            if (_pendingSlideIndex > 0)
+                            {
+                                SwitchSlideInk(_pendingSlideIndex);
+                                _pptUIManager?.UpdateCurrentSlideNumber(_pendingSlideIndex, totalSlides);
+                                _pendingSlideIndex = -1;
+                            }
+                        });
+                        _slideSwitchDebounceTimer?.Stop();
+                    };
+                    _slideSwitchDebounceTimer.Start();
+                }
+                else
+                {
+                    // 直接处理页面切换
+                    SwitchSlideInk(currentSlide);
+                    _pptUIManager?.UpdateCurrentSlideNumber(currentSlide, totalSlides);
+                }
+                
+                _lastSlideSwitchTime = now;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理页面切换防抖失败: {ex}", LogHelper.LogType.Error);
             }
         }
 

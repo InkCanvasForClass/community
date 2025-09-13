@@ -29,6 +29,11 @@ namespace Ink_Canvas.Helpers
         private DateTime _inkLockUntil = DateTime.MinValue;
         private int _lockedSlideIndex = -1;
         private const int InkLockMilliseconds = 500;
+        
+        // 添加快速切换保护机制
+        private DateTime _lastSwitchTime = DateTime.MinValue;
+        private int _lastSwitchSlideIndex = -1;
+        private const int MinSwitchIntervalMs = 100; // 最小切换间隔100毫秒
         #endregion
 
         #region Constructor
@@ -190,6 +195,15 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
+                    // 检查快速切换保护
+                    var now = DateTime.Now;
+                    if (now - _lastSwitchTime < TimeSpan.FromMilliseconds(MinSwitchIntervalMs) && 
+                        _lastSwitchSlideIndex == slideIndex)
+                    {
+                        LogHelper.WriteLogToFile($"快速切换保护：忽略重复的页面切换请求 {slideIndex}", LogHelper.LogType.Warning);
+                        return LoadSlideStrokes(slideIndex);
+                    }
+
                     // 如果有当前墨迹，先保存到正确的页面
                     if (currentStrokes != null && currentStrokes.Count > 0)
                     {
@@ -213,6 +227,11 @@ namespace Ink_Canvas.Helpers
 
                     // 加载新页面的墨迹
                     var newStrokes = LoadSlideStrokes(slideIndex);
+                    
+                    // 更新切换记录
+                    _lastSwitchTime = now;
+                    _lastSwitchSlideIndex = slideIndex;
+                    
                     LogHelper.WriteLogToFile($"已切换到第{slideIndex}页，加载墨迹数量: {newStrokes.Count}", LogHelper.LogType.Trace);
 
                     return newStrokes;

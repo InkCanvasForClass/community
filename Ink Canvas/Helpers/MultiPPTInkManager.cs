@@ -233,6 +233,10 @@ namespace Ink_Canvas.Helpers
                     {
                         return manager.SwitchToSlide(slideIndex, currentStrokes);
                     }
+                    else
+                    {
+                        LogHelper.WriteLogToFile($"无法获取当前墨迹管理器，页面切换失败: {slideIndex}", LogHelper.LogType.Warning);
+                    }
                 }
                 catch (Exception ex)
                 {
