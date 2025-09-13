@@ -20,8 +20,8 @@ namespace Ink_Canvas.Helpers.Plugins
     public class PluginManager
     {
         private static readonly string PluginsDirectory = Path.Combine(App.RootPath, "Plugins");
-        private static readonly string PluginConfigFile = Path.Combine(App.RootPath, "PluginConfig.json");
-        private static readonly string PluginConfigBackupFile = Path.Combine(App.RootPath, "PluginConfig.json.bak");
+        private static readonly string PluginConfigFile = Path.Combine(App.RootPath, "Configs", "PluginConfig.json");
+        private static readonly string PluginConfigBackupFile = Path.Combine(App.RootPath, "Configs", "PluginConfig.json.bak");
 
         private static PluginManager _instance;
         private static SemaphoreSlim _configLock = new SemaphoreSlim(1, 1);
@@ -79,8 +79,6 @@ namespace Ink_Canvas.Helpers.Plugins
                 Directory.CreateDirectory(PluginsDirectory);
             }
 
-            // 加载插件配置
-            LoadConfig();
 
             // 初始化自动保存计时器（3秒）
             _autoSaveTimer = new Timer(3000);

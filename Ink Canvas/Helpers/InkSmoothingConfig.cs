@@ -71,37 +71,43 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 应用质量设置
+        /// 应用质量设置 
         /// </summary>
         public void ApplyQualitySettings()
         {
             switch (Quality)
             {
                 case SmoothingQuality.Performance:
-                    SmoothingStrength = 0.2;
-                    ResampleInterval = 4.0;
-                    InterpolationSteps = 6;
+                    SmoothingStrength = 0.15; 
+                    ResampleInterval = 5.0;   
+                    InterpolationSteps = 4;   
                     UseAdaptiveInterpolation = false;
-                    CurveTension = 0.2;
+                    CurveTension = 0.15;      
                     MaxConcurrentTasks = Math.Max(1, Environment.ProcessorCount / 2);
+                    UseHardwareAcceleration = true; 
+                    UseAsyncProcessing = true;      
                     break;
 
                 case SmoothingQuality.Balanced:
-                    SmoothingStrength = 0.4;
-                    ResampleInterval = 2.5;
-                    InterpolationSteps = 12;
+                    SmoothingStrength = 0.3;  
+                    ResampleInterval = 3.0;   
+                    InterpolationSteps = 8;   
                     UseAdaptiveInterpolation = true;
-                    CurveTension = 0.3;
+                    CurveTension = 0.25;     
                     MaxConcurrentTasks = Environment.ProcessorCount;
+                    UseHardwareAcceleration = true;
+                    UseAsyncProcessing = true;
                     break;
 
                 case SmoothingQuality.Quality:
-                    SmoothingStrength = 0.6;
-                    ResampleInterval = 1.5;
-                    InterpolationSteps = 20;
+                    SmoothingStrength = 0.5;  
+                    ResampleInterval = 2.0; 
+                    InterpolationSteps = 15; 
                     UseAdaptiveInterpolation = true;
-                    CurveTension = 0.4;
+                    CurveTension = 0.35;     
                     MaxConcurrentTasks = Environment.ProcessorCount;
+                    UseHardwareAcceleration = true;
+                    UseAsyncProcessing = true;
                     break;
             }
         }

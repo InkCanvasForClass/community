@@ -32,7 +32,7 @@
                     </MenuItem.Icon>
                 </MenuItem>
                 <Separator Margin="0,3" />
-                <MenuItem>
+                <MenuItem Name="DisableAllHotkeysMenuItem" Click="DisableAllHotkeysMenuItem_Clicked">
                     <MenuItem.Header>
                         <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
                             <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="禁用所有快捷键" />

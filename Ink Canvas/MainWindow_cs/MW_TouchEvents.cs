@@ -8,6 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Point = System.Windows.Point;
 
@@ -30,7 +31,7 @@ namespace Ink_Canvas
         {
             var preservedElements = new List<UIElement>();
 
-            // 遍历inkCanvas的所有子元素
+            // 遍历inkCanvas的所有子元素，创建副本而不是直接引用
             for (int i = inkCanvas.Children.Count - 1; i >= 0; i--)
             {
                 var child = inkCanvas.Children[i];
@@ -39,11 +40,116 @@ namespace Ink_Canvas
                 if (child is Image || child is MediaElement ||
                     (child is Border border && border.Name != "AdvancedEraserOverlay"))
                 {
-                    preservedElements.Add(child);
+                    // 创建元素的深拷贝，避免直接引用导致的问题
+                    var clonedElement = CloneUIElement(child);
+                    if (clonedElement != null)
+                    {
+                        preservedElements.Add(clonedElement);
+                    }
                 }
             }
 
             return preservedElements;
+        }
+
+        /// <summary>
+        /// 克隆UI元素，创建深拷贝
+        /// </summary>
+        private UIElement CloneUIElement(UIElement originalElement)
+        {
+            try
+            {
+                if (originalElement is Image originalImage)
+                {
+                    var clonedImage = new Image();
+                    
+                    // 复制图片源
+                    if (originalImage.Source is BitmapSource bitmapSource)
+                    {
+                        clonedImage.Source = bitmapSource;
+                    }
+                    
+                    // 复制属性
+                    clonedImage.Width = originalImage.Width;
+                    clonedImage.Height = originalImage.Height;
+                    clonedImage.Stretch = originalImage.Stretch;
+                    clonedImage.StretchDirection = originalImage.StretchDirection;
+                    clonedImage.Name = originalImage.Name;
+                    clonedImage.IsHitTestVisible = originalImage.IsHitTestVisible;
+                    clonedImage.Focusable = originalImage.Focusable;
+                    clonedImage.Cursor = originalImage.Cursor;
+                    clonedImage.IsManipulationEnabled = originalImage.IsManipulationEnabled;
+                    
+                    // 复制位置
+                    InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(originalImage));
+                    InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(originalImage));
+                    
+                    // 复制变换
+                    if (originalImage.RenderTransform != null)
+                    {
+                        clonedImage.RenderTransform = originalImage.RenderTransform.Clone();
+                    }
+                    
+                    return clonedImage;
+                }
+                else if (originalElement is MediaElement originalMedia)
+                {
+                    var clonedMedia = new MediaElement();
+                    
+                    // 复制媒体属性
+                    clonedMedia.Source = originalMedia.Source;
+                    clonedMedia.Width = originalMedia.Width;
+                    clonedMedia.Height = originalMedia.Height;
+                    clonedMedia.Name = originalMedia.Name;
+                    clonedMedia.IsHitTestVisible = originalMedia.IsHitTestVisible;
+                    clonedMedia.Focusable = originalMedia.Focusable;
+                    
+                    // 复制位置
+                    InkCanvas.SetLeft(clonedMedia, InkCanvas.GetLeft(originalMedia));
+                    InkCanvas.SetTop(clonedMedia, InkCanvas.GetTop(originalMedia));
+                    
+                    // 复制变换
+                    if (originalMedia.RenderTransform != null)
+                    {
+                        clonedMedia.RenderTransform = originalMedia.RenderTransform.Clone();
+                    }
+                    
+                    return clonedMedia;
+                }
+                else if (originalElement is Border originalBorder)
+                {
+                    var clonedBorder = new Border();
+                    
+                    // 复制边框属性
+                    clonedBorder.Width = originalBorder.Width;
+                    clonedBorder.Height = originalBorder.Height;
+                    clonedBorder.Name = originalBorder.Name;
+                    clonedBorder.IsHitTestVisible = originalBorder.IsHitTestVisible;
+                    clonedBorder.Focusable = originalBorder.Focusable;
+                    clonedBorder.Background = originalBorder.Background;
+                    clonedBorder.BorderBrush = originalBorder.BorderBrush;
+                    clonedBorder.BorderThickness = originalBorder.BorderThickness;
+                    clonedBorder.CornerRadius = originalBorder.CornerRadius;
+                    
+                    // 复制位置
+                    InkCanvas.SetLeft(clonedBorder, InkCanvas.GetLeft(originalBorder));
+                    InkCanvas.SetTop(clonedBorder, InkCanvas.GetTop(originalBorder));
+                    
+                    // 复制变换
+                    if (originalBorder.RenderTransform != null)
+                    {
+                        clonedBorder.RenderTransform = originalBorder.RenderTransform.Clone();
+                    }
+                    
+                    return clonedBorder;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"克隆UI元素失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            
+            return null;
         }
 
         /// <summary>
@@ -55,10 +161,14 @@ namespace Ink_Canvas
 
             foreach (var element in preservedElements)
             {
-                // 确保元素没有父容器再添加到inkCanvas
-                if (element is FrameworkElement fe && fe.Parent == null)
+                try
                 {
+                    // 由于现在使用的是克隆的元素，不需要检查Parent属性
                     inkCanvas.Children.Add(element);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"恢复非笔画元素失败: {ex.Message}", LogHelper.LogType.Error);
                 }
             }
         }
@@ -163,13 +273,11 @@ namespace Ink_Canvas
                 return;
             }
 
-            LogHelper.WriteLogToFile($"MainWindow_StylusDown 被调用，笔尾状态: {e.StylusDevice.Inverted}, 当前 drawingShapeMode: {drawingShapeMode}, 当前 EditingMode: {inkCanvas.EditingMode}");
 
             // 新增：根据是否为笔尾自动切换橡皮擦/画笔模式
             if (e.StylusDevice.Inverted)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
-                LogHelper.WriteLogToFile("检测到笔尾，设置 EditingMode 为 EraseByPoint");
             }
             else
             {
@@ -178,14 +286,12 @@ namespace Ink_Canvas
                 {
                     // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                    LogHelper.WriteLogToFile("几何绘制模式，设置 EditingMode 为 None");
                     return;
                 }
                 // 修复：保持当前的线擦模式，不要强制切换到Ink模式
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                    LogHelper.WriteLogToFile("设置 EditingMode 为 Ink");
                 }
                 else
                 {
@@ -231,17 +337,11 @@ namespace Ink_Canvas
         {
             try
             {
-                LogHelper.WriteLogToFile($"MainWindow_StylusUp 被调用，EditingMode: {inkCanvas.EditingMode}, EnableInkFade: {Settings.Canvas.EnableInkFade}");
-
                 var stroke = GetStrokeVisual(e.StylusDevice.Id).Stroke;
-                LogHelper.WriteLogToFile($"获取到墨迹，StylusPoints数量: {stroke.StylusPoints.Count}");
 
                 // 正常模式：添加到画布并参与墨迹纠正
-                // 墨迹渐隐功能现在在 StrokeCollected 事件中统一处理所有输入方式
-                LogHelper.WriteLogToFile("StylusUp: 添加墨迹到画布");
-
                 inkCanvas.Strokes.Add(stroke);
-                await Task.Delay(5); // 避免渲染墨迹完成前预览墨迹被删除导致墨迹闪烁
+                await Task.Delay(5); 
                 inkCanvas.Children.Remove(GetVisualCanvas(e.StylusDevice.Id));
 
                 inkCanvas_StrokeCollected(inkCanvas,
@@ -369,7 +469,8 @@ namespace Ink_Canvas
             }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
             {
-                // 套索选状态下只return，保证套索选可用
+                // 套索选状态下不直接return，允许触摸事件继续处理
+                dec.Add(e.TouchDevice.Id);
                 return;
             }
             // 修复：几何绘制模式下完全禁止触摸轨迹收集
@@ -502,7 +603,7 @@ namespace Ink_Canvas
 
                 // 计算触摸面积（使用设备提供的Size）
                 double touchArea = size.Width * size.Height;
-                
+
                 // 计算宽高比（使用Bounds确保准确性）
                 double aspectRatio = Math.Min(bounds.Width, bounds.Height) / Math.Max(bounds.Width, bounds.Height);
 
@@ -510,7 +611,7 @@ namespace Ink_Canvas
                 bool isLargeTouch = touchArea >= palmAreaThreshold;
                 bool isPalmLikeShape = aspectRatio >= aspectRatioThreshold;
                 bool hasMultipleTouchPoints = dec.Count >= minTouchPoints;
-                
+
                 // 新增：额外的判定条件提高准确性
                 bool isReasonableSize = size.Width >= 20 && size.Height >= 20 && size.Width <= 200 && size.Height <= 200; // 合理的触摸尺寸范围
                 bool isNotTooElongated = aspectRatio >= 0.2; // 避免过于细长的触摸（可能是手指）
@@ -613,7 +714,7 @@ namespace Ink_Canvas
             if (isPalmEraserActive && palmEraserTouchIds.Count == 0)
             {
                 LogHelper.WriteLogToFile($"Palm eraser recovery triggered - Touch points remaining: {palmEraserTouchIds.Count}, dec.Count: {dec.Count}");
-                
+
                 // 恢复高光状态
                 drawingAttributes.IsHighlighter = palmEraserLastIsHighlighter;
 
@@ -777,10 +878,10 @@ namespace Ink_Canvas
                     if (isPalmEraserActive)
                     {
                         LogHelper.WriteLogToFile("Palm eraser force recovery - all touch points cleared");
-                        
+
                         // 恢复高光状态
                         drawingAttributes.IsHighlighter = palmEraserLastIsHighlighter;
-                        
+
                         // 恢复编辑模式
                         try
                         {
@@ -806,7 +907,7 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile($"Palm eraser force recovery failed: {ex.Message}, forcing to Ink mode", LogHelper.LogType.Error);
                             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                         }
-                        
+
                         // 如果手掌擦还在激活状态但触摸点已清空，强制重置状态
                         isPalmEraserActive = false;
                         palmEraserTouchDownHandled = false;
@@ -816,10 +917,10 @@ namespace Ink_Canvas
 
                         ViewboxFloatingBar.IsHitTestVisible = true;
                         BlackboardUIGridForInkReplay.IsHitTestVisible = true;
-                        
+
                         // 停止恢复定时器
                         StopPalmEraserRecoveryTimer();
-                        
+
                         LogHelper.WriteLogToFile("Palm eraser force recovery completed");
                     }
                 }
@@ -864,7 +965,34 @@ namespace Ink_Canvas
                 return;
             // 三指及以上禁止缩放
             bool disableScale = dec.Count >= 3;
-            if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
+
+            // 修复：允许单指拖动选中的墨迹，即使禁用了多指手势
+            if (isInMultiTouchMode) return;
+
+            // 如果是单指拖动选中的墨迹，允许处理
+            if (dec.Count == 1 && inkCanvas.GetSelectedStrokes().Count > 0)
+            {
+                var md = e.DeltaManipulation;
+                var trans = md.Translation; // 获得位移矢量
+
+                if (trans.X != 0 || trans.Y != 0)
+                {
+                    var m = new Matrix();
+                    m.Translate(trans.X, trans.Y); // 移动
+
+                    var strokes = inkCanvas.GetSelectedStrokes();
+                    foreach (var stroke in strokes)
+                    {
+                        stroke.Transform(m, false);
+                    }
+
+                    // 更新选择框位置
+                    updateBorderStrokeSelectionControlLocation();
+                }
+                return;
+            }
+
+            if (!Settings.Gesture.IsEnableTwoFingerGesture) return;
             if ((dec.Count >= 2 && (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
                                     StackPanelPPTControls.Visibility != Visibility.Visible ||
                                     StackPanelPPTButtons.Visibility == Visibility.Collapsed)) ||
@@ -938,12 +1066,15 @@ namespace Ink_Canvas
                             catch { }
                         }
 
-                        ;
+                        // 同时变换画布上的图片元素
+                        TransformCanvasImages(m);
                     }
                     else
                     {
                         foreach (var stroke in inkCanvas.Strokes) stroke.Transform(m, false);
-                        ;
+                        
+                        // 同时变换画布上的图片元素
+                        TransformCanvasImages(m);
                     }
 
                     foreach (var circle in circles)
@@ -958,6 +1089,86 @@ namespace Ink_Canvas
                         );
                     }
                 }
+            }
+        }
+
+        /// <summary>
+        /// 变换画布上的图片元素，使其与墨迹同步移动
+        /// </summary>
+        private void TransformCanvasImages(Matrix matrix)
+        {
+            try
+            {
+                // 遍历inkCanvas的所有子元素，找到图片元素
+                for (int i = inkCanvas.Children.Count - 1; i >= 0; i--)
+                {
+                    var child = inkCanvas.Children[i];
+                    
+                    if (child is Image image)
+                    {
+                        // 应用矩阵变换到图片
+                        ApplyMatrixTransformToImage(image, matrix);
+                    }
+                    else if (child is MediaElement mediaElement)
+                    {
+                        // 对媒体元素也应用变换
+                        ApplyMatrixTransformToMediaElement(mediaElement, matrix);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"变换画布图片失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 对图片应用矩阵变换
+        /// </summary>
+        private void ApplyMatrixTransformToImage(Image image, Matrix matrix)
+        {
+            try
+            {
+                // 获取图片的RenderTransform，如果不存在则创建新的TransformGroup
+                TransformGroup transformGroup = image.RenderTransform as TransformGroup;
+                if (transformGroup == null)
+                {
+                    transformGroup = new TransformGroup();
+                    image.RenderTransform = transformGroup;
+                }
+
+                // 创建新的MatrixTransform并添加到变换组
+                var matrixTransform = new MatrixTransform(matrix);
+                transformGroup.Children.Add(matrixTransform);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用图片变换失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 对媒体元素应用矩阵变换
+        /// </summary>
+        private void ApplyMatrixTransformToMediaElement(MediaElement mediaElement, Matrix matrix)
+        {
+            try
+            {
+                // 获取媒体元素的RenderTransform，如果不存在则创建新的TransformGroup
+                TransformGroup transformGroup = mediaElement.RenderTransform as TransformGroup;
+                if (transformGroup == null)
+                {
+                    transformGroup = new TransformGroup();
+                    mediaElement.RenderTransform = transformGroup;
+                }
+
+                // 创建新的MatrixTransform并添加到变换组
+                var matrixTransform = new MatrixTransform(matrix);
+                transformGroup.Children.Add(matrixTransform);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用媒体元素变换失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

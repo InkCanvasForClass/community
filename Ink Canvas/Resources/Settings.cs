@@ -440,7 +440,7 @@ namespace Ink_Canvas
         public int MinimumAutomationStrokeNumber { get; set; }
 
         [JsonProperty("autoSavedStrokesLocation")]
-        public string AutoSavedStrokesLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "saves");
+        public string AutoSavedStrokesLocation = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Saves");
 
         [JsonProperty("autoDelSavedFiles")]
         public bool AutoDelSavedFiles;
@@ -448,11 +448,50 @@ namespace Ink_Canvas
         [JsonProperty("autoDelSavedFilesDaysThreshold")]
         public int AutoDelSavedFilesDaysThreshold = 15;
 
+        [JsonProperty("keepFoldAfterSoftwareExit")]
+        public bool KeepFoldAfterSoftwareExit { get; set; } = false;
+
         [JsonProperty("isSaveFullPageStrokes")]
         public bool IsSaveFullPageStrokes;
 
         [JsonProperty("isAutoEnterAnnotationAfterKillHite")]
         public bool IsAutoEnterAnnotationAfterKillHite { get; set; }
+
+        [JsonProperty("floatingWindowInterceptor")]
+        public FloatingWindowInterceptorSettings FloatingWindowInterceptor { get; set; } = new FloatingWindowInterceptorSettings();
+    }
+
+    public class FloatingWindowInterceptorSettings
+    {
+        [JsonProperty("isEnabled")]
+        public bool IsEnabled { get; set; } = false;
+
+        [JsonProperty("scanIntervalMs")]
+        public int ScanIntervalMs { get; set; } = 1000;
+
+        [JsonProperty("interceptRules")]
+        public Dictionary<string, bool> InterceptRules { get; set; } = new Dictionary<string, bool>
+        {
+            { "SeewoWhiteboard3Floating", true },
+            { "SeewoWhiteboard5Floating", true },
+            { "SeewoWhiteboard5CFloating", true },
+            { "SeewoPincoSideBarFloating", true },
+            { "SeewoPincoDrawingFloating", true },
+            { "SeewoPPTFloating", true },
+            { "AiClassFloating", true },
+            { "HiteAnnotationFloating", true },
+            { "ChangYanFloating", true },
+            { "ChangYanPptFloating", true },
+            { "IntelligentClassFloating", true },
+            { "SeewoDesktopAnnotationFloating", true },
+            { "SeewoDesktopSideBarFloating", true }
+        };
+
+        [JsonProperty("autoStart")]
+        public bool AutoStart { get; set; } = false;
+
+        [JsonProperty("showNotifications")]
+        public bool ShowNotifications { get; set; } = true;
     }
 
     public class Advanced
@@ -545,6 +584,8 @@ namespace Ink_Canvas
         public bool ShowRandomAndSingleDraw { get; set; } = true;
         [JsonProperty("directCallCiRand")]
         public bool DirectCallCiRand { get; set; }
+        [JsonProperty("externalCallerType")]
+        public int ExternalCallerType { get; set; } = 0; 
         [JsonProperty("selectedBackgroundIndex")]
         public int SelectedBackgroundIndex { get; set; }
         [JsonProperty("customPickNameBackgrounds")]

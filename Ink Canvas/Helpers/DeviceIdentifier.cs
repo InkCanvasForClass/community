@@ -17,7 +17,7 @@ namespace Ink_Canvas.Helpers
         // 文件路径策略
         private static readonly string DeviceIdFilePath = Path.Combine(App.RootPath, "device_id.dat");
         private static readonly string UsageStatsFilePath = Path.Combine(App.RootPath, "usage_stats.enc");
-        private static readonly string UsageStatsBackupPath = Path.Combine(App.RootPath, "saves", "usage_stats_backup.enc");
+        private static readonly string UsageStatsBackupPath = Path.Combine(App.RootPath, "Saves", "usage_stats_backup.enc");
 
         private static readonly string DeviceId;
         private static readonly object fileLock = new object();
@@ -1092,7 +1092,7 @@ namespace Ink_Canvas.Helpers
                 {
                     int versionDiff = CalculateVersionGenerationDifference(localVersion, updateVersion);
                     LogHelper.WriteLogToFile($"DeviceIdentifier | 无法获取版本发布时间，使用版本号差异判断 - 本地版本: {localVersion}, 远程版本: {updateVersion}, 代数差异: {versionDiff}");
-                    
+
                     // 当版本号代数差异大于3时自动更新
                     if (versionDiff > 3)
                     {

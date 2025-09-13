@@ -24,8 +24,12 @@
     <BootstrapperEnabled>false</BootstrapperEnabled>
     <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
     <UseWPF>true</UseWPF>
-    <Configurations>Release;x86 Debug;Debug</Configurations>
-    <Platforms>AnyCPU;x86</Platforms>
+    <Configurations>Debug;Release;x86 Debug</Configurations>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugType>embedded</DebugType>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <Prefer32Bit>True</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86 Debug|AnyCPU'">
     <DebugType>embedded</DebugType>
@@ -154,6 +158,8 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="NHotkey.Wpf" Version="3.0.0" />
     <PackageReference Include="OSVersionExt" Version="3.0.0" />
+  <PackageReference Include="AForge.Video" Version="2.2.5" />
+  <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="IWshRuntimeLibrary">
@@ -248,6 +254,7 @@
     <Resource Include="Resources\DeveloperAvatars\kengwang.png" />
     <Resource Include="Resources\DeveloperAvatars\STBBRD.png" />
     <Resource Include="Resources\DeveloperAvatars\WXRIW.png" />
+    <Resource Include="Resources\DeveloperAvatars\PrefacedCorg.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-png\down.png" />

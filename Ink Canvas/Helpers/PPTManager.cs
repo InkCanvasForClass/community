@@ -70,17 +70,17 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     if (PPTApplication == null || !Marshal.IsComObject(PPTApplication)) return false;
-                    
+
                     // 检查是否有放映窗口
                     var slideShowWindows = PPTApplication.SlideShowWindows;
                     if (slideShowWindows == null || slideShowWindows.Count == 0) return false;
-                    
+
                     // 验证放映窗口是否真正有效
                     try
                     {
                         var slideShowWindow = slideShowWindows[1];
                         if (slideShowWindow == null) return false;
-                        
+
                         // 尝试访问放映窗口的属性来验证其有效性
                         var _ = slideShowWindow.View;
                         return true;
@@ -249,7 +249,6 @@ namespace Ink_Canvas.Helpers
 
                     if (!currentSlideShowState)
                     {
-                        LogHelper.WriteLogToFile("检测到PPT放映已结束", LogHelper.LogType.Trace);
                     }
                 }
             }
@@ -277,16 +276,6 @@ namespace Ink_Canvas.Helpers
             catch (COMException ex)
             {
                 var hr = (uint)ex.HResult;
-                // 忽略常见的PowerPoint连接错误：
-                // 0x800401E3: 操作无法使用
-                // 0x80004005: 未指定错误
-                // 0x800706B5: RPC服务器不可用
-                // 0x8001010E: 应用程序调用一个已为另一线程整理的接口
-                // 0x800401F3: 无效的类字符串（PowerPoint未安装或COM组件未注册）
-                if (hr != 0x800401E3 && hr != 0x80004005 && hr != 0x800706B5 && hr != 0x8001010E && hr != 0x800401F3)
-                {
-                    LogHelper.WriteLogToFile($"连接PowerPoint失败: {ex}", LogHelper.LogType.Warning);
-                }
                 return null;
             }
             catch (InvalidCastException)
@@ -294,9 +283,8 @@ namespace Ink_Canvas.Helpers
                 // COM对象类型转换失败
                 return null;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"连接PowerPoint时发生意外错误: {ex}", LogHelper.LogType.Warning);
                 return null;
             }
         }
@@ -422,12 +410,7 @@ namespace Ink_Canvas.Helpers
                                 }
                                 catch (COMException comEx)
                                 {
-                                    // COM对象已经被释放或在错误的线程中，忽略这些错误
                                     var hr = (uint)comEx.HResult;
-                                    if (hr != 0x8001010E && hr != 0x80004005 && hr != 0x800706B5)
-                                    {
-                                        LogHelper.WriteLogToFile($"取消PPT事件注册COM异常: {comEx}", LogHelper.LogType.Warning);
-                                    }
                                 }
                                 catch (InvalidCastException)
                                 {
@@ -437,10 +420,53 @@ namespace Ink_Canvas.Helpers
                             }, DispatcherPriority.Normal, CancellationToken.None, TimeSpan.FromSeconds(1));
                         }
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
-                        // 记录但不抛出异常，确保清理过程能够继续
-                        LogHelper.WriteLogToFile($"取消PPT事件注册失败: {ex.GetType().Name} - {ex.Message}", LogHelper.LogType.Warning);
+                    }
+
+                    // 释放COM对象
+                    try
+                    {
+                        if (Marshal.IsComObject(CurrentSlide))
+                        {
+                            Marshal.ReleaseComObject(CurrentSlide);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+
+                    try
+                    {
+                        if (Marshal.IsComObject(CurrentSlides))
+                        {
+                            Marshal.ReleaseComObject(CurrentSlides);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+
+                    try
+                    {
+                        if (Marshal.IsComObject(CurrentPresentation))
+                        {
+                            Marshal.ReleaseComObject(CurrentPresentation);
+                        }
+                    }
+                    catch (Exception)
+                    {
+                    }
+
+                    try
+                    {
+                        if (Marshal.IsComObject(PPTApplication))
+                        {
+                            Marshal.ReleaseComObject(PPTApplication);
+                        }
+                    }
+                    catch (Exception)
+                    {
                     }
 
                     // 清理引用
@@ -479,7 +505,7 @@ namespace Ink_Canvas.Helpers
                         {
                             CurrentPresentation = activePresentation;
                             CurrentSlides = CurrentPresentation.Slides;
-                            
+
                             // 验证页数读取是否成功
                             try
                             {
@@ -487,7 +513,6 @@ namespace Ink_Canvas.Helpers
                                 if (slideCount > 0)
                                 {
                                     SlidesCount = slideCount;
-                                    LogHelper.WriteLogToFile($"成功读取PPT页数: {slideCount}", LogHelper.LogType.Trace);
                                 }
                                 else
                                 {
@@ -603,7 +628,6 @@ namespace Ink_Canvas.Helpers
             try
             {
                 PresentationClose?.Invoke(pres);
-                LogHelper.WriteLogToFile($"演示文稿已关闭: {pres?.Name}", LogHelper.LogType.Event);
 
                 // 重新启动连接检查
                 _connectionCheckTimer?.Start();
@@ -620,7 +644,6 @@ namespace Ink_Canvas.Helpers
             {
                 UpdateCurrentPresentationInfo();
                 SlideShowBegin?.Invoke(wn);
-                LogHelper.WriteLogToFile("幻灯片放映开始", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -634,7 +657,6 @@ namespace Ink_Canvas.Helpers
             {
                 UpdateCurrentPresentationInfo();
                 SlideShowNextSlide?.Invoke(wn);
-                LogHelper.WriteLogToFile($"幻灯片切换到第{wn?.View?.CurrentShowPosition}页", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {
@@ -653,7 +675,6 @@ namespace Ink_Canvas.Helpers
                 }
 
                 SlideShowEnd?.Invoke(pres);
-                LogHelper.WriteLogToFile("幻灯片放映结束", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -825,14 +846,86 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        /// <summary>
+        /// 获取当前活跃的演示文稿（用于多窗口墨迹分离）
+        /// </summary>
+        public Presentation GetCurrentActivePresentation()
+        {
+            try
+            {
+                if (!IsConnected || PPTApplication == null) return null;
+                if (!Marshal.IsComObject(PPTApplication)) return null;
+
+                // 如果在放映模式，获取放映窗口的演示文稿
+                if (IsInSlideShow && PPTApplication.SlideShowWindows.Count > 0)
+                {
+                    var slideShowWindow = PPTApplication.SlideShowWindows[1];
+                    if (slideShowWindow?.View != null)
+                    {
+                        return (Presentation)slideShowWindow.View.Slide.Parent;
+                    }
+                }
+
+                // 如果不在放映模式，获取活动窗口的演示文稿
+                if (PPTApplication.ActiveWindow?.Presentation != null)
+                {
+                    return PPTApplication.ActiveWindow.Presentation;
+                }
+
+                // 如果没有活动窗口，返回当前演示文稿
+                return CurrentPresentation;
+            }
+            catch (COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                if (hr == 0x8001010E || hr == 0x80004005)
+                {
+                    // COM对象已失效，触发断开连接
+                    DisconnectFromPPT();
+                }
+                LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {comEx.Message}", LogHelper.LogType.Warning);
+                return CurrentPresentation;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {ex}", LogHelper.LogType.Error);
+                return CurrentPresentation;
+            }
+        }
+
+        /// <summary>
+        /// 获取当前幻灯片编号
+        /// </summary>
         public int GetCurrentSlideNumber()
         {
             try
             {
-                if (!IsConnected || !IsInSlideShow || PPTApplication == null) return 0;
+                if (!IsConnected || PPTApplication == null) return 0;
                 if (!Marshal.IsComObject(PPTApplication)) return 0;
 
-                return PPTApplication.SlideShowWindows[1]?.View?.CurrentShowPosition ?? 0;
+                // 如果在放映模式，获取放映窗口的当前幻灯片编号
+                if (IsInSlideShow && PPTApplication.SlideShowWindows.Count > 0)
+                {
+                    var slideShowWindow = PPTApplication.SlideShowWindows[1];
+                    if (slideShowWindow?.View != null)
+                    {
+                        return slideShowWindow.View.CurrentShowPosition;
+                    }
+                }
+
+                // 如果不在放映模式，获取活动窗口的当前幻灯片编号
+                if (PPTApplication.ActiveWindow?.Selection?.SlideRange?.SlideNumber > 0)
+                {
+                    return PPTApplication.ActiveWindow.Selection.SlideRange.SlideNumber;
+                }
+
+                // 如果CurrentSlide存在，尝试获取其编号
+                if (CurrentSlide != null && Marshal.IsComObject(CurrentSlide))
+                {
+                    return CurrentSlide.SlideNumber;
+                }
+
+                return 0;
             }
             catch (COMException comEx)
             {
@@ -1042,7 +1135,7 @@ namespace Ink_Canvas.Helpers
                 _wpsProcessCheckTimer.Dispose();
             }
 
-            // 优化：增加检查间隔到2秒，减少性能开销
+            // 增加检查间隔到2秒，减少性能开销
             _wpsProcessCheckTimer = new Timer(2000);
             _wpsProcessCheckTimer.Elapsed += OnWpsProcessCheckTimerElapsed;
             _wpsProcessCheckTimer.Start();
@@ -1076,7 +1169,7 @@ namespace Ink_Canvas.Helpers
                 }
 
 
-                // 检查前台WPS窗口是否存在（优化版）
+                // 检查前台WPS窗口是否存在
                 bool isForegroundWpsWindowActive = IsForegroundWpsWindowStillActiveOptimized();
 
                 if (isForegroundWpsWindowActive)
@@ -1088,7 +1181,7 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
-                // 优化：多重验证确保准确性
+                // 多重验证确保准确性
                 if (!PerformMultipleWpsWindowChecks())
                 {
                     LogHelper.WriteLogToFile("多重验证显示WPS窗口仍然存在，跳过查杀", LogHelper.LogType.Trace);
@@ -1109,7 +1202,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 优化版的前台WPS窗口检测，减少性能开销
+        /// 前台WPS窗口检测
         /// </summary>
         private bool IsForegroundWpsWindowStillActiveOptimized()
         {
@@ -1135,7 +1228,7 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"优化版WPS窗口检测失败: {ex}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"WPS窗口检测失败: {ex}", LogHelper.LogType.Error);
                 return false;
             }
         }

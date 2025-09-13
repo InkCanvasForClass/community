@@ -27,11 +27,15 @@ namespace Ink_Canvas
     {
         public Rectangle Area;
         public List<Point> Path;
+        public Bitmap CameraImage;
+        public BitmapSource CameraBitmapSource;
 
-        public ScreenshotResult(Rectangle area, List<Point> path = null)
+        public ScreenshotResult(Rectangle area, List<Point> path = null, Bitmap cameraImage = null, BitmapSource cameraBitmapSource = null)
         {
             Area = area;
             Path = path;
+            CameraImage = cameraImage;
+            CameraBitmapSource = cameraBitmapSource;
         }
     }
 
@@ -55,34 +59,48 @@ namespace Ink_Canvas
                 // 恢复窗口显示
                 Visibility = originalVisibility;
 
-                if (screenshotResult.HasValue && screenshotResult.Value.Area.Width > 0 && screenshotResult.Value.Area.Height > 0)
+                if (screenshotResult.HasValue)
                 {
-                    // 截取选定区域
-                    using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
+                    // 检查是否是摄像头截图
+                    if (screenshotResult.Value.CameraBitmapSource != null)
                     {
-                        if (originalBitmap != null)
+                        // 摄像头截图（使用BitmapSource）
+                        await InsertBitmapSourceToCanvas(screenshotResult.Value.CameraBitmapSource);
+                    }
+                    else if (screenshotResult.Value.CameraImage != null)
+                    {
+                        // 摄像头截图（使用Bitmap）
+                        await InsertScreenshotToCanvas(screenshotResult.Value.CameraImage);
+                    }
+                    else if (screenshotResult.Value.Area.Width > 0 && screenshotResult.Value.Area.Height > 0)
+                    {
+                        // 屏幕截图
+                        using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
                         {
-                            Bitmap finalBitmap = originalBitmap;
-                            bool needDisposeFinalBitmap = false;
-
-                            try
+                            if (originalBitmap != null)
                             {
-                                // 如果有路径信息，应用形状遮罩
-                                if (screenshotResult.Value.Path != null && screenshotResult.Value.Path.Count > 0)
+                                Bitmap finalBitmap = originalBitmap;
+                                bool needDisposeFinalBitmap = false;
+
+                                try
                                 {
-                                    finalBitmap = ApplyShapeMask(originalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
-                                    needDisposeFinalBitmap = true; // 标记需要释放新创建的位图
+                                    // 如果有路径信息，应用形状遮罩
+                                    if (screenshotResult.Value.Path != null && screenshotResult.Value.Path.Count > 0)
+                                    {
+                                        finalBitmap = ApplyShapeMask(originalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
+                                        needDisposeFinalBitmap = true; // 标记需要释放新创建的位图
+                                    }
+
+                                    // 将截图转换为WPF Image并插入到画布
+                                    await InsertScreenshotToCanvas(finalBitmap);
                                 }
-
-                                // 将截图转换为WPF Image并插入到画布
-                                await InsertScreenshotToCanvas(finalBitmap);
-                            }
-                            finally
-                            {
-                                // 如果创建了新的位图，需要释放它
-                                if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
+                                finally
                                 {
-                                    finalBitmap.Dispose();
+                                    // 如果创建了新的位图，需要释放它
+                                    if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
+                                    {
+                                        finalBitmap.Dispose();
+                                    }
                                 }
                             }
                         }
@@ -100,6 +118,46 @@ namespace Ink_Canvas
             }
         }
 
+        // 直接全屏截图并插入到画布
+        private async Task CaptureFullScreenAndInsert()
+        {
+            try
+            {
+                // 隐藏主窗口以避免截图包含窗口本身
+                var originalVisibility = Visibility;
+                Visibility = Visibility.Hidden;
+
+                // 等待窗口隐藏
+                await Task.Delay(200);
+
+                // 获取虚拟屏幕边界
+                var virtualScreen = SystemInformation.VirtualScreen;
+                var fullScreenArea = new Rectangle(virtualScreen.X, virtualScreen.Y, virtualScreen.Width, virtualScreen.Height);
+
+                // 截取全屏
+                using (var fullScreenBitmap = CaptureScreenArea(fullScreenArea))
+                {
+                    if (fullScreenBitmap != null)
+                    {
+                        // 将截图转换为WPF Image并插入到画布
+                        await InsertScreenshotToCanvas(fullScreenBitmap);
+                    }
+                    else
+                    {
+                        ShowNotification("全屏截图失败");
+                    }
+                }
+
+                // 恢复窗口显示
+                Visibility = originalVisibility;
+            }
+            catch (Exception ex)
+            {
+                ShowNotification($"全屏截图失败: {ex.Message}");
+                Visibility = Visibility.Visible;
+            }
+        }
+
         // 显示截图区域选择器
         private async Task<ScreenshotResult?> ShowScreenshotSelector()
         {
@@ -112,10 +170,31 @@ namespace Ink_Canvas
                     var selectorWindow = new ScreenshotSelectorWindow();
                     if (selectorWindow.ShowDialog() == true)
                     {
-                        result = new ScreenshotResult(
-                            selectorWindow.SelectedArea.Value,
-                            selectorWindow.SelectedPath
-                        );
+                        // 检查是否是摄像头截图
+                        if (selectorWindow.CameraBitmapSource != null)
+                        {
+                            result = new ScreenshotResult(
+                                Rectangle.Empty, // 摄像头截图不需要区域
+                                null, // 摄像头截图不需要路径
+                                null, // 不再使用Bitmap
+                                selectorWindow.CameraBitmapSource // 摄像头BitmapSource
+                            );
+                        }
+                        else if (selectorWindow.CameraImage != null)
+                        {
+                            result = new ScreenshotResult(
+                                Rectangle.Empty, // 摄像头截图不需要区域
+                                null, // 摄像头截图不需要路径
+                                selectorWindow.CameraImage // 摄像头图像
+                            );
+                        }
+                        else
+                        {
+                            result = new ScreenshotResult(
+                                selectorWindow.SelectedArea.Value,
+                                selectorWindow.SelectedPath
+                            );
+                        }
                     }
                 });
             }
@@ -173,8 +252,21 @@ namespace Ink_Canvas
         {
             try
             {
+                // 验证位图有效性
+                if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
+                {
+                    ShowNotification("无效的截图");
+                    return;
+                }
+
                 // 将Bitmap转换为WPF BitmapSource
                 var bitmapSource = ConvertBitmapToBitmapSource(bitmap);
+                
+                if (bitmapSource == null)
+                {
+                    ShowNotification("转换截图失败");
+                    return;
+                }
 
                 // 创建WPF Image控件
                 var image = new Image
@@ -216,12 +308,80 @@ namespace Ink_Canvas
                 // 提交历史记录
                 timeMachine.CommitElementInsertHistory(image);
 
+                // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                SetCurrentToolMode(InkCanvasEditingMode.Select);
+                UpdateCurrentToolMode("select");
+                HideSubPanels("select");
+
                 ShowNotification("截图已插入到画布");
             }
             catch (Exception ex)
             {
                 ShowNotification($"插入截图失败: {ex.Message}");
                 LogHelper.WriteLogToFile($"插入截图失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                bitmap?.Dispose();
+            }
+        }
+
+        // 将BitmapSource插入到画布（用于摄像头截图）
+        private async Task InsertBitmapSourceToCanvas(BitmapSource bitmapSource)
+        {
+            try
+            {
+                // 创建WPF Image控件
+                var image = new Image
+                {
+                    Source = bitmapSource,
+                    Stretch = Stretch.Uniform
+                };
+                RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.HighQuality);
+
+                // 生成唯一名称
+                string timestamp = "camera_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
+                image.Name = timestamp;
+
+                // 初始化TransformGroup
+                InitializeScreenshotTransform(image);
+
+                // 设置截图属性，避免被InkCanvas选择系统处理
+                image.IsHitTestVisible = true;
+                image.Focusable = false;
+
+                // 初始化InkCanvas选择设置
+                InitializeInkCanvasSelectionSettings();
+
+                // 等待图片加载完成后再进行居中处理
+                image.Loaded += (sender, e) =>
+                {
+                    // 确保在UI线程中执行
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        CenterAndScaleScreenshot(image);
+                        // 绑定事件处理器
+                        BindScreenshotEvents(image);
+                    }), DispatcherPriority.Loaded);
+                };
+
+                // 添加到画布
+                inkCanvas.Children.Add(image);
+
+                // 提交历史记录
+                timeMachine.CommitElementInsertHistory(image);
+
+                // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                SetCurrentToolMode(InkCanvasEditingMode.Select);
+                UpdateCurrentToolMode("select");
+                HideSubPanels("select");
+
+                ShowNotification("摄像头截图已插入到画布");
+            }
+            catch (Exception ex)
+            {
+                ShowNotification($"插入摄像头截图失败: {ex.Message}");
+                LogHelper.WriteLogToFile($"插入摄像头截图失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -433,24 +593,169 @@ namespace Ink_Canvas
         {
             try
             {
-                using (var memory = new MemoryStream())
+                // 验证位图有效性
+                if (bitmap == null)
+                    return null;
+
+                // 验证位图尺寸
+                if (bitmap.Width <= 0 || bitmap.Height <= 0)
+                    return null;
+
+                // 使用更安全的方法转换位图
+                var bitmapData = bitmap.LockBits(
+                    new Rectangle(0, 0, bitmap.Width, bitmap.Height),
+                    ImageLockMode.ReadOnly,
+                    bitmap.PixelFormat);
+
+                try
                 {
-                    bitmap.Save(memory, ImageFormat.Png);
-                    memory.Position = 0;
+                    // 根据像素格式选择合适的WPF像素格式
+                    System.Windows.Media.PixelFormat wpfPixelFormat;
+                    switch (bitmap.PixelFormat)
+                    {
+                        case PixelFormat.Format24bppRgb:
+                            wpfPixelFormat = PixelFormats.Bgr24;
+                            break;
+                        case PixelFormat.Format32bppArgb:
+                            wpfPixelFormat = PixelFormats.Bgra32;
+                            break;
+                        case PixelFormat.Format32bppRgb:
+                            wpfPixelFormat = PixelFormats.Bgr32;
+                            break;
+                        default:
+                            wpfPixelFormat = PixelFormats.Bgr24;
+                            break;
+                    }
 
-                    var bitmapImage = new BitmapImage();
-                    bitmapImage.BeginInit();
-                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmapImage.StreamSource = memory;
-                    bitmapImage.EndInit();
-                    bitmapImage.Freeze();
+                    var bitmapSource = BitmapSource.Create(
+                        bitmapData.Width,
+                        bitmapData.Height,
+                        bitmap.HorizontalResolution,
+                        bitmap.VerticalResolution,
+                        wpfPixelFormat,
+                        null,
+                        bitmapData.Scan0,
+                        bitmapData.Stride * bitmapData.Height,
+                        bitmapData.Stride);
 
-                    return bitmapImage;
+                    bitmapSource.Freeze();
+                    return bitmapSource;
+                }
+                finally
+                {
+                    bitmap.UnlockBits(bitmapData);
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"转换位图失败: {ex.Message}", LogHelper.LogType.Error);
+                
+                // 尝试使用备用方法：内存流转换
+                try
+                {
+                    return ConvertBitmapToBitmapSourceFallback(bitmap);
+                }
+                catch (Exception fallbackEx)
+                {
+                    LogHelper.WriteLogToFile($"备用转换方法也失败: {fallbackEx.Message}", LogHelper.LogType.Error);
+                    
+                    // 最后尝试：使用最简单的转换方法
+                    try
+                    {
+                        return ConvertBitmapToBitmapSourceSimple(bitmap);
+                    }
+                    catch (Exception simpleEx)
+                    {
+                        LogHelper.WriteLogToFile($"简单转换方法也失败: {simpleEx.Message}", LogHelper.LogType.Error);
+                        throw;
+                    }
+                }
+            }
+        }
+
+        // 备用的位图转换方法（使用内存流）
+        private BitmapSource ConvertBitmapToBitmapSourceFallback(Bitmap bitmap)
+        {
+            try
+            {
+                // 验证位图有效性
+                if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
+                    return null;
+
+                // 创建一个新的位图，确保格式正确
+                using (var convertedBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format24bppRgb))
+                {
+                    using (var graphics = Graphics.FromImage(convertedBitmap))
+                    {
+                        graphics.DrawImage(bitmap, 0, 0);
+                    }
+
+                    using (var memory = new MemoryStream())
+                    {
+                        convertedBitmap.Save(memory, ImageFormat.Png);
+                        memory.Position = 0;
+
+                        var bitmapImage = new BitmapImage();
+                        bitmapImage.BeginInit();
+                        bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                        bitmapImage.StreamSource = memory;
+                        bitmapImage.EndInit();
+                        bitmapImage.Freeze();
+
+                        return bitmapImage;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"备用转换方法失败: {ex.Message}", LogHelper.LogType.Error);
+                throw;
+            }
+        }
+
+        // 最简单的位图转换方法
+        private BitmapSource ConvertBitmapToBitmapSourceSimple(Bitmap bitmap)
+        {
+            try
+            {
+                if (bitmap == null)
+                    return null;
+
+                // 使用最基础的方法：直接保存为PNG然后加载
+                var tempFile = Path.GetTempFileName() + ".png";
+                
+                try
+                {
+                    bitmap.Save(tempFile, ImageFormat.Png);
+                    
+                    var bitmapImage = new BitmapImage();
+                    bitmapImage.BeginInit();
+                    bitmapImage.UriSource = new Uri(tempFile);
+                    bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
+                    bitmapImage.EndInit();
+                    bitmapImage.Freeze();
+                    
+                    return bitmapImage;
+                }
+                finally
+                {
+                    // 清理临时文件
+                    try
+                    {
+                        if (File.Exists(tempFile))
+                        {
+                            File.Delete(tempFile);
+                        }
+                    }
+                    catch (Exception deleteEx)
+                    {
+                        LogHelper.WriteLogToFile($"删除临时文件失败: {deleteEx.Message}", LogHelper.LogType.Warning);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"简单转换方法失败: {ex.Message}", LogHelper.LogType.Error);
                 throw;
             }
         }

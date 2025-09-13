@@ -33,7 +33,9 @@ namespace Ink_Canvas
 
         public static string[] StartArgs;
         public static string RootPath = Environment.GetEnvironmentVariable("APPDATA") + "\\Ink Canvas\\";
-
+        
+        // 新增：标记是否通过--board参数启动
+        public static bool StartWithBoardMode = false;
         // 新增：保存看门狗进程对象
         private static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
@@ -292,6 +294,27 @@ namespace Ink_Canvas
         {
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
+            
+            // 清理PowerPoint进程守护
+            try
+            {
+                // 获取主窗口实例并清理PowerPoint进程守护
+                var mainWindow = Current.MainWindow as MainWindow;
+                if (mainWindow != null)
+                {
+                    // 通过反射调用StopPowerPointProcessMonitoring方法
+                    var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring", 
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                    method?.Invoke(mainWindow, null);
+                    
+                    WriteCrashLog("PowerPoint进程守护已在系统关机时清理");
+                }
+            }
+            catch (Exception ex)
+            {
+                WriteCrashLog($"清理PowerPoint进程守护失败: {ex.Message}");
+            }
+            
             DeviceIdentifier.SaveUsageStatsOnShutdown();
         }
 
@@ -408,7 +431,7 @@ namespace Ink_Canvas
             try
             {
                 // 优先从 Settings.json 直接读取
-                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Settings.json");
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
                 if (File.Exists(settingsPath))
                 {
                     var json = File.ReadAllText(settingsPath);
@@ -474,6 +497,14 @@ namespace Ink_Canvas
             // 检查是否为最终应用启动（更新后的应用）
             bool isFinalApp = e.Args.Contains("--final-app");
             bool skipMutexCheck = e.Args.Contains("--skip-mutex-check");
+            
+            // 检查是否通过--board参数启动
+            bool hasBoardArg = e.Args.Contains("--board");
+            if (hasBoardArg)
+            {
+                StartWithBoardMode = true;
+                LogHelper.WriteLogToFile("App | 检测到--board参数，将直接进入白板模式");
+            }
 
             // 记录最终应用启动状态
             if (isFinalApp)
@@ -633,13 +664,13 @@ namespace Ink_Canvas
                 if (!ret && !e.Args.Contains("-m")) //-m multiple
                 {
                     LogHelper.NewLog("Detected existing instance");
-                    
+
                     // 检查是否有.icstk文件参数
                     string icstkFile = FileAssociationManager.GetIcstkFileFromArgs(e.Args);
                     if (!string.IsNullOrEmpty(icstkFile))
                     {
                         LogHelper.WriteLogToFile($"检测到已运行实例，尝试通过IPC发送文件: {icstkFile}", LogHelper.LogType.Event);
-                        
+
                         // 尝试通过IPC发送文件路径给已运行实例
                         if (FileAssociationManager.TrySendFileToExistingInstance(icstkFile))
                         {
@@ -650,11 +681,26 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile("通过IPC发送文件路径失败", LogHelper.LogType.Warning);
                         }
                     }
+                    // 检查是否有--board参数
+                    else if (hasBoardArg)
+                    {
+                        LogHelper.WriteLogToFile("检测到已运行实例且有--board参数，尝试通过IPC发送白板模式命令", LogHelper.LogType.Event);
+
+                        // 尝试通过IPC发送白板模式命令给已运行实例
+                        if (FileAssociationManager.TrySendBoardModeCommandToExistingInstance())
+                        {
+                            LogHelper.WriteLogToFile("白板模式命令已通过IPC发送给已运行实例", LogHelper.LogType.Event);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("通过IPC发送白板模式命令失败", LogHelper.LogType.Warning);
+                        }
+                    }
                     else
                     {
                         LogHelper.WriteLogToFile("检测到已运行实例，但无文件参数", LogHelper.LogType.Event);
                     }
-                    
+
                     LogHelper.NewLog("Ink Canvas automatically closed");
                     IsAppExitByUser = true; // 多开时标记为用户主动退出
                     // 写入退出信号，确保看门狗不会重启
@@ -783,7 +829,7 @@ namespace Ink_Canvas
                             }
 
                             // 备份路径更改为软件根目录下的saves/RegistryBackups文件夹
-                            string backupPath = Path.Combine(RootPath, "saves", "RegistryBackups");
+                            string backupPath = Path.Combine(RootPath, "Saves", "RegistryBackups");
                             LogHelper.WriteLogToFile($"备份路径: {backupPath}");
 
                             if (!Directory.Exists(backupPath))
@@ -1297,7 +1343,7 @@ namespace Ink_Canvas
             try
             {
                 // 准备备份目录
-                string backupPath = Path.Combine(RootPath, "saves", "RegistryBackups");
+                string backupPath = Path.Combine(RootPath, "Saves", "RegistryBackups");
                 if (!Directory.Exists(backupPath))
                 {
                     Directory.CreateDirectory(backupPath);

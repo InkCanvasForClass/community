@@ -1,6 +1,7 @@
 ﻿using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Ink;
@@ -29,6 +30,11 @@ namespace Ink_Canvas.Helpers
         private DateTime _inkLockUntil = DateTime.MinValue;
         private int _lockedSlideIndex = -1;
         private const int InkLockMilliseconds = 500;
+        
+        // 添加快速切换保护机制
+        private DateTime _lastSwitchTime = DateTime.MinValue;
+        private int _lastSwitchSlideIndex = -1;
+        private const int MinSwitchIntervalMs = 100; // 最小切换间隔100毫秒
         #endregion
 
         #region Constructor
@@ -66,7 +72,20 @@ namespace Ink_Canvas.Helpers
                     _currentPresentationId = GeneratePresentationId(presentation);
 
                     // 重新初始化内存流数组
-                    var slideCount = presentation.Slides.Count;
+                    int slideCount = 0;
+                    try
+                    {
+                        slideCount = presentation.Slides.Count;
+                    }
+                    catch (COMException comEx)
+                    {
+                        var hr = (uint)comEx.HResult;
+                        if (hr == 0x80048010)
+                        {
+                            return;
+                        }
+                        throw; 
+                    }
                     _memoryStreams = new MemoryStream[slideCount + 2];
 
                     // 如果启用自动保存，尝试加载已保存的墨迹
@@ -75,7 +94,6 @@ namespace Ink_Canvas.Helpers
                         LoadSavedStrokes();
                     }
 
-                    LogHelper.WriteLogToFile($"已初始化演示文稿墨迹管理: {presentation.Name}, 幻灯片数量: {slideCount}", LogHelper.LogType.Trace);
                 }
                 catch (Exception ex)
                 {
@@ -95,10 +113,13 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    // 检查墨迹锁定
+                    // 检查墨迹锁定 
                     if (!CanWriteInk(slideIndex))
                     {
-                        LogHelper.WriteLogToFile($"墨迹写入被锁定，当前页:{slideIndex}，锁定页:{_lockedSlideIndex}", LogHelper.LogType.Warning);
+                        if (DateTime.Now < _inkLockUntil)
+                        {
+                            LogHelper.WriteLogToFile($"墨迹写入被锁定，当前页:{slideIndex}，锁定页:{_lockedSlideIndex}", LogHelper.LogType.Warning);
+                        }
                         return;
                     }
 
@@ -112,12 +133,45 @@ namespace Ink_Canvas.Helpers
                         _memoryStreams[slideIndex]?.Dispose();
                         _memoryStreams[slideIndex] = ms;
 
-                        LogHelper.WriteLogToFile($"已保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
+                        if (ms.Length > 0)
+                        {
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"保存第{slideIndex}页墨迹失败: {ex}", LogHelper.LogType.Error);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 强制保存指定页面的墨迹（忽略锁定状态）
+        /// </summary>
+        public void ForceSaveSlideStrokes(int slideIndex, StrokeCollection strokes)
+        {
+            if (slideIndex <= 0 || strokes == null) return;
+
+            lock (_lockObject)
+            {
+                try
+                {
+                    if (slideIndex < _memoryStreams.Length)
+                    {
+                        var ms = new MemoryStream();
+                        strokes.Save(ms);
+                        ms.Position = 0;
+
+                        // 释放旧的内存流
+                        _memoryStreams[slideIndex]?.Dispose();
+                        _memoryStreams[slideIndex] = ms;
+
+                        LogHelper.WriteLogToFile($"已强制保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"强制保存第{slideIndex}页墨迹失败: {ex}", LogHelper.LogType.Error);
                 }
             }
         }
@@ -137,7 +191,6 @@ namespace Ink_Canvas.Helpers
                     {
                         _memoryStreams[slideIndex].Position = 0;
                         var strokes = new StrokeCollection(_memoryStreams[slideIndex]);
-                        LogHelper.WriteLogToFile($"已加载第{slideIndex}页墨迹，笔画数量: {strokes.Count}", LogHelper.LogType.Trace);
                         return strokes;
                     }
                 }
@@ -159,26 +212,29 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    // 如果有当前墨迹，先保存到正确的页面
-                    if (currentStrokes != null && currentStrokes.Count > 0)
+                    // 检查快速切换保护
+                    var now = DateTime.Now;
+                    if (now - _lastSwitchTime < TimeSpan.FromMilliseconds(MinSwitchIntervalMs) && 
+                        _lastSwitchSlideIndex == slideIndex)
                     {
-                        // 确定要保存的页面索引
-                        int saveToSlideIndex = _lockedSlideIndex > 0 ? _lockedSlideIndex : slideIndex;
-
-                        // 确保页面索引有效
-                        if (saveToSlideIndex > 0 && saveToSlideIndex < _memoryStreams.Length)
-                        {
-                            SaveCurrentSlideStrokes(saveToSlideIndex, currentStrokes);
-                            LogHelper.WriteLogToFile($"已保存第{saveToSlideIndex}页墨迹，墨迹数量: {currentStrokes.Count}", LogHelper.LogType.Trace);
-                        }
+                        LogHelper.WriteLogToFile($"快速切换保护：忽略重复的页面切换请求 {slideIndex}", LogHelper.LogType.Warning);
+                        return LoadSlideStrokes(slideIndex);
                     }
+
 
                     // 设置墨迹锁定
                     LockInkForSlide(slideIndex);
 
                     // 加载新页面的墨迹
                     var newStrokes = LoadSlideStrokes(slideIndex);
-                    LogHelper.WriteLogToFile($"已切换到第{slideIndex}页，加载墨迹数量: {newStrokes.Count}", LogHelper.LogType.Trace);
+                    
+                    // 更新切换记录
+                    _lastSwitchTime = now;
+                    _lastSwitchSlideIndex = slideIndex;
+                    
+                    if (newStrokes.Count > 0)
+                    {
+                    }
 
                     return newStrokes;
                 }
@@ -219,7 +275,23 @@ namespace Ink_Canvas.Helpers
 
                     // 保存所有页面的墨迹
                     int savedCount = 0;
-                    for (int i = 1; i <= presentation.Slides.Count && i < _memoryStreams.Length; i++)
+                    int slideCount = 0;
+                    
+                    try
+                    {
+                        slideCount = presentation.Slides.Count;
+                    }
+                    catch (COMException comEx)
+                    {
+                        var hr = (uint)comEx.HResult;
+                        if (hr == 0x80048010) 
+                        {
+                            return;
+                        }
+                        throw; 
+                    }
+                    
+                    for (int i = 1; i <= slideCount && i < _memoryStreams.Length; i++)
                     {
                         if (_memoryStreams[i] != null)
                         {
@@ -235,7 +307,6 @@ namespace Ink_Canvas.Helpers
                                     File.WriteAllBytes(filePath, srcBuf);
                                     savedCount++;
 
-                                    LogHelper.WriteLogToFile($"已保存第{i}页墨迹，大小: {byteLength} bytes", LogHelper.LogType.Trace);
                                 }
                                 else
                                 {
@@ -254,7 +325,6 @@ namespace Ink_Canvas.Helpers
                         }
                     }
 
-                    LogHelper.WriteLogToFile($"已保存{savedCount}页墨迹到文件", LogHelper.LogType.Event);
                 }
                 catch (Exception ex)
                 {
@@ -301,7 +371,6 @@ namespace Ink_Canvas.Helpers
                         }
                     }
 
-                    LogHelper.WriteLogToFile($"已从文件加载{loadedCount}页墨迹", LogHelper.LogType.Event);
                 }
                 catch (Exception ex)
                 {
@@ -349,9 +418,34 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public bool CanWriteInk(int currentSlideIndex)
         {
-            if (DateTime.Now < _inkLockUntil) return false;
-            if (currentSlideIndex != _lockedSlideIndex && _lockedSlideIndex > 0) return false;
-            return true;
+            // 如果锁定时间已过，允许写入
+            if (DateTime.Now >= _inkLockUntil)
+            {
+                return true;
+            }
+            
+            // 如果当前页面与锁定页面相同，允许写入（用户在当前页面绘制）
+            if (currentSlideIndex == _lockedSlideIndex)
+            {
+                return true;
+            }
+            
+            // 只有在快速切换且页面不同时才锁定
+            return false;
+        }
+
+        /// <summary>
+        /// 重置墨迹锁定状态
+        /// </summary>
+        public void ResetLockState()
+        {
+            lock (_lockObject)
+            {
+                _inkLockUntil = DateTime.MinValue;
+                _lockedSlideIndex = -1;
+                _lastSwitchTime = DateTime.MinValue;
+                _lastSwitchSlideIndex = -1;
+            }
         }
         #endregion
 
@@ -362,7 +456,7 @@ namespace Ink_Canvas.Helpers
             {
                 var presentationPath = presentation.FullName;
                 var fileHash = GetFileHash(presentationPath);
-                return $"{presentation.Name}_{presentation.Slides.Count}_{fileHash}";
+                return $"{presentation.Name}_{fileHash}";
             }
             catch (Exception ex)
             {

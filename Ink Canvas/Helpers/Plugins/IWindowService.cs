@@ -1,5 +1,3 @@
-using System;
-
 namespace Ink_Canvas.Helpers.Plugins
 {
     /// <summary>
@@ -151,4 +149,4 @@ namespace Ink_Canvas.Helpers.Plugins
 
         #endregion
     }
-} 
+}

@@ -260,7 +260,7 @@ namespace Ink_Canvas
                 }
 
                 // 只有在PPT放映模式下且页数有效时才显示翻页按钮
-                if (StackPanelPPTControls.Visibility == Visibility.Visible && 
+                if (StackPanelPPTControls.Visibility == Visibility.Visible &&
                     BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                     PPTManager?.IsInSlideShow == true &&
                     PPTManager?.SlidesCount > 0)
@@ -280,25 +280,24 @@ namespace Ink_Canvas
                     RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                    LogHelper.WriteLogToFile($"从收纳模式恢复时隐藏PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
 
-                // 新增：只在屏幕模式下显示浮动栏
+                // 新只在屏幕模式下显示浮动栏
                 if (currentMode == 0)
                 {
                     // 强制更新布局以确保ActualWidth正确
                     ViewboxFloatingBar.UpdateLayout();
-                    
+
                     // 等待一小段时间让布局完全更新
                     Task.Delay(50);
-                    
+
                     // 再次强制更新布局
                     ViewboxFloatingBar.UpdateLayout();
-                    
+
                     // 强制重新测量和排列
                     ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                     ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
-                    
+
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                         ViewboxFloatingBarMarginAnimation(60);
                     else
@@ -314,7 +313,7 @@ namespace Ink_Canvas
                 {
                     // 等待UI完全更新
                     await Task.Delay(100);
-                    
+
                     // 获取当前选中的模式并重新设置高光位置
                     string selectedToolMode = GetCurrentSelectedMode();
                     if (!string.IsNullOrEmpty(selectedToolMode))

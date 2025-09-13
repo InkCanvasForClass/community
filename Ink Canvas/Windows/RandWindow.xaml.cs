@@ -1,4 +1,5 @@
 ﻿using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace Ink_Canvas
         {
             InitializeComponent();
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
-            BorderBtnHelp.Visibility = !settings.RandSettings.DisplayRandWindowNamesInputBtn ? Visibility.Collapsed : Visibility.Visible;
+            BorderBtnHelp.Visibility = settings.RandSettings.DisplayRandWindowNamesInputBtn == false ? Visibility.Collapsed : Visibility.Visible;
             RandMaxPeopleOneTime = settings.RandSettings.RandWindowOnceMaxStudents;
             RandDoneAutoCloseWaitTime = (int)settings.RandSettings.RandWindowOnceCloseLatency * 1000;
 
@@ -35,10 +36,10 @@ namespace Ink_Canvas
 
             // 设置窗口为置顶
             Topmost = true;
-            
+
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
-            
+
             // 添加窗口显示事件处理，确保置顶
             Loaded += RandWindow_Loaded;
         }
@@ -80,7 +81,7 @@ namespace Ink_Canvas
             isAutoClose = IsAutoClose;
             PeopleControlPane.Opacity = 0.4;
             PeopleControlPane.IsHitTestVisible = false;
-            BorderBtnHelp.Visibility = !settings.RandSettings.DisplayRandWindowNamesInputBtn ? Visibility.Collapsed : Visibility.Visible;
+            BorderBtnHelp.Visibility = settings.RandSettings.DisplayRandWindowNamesInputBtn == false ? Visibility.Collapsed : Visibility.Visible;
             RandMaxPeopleOneTime = settings.RandSettings.RandWindowOnceMaxStudents;
             RandDoneAutoCloseWaitTime = (int)settings.RandSettings.RandWindowOnceCloseLatency * 1000;
 
@@ -89,10 +90,10 @@ namespace Ink_Canvas
 
             // 设置窗口为置顶
             Topmost = true;
-            
+
             // 添加窗口关闭事件处理
             Closed += RandWindow_Closed;
-            
+
             // 添加窗口显示事件处理，确保置顶
             Loaded += RandWindow_Loaded;
 
@@ -120,7 +121,7 @@ namespace Ink_Canvas
             if (RandMaxPeopleOneTime != -1 && TotalCount >= RandMaxPeopleOneTime) return;
             TotalCount++;
             LabelNumberCount.Text = TotalCount.ToString();
-            FontIconStart.Glyph = "&#xE779;";
+            SymbolIconStart.Symbol = Symbol.People;
             BorderBtnAdd.Opacity = 1;
             BorderBtnMinus.Opacity = 1;
         }
@@ -132,7 +133,7 @@ namespace Ink_Canvas
             LabelNumberCount.Text = TotalCount.ToString();
             if (TotalCount == 1)
             {
-                FontIconStart.Glyph = "&#xE779;";
+                SymbolIconStart.Symbol = Symbol.Contact;
             }
         }
 
@@ -371,10 +372,10 @@ namespace Ink_Canvas
                     // 强制激活窗口
                     Activate();
                     Focus();
-                    
+
                     // 设置置顶
                     Topmost = true;
-                    
+
                     // 使用Win32 API强制置顶
                     var hwnd = new WindowInteropHelper(this).Handle;
                     if (hwnd != IntPtr.Zero)

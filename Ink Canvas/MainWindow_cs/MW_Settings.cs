@@ -18,7 +18,7 @@ using Application = System.Windows.Application;
 using CheckBox = System.Windows.Controls.CheckBox;
 using ComboBox = System.Windows.Controls.ComboBox;
 using File = System.IO.File;
-using MessageBox = System.Windows.MessageBox;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using OpenFileDialog = Microsoft.Win32.OpenFileDialog;
 using OperatingSystem = OSVersionExtension.OperatingSystem;
 using RadioButton = System.Windows.Controls.RadioButton;
@@ -197,23 +197,23 @@ namespace Ink_Canvas
                 val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
             ViewboxFloatingBarScaleTransform.ScaleY =
                 val > 0.5 && val < 1.25 ? val : val <= 0.5 ? 0.5 : val >= 1.25 ? 1.25 : 1;
-            
+
             // 等待UI更新后再重新计算浮动栏位置，确保居中计算准确
             Dispatcher.BeginInvoke(new Action(async () =>
             {
                 // 强制更新布局以确保ActualWidth正确
                 ViewboxFloatingBar.UpdateLayout();
-                
+
                 // 等待一小段时间让布局完全更新
                 await Task.Delay(100);
-                
+
                 // 再次强制更新布局
                 ViewboxFloatingBar.UpdateLayout();
-                
+
                 // 强制重新测量和排列
                 ViewboxFloatingBar.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
                 ViewboxFloatingBar.Arrange(new Rect(ViewboxFloatingBar.DesiredSize));
-                
+
                 // auto align - 新增：只在屏幕模式下重新计算浮动栏位置
                 if (currentMode == 0)
                 {
@@ -1814,7 +1814,11 @@ namespace Ink_Canvas
 
                     // 先设为None再设回原来的模式，避免可能的事件冲突
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                    // 保存非笔画元素（如图片）
+                    var preservedElements = PreserveNonStrokeElements();
                     inkCanvas.Children.Clear();
+                    // 恢复非笔画元素
+                    RestoreNonStrokeElements(preservedElements);
                     isInMultiTouchMode = true;
 
                     // 恢复到之前的编辑状态
@@ -2412,12 +2416,23 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchDirectCallCiRand_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchExternalCaller_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
 
             // 获取开关状态并保存到设置中
-            Settings.RandSettings.DirectCallCiRand = ToggleSwitchDirectCallCiRand.IsOn;
+            Settings.RandSettings.DirectCallCiRand = ToggleSwitchExternalCaller.IsOn;
+
+            // 保存设置到文件
+            SaveSettingsToFile();
+        }
+
+        private void ComboBoxExternalCallerType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            // 获取下拉框选择并保存到设置中
+            Settings.RandSettings.ExternalCallerType = ComboBoxExternalCallerType.SelectedIndex;
 
             // 保存设置到文件
             SaveSettingsToFile();
@@ -2747,6 +2762,12 @@ namespace Ink_Canvas
             var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
             try
             {
+                string configsDir = Path.Combine(App.RootPath, "Configs");
+                if (!Directory.Exists(configsDir))
+                {
+                    Directory.CreateDirectory(configsDir);
+                }
+                
                 File.WriteAllText(App.RootPath + settingsFileName, text);
             }
             catch { }
@@ -2958,6 +2979,13 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             Settings.Automation.IsAutoFoldAfterPPTSlideShow = ToggleSwitchAutoFoldAfterPPTSlideShow.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchKeepFoldAfterSoftwareExit_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Automation.KeepFoldAfterSoftwareExit = ToggleSwitchKeepFoldAfterSoftwareExit.IsOn;
             SaveSettingsToFile();
         }
 

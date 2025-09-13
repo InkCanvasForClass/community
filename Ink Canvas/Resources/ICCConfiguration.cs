@@ -1,27 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Media;
 
-namespace Ink_Canvas.Resources.ICCConfiguration {
-    public enum InitialPositionTypes {
+namespace Ink_Canvas.Resources.ICCConfiguration
+{
+    public enum InitialPositionTypes
+    {
         TopLeft, TopRight, BottomLeft, BottomRight, TopCenter, BottomCenter, Custom
     }
-    public enum ElementCornerRadiusTypes {
+    public enum ElementCornerRadiusTypes
+    {
         SuperEllipse, Circle, Custom, None
     }
-    public class NearSnapAreaSize {
-        public double[] TopLeft { get; set; } = {24,24};
-        public double[] TopRight { get; set; } = {24,24};
-        public double[] BottomLeft { get; set; } = {24,24};
-        public double[] BottomRight { get; set; } = {24,24};
+    public class NearSnapAreaSize
+    {
+        public double[] TopLeft { get; set; } = { 24, 24 };
+        public double[] TopRight { get; set; } = { 24, 24 };
+        public double[] BottomLeft { get; set; } = { 24, 24 };
+        public double[] BottomRight { get; set; } = { 24, 24 };
         public double TopCenter { get; set; } = 24;
         public double BottomCenter { get; set; } = 24;
     }
-    public class ICCFloatingBarConfiguration {
+    public class ICCFloatingBarConfiguration
+    {
         public bool SemiTransparent { get; set; } = false;
         public bool NearSnap { get; set; } = true;
         public InitialPositionTypes InitialPosition { get; set; } = InitialPositionTypes.BottomCenter;
@@ -37,7 +37,8 @@ namespace Ink_Canvas.Resources.ICCConfiguration {
         public double MovingLimitationNoSnap { get; set; } = 12;
         public double MovingLimitationSnapped { get; set; } = 24;
 
-        public NearSnapAreaSize NearSnapAreaSize { get; set; } = new NearSnapAreaSize() {
+        public NearSnapAreaSize NearSnapAreaSize { get; set; } = new NearSnapAreaSize()
+        {
             TopLeft = new double[] { 24, 24 },
             TopRight = new double[] { 24, 24 },
             BottomLeft = new double[] { 24, 24 },
@@ -55,7 +56,8 @@ namespace Ink_Canvas.Resources.ICCConfiguration {
         };
     }
 
-    public class ICCConfiguration {
+    public class ICCConfiguration
+    {
         public ICCFloatingBarConfiguration FloatingBar { get; set; } = new ICCFloatingBarConfiguration();
     }
 }

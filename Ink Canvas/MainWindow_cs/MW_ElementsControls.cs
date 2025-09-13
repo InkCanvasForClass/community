@@ -68,6 +68,11 @@ namespace Ink_Canvas
                     };
 
                     timeMachine.CommitElementInsertHistory(image);
+
+                    // 插入图片后切换到选择模式并刷新浮动栏高光显示
+                    SetCurrentToolMode(InkCanvasEditingMode.Select);
+                    UpdateCurrentToolMode("select");
+                    HideSubPanels("select");
                 }
             }
         }
@@ -191,7 +196,16 @@ namespace Ink_Canvas
         {
             if (sender is FrameworkElement element)
             {
-                // 使用触摸拖动的完整实现
+                // 检查是否是双指手势
+                if (e.Manipulators.Count() >= 2)
+                {
+                    // 双指手势时，不处理单个元素的手势，让画布级别的手势处理
+                    // 这样可以实现图片与墨迹的同步移动
+                    e.Handled = false;
+                    return;
+                }
+
+                // 单指手势时，使用触摸拖动的完整实现
                 ApplyTouchManipulationTransform(element, e);
 
                 // 如果是图片元素，更新工具栏位置
@@ -276,25 +290,19 @@ namespace Ink_Canvas
                     BorderImageSelectionControl.Visibility = Visibility.Visible;
                 }
 
-                // 隐藏笔画选择工具栏
-                if (BorderStrokeSelectionControl != null)
-                {
-                    BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
-                }
+                // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
+                // 不需要直接设置BorderStrokeSelectionControl.Visibility
             }
             else
             {
-                // 显示笔画选择工具栏
-                if (BorderStrokeSelectionControl != null)
-                {
-                    BorderStrokeSelectionControl.Visibility = Visibility.Visible;
-                }
-
                 // 隐藏图片选择工具栏
                 if (BorderImageSelectionControl != null)
                 {
                     BorderImageSelectionControl.Visibility = Visibility.Collapsed;
                 }
+
+                // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
+                // 不需要直接设置BorderStrokeSelectionControl.Visibility
             }
 
             // 确保选择框不显示，避免蓝色边框
@@ -308,8 +316,8 @@ namespace Ink_Canvas
             {
                 // 清除当前选择
                 inkCanvas.Select(new StrokeCollection());
-                // 设置编辑模式为非选择模式
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                // 保持选择模式，这样用户可以直接点击墨迹来选择
+                inkCanvas.EditingMode = InkCanvasEditingMode.Select;
             }
         }
 
@@ -318,16 +326,14 @@ namespace Ink_Canvas
         {
             // 去除选中效果
 
-            // 隐藏所有选择工具栏
+            // 隐藏图片选择工具栏
             if (BorderImageSelectionControl != null)
             {
                 BorderImageSelectionControl.Visibility = Visibility.Collapsed;
             }
 
-            if (BorderStrokeSelectionControl != null)
-            {
-                BorderStrokeSelectionControl.Visibility = Visibility.Collapsed;
-            }
+            // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
+            // 不需要直接设置BorderStrokeSelectionControl.Visibility
 
             // 确保选择框隐藏
             if (GridInkCanvasSelectionCover != null)
@@ -335,7 +341,11 @@ namespace Ink_Canvas
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
 
-
+            // 确保InkCanvas处于选择模式，这样用户可以直接点击墨迹来选择
+            if (inkCanvas != null)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.Select;
+            }
         }
 
         // 应用矩阵变换到元素

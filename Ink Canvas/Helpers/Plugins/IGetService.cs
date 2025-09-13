@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
@@ -212,4 +211,4 @@ namespace Ink_Canvas.Helpers.Plugins
 
         #endregion
     }
-} 
+}

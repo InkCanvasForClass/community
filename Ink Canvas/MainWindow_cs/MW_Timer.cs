@@ -65,8 +65,11 @@ namespace Ink_Canvas
 
         private Timer timerDisplayTime = new Timer();
         private Timer timerDisplayDate = new Timer();
+        private Timer timerNtpSync = new Timer();
 
         private TimeViewModel nowTimeVM = new TimeViewModel();
+        private DateTime cachedNetworkTime = DateTime.Now;
+        private DateTime lastNtpSyncTime = DateTime.MinValue;
 
         private async Task<DateTime> GetNetworkTimeAsync()
         {
@@ -117,35 +120,61 @@ namespace Ink_Canvas
             timerDisplayDate.Elapsed += TimerDisplayDate_Elapsed;
             timerDisplayDate.Interval = 1000 * 60 * 60 * 1;
             timerDisplayDate.Start();
+            timerNtpSync.Elapsed += async (s, e) => await TimerNtpSync_ElapsedAsync();
+            timerNtpSync.Interval = 1000 * 60 * 60 * 2; // 每2小时同步一次
+            timerNtpSync.Start();
             timerKillProcess.Start();
             nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
             nowTimeVM.nowTime = DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
         }
 
-        // 修改TimerDisplayTime_ElapsedAsync方法中的时间格式，实现校验制
+        // NTP同步定时器事件处理
+        private async Task TimerNtpSync_ElapsedAsync()
+        {
+            try
+            {
+                DateTime networkTime = await GetNetworkTimeAsync();
+                cachedNetworkTime = networkTime;
+                lastNtpSyncTime = DateTime.Now;
+            }
+            catch
+            {
+                // NTP同步失败时，保持使用本地时间
+                cachedNetworkTime = DateTime.Now;
+            }
+        }
+
+        // 修改TimerDisplayTime_ElapsedAsync方法，使用缓存的网络时间
         private async Task TimerDisplayTime_ElapsedAsync()
         {
             DateTime localTime = DateTime.Now;
             DateTime displayTime = localTime; // 默认使用本地时间
-            
-            try
+
+            // 如果还没有进行过NTP同步，或者距离上次同步超过2小时，则进行一次同步
+            if (lastNtpSyncTime == DateTime.MinValue || 
+                (DateTime.Now - lastNtpSyncTime).TotalHours >= 2)
             {
-                DateTime networkTime = await GetNetworkTimeAsync();
-                
-                // 计算时间差
-                TimeSpan timeDifference = networkTime - localTime;
-                double timeDifferenceMinutes = Math.Abs(timeDifference.TotalMinutes);
-                
-                // 如果网络时间与本地时间相差不超过1分钟，则使用本地时间
-                // 否则使用网络时间
-                displayTime = timeDifferenceMinutes <= 1.0 ? localTime : networkTime;
+                try
+                {
+                    DateTime networkTime = await GetNetworkTimeAsync();
+                    cachedNetworkTime = networkTime;
+                    lastNtpSyncTime = DateTime.Now;
+                }
+                catch
+                {
+                    // 网络时间获取失败时，使用本地时间
+                    cachedNetworkTime = localTime;
+                }
             }
-            catch
-            {
-                // 网络时间获取失败时，使用本地时间
-                displayTime = localTime;
-            }
-            
+
+            // 使用缓存的网络时间进行显示
+            TimeSpan timeDifference = cachedNetworkTime - localTime;
+            double timeDifferenceMinutes = Math.Abs(timeDifference.TotalMinutes);
+
+            // 如果网络时间与本地时间相差不超过3分钟，则使用本地时间
+            // 否则使用网络时间
+            displayTime = timeDifferenceMinutes <= 3.0 ? localTime : cachedNetworkTime;
+
             // 只更新时间，日期由原有逻辑定时更新即可
             Dispatcher.Invoke(() =>
             {
@@ -240,8 +269,18 @@ namespace Ink_Canvas
                             ShowNotification("“鸿合屏幕书写”已自动关闭");
                             if (Settings.Automation.IsAutoKillHiteAnnotation && Settings.Automation.IsAutoEnterAnnotationAfterKillHite)
                             {
-                                // 自动进入批注状态
-                                PenIcon_Click(null, null);
+                                // 检查是否处于收纳状态，如果是则先展开浮动栏
+                                if (isFloatingBarFolded)
+                                {
+                                    // 先展开浮动栏，然后进入批注状态
+                                    // UnFoldFloatingBar 方法内部会根据设置自动进入批注模式
+                                    UnFoldFloatingBar(null);
+                                }
+                                else
+                                {
+                                    // 如果已经展开，直接进入批注状态
+                                    PenIcon_Click(null, null);
+                                }
                             }
                         });
                     }
@@ -302,6 +341,44 @@ namespace Ink_Canvas
         {
             var windowTitle = ForegroundWindowInfo.WindowTitle();
             var windowRect = ForegroundWindowInfo.WindowRect();
+            var windowProcessName = ForegroundWindowInfo.ProcessName();
+
+            // 检测希沃白板五的批注面板
+            // 希沃白板五的批注面板通常具有以下特征：
+            // 1. 窗口标题为空或包含特定关键词
+            // 2. 窗口高度较小（批注工具栏）
+            // 3. 窗口宽度适中（工具栏宽度）
+            if (windowProcessName == "BoardService" || windowProcessName == "seewoPincoTeacher")
+            {
+                // 检测希沃白板五的批注工具栏
+                // 批注工具栏通常高度在50-200像素之间，宽度在200-800像素之间
+                if (windowRect.Height >= 50 && windowRect.Height <= 200 &&
+                    windowRect.Width >= 200 && windowRect.Width <= 800)
+                {
+                    return true;
+                }
+
+                // 检测希沃白板五的二级菜单面板
+                // 二级菜单面板通常高度在100-400像素之间，宽度在150-400像素之间
+                if (windowRect.Height >= 100 && windowRect.Height <= 400 &&
+                    windowRect.Width >= 150 && windowRect.Width <= 400)
+                {
+                    return true;
+                }
+            }
+
+            // 检测鸿合软件的批注面板
+            if (windowProcessName == "HiteCamera" || windowProcessName == "HiteTouchPro" || windowProcessName == "HiteLightBoard")
+            {
+                // 鸿合软件的批注面板特征
+                if (windowRect.Height >= 50 && windowRect.Height <= 300 &&
+                    windowRect.Width >= 200 && windowRect.Width <= 600)
+                {
+                    return true;
+                }
+            }
+
+            // 原有的检测逻辑（保持向后兼容）
             return windowTitle.Length == 0 && windowRect.Height < 500;
         }
 
@@ -369,7 +446,17 @@ namespace Ink_Canvas
                 }
                 else if (Settings.Automation.IsAutoFoldInSeewoPincoTeacher && (windowProcessName == "BoardService" || windowProcessName == "seewoPincoTeacher"))
                 {
-                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    // 检测到希沃白板五的批注窗口时保持收纳状态
+                    if (IsAnnotationWindow())
+                    {
+                        // 批注窗口打开时，如果当前是展开状态则收纳
+                        if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
+                    else
+                    {
+                        // 非批注窗口时正常处理
+                        if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                    }
                     // HiteCamera
                 }
                 else if (Settings.Automation.IsAutoFoldInHiteCamera && windowProcessName == "HiteCamera" &&
@@ -491,8 +578,18 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    if (isFloatingBarFolded && !foldFloatingBarByUser) UnFoldFloatingBar_MouseUp(new object(), null);
-                    unfoldFloatingBarByUser = false;
+                    // 检查是否启用了软件退出后保持收纳模式
+                    if (Settings.Automation.KeepFoldAfterSoftwareExit)
+                    {
+                        // 如果启用了保持收纳模式，则不自动展开浮动栏
+                        unfoldFloatingBarByUser = false;
+                    }
+                    else
+                    {
+                        // 原有的逻辑：软件退出后自动展开浮动栏
+                        if (isFloatingBarFolded && !foldFloatingBarByUser) UnFoldFloatingBar_MouseUp(new object(), null);
+                        unfoldFloatingBarByUser = false;
+                    }
                 }
             }
             catch { }

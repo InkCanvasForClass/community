@@ -86,7 +86,6 @@ namespace Ink_Canvas.Helpers
                         {
                             _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
                             _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
-                            LogHelper.WriteLogToFile($"更新PPT页码显示: {currentSlide}/{totalSlides}", LogHelper.LogType.Trace);
                         }
                         else
                         {
@@ -127,7 +126,6 @@ namespace Ink_Canvas.Helpers
                     {
                         _mainWindow.PPTBtnPageNow.Text = currentSlide.ToString();
                         _mainWindow.PPTBtnPageTotal.Text = $"/ {totalSlides}";
-                        LogHelper.WriteLogToFile($"更新PPT页码显示: {currentSlide}/{totalSlides}", LogHelper.LogType.Trace);
                     }
                     else
                     {
@@ -157,7 +155,6 @@ namespace Ink_Canvas.Helpers
                     {
                         // 如果不在放映模式，隐藏所有导航面板
                         HideAllNavigationPanels();
-                        LogHelper.WriteLogToFile("PPT放映状态变化：隐藏导航面板", LogHelper.LogType.Trace);
                     }
                 }
                 catch (Exception ex)
@@ -181,7 +178,7 @@ namespace Ink_Canvas.Helpers
                     bool isInSlideShow = _mainWindow.PPTManager?.IsInSlideShow == true;
                     int slidesCount = _mainWindow.PPTManager?.SlidesCount ?? 0;
                     bool hasValidPageCount = slidesCount > 0;
-                    
+
                     bool shouldShowButtons = ShowPPTButton &&
                                           _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                                           isInSlideShow &&
@@ -190,11 +187,8 @@ namespace Ink_Canvas.Helpers
                     if (!shouldShowButtons)
                     {
                         HideAllNavigationPanels();
-                        LogHelper.WriteLogToFile($"隐藏PPT导航面板 - 放映状态: {isInSlideShow}, 页数: {slidesCount}, 按钮设置: {ShowPPTButton}", LogHelper.LogType.Trace);
                         return;
                     }
-
-                    LogHelper.WriteLogToFile($"显示PPT导航面板 - 放映状态: {isInSlideShow}, 页数: {slidesCount}", LogHelper.LogType.Trace);
 
                     // 设置侧边按钮位置
                     _mainWindow.LeftSidePanelForPPTNavigation.Margin = new Thickness(0, 0, 0, PPTLSButtonPosition * 2);

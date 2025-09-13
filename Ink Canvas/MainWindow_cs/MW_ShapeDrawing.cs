@@ -10,7 +10,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using MessageBox = System.Windows.MessageBox;
+using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -107,10 +107,10 @@ namespace Ink_Canvas
                 else if (sender == ImageDrawArrow || sender == BoardImageDrawArrow)
                     drawingShapeMode = 2;
                 else if (sender == ImageDrawParallelLine || sender == BoardImageDrawParallelLine) drawingShapeMode = 15;
-                
+
                 // 更新模式缓存
                 UpdateCurrentToolMode("shape");
-                
+
                 isLongPressSelected = true;
                 if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
             }
@@ -118,6 +118,13 @@ namespace Ink_Canvas
 
         private void BtnPen_Click(object sender, RoutedEventArgs e)
         {
+            // 如果当前有选中的图片元素，先取消选中
+            if (currentSelectedElement != null)
+            {
+                UnselectElement(currentSelectedElement);
+                currentSelectedElement = null;
+            }
+
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();
 

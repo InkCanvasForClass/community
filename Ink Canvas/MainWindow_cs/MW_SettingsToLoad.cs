@@ -256,7 +256,7 @@ namespace Ink_Canvas
                 _taskbar.Visibility = Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;
 
                 ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
-                
+
                 // 初始化浮动栏透明度滑块值
                 ViewboxFloatingBarOpacityValueSlider.Value = Settings.Appearance.ViewboxFloatingBarOpacityValue;
                 ViewboxFloatingBarOpacityInPPTValueSlider.Value = Settings.Appearance.ViewboxFloatingBarOpacityInPPTValue;
@@ -763,7 +763,8 @@ namespace Ink_Canvas
                 RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
                 ToggleSwitchShowRandomAndSingleDraw.IsOn = Settings.RandSettings.ShowRandomAndSingleDraw;
-                ToggleSwitchDirectCallCiRand.IsOn = Settings.RandSettings.DirectCallCiRand;
+                ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
+                ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
                 RandomDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
                 SingleDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
 
@@ -783,13 +784,22 @@ namespace Ink_Canvas
                 ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn = Settings.RandSettings.DisplayRandWindowNamesInputBtn;
                 RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
-                ToggleSwitchDirectCallCiRand.IsOn = Settings.RandSettings.DirectCallCiRand;
+                ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
+                ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
             }
 
             // ModeSettings
             if (Settings.ModeSettings != null)
             {
                 ToggleSwitchMode.IsOn = Settings.ModeSettings.IsPPTOnlyMode;
+                
+                // 根据加载的配置状态执行相应的窗口显示/隐藏逻辑
+                if (isStartup && Settings.ModeSettings.IsPPTOnlyMode)
+                {
+                    // 启动时如果是仅PPT模式，隐藏主窗口
+                    Hide();
+                    LogHelper.WriteLogToFile("启动时检测到仅PPT模式，主窗口已隐藏", LogHelper.LogType.Event);
+                }
             }
             else
             {
@@ -847,6 +857,8 @@ namespace Ink_Canvas
                 ToggleSwitchAutoFoldInPPTSlideShow.IsOn = Settings.Automation.IsAutoFoldInPPTSlideShow;
 
                 ToggleSwitchAutoFoldAfterPPTSlideShow.IsOn = Settings.Automation.IsAutoFoldAfterPPTSlideShow;
+
+                ToggleSwitchKeepFoldAfterSoftwareExit.IsOn = Settings.Automation.KeepFoldAfterSoftwareExit;
 
                 if (Settings.Automation.IsAutoKillEasiNote || Settings.Automation.IsAutoKillPptService ||
                     Settings.Automation.IsAutoKillHiteAnnotation || Settings.Automation.IsAutoKillInkCanvas

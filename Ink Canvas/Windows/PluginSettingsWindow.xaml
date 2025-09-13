@@ -6,10 +6,10 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:local="clr-namespace:Ink_Canvas.Windows"
         mc:Ignorable="d"
+        WindowStyle="None"
         Title="插件管理" Height="550" Width="800"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
-        WindowStyle="None"
         AllowsTransparency="True"
         Background="#F9F9F9">
     
