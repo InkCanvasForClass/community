@@ -201,5 +201,60 @@ namespace Ink_Canvas
             }
         }
 
+        private void DisableAllHotkeysMenuItem_Clicked(object sender, RoutedEventArgs e)
+        {
+            var mainWin = (MainWindow)Current.MainWindow;
+            if (mainWin.IsLoaded)
+            {
+                try
+                {
+                    // 获取全局快捷键管理器
+                    var hotkeyManagerField = typeof(MainWindow).GetField("_globalHotkeyManager", 
+                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var hotkeyManager = hotkeyManagerField?.GetValue(mainWin) as GlobalHotkeyManager;
+                    
+                    if (hotkeyManager != null)
+                    {
+                        // 禁用所有快捷键
+                        hotkeyManager.DisableHotkeyRegistration();
+                        
+                        // 更新菜单项文本和状态
+                        var menuItem = sender as MenuItem;
+                        if (menuItem != null)
+                        {
+                            var headerPanel = menuItem.Header as iNKORE.UI.WPF.Modern.Controls.SimpleStackPanel;
+                            if (headerPanel != null)
+                            {
+                                var textBlock = headerPanel.Children[0] as TextBlock;
+                                if (textBlock != null)
+                                {
+                                    if (textBlock.Text == "禁用所有快捷键")
+                                    {
+                                        textBlock.Text = "启用所有快捷键";
+                                        LogHelper.WriteLogToFile("已禁用所有快捷键", LogHelper.LogType.Event);
+                                    }
+                                    else
+                                    {
+                                        textBlock.Text = "禁用所有快捷键";
+                                        // 重新启用快捷键
+                                        hotkeyManager.EnableHotkeyRegistration();
+                                        LogHelper.WriteLogToFile("已启用所有快捷键", LogHelper.LogType.Event);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("无法获取全局快捷键管理器", LogHelper.LogType.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"禁用/启用快捷键时出错: {ex.Message}", LogHelper.LogType.Error);
+                }
+            }
+        }
+
     }
 }

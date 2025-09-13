@@ -34,7 +34,7 @@ namespace Ink_Canvas
         private Rect _currentSelection;
         private ControlPointType _activeControlPoint = ControlPointType.None;
         private CameraService _cameraService;
-        private Bitmap _capturedCameraImage;
+        private Bitmap _capturedCameraImage = null;
 
         // 控制点类型枚举
         private enum ControlPointType
