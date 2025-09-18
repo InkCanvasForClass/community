@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -141,6 +141,7 @@ namespace Ink_Canvas
             {
                 // NTP同步失败时，保持使用本地时间
                 cachedNetworkTime = DateTime.Now;
+                lastNtpSyncTime = DateTime.Now;
             }
         }
 
@@ -164,16 +165,18 @@ namespace Ink_Canvas
                 {
                     // 网络时间获取失败时，使用本地时间
                     cachedNetworkTime = localTime;
+                    lastNtpSyncTime = DateTime.Now;
                 }
             }
 
             // 使用缓存的网络时间进行显示
-            TimeSpan timeDifference = cachedNetworkTime - localTime;
+            DateTime dynamicNetworkTime = cachedNetworkTime + (localTime - lastNtpSyncTime);
+            TimeSpan timeDifference = dynamicNetworkTime - localTime;
             double timeDifferenceMinutes = Math.Abs(timeDifference.TotalMinutes);
 
             // 如果网络时间与本地时间相差不超过3分钟，则使用本地时间
-            // 否则使用网络时间
-            displayTime = timeDifferenceMinutes <= 3.0 ? localTime : cachedNetworkTime;
+            // 否则使用动态网络时间
+            displayTime = timeDifferenceMinutes <= 3.0 ? localTime : dynamicNetworkTime;
 
             // 只更新时间，日期由原有逻辑定时更新即可
             Dispatcher.Invoke(() =>
