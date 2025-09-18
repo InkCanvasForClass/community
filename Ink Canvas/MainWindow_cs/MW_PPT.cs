@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
@@ -622,10 +622,11 @@ namespace Ink_Canvas
                 // 记录进入放映时浮动栏收纳状态
                 wasFloatingBarFoldedWhenEnterSlideShow = isFloatingBarFolded;
 
-                if (Settings.Automation.IsAutoFoldInPPTSlideShow && !isFloatingBarFolded)
-                    FoldFloatingBar_MouseUp(new object(), null);
-                else if (isFloatingBarFolded)
-                    await UnFoldFloatingBar(new object());
+                if (Settings.Automation.IsAutoFoldInPPTSlideShow)
+                {
+                    if (!isFloatingBarFolded)
+                        FoldFloatingBar_MouseUp(new object(), null);
+                }
 
                 isStopInkReplay = true;
 
@@ -772,8 +773,8 @@ namespace Ink_Canvas
         {
             try
             {
-                // 处理浮动栏状态
-                if (Settings.Automation.IsAutoFoldAfterPPTSlideShow && wasFloatingBarFoldedWhenEnterSlideShow)
+                // 处理浮动栏状态：严格按进入前的状态恢复
+                if (wasFloatingBarFoldedWhenEnterSlideShow)
                 {
                     if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
                 }
@@ -1666,28 +1667,5 @@ namespace Ink_Canvas
         {
             BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     }
 }
