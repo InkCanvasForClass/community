@@ -1,4 +1,4 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
+using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using OSVersionExtension;
@@ -75,7 +75,7 @@ namespace Ink_Canvas
                             Settings.Automation.AutoDelSavedFilesDaysThreshold);
                     }
 
-                    if (Settings.Startup.IsFoldAtStartup)
+                    if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode)
                     {
                         FoldFloatingBar_MouseUp(Fold_Icon, null);
                     }
