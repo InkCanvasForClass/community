@@ -489,8 +489,8 @@ namespace Ink_Canvas
             }
 
             SystemEvents.DisplaySettingsChanged += SystemEventsOnDisplaySettingsChanged;
-            // 自动收纳到侧边栏
-            if (Settings.Startup.IsFoldAtStartup)
+            // 自动收纳到侧边栏（若通过 --board 进入白板模式则跳过收纳）
+            if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode)
             {
                 FoldFloatingBar_MouseUp(new object(), null);
             }
