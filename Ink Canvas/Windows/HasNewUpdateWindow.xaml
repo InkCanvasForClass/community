@@ -28,13 +28,13 @@
     <Window.Resources>
         <!-- 渐变背景定义 -->
         <LinearGradientBrush x:Key="HeaderGradient" StartPoint="0,0" EndPoint="1,1">
-            <GradientStop Color="#667eea" Offset="0"/>
-            <GradientStop Color="#764ba2" Offset="1"/>
+            <GradientStop Color="#3b82f6" Offset="0"/>
+            <GradientStop Color="#ffffff" Offset="1"/>
         </LinearGradientBrush>
         
         <!-- 现代按钮样式 -->
         <Style x:Key="ModernPrimaryButton" TargetType="Button">
-            <Setter Property="Background" Value="#4f46e5"/>
+            <Setter Property="Background" Value="#3b82f6"/>
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderThickness" Value="0"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
@@ -52,16 +52,16 @@
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 BorderBrush="{TemplateBinding BorderBrush}">
                             <Border.Effect>
-                                <DropShadowEffect Color="#4f46e5" BlurRadius="8" ShadowDepth="0" Opacity="0.3"/>
+                                <DropShadowEffect Color="#3b82f6" BlurRadius="8" ShadowDepth="0" Opacity="0.3"/>
                             </Border.Effect>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#4338ca"/>
+                                <Setter Property="Background" Value="#2563eb"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#3730a3"/>
+                                <Setter Property="Background" Value="#1d4ed8"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -152,8 +152,8 @@
                             <Image Source="/Resources/Icons-fluent/party.png" Width="24" Height="24"/>
                         </Border>
                         <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
-                            <TextBlock Text="新版本发布" FontSize="28" FontWeight="Bold" Foreground="White" TextAlignment="Left"/>
-                            <TextBlock Text="InkCanvasForClass CE 为您带来全新体验" FontSize="16" TextAlignment="Left" Foreground="White" Opacity="0.9"/>
+                            <TextBlock Text="新版本发布" FontSize="28" FontWeight="Bold" Foreground="#1e40af" TextAlignment="Left"/>
+                            <TextBlock Text="InkCanvasForClass CE 为您带来全新体验" FontSize="16" TextAlignment="Left" Foreground="#374151" Opacity="0.9"/>
                 </ui:SimpleStackPanel>
             </ui:SimpleStackPanel>
 
@@ -175,17 +175,17 @@
                                         BorderThickness="{TemplateBinding BorderThickness}"
                                         BorderBrush="{TemplateBinding BorderBrush}">
                                     <Path Data="M8,8 L16,16 M16,8 L8,16" 
-                                          Stroke="White" 
+                                          Stroke="#374151" 
                                           StrokeThickness="2" 
                                           HorizontalAlignment="Center" 
                                           VerticalAlignment="Center"/>
                                 </Border>
                                 <ControlTemplate.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#33FFFFFF"/>
+                                        <Setter Property="Background" Value="#e5e7eb"/>
                                     </Trigger>
                                     <Trigger Property="IsPressed" Value="True">
-                                        <Setter Property="Background" Value="#4DFFFFFF"/>
+                                        <Setter Property="Background" Value="#d1d5db"/>
                                     </Trigger>
                                 </ControlTemplate.Triggers>
                             </ControlTemplate>
@@ -204,7 +204,7 @@
                     <!-- 内容标题 -->
                     <Border Background="#f8fafc" CornerRadius="16,16,0,0" Padding="24,20,24,16">
                         <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12">
-                            <Border Background="#4f46e5" CornerRadius="8" Padding="8">
+                            <Border Background="#3b82f6" CornerRadius="8" Padding="8">
                                 <TextBlock Text="📝" FontSize="16" Foreground="White" 
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
@@ -264,7 +264,7 @@
                 </Border.Effect>
                 <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="16">
                     <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
-                        <Border Background="#4f46e5" CornerRadius="8" Padding="8">
+                        <Border Background="#3b82f6" CornerRadius="8" Padding="8">
                             <TextBlock Text="⚡" FontSize="16" Foreground="White" 
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
@@ -311,10 +311,10 @@
                     
                     <!-- 现代化进度条 -->
                     <Border Background="#f3f4f6" CornerRadius="12" Height="8" Width="400">
-                        <Border x:Name="ProgressFill" Background="#4f46e5" CornerRadius="12" 
+                        <Border x:Name="ProgressFill" Background="#3b82f6" CornerRadius="12" 
                                 Width="0" HorizontalAlignment="Left">
                             <Border.Effect>
-                                <DropShadowEffect Color="#4f46e5" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
+                                <DropShadowEffect Color="#3b82f6" BlurRadius="8" ShadowDepth="0" Opacity="0.4"/>
                             </Border.Effect>
                         </Border>
                     </Border>
