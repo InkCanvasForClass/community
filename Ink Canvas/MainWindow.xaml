@@ -4091,13 +4091,13 @@
                     <Grid Name="BlackboardLeftSide" Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ui:SimpleStackPanel Orientation="Horizontal" Spacing="5">
-                            <Border CornerRadius="5,5,5,5" Background="#f4f4f5" Margin="0,0,0,0">
+                            <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,0,0">
                                 <ui:SimpleStackPanel Orientation="Horizontal">
                                     <Border Width="60" Height="50"
                                             IsEnabled="{Binding ElementName=BtnWhiteBoardSwitchPrevious, Path=IsEnabled}"
-                                            BorderThickness="1,1,0,1" BorderBrush="#a1a1aa"
+                                            BorderThickness="1,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                             MouseUp="BtnWhiteBoardSwitchPrevious_Click" CornerRadius="5,0,0,5"
-                                            Background="#f4f4f5"
+                                            Background="{DynamicResource BoardFloatBarBackground}"
                                             Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
                                             <Image VerticalAlignment="Top"
@@ -4121,7 +4121,7 @@
                                     </Border>
                                     <Border Width="75" Height="50" MouseUp="BtnWhiteBoardPageIndex_Click"
                                             Name="BtnLeftPageListWB"
-                                            BorderThickness="1,1,1,1" BorderBrush="#a1a1aa" Background="#f4f4f5"
+                                            BorderThickness="1,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" Background="{DynamicResource BoardFloatBarBackground}"
                                             Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
                                             <TextBlock HorizontalAlignment="Center"
@@ -4152,7 +4152,7 @@
                                                         <DataTemplate>
                                                             <ui:SimpleStackPanel Orientation="Vertical"
                                                                 MouseUp="BlackBoardLeftSidePageListView_OnMouseUp">
-                                                                <Border Margin="0,4" Width="160" BorderBrush="#a1a1aa"
+                                                                <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>
                                                                         <Viewbox Width="160">
@@ -4187,8 +4187,8 @@
                                     <Border Width="60" Height="50" MouseUp="BtnWhiteBoardSwitchNext_Click"
                                             CornerRadius="0,5,5,0"
                                             IsEnabled="{Binding ElementName=BtnWhiteBoardSwitchNext, Path=IsEnabled}"
-                                            BorderThickness="0,1,1,1" BorderBrush="#a1a1aa"
-                                            Background="#f4f4f5" Opacity="0.95">
+                                            BorderThickness="0,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
+                                            Background="{DynamicResource BoardFloatBarBackground}" Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
                                             <Image VerticalAlignment="Top"
                                                    RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
@@ -4212,8 +4212,8 @@
                                 </ui:SimpleStackPanel>
                             </Border>
                             <Border Width="60" Height="50"
-                                    BorderThickness="1" BorderBrush="#a1a1aa"
-                                    MouseUp="BtnWhiteBoardAdd_Click" CornerRadius="5" Background="#f4f4f5"
+                                    BorderThickness="1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
+                                    MouseUp="BtnWhiteBoardAdd_Click" CornerRadius="5" Background="{DynamicResource BoardFloatBarBackground}"
                                     Opacity="0.95">
                                 <Grid Margin="6,6,6,4">
                                     <Image VerticalAlignment="Top"
@@ -4245,12 +4245,12 @@
                     <Grid x:Name="BlackboardCenterSide" Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ui:SimpleStackPanel Orientation="Horizontal">
-                            <Border CornerRadius="5,5,5,5" Background="#f4f4f5" Margin="0,0,5,0">
+                            <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,5,0">
                                 <ui:SimpleStackPanel Orientation="Horizontal">
                                     <Border Width="60" Height="50" MouseDown="Border_MouseDown" Name="BoardGesture"
                                             MouseUp="TwoFingerGestureBorder_MouseUp" CornerRadius="5,0,0,5"
-                                            Background="#f4f4f5"
-                                            Opacity="1" BorderThickness="1,1,0,1" BorderBrush="#a1a1aa">
+                                            Background="{DynamicResource BoardFloatBarBackground}"
+                                            Opacity="1" BorderThickness="1,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}">
                                         <Grid Margin="6,6,6,4">
                                             <Image VerticalAlignment="Top"
                                                    RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
@@ -6225,8 +6225,8 @@
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ui:SimpleStackPanel Orientation="Horizontal" Spacing="5">
                             <Border Width="60" Height="50"
-                                    BorderThickness="1" BorderBrush="#a1a1aa"
-                                    MouseUp="BtnWhiteBoardAdd_Click" CornerRadius="5" Background="#f4f4f5"
+                                    BorderThickness="1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
+                                    MouseUp="BtnWhiteBoardAdd_Click" CornerRadius="5" Background="{DynamicResource BoardFloatBarBackground}"
                                     Opacity="0.95">
                                 <Grid Margin="6,6,6,4">
                                     <Image VerticalAlignment="Top"
@@ -6246,13 +6246,13 @@
                                                HorizontalAlignment="Center" FontSize="12" />
                                 </Grid>
                             </Border>
-                            <Border CornerRadius="5,5,5,5" Background="#f4f4f5" Margin="0,0,0,0">
+                            <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,0,0">
                                 <ui:SimpleStackPanel Orientation="Horizontal">
                                     <Border Width="60" Height="50"
                                             IsEnabled="{Binding ElementName=BtnWhiteBoardSwitchPrevious, Path=IsEnabled}"
-                                            BorderThickness="1,1,0,1" BorderBrush="#a1a1aa"
+                                            BorderThickness="1,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                             MouseUp="BtnWhiteBoardSwitchPrevious_Click" CornerRadius="5,0,0,5"
-                                            Background="#f4f4f5"
+                                            Background="{DynamicResource BoardFloatBarBackground}"
                                             Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
                                             <Image VerticalAlignment="Top"
@@ -6276,7 +6276,7 @@
                                     </Border>
                                     <Border Width="75" Height="50" MouseUp="BtnWhiteBoardPageIndex_Click"
                                             Name="BtnRightPageListWB"
-                                            BorderThickness="1,1,1,1" BorderBrush="#a1a1aa" Background="#f4f4f5"
+                                            BorderThickness="1,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" Background="{DynamicResource BoardFloatBarBackground}"
                                             Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
                                             <TextBlock HorizontalAlignment="Center"
@@ -6307,7 +6307,7 @@
                                                         <DataTemplate>
                                                             <ui:SimpleStackPanel Orientation="Vertical"
                                                                 MouseUp="BlackBoardRightSidePageListView_OnMouseUp">
-                                                                <Border Margin="0,4" Width="160" BorderBrush="#a1a1aa"
+                                                                <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>
                                                                         <Viewbox Width="160">
@@ -6342,8 +6342,8 @@
                                     <Border Width="60" Height="50" MouseUp="BtnWhiteBoardSwitchNext_Click"
                                             IsEnabled="{Binding ElementName=BtnWhiteBoardSwitchNext, Path=IsEnabled}"
                                             CornerRadius="0,5,5,0"
-                                            BorderThickness="0,1,1,1" BorderBrush="#a1a1aa"
-                                            Background="#f4f4f5" Opacity="0.95">
+                                            BorderThickness="0,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
+                                            Background="{DynamicResource BoardFloatBarBackground}" Opacity="0.95">
                                         <Grid Margin="6,6,6,4">
                                             <Image VerticalAlignment="Top"
                                                    RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">

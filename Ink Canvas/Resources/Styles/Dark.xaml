@@ -20,4 +20,8 @@
     <Color x:Key="FloatBarButtonBackgroundKey">Transparent</Color>
     <Color x:Key="FloatBarButtonBackgroundPointerOverKey">#2200CDCD</Color>
     <Color x:Key="FloatBarButtonButtonBackgroundPressedKey">#4400CDCD</Color>
+    
+    <!-- 白板模式浮动栏颜色 -->
+    <SolidColorBrush x:Key="BoardFloatBarBackground" Color="#2a2a2a" />
+    <SolidColorBrush x:Key="BoardFloatBarBorderBrush" Color="#555555" />
 </ResourceDictionary>
