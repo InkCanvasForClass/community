@@ -11,7 +11,9 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using System.Windows.Threading;
+using Path = System.IO.Path;
 
 namespace Ink_Canvas
 {
@@ -166,6 +168,12 @@ namespace Ink_Canvas
                     UpdateImageSelectionToolbarPosition(element);
                 }
 
+                // 如果是图片元素，更新选择点位置
+                if (element is Image && ImageResizeHandlesCanvas?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
+                }
+
                 dragStartPoint = currentPoint;
                 e.Handled = true;
             }
@@ -185,6 +193,12 @@ namespace Ink_Canvas
                 if (element is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
                 {
                     UpdateImageSelectionToolbarPosition(element);
+                }
+
+                // 如果是图片元素，更新选择点位置
+                if (element is Image && ImageResizeHandlesCanvas?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
                 }
 
                 e.Handled = true;
@@ -212,6 +226,12 @@ namespace Ink_Canvas
                 if (element is Image && BorderImageSelectionControl?.Visibility == Visibility.Visible)
                 {
                     UpdateImageSelectionToolbarPosition(element);
+                }
+
+                // 如果是图片元素，更新选择点位置
+                if (element is Image && ImageResizeHandlesCanvas?.Visibility == Visibility.Visible)
+                {
+                    UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
                 }
 
                 e.Handled = true;
@@ -290,6 +310,9 @@ namespace Ink_Canvas
                     BorderImageSelectionControl.Visibility = Visibility.Visible;
                 }
 
+                // 显示图片缩放选择点
+                ShowImageResizeHandles(element);
+
                 // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
                 // 不需要直接设置BorderStrokeSelectionControl.Visibility
             }
@@ -300,6 +323,9 @@ namespace Ink_Canvas
                 {
                     BorderImageSelectionControl.Visibility = Visibility.Collapsed;
                 }
+
+                // 隐藏图片缩放选择点
+                HideImageResizeHandles();
 
                 // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
                 // 不需要直接设置BorderStrokeSelectionControl.Visibility
@@ -331,6 +357,9 @@ namespace Ink_Canvas
             {
                 BorderImageSelectionControl.Visibility = Visibility.Collapsed;
             }
+
+            // 隐藏图片缩放选择点
+            HideImageResizeHandles();
 
             // 墨迹选择工具栏通过GridInkCanvasSelectionCover的可见性来控制
             // 不需要直接设置BorderStrokeSelectionControl.Visibility
@@ -1415,6 +1444,239 @@ namespace Ink_Canvas
             {
                 // 记录错误但不中断程序
                 LogHelper.WriteLogToFile($"克隆墨迹到新页面时发生错误: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #endregion
+
+        #region Image Resize Handles
+
+        // 图片缩放选择点相关变量
+        private bool isResizingImage = false;
+        private Point imageResizeStartPoint;
+        private string activeResizeHandle = "";
+
+        // 显示图片缩放选择点
+        private void ShowImageResizeHandles(FrameworkElement element)
+        {
+            try
+            {
+                if (ImageResizeHandlesCanvas == null || element == null) return;
+
+                // 获取元素的实际边界
+                Rect elementBounds = GetElementActualBounds(element);
+
+                // 设置选择点位置
+                UpdateImageResizeHandlesPosition(elementBounds);
+
+                // 显示选择点
+                ImageResizeHandlesCanvas.Visibility = Visibility.Visible;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"显示图片缩放选择点失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 隐藏图片缩放选择点
+        private void HideImageResizeHandles()
+        {
+            try
+            {
+                if (ImageResizeHandlesCanvas != null)
+                {
+                    ImageResizeHandlesCanvas.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"隐藏图片缩放选择点失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 更新图片缩放选择点位置
+        private void UpdateImageResizeHandlesPosition(Rect elementBounds)
+        {
+            try
+            {
+                if (ImageResizeHandlesCanvas == null) return;
+
+                ImageResizeHandlesCanvas.Margin = new Thickness(elementBounds.Left, elementBounds.Top, 0, 0);
+
+                // 四个角控制点
+                System.Windows.Controls.Canvas.SetLeft(ImageTopLeftHandle, -4);
+                System.Windows.Controls.Canvas.SetTop(ImageTopLeftHandle, -4);
+
+                System.Windows.Controls.Canvas.SetLeft(ImageTopRightHandle, elementBounds.Width - 4);
+                System.Windows.Controls.Canvas.SetTop(ImageTopRightHandle, -4);
+
+                System.Windows.Controls.Canvas.SetLeft(ImageBottomLeftHandle, -4);
+                System.Windows.Controls.Canvas.SetTop(ImageBottomLeftHandle, elementBounds.Height - 4);
+
+                System.Windows.Controls.Canvas.SetLeft(ImageBottomRightHandle, elementBounds.Width - 4);
+                System.Windows.Controls.Canvas.SetTop(ImageBottomRightHandle, elementBounds.Height - 4);
+
+                // 四个边控制点
+                System.Windows.Controls.Canvas.SetLeft(ImageTopHandle, elementBounds.Width / 2 - 4);
+                System.Windows.Controls.Canvas.SetTop(ImageTopHandle, -4);
+
+                System.Windows.Controls.Canvas.SetLeft(ImageBottomHandle, elementBounds.Width / 2 - 4);
+                System.Windows.Controls.Canvas.SetTop(ImageBottomHandle, elementBounds.Height - 4);
+
+                System.Windows.Controls.Canvas.SetLeft(ImageLeftHandle, -4);
+                System.Windows.Controls.Canvas.SetTop(ImageLeftHandle, elementBounds.Height / 2 - 4);
+
+                System.Windows.Controls.Canvas.SetLeft(ImageRightHandle, elementBounds.Width - 4);
+                System.Windows.Controls.Canvas.SetTop(ImageRightHandle, elementBounds.Height / 2 - 4);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新图片缩放选择点位置失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片缩放选择点鼠标按下事件
+        private void ImageResizeHandle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (currentSelectedElement is Image image && sender is Ellipse ellipse)
+                {
+                    isResizingImage = true;
+                    imageResizeStartPoint = e.GetPosition(inkCanvas);
+                    
+                    // 确定是哪个控制点
+                    activeResizeHandle = ellipse.Name;
+
+                    // 捕获鼠标
+                    ellipse.CaptureMouse();
+                    e.Handled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片缩放选择点鼠标按下事件失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片缩放选择点鼠标释放事件
+        private void ImageResizeHandle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            try
+            {
+                if (isResizingImage && sender is Ellipse ellipse)
+                {
+                    isResizingImage = false;
+                    ellipse.ReleaseMouseCapture();
+                    activeResizeHandle = "";
+                    e.Handled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片缩放选择点鼠标释放事件失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 图片缩放选择点鼠标移动事件
+        private void ImageResizeHandle_MouseMove(object sender, MouseEventArgs e)
+        {
+            try
+            {
+                if (isResizingImage && currentSelectedElement is Image image && sender is Ellipse ellipse)
+                {
+                    var currentPoint = e.GetPosition(inkCanvas);
+                    ResizeImageByHandle(image, imageResizeStartPoint, currentPoint, activeResizeHandle);
+                    imageResizeStartPoint = currentPoint;
+                    e.Handled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"图片缩放选择点鼠标移动事件失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 根据控制点缩放图片
+        private void ResizeImageByHandle(Image image, Point startPoint, Point currentPoint, string handleName)
+        {
+            try
+            {
+                if (image.RenderTransform is TransformGroup transformGroup)
+                {
+                    var scaleTransform = transformGroup.Children.OfType<ScaleTransform>().FirstOrDefault();
+                    var translateTransform = transformGroup.Children.OfType<TranslateTransform>().FirstOrDefault();
+
+                    if (scaleTransform == null || translateTransform == null) return;
+
+                    // 获取图片的当前边界
+                    Rect currentBounds = GetElementActualBounds(image);
+                    double deltaX = currentPoint.X - startPoint.X;
+                    double deltaY = currentPoint.Y - startPoint.Y;
+
+                    // 计算缩放比例
+                    double scaleX = 1.0;
+                    double scaleY = 1.0;
+                    double translateX = 0;
+                    double translateY = 0;
+
+                    switch (handleName)
+                    {
+                        case "ImageTopLeftHandle":
+                            scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
+                            scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
+                            translateX = deltaX;
+                            translateY = deltaY;
+                            break;
+                        case "ImageTopRightHandle":
+                            scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
+                            scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
+                            translateY = deltaY;
+                            break;
+                        case "ImageBottomLeftHandle":
+                            scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
+                            scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
+                            translateX = deltaX;
+                            break;
+                        case "ImageBottomRightHandle":
+                            scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
+                            scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
+                            break;
+                        case "ImageTopHandle":
+                            scaleY = (currentBounds.Height - deltaY) / currentBounds.Height;
+                            translateY = deltaY;
+                            break;
+                        case "ImageBottomHandle":
+                            scaleY = (currentBounds.Height + deltaY) / currentBounds.Height;
+                            break;
+                        case "ImageLeftHandle":
+                            scaleX = (currentBounds.Width - deltaX) / currentBounds.Width;
+                            translateX = deltaX;
+                            break;
+                        case "ImageRightHandle":
+                            scaleX = (currentBounds.Width + deltaX) / currentBounds.Width;
+                            break;
+                    }
+
+                    // 限制缩放范围
+                    scaleX = Math.Max(0.1, Math.Min(scaleX, 5.0));
+                    scaleY = Math.Max(0.1, Math.Min(scaleY, 5.0));
+
+                    // 应用缩放
+                    scaleTransform.ScaleX *= scaleX;
+                    scaleTransform.ScaleY *= scaleY;
+
+                    // 应用平移
+                    translateTransform.X += translateX;
+                    translateTransform.Y += translateY;
+
+                    // 更新选择点位置
+                    UpdateImageResizeHandlesPosition(GetElementActualBounds(image));
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"根据控制点缩放图片失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

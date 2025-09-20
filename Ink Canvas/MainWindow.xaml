@@ -3951,6 +3951,87 @@
                 </Viewbox>
             </Border>
 
+            <!-- 图片缩放选择点 -->
+            <Canvas Name="ImageResizeHandlesCanvas" 
+                    Visibility="Collapsed" 
+                    Panel.ZIndex="1000">
+                <!-- 四个角控制点 -->
+                <Ellipse Name="ImageTopLeftHandle" 
+                         Width="8" Height="8" 
+                         Fill="White" 
+                         Stroke="#0078D4" 
+                         StrokeThickness="1" 
+                         Cursor="SizeNWSE"
+                         MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                         MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                         MouseMove="ImageResizeHandle_MouseMove" />
+                <Ellipse Name="ImageTopRightHandle" 
+                         Width="8" Height="8" 
+                         Fill="White" 
+                         Stroke="#0078D4" 
+                         StrokeThickness="1" 
+                         Cursor="SizeNESW"
+                         MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                         MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                         MouseMove="ImageResizeHandle_MouseMove" />
+                <Ellipse Name="ImageBottomLeftHandle" 
+                         Width="8" Height="8" 
+                         Fill="White" 
+                         Stroke="#0078D4" 
+                         StrokeThickness="1" 
+                         Cursor="SizeNESW"
+                         MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                         MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                         MouseMove="ImageResizeHandle_MouseMove" />
+                <Ellipse Name="ImageBottomRightHandle" 
+                         Width="8" Height="8" 
+                         Fill="White" 
+                         Stroke="#0078D4" 
+                         StrokeThickness="1" 
+                         Cursor="SizeNWSE"
+                         MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                         MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                         MouseMove="ImageResizeHandle_MouseMove" />
+                
+                <!-- 四个边控制点 -->
+                <Ellipse Name="ImageTopHandle" 
+                         Width="8" Height="8" 
+                         Fill="White" 
+                         Stroke="#0078D4" 
+                         StrokeThickness="1" 
+                         Cursor="SizeNS"
+                         MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                         MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                         MouseMove="ImageResizeHandle_MouseMove" />
+                <Ellipse Name="ImageBottomHandle" 
+                         Width="8" Height="8" 
+                         Fill="White" 
+                         Stroke="#0078D4" 
+                         StrokeThickness="1" 
+                         Cursor="SizeNS"
+                         MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                         MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                         MouseMove="ImageResizeHandle_MouseMove" />
+                <Ellipse Name="ImageLeftHandle" 
+                         Width="8" Height="8" 
+                         Fill="White" 
+                         Stroke="#0078D4" 
+                         StrokeThickness="1" 
+                         Cursor="SizeWE"
+                         MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                         MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                         MouseMove="ImageResizeHandle_MouseMove" />
+                <Ellipse Name="ImageRightHandle" 
+                         Width="8" Height="8" 
+                         Fill="White" 
+                         Stroke="#0078D4" 
+                         StrokeThickness="1" 
+                         Cursor="SizeWE"
+                         MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                         MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                         MouseMove="ImageResizeHandle_MouseMove" />
+            </Canvas>
+
         </Grid>
 
         <Grid Visibility="Collapsed">
