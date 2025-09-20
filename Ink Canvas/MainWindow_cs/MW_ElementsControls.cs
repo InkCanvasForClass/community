@@ -1334,6 +1334,90 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 克隆墨迹集合
+        /// </summary>
+        /// <param name="strokes">要克隆的墨迹集合</param>
+        /// <returns>克隆后的墨迹集合</returns>
+        private StrokeCollection CloneStrokes(StrokeCollection strokes)
+        {
+            if (strokes == null || strokes.Count == 0) return new StrokeCollection();
+
+            try
+            {
+                // 创建墨迹集合的副本
+                var clonedStrokes = strokes.Clone();
+
+                // 为每个墨迹添加位置偏移以避免重叠
+                foreach (var stroke in clonedStrokes)
+                {
+                    var offsetPoints = new StylusPointCollection();
+                    foreach (var point in stroke.StylusPoints)
+                    {
+                        offsetPoints.Add(new StylusPoint(point.X + 20, point.Y + 20, point.PressureFactor));
+                    }
+                    stroke.StylusPoints = offsetPoints;
+                }
+
+                // 添加到画布
+                inkCanvas.Strokes.Add(clonedStrokes);
+
+                // 提交到时间机器以支持撤销
+                timeMachine.CommitStrokeUserInputHistory(clonedStrokes);
+
+                LogHelper.WriteLogToFile($"墨迹克隆完成: {clonedStrokes.Count} 个墨迹");
+                return clonedStrokes;
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不中断程序
+                LogHelper.WriteLogToFile($"克隆墨迹时发生错误: {ex.Message}", LogHelper.LogType.Error);
+                return new StrokeCollection();
+            }
+        }
+
+        /// <summary>
+        /// 克隆墨迹集合到新页面
+        /// </summary>
+        /// <param name="strokes">要克隆的墨迹集合</param>
+        private void CloneStrokesToNewBoard(StrokeCollection strokes)
+        {
+            if (strokes == null || strokes.Count == 0) return;
+
+            try
+            {
+                // 创建墨迹集合的副本
+                var clonedStrokes = strokes.Clone();
+
+                // 为每个墨迹添加位置偏移以避免重叠
+                foreach (var stroke in clonedStrokes)
+                {
+                    var offsetPoints = new StylusPointCollection();
+                    foreach (var point in stroke.StylusPoints)
+                    {
+                        offsetPoints.Add(new StylusPoint(point.X + 20, point.Y + 20, point.PressureFactor));
+                    }
+                    stroke.StylusPoints = offsetPoints;
+                }
+
+                // 创建新页面
+                BtnWhiteBoardAdd_Click(null, null);
+
+                // 添加到新页面的画布
+                inkCanvas.Strokes.Add(clonedStrokes);
+
+                // 提交到时间机器以支持撤销
+                timeMachine.CommitStrokeUserInputHistory(clonedStrokes);
+
+                LogHelper.WriteLogToFile($"墨迹克隆到新页面完成: {clonedStrokes.Count} 个墨迹");
+            }
+            catch (Exception ex)
+            {
+                // 记录错误但不中断程序
+                LogHelper.WriteLogToFile($"克隆墨迹到新页面时发生错误: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         #endregion
     }
 }

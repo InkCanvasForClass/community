@@ -34,23 +34,24 @@ namespace Ink_Canvas
             lastBorderMouseDownObject = sender;
         }
 
-        private bool isStrokeSelectionCloneOn;
 
         private void BorderStrokeSelectionClone_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
 
-            if (isStrokeSelectionCloneOn)
+            try
             {
-                BorderStrokeSelectionClone.Background = Brushes.Transparent;
-
-                isStrokeSelectionCloneOn = false;
+                var strokes = inkCanvas.GetSelectedStrokes();
+                if (strokes.Count > 0)
+                {
+                    // 直接执行克隆操作，与图片克隆保持一致
+                    CloneStrokes(strokes);
+                    LogHelper.WriteLogToFile($"墨迹克隆完成: {strokes.Count} 个墨迹");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                BorderStrokeSelectionClone.Background = new SolidColorBrush(StringToColor("#FF1ED760"));
-
-                isStrokeSelectionCloneOn = true;
+                LogHelper.WriteLogToFile($"墨迹克隆失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -60,9 +61,7 @@ namespace Ink_Canvas
 
             var strokes = inkCanvas.GetSelectedStrokes();
             inkCanvas.Select(new StrokeCollection());
-            strokes = strokes.Clone();
-            BtnWhiteBoardAdd_Click(null, null);
-            inkCanvas.Strokes.Add(strokes);
+            CloneStrokesToNewBoard(strokes);
         }
 
         private void BorderStrokeSelectionDelete_MouseUp(object sender, MouseButtonEventArgs e)
@@ -408,7 +407,6 @@ namespace Ink_Canvas
                 // 显示墨迹选择栏和选择框
                 GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
                 BorderStrokeSelectionClone.Background = Brushes.Transparent;
-                isStrokeSelectionCloneOn = false;
                 updateBorderStrokeSelectionControlLocation();
                 UpdateSelectionDisplay();
                 return;
@@ -657,23 +655,9 @@ namespace Ink_Canvas
                     }
                 }
 
-                if (isStrokeSelectionCloneOn)
-                {
-                    var strokes = inkCanvas.GetSelectedStrokes();
-                    isProgramChangeStrokeSelection = true;
-                    inkCanvas.Select(new StrokeCollection());
-                    StrokesSelectionClone = strokes.Clone();
-                    inkCanvas.Select(strokes);
-                    isProgramChangeStrokeSelection = false;
-                    inkCanvas.Strokes.Add(StrokesSelectionClone);
-                }
-                else
-                {
-                    // 新增：启动套索选择模式
-                    // 使用集中化的工具模式切换方法
-                    SetCurrentToolMode(InkCanvasEditingMode.Select);
-                    inkCanvas.Select(new StrokeCollection());
-                }
+
+                SetCurrentToolMode(InkCanvasEditingMode.Select);
+                inkCanvas.Select(new StrokeCollection());
             }
         }
 
