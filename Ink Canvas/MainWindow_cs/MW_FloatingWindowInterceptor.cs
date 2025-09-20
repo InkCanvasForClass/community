@@ -3,7 +3,6 @@ using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 
 namespace Ink_Canvas
 {
