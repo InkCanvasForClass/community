@@ -260,10 +260,12 @@ namespace Ink_Canvas
                 }
 
                 // 只有在PPT放映模式下且页数有效时才显示翻页按钮
+                // 但是，如果启用了PPT自动收纳功能，则不显示翻页按钮
                 if (StackPanelPPTControls.Visibility == Visibility.Visible &&
                     BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                     PPTManager?.IsInSlideShow == true &&
-                    PPTManager?.SlidesCount > 0)
+                    PPTManager?.SlidesCount > 0 &&
+                    !Settings.Automation.IsAutoFoldInPPTSlideShow)
                 {
                     var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                     var dopsc = dops.ToCharArray();
