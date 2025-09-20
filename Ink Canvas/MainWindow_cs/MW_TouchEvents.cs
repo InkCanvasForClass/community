@@ -23,8 +23,16 @@ namespace Ink_Canvas
         private bool isSingleFingerDragMode;
         private Point centerPoint = new Point(0, 0);
         private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
-
-        /// <summary>
+        
+        // 书写保护相关变量
+        private bool isWritingInProgress = false;
+        private DateTime lastTouchDownTime = DateTime.Now;
+        private const int WRITING_PROTECTION_DELAY_MS = 200; // 书写保护延迟时间（毫秒）
+        private Dictionary<int, DateTime> touchDownTimes = new Dictionary<int, DateTime>();
+        private Dictionary<int, Point> touchDownPositions = new Dictionary<int, Point>();
+        private Dictionary<int, Point> lastTouchPositions = new Dictionary<int, Point>();
+        private const double GESTURE_MOVEMENT_THRESHOLD = 20.0; // 手势移动阈值（像素）
+        private const double WRITING_MOVEMENT_THRESHOLD = 5.0; // 书写移动阈值（像素） 
         /// 保存画布上的非笔画元素（如图片、媒体元素等）
         /// </summary>
         private List<UIElement> PreserveNonStrokeElements()
@@ -568,6 +576,17 @@ namespace Ink_Canvas
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
             dec.Add(e.TouchDevice.Id);
+            
+            // 记录触摸按下时间和位置，用于书写保护判断
+            touchDownTimes[e.TouchDevice.Id] = DateTime.Now;
+            touchDownPositions[e.TouchDevice.Id] = e.GetTouchPoint(inkCanvas).Position;
+            
+            // 如果是第一个触摸点，标记书写开始
+            if (dec.Count == 1)
+            {
+                isWritingInProgress = true;
+                lastTouchDownTime = DateTime.Now;
+            }
 
             // Palm Eraser 逻辑 - 优化：改进手掌判定条件，使用设备提供的触摸面积信息
             if (Settings.Canvas.EnablePalmEraser && dec.Count >= 2 && !isPalmEraserActive && !palmEraserTouchDownHandled)
@@ -679,6 +698,17 @@ namespace Ink_Canvas
                 if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None ||
                     inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
+                    
+                // 书写保护：如果正在书写且时间间隔很短，延迟禁用画笔功能
+                if (isWritingInProgress && dec.Count == 2)
+                {
+                    var timeSinceFirstTouch = DateTime.Now - lastTouchDownTime;
+                    if (timeSinceFirstTouch.TotalMilliseconds < WRITING_PROTECTION_DELAY_MS)
+                    {
+                        return;
+                    }
+                }
+                
                 lastInkCanvasEditingMode = inkCanvas.EditingMode;
                 // 修复：几何绘制模式下禁止切回Ink
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
@@ -687,6 +717,18 @@ namespace Ink_Canvas
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 }
+                
+                // 清除书写状态
+                isWritingInProgress = false;
+            }
+        }
+
+        private void inkCanvas_PreviewTouchMove(object sender, TouchEventArgs e)
+        {
+            // 更新触摸位置记录，用于手势检测
+            if (lastTouchPositions.ContainsKey(e.TouchDevice.Id))
+            {
+                lastTouchPositions[e.TouchDevice.Id] = e.GetTouchPoint(inkCanvas).Position;
             }
         }
 
@@ -703,6 +745,17 @@ namespace Ink_Canvas
 
             // Palm Eraser 逻辑：优化状态恢复机制
             dec.Remove(e.TouchDevice.Id);
+            
+            // 清理触摸记录
+            touchDownTimes.Remove(e.TouchDevice.Id);
+            touchDownPositions.Remove(e.TouchDevice.Id);
+            lastTouchPositions.Remove(e.TouchDevice.Id);
+            
+            // 如果所有触摸点都抬起，清除书写状态
+            if (dec.Count == 0)
+            {
+                isWritingInProgress = false;
+            }
 
             // 如果是手掌擦的触摸点，从记录中移除
             if (palmEraserTouchIds.Contains(e.TouchDevice.Id))
@@ -1316,6 +1369,56 @@ namespace Ink_Canvas
 
                 LogHelper.WriteLogToFile("Palm eraser timer recovery completed");
             }
+        }
+
+        /// <summary>
+        /// 检测是否为手势操作而非书写
+        /// </summary>
+        private bool IsGestureOperation()
+        {
+            if (dec.Count < 2) return false;
+            
+            // 检查触摸点之间的移动模式
+            var currentTime = DateTime.Now;
+            var gestureIndicators = 0;
+            var totalMovement = 0.0;
+            
+            foreach (var touchId in dec)
+            {
+                if (touchDownTimes.ContainsKey(touchId) && touchDownPositions.ContainsKey(touchId) && lastTouchPositions.ContainsKey(touchId))
+                {
+                    var timeSinceTouch = currentTime - touchDownTimes[touchId];
+                    var initialPosition = touchDownPositions[touchId];
+                    var currentPosition = lastTouchPositions[touchId];
+                    
+                    // 计算移动距离
+                    var movement = Math.Sqrt(Math.Pow(currentPosition.X - initialPosition.X, 2) + 
+                                           Math.Pow(currentPosition.Y - initialPosition.Y, 2));
+                    totalMovement += movement;
+                    
+                    // 综合判断：时间、移动距离和触摸点数量
+                    if (timeSinceTouch.TotalMilliseconds < WRITING_PROTECTION_DELAY_MS && movement < WRITING_MOVEMENT_THRESHOLD)
+                    {
+                        // 短时间、小移动 - 可能是书写
+                        gestureIndicators--;
+                    }
+                    else if (timeSinceTouch.TotalMilliseconds > WRITING_PROTECTION_DELAY_MS || movement > GESTURE_MOVEMENT_THRESHOLD)
+                    {
+                        // 长时间或大移动 - 可能是手势
+                        gestureIndicators++;
+                    }
+                }
+            }
+            
+            // 如果平均移动距离很大，更可能是手势
+            var averageMovement = totalMovement / dec.Count;
+            if (averageMovement > GESTURE_MOVEMENT_THRESHOLD)
+            {
+                gestureIndicators += 2;
+            }
+            
+            // 如果大部分触摸点都满足手势条件，认为是手势操作
+            return gestureIndicators > 0;
         }
     }
 }

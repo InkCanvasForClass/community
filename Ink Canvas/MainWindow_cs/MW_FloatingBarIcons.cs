@@ -2782,6 +2782,12 @@ namespace Ink_Canvas
                 ViewboxFloatingBar.IsHitTestVisible = true;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
                 
+                // 重置书写保护相关状态
+                isWritingInProgress = false;
+                touchDownTimes.Clear();
+                touchDownPositions.Clear();
+                lastTouchPositions.Clear();
+                
             }
             catch (Exception ex)
             {
