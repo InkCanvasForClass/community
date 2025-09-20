@@ -344,7 +344,7 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(3);
             CancelSingleFingerDragMode();
-            isLongPressSelected = true; // 设置为选中状态，避免抬笔后切换回笔模式
+            isLongPressSelected = false; 
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
