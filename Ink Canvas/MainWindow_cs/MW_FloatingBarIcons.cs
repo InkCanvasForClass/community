@@ -1274,6 +1274,15 @@ namespace Ink_Canvas
                     FloatingbarUIForInkReplay.IsHitTestVisible = true;
                     BlackboardUIGridForInkReplay.Visibility = Visibility.Visible;
                     BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                    inkCanvas.IsHitTestVisible = true;
+                    inkCanvas.IsManipulationEnabled = true;
+                    
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                    {
+                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    }
+                    
+                    ResetTouchStates();
                 });
             }).Start();
         }
@@ -1296,6 +1305,15 @@ namespace Ink_Canvas
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
                 AnimationsHelper.HideWithFadeOut(BorderInkReplayToolBox);
                 isStopInkReplay = true;
+                inkCanvas.IsHitTestVisible = true;
+                inkCanvas.IsManipulationEnabled = true;
+                
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                }
+                
+                ResetTouchStates();
             }
         }
 
