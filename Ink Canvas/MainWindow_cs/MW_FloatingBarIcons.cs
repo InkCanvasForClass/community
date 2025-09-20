@@ -2750,12 +2750,7 @@ namespace Ink_Canvas
             {
                 // 清空触摸点计数器
                 dec.Clear();
-                
-                // 重置多指触摸模式状态
-                if (isInMultiTouchMode)
-                {
-                    isInMultiTouchMode = false;
-                }
+            
                 
                 // 重置单指拖动模式状态
                 if (isSingleFingerDragMode)
