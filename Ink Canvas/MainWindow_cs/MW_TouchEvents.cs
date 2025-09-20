@@ -968,6 +968,12 @@ namespace Ink_Canvas
 
             // 修复：允许单指拖动选中的墨迹，即使禁用了多指手势
             if (isInMultiTouchMode) return;
+                
+            if (dec.Count == 0 && (isSingleFingerDragMode || isInMultiTouchMode))
+            {
+                ResetTouchStates();
+                return;
+            }
 
             // 如果是单指拖动选中的墨迹，允许处理
             if (dec.Count == 1 && inkCanvas.GetSelectedStrokes().Count > 0)

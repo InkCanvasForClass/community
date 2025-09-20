@@ -191,9 +191,12 @@ namespace Ink_Canvas
                     RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
                     await Task.Delay(1);
-                    ScrollViewToVerticalTop(
-                        (ListViewItem)BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            CurrentWhiteboardIndex - 1), BlackBoardLeftSidePageListScrollViewer);
+                    var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                        CurrentWhiteboardIndex - 1) as ListViewItem;
+                    if (leftContainer != null)
+                    {
+                        ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
+                    }
                 }
             }
             else if (sender == BtnRightPageListWB)
@@ -208,9 +211,12 @@ namespace Ink_Canvas
                     RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
                     await Task.Delay(1);
-                    ScrollViewToVerticalTop(
-                        (ListViewItem)BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            CurrentWhiteboardIndex - 1), BlackBoardRightSidePageListScrollViewer);
+                    var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                        CurrentWhiteboardIndex - 1) as ListViewItem;
+                    if (rightContainer != null)
+                    {
+                        ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
+                    }
                 }
             }
 

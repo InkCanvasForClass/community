@@ -2134,6 +2134,11 @@ namespace Ink_Canvas
                 SaveStrokes();
             }
 
+            if (!isAlreadyEraser)
+            {
+                ResetTouchStates();
+            }
+
             // 启用新的高级橡皮擦系统
             EnableAdvancedEraserSystem();
 
@@ -2732,6 +2737,61 @@ namespace Ink_Canvas
 
             if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
             isLongPressSelected = false;
+
+            ResetTouchStates();
+        }
+        
+        /// <summary>
+        /// 重置所有触摸相关状态，
+        /// </summary>
+        private void ResetTouchStates()
+        {
+            try
+            {
+                // 清空触摸点计数器
+                dec.Clear();
+                
+                // 重置多指触摸模式状态
+                if (isInMultiTouchMode)
+                {
+                    isInMultiTouchMode = false;
+                }
+                
+                // 重置单指拖动模式状态
+                if (isSingleFingerDragMode)
+                {
+                    isSingleFingerDragMode = false;
+                    if (BtnFingerDragMode != null)
+                    {
+                        BtnFingerDragMode.Content = "单指\n拖动";
+                    }
+                }
+                
+                // 重置手掌擦状态
+                if (isPalmEraserActive)
+                {
+                    isPalmEraserActive = false;
+                    palmEraserTouchDownHandled = false;
+                    palmEraserTouchIds.Clear();
+                    StopPalmEraserRecoveryTimer();
+                }
+                
+                // 确保触摸事件能正常响应
+                inkCanvas.IsHitTestVisible = true;
+                inkCanvas.IsManipulationEnabled = true;
+                
+                // 释放所有触摸捕获
+                inkCanvas.ReleaseAllTouchCaptures();
+                
+                // 恢复UI元素的触摸响应
+                ViewboxFloatingBar.IsHitTestVisible = true;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
+                
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"重置触摸状态失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void BtnHideControl_Click(object sender, RoutedEventArgs e)

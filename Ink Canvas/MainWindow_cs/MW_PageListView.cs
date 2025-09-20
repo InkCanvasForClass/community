@@ -68,9 +68,20 @@ namespace Ink_Canvas
 
         public static void ScrollViewToVerticalTop(FrameworkElement element, ScrollViewer scrollViewer)
         {
+            if (element == null || scrollViewer == null)
+            {
+                return;
+            }
+
             var scrollViewerOffset = scrollViewer.VerticalOffset;
             var point = new Point(0, scrollViewerOffset);
-            var tarPos = element.TransformToVisual(scrollViewer).Transform(point);
+            var transform = element.TransformToVisual(scrollViewer);
+            if (transform == null)
+            {
+                return;
+            }
+            
+            var tarPos = transform.Transform(point);
             scrollViewer.ScrollToVerticalOffset(tarPos.Y);
         }
 
