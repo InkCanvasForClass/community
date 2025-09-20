@@ -13,7 +13,6 @@ namespace Ink_Canvas.Helpers
 {
     /// <summary>
     /// 全局快捷键管理器 - 使用NHotkey库实现全局快捷键功能
-    /// 支持多屏幕环境下的智能热键注册，避免影响其他屏幕的复制粘贴功能
     /// </summary>
     public class GlobalHotkeyManager : IDisposable
     {
