@@ -107,93 +107,6 @@
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="Height" Value="40"/>
             <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBox">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="8" 
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                BorderBrush="{TemplateBinding BorderBrush}">
-                            <Grid>
-                                <ToggleButton Name="ToggleButton" 
-                                            Grid.Column="2" 
-                                            Focusable="false" 
-                                            IsChecked="{Binding Path=IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}" 
-                                            ClickMode="Press"
-                                            Background="Transparent"
-                                            BorderThickness="0">
-                                    <Grid>
-                                        <Path Name="Arrow" 
-                                              Fill="#6b7280" 
-                                              HorizontalAlignment="Right" 
-                                              VerticalAlignment="Center" 
-                                              Margin="0,0,12,0" 
-                                              Data="M 0 0 L 4 4 L 8 0 Z"/>
-                                    </Grid>
-                                </ToggleButton>
-                                <ContentPresenter Name="ContentSite" 
-                                                IsHitTestVisible="False" 
-                                                Content="{TemplateBinding SelectionBoxItem}" 
-                                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" 
-                                                ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" 
-                                                Margin="12,8,30,8" 
-                                                VerticalAlignment="Center" 
-                                                HorizontalAlignment="Left"/>
-                                <TextBox Name="PART_EditableTextBox" 
-                                       IsReadOnly="{TemplateBinding IsReadOnly}" 
-                                       Background="{TemplateBinding Background}" 
-                                       Foreground="{TemplateBinding Foreground}" 
-                                       BorderThickness="0" 
-                                       Padding="12,8,30,8" 
-                                       Margin="0" 
-                                       Focusable="True" 
-                                       HorizontalAlignment="Left" 
-                                       VerticalAlignment="Center"/>
-                                <Popup Name="Popup" 
-                                     Placement="Bottom" 
-                                     IsOpen="{TemplateBinding IsDropDownOpen}" 
-                                     AllowsTransparency="True" 
-                                     Focusable="False" 
-                                     PopupAnimation="Slide">
-                                    <Grid Name="DropDown" 
-                                        SnapsToDevicePixels="True" 
-                                        MinWidth="{TemplateBinding ActualWidth}" 
-                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
-                                        <Border Name="DropDownBorder" 
-                                              Background="White" 
-                                              BorderThickness="1" 
-                                              BorderBrush="#d1d5db" 
-                                              CornerRadius="8" 
-                                              Margin="0,4,0,0">
-                                            <Border.Effect>
-                                                <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="0" Opacity="0.15"/>
-                                            </Border.Effect>
-                                        </Border>
-                                        <ScrollViewer Margin="4,6,4,6" 
-                                                    SnapsToDevicePixels="True">
-                                            <StackPanel IsItemsHost="True" 
-                                                      KeyboardNavigation.DirectionalNavigation="Contained"/>
-                                        </ScrollViewer>
-                                    </Grid>
-                                </Popup>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="DropDownBorder" Property="BorderBrush" Value="#3b82f6"/>
-                                <Setter Property="BorderBrush" Value="#3b82f6"/>
-                            </Trigger>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter TargetName="DropDownBorder" Property="BorderBrush" Value="#3b82f6"/>
-                                <Setter Property="BorderBrush" Value="#3b82f6"/>
-                            </Trigger>
-                            <Trigger Property="IsDropDownOpen" Value="True">
-                                <Setter Property="BorderBrush" Value="#3b82f6"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
         </Style>
         
         <!-- ComboBoxItem样式 -->
@@ -260,10 +173,13 @@
                         <TextBlock Text="选择版本" FontSize="16" FontWeight="SemiBold" 
                                  Foreground="#374151"/>
                         <ComboBox x:Name="VersionComboBox" 
-                                Style="{StaticResource ModernComboBox}"
                                 Width="400" Height="40" 
                                 DisplayMemberPath="Version" 
-                                SelectionChanged="VersionComboBox_SelectionChanged"/>
+                                SelectionChanged="VersionComboBox_SelectionChanged"
+                                Background="White"
+                                BorderBrush="#d1d5db"
+                                BorderThickness="1"
+                                FontSize="14"/>
                     </ui:SimpleStackPanel>
                 </Border>
                 
