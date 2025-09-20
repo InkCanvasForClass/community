@@ -4136,7 +4136,7 @@
                                         <Border ClipToBounds="True" Name="BoardBorderLeftPageListView"
                                                 Margin="-134,-465,-60,50"
                                                 CornerRadius="8"
-                                                Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="#a1a1aa"
+                                                Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                 BorderThickness="1">
                                             <ui:ScrollViewerEx Name="BlackBoardLeftSidePageListScrollViewer"
                                                                Height="460"
@@ -4278,7 +4278,7 @@
                                         <Border ClipToBounds="True" Name="BoardTwoFingerGestureBorder"
                                                 Margin="-115,-161,-55,50"
                                                 CornerRadius="8"
-                                                Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="#2563eb"
+                                                Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="{DynamicResource FloatBarBorderBrush}"
                                                 BorderThickness="1">
                                             <ui:SimpleStackPanel Margin="0">
                                                 <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
@@ -4513,7 +4513,7 @@
                                                 </Grid.RenderTransform>
                                                 <Border x:Name="BoardPenPalette" Visibility="Visible"
                                                         Background="{DynamicResource FloatBarBackground}"
-                                                        Opacity="1" BorderBrush="#2563eb"
+                                                        Opacity="1" BorderBrush="{DynamicResource FloatBarBorderBrush}"
                                                         BorderThickness="1" CornerRadius="8">
                                                     <ui:SimpleStackPanel Margin="0,-20,0,0">
                                                         <Border BorderBrush="#1e3a8a" Height="32"
@@ -5644,8 +5644,8 @@
                                     </Border>
                                     <Border Width="0">
                                         <Border x:Name="BoardBorderDrawShape" Visibility="Visible"
-                                                Background="LightGray"
-                                                Opacity="0.85" BorderBrush="Black" BorderThickness="1" CornerRadius="5"
+                                                Background="{DynamicResource FloatBarBackground}"
+                                                Opacity="0.85" BorderBrush="{DynamicResource FloatBarBorderBrush}" BorderThickness="1" CornerRadius="5"
                                                 Margin="-147,-286,-89,55">
                                             <Viewbox>
                                                 <ui:SimpleStackPanel Spacing="-8" Orientation="Vertical">

@@ -24,4 +24,9 @@
     <!-- 白板模式浮动栏颜色 -->
     <SolidColorBrush x:Key="BoardFloatBarBackground" Color="#f4f4f5" />
     <SolidColorBrush x:Key="BoardFloatBarBorderBrush" Color="#a1a1aa" />
+    
+    <!-- 白板模式按钮选中状态颜色 -->
+    <SolidColorBrush x:Key="BoardFloatBarSelectedBackground" Color="#2563eb" />
+    <SolidColorBrush x:Key="BoardFloatBarSelectedBorderBrush" Color="#2563eb" />
+    <SolidColorBrush x:Key="BoardFloatBarSelectedForeground" Color="White" />
 </ResourceDictionary>
