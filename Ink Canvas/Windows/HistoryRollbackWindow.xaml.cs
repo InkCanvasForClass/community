@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 
 // Added for OrderByDescending
 
@@ -32,6 +33,15 @@ namespace Ink_Canvas
             InitializeComponent();
             this.channel = channel;
             LoadVersions();
+            
+            // 添加窗口拖动功能
+            this.MouseDown += (sender, e) =>
+            {
+                if (e.ChangedButton == MouseButton.Left)
+                {
+                    this.DragMove();
+                }
+            };
         }
 
         private async void LoadVersions()
@@ -133,6 +143,16 @@ namespace Ink_Canvas
                 RollbackButton.IsEnabled = true;
                 VersionComboBox.IsEnabled = true;
             }
+        }
+
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
 
         protected override void OnClosing(CancelEventArgs e)
