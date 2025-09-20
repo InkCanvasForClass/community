@@ -23,13 +23,13 @@
 ## 🤔 发生了什么？
 
 
-由于众所周知的原因，[DotteringDoge471](https://github.com/DotteringDoge471) 不再积极负责 InkCanvasForClass 旧时代版本的开发与维护工作，而刚好 [CJKmkp](https://github.com/CJK-mkp) 又维护了这个社区版本的 icc，经过沟通后就顺理成章地成为了 icc 的官方版本。该分支版本 **目前还在开发之中** ，可能会有潜在的问题/ Bug 出现，请在出现 Bug 后与开发者或与 [DotteringDoge471](https://github.com/DotteringDoge471) 上报，方便我们迅速诊断并解决问题。
+由于众所周知的原因，[DotteringDoge471](https://github.com/DotteringDoge471) 不再积极负责 InkCanvasForClass 旧时代版本的开发与维护工作，而刚好 [CJKmkp](https://github.com/CJKmkp) 又维护了这个社区版本的 icc，经过沟通后就顺理成章地成为了 icc 的官方版本。该分支版本 **目前还在开发之中** ，可能会有潜在的问题/ Bug 出现，请在出现 Bug 后与开发者或与 [DotteringDoge471](https://github.com/DotteringDoge471) 上报，方便我们迅速诊断并解决问题。
 
-> ⚠️ 请注意：[DotteringDoge471](https://github.com/DotteringDoge471) 不积极负责 **本社区版本** 的开发与维护工作，仅会在有空的时候对本项目开发新功能或修复 Bug。因此，任何问题反馈/Bug反馈/建议等，请优先找本项目主要维护者 [CJKmkp](https://github.com/CJK-mkp) 反馈或在 GitHub 仓库内提出 Issue！
+> ⚠️ 请注意：[DotteringDoge471](https://github.com/DotteringDoge471) 不积极负责 **本社区版本** 的开发与维护工作，仅会在有空的时候对本项目开发新功能或修复 Bug。因此，任何问题反馈/Bug反馈/建议等，请优先找本项目主要维护者 [CJKmkp](https://github.com/CJKmkp) 反馈或在 GitHub 仓库内提出 Issue！
 
-使用该版本 InkCanvasForClass，意味着您同意自行承担任何可能存在的问题与风险。建议不要在公众场合（例如公开课，录播课，线上直播课，大型会议）使用未经广泛测试和优化的 Beta 版本，对使用 Beta 版本而带来的任何问题和风险（例如：被班主任批斗，被校长处罚，崩溃而导致的场面混乱，全球海平面上升等），**将由使用者自行承担**，[CJKmkp](https://github.com/CJK-mkp) 和 [DotteringDoge471](https://github.com/DotteringDoge471) 及其项目的所有维护者不提供任何担保。
+使用该版本 InkCanvasForClass，意味着您同意自行承担任何可能存在的问题与风险。建议不要在公众场合（例如公开课，录播课，线上直播课，大型会议）使用未经广泛测试和优化的 Beta 版本，对使用 Beta 版本而带来的任何问题和风险（例如：被班主任批斗，被校长处罚，崩溃而导致的场面混乱，全球海平面上升等），**将由使用者自行承担**，[CJKmkp](https://github.com/CJKmkp) 和 [DotteringDoge471](https://github.com/DotteringDoge471) 及其项目的所有维护者不提供任何担保。
 
-♥️ **本项目版权归 [CJKmkp](https://github.com/CJK-mkp) 所有。[CJKmkp](https://github.com/CJK-mkp) 拥有最终解释权。**
+♥️ **本项目版权归 [CJKmkp](https://github.com/CJKmkp) 所有。[CJKmkp](https://github.com/CJKmkp) 拥有最终解释权。**
 
 **智教联盟 InkCanvasForClass Community Edition 板块：** [forum.smart-teach.cn/t/icc-ce](https://forum.smart-teach.cn/t/icc-ce) ，我们会在此处发布版本更新日志，同时，您也可以在遵守论坛对应管理规则与InkCanvasForClass Community Edition 板块管理条约的情况下，在该板块内提问或发表自己的使用体验。
 
