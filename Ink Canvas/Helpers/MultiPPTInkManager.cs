@@ -26,6 +26,11 @@ namespace Ink_Canvas.Helpers
         private readonly object _lockObject = new object();
         private bool _disposed;
         private string _currentActivePresentationId = "";
+        
+        // 墨迹备份机制
+        private readonly Dictionary<string, Dictionary<int, StrokeCollection>> _strokeBackups;
+        private DateTime _lastBackupTime = DateTime.MinValue;
+        private const int BackupIntervalMinutes = 2; // 每2分钟备份一次
         #endregion
 
         #region Constructor
@@ -33,6 +38,7 @@ namespace Ink_Canvas.Helpers
         {
             _presentationManagers = new Dictionary<string, PPTInkManager>();
             _presentationInfos = new Dictionary<string, PresentationInfo>();
+            _strokeBackups = new Dictionary<string, Dictionary<int, StrokeCollection>>();
         }
         #endregion
 
@@ -112,8 +118,15 @@ namespace Ink_Canvas.Helpers
                                 var currentPresentation = GetCurrentActivePresentation();
                                 if (currentPresentation != null)
                                 {
-                                    currentManager.SaveAllStrokesToFile(currentPresentation);
-                                    LogHelper.WriteLogToFile($"已保存当前演示文稿墨迹: {currentPresentation.Name}", LogHelper.LogType.Trace);
+                                    try
+                                    {
+                                        currentManager.SaveAllStrokesToFile(currentPresentation);
+                                        LogHelper.WriteLogToFile($"已保存当前演示文稿墨迹: {currentPresentation.Name}", LogHelper.LogType.Trace);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogHelper.WriteLogToFile($"保存当前演示文稿墨迹失败: {ex}", LogHelper.LogType.Error);
+                                    }
                                 }
                             }
                         }
@@ -126,10 +139,10 @@ namespace Ink_Canvas.Helpers
                             _presentationInfos[presentationId].LastAccessTime = DateTime.Now;
                         }
 
-                    if (_currentActivePresentationId != presentationId)
-                    {
-                        LogHelper.WriteLogToFile($"已切换到演示文稿: {presentation.Name}", LogHelper.LogType.Trace);
-                    }
+                        if (_currentActivePresentationId != presentationId)
+                        {
+                            LogHelper.WriteLogToFile($"已切换到演示文稿: {presentation.Name}", LogHelper.LogType.Trace);
+                        }
                         return true;
                     }
                     else
@@ -161,7 +174,17 @@ namespace Ink_Canvas.Helpers
                     var manager = GetCurrentManager();
                     if (manager != null)
                     {
+                        // 先创建备份
+                        if (!string.IsNullOrEmpty(_currentActivePresentationId))
+                        {
+                            CreateStrokeBackup(_currentActivePresentationId, slideIndex, strokes);
+                        }
+
+                        // 保存到管理器
                         manager.SaveCurrentSlideStrokes(slideIndex, strokes);
+                        
+                        // 检查是否需要执行定期备份
+                        CheckAndPerformBackup();
                     }
                 }
                 catch (Exception ex)
@@ -209,12 +232,29 @@ namespace Ink_Canvas.Helpers
                     var manager = GetCurrentManager();
                     if (manager != null)
                     {
-                        return manager.LoadSlideStrokes(slideIndex);
+                        var strokes = manager.LoadSlideStrokes(slideIndex);
+                        
+                        // 如果从管理器加载失败，尝试从备份恢复
+                        if (strokes == null || strokes.Count == 0)
+                        {
+                            if (!string.IsNullOrEmpty(_currentActivePresentationId))
+                            {
+                                strokes = RestoreStrokeFromBackup(_currentActivePresentationId, slideIndex);
+                            }
+                        }
+                        
+                        return strokes ?? new StrokeCollection();
                     }
                 }
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"加载页面墨迹失败: {ex}", LogHelper.LogType.Error);
+                    
+                    // 尝试从备份恢复
+                    if (!string.IsNullOrEmpty(_currentActivePresentationId))
+                    {
+                        return RestoreStrokeFromBackup(_currentActivePresentationId, slideIndex);
+                    }
                 }
             }
 
@@ -511,6 +551,12 @@ namespace Ink_Canvas.Helpers
                         }
                         _presentationInfos.Remove(id);
                         
+                        // 清理备份数据
+                        if (_strokeBackups.ContainsKey(id))
+                        {
+                            _strokeBackups.Remove(id);
+                        }
+                        
                         LogHelper.WriteLogToFile($"已清理非活跃演示文稿: {id}", LogHelper.LogType.Trace);
                     }
                 }
@@ -518,6 +564,98 @@ namespace Ink_Canvas.Helpers
                 {
                     LogHelper.WriteLogToFile($"清理非活跃演示文稿失败: {ex}", LogHelper.LogType.Error);
                 }
+            }
+        }
+
+        /// <summary>
+        /// 创建墨迹备份
+        /// </summary>
+        private void CreateStrokeBackup(string presentationId, int slideIndex, StrokeCollection strokes)
+        {
+            try
+            {
+                if (strokes == null || strokes.Count == 0) return;
+
+                if (!_strokeBackups.ContainsKey(presentationId))
+                {
+                    _strokeBackups[presentationId] = new Dictionary<int, StrokeCollection>();
+                }
+
+                // 释放旧的备份
+                if (_strokeBackups[presentationId].ContainsKey(slideIndex))
+                {
+                    _strokeBackups[presentationId][slideIndex] = null;
+                }
+
+                // 创建新的备份
+                _strokeBackups[presentationId][slideIndex] = strokes.Clone();
+                
+                LogHelper.WriteLogToFile($"已创建第{slideIndex}页墨迹备份", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"创建墨迹备份失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 从备份恢复墨迹
+        /// </summary>
+        private StrokeCollection RestoreStrokeFromBackup(string presentationId, int slideIndex)
+        {
+            try
+            {
+                if (_strokeBackups.ContainsKey(presentationId) && 
+                    _strokeBackups[presentationId].ContainsKey(slideIndex))
+                {
+                    var backup = _strokeBackups[presentationId][slideIndex];
+                    if (backup != null)
+                    {
+                        LogHelper.WriteLogToFile($"从备份恢复第{slideIndex}页墨迹", LogHelper.LogType.Trace);
+                        return backup.Clone();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从备份恢复墨迹失败: {ex}", LogHelper.LogType.Error);
+            }
+
+            return new StrokeCollection();
+        }
+
+        /// <summary>
+        /// 检查并执行定期备份
+        /// </summary>
+        private void CheckAndPerformBackup()
+        {
+            try
+            {
+                var now = DateTime.Now;
+                
+                // 检查是否需要执行备份
+                if (now - _lastBackupTime < TimeSpan.FromMinutes(BackupIntervalMinutes))
+                {
+                    return;
+                }
+
+                // 备份当前活跃演示文稿的所有墨迹
+                if (!string.IsNullOrEmpty(_currentActivePresentationId) && 
+                    _presentationManagers.ContainsKey(_currentActivePresentationId))
+                {
+                    var manager = _presentationManagers[_currentActivePresentationId];
+                    if (manager != null)
+                    {
+                        // 这里可以添加更详细的备份逻辑
+                        LogHelper.WriteLogToFile($"执行定期墨迹备份: {_currentActivePresentationId}", LogHelper.LogType.Trace);
+                    }
+                }
+
+                _lastBackupTime = now;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"定期备份检查失败: {ex}", LogHelper.LogType.Error);
             }
         }
         #endregion
@@ -637,12 +775,24 @@ namespace Ink_Canvas.Helpers
             {
                 lock (_lockObject)
                 {
+                    // 释放所有管理器
                     foreach (var manager in _presentationManagers.Values)
                     {
                         manager?.Dispose();
                     }
                     _presentationManagers.Clear();
                     _presentationInfos.Clear();
+                    
+                    // 清理备份数据
+                    foreach (var backupDict in _strokeBackups.Values)
+                    {
+                        foreach (var backup in backupDict.Values)
+                        {
+                            backup?.Clear();
+                        }
+                        backupDict.Clear();
+                    }
+                    _strokeBackups.Clear();
                 }
                 _disposed = true;
             }

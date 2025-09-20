@@ -35,6 +35,12 @@ namespace Ink_Canvas.Helpers
         private DateTime _lastSwitchTime = DateTime.MinValue;
         private int _lastSwitchSlideIndex = -1;
         private const int MinSwitchIntervalMs = 100; // 最小切换间隔100毫秒
+        
+        // 内存管理相关字段
+        private long _totalMemoryUsage = 0;
+        private const long MaxMemoryUsageBytes = 100 * 1024 * 1024; // 100MB限制
+        private DateTime _lastMemoryCleanup = DateTime.MinValue;
+        private const int MemoryCleanupIntervalMinutes = 5; // 5分钟清理一次
         #endregion
 
         #region Constructor
@@ -125,17 +131,29 @@ namespace Ink_Canvas.Helpers
 
                     if (slideIndex < _memoryStreams.Length)
                     {
+                        // 先释放旧的内存流，防止内存泄漏
+                        try
+                        {
+                            _memoryStreams[slideIndex]?.Dispose();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"释放旧内存流失败: {ex}", LogHelper.LogType.Warning);
+                        }
+
+                        // 创建新的内存流
                         var ms = new MemoryStream();
                         strokes.Save(ms);
                         ms.Position = 0;
-
-                        // 释放旧的内存流
-                        _memoryStreams[slideIndex]?.Dispose();
                         _memoryStreams[slideIndex] = ms;
 
                         if (ms.Length > 0)
                         {
+                            LogHelper.WriteLogToFile($"已保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
                         }
+
+                        // 检查内存使用情况
+                        CheckAndPerformMemoryCleanup();
                     }
                 }
                 catch (Exception ex)
@@ -158,12 +176,20 @@ namespace Ink_Canvas.Helpers
                 {
                     if (slideIndex < _memoryStreams.Length)
                     {
+                        // 先释放旧的内存流，防止内存泄漏
+                        try
+                        {
+                            _memoryStreams[slideIndex]?.Dispose();
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"释放旧内存流失败: {ex}", LogHelper.LogType.Warning);
+                        }
+
+                        // 创建新的内存流
                         var ms = new MemoryStream();
                         strokes.Save(ms);
                         ms.Position = 0;
-
-                        // 释放旧的内存流
-                        _memoryStreams[slideIndex]?.Dispose();
                         _memoryStreams[slideIndex] = ms;
 
                         LogHelper.WriteLogToFile($"已强制保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
@@ -388,13 +414,30 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    for (int i = 0; i < _memoryStreams.Length; i++)
+                    // 安全释放所有内存流
+                    if (_memoryStreams != null)
                     {
-                        _memoryStreams[i]?.Dispose();
-                        _memoryStreams[i] = null;
+                        for (int i = 0; i < _memoryStreams.Length; i++)
+                        {
+                            try
+                            {
+                                _memoryStreams[i]?.Dispose();
+                            }
+                            catch (Exception ex)
+                            {
+                                LogHelper.WriteLogToFile($"释放内存流{i}失败: {ex}", LogHelper.LogType.Warning);
+                            }
+                            finally
+                            {
+                                _memoryStreams[i] = null;
+                            }
+                        }
+                        
+                        // 重新初始化数组
+                        _memoryStreams = new MemoryStream[_maxSlides + 2];
                     }
 
-                    CurrentStrokes.Clear();
+                    CurrentStrokes?.Clear();
                     LogHelper.WriteLogToFile("已清除所有墨迹", LogHelper.LogType.Trace);
                 }
                 catch (Exception ex)
@@ -445,6 +488,110 @@ namespace Ink_Canvas.Helpers
                 _lockedSlideIndex = -1;
                 _lastSwitchTime = DateTime.MinValue;
                 _lastSwitchSlideIndex = -1;
+            }
+        }
+
+        /// <summary>
+        /// 检查并执行内存清理
+        /// </summary>
+        private void CheckAndPerformMemoryCleanup()
+        {
+            try
+            {
+                var now = DateTime.Now;
+                
+                // 检查是否需要执行内存清理
+                if (now - _lastMemoryCleanup < TimeSpan.FromMinutes(MemoryCleanupIntervalMinutes))
+                {
+                    return;
+                }
+
+                // 计算当前内存使用量
+                long currentMemoryUsage = 0;
+                if (_memoryStreams != null)
+                {
+                    for (int i = 0; i < _memoryStreams.Length; i++)
+                    {
+                        if (_memoryStreams[i] != null)
+                        {
+                            currentMemoryUsage += _memoryStreams[i].Length;
+                        }
+                    }
+                }
+
+                _totalMemoryUsage = currentMemoryUsage;
+
+                // 如果内存使用量超过限制，执行清理
+                if (currentMemoryUsage > MaxMemoryUsageBytes)
+                {
+                    LogHelper.WriteLogToFile($"内存使用量超限 ({currentMemoryUsage / 1024 / 1024}MB)，开始清理", LogHelper.LogType.Warning);
+                    
+                    // 清理非当前页面的墨迹
+                    CleanupInactiveSlideStrokes();
+                    
+                    _lastMemoryCleanup = now;
+                    LogHelper.WriteLogToFile($"内存清理完成，当前使用量: {_totalMemoryUsage / 1024 / 1024}MB", LogHelper.LogType.Trace);
+                }
+                else
+                {
+                    _lastMemoryCleanup = now;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"内存清理检查失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 清理非活跃页面的墨迹
+        /// </summary>
+        private void CleanupInactiveSlideStrokes()
+        {
+            try
+            {
+                if (_memoryStreams == null) return;
+
+                int cleanedCount = 0;
+                long freedMemory = 0;
+
+                for (int i = 0; i < _memoryStreams.Length; i++)
+                {
+                    // 保留当前锁定页面和最近访问的页面
+                    if (i == _lockedSlideIndex || i == _lastSwitchSlideIndex)
+                    {
+                        continue;
+                    }
+
+                    if (_memoryStreams[i] != null)
+                    {
+                        long memorySize = _memoryStreams[i].Length;
+                        
+                        try
+                        {
+                            _memoryStreams[i].Dispose();
+                            freedMemory += memorySize;
+                            cleanedCount++;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"清理页面{i}墨迹失败: {ex}", LogHelper.LogType.Warning);
+                        }
+                        finally
+                        {
+                            _memoryStreams[i] = null;
+                        }
+                    }
+                }
+
+                if (cleanedCount > 0)
+                {
+                    LogHelper.WriteLogToFile($"已清理{cleanedCount}个页面的墨迹，释放内存: {freedMemory / 1024}KB", LogHelper.LogType.Trace);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"清理非活跃页面墨迹失败: {ex}", LogHelper.LogType.Error);
             }
         }
         #endregion

@@ -411,63 +411,30 @@ namespace Ink_Canvas.Helpers
                                 catch (COMException comEx)
                                 {
                                     var hr = (uint)comEx.HResult;
+                                    LogHelper.WriteLogToFile($"取消PPT事件注册时COM异常: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
                                 }
                                 catch (InvalidCastException)
                                 {
                                     // COM对象类型转换失败，通常是因为对象已经被释放
                                     LogHelper.WriteLogToFile("PPT COM对象已被释放，跳过事件注册取消", LogHelper.LogType.Trace);
                                 }
+                                catch (Exception ex)
+                                {
+                                    LogHelper.WriteLogToFile($"取消PPT事件注册时发生异常: {ex}", LogHelper.LogType.Warning);
+                                }
                             }, DispatcherPriority.Normal, CancellationToken.None, TimeSpan.FromSeconds(1));
                         }
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
+                        LogHelper.WriteLogToFile($"取消PPT事件注册失败: {ex}", LogHelper.LogType.Warning);
                     }
 
-                    // 释放COM对象
-                    try
-                    {
-                        if (Marshal.IsComObject(CurrentSlide))
-                        {
-                            Marshal.ReleaseComObject(CurrentSlide);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                    }
-
-                    try
-                    {
-                        if (Marshal.IsComObject(CurrentSlides))
-                        {
-                            Marshal.ReleaseComObject(CurrentSlides);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                    }
-
-                    try
-                    {
-                        if (Marshal.IsComObject(CurrentPresentation))
-                        {
-                            Marshal.ReleaseComObject(CurrentPresentation);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                    }
-
-                    try
-                    {
-                        if (Marshal.IsComObject(PPTApplication))
-                        {
-                            Marshal.ReleaseComObject(PPTApplication);
-                        }
-                    }
-                    catch (Exception)
-                    {
-                    }
+                    // 安全释放COM对象
+                    SafeReleaseComObject(CurrentSlide, "CurrentSlide");
+                    SafeReleaseComObject(CurrentSlides, "CurrentSlides");
+                    SafeReleaseComObject(CurrentPresentation, "CurrentPresentation");
+                    SafeReleaseComObject(PPTApplication, "PPTApplication");
 
                     // 清理引用
                     PPTApplication = null;
@@ -488,6 +455,30 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"断开PPT连接失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 安全释放COM对象
+        /// </summary>
+        private void SafeReleaseComObject(object comObject, string objectName)
+        {
+            try
+            {
+                if (comObject != null && Marshal.IsComObject(comObject))
+                {
+                    int refCount = Marshal.ReleaseComObject(comObject);
+                    LogHelper.WriteLogToFile($"已释放COM对象 {objectName}，引用计数: {refCount}", LogHelper.LogType.Trace);
+                }
+            }
+            catch (COMException comEx)
+            {
+                var hr = (uint)comEx.HResult;
+                LogHelper.WriteLogToFile($"释放COM对象 {objectName} 时COM异常: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"释放COM对象 {objectName} 时发生异常: {ex}", LogHelper.LogType.Warning);
             }
         }
 
