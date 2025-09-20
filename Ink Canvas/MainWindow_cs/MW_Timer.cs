@@ -99,7 +99,7 @@ namespace Ink_Canvas
                 var networkDateTime = (new DateTime(1900, 1, 1)).AddMilliseconds((long)milliseconds);
                 return networkDateTime.ToLocalTime();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return DateTime.Now;
             }
