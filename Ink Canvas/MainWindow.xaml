@@ -3289,9 +3289,31 @@
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition />
                                             <ColumnDefinition />
-                                            <ColumnDefinition />
                                         </Grid.ColumnDefinitions>
-                                        <ui:SimpleStackPanel Grid.Column="0" Orientation="Vertical">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition />
+                                            <RowDefinition />
+                                        </Grid.RowDefinitions>
+                                        <ui:SimpleStackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical">
+                                            <Image Source="/Resources/DeveloperAvatars/CJKmkp.jpg"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="64"
+                                                   Margin="0,0,0,6" Height="64">
+                                                <Image.Clip>
+                                                    <EllipseGeometry Center="32,32" RadiusX="32" RadiusY="32" />
+                                                </Image.Clip>
+                                            </Image>
+                                            <TextBlock Margin="0,0,0,2" VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center" FontSize="18" Foreground="#fde047"
+                                                       FontWeight="Bold">
+                                                CJK_mkp
+                                            </TextBlock>
+                                            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                       FontSize="12" Foreground="White">
+                                                ICC CE 的开发者
+                                            </TextBlock>
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Grid.Column="1" Grid.Row="0" Orientation="Vertical">
                                             <Image Source="/Resources/DeveloperAvatars/dubi906w.jpg"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                                    RenderOptions.BitmapScalingMode="HighQuality" Width="64"
@@ -3310,7 +3332,7 @@
                                                 ICC 的开发者
                                             </TextBlock>
                                         </ui:SimpleStackPanel>
-                                        <ui:SimpleStackPanel Grid.Column="1" Orientation="Vertical">
+                                        <ui:SimpleStackPanel Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                                             <Image Source="/Resources/DeveloperAvatars/ChangSakura.png"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                                    RenderOptions.BitmapScalingMode="HighQuality" Width="64"
@@ -3329,7 +3351,7 @@
                                                 ICA 的开发者
                                             </TextBlock>
                                         </ui:SimpleStackPanel>
-                                        <ui:SimpleStackPanel Grid.Column="2" Orientation="Vertical">
+                                        <ui:SimpleStackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical">
                                             <Image Source="/Resources/DeveloperAvatars/WXRIW.png"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
                                                    RenderOptions.BitmapScalingMode="HighQuality" Width="64"
