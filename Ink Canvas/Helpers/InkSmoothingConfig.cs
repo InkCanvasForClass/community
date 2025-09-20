@@ -75,6 +75,9 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public void ApplyQualitySettings()
         {
+            // 保存用户设置的异步处理偏好
+            bool userAsyncPreference = UseAsyncProcessing;
+            
             switch (Quality)
             {
                 case SmoothingQuality.Performance:
@@ -85,7 +88,7 @@ namespace Ink_Canvas.Helpers
                     CurveTension = 0.15;      
                     MaxConcurrentTasks = Math.Max(1, Environment.ProcessorCount / 2);
                     UseHardwareAcceleration = true; 
-                    UseAsyncProcessing = true;      
+                    UseAsyncProcessing = userAsyncPreference; 
                     break;
 
                 case SmoothingQuality.Balanced:
@@ -96,7 +99,7 @@ namespace Ink_Canvas.Helpers
                     CurveTension = 0.25;     
                     MaxConcurrentTasks = Environment.ProcessorCount;
                     UseHardwareAcceleration = true;
-                    UseAsyncProcessing = true;
+                    UseAsyncProcessing = userAsyncPreference; 
                     break;
 
                 case SmoothingQuality.Quality:
@@ -107,7 +110,7 @@ namespace Ink_Canvas.Helpers
                     CurveTension = 0.35;     
                     MaxConcurrentTasks = Environment.ProcessorCount;
                     UseHardwareAcceleration = true;
-                    UseAsyncProcessing = true;
+                    UseAsyncProcessing = userAsyncPreference; 
                     break;
             }
         }

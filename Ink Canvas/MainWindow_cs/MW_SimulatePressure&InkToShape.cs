@@ -717,16 +717,22 @@ namespace Ink_Canvas
             catch { }
 
             // 应用高级贝塞尔曲线平滑（仅在未进行直线拉直时）
+            Debug.WriteLine($"墨迹平滑检查: UseAdvancedBezierSmoothing={Settings.Canvas.UseAdvancedBezierSmoothing}, wasStraightened={wasStraightened}");
+            Debug.WriteLine($"异步平滑设置: UseAsyncInkSmoothing={Settings.Canvas.UseAsyncInkSmoothing}, _inkSmoothingManager={_inkSmoothingManager != null}");
+            
             if (Settings.Canvas.UseAdvancedBezierSmoothing && !wasStraightened)
             {
                 try
                 {
+                    Debug.WriteLine($"开始墨迹平滑处理: 原始点数={e.Stroke.StylusPoints.Count}, 直线拉直={wasStraightened}");
+                    
                     // 检查原始笔画是否仍然存在于画布中
                     if (inkCanvas.Strokes.Contains(e.Stroke))
                     {
                         // 使用新的异步墨迹平滑管理器
                         if (Settings.Canvas.UseAsyncInkSmoothing && _inkSmoothingManager != null)
                         {
+                            Debug.WriteLine("使用异步墨迹平滑");
                             // 异步处理
                             _ = ProcessStrokeAsync(e.Stroke);
                         }
@@ -745,6 +751,10 @@ namespace Ink_Canvas
                                 _currentCommitType = CommitReason.UserInput;
                             }
                         }
+                    }
+                    else
+                    {
+                        Debug.WriteLine("原始笔画不在画布中，跳过平滑处理");
                     }
                 }
                 catch (Exception ex)
@@ -766,16 +776,26 @@ namespace Ink_Canvas
         {
             try
             {
+                Debug.WriteLine($"异步平滑开始: 原始点数={originalStroke.StylusPoints.Count}");
                 await _inkSmoothingManager.SmoothStrokeAsync(originalStroke, (original, smoothed) =>
                 {
+                    Debug.WriteLine($"异步平滑完成: 原始点数={original.StylusPoints.Count}, 平滑后点数={smoothed.StylusPoints.Count}");
+                    Debug.WriteLine($"墨迹比较: smoothed != original = {smoothed != original}");
+                    Debug.WriteLine($"画布包含原始墨迹: {inkCanvas.Strokes.Contains(original)}");
+                    
                     // 在UI线程上执行笔画替换
                     if (inkCanvas.Strokes.Contains(original) && smoothed != original)
                     {
+                        Debug.WriteLine("异步替换原始笔画为平滑后的笔画");
                         SetNewBackupOfStroke();
                         _currentCommitType = CommitReason.ShapeRecognition;
                         inkCanvas.Strokes.Remove(original);
                         inkCanvas.Strokes.Add(smoothed);
                         _currentCommitType = CommitReason.UserInput;
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"异步平滑后的笔画与原始笔画相同，未进行替换 (contains={inkCanvas.Strokes.Contains(original)}, different={smoothed != original})");
                     }
                 });
             }

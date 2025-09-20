@@ -95,18 +95,22 @@ namespace Ink_Canvas.Helpers
             // 使用改进的贝塞尔曲线拟合
             var smoothedPoints = ApplyImprovedBezierSmoothing(originalPoints);
 
+            System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 原始点数={originalPoints.Length}, 平滑后点数={smoothedPoints.Length}");
+
             cancellationToken.ThrowIfCancellationRequested();
 
-            // 严格控制点数，避免产生过多点
-            if (smoothedPoints.Length > originalPoints.Length * 2)
+            // 放宽点数限制
+            if (smoothedPoints.Length > originalPoints.Length * 3.0)
             {
+                System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 点数过多，进行重采样");
                 // 如果点数增加太多，进行重采样
                 smoothedPoints = ResampleEquidistantOptimized(smoothedPoints, ResampleInterval);
             }
 
-            // 最终检查：确保点数不会过多
-            if (smoothedPoints.Length > originalPoints.Length * 1.5)
+            // 进一步放宽最终检查
+            if (smoothedPoints.Length > originalPoints.Length * 2.5)
             {
+                System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 重采样后点数仍然过多，返回原始笔画");
                 // 如果仍然太多点，使用原始笔画
                 return stroke;
             }
@@ -117,6 +121,7 @@ namespace Ink_Canvas.Helpers
                 DrawingAttributes = stroke.DrawingAttributes.Clone()
             };
 
+            System.Diagnostics.Debug.WriteLine($"AsyncAdvancedBezierSmoothing: 成功创建平滑笔画");
             return smoothedStroke;
         }
 
@@ -125,33 +130,42 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         private StylusPoint[] ApplyImprovedBezierSmoothing(StylusPoint[] points)
         {
-            if (points.Length < 4) return points;
+            if (points.Length < 6) return points; // 5次贝塞尔需要6个点
 
             var result = new List<StylusPoint>();
 
             // 添加第一个点
             result.Add(points[0]);
 
-            // 使用非重叠的窗口进行贝塞尔曲线拟合
-            for (int i = 0; i < points.Length - 3; i += 3) // 每次移动3个点，避免重叠
+            // 使用5次贝塞尔曲线，每次移动1个点确保连续性
+            for (int i = 0; i < points.Length - 5; i++)
             {
                 var p0 = points[i];
-                var p1 = points[Math.Min(i + 1, points.Length - 1)];
-                var p2 = points[Math.Min(i + 2, points.Length - 1)];
-                var p3 = points[Math.Min(i + 3, points.Length - 1)];
+                var p1 = points[i + 1];
+                var p2 = points[i + 2];
+                var p3 = points[i + 3];
+                var p4 = points[i + 4];
+                var p5 = points[i + 5];
 
-                // 计算改进的控制点
-                var controlPoints = CalculateImprovedControlPoints(p0, p1, p2, p3);
+                // 计算5次贝塞尔的控制点
+                var controlPoints = CalculateQuinticControlPoints(p0, p1, p2, p3, p4, p5);
 
-                // 限制插值步数，避免点数爆炸
-                int steps = Math.Min(UseAdaptiveInterpolation ?
-                    CalculateAdaptiveSteps(p0, p1, p2, p3) : InterpolationSteps, 16);
-
-                // 生成贝塞尔曲线点，但跳过第一个点避免重复
-                for (int j = 1; j <= steps; j++)
+                // 生成插值点
+                if (i == 0)
                 {
-                    double t = (double)j / steps;
-                    var bezierPoint = CubicBezierWithControlPoints(controlPoints, t, p0, p3);
+                    // 第一个窗口：生成更多插值点
+                    for (int j = 1; j <= 4; j++)
+                    {
+                        double t = (double)j / 5;
+                        var bezierPoint = CalculateQuinticBezierPoint(p0, controlPoints, p5, t);
+                        result.Add(bezierPoint);
+                    }
+                }
+                else
+                {
+                    // 后续窗口：只生成最后一个插值点，避免重复
+                    double t = 4.0 / 5.0; // 只取最后一个插值点
+                    var bezierPoint = CalculateQuinticBezierPoint(p0, controlPoints, p5, t);
                     result.Add(bezierPoint);
                 }
             }
@@ -159,8 +173,209 @@ namespace Ink_Canvas.Helpers
             // 添加最后一个点
             result.Add(points[points.Length - 1]);
 
-            // 去重和优化点数
-            return RemoveDuplicatePoints(result.ToArray());
+            System.Diagnostics.Debug.WriteLine($"ApplyImprovedBezierSmoothing: 原始点数={points.Length}, 生成点数={result.Count}");
+
+            // 使用更宽松的去重
+            return RemoveDuplicatePointsLoose(result.ToArray());
+        }
+
+        /// <summary>
+        /// 5次贝塞尔曲线控制点计算
+        /// </summary>
+        private (Point cp1, Point cp2, Point cp3, Point cp4) CalculateQuinticControlPoints(
+            StylusPoint p0, StylusPoint p1, StylusPoint p2, StylusPoint p3, StylusPoint p4, StylusPoint p5)
+        {
+            // 计算控制点距离（基于相邻点距离）
+            double dist1 = Math.Sqrt((p1.X - p0.X) * (p1.X - p0.X) + (p1.Y - p0.Y) * (p1.Y - p0.Y));
+            double dist2 = Math.Sqrt((p2.X - p1.X) * (p2.X - p1.X) + (p2.Y - p1.Y) * (p2.Y - p1.Y));
+            double dist3 = Math.Sqrt((p4.X - p3.X) * (p4.X - p3.X) + (p4.Y - p3.Y) * (p4.Y - p3.Y));
+            double dist4 = Math.Sqrt((p5.X - p4.X) * (p5.X - p4.X) + (p5.Y - p4.Y) * (p5.Y - p4.Y));
+
+            // 使用更小的控制点距离，产生超平滑的曲线
+            double controlDist1 = dist1 * 0.15;
+            double controlDist2 = dist2 * 0.15;
+            double controlDist3 = dist3 * 0.15;
+            double controlDist4 = dist4 * 0.15;
+
+            // 计算控制点方向 - 使用更平滑的方向计算
+            double dir1X = p2.X - p0.X;
+            double dir1Y = p2.Y - p0.Y;
+            double dir2X = p3.X - p1.X;
+            double dir2Y = p3.Y - p1.Y;
+            double dir3X = p4.X - p2.X;
+            double dir3Y = p4.Y - p2.Y;
+            double dir4X = p5.X - p3.X;
+            double dir4Y = p5.Y - p3.Y;
+
+            // 归一化方向
+            NormalizeVector(ref dir1X, ref dir1Y);
+            NormalizeVector(ref dir2X, ref dir2Y);
+            NormalizeVector(ref dir3X, ref dir3Y);
+            NormalizeVector(ref dir4X, ref dir4Y);
+
+            // 计算控制点
+            var cp1 = new Point(p1.X + dir1X * controlDist1, p1.Y + dir1Y * controlDist1);
+            var cp2 = new Point(p2.X + dir2X * controlDist2, p2.Y + dir2Y * controlDist2);
+            var cp3 = new Point(p3.X - dir3X * controlDist3, p3.Y - dir3Y * controlDist3);
+            var cp4 = new Point(p4.X - dir4X * controlDist4, p4.Y - dir4Y * controlDist4);
+
+            return (cp1, cp2, cp3, cp4);
+        }
+
+        /// <summary>
+        /// 归一化向量
+        /// </summary>
+        private void NormalizeVector(ref double x, ref double y)
+        {
+            double length = Math.Sqrt(x * x + y * y);
+            if (length > 0)
+            {
+                x /= length;
+                y /= length;
+            }
+        }
+
+        /// <summary>
+        /// 5次贝塞尔曲线点计算
+        /// </summary>
+        private StylusPoint CalculateQuinticBezierPoint(StylusPoint p0, (Point cp1, Point cp2, Point cp3, Point cp4) controlPoints, StylusPoint p5, double t)
+        {
+            double oneMinusT = 1 - t;
+            double oneMinusT2 = oneMinusT * oneMinusT;
+            double oneMinusT3 = oneMinusT2 * oneMinusT;
+            double oneMinusT4 = oneMinusT3 * oneMinusT;
+            double oneMinusT5 = oneMinusT4 * oneMinusT;
+
+            double t2 = t * t;
+            double t3 = t2 * t;
+            double t4 = t3 * t;
+            double t5 = t4 * t;
+
+            // 5次贝塞尔曲线公式
+            double x = oneMinusT5 * p0.X +
+                      5 * oneMinusT4 * t * controlPoints.cp1.X +
+                      10 * oneMinusT3 * t2 * controlPoints.cp2.X +
+                      10 * oneMinusT2 * t3 * controlPoints.cp3.X +
+                      5 * oneMinusT * t4 * controlPoints.cp4.X +
+                      t5 * p5.X;
+
+            double y = oneMinusT5 * p0.Y +
+                      5 * oneMinusT4 * t * controlPoints.cp1.Y +
+                      10 * oneMinusT3 * t2 * controlPoints.cp2.Y +
+                      10 * oneMinusT2 * t3 * controlPoints.cp3.Y +
+                      5 * oneMinusT * t4 * controlPoints.cp4.Y +
+                      t5 * p5.Y;
+
+            // 压力插值 - 使用线性插值
+            float pressure = (float)((1 - t) * p0.PressureFactor + t * p5.PressureFactor);
+
+            return new StylusPoint(x, y, Math.Max(pressure, 0.1f));
+        }
+
+        /// <summary>
+        /// 简化的控制点计算 
+        /// </summary>
+        private (Point cp1, Point cp2) CalculateSimpleControlPoints(StylusPoint p0, StylusPoint p1, StylusPoint p2, StylusPoint p3)
+        {
+            // 计算控制点距离（基于线段长度）
+            double dist1 = Math.Sqrt((p1.X - p0.X) * (p1.X - p0.X) + (p1.Y - p0.Y) * (p1.Y - p0.Y));
+            double dist2 = Math.Sqrt((p3.X - p2.X) * (p3.X - p2.X) + (p3.Y - p2.Y) * (p3.Y - p2.Y));
+
+            // 使用更小的控制点距离，产生更平滑的曲线
+            double controlDist1 = dist1 * 0.2; // 进一步减少控制点影响
+            double controlDist2 = dist2 * 0.2;
+
+            // 计算控制点方向 - 使用更平滑的方向计算
+            double dir1X = p2.X - p0.X; // 使用更远的点计算方向
+            double dir1Y = p2.Y - p0.Y;
+            double dir2X = p3.X - p1.X;
+            double dir2Y = p3.Y - p1.Y;
+
+            // 归一化方向
+            double len1 = Math.Sqrt(dir1X * dir1X + dir1Y * dir1Y);
+            double len2 = Math.Sqrt(dir2X * dir2X + dir2Y * dir2Y);
+
+            if (len1 > 0)
+            {
+                dir1X /= len1;
+                dir1Y /= len1;
+            }
+
+            if (len2 > 0)
+            {
+                dir2X /= len2;
+                dir2Y /= len2;
+            }
+
+            // 计算控制点
+            var cp1 = new Point(
+                p1.X + dir1X * controlDist1,
+                p1.Y + dir1Y * controlDist1
+            );
+
+            var cp2 = new Point(
+                p2.X - dir2X * controlDist2,
+                p2.Y - dir2Y * controlDist2
+            );
+
+            return (cp1, cp2);
+        }
+
+        /// <summary>
+        /// 宽松的去重算法
+        /// </summary>
+        private StylusPoint[] RemoveDuplicatePointsLoose(StylusPoint[] points)
+        {
+            if (points.Length < 2) return points;
+
+            var result = new List<StylusPoint>();
+            result.Add(points[0]);
+
+            double minDistance = 0.1; // 非常小的距离阈值，几乎不去重
+
+            for (int i = 1; i < points.Length; i++)
+            {
+                var lastPoint = result[result.Count - 1];
+                var currentPoint = points[i];
+
+                // 计算距离
+                double distance = Math.Sqrt(
+                    (currentPoint.X - lastPoint.X) * (currentPoint.X - lastPoint.X) +
+                    (currentPoint.Y - lastPoint.Y) * (currentPoint.Y - lastPoint.Y));
+
+                // 如果距离足够大，添加这个点
+                if (distance >= minDistance)
+                {
+                    result.Add(currentPoint);
+                }
+            }
+
+            System.Diagnostics.Debug.WriteLine($"RemoveDuplicatePointsLoose: 输入点数={points.Length}, 输出点数={result.Count}");
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// 计算贝塞尔曲线上的点
+        /// </summary>
+        private StylusPoint CalculateBezierPoint(StylusPoint p0, Point cp1, Point cp2, StylusPoint p3, double t)
+        {
+            double x = Math.Pow(1 - t, 3) * p0.X +
+                      3 * Math.Pow(1 - t, 2) * t * cp1.X +
+                      3 * (1 - t) * Math.Pow(t, 2) * cp2.X +
+                      Math.Pow(t, 3) * p3.X;
+
+            double y = Math.Pow(1 - t, 3) * p0.Y +
+                      3 * Math.Pow(1 - t, 2) * t * cp1.Y +
+                      3 * (1 - t) * Math.Pow(t, 2) * cp2.Y +
+                      Math.Pow(t, 3) * p3.Y;
+
+            // 压力插值
+            float pressure = (float)(Math.Pow(1 - t, 3) * p0.PressureFactor +
+                                   3 * Math.Pow(1 - t, 2) * t * p0.PressureFactor +
+                                   3 * (1 - t) * Math.Pow(t, 2) * p3.PressureFactor +
+                                   Math.Pow(t, 3) * p3.PressureFactor);
+
+            return new StylusPoint(x, y, Math.Max(pressure, 0.1f));
         }
 
         /// <summary>
@@ -251,7 +466,7 @@ namespace Ink_Canvas.Helpers
             var result = new List<StylusPoint>();
             result.Add(points[0]);
 
-            double minDistance = ResampleInterval * 0.5; // 最小距离阈值
+            double minDistance = 0.3; // 进一步减少最小距离阈值，保留更多平滑点
 
             for (int i = 1; i < points.Length; i++)
             {
@@ -270,6 +485,7 @@ namespace Ink_Canvas.Helpers
                 }
             }
 
+            System.Diagnostics.Debug.WriteLine($"RemoveDuplicatePoints: 输入点数={points.Length}, 输出点数={result.Count}");
             return result.ToArray();
         }
 
@@ -516,23 +732,31 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public class AdvancedBezierSmoothing
     {
-        public double SmoothingStrength { get; set; } = 0.3;
-        public double ResampleInterval { get; set; } = 3.0;
-        public int InterpolationSteps { get; set; } = 8;
+        public double SmoothingStrength { get; set; } = 0.6; 
+        public double ResampleInterval { get; set; } = 2.0; 
+        public int InterpolationSteps { get; set; } = 12; 
 
         public Stroke SmoothStroke(Stroke stroke)
         {
             if (stroke == null || stroke.StylusPoints.Count < 3)
+            {
+                System.Diagnostics.Debug.WriteLine($"AdvancedBezierSmoothing: 笔画点数不足，跳过平滑 (点数: {stroke?.StylusPoints.Count ?? 0})");
                 return stroke;
+            }
 
-            var originalPoints = stroke.StylusPoints.ToList();
+            System.Diagnostics.Debug.WriteLine($"AdvancedBezierSmoothing: 开始平滑处理，原始点数: {stroke.StylusPoints.Count}");
 
-            // 简化处理：只进行轻度平滑
-            var smoothedPoints = ApplyLightExponentialSmoothing(originalPoints, 0.2); // 很轻的平滑
+            var originalPoints = stroke.StylusPoints.ToArray();
+
+            // 使用真正的贝塞尔曲线平滑
+            var smoothedPoints = ApplyCubicBezierSmoothing(originalPoints);
+
+            System.Diagnostics.Debug.WriteLine($"AdvancedBezierSmoothing: 平滑完成，平滑后点数: {smoothedPoints.Length}");
 
             // 检查点数是否合理
-            if (smoothedPoints.Count > originalPoints.Count * 1.5)
+            if (smoothedPoints.Length > originalPoints.Length * 10.0)
             {
+                System.Diagnostics.Debug.WriteLine($"AdvancedBezierSmoothing: 点数增加过多，返回原始笔画 (原始:{originalPoints.Length}, 平滑后:{smoothedPoints.Length})");
                 return stroke; // 如果点数增加太多，返回原始笔画
             }
 
@@ -540,7 +764,138 @@ namespace Ink_Canvas.Helpers
             {
                 DrawingAttributes = stroke.DrawingAttributes.Clone()
             };
+            
+            System.Diagnostics.Debug.WriteLine($"AdvancedBezierSmoothing: 创建平滑笔画成功");
             return smoothedStroke;
+        }
+
+        /// <summary>
+        /// 三次贝塞尔曲线平滑 
+        /// </summary>
+        private StylusPoint[] ApplyCubicBezierSmoothing(StylusPoint[] points)
+        {
+            if (points.Length < 4) return points;
+
+            var result = new List<StylusPoint>();
+            result.Add(points[0]);
+
+            // 使用更保守的窗口大小和插值
+            int windowSize = Math.Min(4, points.Length);
+            int stepSize = Math.Max(1, points.Length / 10); // 根据点数动态调整步长
+
+            for (int i = 0; i <= points.Length - windowSize; i += stepSize)
+            {
+                if (i + windowSize - 1 >= points.Length) break;
+
+                var p0 = points[i];
+                var p1 = points[Math.Min(i + 1, points.Length - 1)];
+                var p2 = points[Math.Min(i + 2, points.Length - 1)];
+                var p3 = points[Math.Min(i + windowSize - 1, points.Length - 1)];
+
+                // 计算控制点
+                var controlPoints = CalculateControlPoints(p0, p1, p2, p3);
+
+                // 只生成2-3个插值点
+                int steps = 2;
+                
+                // 生成贝塞尔曲线点
+                for (int j = 1; j <= steps; j++)
+                {
+                    double t = (double)j / steps;
+                    var bezierPoint = CalculateBezierPoint(p0, controlPoints.cp1, controlPoints.cp2, p3, t);
+                    result.Add(bezierPoint);
+                }
+            }
+
+            result.Add(points[points.Length - 1]);
+            
+            // 去重处理
+            return RemoveDuplicatePoints(result.ToArray());
+        }
+
+        /// <summary>
+        /// 去除重复点
+        /// </summary>
+        private StylusPoint[] RemoveDuplicatePoints(StylusPoint[] points)
+        {
+            if (points.Length <= 1) return points;
+
+            var result = new List<StylusPoint> { points[0] };
+            double minDistance = 1.0; // 最小距离阈值
+
+            for (int i = 1; i < points.Length; i++)
+            {
+                var lastPoint = result[result.Count - 1];
+                var currentPoint = points[i];
+                
+                double distance = Math.Sqrt(Math.Pow(currentPoint.X - lastPoint.X, 2) + 
+                                          Math.Pow(currentPoint.Y - lastPoint.Y, 2));
+                
+                if (distance > minDistance)
+                {
+                    result.Add(currentPoint);
+                }
+            }
+
+            return result.ToArray();
+        }
+
+        /// <summary>
+        /// 计算控制点
+        /// </summary>
+        private (Point cp1, Point cp2) CalculateControlPoints(StylusPoint p0, StylusPoint p1, StylusPoint p2, StylusPoint p3)
+        {
+            // 计算切线方向
+            var tangent1 = new Vector(p1.X - p0.X, p1.Y - p0.Y);
+            var tangent2 = new Vector(p3.X - p2.X, p3.Y - p2.Y);
+
+            // 归一化切线
+            if (tangent1.Length > 0) tangent1.Normalize();
+            if (tangent2.Length > 0) tangent2.Normalize();
+
+            // 计算控制点距离
+            double dist1 = Math.Sqrt((p1.X - p0.X) * (p1.X - p0.X) + (p1.Y - p0.Y) * (p1.Y - p0.Y));
+            double dist2 = Math.Sqrt((p3.X - p2.X) * (p3.X - p2.X) + (p3.Y - p2.Y) * (p3.Y - p2.Y));
+
+            double controlDist1 = dist1 * SmoothingStrength;
+            double controlDist2 = dist2 * SmoothingStrength;
+
+            // 计算控制点
+            var cp1 = new Point(
+                p1.X + tangent1.X * controlDist1,
+                p1.Y + tangent1.Y * controlDist1
+            );
+
+            var cp2 = new Point(
+                p2.X - tangent2.X * controlDist2,
+                p2.Y - tangent2.Y * controlDist2
+            );
+
+            return (cp1, cp2);
+        }
+
+        /// <summary>
+        /// 计算贝塞尔曲线上的点
+        /// </summary>
+        private StylusPoint CalculateBezierPoint(StylusPoint p0, Point cp1, Point cp2, StylusPoint p3, double t)
+        {
+            double x = Math.Pow(1 - t, 3) * p0.X +
+                      3 * Math.Pow(1 - t, 2) * t * cp1.X +
+                      3 * (1 - t) * Math.Pow(t, 2) * cp2.X +
+                      Math.Pow(t, 3) * p3.X;
+
+            double y = Math.Pow(1 - t, 3) * p0.Y +
+                      3 * Math.Pow(1 - t, 2) * t * cp1.Y +
+                      3 * (1 - t) * Math.Pow(t, 2) * cp2.Y +
+                      Math.Pow(t, 3) * p3.Y;
+
+            // 压力插值
+            float pressure = (float)(Math.Pow(1 - t, 3) * p0.PressureFactor +
+                                   3 * Math.Pow(1 - t, 2) * t * p0.PressureFactor +
+                                   3 * (1 - t) * Math.Pow(t, 2) * p3.PressureFactor +
+                                   Math.Pow(t, 3) * p3.PressureFactor);
+
+            return new StylusPoint(x, y, Math.Max(pressure, 0.1f));
         }
 
         /// <summary>
