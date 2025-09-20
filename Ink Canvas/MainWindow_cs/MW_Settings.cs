@@ -1787,6 +1787,18 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTwoFingerZoom_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
+            
+            // 如果多指书写模式启用，强制禁用双指手势
+            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                ToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                Settings.Gesture.IsEnableTwoFingerZoom = false;
+                CheckEnableTwoFingerGestureBtnColorPrompt();
+                SaveSettingsToFile();
+                return;
+            }
+            
             if (sender == ToggleSwitchEnableTwoFingerZoom)
                 BoardToggleSwitchEnableTwoFingerZoom.IsOn = ToggleSwitchEnableTwoFingerZoom.IsOn;
             else
@@ -1866,6 +1878,32 @@ namespace Ink_Canvas
             }
 
             Settings.Gesture.IsEnableMultiTouchMode = ToggleSwitchEnableMultiTouchMode.IsOn;
+            
+            // 如果启用多指书写模式，强制禁用所有双指手势
+            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                // 强制关闭所有双指手势设置
+                Settings.Gesture.IsEnableTwoFingerTranslate = false;
+                Settings.Gesture.IsEnableTwoFingerZoom = false;
+                Settings.Gesture.IsEnableTwoFingerRotation = false;
+
+                // 更新UI开关状态
+                if (ToggleSwitchEnableTwoFingerTranslate != null)
+                    ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                if (ToggleSwitchEnableTwoFingerZoom != null)
+                    ToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                if (ToggleSwitchEnableTwoFingerRotation != null)
+                    ToggleSwitchEnableTwoFingerRotation.IsOn = false;
+
+                // 更新设置窗口中的开关状态
+                if (BoardToggleSwitchEnableTwoFingerTranslate != null)
+                    BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                if (BoardToggleSwitchEnableTwoFingerZoom != null)
+                    BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                if (BoardToggleSwitchEnableTwoFingerRotation != null)
+                    BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
+            }
+            
             CheckEnableTwoFingerGestureBtnColorPrompt();
             SaveSettingsToFile();
         }
@@ -1873,6 +1911,18 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTwoFingerTranslate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
+            
+            // 如果多指书写模式启用，强制禁用双指手势
+            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                Settings.Gesture.IsEnableTwoFingerTranslate = false;
+                CheckEnableTwoFingerGestureBtnColorPrompt();
+                SaveSettingsToFile();
+                return;
+            }
+            
             if (sender == ToggleSwitchEnableTwoFingerTranslate)
                 BoardToggleSwitchEnableTwoFingerTranslate.IsOn = ToggleSwitchEnableTwoFingerTranslate.IsOn;
             else
@@ -1885,6 +1935,17 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTwoFingerRotation_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
+
+            // 如果多指书写模式启用，强制禁用双指手势
+            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                ToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                Settings.Gesture.IsEnableTwoFingerRotation = false;
+                CheckEnableTwoFingerGestureBtnColorPrompt();
+                SaveSettingsToFile();
+                return;
+            }
 
             if (sender == ToggleSwitchEnableTwoFingerRotation)
                 BoardToggleSwitchEnableTwoFingerRotation.IsOn = ToggleSwitchEnableTwoFingerRotation.IsOn;
@@ -1903,6 +1964,7 @@ namespace Ink_Canvas
                 ToggleSwitchEnableTwoFingerGestureInPresentationMode.IsOn;
             SaveSettingsToFile();
         }
+
 
         #endregion
 

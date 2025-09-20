@@ -151,9 +151,11 @@ namespace Ink_Canvas
             }
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
 
-            // 修复：确保从橡皮擦切换到笔时，多指手势功能能正确恢复
+
             // 更新lastInkCanvasEditingMode以确保多指手势逻辑正确
             lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+
+            ResetAllShapeButtonsOpacity();
 
             SetCursorBasedOnEditingMode(inkCanvas);
         }
@@ -1987,6 +1989,38 @@ namespace Ink_Canvas
             drawingShapeMode = mode;
             inkCanvas.EditingMode = InkCanvasEditingMode.None;
             SetCursorBasedOnEditingMode(inkCanvas);
+            ResetAllShapeButtonsOpacity();
+        }
+
+        /// <summary>
+        /// 重置所有几何绘制按钮的透明度状态
+        /// </summary>
+        private void ResetAllShapeButtonsOpacity()
+        {
+            try
+            {
+                // 重置所有几何绘制按钮的透明度为1（完全不透明）
+                var buttons = new UIElement[] {
+                    ImageDrawLine, BoardImageDrawLine,
+                    ImageDrawDashedLine, BoardImageDrawDashedLine,
+                    ImageDrawDotLine, BoardImageDrawDotLine,
+                    ImageDrawArrow, BoardImageDrawArrow,
+                    ImageDrawParallelLine, BoardImageDrawParallelLine,
+                };
+
+                foreach (var button in buttons)
+                {
+                    if (button != null)
+                    {
+                        var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
+                        button.BeginAnimation(OpacityProperty, dA);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"重置几何绘制按钮透明度失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>

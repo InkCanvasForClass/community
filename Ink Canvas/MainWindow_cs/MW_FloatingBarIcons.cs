@@ -91,6 +91,9 @@ namespace Ink_Canvas
                 BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                 BoardGestureGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
                 BoardGestureGeometry2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
+
+                // 强制禁用所有双指手势功能
+                ForceDisableTwoFingerGestures();
             }
             else
             {
@@ -1887,8 +1890,6 @@ namespace Ink_Canvas
             // 禁用高级橡皮擦系统
             DisableAdvancedEraserSystem();
 
-            // 修复：从橡皮擦切换到批注模式时，退出多指书写模式
-            // 这解决了从橡皮擦切换为批注时被锁定为多指书写的问题
             ExitMultiTouchModeIfNeeded();
 
             SetFloatingBarHighlightPosition("pen");
@@ -1897,14 +1898,20 @@ namespace Ink_Canvas
             bool wasInInkMode = inkCanvas.EditingMode == InkCanvasEditingMode.Ink;
             bool wasHighlighter = drawingAttributes.IsHighlighter;
 
-            // 禁止几何绘制模式下切换到Ink
-            if (drawingShapeMode != 0)
+            if (drawingShapeMode != 0 && !isLongPressSelected)
             {
                 return;
             }
 
             if (Pen_Icon.Background == null || StackPanelCanvasControls.Visibility == Visibility.Collapsed)
             {
+                if (isLongPressSelected)
+                {
+                    drawingShapeMode = 0;
+                    isLongPressSelected = false;
+                    ResetAllShapeButtonsOpacity();
+                }
+
                 // 使用集中化的工具模式切换方法
                 SetCurrentToolMode(InkCanvasEditingMode.Ink);
 
@@ -3724,7 +3731,32 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 强制禁用所有双指手势功能（当多指书写模式启用时）
+        /// </summary>
+        private void ForceDisableTwoFingerGestures()
+        {
+            // 强制关闭所有双指手势设置
+            Settings.Gesture.IsEnableTwoFingerTranslate = false;
+            Settings.Gesture.IsEnableTwoFingerZoom = false;
+            Settings.Gesture.IsEnableTwoFingerRotation = false;
 
+            // 更新UI开关状态
+            if (ToggleSwitchEnableTwoFingerTranslate != null)
+                ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+            if (ToggleSwitchEnableTwoFingerZoom != null)
+                ToggleSwitchEnableTwoFingerZoom.IsOn = false;
+            if (ToggleSwitchEnableTwoFingerRotation != null)
+                ToggleSwitchEnableTwoFingerRotation.IsOn = false;
+
+            // 更新设置窗口中的开关状态
+            if (BoardToggleSwitchEnableTwoFingerTranslate != null)
+                BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+            if (BoardToggleSwitchEnableTwoFingerZoom != null)
+                BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
+            if (BoardToggleSwitchEnableTwoFingerRotation != null)
+                BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
+        }
 
         #endregion
 
