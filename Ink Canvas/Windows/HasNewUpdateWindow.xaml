@@ -140,69 +140,70 @@
     </Window.Resources>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="0,0,0,30">
+        <Grid Margin="0,0,0,0">
             <ui:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0">
-            <!-- 现代化标题栏 -->
-            <Border Background="{StaticResource HeaderGradient}" CornerRadius="16,16,0,0" Margin="0,0,0,0"
-                    MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
-                <Grid>
-                    <!-- 标题栏内容 -->
-                    <ui:SimpleStackPanel Orientation="Horizontal" Margin="32,24,80,24" Spacing="16">
-                        <Border Background="White" CornerRadius="16" Padding="16" Margin="0,0,0,0">
-                            <Image Source="/Resources/Icons-fluent/party.png" Width="24" Height="24"/>
-                        </Border>
-                        <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
-                            <TextBlock Text="新版本发布" FontSize="28" FontWeight="Bold" Foreground="#1e40af" TextAlignment="Left"/>
-                            <TextBlock Text="InkCanvasForClass CE 为您带来全新体验" FontSize="16" TextAlignment="Left" Foreground="#374151" Opacity="0.9"/>
-                </ui:SimpleStackPanel>
-            </ui:SimpleStackPanel>
-
-                    <!-- 自定义关闭按钮 -->
-                    <Button x:Name="CloseButton" 
-                            HorizontalAlignment="Right" 
-                            VerticalAlignment="Top" 
-                            Margin="0,12,12,0"
-                            Width="32" Height="32"
-                            Background="Transparent"
-                            BorderThickness="0"
-                            Click="CloseButton_Click"
-                            Cursor="Hand"
-                            ToolTip="关闭">
-                        <Button.Template>
-                            <ControlTemplate TargetType="Button">
-                                <Border Background="{TemplateBinding Background}" 
-                                        CornerRadius="16" 
-                                        BorderThickness="{TemplateBinding BorderThickness}"
-                                        BorderBrush="{TemplateBinding BorderBrush}">
-                                    <Path Data="M8,8 L16,16 M16,8 L8,16" 
-                                          Stroke="#374151" 
-                                          StrokeThickness="2" 
-                                          HorizontalAlignment="Center" 
-                                          VerticalAlignment="Center"/>
-                                </Border>
-                                <ControlTemplate.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#e5e7eb"/>
-                                    </Trigger>
-                                    <Trigger Property="IsPressed" Value="True">
-                                        <Setter Property="Background" Value="#d1d5db"/>
-                                    </Trigger>
-                                </ControlTemplate.Triggers>
-                            </ControlTemplate>
-                        </Button.Template>
-                    </Button>
-                </Grid>
-            </Border>
-
-            <!-- 现代化内容区域 -->
-            <Border Background="White" CornerRadius="16" Margin="32,24,32,0" 
+            <!-- 统一的主容器 -->
+            <Border Background="White" CornerRadius="16" Margin="0,0,0,0" 
                     BorderThickness="0" Padding="0">
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="0" Opacity="0.08"/>
                 </Border.Effect>
+                
                 <ui:SimpleStackPanel Spacing="0">
+                    <!-- 现代化标题栏 -->
+                    <Border Background="{StaticResource HeaderGradient}" CornerRadius="16,16,0,0" Margin="0,0,0,0"
+                            MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                        <Grid>
+                            <!-- 标题栏内容 -->
+                            <ui:SimpleStackPanel Orientation="Horizontal" Margin="32,24,80,24" Spacing="16">
+                                <Border Background="White" CornerRadius="16" Padding="16" Margin="0,0,0,0">
+                                    <Image Source="/Resources/Icons-fluent/party.png" Width="24" Height="24"/>
+                                </Border>
+                                <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
+                                    <TextBlock Text="新版本发布" FontSize="28" FontWeight="Bold" Foreground="#1e40af" TextAlignment="Left"/>
+                                    <TextBlock Text="InkCanvasForClass CE 为您带来全新体验" FontSize="16" TextAlignment="Left" Foreground="#374151" Opacity="0.9"/>
+                        </ui:SimpleStackPanel>
+                    </ui:SimpleStackPanel>
+
+                            <!-- 自定义关闭按钮 -->
+                            <Button x:Name="CloseButton" 
+                                    HorizontalAlignment="Right" 
+                                    VerticalAlignment="Top" 
+                                    Margin="0,12,12,0"
+                                    Width="32" Height="32"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Click="CloseButton_Click"
+                                    Cursor="Hand"
+                                    ToolTip="关闭">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="16" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                BorderBrush="{TemplateBinding BorderBrush}">
+                                            <Path Data="M8,8 L16,16 M16,8 L8,16" 
+                                                  Stroke="#374151" 
+                                                  StrokeThickness="2" 
+                                                  HorizontalAlignment="Center" 
+                                                  VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#e5e7eb"/>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background" Value="#d1d5db"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+
                     <!-- 内容标题 -->
-                    <Border Background="#f8fafc" CornerRadius="16,16,0,0" Padding="24,20,24,16">
+                    <Border Background="#f8fafc" Padding="24,20,24,16">
                         <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                             <Border Background="#3b82f6" CornerRadius="8" Padding="8">
                                 <TextBlock Text="📝" FontSize="16" Foreground="White" 
@@ -237,11 +238,8 @@
                 </ui:SimpleStackPanel>
             </Border>
             
-            <!-- 现代化版本信息 -->
-            <Border Background="White" CornerRadius="16" Margin="32,16,32,0" Padding="24,20">
-                <Border.Effect>
-                    <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="0" Opacity="0.08"/>
-                </Border.Effect>
+                    <!-- 现代化版本信息 -->
+                    <Border Background="#f8fafc" Margin="0,0,0,0" Padding="24,20">
                 <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24">
                     <ui:SimpleStackPanel Orientation="Vertical" Spacing="4" HorizontalAlignment="Center">
                         <TextBlock Text="版本信息" FontSize="14" FontWeight="Medium" Foreground="#6b7280"/>
@@ -257,11 +255,8 @@
                 </ui:SimpleStackPanel>
             </Border>
             
-            <!-- 现代化按钮区域 -->
-            <Border Background="White" CornerRadius="16" Margin="32,16,32,20" Padding="32,24">
-                <Border.Effect>
-                    <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="0" Opacity="0.08"/>
-                </Border.Effect>
+                    <!-- 现代化按钮区域 -->
+                    <Border Background="#f8fafc" Margin="0,0,0,0" Padding="32,24" CornerRadius="0,0,16,16">
                 <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="16">
                     <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
                         <Border Background="#3b82f6" CornerRadius="8" Padding="8">
@@ -293,12 +288,9 @@
                     </ui:SimpleStackPanel>
                                 </Border>
 
-            <!-- 现代化下载进度指示器 -->
-            <Border x:Name="DownloadProgressPanel" Background="White" CornerRadius="16" 
-                    Margin="32,16,32,20" Padding="32,24" Visibility="Collapsed">
-                <Border.Effect>
-                    <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="0" Opacity="0.08"/>
-                </Border.Effect>
+                    <!-- 现代化下载进度指示器 -->
+                    <Border x:Name="DownloadProgressPanel" Background="#f8fafc" 
+                            Margin="0,0,0,0" Padding="32,24" Visibility="Collapsed">
                 <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="16">
                     <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
                         <Border Background="#10b981" CornerRadius="8" Padding="8">
