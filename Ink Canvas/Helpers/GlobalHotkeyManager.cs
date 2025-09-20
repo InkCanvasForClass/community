@@ -5,12 +5,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Windows;
 using System.Windows.Input;
+using System.Windows.Forms;
 
 namespace Ink_Canvas.Helpers
 {
     /// <summary>
     /// 全局快捷键管理器 - 使用NHotkey库实现全局快捷键功能
+    /// 支持多屏幕环境下的智能热键注册，避免影响其他屏幕的复制粘贴功能
     /// </summary>
     public class GlobalHotkeyManager : IDisposable
     {
@@ -19,6 +22,16 @@ namespace Ink_Canvas.Helpers
         private readonly MainWindow _mainWindow;
         private bool _isDisposed;
         private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
+        
+        // 多屏幕支持相关字段
+        private Screen _currentScreen;
+        private bool _isMultiScreenMode = false;
+        private bool _enableScreenSpecificHotkeys = true; // 是否启用基于屏幕的热键注册
+        
+        // 智能热键管理相关字段
+        private bool _isWindowFocused = false;
+        private bool _isMouseOverWindow = false;
+        private System.Windows.Threading.DispatcherTimer _mousePositionTimer;
 
         // 配置文件路径
         private static readonly string HotkeyConfigFile = Path.Combine(App.RootPath, "Configs", "HotkeyConfig.json");
@@ -30,6 +43,9 @@ namespace Ink_Canvas.Helpers
             _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
             _registeredHotkeys = new Dictionary<string, HotkeyInfo>();
             _hotkeysShouldBeRegistered = true; // 启动时注册热键
+            
+            // 初始化多屏幕支持
+            InitializeMultiScreenSupport();
             
             // 启动时确保配置文件存在
             EnsureConfigFileExists();
@@ -51,6 +67,12 @@ namespace Ink_Canvas.Helpers
             {
                 if (_isDisposed)
                     return false;
+
+                // 检查是否应该注册热键（基于屏幕和模式）
+                if (!ShouldRegisterHotkeys())
+                {
+                    return false;
+                }
 
                 // 如果快捷键已存在，先注销
                 if (_registeredHotkeys.ContainsKey(hotkeyName))
@@ -85,7 +107,10 @@ namespace Ink_Canvas.Helpers
                 });
 
                 _registeredHotkeys[hotkeyName] = hotkeyInfo;
-                // 成功注册全局快捷键
+                
+                // 记录注册信息
+                var screenInfo = _isMultiScreenMode ? $" (屏幕: {_currentScreen?.DeviceName})" : "";
+                
                 return true;
             }
             catch (Exception ex)
@@ -179,7 +204,6 @@ namespace Ink_Canvas.Helpers
             {
                 if (!File.Exists(HotkeyConfigFile))
                 {
-                    LogHelper.WriteLogToFile("快捷键配置文件不存在");
                     return new List<HotkeyInfo>();
                 }
 
@@ -212,7 +236,6 @@ namespace Ink_Canvas.Helpers
                     });
                 }
 
-                LogHelper.WriteLogToFile($"从配置文件读取到 {hotkeyList.Count} 个快捷键信息");
                 return hotkeyList;
             }
             catch (Exception ex)
@@ -287,7 +310,6 @@ namespace Ink_Canvas.Helpers
                 if (!File.Exists(HotkeyConfigFile))
                 {
                     LogHelper.WriteLogToFile($"快捷键配置文件不存在: {HotkeyConfigFile}", LogHelper.LogType.Warning);
-                    LogHelper.WriteLogToFile("配置文件不存在，创建默认配置文件并注册默认快捷键");
                     CreateDefaultConfigFile();
                     RegisterDefaultHotkeys();
                     _hotkeysShouldBeRegistered = true;
@@ -299,7 +321,6 @@ namespace Ink_Canvas.Helpers
                 {
                     // 成功从配置文件加载快捷键设置
                     _hotkeysShouldBeRegistered = true;
-                    LogHelper.WriteLogToFile("成功从配置文件加载快捷键设置");
                 }
                 else
                 {
@@ -322,11 +343,9 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                LogHelper.WriteLogToFile("开始保存快捷键配置到配置文件", LogHelper.LogType.Event);
 
                 if (SaveHotkeysToConfigFile())
                 {
-                    LogHelper.WriteLogToFile("快捷键配置已成功保存到配置文件", LogHelper.LogType.Event);
                 }
                 else
                 {
@@ -350,10 +369,18 @@ namespace Ink_Canvas.Helpers
                 if (!_hotkeysShouldBeRegistered)
                 {
                     _hotkeysShouldBeRegistered = true;
-                    LogHelper.WriteLogToFile("启用快捷键注册功能");
 
-                    // 立即加载快捷键设置
-                    LoadHotkeysFromSettings();
+                    // 启动鼠标位置监控定时器
+                    if (_isMultiScreenMode && _enableScreenSpecificHotkeys && _mousePositionTimer != null)
+                    {
+                        _mousePositionTimer.Start();
+                    }
+
+                    // 根据上下文决定是否立即加载快捷键
+                    if (ShouldEnableHotkeysBasedOnContext())
+                    {
+                        LoadHotkeysFromSettings();
+                    }
                 }
                 else
                 {
@@ -377,12 +404,17 @@ namespace Ink_Canvas.Helpers
                 {
                     _hotkeysShouldBeRegistered = false;
 
+                    // 停止鼠标位置监控定时器
+                    if (_mousePositionTimer != null && _mousePositionTimer.IsEnabled)
+                    {
+                        _mousePositionTimer.Stop();
+                    }
+
                     // 注销所有快捷键
                     UnregisterAllHotkeys();
                 }
                 else
                 {
-                    LogHelper.WriteLogToFile("快捷键注册功能已经禁用");
                 }
             }
             catch (Exception ex)
@@ -407,7 +439,6 @@ namespace Ink_Canvas.Helpers
                     {
                         // 如果设置允许，则在鼠标模式下也启用快捷键
                         EnableHotkeyRegistration();
-                        LogHelper.WriteLogToFile("切换到鼠标模式，但根据设置保持快捷键启用");
                     }
                     else
                     {
@@ -455,7 +486,6 @@ namespace Ink_Canvas.Helpers
 
                 if (success)
                 {
-                    LogHelper.WriteLogToFile($"成功更新快捷键 {hotkeyName}: {modifiers}+{key}", LogHelper.LogType.Event);
                     // 自动保存配置
                     SaveHotkeysToSettings();
                 }
@@ -468,9 +498,418 @@ namespace Ink_Canvas.Helpers
                 return false;
             }
         }
+
+        /// <summary>
+        /// 启用基于屏幕的热键注册
+        /// </summary>
+        public void EnableScreenSpecificHotkeys()
+        {
+            try
+            {
+                _enableScreenSpecificHotkeys = true;
+                
+                // 如果当前在多屏幕环境下，刷新热键注册
+                if (_isMultiScreenMode)
+                {
+                    RefreshHotkeysForCurrentScreen();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启用基于屏幕的热键注册时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 禁用基于屏幕的热键注册
+        /// </summary>
+        public void DisableScreenSpecificHotkeys()
+        {
+            try
+            {
+                _enableScreenSpecificHotkeys = false;
+                
+                // 重新注册热键（全局模式）
+                if (_hotkeysShouldBeRegistered)
+                {
+                    RefreshHotkeysForCurrentScreen();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"禁用基于屏幕的热键注册时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 获取当前屏幕信息
+        /// </summary>
+        /// <returns>当前屏幕信息</returns>
+        public string GetCurrentScreenInfo()
+        {
+            try
+            {
+                if (_isMultiScreenMode && _currentScreen != null)
+                {
+                    return $"多屏幕环境 - 当前屏幕: {_currentScreen.DeviceName} ({_currentScreen.Bounds.Width}x{_currentScreen.Bounds.Height})";
+                }
+                else
+                {
+                    return "单屏幕环境";
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"获取当前屏幕信息时出错: {ex.Message}", LogHelper.LogType.Error);
+                return "无法获取屏幕信息";
+            }
+        }
+
+        /// <summary>
+        /// 检查是否启用了基于屏幕的热键注册
+        /// </summary>
+        /// <returns>是否启用</returns>
+        public bool IsScreenSpecificHotkeysEnabled()
+        {
+            return _enableScreenSpecificHotkeys && _isMultiScreenMode;
+        }
+
+        /// <summary>
+        /// 手动刷新当前屏幕的热键注册
+        /// </summary>
+        public void RefreshCurrentScreenHotkeys()
+        {
+            try
+            {
+                RefreshHotkeysForCurrentScreen();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新当前屏幕热键时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
         #endregion
 
         #region Private Helper Methods
+        /// <summary>
+        /// 初始化多屏幕支持
+        /// </summary>
+        private void InitializeMultiScreenSupport()
+        {
+            try
+            {
+                // 检测是否有多个屏幕
+                _isMultiScreenMode = ScreenDetectionHelper.HasMultipleScreens();
+                
+                if (_isMultiScreenMode)
+                {
+                    // 获取当前窗口所在的屏幕
+                    _currentScreen = ScreenDetectionHelper.GetWindowScreen(_mainWindow);
+                    
+                    // 监听窗口位置变化事件
+                    _mainWindow.LocationChanged += OnWindowLocationChanged;
+                    
+                    // 初始化智能热键管理
+                    InitializeSmartHotkeyManagement();
+                }
+                else
+                {
+                    _currentScreen = ScreenDetectionHelper.GetPrimaryScreen();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化多屏幕支持时出错: {ex.Message}", LogHelper.LogType.Error);
+                _isMultiScreenMode = false;
+                _currentScreen = ScreenDetectionHelper.GetPrimaryScreen();
+            }
+        }
+
+        /// <summary>
+        /// 初始化智能热键管理
+        /// </summary>
+        private void InitializeSmartHotkeyManagement()
+        {
+            try
+            {
+                // 监听窗口焦点事件
+                _mainWindow.GotFocus += OnWindowGotFocus;
+                _mainWindow.LostFocus += OnWindowLostFocus;
+                
+                // 监听鼠标进入/离开事件
+                _mainWindow.MouseEnter += OnMouseEnterWindow;
+                _mainWindow.MouseLeave += OnMouseLeaveWindow;
+                
+                // 初始化鼠标位置监控定时器
+                _mousePositionTimer = new System.Windows.Threading.DispatcherTimer();
+                _mousePositionTimer.Interval = TimeSpan.FromMilliseconds(500); // 每500ms检查一次
+                _mousePositionTimer.Tick += OnMousePositionTimerTick;
+                
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化热键管理时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 窗口位置变化事件处理
+        /// </summary>
+        private void OnWindowLocationChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!_isMultiScreenMode || !_enableScreenSpecificHotkeys)
+                    return;
+
+                var newScreen = ScreenDetectionHelper.GetWindowScreen(_mainWindow);
+                if (newScreen != null && newScreen != _currentScreen)
+                {
+                    _currentScreen = newScreen;
+                    
+                    // 重新注册热键以适应新屏幕
+                    RefreshHotkeysForCurrentScreen();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理窗口位置变化时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 为当前屏幕刷新热键注册
+        /// </summary>
+        private void RefreshHotkeysForCurrentScreen()
+        {
+            try
+            {
+                if (!_hotkeysShouldBeRegistered)
+                    return;
+
+                // 注销所有现有热键
+                UnregisterAllHotkeys();
+
+                // 重新注册热键
+                LoadHotkeysFromSettings();
+                
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新当前屏幕热键时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 窗口获得焦点事件处理
+        /// </summary>
+        private void OnWindowGotFocus(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _isWindowFocused = true;
+                UpdateHotkeyStateBasedOnContext();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理窗口获得焦点事件时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 窗口失去焦点事件处理
+        /// </summary>
+        private void OnWindowLostFocus(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                _isWindowFocused = false;
+                UpdateHotkeyStateBasedOnContext();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理窗口失去焦点事件时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 鼠标进入窗口事件处理
+        /// </summary>
+        private void OnMouseEnterWindow(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            try
+            {
+                _isMouseOverWindow = true;
+                UpdateHotkeyStateBasedOnContext();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理鼠标进入窗口事件时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 鼠标离开窗口事件处理
+        /// </summary>
+        private void OnMouseLeaveWindow(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            try
+            {
+                _isMouseOverWindow = false;
+                UpdateHotkeyStateBasedOnContext();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理鼠标离开窗口事件时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 鼠标位置定时器事件处理
+        /// </summary>
+        private void OnMousePositionTimerTick(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!_isMultiScreenMode || !_enableScreenSpecificHotkeys)
+                    return;
+
+                // 检查鼠标是否在当前窗口所在的屏幕上
+                var mousePosition = System.Windows.Forms.Control.MousePosition;
+                var currentScreen = Screen.FromPoint(mousePosition);
+                
+                // 无论屏幕是否变化，都检查热键状态
+                // 这样可以确保热键状态始终与当前上下文保持一致
+                bool shouldEnableHotkeys = ShouldEnableHotkeysBasedOnContext();
+                bool currentlyHasHotkeys = _registeredHotkeys.Count > 0;
+                
+                if (shouldEnableHotkeys && !currentlyHasHotkeys)
+                {
+                    UpdateHotkeyStateBasedOnContext();
+                }
+                else if (!shouldEnableHotkeys && currentlyHasHotkeys)
+                {
+                    UpdateHotkeyStateBasedOnContext();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"处理鼠标位置定时器事件时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 根据上下文更新热键状态
+        /// </summary>
+        private void UpdateHotkeyStateBasedOnContext()
+        {
+            try
+            {
+                if (!_hotkeysShouldBeRegistered)
+                    return;
+
+                bool shouldEnableHotkeys = ShouldEnableHotkeysBasedOnContext();
+                
+                if (shouldEnableHotkeys)
+                {
+                    // 如果热键未注册，则注册
+                    if (_registeredHotkeys.Count == 0)
+                    {
+                        LoadHotkeysFromSettings();
+                    }
+                }
+                else
+                {
+                    // 如果热键已注册，则注销（与鼠标模式禁用保持一致）
+                    if (_registeredHotkeys.Count > 0)
+                    {
+                        UnregisterAllHotkeys();
+                        
+                        // 注意：这里不设置 _hotkeysShouldBeRegistered = false
+                        // 因为我们需要保持热键系统的启用状态，只是暂时注销热键
+                        // 这样当上下文变化时，热键可以重新注册
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"根据上下文更新热键状态时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 检查是否应该注册热键（基于屏幕和模式）
+        /// </summary>
+        /// <returns>是否应该注册热键</returns>
+        private bool ShouldRegisterHotkeys()
+        {
+            try
+            {
+                // 如果禁用热键注册，则不注册
+                if (!_hotkeysShouldBeRegistered)
+                    return false;
+
+                // 如果启用基于屏幕的热键注册
+                if (_enableScreenSpecificHotkeys && _isMultiScreenMode)
+                {
+                    return ShouldEnableHotkeysBasedOnContext();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查是否应该注册热键时出错: {ex.Message}", LogHelper.LogType.Error);
+                return true; // 出错时默认注册
+            }
+        }
+
+        /// <summary>
+        /// 根据上下文检查是否应该启用热键
+        /// </summary>
+        /// <returns>是否应该启用热键</returns>
+        private bool ShouldEnableHotkeysBasedOnContext()
+        {
+            try
+            {
+                // 策略1：鼠标在窗口上时启用热键（最高优先级）
+                if (_isMouseOverWindow)
+                {
+                    return true;
+                }
+
+                // 策略2：在多屏幕环境下，检查鼠标是否在当前窗口所在的屏幕上
+                if (_isMultiScreenMode)
+                {
+                    var mousePosition = System.Windows.Forms.Control.MousePosition;
+                    var mouseScreen = Screen.FromPoint(mousePosition);
+                    
+                    if (mouseScreen == _currentScreen)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+
+                // 策略3：单屏幕环境下，窗口有焦点时启用热键
+                if (_isWindowFocused)
+                {
+                    return true;
+                }
+
+                // 默认情况：禁用热键
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查是否应该启用热键时出错: {ex.Message}", LogHelper.LogType.Error);
+                return true; // 出错时默认启用
+            }
+        }
+
         /// <summary>
         /// 切换到指定笔类型
         /// </summary>
@@ -513,7 +952,6 @@ namespace Ink_Canvas.Helpers
                 // 如果配置文件不存在，创建默认配置文件
                 if (!File.Exists(HotkeyConfigFile))
                 {
-                    LogHelper.WriteLogToFile($"快捷键配置文件不存在，创建默认配置文件: {HotkeyConfigFile}", LogHelper.LogType.Event);
                     CreateDefaultConfigFile();
                 }
             }
@@ -579,7 +1017,6 @@ namespace Ink_Canvas.Helpers
                 // 写入配置文件
                 File.WriteAllText(HotkeyConfigFile, jsonContent, Encoding.UTF8);
 
-                LogHelper.WriteLogToFile($"已创建默认快捷键配置文件: {HotkeyConfigFile}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -643,7 +1080,6 @@ namespace Ink_Canvas.Helpers
                     }
                 }
 
-                LogHelper.WriteLogToFile($"成功加载 {successCount}/{config.Hotkeys.Count} 个快捷键配置", LogHelper.LogType.Event);
                 if (successCount > 0)
                 {
                     _hotkeysShouldBeRegistered = true;
@@ -702,7 +1138,6 @@ namespace Ink_Canvas.Helpers
                 // 直接写入原文件，覆盖原有内容
                 File.WriteAllText(HotkeyConfigFile, jsonContent, Encoding.UTF8);
 
-                LogHelper.WriteLogToFile($"快捷键配置已保存到: {HotkeyConfigFile}", LogHelper.LogType.Event);
                 return true;
             }
             catch (Exception ex)
@@ -908,6 +1343,29 @@ namespace Ink_Canvas.Helpers
         {
             if (!_isDisposed)
             {
+                // 注销所有快捷键
+                UnregisterAllHotkeys();
+                
+                // 停止定时器
+                if (_mousePositionTimer != null)
+                {
+                    _mousePositionTimer.Stop();
+                    _mousePositionTimer = null;
+                }
+                
+                // 移除事件监听器
+                if (_mainWindow != null)
+                {
+                    if (_isMultiScreenMode)
+                    {
+                        _mainWindow.LocationChanged -= OnWindowLocationChanged;
+                    }
+                    
+                    _mainWindow.GotFocus -= OnWindowGotFocus;
+                    _mainWindow.LostFocus -= OnWindowLostFocus;
+                    _mainWindow.MouseEnter -= OnMouseEnterWindow;
+                    _mainWindow.MouseLeave -= OnMouseLeaveWindow;
+                }
 
                 _isDisposed = true;
             }
