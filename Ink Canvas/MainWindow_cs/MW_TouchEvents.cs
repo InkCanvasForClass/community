@@ -590,8 +590,8 @@ namespace Ink_Canvas
                 lastTouchDownTime = DateTime.Now;
             }
 
-            // Palm Eraser 逻辑
-            if (Settings.Canvas.EnablePalmEraser && dec.Count >= 2 && !isPalmEraserActive)
+            // Palm Eraser 逻辑 
+            if (Settings.Canvas.EnablePalmEraser && !isPalmEraserActive)
             {
                 touchPoint = e.GetTouchPoint(inkCanvas);
                 double boundWidth = GetTouchBoundWidth(e);
