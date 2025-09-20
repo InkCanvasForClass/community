@@ -1042,13 +1042,6 @@ namespace Ink_Canvas
                                 break;
                             }
 
-                        if (!Settings.Gesture.IsEnableTwoFingerZoom) continue;
-                        try
-                        {
-                            stroke.DrawingAttributes.Width *= md.Scale.X;
-                            stroke.DrawingAttributes.Height *= md.Scale.Y;
-                        }
-                        catch { }
                     }
                 }
                 else
