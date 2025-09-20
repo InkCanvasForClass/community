@@ -3297,10 +3297,10 @@
                                         <ui:SimpleStackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical">
                                             <Image Source="/Resources/DeveloperAvatars/CJKmkp.jpg"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="64"
-                                                   Margin="0,0,0,6" Height="64">
+                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="128"
+                                                   Margin="0,0,0,6" Height="128">
                                                 <Image.Clip>
-                                                    <EllipseGeometry Center="32,32" RadiusX="32" RadiusY="32" />
+                                                    <EllipseGeometry Center="64,64" RadiusX="64" RadiusY="64" />
                                                 </Image.Clip>
                                             </Image>
                                             <TextBlock Margin="0,0,0,2" VerticalAlignment="Center"
@@ -3316,10 +3316,10 @@
                                         <ui:SimpleStackPanel Grid.Column="1" Grid.Row="0" Orientation="Vertical">
                                             <Image Source="/Resources/DeveloperAvatars/dubi906w.jpg"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="64"
-                                                   Margin="0,0,0,6" Height="64">
+                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="128"
+                                                   Margin="0,0,0,6" Height="128">
                                                 <Image.Clip>
-                                                    <EllipseGeometry Center="32,32" RadiusX="32" RadiusY="32" />
+                                                    <EllipseGeometry Center="64,64" RadiusX="64" RadiusY="64" />
                                                 </Image.Clip>
                                             </Image>
                                             <TextBlock Margin="0,0,0,2" VerticalAlignment="Center"
@@ -3335,10 +3335,10 @@
                                         <ui:SimpleStackPanel Grid.Column="0" Grid.Row="1" Orientation="Vertical">
                                             <Image Source="/Resources/DeveloperAvatars/ChangSakura.png"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="64"
-                                                   Margin="0,0,0,6" Height="64">
+                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="128"
+                                                   Margin="0,0,0,6" Height="128">
                                                 <Image.Clip>
-                                                    <EllipseGeometry Center="32,32" RadiusX="32" RadiusY="32" />
+                                                    <EllipseGeometry Center="64,64" RadiusX="64" RadiusY="64" />
                                                 </Image.Clip>
                                             </Image>
                                             <TextBlock Margin="0,0,0,2" VerticalAlignment="Center"
@@ -3354,10 +3354,10 @@
                                         <ui:SimpleStackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical">
                                             <Image Source="/Resources/DeveloperAvatars/WXRIW.png"
                                                    VerticalAlignment="Center" HorizontalAlignment="Center"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="64"
-                                                   Margin="0,0,0,6" Height="64">
+                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="128"
+                                                   Margin="0,0,0,6" Height="128">
                                                 <Image.Clip>
-                                                    <EllipseGeometry Center="32,32" RadiusX="32" RadiusY="32" />
+                                                    <EllipseGeometry Center="64,64" RadiusX="64" RadiusY="64" />
                                                 </Image.Clip>
                                             </Image>
                                             <TextBlock Margin="0,0,0,2" VerticalAlignment="Center"
