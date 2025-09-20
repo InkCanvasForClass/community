@@ -1,7 +1,23 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <SolidColorBrush x:Key="FloatBarBackground" Color="Black" Opacity="0.5"/>
-    <SolidColorBrush x:Key="FloatBarBorderBrush" Color="White" Opacity="0.5"/>
-    <SolidColorBrush x:Key="FloatBarForeground" Color="White"/>
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <SolidColorBrush x:Key="FloatBarBackground" Opacity="0.6" Color="Black" />
+    <SolidColorBrush x:Key="FloatBarBackgroundWithoutOpacity" Opacity="0.95" Color="Black" />
+    <SolidColorBrush x:Key="FloatBarTitleBackground" Opacity="0.5" Color="#2156c9" />
+    <SolidColorBrush x:Key="FloatBarBorderBrush" Opacity="0.6" Color="White" />
+    <SolidColorBrush x:Key="FloatBarForeground" Color="White" />
     <Color x:Key="FloatBarForegroundColor">#FFcccccc</Color>
+
+    <SolidColorBrush x:Key="SettingsPageForeground" Color="White" />
+    <SolidColorBrush x:Key="SettingsPageAnnotationForeground" Opacity="0.7" Color="White" />
+    <SolidColorBrush x:Key="SettingsPageBorderBrush" Opacity="0.8" Color="White" />
+    <SolidColorBrush x:Key="SettingsPageBackground" Opacity="0.95" Color="#1f1f1f" />
+
+    <SolidColorBrush x:Key="IconForeground" Color="White" />
+    <SolidColorBrush x:Key="TextForeground" Color="White" />
+
+    <SolidColorBrush x:Key="RedBrush" Color="IndianRed" />
+    <SolidColorBrush x:Key="PurpleBrush" Color="MediumPurple" />
+
+    <Color x:Key="FloatBarButtonBackgroundKey">Transparent</Color>
+    <Color x:Key="FloatBarButtonBackgroundPointerOverKey">#2200CDCD</Color>
+    <Color x:Key="FloatBarButtonButtonBackgroundPressedKey">#4400CDCD</Color>
 </ResourceDictionary>

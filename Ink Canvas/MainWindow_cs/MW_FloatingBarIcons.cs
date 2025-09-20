@@ -404,17 +404,17 @@ namespace Ink_Canvas
             {
                 if (mode != "clear")
                 {
-                    CursorIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(27, 27, 27));
+                    CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
                     CursorIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedCursorIcon);
-                    PenIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(27, 27, 27));
+                    PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
                     PenIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedPenIcon);
-                    StrokeEraserIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(27, 27, 27));
+                    StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
                     StrokeEraserIconGeometry.Geometry =
                         Geometry.Parse(XamlGraphicsIconGeometries.LinedEraserStrokeIcon);
-                    CircleEraserIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(27, 27, 27));
+                    CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
                     CircleEraserIconGeometry.Geometry =
                         Geometry.Parse(XamlGraphicsIconGeometries.LinedEraserCircleIcon);
-                    LassoSelectIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(27, 27, 27));
+                    LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
                     LassoSelectIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedLassoSelectIcon);
 
                     BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
