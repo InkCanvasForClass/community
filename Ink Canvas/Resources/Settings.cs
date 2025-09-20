@@ -339,6 +339,9 @@ namespace Ink_Canvas
         [JsonProperty("isAutoEnterAnnotationModeWhenExitFoldMode")]
         public bool IsAutoEnterAnnotationModeWhenExitFoldMode { get; set; }
 
+        [JsonProperty("isAutoFoldWhenExitWhiteboard")]
+        public bool IsAutoFoldWhenExitWhiteboard { get; set; }
+
         [JsonProperty("isAutoFoldInEasiNote")]
         public bool IsAutoFoldInEasiNote { get; set; }
 

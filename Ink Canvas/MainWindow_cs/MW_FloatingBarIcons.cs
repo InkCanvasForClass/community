@@ -2808,6 +2808,12 @@ namespace Ink_Canvas
                         // 新增：在屏幕模式下恢复基础浮动栏的显示
                         ViewboxFloatingBar.Visibility = Visibility.Visible;
 
+                        // 新增：退出白板时自动收纳功能
+                        if (Settings.Automation.IsAutoFoldWhenExitWhiteboard && !isFloatingBarFolded)
+                        {
+                            FoldFloatingBar_MouseUp(null, null);
+                        }
+
                         if (BtnSwitchTheme.Content.ToString() == "浅色")
                         {
                             BtnSwitch.Content = "黑板";

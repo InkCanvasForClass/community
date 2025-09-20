@@ -700,6 +700,9 @@ namespace Ink_Canvas
                     if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
                         !Settings.Automation.IsAutoFoldInPPTSlideShow)
                     {
+                        // 先进入批注模式，这会显示调色盘
+                        PenIcon_Click(null, null);
+                        // 然后设置颜色
                         BtnColorRed_Click(null, null);
                         Dispatcher.BeginInvoke(new Action(() =>
                         {

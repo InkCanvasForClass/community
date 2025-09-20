@@ -3098,6 +3098,15 @@
                                                          Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <TextBlock Text="# 开启后，如果进入PPT放映前为收纳模式则退出后也为收纳模式，如果进入前不是收纳模式则退出后也不是收纳模式" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="退出白板时自动收纳"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchAutoFoldWhenExitWhiteboard"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后，退出白板模式时会自动收纳到侧边栏" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <GroupBox Name="GroupBoxRandWindow">

@@ -1543,6 +1543,13 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Automation.IsAutoFoldWhenExitWhiteboard = ToggleSwitchAutoFoldWhenExitWhiteboard.IsOn;
+            SaveSettingsToFile();
+        }
+
         private void ToggleSwitchSaveScreenshotsInDateFolders_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;

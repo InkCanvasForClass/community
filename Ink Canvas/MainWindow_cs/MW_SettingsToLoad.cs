@@ -907,6 +907,9 @@ namespace Ink_Canvas
 
                 // 加载退出收纳模式自动切换至批注模式设置
                 ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode.IsOn = Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode;
+                
+                // 加载退出白板时自动收纳设置
+                ToggleSwitchAutoFoldWhenExitWhiteboard.IsOn = Settings.Automation.IsAutoFoldWhenExitWhiteboard;
             }
             else
             {

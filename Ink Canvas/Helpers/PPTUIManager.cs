@@ -183,7 +183,7 @@ namespace Ink_Canvas.Helpers
                                           _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                                           isInSlideShow &&
                                           hasValidPageCount &&
-                                          !Settings.Automation.IsAutoFoldInPPTSlideShow;
+                                          !MainWindow.Settings.Automation.IsAutoFoldInPPTSlideShow;
 
                     if (!shouldShowButtons)
                     {
