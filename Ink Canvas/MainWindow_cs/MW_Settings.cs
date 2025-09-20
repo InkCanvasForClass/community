@@ -1980,6 +1980,10 @@ namespace Ink_Canvas
             Settings.Advanced.TouchMultiplier = 0.3;
             Settings.Advanced.NibModeBoundsWidth = 5;
             Settings.Advanced.FingerModeBoundsWidth = 20;
+            Settings.Advanced.NibModeBoundsWidthThresholdValue = 2.5;
+            Settings.Advanced.FingerModeBoundsWidthThresholdValue = 2.5;
+            Settings.Advanced.NibModeBoundsWidthEraserSize = 0.8;
+            Settings.Advanced.FingerModeBoundsWidthEraserSize = 0.8;
             Settings.Advanced.EraserBindTouchMultiplier = true;
             Settings.Advanced.IsLogEnabled = true;
             Settings.Advanced.IsSecondConfirmWhenShutdownApp = false;

@@ -2784,9 +2784,6 @@ namespace Ink_Canvas
                 if (isPalmEraserActive)
                 {
                     isPalmEraserActive = false;
-                    palmEraserTouchDownHandled = false;
-                    palmEraserTouchIds.Clear();
-                    StopPalmEraserRecoveryTimer();
                 }
                 
                 // 确保触摸事件能正常响应
