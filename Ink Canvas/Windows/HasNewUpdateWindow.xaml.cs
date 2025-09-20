@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 
@@ -143,7 +144,13 @@ namespace Ink_Canvas
             UpdateLaterButton.IsEnabled = false;
             SkipVersionButton.IsEnabled = false;
             DownloadProgressPanel.Visibility = Visibility.Visible;
-            DownloadProgressBar.Value = 0;
+            
+            // 重置进度条
+            var progressFill = FindName("ProgressFill") as Border;
+            if (progressFill != null)
+            {
+                progressFill.Width = 0;
+            }
             DownloadProgressText.Text = "正在准备下载...";
 
             // 启动多线路下载
@@ -156,7 +163,12 @@ namespace Ink_Canvas
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        DownloadProgressBar.Value = percent;
+                        // 更新自定义进度条
+                        progressFill = FindName("ProgressFill") as Border;
+                        if (progressFill != null)
+                        {
+                            progressFill.Width = (percent / 100.0) * 400; // 400是进度条总宽度
+                        }
                         DownloadProgressText.Text = text;
                     });
                 });
@@ -174,7 +186,12 @@ namespace Ink_Canvas
 
             if (downloadSuccess)
             {
-                DownloadProgressBar.Value = 100;
+                // 设置进度条为100%
+                progressFill = FindName("ProgressFill") as Border;
+                if (progressFill != null)
+                {
+                    progressFill.Width = 400; // 100%完成
+                }
                 DownloadProgressText.Text = "下载完成，准备安装...";
                 await Task.Delay(800);
                 // 设置结果为立即更新
@@ -213,6 +230,27 @@ namespace Ink_Canvas
             // 关闭窗口
             DialogResult = true;
             Close();
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            LogHelper.WriteLogToFile("AutoUpdate | Close button clicked");
+
+            // 设置结果为稍后更新（默认行为）
+            Result = UpdateResult.UpdateLater;
+
+            // 关闭窗口
+            DialogResult = false;
+            Close();
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // 开始拖动窗口
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
         }
 
 
