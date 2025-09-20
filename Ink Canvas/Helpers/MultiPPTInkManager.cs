@@ -561,7 +561,7 @@ namespace Ink_Canvas.Helpers
                 var presentationPath = presentation.FullName;
                 var fileHash = GetFileHash(presentationPath);
                 var processId = GetProcessId(presentation);
-                return $"{presentation.Name}_{fileHash}_{processId}";
+                return $"{presentation.Name}_{presentation.Slides.Count}_{fileHash}_{processId}";
             }
             catch (COMException comEx)
             {
