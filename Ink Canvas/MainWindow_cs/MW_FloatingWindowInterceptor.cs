@@ -312,6 +312,37 @@ namespace Ink_Canvas
                 {
                     Settings.Automation.FloatingWindowInterceptor.InterceptRules[ruleName] = enabled;
                 }
+
+                // 获取规则信息以处理父子关系
+                var rule = _floatingWindowInterceptorManager?.GetInterceptRule(type);
+                if (rule != null)
+                {
+                    // 如果是父规则，更新所有子规则的设置
+                    if (rule.ChildTypes.Count > 0)
+                    {
+                        foreach (var childType in rule.ChildTypes)
+                        {
+                            var childRuleName = childType.ToString();
+                            if (Settings.Automation.FloatingWindowInterceptor.InterceptRules.ContainsKey(childRuleName))
+                            {
+                                Settings.Automation.FloatingWindowInterceptor.InterceptRules[childRuleName] = enabled;
+                            }
+                        }
+                    }
+                    // 如果是子规则，更新父规则的设置
+                    else if (rule.ParentType.HasValue)
+                    {
+                        var parentRule = _floatingWindowInterceptorManager?.GetInterceptRule(rule.ParentType.Value);
+                        if (parentRule != null)
+                        {
+                            var parentRuleName = rule.ParentType.Value.ToString();
+                            if (Settings.Automation.FloatingWindowInterceptor.InterceptRules.ContainsKey(parentRuleName))
+                            {
+                                Settings.Automation.FloatingWindowInterceptor.InterceptRules[parentRuleName] = parentRule.IsEnabled;
+                            }
+                        }
+                    }
+                }
                 
                 // 更新UI显示
                 UpdateFloatingWindowInterceptorUI();

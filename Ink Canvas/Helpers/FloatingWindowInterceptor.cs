@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -18,6 +19,9 @@ namespace Ink_Canvas.Helpers
 
         [DllImport("user32.dll")]
         private static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumChildWindows(IntPtr hWndParent, EnumWindowsProc enumProc, IntPtr lParam);
 
         [DllImport("user32.dll")]
         private static extern IntPtr GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
@@ -110,6 +114,10 @@ namespace Ink_Canvas.Helpers
             /// </summary>
             SeewoPincoDrawingFloating,
             /// <summary>
+            /// 希沃品课教师端 桌面画板
+            /// </summary>
+            SeewoPincoBoardService,
+            /// <summary>
             /// 希沃PPT小工具
             /// </summary>
             SeewoPPTFloating,
@@ -122,17 +130,65 @@ namespace Ink_Canvas.Helpers
             /// </summary>
             HiteAnnotationFloating,
             /// <summary>
-            /// 畅言智慧课堂 桌面悬浮窗
+            /// 畅言智慧课堂 主栏悬浮窗
             /// </summary>
             ChangYanFloating,
+            /// <summary>
+            /// 畅言智慧课堂 画笔设置
+            /// </summary>
+            ChangYanBrushSettings,
+            /// <summary>
+            /// 畅言智慧课堂 滑动清除
+            /// </summary>
+            ChangYanSwipeClear,
+            /// <summary>
+            /// 畅言智慧课堂 互动
+            /// </summary>
+            ChangYanInteraction,
+            /// <summary>
+            /// 畅言智慧课堂 学科应用
+            /// </summary>
+            ChangYanSubjectApp,
+            /// <summary>
+            /// 畅言智慧课堂 管控
+            /// </summary>
+            ChangYanControl,
+            /// <summary>
+            /// 畅言智慧课堂 通用工具
+            /// </summary>
+            ChangYanCommonTools,
+            /// <summary>
+            /// 畅言智慧课堂 场景工具栏
+            /// </summary>
+            ChangYanSceneToolbar,
+            /// <summary>
+            /// 畅言智慧课堂 绘制窗口
+            /// </summary>
+            ChangYanDrawWindow,
             /// <summary>
             /// 畅言智慧课堂 PPT悬浮窗
             /// </summary>
             ChangYanPptFloating,
             /// <summary>
+            /// 畅言智慧课堂 PPT页面控制
+            /// </summary>
+            ChangYanPptPageControl,
+            /// <summary>
+            /// 畅言智慧课堂 PPT返回
+            /// </summary>
+            ChangYanPptGoBack,
+            /// <summary>
+            /// 畅言智慧课堂 PPT预览
+            /// </summary>
+            ChangYanPptPreview,
+            /// <summary>
             /// 天喻教育云互动课堂 桌面悬浮窗（包括PPT控件）
             /// </summary>
             IntelligentClassFloating,
+            /// <summary>
+            /// 天喻教育云互动课堂 PPT悬浮窗
+            /// </summary>
+            IntelligentClassPptFloating,
             /// <summary>
             /// 希沃桌面 画笔悬浮窗
             /// </summary>
@@ -155,6 +211,8 @@ namespace Ink_Canvas.Helpers
             public bool IsEnabled { get; set; }
             public bool RequiresAdmin { get; set; }
             public string Description { get; set; }
+            public InterceptType? ParentType { get; set; }
+            public List<InterceptType> ChildTypes { get; set; } = new List<InterceptType>();
         }
 
         #endregion
@@ -206,8 +264,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.SeewoWhiteboard3Floating,
                 ProcessName = "EasiNote",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                WindowTitlePattern = "Note",
+                ClassNamePattern = "HwndWrapper[EasiNote.exe;;",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃白板3 桌面悬浮窗"
@@ -219,7 +277,7 @@ namespace Ink_Canvas.Helpers
                 Type = InterceptType.SeewoWhiteboard5Floating,
                 ProcessName = "EasiNote",
                 WindowTitlePattern = "",
-                ClassNamePattern = "",
+                ClassNamePattern = "HwndWrapper[EasiNote;;",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃白板5 桌面悬浮窗"
@@ -231,43 +289,61 @@ namespace Ink_Canvas.Helpers
                 Type = InterceptType.SeewoWhiteboard5CFloating,
                 ProcessName = "EasiNote5C",
                 WindowTitlePattern = "",
-                ClassNamePattern = "",
+                ClassNamePattern = "HwndWrapper[EasiNote5C;;",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃白板5C 桌面悬浮窗"
             };
 
-            // 希沃品课教师端 桌面悬浮窗
+            // 希沃品课教师端 桌面悬浮窗（父规则）
             _interceptRules[InterceptType.SeewoPincoSideBarFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoPincoSideBarFloating,
                 ProcessName = "ClassIn",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                WindowTitlePattern = "希沃品课——appBar",
+                ClassNamePattern = "Chrome_WidgetWin_1",
                 IsEnabled = true,
                 RequiresAdmin = false,
-                Description = "希沃品课教师端 桌面悬浮窗"
+                Description = "希沃品课教师端 桌面悬浮窗",
+                ParentType = null,
+                ChildTypes = new List<InterceptType> { InterceptType.SeewoPincoDrawingFloating, InterceptType.SeewoPincoBoardService }
             };
 
-            // 希沃品课教师端 画笔悬浮窗
+            // 希沃品课教师端 画笔悬浮窗（子规则）
             _interceptRules[InterceptType.SeewoPincoDrawingFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoPincoDrawingFloating,
                 ProcessName = "ClassIn",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                WindowTitlePattern = "希沃品课——integration",
+                ClassNamePattern = "Chrome_WidgetWin_1",
                 IsEnabled = true,
                 RequiresAdmin = false,
-                Description = "希沃品课教师端 画笔悬浮窗（包括PPT控件）"
+                Description = "希沃品课教师端 画笔悬浮窗（包括PPT控件）",
+                ParentType = InterceptType.SeewoPincoSideBarFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 希沃品课教师端 桌面画板（子规则）
+            _interceptRules[InterceptType.SeewoPincoBoardService] = new InterceptRule
+            {
+                Type = InterceptType.SeewoPincoBoardService,
+                ProcessName = "BoardService",
+                WindowTitlePattern = "",
+                ClassNamePattern = "HwndWrapper[BoardService;;",
+                IsEnabled = true,
+                RequiresAdmin = false,
+                Description = "希沃品课教师端 桌面画板",
+                ParentType = InterceptType.SeewoPincoSideBarFloating,
+                ChildTypes = new List<InterceptType>()
             };
 
             // 希沃PPT小工具
             _interceptRules[InterceptType.SeewoPPTFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoPPTFloating,
-                ProcessName = "SeewoPPT",
+                ProcessName = "PPTService",
                 WindowTitlePattern = "",
-                ClassNamePattern = "",
+                ClassNamePattern = "HwndWrapper[PPTService.exe;;",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃PPT小工具"
@@ -278,8 +354,8 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.AiClassFloating,
                 ProcessName = "ClassIn",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                WindowTitlePattern = "TransparentWindow",
+                ClassNamePattern = "UIWndTransparent",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "AiClass 桌面悬浮窗"
@@ -290,23 +366,147 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.HiteAnnotationFloating,
                 ProcessName = "HiteVision",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                WindowTitlePattern = "HiteAnnotation",
+                ClassNamePattern = "Qt5QWindowToolSaveBits",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "鸿合屏幕书写"
             };
 
-            // 畅言智慧课堂 桌面悬浮窗
+            // 畅言智慧课堂 主栏悬浮窗（父规则）
             _interceptRules[InterceptType.ChangYanFloating] = new InterceptRule
             {
                 Type = InterceptType.ChangYanFloating,
                 ProcessName = "ClassIn",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                WindowTitlePattern = "ifly",
+                ClassNamePattern = "Qt5QWindowOwnDCIcon",
                 IsEnabled = true,
                 RequiresAdmin = true,
-                Description = "畅言智慧课堂 桌面悬浮窗"
+                Description = "畅言智慧课堂 主栏悬浮窗",
+                ParentType = null,
+                ChildTypes = new List<InterceptType> 
+                { 
+                    InterceptType.ChangYanBrushSettings, 
+                    InterceptType.ChangYanSwipeClear, 
+                    InterceptType.ChangYanInteraction, 
+                    InterceptType.ChangYanSubjectApp, 
+                    InterceptType.ChangYanControl, 
+                    InterceptType.ChangYanCommonTools, 
+                    InterceptType.ChangYanSceneToolbar, 
+                    InterceptType.ChangYanDrawWindow
+                }
+            };
+
+            // 畅言智慧课堂 画笔设置（子规则）
+            _interceptRules[InterceptType.ChangYanBrushSettings] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanBrushSettings,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "画笔设置",
+                ClassNamePattern = "Qt5QWindowOwnDCIcon",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 画笔设置",
+                ParentType = InterceptType.ChangYanFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 畅言智慧课堂 滑动清除（子规则）
+            _interceptRules[InterceptType.ChangYanSwipeClear] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanSwipeClear,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "滑动清除",
+                ClassNamePattern = "Qt5QWindowOwnDCIcon",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 滑动清除",
+                ParentType = InterceptType.ChangYanFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 畅言智慧课堂 互动（子规则）
+            _interceptRules[InterceptType.ChangYanInteraction] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanInteraction,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "互动",
+                ClassNamePattern = "Qt5QWindowOwnDCIcon",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 互动",
+                ParentType = InterceptType.ChangYanFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 畅言智慧课堂 学科应用（子规则）
+            _interceptRules[InterceptType.ChangYanSubjectApp] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanSubjectApp,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "学科应用",
+                ClassNamePattern = "Qt5QWindowOwnDCIcon",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 学科应用",
+                ParentType = InterceptType.ChangYanFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 畅言智慧课堂 管控（子规则）
+            _interceptRules[InterceptType.ChangYanControl] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanControl,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "管控",
+                ClassNamePattern = "Qt5QWindowOwnDCIcon",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 管控",
+                ParentType = InterceptType.ChangYanFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 畅言智慧课堂 通用工具（子规则）
+            _interceptRules[InterceptType.ChangYanCommonTools] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanCommonTools,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "通用工具",
+                ClassNamePattern = "Qt5QWindowOwnDCIcon",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 通用工具",
+                ParentType = InterceptType.ChangYanFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 畅言智慧课堂 场景工具栏（子规则）
+            _interceptRules[InterceptType.ChangYanSceneToolbar] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanSceneToolbar,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "SceneToolbar",
+                ClassNamePattern = "Qt5QWindowOwnDCIcon",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 场景工具栏",
+                ParentType = InterceptType.ChangYanFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 畅言智慧课堂 绘制窗口（子规则）
+            _interceptRules[InterceptType.ChangYanDrawWindow] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanDrawWindow,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "DrawWindow",
+                ClassNamePattern = "Qt5QWindowToolSaveBits",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 绘制窗口",
+                ParentType = InterceptType.ChangYanFloating,
+                ChildTypes = new List<InterceptType>()
             };
 
             // 畅言智慧课堂 PPT悬浮窗
@@ -314,32 +514,92 @@ namespace Ink_Canvas.Helpers
             {
                 Type = InterceptType.ChangYanPptFloating,
                 ProcessName = "ClassIn",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                WindowTitlePattern = "Exch",
+                ClassNamePattern = "Qt5QWindowToolSaveBitsOwnDC",
                 IsEnabled = true,
                 RequiresAdmin = true,
-                Description = "畅言智慧课堂 PPT悬浮窗"
+                Description = "畅言智慧课堂 PPT悬浮窗",
+                ParentType = null,
+                ChildTypes = new List<InterceptType> { InterceptType.ChangYanPptPageControl, InterceptType.ChangYanPptGoBack, InterceptType.ChangYanPptPreview }
             };
 
-            // 天喻教育云互动课堂 桌面悬浮窗
+            // 畅言智慧课堂 PPT页面控制（子规则）
+            _interceptRules[InterceptType.ChangYanPptPageControl] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanPptPageControl,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "PageCtl",
+                ClassNamePattern = "Qt5QWindowToolSaveBitsOwnDC",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 PPT页面控制",
+                ParentType = InterceptType.ChangYanPptFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 畅言智慧课堂 PPT返回（子规则）
+            _interceptRules[InterceptType.ChangYanPptGoBack] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanPptGoBack,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "Goback",
+                ClassNamePattern = "Qt5QWindowToolSaveBitsOwnDC",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 PPT返回",
+                ParentType = InterceptType.ChangYanPptFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 畅言智慧课堂 PPT预览（子规则）
+            _interceptRules[InterceptType.ChangYanPptPreview] = new InterceptRule
+            {
+                Type = InterceptType.ChangYanPptPreview,
+                ProcessName = "ClassIn",
+                WindowTitlePattern = "Preview",
+                ClassNamePattern = "Qt5QWindowToolSaveBitsOwnDC",
+                IsEnabled = true,
+                RequiresAdmin = true,
+                Description = "畅言智慧课堂 PPT预览",
+                ParentType = InterceptType.ChangYanPptFloating,
+                ChildTypes = new List<InterceptType>()
+            };
+
+            // 天喻教育云互动课堂 桌面悬浮窗（父规则）
             _interceptRules[InterceptType.IntelligentClassFloating] = new InterceptRule
             {
                 Type = InterceptType.IntelligentClassFloating,
-                ProcessName = "ClassIn",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                ProcessName = "IntelligentClassApp",
+                WindowTitlePattern = "桌面小工具 - 互动课堂",
+                ClassNamePattern = "HwndWrapper[IntelligentClassApp.exe;;",
                 IsEnabled = true,
                 RequiresAdmin = false,
-                Description = "天喻教育云互动课堂 桌面悬浮窗（包括PPT控件）"
+                Description = "天喻教育云互动课堂 桌面悬浮窗（包括PPT控件）",
+                ParentType = null,
+                ChildTypes = new List<InterceptType> { InterceptType.IntelligentClassPptFloating }
+            };
+
+            // 天喻教育云互动课堂 PPT悬浮窗（子规则）
+            _interceptRules[InterceptType.IntelligentClassPptFloating] = new InterceptRule
+            {
+                Type = InterceptType.IntelligentClassPptFloating,
+                ProcessName = "IntelligentClass",
+                WindowTitlePattern = "",
+                ClassNamePattern = "HwndWrapper[IntelligentClass.Office.PowerPoint.vsto|vstolocal;VSTA_Main;",
+                IsEnabled = true,
+                RequiresAdmin = false,
+                Description = "天喻教育云互动课堂 PPT悬浮窗",
+                ParentType = InterceptType.IntelligentClassFloating,
+                ChildTypes = new List<InterceptType>()
             };
 
             // 希沃桌面 画笔悬浮窗
             _interceptRules[InterceptType.SeewoDesktopAnnotationFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoDesktopAnnotationFloating,
-                ProcessName = "Seewo",
+                ProcessName = "DesktopAnnotation",
                 WindowTitlePattern = "",
-                ClassNamePattern = "",
+                ClassNamePattern = "HwndWrapper[DesktopAnnotation.exe;;",
                 IsEnabled = true,
                 RequiresAdmin = false,
                 Description = "希沃桌面 画笔悬浮窗"
@@ -349,9 +609,9 @@ namespace Ink_Canvas.Helpers
             _interceptRules[InterceptType.SeewoDesktopSideBarFloating] = new InterceptRule
             {
                 Type = InterceptType.SeewoDesktopSideBarFloating,
-                ProcessName = "Seewo",
-                WindowTitlePattern = "",
-                ClassNamePattern = "",
+                ProcessName = "ResidentSideBar",
+                WindowTitlePattern = "ResidentSideBar",
+                ClassNamePattern = "HwndWrapper[ResidentSideBar.exe;;",
                 IsEnabled = true,
                 RequiresAdmin = true,
                 Description = "希沃桌面 侧栏悬浮窗"
@@ -395,7 +655,51 @@ namespace Ink_Canvas.Helpers
         {
             if (_interceptRules.ContainsKey(type))
             {
-                _interceptRules[type].IsEnabled = enabled;
+                var rule = _interceptRules[type];
+                rule.IsEnabled = enabled;
+
+                // 如果是父规则被禁用，则禁用所有子规则
+                if (!enabled && rule.ChildTypes.Count > 0)
+                {
+                    foreach (var childType in rule.ChildTypes)
+                    {
+                        if (_interceptRules.ContainsKey(childType))
+                        {
+                            _interceptRules[childType].IsEnabled = false;
+                        }
+                    }
+                }
+                // 如果是父规则被启用，则启用所有子规则
+                else if (enabled && rule.ChildTypes.Count > 0)
+                {
+                    foreach (var childType in rule.ChildTypes)
+                    {
+                        if (_interceptRules.ContainsKey(childType))
+                        {
+                            _interceptRules[childType].IsEnabled = true;
+                        }
+                    }
+                }
+                // 如果是子规则被禁用，检查是否需要禁用父规则
+                else if (!enabled && rule.ParentType.HasValue)
+                {
+                    var parentRule = _interceptRules[rule.ParentType.Value];
+                    // 检查是否还有其他启用的子规则
+                    bool hasEnabledChildren = parentRule.ChildTypes.Any(childType => 
+                        _interceptRules.ContainsKey(childType) && _interceptRules[childType].IsEnabled);
+                    
+                    // 如果没有启用的子规则，则禁用父规则
+                    if (!hasEnabledChildren)
+                    {
+                        parentRule.IsEnabled = false;
+                    }
+                }
+                // 如果是子规则被启用，则启用父规则
+                else if (enabled && rule.ParentType.HasValue)
+                {
+                    var parentRule = _interceptRules[rule.ParentType.Value];
+                    parentRule.IsEnabled = true;
+                }
             }
         }
 
@@ -470,6 +774,7 @@ namespace Ink_Canvas.Helpers
 
             try
             {
+                // 使用递归枚举，包括子窗口
                 EnumWindows(EnumWindowsCallback, IntPtr.Zero);
             }
             catch (Exception ex)
@@ -483,6 +788,9 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                // 递归枚举子窗口
+                EnumChildWindows(hWnd, EnumWindowsCallback, lParam);
+
                 // 基本检查
                 if (!IsWindow(hWnd) || !IsWindowVisible(hWnd)) return true;
                 

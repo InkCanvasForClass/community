@@ -2893,7 +2893,7 @@
                                         
                                         <!-- 畅言智慧课堂 -->
                                         <ui:SimpleStackPanel Grid.Row="2" Grid.Column="0" Orientation="Vertical">
-                                            <Image Source="/Resources/Icons-png/ChangYan.png" Margin="0,0,0,4"
+                                            <Image Source="/Resources/Icons-png/畅言智慧课堂.png" Margin="0,0,0,4"
                                                    Width="42" Height="42" HorizontalAlignment="Center" />
                                             <TextBlock Foreground="#fafafa" Text="畅言智慧课堂" HorizontalAlignment="Center"
                                                        FontSize="14" Margin="0,0,0,4" />
@@ -2907,7 +2907,7 @@
                                         
                                         <!-- 畅言PPT -->
                                         <ui:SimpleStackPanel Grid.Row="2" Grid.Column="1" Orientation="Vertical">
-                                            <Image Source="/Resources/Icons-png/ChangYanPPT.png" Margin="0,0,0,4"
+                                            <Image Source="/Resources/Icons-png/畅言智慧课堂.png" Margin="0,0,0,4"
                                                    Width="42" Height="42" HorizontalAlignment="Center" />
                                             <TextBlock Foreground="#fafafa" Text="畅言PPT" HorizontalAlignment="Center"
                                                        FontSize="14" Margin="0,0,0,4" />
@@ -2921,7 +2921,7 @@
                                         
                                         <!-- 天喻教育云 -->
                                         <ui:SimpleStackPanel Grid.Row="2" Grid.Column="2" Orientation="Vertical">
-                                            <Image Source="/Resources/Icons-png/IntelligentClass.png" Margin="0,0,0,4"
+                                            <Image Source="/Resources/Icons-png/天喻教育云.png" Margin="0,0,0,4"
                                                    Width="42" Height="42" HorizontalAlignment="Center" />
                                             <TextBlock Foreground="#fafafa" Text="天喻教育云" HorizontalAlignment="Center"
                                                        FontSize="14" Margin="0,0,0,4" />
@@ -2935,7 +2935,7 @@
                                         
                                         <!-- 希沃桌面画笔 -->
                                         <ui:SimpleStackPanel Grid.Row="2" Grid.Column="3" Orientation="Vertical">
-                                            <Image Source="/Resources/Icons-png/SeewoDesktop.png" Margin="0,0,0,4"
+                                            <Image Source="/Resources/Icons-png/SeewoPinco.png" Margin="0,0,0,4"
                                                    Width="42" Height="42" HorizontalAlignment="Center" />
                                             <TextBlock Foreground="#fafafa" Text="希沃桌面画笔" HorizontalAlignment="Center"
                                                        FontSize="14" Margin="0,0,0,4" />
@@ -2949,7 +2949,7 @@
                                         
                                         <!-- 希沃桌面侧栏 -->
                                         <ui:SimpleStackPanel Grid.Row="3" Grid.Column="0" Orientation="Vertical">
-                                            <Image Source="/Resources/Icons-png/SeewoDesktop.png" Margin="0,0,0,4"
+                                            <Image Source="/Resources/Icons-png/SeewoPinco.png" Margin="0,0,0,4"
                                                    Width="42" Height="42" HorizontalAlignment="Center" />
                                             <TextBlock Foreground="#fafafa" Text="希沃桌面侧栏" HorizontalAlignment="Center"
                                                        FontSize="14" Margin="0,0,0,4" />

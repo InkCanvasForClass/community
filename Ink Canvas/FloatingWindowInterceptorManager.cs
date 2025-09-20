@@ -124,6 +124,37 @@ namespace Ink_Canvas
                 {
                     _settings.InterceptRules[ruleName] = enabled;
                 }
+
+                // 获取规则信息以处理父子关系
+                var rule = _interceptor.GetInterceptRule(type);
+                if (rule != null)
+                {
+                    // 如果是父规则，更新所有子规则的设置
+                    if (rule.ChildTypes.Count > 0)
+                    {
+                        foreach (var childType in rule.ChildTypes)
+                        {
+                            var childRuleName = childType.ToString();
+                            if (_settings.InterceptRules.ContainsKey(childRuleName))
+                            {
+                                _settings.InterceptRules[childRuleName] = enabled;
+                            }
+                        }
+                    }
+                    // 如果是子规则，更新父规则的设置
+                    else if (rule.ParentType.HasValue)
+                    {
+                        var parentRule = _interceptor.GetInterceptRule(rule.ParentType.Value);
+                        if (parentRule != null)
+                        {
+                            var parentRuleName = rule.ParentType.Value.ToString();
+                            if (_settings.InterceptRules.ContainsKey(parentRuleName))
+                            {
+                                _settings.InterceptRules[parentRuleName] = parentRule.IsEnabled;
+                            }
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
