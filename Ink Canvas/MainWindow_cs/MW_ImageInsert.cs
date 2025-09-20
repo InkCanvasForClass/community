@@ -237,7 +237,6 @@ namespace Ink_Canvas
                     graphics.CopyFromScreen(x, y, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
                 }
 
-                LogHelper.WriteLogToFile($"成功截取区域: X={x}, Y={y}, Width={width}, Height={height}");
                 return bitmap;
             }
             catch (Exception ex)
@@ -492,7 +491,6 @@ namespace Ink_Canvas
                     InitializeScreenshotTransform(image);
                 }
 
-                LogHelper.WriteLogToFile($"截图居中完成: 位置({centerX}, {centerY}), 尺寸({newWidth}x{newHeight})");
             }
             catch (Exception ex)
             {

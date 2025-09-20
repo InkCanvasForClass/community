@@ -47,7 +47,6 @@ namespace Ink_Canvas.Helpers
                     AvailableCameras.Add(device);
                 }
 
-                LogHelper.WriteLogToFile($"发现 {AvailableCameras.Count} 个摄像头设备");
             }
             catch (Exception ex)
             {
@@ -120,7 +119,6 @@ namespace Ink_Canvas.Helpers
                 }
 
                 _isCapturing = false;
-                LogHelper.WriteLogToFile("摄像头预览已停止");
             }
             catch (Exception ex)
             {
