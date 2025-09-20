@@ -5538,7 +5538,7 @@
                                                         <Run Text="图形" />
                                                         <Run Text="(第一行支持长按保持选中)" FontSize="10" />
                                                     </TextBlock>
-                                                    <ui:FontIcon Margin="0,-20,8,15" Glyph="&#xE840;"
+                                                    <ui:SymbolIcon Margin="0,-20,8,15" Symbol="Pin"
                                                                    MouseDown="Border_MouseDown"
                                                                    MouseUp="SymbolIconPinBorderDrawShape_MouseUp"
                                                                    Foreground="{DynamicResource FloatBarForeground}"

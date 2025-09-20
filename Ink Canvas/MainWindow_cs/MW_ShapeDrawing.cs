@@ -10,6 +10,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Point = System.Windows.Point;
 
@@ -74,9 +75,9 @@ namespace Ink_Canvas
             ToggleSwitchDrawShapeBorderAutoHide.IsOn = !ToggleSwitchDrawShapeBorderAutoHide.IsOn;
 
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-                ((FontIcon)sender).Glyph = "&#xE840;";
+                ((SymbolIcon)sender).Symbol = Symbol.Pin;
             else
-                ((FontIcon)sender).Glyph = "&#xE77A;";
+                ((SymbolIcon)sender).Symbol = Symbol.UnPin;
         }
 
         private object lastMouseDownSender;
@@ -587,44 +588,20 @@ namespace Ink_Canvas
                     {
                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                     };
-                    try
-                    {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
-                    }
-                    catch { }
-
-                    lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    
+                    UpdateTempStrokeSafely(stroke);
                     break;
                 case 8:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     strokes.Add(GenerateDashedLineStrokeCollection(iniP, endP));
-                    try
-                    {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
-                    }
-                    catch
-                    {
-                        Trace.WriteLine("lastTempStrokeCollection failed.");
-                    }
-
-                    lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    
+                    UpdateTempStrokeCollectionSafely(strokes);
                     break;
                 case 18:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     strokes.Add(GenerateDotLineStrokeCollection(iniP, endP));
-                    try
-                    {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
-                    }
-                    catch
-                    {
-                        Trace.WriteLine("lastTempStrokeCollection failed.");
-                    }
-
-                    lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    
+                    UpdateTempStrokeCollectionSafely(strokes);
                     break;
                 case 2:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -645,14 +622,9 @@ namespace Ink_Canvas
                     {
                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                     };
-                    try
-                    {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
-                    }
-                    catch { }
-
-                    lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    
+                    // 优化：使用更安全的临时笔画更新方式，减少闪烁
+                    UpdateTempStrokeSafely(stroke);
                     break;
                 case 15:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1509,6 +1481,119 @@ namespace Ink_Canvas
         private StrokeCollection lastTempStrokeCollection = new StrokeCollection();
 
         private bool isWaitUntilNextTouchDown;
+
+        // 添加节流机制，减少更新频率
+        private DateTime lastUpdateTime = DateTime.MinValue;
+        private const int UpdateThrottleMs = 16; // 约60fps的更新频率
+
+        /// <summary>
+        /// 安全地更新临时笔画，减少预览闪烁
+        /// </summary>
+        /// <param name="newStroke">新的临时笔画</param>
+        private void UpdateTempStrokeSafely(Stroke newStroke)
+        {
+            // 节流机制：限制更新频率
+            var now = DateTime.Now;
+            if ((now - lastUpdateTime).TotalMilliseconds < UpdateThrottleMs)
+            {
+                return;
+            }
+            lastUpdateTime = now;
+
+            try
+            {
+                // 使用Dispatcher.BeginInvoke确保UI更新在UI线程上执行
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        // 先添加新笔画，再删除旧笔画，减少视觉闪烁
+                        inkCanvas.Strokes.Add(newStroke);
+                        
+                        if (lastTempStroke != null && inkCanvas.Strokes.Contains(lastTempStroke))
+                        {
+                            inkCanvas.Strokes.Remove(lastTempStroke);
+                        }
+                        
+                        lastTempStroke = newStroke;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"UpdateTempStrokeSafely 失败: {ex.Message}");
+                        // 如果更新失败，确保清理状态
+                        if (lastTempStroke != null && inkCanvas.Strokes.Contains(lastTempStroke))
+                        {
+                            try { inkCanvas.Strokes.Remove(lastTempStroke); } catch { }
+                        }
+                        lastTempStroke = newStroke;
+                        try { inkCanvas.Strokes.Add(newStroke); } catch { }
+                    }
+                }), DispatcherPriority.Render);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"UpdateTempStrokeSafely Dispatcher 失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 安全地更新临时笔画集合，减少预览闪烁
+        /// </summary>
+        /// <param name="newStrokeCollection">新的临时笔画集合</param>
+        private void UpdateTempStrokeCollectionSafely(StrokeCollection newStrokeCollection)
+        {
+            // 节流机制：限制更新频率
+            var now = DateTime.Now;
+            if ((now - lastUpdateTime).TotalMilliseconds < UpdateThrottleMs)
+            {
+                return;
+            }
+            lastUpdateTime = now;
+
+            try
+            {
+                // 使用Dispatcher.BeginInvoke确保UI更新在UI线程上执行
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        // 先添加新笔画集合，再删除旧笔画集合，减少视觉闪烁
+                        inkCanvas.Strokes.Add(newStrokeCollection);
+                        
+                        if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0)
+                        {
+                            foreach (var stroke in lastTempStrokeCollection)
+                            {
+                                if (inkCanvas.Strokes.Contains(stroke))
+                                {
+                                    inkCanvas.Strokes.Remove(stroke);
+                                }
+                            }
+                        }
+                        
+                        lastTempStrokeCollection = newStrokeCollection;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"UpdateTempStrokeCollectionSafely 失败: {ex.Message}");
+                        // 如果更新失败，确保清理状态
+                        if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0)
+                        {
+                            foreach (var stroke in lastTempStrokeCollection)
+                            {
+                                try { inkCanvas.Strokes.Remove(stroke); } catch { }
+                            }
+                        }
+                        lastTempStrokeCollection = newStrokeCollection;
+                        try { inkCanvas.Strokes.Add(newStrokeCollection); } catch { }
+                    }
+                }), DispatcherPriority.Render);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"UpdateTempStrokeCollectionSafely Dispatcher 失败: {ex.Message}");
+            }
+        }
 
         private List<Point> GenerateEllipseGeometry(Point st, Point ed, bool isDrawTop = true,
             bool isDrawBottom = true)
