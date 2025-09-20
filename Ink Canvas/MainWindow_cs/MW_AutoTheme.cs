@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Media;
-using Ink_Canvas.Helpers;
 using Application = System.Windows.Application;
 
 namespace Ink_Canvas
@@ -80,12 +79,78 @@ namespace Ink_Canvas
             try
             {
                 FloatBarForegroundColor = (Color)Application.Current.FindResource("FloatBarForegroundColor");
+                
+                // 强制刷新浮动工具栏按钮颜色
+                RefreshFloatingBarButtonColors();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 // 如果无法从资源中加载，使用默认颜色
                 FloatBarForegroundColor = Color.FromRgb(0, 0, 0); 
-                LogHelper.WriteLogToFile($"初始化FloatBarForegroundColor时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 刷新浮动工具栏按钮颜色
+        /// </summary>
+        private void RefreshFloatingBarButtonColors()
+        {
+            try
+            {
+                // 选中状态的颜色（蓝底）
+                var selectedColor = Color.FromRgb(30, 58, 138);
+                
+                // 根据当前模式设置按钮颜色
+                switch (_currentToolMode)
+                {
+                    case "cursor":
+                        CursorIconGeometry.Brush = new SolidColorBrush(selectedColor);
+                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        break;
+                    case "pen":
+                    case "color":
+                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        PenIconGeometry.Brush = new SolidColorBrush(selectedColor);
+                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        break;
+                    case "eraser":
+                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        CircleEraserIconGeometry.Brush = new SolidColorBrush(selectedColor);
+                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        break;
+                    case "eraserByStrokes":
+                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(selectedColor);
+                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        break;
+                    case "select":
+                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        LassoSelectIconGeometry.Brush = new SolidColorBrush(selectedColor);
+                        break;
+                    default:
+                        // 默认情况，所有按钮都使用主题颜色
+                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        break;
+                }
+            }
+            catch (Exception)
+            {
             }
         }
 
