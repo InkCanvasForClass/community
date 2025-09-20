@@ -6291,7 +6291,7 @@
                                         <Border ClipToBounds="True" Name="BoardBorderRightPageListView"
                                                 Margin="-138,-465,-56,50"
                                                 CornerRadius="8"
-                                                Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="#a1a1aa"
+                                                Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                 BorderThickness="1">
                                             <ui:ScrollViewerEx Name="BlackBoardRightSidePageListScrollViewer"
                                                                Height="460"

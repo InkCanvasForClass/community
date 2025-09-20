@@ -31,24 +31,24 @@ namespace Ink_Canvas
                 Application.Current.Resources.MergedDictionaries.Remove(dict);
             }
 
-            // 先添加其他资源
-            var rd2 = new ResourceDictionary
-            { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
-            Application.Current.Resources.MergedDictionaries.Add(rd2);
-
-            var rd3 = new ResourceDictionary
-            { Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative) };
-            Application.Current.Resources.MergedDictionaries.Add(rd3);
-
-            var rd4 = new ResourceDictionary
-            { Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative) };
-            Application.Current.Resources.MergedDictionaries.Add(rd4);
-
             if (theme == "Light")
             {
                 var rd1 = new ResourceDictionary
                 { Source = new Uri("Resources/Styles/Light.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
+                
+                // 在主题资源之后添加其他资源
+                var rd2 = new ResourceDictionary
+                { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
+                Application.Current.Resources.MergedDictionaries.Add(rd2);
+
+                var rd3 = new ResourceDictionary
+                { Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative) };
+                Application.Current.Resources.MergedDictionaries.Add(rd3);
+
+                var rd4 = new ResourceDictionary
+                { Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative) };
+                Application.Current.Resources.MergedDictionaries.Add(rd4);
 
                 ThemeManager.SetRequestedTheme(window, ElementTheme.Light);
 
@@ -61,6 +61,19 @@ namespace Ink_Canvas
             {
                 var rd1 = new ResourceDictionary { Source = new Uri("Resources/Styles/Dark.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
+                
+                // 在主题资源之后添加其他资源
+                var rd2 = new ResourceDictionary
+                { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
+                Application.Current.Resources.MergedDictionaries.Add(rd2);
+
+                var rd3 = new ResourceDictionary
+                { Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative) };
+                Application.Current.Resources.MergedDictionaries.Add(rd3);
+
+                var rd4 = new ResourceDictionary
+                { Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative) };
+                Application.Current.Resources.MergedDictionaries.Add(rd4);
 
                 ThemeManager.SetRequestedTheme(window, ElementTheme.Dark);
 
