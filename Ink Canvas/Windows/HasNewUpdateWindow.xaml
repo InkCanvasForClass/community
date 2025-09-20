@@ -205,7 +205,8 @@
                     <Border Background="#f8fafc" CornerRadius="16,16,0,0" Padding="24,20,24,16">
                         <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                             <Border Background="#4f46e5" CornerRadius="8" Padding="8">
-                                <TextBlock Text="📝" FontSize="16" Foreground="White"/>
+                                <TextBlock Text="📝" FontSize="16" Foreground="White" 
+                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
                             <ui:SimpleStackPanel Orientation="Vertical" Spacing="2">
                                 <TextBlock Text="更新内容" FontSize="18" FontWeight="SemiBold" Foreground="#1f2937"/>
@@ -264,7 +265,8 @@
                 <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="16">
                     <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
                         <Border Background="#4f46e5" CornerRadius="8" Padding="8">
-                            <TextBlock Text="⚡" FontSize="16" Foreground="White"/>
+                            <TextBlock Text="⚡" FontSize="16" Foreground="White" 
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="选择更新方式" FontWeight="SemiBold" FontSize="18" 
                                    Foreground="#1f2937" VerticalAlignment="Center"/>
@@ -300,7 +302,8 @@
                 <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="16">
                     <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
                         <Border Background="#10b981" CornerRadius="8" Padding="8">
-                            <TextBlock Text="📥" FontSize="16" Foreground="White"/>
+                            <TextBlock Text="📥" FontSize="16" Foreground="White" 
+                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="正在下载更新" FontWeight="SemiBold" FontSize="18" 
                                    Foreground="#1f2937" VerticalAlignment="Center"/>
