@@ -124,7 +124,6 @@ namespace Ink_Canvas.Helpers
                     {
                         if (DateTime.Now < _inkLockUntil)
                         {
-                            LogHelper.WriteLogToFile($"墨迹写入被锁定，当前页:{slideIndex}，锁定页:{_lockedSlideIndex}", LogHelper.LogType.Warning);
                         }
                         return;
                     }
@@ -149,7 +148,6 @@ namespace Ink_Canvas.Helpers
 
                         if (ms.Length > 0)
                         {
-                            LogHelper.WriteLogToFile($"已保存第{slideIndex}页墨迹，大小: {ms.Length} bytes", LogHelper.LogType.Trace);
                         }
 
                         // 检查内存使用情况

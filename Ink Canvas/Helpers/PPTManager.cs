@@ -93,7 +93,6 @@ namespace Ink_Canvas.Helpers
                             // COM对象已失效，触发断开连接
                             DisconnectFromPPT();
                         }
-                        LogHelper.WriteLogToFile($"验证PPT放映窗口失败: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
                         return false;
                     }
                 }
@@ -863,7 +862,6 @@ namespace Ink_Canvas.Helpers
                         var hr = (uint)comEx.HResult;
                         if (hr == 0x80048240) // Integer out of range
                         {
-                            LogHelper.WriteLogToFile($"验证PPT放映窗口失败: {comEx.Message}", LogHelper.LogType.Warning);
                             // 放映窗口已不存在，返回null
                             return null;
                         }
@@ -940,12 +938,10 @@ namespace Ink_Canvas.Helpers
                     // COM对象已失效，触发断开连接
                     DisconnectFromPPT();
                 }
-                LogHelper.WriteLogToFile($"获取当前幻灯片编号失败: {comEx.Message}", LogHelper.LogType.Warning);
                 return 0;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"获取当前幻灯片编号失败: {ex}", LogHelper.LogType.Error);
                 return 0;
             }
         }

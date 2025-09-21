@@ -590,7 +590,6 @@ namespace Ink_Canvas.Helpers
                 // 创建新的备份
                 _strokeBackups[presentationId][slideIndex] = strokes.Clone();
                 
-                LogHelper.WriteLogToFile($"已创建第{slideIndex}页墨迹备份", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {
