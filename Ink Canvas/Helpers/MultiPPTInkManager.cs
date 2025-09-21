@@ -174,14 +174,14 @@ namespace Ink_Canvas.Helpers
                     var manager = GetCurrentManager();
                     if (manager != null)
                     {
-                        // 先创建备份
+                        // 保存到管理器
+                        manager.SaveCurrentSlideStrokes(slideIndex, strokes);
+                        
+                        // 只有在保存成功后才创建备份
                         if (!string.IsNullOrEmpty(_currentActivePresentationId))
                         {
                             CreateStrokeBackup(_currentActivePresentationId, slideIndex, strokes);
                         }
-
-                        // 保存到管理器
-                        manager.SaveCurrentSlideStrokes(slideIndex, strokes);
                         
                         // 检查是否需要执行定期备份
                         CheckAndPerformBackup();

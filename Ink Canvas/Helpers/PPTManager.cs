@@ -850,10 +850,24 @@ namespace Ink_Canvas.Helpers
                 // 如果在放映模式，获取放映窗口的演示文稿
                 if (IsInSlideShow && PPTApplication.SlideShowWindows.Count > 0)
                 {
-                    var slideShowWindow = PPTApplication.SlideShowWindows[1];
-                    if (slideShowWindow?.View != null)
+                    try
                     {
-                        return (Presentation)slideShowWindow.View.Slide.Parent;
+                        var slideShowWindow = PPTApplication.SlideShowWindows[1];
+                        if (slideShowWindow?.View != null)
+                        {
+                            return (Presentation)slideShowWindow.View.Slide.Parent;
+                        }
+                    }
+                    catch (COMException comEx)
+                    {
+                        var hr = (uint)comEx.HResult;
+                        if (hr == 0x80048240) // Integer out of range
+                        {
+                            LogHelper.WriteLogToFile($"验证PPT放映窗口失败: {comEx.Message}", LogHelper.LogType.Warning);
+                            // 放映窗口已不存在，返回null
+                            return null;
+                        }
+                        throw; // 重新抛出其他COM异常
                     }
                 }
 

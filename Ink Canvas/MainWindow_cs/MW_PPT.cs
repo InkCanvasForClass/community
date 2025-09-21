@@ -1121,14 +1121,48 @@ namespace Ink_Canvas
         {
             try
             {
+                // 检查PPT连接状态
+                if (_pptManager?.IsConnected != true || _pptManager?.IsInSlideShow != true)
+                {
+                    LogHelper.WriteLogToFile($"PPT未连接或未在放映状态，跳过页面切换: IsConnected={_pptManager?.IsConnected}, IsInSlideShow={_pptManager?.IsInSlideShow}", LogHelper.LogType.Warning);
+                    return;
+                }
+
                 // 获取当前页面索引
                 var currentSlideIndex = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                
+                LogHelper.WriteLogToFile($"开始切换页面墨迹: 从第{currentSlideIndex}页到第{newSlideIndex}页", LogHelper.LogType.Trace);
+                
+                // 验证页面索引的有效性
+                if (newSlideIndex <= 0)
+                {
+                    LogHelper.WriteLogToFile($"无效的新页面索引: {newSlideIndex}，跳过页面切换", LogHelper.LogType.Warning);
+                    return;
+                }
                 
                 // 如果有当前墨迹且不是第一次切换，先保存到当前页面
                 if (inkCanvas.Strokes.Count > 0 && currentSlideIndex > 0 && currentSlideIndex != newSlideIndex)
                 {
-                    _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlideIndex, inkCanvas.Strokes);
-                    LogHelper.WriteLogToFile($"切换前保存第{currentSlideIndex}页墨迹，墨迹数量: {inkCanvas.Strokes.Count}", LogHelper.LogType.Trace);
+                    // 检查是否可以写入墨迹
+                    bool canWrite = _multiPPTInkManager?.CanWriteInk(currentSlideIndex) == true;
+                    LogHelper.WriteLogToFile($"第{currentSlideIndex}页墨迹写入权限: {canWrite}", LogHelper.LogType.Trace);
+                    
+                    if (canWrite)
+                    {
+                        // 正常保存
+                        _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlideIndex, inkCanvas.Strokes);
+                        LogHelper.WriteLogToFile($"正常保存第{currentSlideIndex}页墨迹，墨迹数量: {inkCanvas.Strokes.Count}", LogHelper.LogType.Trace);
+                    }
+                    else
+                    {
+                        // 墨迹被锁定，跳过保存以避免墨迹错页
+                        LogHelper.WriteLogToFile($"第{currentSlideIndex}页墨迹被锁定，跳过保存以避免墨迹错页", LogHelper.LogType.Warning);
+                    }
+                }
+                else if (inkCanvas.Strokes.Count > 0 && currentSlideIndex <= 0)
+                {
+                    // 无法获取当前页面索引时，不保存墨迹，直接清空
+                    LogHelper.WriteLogToFile($"无法获取当前页面索引({currentSlideIndex})，跳过墨迹保存", LogHelper.LogType.Warning);
                 }
                 
                 // 切换到新页面并加载墨迹
@@ -1137,10 +1171,10 @@ namespace Ink_Canvas
                 {
                     inkCanvas.Strokes.Clear();
                     inkCanvas.Strokes.Add(newStrokes);
+                    LogHelper.WriteLogToFile($"已切换到第{newSlideIndex}页，加载墨迹数量: {newStrokes.Count}", LogHelper.LogType.Trace);
                 }
 
-                // 设置墨迹锁定
-                _multiPPTInkManager?.LockInkForSlide(newSlideIndex);
+                // 注意：LockInkForSlide已经在SwitchToSlide中调用，这里不需要重复调用
             }
             catch (Exception ex)
             {

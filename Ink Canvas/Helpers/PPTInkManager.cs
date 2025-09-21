@@ -473,6 +473,13 @@ namespace Ink_Canvas.Helpers
                 return true;
             }
             
+            // 如果当前页面不是锁定页面，但锁定时间很短（小于50ms），允许写入
+            // 这样可以确保旧页面的墨迹能够及时保存
+            if (DateTime.Now - (_inkLockUntil.AddMilliseconds(-InkLockMilliseconds)) < TimeSpan.FromMilliseconds(50))
+            {
+                return true;
+            }
+            
             // 只有在快速切换且页面不同时才锁定
             return false;
         }
