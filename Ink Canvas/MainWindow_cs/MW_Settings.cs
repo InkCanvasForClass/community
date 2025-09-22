@@ -1406,7 +1406,18 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInPPTSlideShow_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
+            
+            // 记录设置变更前的状态
+            bool previousState = Settings.Automation.IsAutoFoldInPPTSlideShow;
             Settings.Automation.IsAutoFoldInPPTSlideShow = ToggleSwitchAutoFoldInPPTSlideShow.IsOn;
+            
+            // 如果设置状态发生变化，重置PPT相关状态变量
+            if (previousState != Settings.Automation.IsAutoFoldInPPTSlideShow)
+            {
+                ResetPPTStateVariables();
+                LogHelper.WriteLogToFile($"PPT自动收纳设置已变更: {Settings.Automation.IsAutoFoldInPPTSlideShow}, 已重置相关状态变量", LogHelper.LogType.Trace);
+            }
+            
             if (Settings.Automation.IsAutoFoldInPPTSlideShow)
             {
                 SettingsPPTInkingAndAutoFoldExplictBorder.Visibility = Visibility.Visible;

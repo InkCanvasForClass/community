@@ -741,12 +741,11 @@ namespace Ink_Canvas
                 HideSubPanelsImmediately();
 
                 // 只有在PPT放映模式下且页数有效时才显示翻页按钮
-                // 但是，如果启用了PPT自动收纳功能，则不显示翻页按钮
+                // 翻页按钮的显示应该基于PPT放映状态，而不是自动收纳设置
                 if (StackPanelPPTControls.Visibility == Visibility.Visible &&
                     BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                     PPTManager?.IsInSlideShow == true &&
-                    PPTManager?.SlidesCount > 0 &&
-                    !Settings.Automation.IsAutoFoldInPPTSlideShow)
+                    PPTManager?.SlidesCount > 0)
                 {
                     var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                     var dopsc = dops.ToCharArray();
@@ -754,7 +753,7 @@ namespace Ink_Canvas
                     if (dopsc[1] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
                     if (dopsc[2] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
                     if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
-                    LogHelper.WriteLogToFile($"显示PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
+                    LogHelper.WriteLogToFile($"显示PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}, 自动收纳: {Settings.Automation.IsAutoFoldInPPTSlideShow}", LogHelper.LogType.Trace);
                 }
                 else
                 {

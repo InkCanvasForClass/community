@@ -627,6 +627,11 @@ namespace Ink_Canvas
                     if (!isFloatingBarFolded)
                         FoldFloatingBar_MouseUp(new object(), null);
                 }
+                else
+                {
+                    // 如果关闭了自动收纳功能，重置状态记录，确保退出时不会错误收纳
+                    wasFloatingBarFoldedWhenEnterSlideShow = false;
+                }
 
                 isStopInkReplay = true;
 
@@ -776,14 +781,27 @@ namespace Ink_Canvas
         {
             try
             {
-                // 处理浮动栏状态：严格按进入前的状态恢复
-                if (wasFloatingBarFoldedWhenEnterSlideShow)
+                // 处理浮动栏状态：根据自动收纳功能状态和进入前的状态恢复
+                if (Settings.Automation.IsAutoFoldInPPTSlideShow)
                 {
-                    if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
+                    // 只有在启用自动收纳功能时才根据记录的状态恢复
+                    if (wasFloatingBarFoldedWhenEnterSlideShow)
+                    {
+                        if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
+                    }
+                    else
+                    {
+                        if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
+                    }
                 }
                 else
                 {
-                    if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
+                    // 如果关闭了自动收纳功能，确保浮动栏展开
+                    if (isFloatingBarFolded) 
+                    {
+                        await UnFoldFloatingBar(new object());
+                        LogHelper.WriteLogToFile("PPT自动收纳功能已关闭，强制展开浮动栏", LogHelper.LogType.Trace);
+                    }
                 }
 
                 if (isEnteredSlideShowEndEvent) return;
@@ -1065,6 +1083,38 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"重置墨迹管理器锁定状态失败: {ex}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 重置PPT相关的状态变量，当PPT自动收纳设置变更时调用
+        /// </summary>
+        public void ResetPPTStateVariables()
+        {
+            try
+            {
+                // 重置进入PPT时的浮动栏收纳状态记录
+                wasFloatingBarFoldedWhenEnterSlideShow = false;
+                
+                // 重置PPT放映结束事件标志
+                isEnteredSlideShowEndEvent = false;
+                
+                // 重置演示文稿黑边状态
+                isPresentationHaveBlackSpace = false;
+                
+                // 重置上次播放位置相关字段
+                _lastPlaybackPage = 0;
+                _shouldNavigateToLastPage = false;
+                
+                // 重置页面切换防抖机制
+                _lastSlideSwitchTime = DateTime.MinValue;
+                _pendingSlideIndex = -1;
+                
+                LogHelper.WriteLogToFile("PPT状态变量已重置", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"重置PPT状态变量失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
