@@ -940,7 +940,7 @@ namespace Ink_Canvas.Helpers
                 }
                 return 0;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return 0;
             }
