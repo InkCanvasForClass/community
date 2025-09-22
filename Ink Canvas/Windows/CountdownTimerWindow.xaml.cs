@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using System;
 using System.Media;
 using System.Timers;
@@ -51,7 +51,7 @@ namespace Ink_Canvas
                     TextBlockSecond.Text = "00";
                     timer.Stop();
                     isTimerRunning = false;
-                    SymbolIconStart.Glyph = "Play";
+                    SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                     BtnStartCover.Visibility = Visibility.Visible;
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                     BorderStopTime.Visibility = Visibility.Collapsed;
@@ -202,12 +202,12 @@ namespace Ink_Canvas
             if (WindowState == WindowState.Normal)
             {
                 WindowState = WindowState.Maximized;
-                SymbolIconFullscreen.Glyph = "BackToWindow";
+                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.BackToWindow;
             }
             else
             {
                 WindowState = WindowState.Normal;
-                SymbolIconFullscreen.Glyph = "FullScreen";
+                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.FullScreen;
             }
         }
 
@@ -232,7 +232,7 @@ namespace Ink_Canvas
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                SymbolIconStart.Glyph = "Play";
+                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 isTimerRunning = false;
                 timer.Stop();
                 isPaused = false;
@@ -282,7 +282,7 @@ namespace Ink_Canvas
                 startTime += DateTime.Now - pauseTime;
                 ProcessBarTime.IsPaused = false;
                 TextBlockHour.Foreground = Brushes.Black;
-                SymbolIconStart.Glyph = "Pause";
+                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 isPaused = false;
                 timer.Start();
                 UpdateStopTime();
@@ -294,7 +294,7 @@ namespace Ink_Canvas
                 pauseTime = DateTime.Now;
                 ProcessBarTime.IsPaused = true;
                 TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                SymbolIconStart.Glyph = "Play";
+                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 isPaused = true;
                 timer.Stop();
@@ -306,7 +306,7 @@ namespace Ink_Canvas
                 totalSeconds = ((hour * 60) + minute) * 60 + second;
                 ProcessBarTime.IsPaused = false;
                 TextBlockHour.Foreground = Brushes.Black;
-                SymbolIconStart.Glyph = "Pause";
+                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 BtnResetCover.Visibility = Visibility.Collapsed;
 
                 if (totalSeconds <= 10)

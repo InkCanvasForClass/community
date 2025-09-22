@@ -5655,7 +5655,7 @@
                                                         <Run Text="图形" />
                                                         <Run Text="(第一行支持长按保持选中)" FontSize="10" />
                                                     </TextBlock>
-                                                    <ui:FontIcon Margin="0,-20,8,15" Glyph="Pin"
+                                                    <ui:SymbolIcon Margin="0,-20,8,15" Symbol="Pin"
                                                                    MouseDown="Border_MouseDown"
                                                                    MouseUp="SymbolIconPinBorderDrawShape_MouseUp"
                                                                    Foreground="{DynamicResource FloatBarForeground}"
@@ -6379,7 +6379,7 @@
                             Width="50" Height="48" FontSize="26" Click="BtnWhiteBoardAdd_Click"
                             Foreground="{Binding ElementName=BtnExit, Path=Foreground}"
                             Background="{Binding ElementName=BtnExit, Path=Background}">
-                        <ui:FontIcon Glyph="Add" />
+                        <ui:SymbolIcon Symbol="Add" />
                     </Button>
                     <Button Name="BtnWhiteBoardSwitchPrevious" FontFamily="Symbol"
                             Width="50" Height="48" FontSize="25" Click="BtnWhiteBoardSwitchPrevious_Click"
@@ -6452,7 +6452,7 @@
                             Foreground="{Binding ElementName=BtnExit, Path=Foreground}"
                             Background="{Binding ElementName=BtnExit, Path=Background}"
                             IsEnabled="False">
-                        <ui:FontIcon Glyph="Delete" />
+                        <ui:SymbolIcon Symbol="Delete" />
                     </Button>
                 </ui:SimpleStackPanel>
             </Grid>
@@ -6566,7 +6566,7 @@
                         Background="{Binding ElementName=BtnExit, Path=Background}"
                         IsEnabled="False" Visibility="Collapsed" IsEnabledChanged="Btn_IsEnabledChanged">
                     <StackPanel Opacity="0.2">
-                        <ui:FontIcon Glyph="Undo" />
+                        <ui:SymbolIcon Symbol="Undo" />
                         <TextBlock Text="撤销" Margin="0,4,0,0" />
                     </StackPanel>
                 </Button>
@@ -6576,7 +6576,7 @@
                         Background="{Binding ElementName=BtnExit, Path=Background}"
                         IsEnabled="False" Visibility="Collapsed" IsEnabledChanged="Btn_IsEnabledChanged">
                     <StackPanel Opacity="0.2">
-                        <ui:FontIcon Glyph="Redo" />
+                        <ui:SymbolIcon Symbol="Redo" />
                         <TextBlock Text="恢复" Margin="0,4,0,0" />
                     </StackPanel>
                 </Button>
@@ -8438,7 +8438,7 @@
                                                 <Run Text="图形"/>
                                                 <Run Text="(第一行支持长按保持选中)" FontSize="10"/>
                                             </TextBlock>
-                                            <ui:FontIcon Margin="0,-20,8,15" Glyph="Pin" MouseDown="Border_MouseDown" MouseUp="SymbolIconPinBorderDrawShape_MouseUp" Foreground="{DynamicResource FloatBarForeground}" HorizontalAlignment="Right"/>-->
+                                            <ui:SymbolIcon Margin="0,-20,8,15" Symbol="Pin" MouseDown="Border_MouseDown" MouseUp="SymbolIconPinBorderDrawShape_MouseUp" Foreground="{DynamicResource FloatBarForeground}" HorizontalAlignment="Right"/>-->
                                                 <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1"
                                                         CornerRadius="8,8,0,0" Background="#2563eb" Margin="-1,-1,-1,0"
                                                         Padding="1,1,1,0">

@@ -1,4 +1,4 @@
-<Window x:Class="Ink_Canvas.YesOrNoNotificationWindow"
+﻿<Window x:Class="Ink_Canvas.YesOrNoNotificationWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -14,7 +14,7 @@
                 <RowDefinition Height="40"/>
             </Grid.RowDefinitions>
             <Viewbox HorizontalAlignment="Left" Margin="10" Height="30">
-                <ui:FontIcon Glyph="SlideShow" Foreground="{Binding ElementName=Label, Path=Foreground}"/>
+                <ui:SymbolIcon Symbol="SlideShow" Foreground="{Binding ElementName=Label, Path=Foreground}"/>
             </Viewbox>
             <TextBlock TextWrapping="Wrap" Name="Label" Margin="60,0,10,0" VerticalAlignment="Center"/>
             <ui:SimpleStackPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="10">
