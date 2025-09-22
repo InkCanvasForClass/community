@@ -1000,11 +1000,23 @@ namespace Ink_Canvas
                 PPTBtnPreviewRS.Visibility = Visibility.Collapsed;
             }
 
-            PPTBtnPreviewRSTransform.Y = -(Settings.PowerPointSettings.PPTRSButtonPosition * 0.5);
-            PPTBtnPreviewLSTransform.Y = -(Settings.PowerPointSettings.PPTLSButtonPosition * 0.5);
+            // 计算预览区域的缩放比例
+            double previewScaleY = 182.0 / SystemParameters.PrimaryScreenHeight;
+            double previewScaleX = 324.0 / SystemParameters.PrimaryScreenWidth;
+            
+            double sideButtonScaleFactor = 1.9;
+            
+            double rsPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
+            double lsPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
+        
+            PPTBtnPreviewRSTransform.Y = -(rsPosition * 2 * previewScaleY / sideButtonScaleFactor);
+            PPTBtnPreviewLSTransform.Y = -(lsPosition * 2 * previewScaleY / sideButtonScaleFactor);
 
-            PPTBtnPreviewLBTransform.X = -(Settings.PowerPointSettings.PPTLBButtonPosition * 0.5);
-            PPTBtnPreviewRBTransform.X = -(Settings.PowerPointSettings.PPTRBButtonPosition * 0.5);
+
+            double bottomButtonScaleFactor = 1.2;
+            double leftMarginOffset = 6 * previewScaleX;
+            PPTBtnPreviewLBTransform.X = leftMarginOffset + (Settings.PowerPointSettings.PPTLBButtonPosition * previewScaleX / bottomButtonScaleFactor);
+            PPTBtnPreviewRBTransform.X = -(leftMarginOffset + (Settings.PowerPointSettings.PPTRBButtonPosition * previewScaleX / bottomButtonScaleFactor));
         }
 
         private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
