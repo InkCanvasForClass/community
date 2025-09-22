@@ -1,4 +1,4 @@
-﻿<Window x:Class="Ink_Canvas.CountdownTimerWindow"
+<Window x:Class="Ink_Canvas.CountdownTimerWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -114,7 +114,7 @@
                                     <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                                 </Border.Effect>
                                 <Viewbox Margin="5.5">
-                                    <ui:SymbolIcon Symbol="Save" Foreground="White"/>
+                                    <ui:FontIcon Glyph="Save" Foreground="White"/>
                                 </Viewbox>
                             </Border>
                         </Grid>
@@ -179,12 +179,12 @@
                         <Grid>
                             <Border x:Name="BtnStart" MouseUp="BtnStart_MouseUp" Background="#0066BF" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5">
-                                    <ui:SymbolIcon Name="SymbolIconStart" Symbol="Play" Foreground="White"/>
+                                    <ui:FontIcon Name="SymbolIconStart" Glyph="Play" Foreground="White"/>
                                 </Viewbox>
                             </Border>
                             <Border x:Name="BtnStartCover" Visibility="Collapsed" Background="#BFBFBF" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5">
-                                    <ui:SymbolIcon Symbol="{Binding ElementName=SymbolIconStart, Path=Symbol}" Foreground="White"/>
+                                    <ui:FontIcon Glyph="{Binding ElementName=SymbolIconStart, Path=Glyph}" Foreground="White"/>
                                 </Viewbox>
                             </Border>
                         </Grid>
@@ -194,12 +194,12 @@
                                     <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.15" BlurRadius="3"/>
                                 </Border.Effect>
                                 <Viewbox Margin="5.5">
-                                    <ui:SymbolIcon Symbol="Refresh" Foreground="Black"/>
+                                    <ui:FontIcon Glyph="Refresh" Foreground="Black"/>
                                 </Viewbox>
                             </Border>
                             <Border x:Name="BtnResetCover" Background="#F3F5F9" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5.5">
-                                    <ui:SymbolIcon Symbol="Refresh" Foreground="#9D9D9E"/>
+                                    <ui:FontIcon Glyph="Refresh" Foreground="#9D9D9E"/>
                                 </Viewbox>
                             </Border>
                         </Grid>
@@ -215,7 +215,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:SymbolIcon Name="SymbolIconMinimal" Symbol="HideBcc" Foreground="Black"/>
+                            <ui:FontIcon Name="SymbolIconMinimal" Glyph="HideBcc" Foreground="Black"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnFullscreen" MouseUp="BtnFullscreen_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -225,7 +225,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:SymbolIcon Name="SymbolIconFullscreen" Symbol="FullScreen" Foreground="Black"/>
+                            <ui:FontIcon Name="SymbolIconFullscreen" Glyph="FullScreen" Foreground="Black"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnClose" MouseUp="BtnClose_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
@@ -235,7 +235,7 @@
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:SymbolIcon Symbol="Clear"  Foreground="White"/>
+                            <ui:FontIcon Glyph="Clear"  Foreground="White"/>
                         </Viewbox>
                     </Border>
                 </ui:SimpleStackPanel>

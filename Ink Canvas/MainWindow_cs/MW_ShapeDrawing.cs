@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
@@ -75,9 +75,9 @@ namespace Ink_Canvas
             ToggleSwitchDrawShapeBorderAutoHide.IsOn = !ToggleSwitchDrawShapeBorderAutoHide.IsOn;
 
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-                ((SymbolIcon)sender).Symbol = Symbol.Pin;
+                ((FontIcon)sender).Glyph = "Pin";
             else
-                ((SymbolIcon)sender).Symbol = Symbol.UnPin;
+                ((FontIcon)sender).Glyph = "UnPin";
         }
 
         private object lastMouseDownSender;
