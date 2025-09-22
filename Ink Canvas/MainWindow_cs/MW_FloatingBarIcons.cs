@@ -1937,7 +1937,6 @@ namespace Ink_Canvas
             {
                 SaveStrokes();
                 RestoreStrokes(true);
-                LogHelper.WriteLogToFile($"退出白板模式，恢复备份墨迹。当前模式：{(BtnPPTSlideShowEnd.Visibility == Visibility.Visible ? "PPT放映" : "桌面")}", LogHelper.LogType.Trace);
             }
 
             if (BtnSwitchTheme.Content.ToString() == "浅色")
