@@ -9559,7 +9559,7 @@
                         Width="32" Margin="0" Visibility="Collapsed">
                         <Image Source="/Resources/new-icons/end-slides-show.png"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="退出放映" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
+                        <TextBlock Text="退出放映" Foreground="{DynamicResource FloatBarForeground}" FontSize="7" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
 
                     <ui:SimpleStackPanel
@@ -9642,7 +9642,7 @@
                         Width="32" Margin="0" Visibility="Collapsed">
                         <Image Source="/Resources/new-icons/end-slides-show.png"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="退出放映" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
+                        <TextBlock Text="退出放映" Foreground="{DynamicResource FloatBarForeground}" FontSize="7" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
 
                     <ui:SimpleStackPanel
