@@ -804,6 +804,36 @@ namespace Ink_Canvas
 
             BtnSwitch_Click(BtnSwitch, null);
 
+            if (currentMode == 0)
+            {
+                // 根据当前编辑模式正确设置工具模式和高光位置
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                {
+                    UpdateCurrentToolMode("cursor");
+                    SetFloatingBarHighlightPosition("cursor");
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                {
+                    UpdateCurrentToolMode("pen");
+                    SetFloatingBarHighlightPosition("pen");
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                {
+                    UpdateCurrentToolMode("eraser");
+                    SetFloatingBarHighlightPosition("eraser");
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+                {
+                    UpdateCurrentToolMode("eraserByStrokes");
+                    SetFloatingBarHighlightPosition("eraserByStrokes");
+                }
+                else if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+                {
+                    UpdateCurrentToolMode("select");
+                    SetFloatingBarHighlightPosition("select");
+                }
+            }
+
             if (currentMode == 0 && inkCanvas.Strokes.Count == 0 && BtnPPTSlideShowEnd.Visibility != Visibility.Visible)
                 CursorIcon_Click(null, null);
 
