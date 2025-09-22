@@ -245,6 +245,9 @@ namespace Ink_Canvas
                         break;
                 }
 
+                // 设置主题下拉框
+                ComboBoxTheme.SelectedIndex = Settings.Appearance.Theme;
+
                 ComboBoxChickenSoupSource.SelectedIndex = Settings.Appearance.ChickenSoupSource;
 
                 ToggleSwitchEnableQuickPanel.IsOn = Settings.Appearance.IsShowQuickPanel;

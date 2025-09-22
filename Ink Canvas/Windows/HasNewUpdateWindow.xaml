@@ -11,13 +11,13 @@
         ui:WindowHelper.SystemBackdropType="Mica"
         Title="InkCanvasForClass CE有新版本可用" Height="650" Width="900" ResizeMode="NoResize" 
         WindowStartupLocation="CenterScreen" WindowStyle="None" AllowsTransparency="True"
-        Background="#f8fafc">
+        Background="Transparent">
     <Window.Template>
         <ControlTemplate TargetType="Window">
-            <Border Background="{TemplateBinding Background}" 
+            <Border Background="#f8fafc" 
                     CornerRadius="16" 
-                    BorderBrush="{TemplateBinding BorderBrush}" 
-                    BorderThickness="{TemplateBinding BorderThickness}">
+                    BorderBrush="Transparent" 
+                    BorderThickness="0">
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="0" Opacity="0.15"/>
                 </Border.Effect>
@@ -140,7 +140,7 @@
     </Window.Resources>
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <Grid Margin="0,0,0,0">
+        <Grid Margin="0,0,0,0" Background="Transparent">
             <ui:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0">
             <!-- 统一的主容器 -->
             <Border Background="White" CornerRadius="16" Margin="0,0,0,0" 
