@@ -1597,8 +1597,36 @@ namespace Ink_Canvas
                 HideSubPanels("cursor");
                 SetCurrentToolMode(InkCanvasEditingMode.None);
                 
+                // 根据"退出PPT放映后自动恢复浮动栏状态"设置决定浮动栏边距
                 await Task.Delay(150);
-                ViewboxFloatingBarMarginAnimation(100, true);
+                if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
+                {
+                    // 如果启用了"退出PPT放映后自动恢复浮动栏状态"功能，根据进入前状态设置边距
+                    if (wasFloatingBarFoldedWhenEnterSlideShow)
+                    {
+                        // 进入前是收纳状态，设置为收纳边距
+                        ViewboxFloatingBarMarginAnimation(-60);
+                    }
+                    else
+                    {
+                        // 进入前是展开状态，设置为展开边距
+                        ViewboxFloatingBarMarginAnimation(100, true);
+                    }
+                }
+                else
+                {
+                    // 如果没有启用"退出PPT放映后自动恢复浮动栏状态"功能，根据当前状态设置边距
+                    if (isFloatingBarFolded)
+                    {
+                        // 如果浮动栏处于收纳状态，设置为收纳边距
+                        ViewboxFloatingBarMarginAnimation(-60);
+                    }
+                    else
+                    {
+                        // 如果浮动栏处于展开状态，设置为展开边距
+                        ViewboxFloatingBarMarginAnimation(100, true);
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -1613,6 +1641,37 @@ namespace Ink_Canvas
 
                 // 异常情况下也手动处理收纳状态恢复
                 await HandleManualSlideShowEnd();
+                
+                // 异常情况下也要根据设置决定浮动栏边距
+                await Task.Delay(150);
+                if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
+                {
+                    // 如果启用了"退出PPT放映后自动恢复浮动栏状态"功能，根据进入前状态设置边距
+                    if (wasFloatingBarFoldedWhenEnterSlideShow)
+                    {
+                        // 进入前是收纳状态，设置为收纳边距
+                        ViewboxFloatingBarMarginAnimation(-60);
+                    }
+                    else
+                    {
+                        // 进入前是展开状态，设置为展开边距
+                        ViewboxFloatingBarMarginAnimation(100, true);
+                    }
+                }
+                else
+                {
+                    // 如果没有启用"退出PPT放映后自动恢复浮动栏状态"功能，根据当前状态设置边距
+                    if (isFloatingBarFolded)
+                    {
+                        // 如果浮动栏处于收纳状态，设置为收纳边距
+                        ViewboxFloatingBarMarginAnimation(-60);
+                    }
+                    else
+                    {
+                        // 如果浮动栏处于展开状态，设置为展开边距
+                        ViewboxFloatingBarMarginAnimation(100, true);
+                    }
+                }
             }
         }
 
