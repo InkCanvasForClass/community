@@ -619,7 +619,7 @@ namespace Ink_Canvas
         {
             try
             {
-                // 记录进入放映时浮动栏收纳状态
+                // 始终记录进入放映时浮动栏收纳状态，用于退出时恢复
                 wasFloatingBarFoldedWhenEnterSlideShow = isFloatingBarFolded;
 
                 if (Settings.Automation.IsAutoFoldInPPTSlideShow)
@@ -629,8 +629,11 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    // 如果关闭了自动收纳功能，重置状态记录，确保退出时不会错误收纳
-                    wasFloatingBarFoldedWhenEnterSlideShow = false;
+                    // 如果关闭了PPT自动收纳功能，但用户当前在收纳模式下，进入PPT时取消收纳以提供更好的使用体验
+                    if (isFloatingBarFolded)
+                    {
+                        await UnFoldFloatingBar(new object());
+                    }
                 }
 
                 isStopInkReplay = true;
@@ -781,10 +784,8 @@ namespace Ink_Canvas
         {
             try
             {
-                // 处理浮动栏状态：根据自动收纳功能状态和进入前的状态恢复
-                if (Settings.Automation.IsAutoFoldInPPTSlideShow)
+                if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
                 {
-                    // 只有在启用自动收纳功能时才根据记录的状态恢复
                     if (wasFloatingBarFoldedWhenEnterSlideShow)
                     {
                         if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
@@ -793,14 +794,27 @@ namespace Ink_Canvas
                     {
                         if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
                     }
+                
                 }
                 else
                 {
-                    // 如果关闭了自动收纳功能，确保浮动栏展开
-                    if (isFloatingBarFolded) 
+                    if (Settings.Automation.IsAutoFoldInPPTSlideShow)
                     {
-                        await UnFoldFloatingBar(new object());
-                        LogHelper.WriteLogToFile("PPT自动收纳功能已关闭，强制展开浮动栏", LogHelper.LogType.Trace);
+                        if (wasFloatingBarFoldedWhenEnterSlideShow)
+                        {
+                            if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
+                        }
+                        else
+                        {
+                            if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
+                        }
+                    }
+                    else
+                    {
+                        if (isFloatingBarFolded) 
+                        {
+                            await UnFoldFloatingBar(new object());
+                        }
                     }
                 }
 
