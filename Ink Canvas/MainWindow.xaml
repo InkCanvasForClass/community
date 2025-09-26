@@ -2765,7 +2765,7 @@
                                           StrokeThickness="1" Margin="0,8,0,8" />
                                     <TextBlock Text="悬浮窗拦截" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="16" Margin="0,8,0,8" />
-                                    <TextBlock Text="自动检测并隐藏教育软件的悬浮窗，保持桌面整洁" 
+                                    <TextBlock Text="自动检测并拦截同类软件的悬浮窗" 
                                                TextWrapping="Wrap" Foreground="#a1a1aa" Margin="0,0,0,8" />
                                     
                                     <!-- 主控制开关 -->
