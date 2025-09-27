@@ -643,7 +643,7 @@ namespace Ink_Canvas
                         eraserWidth = boundWidth;
                         UpdateEraserStyle();
                         // 显示初始橡皮擦反馈位置
-                        var touchPoint = e.GetTouchPoint(inkCanvas);
+                        touchPoint = e.GetTouchPoint(inkCanvas);
                         EraserOverlay_PointerDown(sender);
                         EraserOverlay_PointerMove(sender, touchPoint.Position);
                     }
