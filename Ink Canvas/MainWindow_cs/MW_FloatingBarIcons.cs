@@ -911,6 +911,7 @@ namespace Ink_Canvas
         /// <param name="e">RoutedEventArgs</param>
         private void EraserPanelSymbolIconDelete_MouseUp(object sender, RoutedEventArgs e)
         {
+            PenIcon_Click(null, null);
             SymbolIconDelete_MouseUp(null, null);
         }
 
