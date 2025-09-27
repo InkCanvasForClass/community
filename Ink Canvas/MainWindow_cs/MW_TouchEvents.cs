@@ -636,6 +636,16 @@ namespace Ink_Canvas
                         inkCanvas.EraserShape = new EllipseStylusShape(boundWidth, boundWidth);
                         inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
                         isPalmEraserActive = true;
+                        
+                        // 启用橡皮擦覆盖层显示手掌擦样式
+                        EnableEraserOverlay();
+                        // 更新橡皮擦大小以匹配手掌擦面积
+                        eraserWidth = boundWidth;
+                        UpdateEraserStyle();
+                        // 显示初始橡皮擦反馈位置
+                        var touchPoint = e.GetTouchPoint(inkCanvas);
+                        EraserOverlay_PointerDown(sender);
+                        EraserOverlay_PointerMove(sender, touchPoint.Position);
                     }
                 }
             }
@@ -707,6 +717,13 @@ namespace Ink_Canvas
             {
                 lastTouchPositions[e.TouchDevice.Id] = e.GetTouchPoint(inkCanvas).Position;
             }
+            
+            // 如果手掌擦激活，更新橡皮擦反馈位置
+            if (isPalmEraserActive)
+            {
+                var touchPoint = e.GetTouchPoint(inkCanvas);
+                EraserOverlay_PointerMove(sender, touchPoint.Position);
+            }
         }
 
         private void inkCanvas_PreviewTouchUp(object sender, TouchEventArgs e)
@@ -773,6 +790,9 @@ namespace Ink_Canvas
 
                 // 重置手掌擦状态
                 isPalmEraserActive = false;
+                
+                // 禁用橡皮擦覆盖层
+                DisableEraserOverlay();
 
                 LogHelper.WriteLogToFile("Palm eraser state reset completed");
             }
