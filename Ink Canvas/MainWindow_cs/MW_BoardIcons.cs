@@ -716,7 +716,7 @@ namespace Ink_Canvas
             //}
             //else {
             // 禁用高级橡皮擦系统
-            DisableAdvancedEraserSystem();
+            DisableEraserOverlay();
 
             forceEraser = true;
             forcePointEraser = false;

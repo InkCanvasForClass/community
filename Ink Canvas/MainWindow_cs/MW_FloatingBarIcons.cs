@@ -1867,7 +1867,7 @@ namespace Ink_Canvas
             if (sender == Cursor_Icon && lastBorderMouseDownObject != Cursor_Icon) return;
 
             // 禁用高级橡皮擦系统
-            DisableAdvancedEraserSystem();
+                DisableEraserOverlay();
 
             // 使用集中化的工具模式切换方法，确保快捷键状态正确更新
             // 鼠标模式下应该禁用快捷键以放行键盘操作
@@ -1988,7 +1988,7 @@ namespace Ink_Canvas
             }
 
             // 禁用高级橡皮擦系统
-            DisableAdvancedEraserSystem();
+                DisableEraserOverlay();
 
             ExitMultiTouchModeIfNeeded();
 
@@ -2240,7 +2240,7 @@ namespace Ink_Canvas
             }
 
             // 启用新的高级橡皮擦系统
-            EnableAdvancedEraserSystem();
+                EnableEraserOverlay();
 
             // 使用新的高级橡皮擦系统
             // 使用集中化的工具模式切换方法
@@ -2252,10 +2252,7 @@ namespace Ink_Canvas
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
-
-            // 显示橡皮擦视觉反馈（用于测试）
-            // 注意：eraserVisualBorder在MW_Eraser.cs中定义，这里无法直接访问
-            Trace.WriteLine($"Advanced Eraser: Eraser button clicked, current size: {currentEraserSize}, circle: {isCurrentEraserCircle}");
+                Trace.WriteLine($"Eraser: Eraser button clicked, current size: {eraserWidth}, circle: {isEraserCircleShape}");
 
             if (isAlreadyEraser)
             {
@@ -2284,7 +2281,7 @@ namespace Ink_Canvas
             drawingShapeMode = 0;
 
             // 启用新的高级橡皮擦系统
-            EnableAdvancedEraserSystem();
+                EnableEraserOverlay();
 
             // 使用新的高级橡皮擦系统
             // 使用集中化的工具模式切换方法
@@ -2323,7 +2320,7 @@ namespace Ink_Canvas
             if (sender == EraserByStrokes_Icon && lastBorderMouseDownObject != EraserByStrokes_Icon) return;
 
             // 禁用高级橡皮擦系统
-            DisableAdvancedEraserSystem();
+                DisableEraserOverlay();
 
             forceEraser = true;
             forcePointEraser = false;
@@ -2600,7 +2597,7 @@ namespace Ink_Canvas
         private void SelectIcon_MouseUp(object sender, RoutedEventArgs e)
         {
             // 禁用高级橡皮擦系统
-            DisableAdvancedEraserSystem();
+                DisableEraserOverlay();
 
             forceEraser = true;
             drawingShapeMode = 0;

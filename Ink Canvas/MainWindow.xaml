@@ -3678,12 +3678,24 @@
                        SelectionChanged="inkCanvas_SelectionChanged"
                        StrokeCollected="inkCanvas_StrokeCollected" ClipToBounds="False" Background="Transparent" />
             
-            <!-- 新橡皮擦覆盖层 - 用于高级橡皮擦系统 -->
-            <Border x:Name="AdvancedEraserOverlay" 
+            <Canvas x:Name="EraserOverlayCanvas" 
                     Background="Transparent" 
                     IsHitTestVisible="False"
-                    Loaded="EraserOverlay_Loaded"
-                    Panel.ZIndex="1000" />
+                    Loaded="EraserOverlayCanvas_Loaded"
+                    Panel.ZIndex="1000">
+                <!-- 橡皮擦视觉反馈图像 -->
+                <Image x:Name="EraserFeedback" 
+                       Canvas.Left="0" 
+                       Canvas.Top="0" 
+                       RenderTransformOrigin="0,0" 
+                       Width="0" 
+                       Height="0"
+                       Visibility="Collapsed">
+                    <Image.RenderTransform>
+                        <TranslateTransform x:Name="EraserFeedbackTranslateTransform"/>
+                    </Image.RenderTransform>
+                </Image>
+            </Canvas>
         </Grid>
 
         <Canvas IsHitTestVisible="False">

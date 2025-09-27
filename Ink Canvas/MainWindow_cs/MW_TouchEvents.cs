@@ -45,7 +45,7 @@ namespace Ink_Canvas
 
                 // 保存图片、媒体元素等非笔画相关的UI元素
                 if (child is Image || child is MediaElement ||
-                    (child is Border border && border.Name != "AdvancedEraserOverlay"))
+                    (child is Border border && border.Name != "EraserOverlayCanvas"))
                 {
                     // 创建元素的深拷贝，避免直接引用导致的问题
                     var clonedElement = CloneUIElement(child);
