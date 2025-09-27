@@ -774,7 +774,7 @@ namespace Ink_Canvas.Helpers
                     return;
 
                 // 检查鼠标是否在当前窗口所在的屏幕上
-                var mousePosition = System.Windows.Forms.Control.MousePosition;
+                var mousePosition = Control.MousePosition;
                 var currentScreen = Screen.FromPoint(mousePosition);
                 
                 // 无论屏幕是否变化，都检查热键状态
@@ -880,7 +880,7 @@ namespace Ink_Canvas.Helpers
                 // 策略2：在多屏幕环境下，检查鼠标是否在当前窗口所在的屏幕上
                 if (_isMultiScreenMode)
                 {
-                    var mousePosition = System.Windows.Forms.Control.MousePosition;
+                    var mousePosition = Control.MousePosition;
                     var mouseScreen = Screen.FromPoint(mousePosition);
                     
                     if (mouseScreen == _currentScreen)

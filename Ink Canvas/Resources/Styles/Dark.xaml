@@ -29,4 +29,13 @@
     <SolidColorBrush x:Key="BoardFloatBarSelectedBackground" Color="#2563eb" />
     <SolidColorBrush x:Key="BoardFloatBarSelectedBorderBrush" Color="#2563eb" />
     <SolidColorBrush x:Key="BoardFloatBarSelectedForeground" Color="White" />
+    
+    <!-- 历史回滚窗口主题颜色 -->
+    <SolidColorBrush x:Key="HistoryWindowPrimaryBrush" Color="#3b82f6"/>
+    <SolidColorBrush x:Key="HistoryWindowPrimaryHoverBrush" Color="#2563eb"/>
+    <SolidColorBrush x:Key="HistoryWindowPrimaryPressedBrush" Color="#1d4ed8"/>
+    <SolidColorBrush x:Key="HistoryWindowCardBackgroundBrush" Color="#2a2a2a"/>
+    <SolidColorBrush x:Key="HistoryWindowCardBorderBrush" Color="#404040"/>
+    <SolidColorBrush x:Key="HistoryWindowTextPrimaryBrush" Color="#f9fafb"/>
+    <SolidColorBrush x:Key="HistoryWindowTextSecondaryBrush" Color="#9ca3af"/>
 </ResourceDictionary>

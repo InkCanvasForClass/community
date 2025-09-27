@@ -8,234 +8,230 @@
         mc:Ignorable="d"
         ui:WindowHelper.UseModernWindowStyle="False"
         ui:WindowHelper.SystemBackdropType="Mica"
-        Title="历史版本回滚" Height="650" Width="900" ResizeMode="CanResize" 
-        WindowStartupLocation="CenterScreen" WindowStyle="None" AllowsTransparency="True"
+        Title="历史版本回滚" Height="650" Width="900" ResizeMode="NoResize" 
+        WindowStartupLocation="CenterScreen" WindowStyle="None" 
         Background="Transparent" MinHeight="550" MinWidth="800">
     <Window.Template>
         <ControlTemplate TargetType="Window">
-            <Border Background="#f8fafc" 
-                    CornerRadius="16" 
-                    BorderBrush="Transparent" 
-                    BorderThickness="0">
+            <Border Background="{DynamicResource SettingsPageBackground}" 
+                    CornerRadius="8" 
+                    BorderBrush="{DynamicResource SettingsPageBorderBrush}" 
+                    BorderThickness="1">
                 <Border.Effect>
-                    <DropShadowEffect Color="#000000" BlurRadius="30" ShadowDepth="0" Opacity="0.15"/>
+                    <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="0" Opacity="0.1"/>
                 </Border.Effect>
                 <Grid>
                     <!-- 标题栏 -->
-                    <Border Background="Transparent" Height="40" VerticalAlignment="Top">
+                    <Border Background="{DynamicResource SettingsPageBackground}" Height="48" VerticalAlignment="Top">
                         <Grid>
                             <TextBlock Text="{TemplateBinding Title}" 
-                                     FontSize="16" FontWeight="SemiBold" 
-                                     Foreground="#374151" 
+                                     FontSize="14" FontWeight="SemiBold" 
+                                     Foreground="{DynamicResource SettingsPageForeground}" 
                                      VerticalAlignment="Center" 
-                                     Margin="20,0,0,0"/>
-                            <StackPanel Orientation="Horizontal" 
-                                       HorizontalAlignment="Right" 
-                                       VerticalAlignment="Center">
-                                <Button Name="MinimizeButton" 
-                                      Width="40" Height="30" 
-                                      Background="Transparent" 
-                                      BorderThickness="0"
-                                      Click="MinimizeButton_Click"
-                                      Margin="0,0,2,0">
-                                    <TextBlock Text="−" FontSize="16" Foreground="#6b7280"/>
-                                </Button>
-                                <Button Name="CloseButton" 
-                                      Width="40" Height="30" 
-                                      Background="Transparent" 
-                                      BorderThickness="0"
-                                      Click="CloseButton_Click">
-                                    <TextBlock Text="×" FontSize="16" Foreground="#6b7280"/>
-                                </Button>
-                            </StackPanel>
+                                     Margin="16,0,0,0"/>
+                            <!-- 最小化按钮 -->
+                            <Button Name="MinimizeButton" 
+                                    HorizontalAlignment="Right" 
+                                    VerticalAlignment="Top" 
+                                    Margin="0,8,40,0"
+                                    Width="32" Height="32" 
+                                    Background="Transparent" 
+                                    BorderThickness="0"
+                                    Click="MinimizeButton_Click"
+                                    Cursor="Hand"
+                                    ToolTip="最小化">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="4" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                BorderBrush="{TemplateBinding BorderBrush}">
+                                            <TextBlock Text="−" FontSize="14" 
+                                                     Foreground="{DynamicResource SettingsPageForeground}" 
+                                                     HorizontalAlignment="Center" 
+                                                     VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="#FF2563eb" Opacity="0.1"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="#FF2563eb" Opacity="0.2"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                            
+                            <!-- 关闭按钮 -->
+                            <Button Name="CloseButton" 
+                                    HorizontalAlignment="Right" 
+                                    VerticalAlignment="Top" 
+                                    Margin="0,8,8,0"
+                                    Width="32" Height="32" 
+                                    Background="Transparent" 
+                                    BorderThickness="0"
+                                    Click="CloseButton_Click"
+                                    Cursor="Hand"
+                                    ToolTip="关闭">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="4" 
+                                                BorderThickness="{TemplateBinding BorderThickness}"
+                                                BorderBrush="{TemplateBinding BorderBrush}">
+                                            <TextBlock Text="×" FontSize="14" 
+                                                     Foreground="{DynamicResource SettingsPageForeground}" 
+                                                     HorizontalAlignment="Center" 
+                                                     VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="#ef4444" Opacity="0.1"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                            <Trigger Property="IsPressed" Value="True">
+                                                <Setter Property="Background">
+                                                    <Setter.Value>
+                                                        <SolidColorBrush Color="#ef4444" Opacity="0.2"/>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
                         </Grid>
                     </Border>
                     <!-- 内容区域 -->
-                    <ContentPresenter Margin="0,40,0,0"/>
+                    <ContentPresenter Margin="0,48,0,0"/>
                 </Grid>
             </Border>
         </ControlTemplate>
     </Window.Template>
     <Window.Resources>
-        <!-- 现代化按钮样式 -->
-        <Style x:Key="ModernPrimaryButton" TargetType="Button">
-            <Setter Property="Background" Value="#3b82f6"/>
-            <Setter Property="Foreground" Value="White"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="FontWeight" Value="SemiBold"/>
-            <Setter Property="FontSize" Value="15"/>
-            <Setter Property="Padding" Value="24,12"/>
-            <Setter Property="Height" Value="48"/>
-            <Setter Property="Width" Value="320"/>
-            <Setter Property="HorizontalAlignment" Value="Center"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="12" 
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                BorderBrush="{TemplateBinding BorderBrush}">
-                            <Border.Effect>
-                                <DropShadowEffect Color="#3b82f6" BlurRadius="8" ShadowDepth="0" Opacity="0.3"/>
-                            </Border.Effect>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#2563eb"/>
-                            </Trigger>
-                            <Trigger Property="IsPressed" Value="True">
-                                <Setter Property="Background" Value="#1d4ed8"/>
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="#9ca3af"/>
-                                <Setter Property="Foreground" Value="#6b7280"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        
-        <!-- 现代化ComboBox样式 -->
-        <Style x:Key="ModernComboBox" TargetType="ComboBox">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#374151"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="#d1d5db"/>
-            <Setter Property="FontSize" Value="14"/>
-            <Setter Property="Height" Value="40"/>
-            <Setter Property="Padding" Value="12,8"/>
-        </Style>
-        
-        <!-- ComboBoxItem样式 -->
-        <Style TargetType="ComboBoxItem">
-            <Setter Property="Background" Value="White"/>
-            <Setter Property="Foreground" Value="#374151"/>
-            <Setter Property="Padding" Value="12,8"/>
-            <Setter Property="Margin" Value="0,1"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="ComboBoxItem">
-                        <Border Background="{TemplateBinding Background}" 
-                                CornerRadius="4" 
-                                Margin="2">
-                            <ContentPresenter Margin="{TemplateBinding Padding}"/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Background" Value="#f0f9ff"/>
-                                <Setter Property="Foreground" Value="#1e40af"/>
-                            </Trigger>
-                            <Trigger Property="IsSelected" Value="True">
-                                <Setter Property="Background" Value="#3b82f6"/>
-                                <Setter Property="Foreground" Value="White"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
+        <!-- 主题相关颜色资源 -->
+        <SolidColorBrush x:Key="PrimaryBrush" Color="#FF2563eb"/>
+        <SolidColorBrush x:Key="TextPrimaryBrush" Color="#FF1f2937"/>
+        <SolidColorBrush x:Key="TextSecondaryBrush" Color="#FF6b7280"/>
     </Window.Resources>
     
-    <Grid Background="Transparent">
-        <!-- 主内容区域 -->
-        <Border Background="White" CornerRadius="16" Margin="20" 
-                BorderThickness="0" Padding="0">
-            <Border.Effect>
-                <DropShadowEffect Color="#000000" BlurRadius="20" ShadowDepth="0" Opacity="0.08"/>
-            </Border.Effect>
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <Grid Background="Transparent">
+            <!-- 主内容区域 -->
+            <ui:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0" Margin="20">
+            <!-- 标题区域 -->
+            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
+                <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="16" Padding="12" Margin="0,0,0,0">
+                    <ui:SymbolIcon Symbol="Undo" FontSize="20" Foreground="White" 
+                                  VerticalAlignment="Center"/>
+                </Border>
+                <ui:SimpleStackPanel VerticalAlignment="Center" Spacing="4">
+                    <TextBlock Text="历史版本回滚" FontSize="22" FontWeight="Bold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <TextBlock Text="选择要回滚到的历史版本" FontSize="14" 
+                             Foreground="{DynamicResource TextSecondaryBrush}"/>
+                </ui:SimpleStackPanel>
+            </ui:SimpleStackPanel>
             
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <ui:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0" Margin="28">
-                <!-- 标题区域 -->
-                <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,32,0,24">
-                    <Border Background="#3b82f6" CornerRadius="8" Width="40" Height="40" 
-                            VerticalAlignment="Center">
-                        <TextBlock Text="↶" FontSize="20" Foreground="White" 
-                                 HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
-                    <ui:SimpleStackPanel VerticalAlignment="Center" Spacing="4">
-                        <TextBlock Text="历史版本回滚" FontSize="28" FontWeight="Bold" 
-                                 Foreground="#1f2937"/>
-                        <TextBlock Text="选择要回滚到的历史版本" FontSize="14" 
-                                 Foreground="#6b7280"/>
-                    </ui:SimpleStackPanel>
-                </ui:SimpleStackPanel>
-                
-                <!-- 版本选择卡片 -->
-                <Border Background="#f8fafc" CornerRadius="12" Padding="20" Margin="0,0,0,20">
-                    <Border.Effect>
-                        <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="0" Opacity="0.05"/>
-                    </Border.Effect>
-                    <ui:SimpleStackPanel Spacing="12">
-                        <TextBlock Text="选择版本" FontSize="16" FontWeight="SemiBold" 
-                                 Foreground="#374151"/>
-                        <ComboBox x:Name="VersionComboBox" 
-                                Width="400" Height="40" 
+            <!-- 版本选择卡片 -->
+            <Border Background="{DynamicResource SettingsPageBackground}" 
+                    BorderBrush="{DynamicResource SettingsPageBorderBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="12" 
+                    Margin="0,0,0,16" 
+                    Padding="20">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="0" Opacity="0.05"/>
+                </Border.Effect>
+                <ui:SimpleStackPanel Spacing="16">
+                    <TextBlock Text="选择版本" FontSize="16" FontWeight="SemiBold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <ComboBox x:Name="VersionComboBox" 
+                                Width="300" Height="40" 
                                 DisplayMemberPath="Version" 
-                                SelectionChanged="VersionComboBox_SelectionChanged"
-                                Background="White"
-                                BorderBrush="#d1d5db"
-                                BorderThickness="1"
-                                FontSize="14"/>
-                    </ui:SimpleStackPanel>
-                </Border>
+                                SelectionChanged="VersionComboBox_SelectionChanged"/>
+                </ui:SimpleStackPanel>
+            </Border>
+            
+            <!-- 发布说明卡片 -->
+            <Border Background="{DynamicResource SettingsPageBackground}" 
+                    BorderBrush="{DynamicResource SettingsPageBorderBrush}" 
+                    BorderThickness="1" 
+                    CornerRadius="12" 
+                    Margin="0,0,0,16" 
+                    Padding="20">
+                <Border.Effect>
+                    <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="0" Opacity="0.05"/>
+                </Border.Effect>
+                <ui:SimpleStackPanel Spacing="16">
+                    <TextBlock Text="版本更新说明" FontSize="16" FontWeight="SemiBold" 
+                             Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <Border Background="{DynamicResource SettingsPageBackground}" 
+                          BorderBrush="{DynamicResource SettingsPageBorderBrush}" 
+                          BorderThickness="1" 
+                          CornerRadius="8" 
+                          MinHeight="150" MaxHeight="250">
+                        <Border.Effect>
+                            <DropShadowEffect Color="#000000" BlurRadius="4" ShadowDepth="0" Opacity="0.03"/>
+                        </Border.Effect>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                                    HorizontalScrollBarVisibility="Disabled"
+                                    Padding="16">
+                            <mdxam:MarkdownScrollViewer x:Name="ReleaseNotesViewer" 
+                                                      Foreground="{DynamicResource TextPrimaryBrush}" 
+                                                      MarkdownStyleName="GithubLike"/>
+                        </ScrollViewer>
+                    </Border>
+                </ui:SimpleStackPanel>
+            </Border>
+            
+            <!-- 操作按钮区域 -->
+            <ui:SimpleStackPanel Spacing="16" Margin="0,0,0,16">
+                <Button x:Name="RollbackButton" 
+                      Content="回滚到此版本" 
+                      HorizontalAlignment="Center"
+                      Click="RollbackButton_Click"
+                      Style="{DynamicResource AccentButtonStyle}"
+                      Width="200" Height="48"
+                      FontSize="16" FontWeight="SemiBold"/>
                 
-                <!-- 发布说明卡片 -->
-                <Border Background="#f8fafc" CornerRadius="12" Padding="20" Margin="0,0,0,20">
+                <!-- 下载进度面板 -->
+                <Border x:Name="DownloadProgressPanel" 
+                        Background="{DynamicResource SettingsPageBackground}" 
+                        BorderBrush="{DynamicResource SettingsPageBorderBrush}" 
+                        BorderThickness="1" 
+                        CornerRadius="12" 
+                        Visibility="Collapsed"
+                        Margin="0,8,0,0" 
+                        Padding="24">
                     <Border.Effect>
                         <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="0" Opacity="0.05"/>
                     </Border.Effect>
                     <ui:SimpleStackPanel Spacing="12">
-                        <TextBlock Text="版本更新说明" FontSize="16" FontWeight="SemiBold" 
-                                 Foreground="#374151"/>
-                        <Border Background="White" BorderBrush="#e5e7eb" BorderThickness="1" 
-                              CornerRadius="8" MinHeight="200" MaxHeight="300">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" 
-                                        HorizontalScrollBarVisibility="Disabled"
-                                        Padding="16">
-                                <mdxam:MarkdownScrollViewer x:Name="ReleaseNotesViewer" 
-                                                          Foreground="#374151" 
-                                                          MarkdownStyleName="GithubLike"/>
-                            </ScrollViewer>
-                        </Border>
+                        <ProgressBar x:Name="DownloadProgressBar" 
+                                   Width="300" Height="8" 
+                                   Minimum="0" Maximum="100" Value="0"/>
+                        <TextBlock x:Name="DownloadProgressText" 
+                                 Text="正在下载..." 
+                                 FontSize="14" 
+                                 Foreground="{DynamicResource TextPrimaryBrush}" 
+                                 HorizontalAlignment="Center"/>
                     </ui:SimpleStackPanel>
                 </Border>
-                
-                <!-- 操作按钮区域 -->
-                <ui:SimpleStackPanel Spacing="16" Margin="0,0,0,32">
-                    <Button x:Name="RollbackButton" 
-                          Content="回滚到此版本" 
-                          Style="{StaticResource ModernPrimaryButton}"
-                          Click="RollbackButton_Click"/>
-                    
-                    <!-- 下载进度面板 -->
-                    <StackPanel x:Name="DownloadProgressPanel" 
-                              Orientation="Vertical" 
-                              HorizontalAlignment="Center" 
-                              Visibility="Collapsed"
-                              Margin="0,8,0,0">
-                        <Border Background="#f0f9ff" BorderBrush="#3b82f6" 
-                              BorderThickness="1" CornerRadius="8" Padding="16">
-                            <ui:SimpleStackPanel Spacing="12">
-                                <ProgressBar x:Name="DownloadProgressBar" 
-                                           Width="400" Height="8" 
-                                           Minimum="0" Maximum="100" Value="0"
-                                           Background="#e0f2fe"
-                                           Foreground="#3b82f6"/>
-                                <TextBlock x:Name="DownloadProgressText" 
-                                         Text="正在下载..." 
-                                         FontSize="14" 
-                                         Foreground="#1e40af" 
-                                         HorizontalAlignment="Center"/>
-                            </ui:SimpleStackPanel>
-            </Border>
-            </StackPanel>
-                </ui:SimpleStackPanel>
-                </ui:SimpleStackPanel>
-            </ScrollViewer>
-        </Border>
-    </Grid>
+            </ui:SimpleStackPanel>
+        </ui:SimpleStackPanel>
+        </Grid>
+    </ScrollViewer>
 </Window>

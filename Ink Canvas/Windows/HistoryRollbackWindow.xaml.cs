@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 // Added for OrderByDescending
 
@@ -31,16 +33,116 @@ namespace Ink_Canvas
         {
             InitializeComponent();
             this.channel = channel;
+            
+            // 应用当前主题
+            ApplyCurrentTheme();
+            
             LoadVersions();
             
             // 添加窗口拖动功能
-            this.MouseDown += (sender, e) =>
+            MouseDown += (sender, e) =>
             {
                 if (e.ChangedButton == MouseButton.Left)
                 {
-                    this.DragMove();
+                    DragMove();
                 }
             };
+        }
+        
+        /// <summary>
+        /// 应用当前主题设置
+        /// </summary>
+        private void ApplyCurrentTheme()
+        {
+            try
+            {
+                // 根据主窗口的主题设置应用主题
+                switch (MainWindow.Settings.Appearance.Theme)
+                {
+                    case 0: // 浅色主题
+                        ThemeManager.SetRequestedTheme(this, ElementTheme.Light);
+                        UpdateColorsForLightTheme();
+                        break;
+                    case 1: // 深色主题
+                        ThemeManager.SetRequestedTheme(this, ElementTheme.Dark);
+                        UpdateColorsForDarkTheme();
+                        break;
+                    case 2: // 跟随系统
+                        if (IsSystemThemeLight())
+                        {
+                            ThemeManager.SetRequestedTheme(this, ElementTheme.Light);
+                            UpdateColorsForLightTheme();
+                        }
+                        else
+                        {
+                            ThemeManager.SetRequestedTheme(this, ElementTheme.Dark);
+                            UpdateColorsForDarkTheme();
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用主题时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 更新为浅色主题颜色
+        /// </summary>
+        private void UpdateColorsForLightTheme()
+        {
+            try
+            {
+                // 更新主要颜色资源
+                Resources["PrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb));
+                Resources["TextPrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0x1f, 0x29, 0x37));
+                Resources["TextSecondaryBrush"] = new SolidColorBrush(Color.FromRgb(0x6b, 0x72, 0x80));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新浅色主题颜色时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 更新为深色主题颜色
+        /// </summary>
+        private void UpdateColorsForDarkTheme()
+        {
+            try
+            {
+                // 更新主要颜色资源
+                Resources["PrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0x3b, 0x82, 0xf6));
+                Resources["TextPrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0xf9, 0xfa, 0xfb));
+                Resources["TextSecondaryBrush"] = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新深色主题颜色时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 检查系统是否为浅色主题
+        /// </summary>
+        private bool IsSystemThemeLight()
+        {
+            try
+            {
+                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
+                {
+                    if (key?.GetValue("AppsUseLightTheme") is int value)
+                    {
+                        return value == 1;
+                    }
+                }
+            }
+            catch
+            {
+                // 如果无法读取注册表，默认返回true（浅色主题）
+            }
+            return true;
         }
 
         private async void LoadVersions()
@@ -146,12 +248,12 @@ namespace Ink_Canvas
 
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            WindowState = WindowState.Minimized;
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            Close();
         }
 
         protected override void OnClosing(CancelEventArgs e)
