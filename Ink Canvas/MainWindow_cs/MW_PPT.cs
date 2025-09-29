@@ -787,7 +787,6 @@ namespace Ink_Canvas
                 // 处理浮动栏状态：根据"退出PPT放映后自动恢复浮动栏状态"设置决定是否恢复
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
                 {
-                    // 如果启用了"退出PPT放映后自动恢复浮动栏状态"功能，则恢复到进入前的状态
                     if (wasFloatingBarFoldedWhenEnterSlideShow)
                     {
                         if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
@@ -796,18 +795,14 @@ namespace Ink_Canvas
                     {
                         if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
                     }
-                    LogHelper.WriteLogToFile($"退出PPT放映后自动恢复浮动栏状态: 恢复到进入前状态({wasFloatingBarFoldedWhenEnterSlideShow})", LogHelper.LogType.Trace);
                 }
                 else
                 {
-                    // 如果没有启用"退出PPT放映后自动恢复浮动栏状态"功能
                     if (Settings.Automation.IsAutoFoldInPPTSlideShow)
                     {
-                        // 如果启用了"进入PPT时自动收纳"功能，退出时应该保持展开状态
                         if (isFloatingBarFolded) 
                         {
                             await UnFoldFloatingBar(new object());
-                            LogHelper.WriteLogToFile("进入PPT时自动收纳功能启用，退出时保持展开状态", LogHelper.LogType.Trace);
                         }
                     }
                     else
@@ -816,7 +811,6 @@ namespace Ink_Canvas
                         if (isFloatingBarFolded) 
                         {
                             await UnFoldFloatingBar(new object());
-                            LogHelper.WriteLogToFile("PPT自动收纳功能已关闭，强制展开浮动栏", LogHelper.LogType.Trace);
                         }
                     }
                 }
@@ -1596,34 +1590,27 @@ namespace Ink_Canvas
 
                 HideSubPanels("cursor");
                 SetCurrentToolMode(InkCanvasEditingMode.None);
-                
-                // 根据"退出PPT放映后自动恢复浮动栏状态"设置决定浮动栏边距
+    
                 await Task.Delay(150);
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
                 {
-                    // 如果启用了"退出PPT放映后自动恢复浮动栏状态"功能，根据进入前状态设置边距
                     if (wasFloatingBarFoldedWhenEnterSlideShow)
                     {
-                        // 进入前是收纳状态，设置为收纳边距
                         ViewboxFloatingBarMarginAnimation(-60);
                     }
                     else
                     {
-                        // 进入前是展开状态，设置为展开边距
                         ViewboxFloatingBarMarginAnimation(100, true);
                     }
                 }
                 else
                 {
-                    // 如果没有启用"退出PPT放映后自动恢复浮动栏状态"功能，根据当前状态设置边距
                     if (isFloatingBarFolded)
                     {
-                        // 如果浮动栏处于收纳状态，设置为收纳边距
                         ViewboxFloatingBarMarginAnimation(-60);
                     }
                     else
                     {
-                        // 如果浮动栏处于展开状态，设置为展开边距
                         ViewboxFloatingBarMarginAnimation(100, true);
                     }
                 }
@@ -1646,29 +1633,23 @@ namespace Ink_Canvas
                 await Task.Delay(150);
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
                 {
-                    // 如果启用了"退出PPT放映后自动恢复浮动栏状态"功能，根据进入前状态设置边距
                     if (wasFloatingBarFoldedWhenEnterSlideShow)
                     {
-                        // 进入前是收纳状态，设置为收纳边距
                         ViewboxFloatingBarMarginAnimation(-60);
                     }
                     else
                     {
-                        // 进入前是展开状态，设置为展开边距
                         ViewboxFloatingBarMarginAnimation(100, true);
                     }
                 }
                 else
                 {
-                    // 如果没有启用"退出PPT放映后自动恢复浮动栏状态"功能，根据当前状态设置边距
                     if (isFloatingBarFolded)
                     {
-                        // 如果浮动栏处于收纳状态，设置为收纳边距
                         ViewboxFloatingBarMarginAnimation(-60);
                     }
                     else
                     {
-                        // 如果浮动栏处于展开状态，设置为展开边距
                         ViewboxFloatingBarMarginAnimation(100, true);
                     }
                 }
@@ -1682,10 +1663,8 @@ namespace Ink_Canvas
         {
             try
             {
-                // 处理浮动栏状态：根据"退出PPT放映后自动恢复浮动栏状态"设置决定是否恢复
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
                 {
-                    // 如果启用了"退出PPT放映后自动恢复浮动栏状态"功能，则恢复到进入前的状态
                     if (wasFloatingBarFoldedWhenEnterSlideShow)
                     {
                         if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(new object(), null);
@@ -1694,18 +1673,14 @@ namespace Ink_Canvas
                     {
                         if (isFloatingBarFolded) await UnFoldFloatingBar(new object());
                     }
-                    LogHelper.WriteLogToFile($"手动处理PPT放映结束: 恢复到进入前状态({wasFloatingBarFoldedWhenEnterSlideShow})", LogHelper.LogType.Trace);
                 }
                 else
                 {
-                    // 如果没有启用"退出PPT放映后自动恢复浮动栏状态"功能
                     if (Settings.Automation.IsAutoFoldInPPTSlideShow)
                     {
-                        // 如果启用了"进入PPT时自动收纳"功能，退出时应该保持展开状态
                         if (isFloatingBarFolded) 
                         {
                             await UnFoldFloatingBar(new object());
-                            LogHelper.WriteLogToFile("手动处理PPT放映结束: 进入PPT时自动收纳功能启用，退出时保持展开状态", LogHelper.LogType.Trace);
                         }
                     }
                     else
@@ -1714,7 +1689,6 @@ namespace Ink_Canvas
                         if (isFloatingBarFolded) 
                         {
                             await UnFoldFloatingBar(new object());
-                            LogHelper.WriteLogToFile("手动处理PPT放映结束: PPT自动收纳功能已关闭，强制展开浮动栏", LogHelper.LogType.Trace);
                         }
                     }
                 }
