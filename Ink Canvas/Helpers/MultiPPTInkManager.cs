@@ -646,7 +646,6 @@ namespace Ink_Canvas.Helpers
                     if (manager != null)
                     {
                         // 这里可以添加更详细的备份逻辑
-                        LogHelper.WriteLogToFile($"执行定期墨迹备份: {_currentActivePresentationId}", LogHelper.LogType.Trace);
                     }
                 }
 
