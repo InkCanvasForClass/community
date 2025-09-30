@@ -398,7 +398,7 @@ namespace Ink_Canvas.Windows
             ((Border)border).Background = new SolidColorBrush(Color.FromRgb(138, 138, 138));
         }
 
-        private Border _sidebarItemMouseDownBorder = null;
+        private Border _sidebarItemMouseDownBorder;
 
         private void SidebarItem_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -999,7 +999,7 @@ namespace Ink_Canvas.Windows
             public Image ThumbImage { get; set; }
             public Border TrackBorder { get; set; }
             public Border ValueBorder { get; set; }
-            public bool IsTouchCaptured { get; set; } = false;
+            public bool IsTouchCaptured { get; set; }
         }
 
         #endregion

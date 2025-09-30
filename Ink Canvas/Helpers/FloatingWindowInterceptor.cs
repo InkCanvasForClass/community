@@ -229,7 +229,7 @@ namespace Ink_Canvas.Helpers
         private readonly Dictionary<IntPtr, DateTime> _lastScanTime = new Dictionary<IntPtr, DateTime>();
         private readonly HashSet<IntPtr> _knownWindows = new HashSet<IntPtr>();
         private readonly Dictionary<string, DateTime> _processLastScanTime = new Dictionary<string, DateTime>();
-        private int _consecutiveEmptyScans = 0;
+        private int _consecutiveEmptyScans;
         private DateTime _lastSuccessfulScan = DateTime.Now;
         private readonly object _scanLock = new object();
 

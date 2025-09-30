@@ -1493,7 +1493,7 @@ namespace Ink_Canvas
         #region Image Resize Handles
 
         // 图片缩放选择点相关变量
-        private bool isResizingImage = false;
+        private bool isResizingImage;
         private Point imageResizeStartPoint;
         private string activeResizeHandle = "";
 

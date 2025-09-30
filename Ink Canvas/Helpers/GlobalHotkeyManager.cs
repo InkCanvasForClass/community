@@ -24,12 +24,12 @@ namespace Ink_Canvas.Helpers
         
         // 多屏幕支持相关字段
         private Screen _currentScreen;
-        private bool _isMultiScreenMode = false;
+        private bool _isMultiScreenMode;
         private bool _enableScreenSpecificHotkeys = true; // 是否启用基于屏幕的热键注册
         
         // 智能热键管理相关字段
-        private bool _isWindowFocused = false;
-        private bool _isMouseOverWindow = false;
+        private bool _isWindowFocused;
+        private bool _isMouseOverWindow;
         private System.Windows.Threading.DispatcherTimer _mousePositionTimer;
 
         // 配置文件路径

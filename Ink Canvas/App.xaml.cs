@@ -35,7 +35,7 @@ namespace Ink_Canvas
         public static string RootPath = Environment.GetEnvironmentVariable("APPDATA") + "\\Ink Canvas\\";
         
         // 新增：标记是否通过--board参数启动
-        public static bool StartWithBoardMode = false;
+        public static bool StartWithBoardMode;
         // 新增：保存看门狗进程对象
         private static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出

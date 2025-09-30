@@ -856,6 +856,10 @@ namespace Ink_Canvas
                 RandomDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
                 SingleDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
 
+                // 计时器设置
+                ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
+                TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
+
                 // 加载自定义点名背景
                 UpdatePickNameBackgroundsInComboBox();
 
@@ -874,6 +878,8 @@ namespace Ink_Canvas
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
                 ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
                 ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
+                ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
+                TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
             }
 
             // ModeSettings

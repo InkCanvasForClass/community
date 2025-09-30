@@ -71,10 +71,10 @@ namespace Ink_Canvas
         private DateTime cachedNetworkTime = DateTime.Now;
         private DateTime lastNtpSyncTime = DateTime.MinValue;
         private string lastDisplayedTime = ""; 
-        private bool useNetworkTime = false; 
+        private bool useNetworkTime; 
         private TimeSpan networkTimeOffset = TimeSpan.Zero;
         private DateTime lastLocalTime = DateTime.Now; // 记录上次的本地时间，用于检测时间跳跃
-        private bool isNtpSyncing = false; // 防止重复NTP同步的标志 
+        private bool isNtpSyncing; // 防止重复NTP同步的标志 
 
         private async Task<DateTime> GetNetworkTimeAsync()
         {

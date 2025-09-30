@@ -2516,6 +2516,44 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchUseLegacyTimerUI_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.UseLegacyTimerUI = ToggleSwitchUseLegacyTimerUI.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void TimerVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.TimerVolume = TimerVolumeSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void ButtonSelectCustomTimerSound_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "选择计时器提醒铃声",
+                Filter = "音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*",
+                DefaultExt = "wav"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Settings.RandSettings.CustomTimerSoundPath = openFileDialog.FileName;
+                SaveSettingsToFile();
+                MessageBox.Show("自定义铃声设置成功！", "设置成功", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void ButtonResetTimerSound_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.RandSettings.CustomTimerSoundPath = "";
+            SaveSettingsToFile();
+            MessageBox.Show("已重置为默认铃声！", "重置成功", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
         private void ToggleSwitchShowRandomAndSingleDraw_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
