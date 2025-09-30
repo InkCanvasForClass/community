@@ -37,7 +37,7 @@ namespace Ink_Canvas.Helpers
         private const int MinSwitchIntervalMs = 100; // 最小切换间隔100毫秒
         
         // 内存管理相关字段
-        private long _totalMemoryUsage;
+        private long _totalMemoryUsage = 0;
         private const long MaxMemoryUsageBytes = 100 * 1024 * 1024; // 100MB限制
         private DateTime _lastMemoryCleanup = DateTime.MinValue;
         private const int MemoryCleanupIntervalMinutes = 5; // 5分钟清理一次

@@ -91,7 +91,7 @@ namespace Ink_Canvas
         [JsonProperty("enablePalmEraser")]
         public bool EnablePalmEraser { get; set; } = true;
         [JsonProperty("palmEraserSensitivity")]
-        public int PalmEraserSensitivity { get; set; } // 0-低敏感度, 1-中敏感度, 2-高敏感度
+        public int PalmEraserSensitivity { get; set; } = 0; // 0-低敏感度, 1-中敏感度, 2-高敏感度
         [JsonProperty("clearCanvasAlsoClearImages")]
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
@@ -99,7 +99,7 @@ namespace Ink_Canvas
 
         // 墨迹渐隐功能设置
         [JsonProperty("enableInkFade")]
-        public bool EnableInkFade { get; set; } 
+        public bool EnableInkFade { get; set; } = false; 
         [JsonProperty("inkFadeTime")]
         public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
 
@@ -236,7 +236,7 @@ namespace Ink_Canvas
         public int QuickColorPaletteDisplayMode { get; set; } = 1;
 
         [JsonProperty("enableHotkeysInMouseMode")]
-        public bool EnableHotkeysInMouseMode { get; set; }
+        public bool EnableHotkeysInMouseMode { get; set; } = false;
 
     }
 
@@ -310,9 +310,9 @@ namespace Ink_Canvas
         [JsonProperty("isAlwaysGoToFirstPageOnReenter")]
         public bool IsAlwaysGoToFirstPageOnReenter { get; set; }
         [JsonProperty("enablePowerPointEnhancement")]
-        public bool EnablePowerPointEnhancement { get; set; }
+        public bool EnablePowerPointEnhancement { get; set; } = false;
         [JsonProperty("showGestureButtonInSlideShow")]
-        public bool ShowGestureButtonInSlideShow { get; set; }
+        public bool ShowGestureButtonInSlideShow { get; set; } = false;
     }
 
     public class Automation
@@ -452,7 +452,7 @@ namespace Ink_Canvas
         public int AutoDelSavedFilesDaysThreshold = 15;
 
         [JsonProperty("keepFoldAfterSoftwareExit")]
-        public bool KeepFoldAfterSoftwareExit { get; set; }
+        public bool KeepFoldAfterSoftwareExit { get; set; } = false;
 
         [JsonProperty("isSaveFullPageStrokes")]
         public bool IsSaveFullPageStrokes;
@@ -467,13 +467,13 @@ namespace Ink_Canvas
     public class FloatingWindowInterceptorSettings
     {
         [JsonProperty("isEnabled")]
-        public bool IsEnabled { get; set; }
+        public bool IsEnabled { get; set; } = false;
 
         [JsonProperty("scanIntervalMs")]
         public int ScanIntervalMs { get; set; } = 5000; 
 
         [JsonProperty("autoStart")]
-        public bool AutoStart { get; set; }
+        public bool AutoStart { get; set; } = false;
 
         [JsonProperty("showNotifications")]
         public bool ShowNotifications { get; set; } = true;
@@ -622,17 +622,11 @@ namespace Ink_Canvas
         [JsonProperty("directCallCiRand")]
         public bool DirectCallCiRand { get; set; }
         [JsonProperty("externalCallerType")]
-        public int ExternalCallerType { get; set; } 
+        public int ExternalCallerType { get; set; } = 0; 
         [JsonProperty("selectedBackgroundIndex")]
         public int SelectedBackgroundIndex { get; set; }
         [JsonProperty("customPickNameBackgrounds")]
         public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
-        [JsonProperty("useLegacyTimerUI")]
-        public bool UseLegacyTimerUI { get; set; }
-        [JsonProperty("timerVolume")]
-        public double TimerVolume { get; set; } = 1.0;
-        [JsonProperty("customTimerSoundPath")]
-        public string CustomTimerSoundPath { get; set; } = "";
     }
 
     public class CustomPickNameBackground
@@ -674,6 +668,6 @@ namespace Ink_Canvas
     public class ModeSettings
     {
         [JsonProperty("isPPTOnlyMode")]
-        public bool IsPPTOnlyMode { get; set; } // 是否为仅PPT模式，默认为false（正常模式）
+        public bool IsPPTOnlyMode { get; set; } = false; // 是否为仅PPT模式，默认为false（正常模式）
     }
 }

@@ -13,14 +13,14 @@ namespace Ink_Canvas
     public partial class MainWindow : Window
     {
         // 橡皮擦系统核心变量
-        public bool isUsingGeometryEraser;
-        private IncrementalStrokeHitTester hitTester;
+        public bool isUsingGeometryEraser = false;
+        private IncrementalStrokeHitTester hitTester = null;
 
         public double eraserWidth = 64;
-        public bool isEraserCircleShape;
-        public bool isUsingStrokesEraser;
+        public bool isEraserCircleShape = false;
+        public bool isUsingStrokesEraser = false;
 
-        private Matrix scaleMatrix;
+        private Matrix scaleMatrix = new Matrix();
 
         // 橡皮擦覆盖层相关控件
         private System.Windows.Controls.Canvas eraserOverlayCanvas;

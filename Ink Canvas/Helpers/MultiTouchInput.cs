@@ -30,7 +30,7 @@ namespace Ink_Canvas.Helpers
     public class StrokeVisual : DrawingVisual
     {
         private bool _needsRedraw = true;
-        private int _lastPointCount;
+        private int _lastPointCount = 0;
         private const int REDRAW_THRESHOLD = 3; 
 
         /// <summary>

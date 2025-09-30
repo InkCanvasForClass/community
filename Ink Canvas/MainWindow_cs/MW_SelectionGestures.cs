@@ -255,12 +255,12 @@ namespace Ink_Canvas
         #endregion
 
         private bool isGridInkCanvasSelectionCoverMouseDown;
-        private bool isStrokeDragging;
+        private bool isStrokeDragging = false;
         private Point strokeDragStartPoint;
         private StrokeCollection StrokesSelectionClone = new StrokeCollection();
 
         // 选择框和选择点相关变量
-        private bool isResizing;
+        private bool isResizing = false;
         private string currentResizeHandle = "";
         private Point resizeStartPoint;
         private Rect originalSelectionBounds;

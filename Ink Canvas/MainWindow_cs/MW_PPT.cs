@@ -91,8 +91,8 @@ namespace Ink_Canvas
         private const int ProcessMonitorInterval = 1000; // 应用程序监控间隔（毫秒）
         
         // 上次播放位置相关字段
-        private int _lastPlaybackPage;
-        private bool _shouldNavigateToLastPage;
+        private int _lastPlaybackPage = 0;
+        private bool _shouldNavigateToLastPage = false;
         
         // 页面切换防抖机制
         private DateTime _lastSlideSwitchTime = DateTime.MinValue;

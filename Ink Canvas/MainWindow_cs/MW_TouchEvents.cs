@@ -24,7 +24,8 @@ namespace Ink_Canvas
         private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
         private DateTime lastTouchDownTime = DateTime.MinValue;
         private const double MULTI_TOUCH_DELAY_MS = 100; 
-        private bool isMultiTouchTimerActive;
+        private bool isInWritingMode = false;
+        private bool isMultiTouchTimerActive = false;
         
         /// </summary> 
         /// 保存画布上的非笔画元素（如图片、媒体元素等）

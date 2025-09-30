@@ -1,5 +1,4 @@
 ﻿using Ink_Canvas.Helpers;
-using Ink_Canvas.Resources;
 using System;
 using System.Media;
 using System.Timers;
@@ -7,7 +6,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas
 {
@@ -23,7 +21,6 @@ namespace Ink_Canvas
 
             timer.Elapsed += Timer_Elapsed;
             timer.Interval = 50;
-            InitializeUI();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -65,25 +62,24 @@ namespace Ink_Canvas
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     //Play sound
-                    PlayTimerSound();
+                    player.Stream = Properties.Resources.TimerDownNotice;
+                    player.Play();
                 });
             }
         }
 
         SoundPlayer player = new SoundPlayer();
-        MediaPlayer mediaPlayer = new MediaPlayer();
 
-        int hour;
+        int hour = 0;
         int minute = 1;
-        int second;
+        int second = 0;
         int totalSeconds = 60;
 
         DateTime startTime = DateTime.Now;
         DateTime pauseTime = DateTime.Now;
 
-        bool isTimerRunning;
-        bool isPaused;
-        bool useLegacyUI;
+        bool isTimerRunning = false;
+        bool isPaused = false;
 
         Timer timer = new Timer();
 
@@ -338,97 +334,6 @@ namespace Ink_Canvas
             }
         }
 
-        private void InitializeUI()
-        {
-            // 从设置中读取配置
-            if (MainWindow.Settings.RandSettings != null)
-            {
-                useLegacyUI = MainWindow.Settings.RandSettings.UseLegacyTimerUI;
-                UpdateButtonTexts();
-            }
-        }
-
-        public void RefreshUI()
-        {
-            InitializeUI();
-        }
-
-        private void UpdateButtonTexts()
-        {
-            if (useLegacyUI)
-            {
-                // 老版UI：使用+5, +1, -1, -5
-                HourPlus5Text.Text = "+5";
-                HourPlus1Text.Text = "+1";
-                HourMinus1Text.Text = "-1";
-                HourMinus5Text.Text = "-5";
-                
-                MinutePlus5Text.Text = "+5";
-                MinutePlus1Text.Text = "+1";
-                MinuteMinus1Text.Text = "-1";
-                MinuteMinus5Text.Text = "-5";
-                
-                SecondPlus5Text.Text = "+5";
-                SecondPlus1Text.Text = "+1";
-                SecondMinus1Text.Text = "-1";
-                SecondMinus5Text.Text = "-5";
-            }
-            else
-            {
-                // 新版UI：使用箭头符号
-                HourPlus5Text.Text = "∧∧";
-                HourPlus1Text.Text = "∧";
-                HourMinus1Text.Text = "∨";
-                HourMinus5Text.Text = "∨∨";
-                
-                MinutePlus5Text.Text = "∧∧";
-                MinutePlus1Text.Text = "∧";
-                MinuteMinus1Text.Text = "∨";
-                MinuteMinus5Text.Text = "∨∨";
-                
-                SecondPlus5Text.Text = "∧∧";
-                SecondPlus1Text.Text = "∧";
-                SecondMinus1Text.Text = "∨";
-                SecondMinus5Text.Text = "∨∨";
-            }
-        }
-
-        private void PlayTimerSound()
-        {
-            try
-            {
-                double volume = MainWindow.Settings.RandSettings?.TimerVolume ?? 1.0;
-                mediaPlayer.Volume = volume;
-                
-                if (!string.IsNullOrEmpty(MainWindow.Settings.RandSettings?.CustomTimerSoundPath) && 
-                    System.IO.File.Exists(MainWindow.Settings.RandSettings.CustomTimerSoundPath))
-                {
-                    // 播放自定义铃声
-                    mediaPlayer.Open(new Uri(MainWindow.Settings.RandSettings.CustomTimerSoundPath));
-                }
-                else
-                {
-                    // 播放默认铃声
-                    string tempPath = System.IO.Path.GetTempFileName() + ".wav";
-                    using (var stream = Properties.Resources.TimerDownNotice)
-                    {
-                        using (var fileStream = new System.IO.FileStream(tempPath, System.IO.FileMode.Create))
-                        {
-                            stream.CopyTo(fileStream);
-                        }
-                    }
-                    mediaPlayer.Open(new Uri(tempPath));
-                }
-                
-                mediaPlayer.Play();
-            }
-            catch (Exception ex)
-            {
-                // 如果播放失败，静默处理
-                System.Diagnostics.Debug.WriteLine($"播放计时器铃声失败: {ex.Message}");
-            }
-        }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             isTimerRunning = false;
@@ -439,7 +344,7 @@ namespace Ink_Canvas
             Close();
         }
 
-        private bool _isInCompact;
+        private bool _isInCompact = false;
 
         private void BtnMinimal_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
