@@ -9,7 +9,6 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -64,10 +63,10 @@ namespace Ink_Canvas
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
                 var endPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint() : new Point();
 
-                // 确保InkCanvas保持Ink编辑模式，防止自动切换到鼠标模式
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
+                // 从InkCanvas中移除墨迹，因为我们要用渐隐管理器来管理它
+                if (inkCanvas.Strokes.Contains(e.Stroke))
                 {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    inkCanvas.Strokes.Remove(e.Stroke);
                 }
 
                 // 添加到墨迹渐隐管理器
@@ -79,30 +78,6 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile("StrokeCollected: 墨迹渐隐管理器为空，无法添加墨迹", LogHelper.LogType.Error);
                 }
-
-                // 延迟移除墨迹，避免立即移除导致模式切换
-                // 使用Dispatcher.BeginInvoke确保在UI线程上异步执行
-                Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    try
-                    {
-                        // 再次确保InkCanvas保持Ink编辑模式
-                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                        {
-                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                        }
-
-                        // 从InkCanvas中移除墨迹，因为我们要用渐隐管理器来管理它
-                        if (inkCanvas.Strokes.Contains(e.Stroke))
-                        {
-                            inkCanvas.Strokes.Remove(e.Stroke);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"延迟移除墨迹时出错: {ex}", LogHelper.LogType.Error);
-                    }
-                }), DispatcherPriority.Background);
 
                 // 墨迹渐隐模式下不参与墨迹纠正和其他处理，直接返回
                 return;
