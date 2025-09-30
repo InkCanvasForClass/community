@@ -3242,6 +3242,39 @@
                                                    FontFamily="Consolas"
                                                    Text="{Binding ElementName=RandWindowOnceMaxStudentsSlider, Path=Value, Converter={StaticResource IntNumberToString}}" />
                                     </ui:SimpleStackPanel>
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
+                                          Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
+                                    <TextBlock Foreground="#fafafa" Text="计时器设置" 
+                                               FontSize="16" FontWeight="Bold" Margin="0,10,0,5" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="使用老版计时器按钮UI"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchUseLegacyTimerUI"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchUseLegacyTimerUI_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="计时器提醒音量" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider x:Name="TimerVolumeSlider" Minimum="0"
+                                                Maximum="1" Width="168" FontFamily="Microsoft YaHei UI"
+                                                ValueChanged="TimerVolumeSlider_ValueChanged"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"
+                                                TickPlacement="None" AutoToolTipPlacement="None" />
+                                        <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
+                                                   FontFamily="Consolas"
+                                                   Text="{Binding ElementName=TimerVolumeSlider, Path=Value, StringFormat={}{0:P0}}" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="自定义提醒铃声：" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Button Name="ButtonSelectCustomTimerSound" Content="选择文件" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonSelectCustomTimerSound_Click" Padding="10,3"/>
+                                        <Button Name="ButtonResetTimerSound" Content="重置" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonResetTimerSound_Click" Padding="10,3" Margin="5,0,0,0"/>
+                                    </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <GroupBox>
