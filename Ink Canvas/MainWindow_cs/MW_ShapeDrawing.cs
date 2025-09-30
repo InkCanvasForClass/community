@@ -489,16 +489,20 @@ namespace Ink_Canvas
             {
                 SetCursorBasedOnEditingMode(inkCanvas);
             }
-            
+
+            // 修复：几何绘制模式下完全禁止触摸轨迹收集
             if (drawingShapeMode != 0)
             {
+                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
 
                 if (isWaitUntilNextTouchDown && dec.Count > 1) return;
                 if (dec.Count > 1)
                 {
+                    // 修复：双曲线绘制时，多指触摸不应该删除第一笔的辅助线
                     if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
                     {
+                        // 第二笔绘制双曲线时，只删除第二笔的临时笔画，保留第一笔的辅助线
                         try
                         {
                             inkCanvas.Strokes.Remove(lastTempStroke);
@@ -519,10 +523,13 @@ namespace Ink_Canvas
                     }
                     return;
                 }
-                
+
+                // 修复：双曲线绘制时，第二笔应该基于第一笔的起点，而不是触摸实时位置
                 Point touchPoint = e.GetTouchPoint(inkCanvas).Position;
                 if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
                 {
+                    // 第二笔绘制双曲线时，使用触摸位置作为终点，但保持第一笔的起点
+                    // 这里不需要特殊处理，因为MouseTouchMove函数内部已经正确处理了双曲线的绘制逻辑
                     MouseTouchMove(touchPoint);
                 }
                 else
@@ -531,13 +538,15 @@ namespace Ink_Canvas
                     MouseTouchMove(touchPoint);
                 }
 
-                return;
+                return; // 处理完几何绘制后直接返回，不执行后面的代码
             }
-            
+
+            // 其它模式下，允许橡皮、套索、批注等正常工作，不覆盖EditingMode
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint ||
                 inkCanvas.EditingMode == InkCanvasEditingMode.Select ||
                 inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
             {
+                // 允许正常橡皮、套索、批注
             }
         }
 

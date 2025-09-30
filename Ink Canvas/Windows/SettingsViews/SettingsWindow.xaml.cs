@@ -440,14 +440,16 @@ namespace Ink_Canvas.Windows
 
         private void ToggleSwitch_Click(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Border border)
+            var border = sender as Border;
+            if (border != null)
             {
                 // 切换开关状态
                 bool isOn = border.Background.ToString() == "#FF3584E4";
                 border.Background = isOn ? new SolidColorBrush(Color.FromRgb(225, 225, 225)) : new SolidColorBrush(Color.FromRgb(53, 132, 228));
 
                 // 切换内部圆点的位置
-                if (border.Child is Border innerBorder)
+                var innerBorder = border.Child as Border;
+                if (innerBorder != null)
                 {
                     innerBorder.HorizontalAlignment = isOn ? HorizontalAlignment.Left : HorizontalAlignment.Right;
                 }
@@ -555,7 +557,8 @@ namespace Ink_Canvas.Windows
 
         private void OptionButton_Click(object sender, MouseButtonEventArgs e)
         {
-            if (sender is Border border)
+            var border = sender as Border;
+            if (border != null)
             {
                 string tag = border.Tag?.ToString();
                 if (!string.IsNullOrEmpty(tag))
@@ -565,7 +568,8 @@ namespace Ink_Canvas.Windows
 
                     // 设置当前按钮为选中状态
                     border.Background = new SolidColorBrush(Color.FromRgb(225, 225, 225));
-                    if (border.Child is TextBlock textBlock)
+                    var textBlock = border.Child as TextBlock;
+                    if (textBlock != null)
                     {
                         textBlock.FontWeight = FontWeights.Bold;
                     }
@@ -579,7 +583,8 @@ namespace Ink_Canvas.Windows
         private void ClearOtherOptionsInGroup(Border currentBorder, string currentTag)
         {
             // 获取当前按钮所在的父容器
-            if (currentBorder.Parent is StackPanel parent)
+            var parent = currentBorder.Parent as StackPanel;
+            if (parent != null)
             {
                 // 获取组名（Tag中下划线前的部分）
                 string groupName = currentTag.Split('_')[0];
@@ -593,7 +598,8 @@ namespace Ink_Canvas.Windows
                         if (!string.IsNullOrEmpty(childTag) && childTag.StartsWith(groupName + "_"))
                         {
                             border.Background = new SolidColorBrush(Colors.Transparent);
-                            if (border.Child is TextBlock textBlock)
+                            var textBlock = border.Child as TextBlock;
+                            if (textBlock != null)
                             {
                                 textBlock.FontWeight = FontWeights.Normal;
                             }
@@ -770,7 +776,8 @@ namespace Ink_Canvas.Windows
 
                 if (child is Border border && border.Background != null)
                 {
-                    if (border.Background is SolidColorBrush brush && brush.Color.ToString() == "#FFDEDEDE")
+                    var brush = border.Background as SolidColorBrush;
+                    if (brush != null && brush.Color.ToString() == "#FFDEDEDE")
                     {
                         return border;
                     }
@@ -793,7 +800,8 @@ namespace Ink_Canvas.Windows
 
                 if (child is Border border && border.Background != null)
                 {
-                    if (border.Background is SolidColorBrush brush && brush.Color.ToString() == "#FF3584E4")
+                    var brush = border.Background as SolidColorBrush;
+                    if (brush != null && brush.Color.ToString() == "#FF3584E4")
                     {
                         return border;
                     }
@@ -951,7 +959,8 @@ namespace Ink_Canvas.Windows
                 var relativePosition = Math.Max(0, Math.Min(1, adjustedX / effectiveWidth));
 
                 // 更新滑块位置
-                if (!(customSlider.ThumbImage.RenderTransform is TranslateTransform thumbTransform))
+                var thumbTransform = customSlider.ThumbImage.RenderTransform as TranslateTransform;
+                if (thumbTransform == null)
                 {
                     thumbTransform = new TranslateTransform();
                     customSlider.ThumbImage.RenderTransform = thumbTransform;

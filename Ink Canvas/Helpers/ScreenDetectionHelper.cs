@@ -25,7 +25,8 @@ namespace Ink_Canvas.Helpers
                     return Screen.PrimaryScreen;
 
                 // 获取窗口的句柄
-                if (!(PresentationSource.FromVisual(window) is HwndSource hwndSource))
+                var hwndSource = PresentationSource.FromVisual(window) as HwndSource;
+                if (hwndSource == null)
                     return Screen.PrimaryScreen;
 
                 // 获取窗口在屏幕上的位置

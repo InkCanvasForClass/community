@@ -26,7 +26,6 @@ using System.Windows.Threading;
 using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Button = System.Windows.Controls.Button;
-using ComboBox = System.Windows.Controls.ComboBox;
 using Cursor = System.Windows.Input.Cursor;
 using Cursors = System.Windows.Input.Cursors;
 using DpiChangedEventArgs = System.Windows.DpiChangedEventArgs;
@@ -329,7 +328,8 @@ namespace Ink_Canvas
 
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e)
         {
-            if (!(sender is InkCanvas inkCanvas1)) return;
+            var inkCanvas1 = sender as InkCanvas;
+            if (inkCanvas1 == null) return;
 
             // 使用辅助方法设置光标
             SetCursorBasedOnEditingMode(inkCanvas1);
@@ -358,7 +358,8 @@ namespace Ink_Canvas
             if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) forcePointEraser = !forcePointEraser;
 
             // 处理橡皮擦覆盖层的启用/禁用
-            if (FindName("EraserOverlayCanvas") is Canvas eraserOverlay)
+            var eraserOverlay = FindName("EraserOverlayCanvas") as Canvas;
+            if (eraserOverlay != null)
             {
                 if (inkCanvas1.EditingMode == InkCanvasEditingMode.EraseByPoint)
                 {
@@ -1300,7 +1301,8 @@ namespace Ink_Canvas
             BorderSettingsMask.Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
 
             // 获取SettingsPanelScrollViewer中的所有GroupBox
-            if (!(SettingsPanelScrollViewer.Content is StackPanel stackPanel)) return;
+            var stackPanel = SettingsPanelScrollViewer.Content as StackPanel;
+            if (stackPanel == null) return;
 
             // 确保所有GroupBox都是可见的
             foreach (var child in stackPanel.Children)
@@ -1515,15 +1517,20 @@ namespace Ink_Canvas
         // 清除所有导航按钮的Tag属性
         private void ClearAllNavButtonTags()
         {
-            if (!(BorderSettings.Child is Grid grid)) return;
+            var grid = BorderSettings.Child as Grid;
+            if (grid == null) return;
 
-            if (!(grid.Children[0] is Border navSidebar)) return;
+            var navSidebar = grid.Children[0] as Border;
+            if (navSidebar == null) return;
 
-            if (!(navSidebar.Child is Grid navGrid)) return;
+            var navGrid = navSidebar.Child as Grid;
+            if (navGrid == null) return;
 
-            if (!(navGrid.Children[1] is ScrollViewer scrollViewer)) return;
+            var scrollViewer = navGrid.Children[1] as ScrollViewer;
+            if (scrollViewer == null) return;
 
-            if (!(scrollViewer.Content is StackPanel stackPanel)) return;
+            var stackPanel = scrollViewer.Content as StackPanel;
+            if (stackPanel == null) return;
 
             foreach (var child in stackPanel.Children)
             {
@@ -1537,24 +1544,30 @@ namespace Ink_Canvas
         // 设置导航按钮的Tag属性
         private void SetNavButtonTag(string tag)
         {
-            if (!(BorderSettings.Child is Grid grid)) return;
+            var grid = BorderSettings.Child as Grid;
+            if (grid == null) return;
 
-            if (!(grid.Children[0] is Border navSidebar)) return;
+            var navSidebar = grid.Children[0] as Border;
+            if (navSidebar == null) return;
 
-            if (!(navSidebar.Child is Grid navGrid)) return;
+            var navGrid = navSidebar.Child as Grid;
+            if (navGrid == null) return;
 
-            if (!(navGrid.Children[1] is ScrollViewer scrollViewer)) return;
+            var scrollViewer = navGrid.Children[1] as ScrollViewer;
+            if (scrollViewer == null) return;
 
-            if (!(scrollViewer.Content is StackPanel stackPanel)) return;
+            var stackPanel = scrollViewer.Content as StackPanel;
+            if (stackPanel == null) return;
 
             foreach (var child in stackPanel.Children)
             {
                 if (child is Button button)
                 {
                     // 检查按钮的ToolTip属性，根据tag设置对应的按钮
+                    string buttonTag = button.Tag as string;
 
                     // 如果按钮的Tag与要设置的tag匹配，则设置Tag
-                    if (button.Tag is string buttonTag && buttonTag.ToLower() == tag.ToLower())
+                    if (buttonTag != null && buttonTag.ToLower() == tag.ToLower())
                     {
                         button.Tag = tag;
                         return;
@@ -2533,7 +2546,8 @@ namespace Ink_Canvas
             try
             {
                 // 获取滑块的轨道元素
-                if (!(slider.Template.FindName("PART_Track", slider) is Track track))
+                var track = slider.Template.FindName("PART_Track", slider) as Track;
+                if (track == null)
                 {
                     // 如果找不到轨道，使用简单方法
                     UpdateSliderValueFromPosition(slider, position);
@@ -2660,7 +2674,8 @@ namespace Ink_Canvas
         {
             try
             {
-                if (sender is ToggleSwitch toggle)
+                var toggle = sender as ToggleSwitch;
+                if (toggle != null)
                 {
                     Settings.ModeSettings.IsPPTOnlyMode = toggle.IsOn;
                     
@@ -2758,7 +2773,8 @@ namespace Ink_Canvas
             
             try
             {
-                if (sender is ComboBox comboBox)
+                System.Windows.Controls.ComboBox comboBox = sender as System.Windows.Controls.ComboBox;
+                if (comboBox != null)
                 {
                     Settings.Appearance.Theme = comboBox.SelectedIndex;
                     

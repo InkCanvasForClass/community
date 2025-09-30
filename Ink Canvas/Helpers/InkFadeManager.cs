@@ -107,7 +107,8 @@ namespace Ink_Canvas.Helpers
                         {
                             // 将墨迹添加到 inkCanvas 的父容器中，而不是 inkCanvas.Children
                             // 这样可以避免坐标系统问题
-                            if (_mainWindow.inkCanvas.Parent is Panel parent)
+                            var parent = _mainWindow.inkCanvas.Parent as Panel;
+                            if (parent != null)
                             {
                                 parent.Children.Add(strokeVisual);
                             }
@@ -153,7 +154,8 @@ namespace Ink_Canvas.Helpers
                         try
                         {
                             // 从父容器中移除墨迹
-                            if (_mainWindow.inkCanvas?.Parent is Panel parent && parent.Children.Contains(visual))
+                            var parent = _mainWindow.inkCanvas?.Parent as Panel;
+                            if (parent != null && parent.Children.Contains(visual))
                             {
                                 parent.Children.Remove(visual);
                             }
@@ -511,7 +513,8 @@ namespace Ink_Canvas.Helpers
                 originalVisual.Visibility = Visibility.Hidden;
 
                 var segments = new List<UIElement>();
-                if (!(_mainWindow.inkCanvas?.Parent is Panel parent))
+                var parent = _mainWindow.inkCanvas?.Parent as Panel;
+                if (parent == null)
                 {
                     // 如果父容器不是Panel，直接使用InkCanvas
                     parent = null; // 稍后会检查并使用InkCanvas.Children
@@ -867,7 +870,8 @@ namespace Ink_Canvas.Helpers
             try
             {
                 // 从父容器中移除墨迹
-                if (_mainWindow.inkCanvas?.Parent is Panel parent && parent.Children.Contains(visual))
+                var parent = _mainWindow.inkCanvas?.Parent as Panel;
+                if (parent != null && parent.Children.Contains(visual))
                 {
                     parent.Children.Remove(visual);
                 }
