@@ -2846,9 +2846,39 @@ namespace Ink_Canvas
             CancelSingleFingerDragMode();
 
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
+
+            // 清空墨迹后模拟用户重新手动开关多指书写功能
+            SimulateMultiTouchToggle();
         }
 
         private bool lastIsInMultiTouchMode;
+
+        /// <summary>
+        /// 模拟用户重新手动开关多指书写功能
+        /// </summary>
+        private void SimulateMultiTouchToggle()
+        {
+            try
+            {
+                // 检查多指书写模式是否启用
+                if (ToggleSwitchEnableMultiTouchMode != null && ToggleSwitchEnableMultiTouchMode.IsOn)
+                {
+                    // 先关闭多指书写模式
+                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
+                    
+                    // 使用Dispatcher.BeginInvoke确保UI更新完成后再重新开启
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        // 重新开启多指书写模式
+                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                    }), DispatcherPriority.Background);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"模拟多指书写开关时发生错误: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
 
         private void CancelSingleFingerDragMode()
         {
