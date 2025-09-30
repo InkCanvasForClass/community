@@ -21,7 +21,11 @@ namespace Ink_Canvas
         private List<int> dec = new List<int>();
         private bool isSingleFingerDragMode;
         private Point centerPoint = new Point(0, 0);
-        private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink; 
+        private InkCanvasEditingMode lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+        private DateTime lastTouchDownTime = DateTime.MinValue;
+        private const double MULTI_TOUCH_DELAY_MS = 100; 
+        private bool isInWritingMode = false;
+        private bool isMultiTouchTimerActive = false; 
         /// 保存画布上的非笔画元素（如图片、媒体元素等）
         /// </summary>
         private List<UIElement> PreserveNonStrokeElements()
@@ -271,21 +275,18 @@ namespace Ink_Canvas
             }
 
 
-            // 新增：根据是否为笔尾自动切换橡皮擦/画笔模式
+            // 根据是否为笔尾自动切换橡皮擦/画笔模式
             if (e.StylusDevice.Inverted)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
             }
             else
             {
-                // 修复：几何绘制模式下完全禁止触摸轨迹收集
                 if (drawingShapeMode != 0)
                 {
-                    // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
                     return;
                 }
-                // 修复：保持当前的线擦模式，不要强制切换到Ink模式
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
@@ -565,6 +566,7 @@ namespace Ink_Canvas
             inkCanvas.CaptureTouch(e.TouchDevice);
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+            lastTouchDownTime = DateTime.Now;
             dec.Add(e.TouchDevice.Id);
 
             // Palm Eraser 逻辑 
@@ -662,6 +664,27 @@ namespace Ink_Canvas
                 if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None ||
                     inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
+                var timeSinceLastTouch = (DateTime.Now - lastTouchDownTime).TotalMilliseconds;
+                if (timeSinceLastTouch < MULTI_TOUCH_DELAY_MS && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                {
+                    if (!isMultiTouchTimerActive)
+                    {
+                        isMultiTouchTimerActive = true;
+                        var remainingTime = MULTI_TOUCH_DELAY_MS - timeSinceLastTouch;
+                        System.Threading.Tasks.Task.Delay((int)remainingTime).ContinueWith(_ => 
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                if (dec.Count > 1 && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                                {
+                                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                                }
+                                isMultiTouchTimerActive = false;
+                            });
+                        });
+                    }
+                    return;
+                }
                     
                 lastInkCanvasEditingMode = inkCanvas.EditingMode;
                 if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
@@ -697,6 +720,12 @@ namespace Ink_Canvas
 
             // Palm Eraser 逻辑
             dec.Remove(e.TouchDevice.Id);
+            
+            // 重置多触控点定时器状态
+            if (dec.Count <= 1)
+            {
+                isMultiTouchTimerActive = false;
+            }
             
 
             // 当手掌擦激活且所有触摸点都抬起时，恢复原编辑模式
