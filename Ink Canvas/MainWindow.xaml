@@ -3670,6 +3670,7 @@
                        IsManipulationEnabled="True"
                        EditingModeChanged="inkCanvas_EditingModeChanged"
                        PreviewTouchDown="inkCanvas_PreviewTouchDown"
+                       PreviewTouchMove="inkCanvas_PreviewTouchMove"
                        PreviewTouchUp="inkCanvas_PreviewTouchUp"
                        MouseDown="inkCanvas_MouseDown"
                        MouseMove="inkCanvas_MouseMove"
