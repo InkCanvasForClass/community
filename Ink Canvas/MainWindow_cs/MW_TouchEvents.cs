@@ -926,13 +926,12 @@ namespace Ink_Canvas
         private void Main_Grid_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
             if (e.Manipulators.Count() != 0) return;
-            // 修复：几何绘制模式下不自动切换到Ink模式，避免触摸轨迹被收集
             if (drawingShapeMode == 0
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                // 修复：确保多指手势完成后正确更新lastInkCanvasEditingMode
                 lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
             }
         }
