@@ -85,9 +85,8 @@ namespace Ink_Canvas
 
             // 根据橡皮擦形状选择对应的图像资源
             string resourceKey = isEraserCircleShape ? "EllipseEraserImageSource" : "RectangleEraserImageSource";
-            var imageSource = TryFindResource(resourceKey) as DrawingImage;
-            
-            if (imageSource != null)
+
+            if (TryFindResource(resourceKey) is DrawingImage imageSource)
             {
                 eraserFeedback.Source = imageSource;
             }

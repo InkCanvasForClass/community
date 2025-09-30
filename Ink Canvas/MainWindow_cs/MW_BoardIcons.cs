@@ -504,8 +504,7 @@ namespace Ink_Canvas
             BackgroundPalette.Child = stackPanel;
 
             // 获取主窗口中的根网格，确保面板添加到顶层
-            Grid mainGrid = FindName("Main_Grid") as Grid;
-            if (mainGrid != null)
+            if (FindName("Main_Grid") is Grid mainGrid)
             {
                 // 删除可能已存在的BackgroundPalette
                 foreach (UIElement element in mainGrid.Children)
@@ -526,8 +525,7 @@ namespace Ink_Canvas
                 mainGrid.Children.Add(BackgroundPalette);
 
                 // 设置面板位置
-                var clickElement = FindName("BoardChangeBackgroundColorBtn") as FrameworkElement;
-                if (clickElement != null)
+                if (FindName("BoardChangeBackgroundColorBtn") is FrameworkElement clickElement)
                 {
                     Point position = clickElement.TranslatePoint(new Point(0, 0), mainGrid);
                     BackgroundPalette.Margin = new Thickness(
@@ -551,10 +549,9 @@ namespace Ink_Canvas
                     {
                         if (modePanel.Children.Count > 1)
                         {
-                            var whiteboardButton = modePanel.Children[0] as Border;
                             var blackboardButton = modePanel.Children[1] as Border;
 
-                            if (whiteboardButton != null && whiteboardButton.Child is TextBlock whiteboardText)
+                            if (modePanel.Children[0] is Border whiteboardButton && whiteboardButton.Child is TextBlock whiteboardText)
                             {
                                 whiteboardButton.Background = Settings.Canvas.UsingWhiteboard ?
                                     new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :

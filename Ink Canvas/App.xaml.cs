@@ -299,8 +299,7 @@ namespace Ink_Canvas
             try
             {
                 // 获取主窗口实例并清理PowerPoint进程守护
-                var mainWindow = Current.MainWindow as MainWindow;
-                if (mainWindow != null)
+                if (Current.MainWindow is MainWindow mainWindow)
                 {
                     // 通过反射调用StopPowerPointProcessMonitoring方法
                     var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring", 

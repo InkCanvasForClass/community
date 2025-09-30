@@ -53,8 +53,7 @@ namespace Ink_Canvas
                 foreach (var kvp in Settings.Automation.FloatingWindowInterceptor.InterceptRules)
                 {
                     var toggleName = $"ToggleSwitch{kvp.Key}";
-                    var toggle = FindName(toggleName) as ToggleSwitch;
-                    if (toggle != null)
+                    if (FindName(toggleName) is ToggleSwitch toggle)
                     {
                         toggle.IsOn = kvp.Value;
                     }

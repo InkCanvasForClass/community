@@ -2895,8 +2895,7 @@ namespace Ink_Canvas
         private async void UpdateChannelSelector_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            var radioButton = sender as RadioButton;
-            if (radioButton != null)
+            if (sender is RadioButton radioButton)
             {
                 string channel = radioButton.Tag.ToString();
                 UpdateChannel newChannel = channel == "Beta" ? UpdateChannel.Beta : UpdateChannel.Release;

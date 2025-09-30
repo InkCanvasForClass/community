@@ -211,22 +211,18 @@ namespace Ink_Canvas
                     // 获取全局快捷键管理器
                     var hotkeyManagerField = typeof(MainWindow).GetField("_globalHotkeyManager", 
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                    var hotkeyManager = hotkeyManagerField?.GetValue(mainWin) as GlobalHotkeyManager;
-                    
-                    if (hotkeyManager != null)
+
+                    if (hotkeyManagerField?.GetValue(mainWin) is GlobalHotkeyManager hotkeyManager)
                     {
                         // 禁用所有快捷键
                         hotkeyManager.DisableHotkeyRegistration();
                         
                         // 更新菜单项文本和状态
-                        var menuItem = sender as MenuItem;
-                        if (menuItem != null)
+                        if (sender is MenuItem menuItem)
                         {
-                            var headerPanel = menuItem.Header as SimpleStackPanel;
-                            if (headerPanel != null)
+                            if (menuItem.Header is SimpleStackPanel headerPanel)
                             {
-                                var textBlock = headerPanel.Children[0] as TextBlock;
-                                if (textBlock != null)
+                                if (headerPanel.Children[0] is TextBlock textBlock)
                                 {
                                     if (textBlock.Text == "禁用所有快捷键")
                                     {

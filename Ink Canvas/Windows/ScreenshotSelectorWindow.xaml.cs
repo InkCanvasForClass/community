@@ -517,18 +517,17 @@ namespace Ink_Canvas
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             // 检查是否点击了UI元素，如果是则不处理选择
-            var hitElement = e.Source as FrameworkElement;
-            if (hitElement != null && (
-                hitElement is Ellipse ||
-                hitElement is System.Windows.Controls.Button ||
-                hitElement is Border ||
-                hitElement is TextBlock ||
-                hitElement is StackPanel ||
-                hitElement is Separator ||
-                hitElement.Name == "SizeInfoBorder" ||
-                hitElement.Name == "HintText" ||
-                hitElement.Name == "AdjustModeHint" ||
-                hitElement.Name == "SelectionRectangle"))
+            if (e.Source is FrameworkElement hitElement && (
+                    hitElement is Ellipse ||
+                    hitElement is System.Windows.Controls.Button ||
+                    hitElement is Border ||
+                    hitElement is TextBlock ||
+                    hitElement is StackPanel ||
+                    hitElement is Separator ||
+                    hitElement.Name == "SizeInfoBorder" ||
+                    hitElement.Name == "HintText" ||
+                    hitElement.Name == "AdjustModeHint" ||
+                    hitElement.Name == "SelectionRectangle"))
             {
                 return;
             }

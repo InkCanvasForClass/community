@@ -30,8 +30,7 @@ namespace Ink_Canvas.Helpers
 
             if (!(bool)window.GetValue(IsAvoidFullScreenEnabledProperty))
             {
-                var hwndSource = PresentationSource.FromVisual(window) as HwndSource;
-                if (hwndSource != null)
+                if (PresentationSource.FromVisual(window) is HwndSource hwndSource)
                 {
                     hwndSource.AddHook(KeepInWorkingAreaHook);
                     window.SetValue(IsAvoidFullScreenEnabledProperty, true);
@@ -46,8 +45,7 @@ namespace Ink_Canvas.Helpers
 
             if ((bool)window.GetValue(IsAvoidFullScreenEnabledProperty))
             {
-                var hwndSource = PresentationSource.FromVisual(window) as HwndSource;
-                if (hwndSource != null)
+                if (PresentationSource.FromVisual(window) is HwndSource hwndSource)
                 {
                     hwndSource.RemoveHook(KeepInWorkingAreaHook);
                     window.ClearValue(IsAvoidFullScreenEnabledProperty);
@@ -61,8 +59,7 @@ namespace Ink_Canvas.Helpers
         private static IntPtr KeepInWorkingAreaHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             // 只拦截主画布窗口的全屏（最大化）操作
-            var window = HwndSource.FromHwnd(hwnd)?.RootVisual as Window;
-            if (window == null) return IntPtr.Zero;
+            if (!(HwndSource.FromHwnd(hwnd)?.RootVisual is Window window)) return IntPtr.Zero;
             // 这里假设主画布窗口类名为MainWindow（如有不同请调整）
             if (window.GetType().Name != "MainWindow") return IntPtr.Zero;
 

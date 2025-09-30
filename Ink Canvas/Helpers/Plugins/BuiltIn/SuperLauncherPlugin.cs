@@ -313,8 +313,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 var buttonElement = _launcherButton.Element;
 
                 // 查找浮动栏
-                var floatingBar = mainWindow.FindName("StackPanelFloatingBar") as Panel;
-                if (floatingBar == null)
+                if (!(mainWindow.FindName("StackPanelFloatingBar") is Panel floatingBar))
                 {
                     // 如果直接查找失败，则尝试遍历可视树查找
                     Panel floatingBarPanelFromTree = null;
@@ -405,8 +404,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn
                 var buttonElement = _launcherButton.Element;
 
                 // 查找浮动栏
-                var floatingBar = mainWindow.FindName("StackPanelFloatingBar") as Panel;
-                if (floatingBar == null)
+                if (!(mainWindow.FindName("StackPanelFloatingBar") is Panel floatingBar))
                 {
                     // 如果直接查找失败，则尝试遍历可视树查找
                     Panel floatingBarPanelFromTree = null;

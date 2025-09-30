@@ -238,9 +238,8 @@ namespace Ink_Canvas
                     RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
                     await Task.Delay(1);
-                    var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                        CurrentWhiteboardIndex - 1) as ListViewItem;
-                    if (leftContainer != null)
+                    if (BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                            CurrentWhiteboardIndex - 1) is ListViewItem leftContainer)
                     {
                         ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
                     }
@@ -258,9 +257,8 @@ namespace Ink_Canvas
                     RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
                     await Task.Delay(1);
-                    var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                        CurrentWhiteboardIndex - 1) as ListViewItem;
-                    if (rightContainer != null)
+                    if (BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                            CurrentWhiteboardIndex - 1) is ListViewItem rightContainer)
                     {
                         ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
                     }
