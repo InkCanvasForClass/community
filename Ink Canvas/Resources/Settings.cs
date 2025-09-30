@@ -575,6 +575,15 @@ namespace Ink_Canvas
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;
 
+        [JsonProperty("isAutoBackupEnabled")]
+        public bool IsAutoBackupEnabled { get; set; } = true;
+
+        [JsonProperty("autoBackupIntervalDays")]
+        public int AutoBackupIntervalDays { get; set; } = 7;
+
+        [JsonProperty("lastAutoBackupTime")]
+        public DateTime LastAutoBackupTime { get; set; } = DateTime.MinValue;
+
         [JsonProperty("isNoFocusMode")]
         public bool IsNoFocusMode { get; set; } = true;
 

@@ -28,12 +28,86 @@ namespace Ink_Canvas
                     {
                         string text = File.ReadAllText(App.RootPath + settingsFileName);
                         Settings = JsonConvert.DeserializeObject<Settings>(text);
+                        
+                        // 验证设置是否成功加载
+                        if (Settings == null)
+                        {
+                            LogHelper.WriteLogToFile("配置文件解析失败，尝试从备份恢复", LogHelper.LogType.Warning);
+                            if (AutoBackupManager.TryRestoreFromBackup())
+                            {
+                                // 重新尝试加载
+                                text = File.ReadAllText(App.RootPath + settingsFileName);
+                                Settings = JsonConvert.DeserializeObject<Settings>(text);
+                                if (Settings != null)
+                                {
+                                }
+                            }
+                            
+                            // 如果仍然失败，使用默认设置
+                            if (Settings == null)
+                            {
+                                LogHelper.WriteLogToFile("从备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
+                                BtnResetToSuggestion_Click(null, null);
+                            }
+                        }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"配置文件加载失败: {ex.Message}", LogHelper.LogType.Error);
+                        
+                        // 尝试从备份恢复
+                        LogHelper.WriteLogToFile("尝试从备份恢复配置文件", LogHelper.LogType.Warning);
+                        if (AutoBackupManager.TryRestoreFromBackup())
+                        {
+                            try
+                            {
+                                string text = File.ReadAllText(App.RootPath + settingsFileName);
+                                Settings = JsonConvert.DeserializeObject<Settings>(text);
+                                if (Settings != null)
+                                {
+                                }
+                            }
+                            catch (Exception restoreEx)
+                            {
+                                LogHelper.WriteLogToFile($"从备份恢复后重新加载失败: {restoreEx.Message}", LogHelper.LogType.Error);
+                                Settings = null;
+                            }
+                        }
+                        
+                        // 如果仍然失败，使用默认设置
+                        if (Settings == null)
+                        {
+                            LogHelper.WriteLogToFile("从备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
+                            BtnResetToSuggestion_Click(null, null);
+                        }
+                    }
                 }
                 else
                 {
-                    BtnResetToSuggestion_Click(null, null);
+                    LogHelper.WriteLogToFile("配置文件不存在，尝试从备份恢复", LogHelper.LogType.Warning);
+                    if (AutoBackupManager.TryRestoreFromBackup())
+                    {
+                        try
+                        {
+                            string text = File.ReadAllText(App.RootPath + settingsFileName);
+                            Settings = JsonConvert.DeserializeObject<Settings>(text);
+                            if (Settings != null)
+                            {
+                            }
+                        }
+                        catch (Exception restoreEx)
+                        {
+                            LogHelper.WriteLogToFile($"从备份恢复后加载失败: {restoreEx.Message}", LogHelper.LogType.Error);
+                            Settings = null;
+                        }
+                    }
+                    
+                    // 如果仍然失败，使用默认设置
+                    if (Settings == null)
+                    {
+                        LogHelper.WriteLogToFile("从备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
+                        BtnResetToSuggestion_Click(null, null);
+                    }
                 }
             }
             catch (Exception ex)
@@ -714,6 +788,17 @@ namespace Ink_Canvas
                 ToggleSwitchIsEnableDPIChangeDetection.IsOn = Settings.Advanced.IsEnableDPIChangeDetection;
                 ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn = Settings.Advanced.IsEnableAvoidFullScreenHelper;
                 ToggleSwitchIsAutoBackupBeforeUpdate.IsOn = Settings.Advanced.IsAutoBackupBeforeUpdate;
+                ToggleSwitchIsAutoBackupEnabled.IsOn = Settings.Advanced.IsAutoBackupEnabled;
+                
+                // 设置备份间隔下拉框
+                foreach (ComboBoxItem item in ComboBoxAutoBackupInterval.Items)
+                {
+                    if (item.Tag != null && int.TryParse(item.Tag.ToString(), out int interval) && interval == Settings.Advanced.AutoBackupIntervalDays)
+                    {
+                        ComboBoxAutoBackupInterval.SelectedItem = item;
+                        break;
+                    }
+                }
                 if (Settings.Advanced.IsEnableFullScreenHelper)
                 {
                     FullScreenHelper.MarkFullscreenWindowTaskbarList(new WindowInteropHelper(this).Handle, true);

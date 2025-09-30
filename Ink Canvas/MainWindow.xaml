@@ -2333,6 +2333,28 @@
                                     </ui:SimpleStackPanel>
                                     
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="定期自动备份" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsAutoBackupEnabled"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchIsAutoBackupEnabled_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="备份间隔" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ComboBox x:Name="ComboBoxAutoBackupInterval" Width="100" Margin="0,0,16,0"
+                                                  SelectionChanged="ComboBoxAutoBackupInterval_SelectionChanged">
+                                            <ComboBoxItem Content="1天" Tag="1" />
+                                            <ComboBoxItem Content="3天" Tag="3" />
+                                            <ComboBoxItem Content="7天" Tag="7" IsSelected="True" />
+                                            <ComboBoxItem Content="14天" Tag="14" />
+                                            <ComboBoxItem Content="30天" Tag="30" />
+                                        </ComboBox>
+                                        <TextBlock Foreground="#a1a1aa" Text="（默认7天）" VerticalAlignment="Center" FontSize="12" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
                                         <Button x:Name="BtnManualBackup" Content="手动备份" Click="BtnManualBackup_Click"
                                                 Background="#2563eb" Foreground="White" Padding="12,6" Margin="0,0,12,0" />
                                         <Button x:Name="BtnRestoreBackup" Content="还原备份" Click="BtnRestoreBackup_Click"

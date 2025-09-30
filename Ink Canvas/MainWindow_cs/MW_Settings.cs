@@ -2371,6 +2371,26 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchIsAutoBackupEnabled_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Advanced.IsAutoBackupEnabled = ToggleSwitchIsAutoBackupEnabled.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ComboBoxAutoBackupInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded) return;
+            if (ComboBoxAutoBackupInterval.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
+            {
+                if (int.TryParse(selectedItem.Tag.ToString(), out int interval))
+                {
+                    Settings.Advanced.AutoBackupIntervalDays = interval;
+                    SaveSettingsToFile();
+                }
+            }
+        }
+
         private void BtnManualBackup_Click(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
