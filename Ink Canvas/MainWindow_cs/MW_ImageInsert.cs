@@ -404,6 +404,8 @@ namespace Ink_Canvas
             image.MouseWheel += Element_MouseWheel;
 
             // 触摸事件
+            image.TouchDown += Element_TouchDown;
+            image.TouchUp += Element_TouchUp;
             image.IsManipulationEnabled = true;
             image.ManipulationDelta += Element_ManipulationDelta;
             image.ManipulationCompleted += Element_ManipulationCompleted;

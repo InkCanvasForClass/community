@@ -3316,6 +3316,8 @@ namespace Ink_Canvas
                         elementForEvents.MouseWheel += Element_MouseWheel;
 
                         // 触摸事件
+                        elementForEvents.TouchDown += Element_TouchDown;
+                        elementForEvents.TouchUp += Element_TouchUp;
                         elementForEvents.IsManipulationEnabled = true;
                         elementForEvents.ManipulationDelta += Element_ManipulationDelta;
                         elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
@@ -3387,6 +3389,8 @@ namespace Ink_Canvas
                         elementForEvents.MouseWheel += Element_MouseWheel;
 
                         // 触摸事件
+                        elementForEvents.TouchDown += Element_TouchDown;
+                        elementForEvents.TouchUp += Element_TouchUp;
                         elementForEvents.IsManipulationEnabled = true;
                         elementForEvents.ManipulationDelta += Element_ManipulationDelta;
                         elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;
@@ -3458,6 +3462,8 @@ namespace Ink_Canvas
                         elementForEvents.MouseWheel += Element_MouseWheel;
 
                         // 触摸事件
+                        elementForEvents.TouchDown += Element_TouchDown;
+                        elementForEvents.TouchUp += Element_TouchUp;
                         elementForEvents.IsManipulationEnabled = true;
                         elementForEvents.ManipulationDelta += Element_ManipulationDelta;
                         elementForEvents.ManipulationCompleted += Element_ManipulationCompleted;

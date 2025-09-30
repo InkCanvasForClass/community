@@ -152,6 +152,19 @@ namespace Ink_Canvas
             }
         }
 
+        // 触摸释放事件
+        private void Element_TouchUp(object sender, TouchEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                isDragging = false;
+                element.ReleaseTouchCapture(e.TouchDevice);
+                element.Cursor = Cursors.Hand;
+
+                e.Handled = true;
+            }
+        }
+
         // 鼠标移动事件
         private void Element_MouseMove(object sender, MouseEventArgs e)
         {
@@ -200,6 +213,34 @@ namespace Ink_Canvas
                 {
                     UpdateImageResizeHandlesPosition(GetElementActualBounds(element));
                 }
+
+                e.Handled = true;
+            }
+        }
+
+        // 触摸按下事件
+        private void Element_TouchDown(object sender, TouchEventArgs e)
+        {
+            if (sender is FrameworkElement element)
+            {
+                // 取消之前选中的元素
+                if (currentSelectedElement != null && currentSelectedElement != element)
+                {
+                    // 保存当前编辑模式
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    UnselectElement(currentSelectedElement);
+                    // 恢复编辑模式
+                    inkCanvas.EditingMode = previousEditingMode;
+                }
+
+                // 选中当前元素
+                SelectElement(element);
+
+                // 开始拖动
+                isDragging = true;
+                dragStartPoint = e.GetTouchPoint(inkCanvas).Position;
+                element.CaptureTouch(e.TouchDevice);
+                element.Cursor = Cursors.SizeAll;
 
                 e.Handled = true;
             }
