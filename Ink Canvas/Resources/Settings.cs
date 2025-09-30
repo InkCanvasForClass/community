@@ -99,7 +99,7 @@ namespace Ink_Canvas
 
         // 墨迹渐隐功能设置
         [JsonProperty("enableInkFade")]
-        public bool EnableInkFade { get; set; } // 是否启用墨迹渐隐功能
+        public bool EnableInkFade { get; set; } = false; 
         [JsonProperty("inkFadeTime")]
         public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
 
