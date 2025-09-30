@@ -224,6 +224,14 @@ namespace Ink_Canvas.Helpers
         private readonly Dispatcher _dispatcher;
         private bool _isRunning;
         private bool _disposed;
+        
+        // 性能优化字段
+        private readonly Dictionary<IntPtr, DateTime> _lastScanTime = new Dictionary<IntPtr, DateTime>();
+        private readonly HashSet<IntPtr> _knownWindows = new HashSet<IntPtr>();
+        private readonly Dictionary<string, DateTime> _processLastScanTime = new Dictionary<string, DateTime>();
+        private int _consecutiveEmptyScans = 0;
+        private DateTime _lastSuccessfulScan = DateTime.Now;
+        private readonly object _scanLock = new object();
 
         #endregion
 
@@ -630,7 +638,7 @@ namespace Ink_Canvas.Helpers
             if (_isRunning) return;
 
             _isRunning = true;
-            _scanTimer.Change(0, scanIntervalMs);
+            _scanTimer.Change(0, Math.Max(scanIntervalMs, 2000)); 
         }
 
         /// <summary>
@@ -771,34 +779,143 @@ namespace Ink_Canvas.Helpers
         {
             if (!_isRunning) return;
 
-            try
+            lock (_scanLock)
             {
-                // 使用递归枚举，包括子窗口
-                EnumWindows(EnumWindowsCallback, IntPtr.Zero);
-            }
-            catch (Exception ex)
-            {
-                // 记录错误但不中断扫描
-                LogHelper.WriteLogToFile($"扫描窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
+                try
+                {
+                    var scanStartTime = DateTime.Now;
+                    var windowsFound = 0;
+                    var windowsIntercepted = 0;
+
+                    // 清理过期的缓存
+                    CleanupExpiredCache();
+
+                    // 使用优化的扫描策略
+                    if (_consecutiveEmptyScans > 3)
+                    {
+                        // 如果连续多次扫描没有发现新窗口，使用快速扫描模式
+                        PerformQuickScan(ref windowsFound, ref windowsIntercepted);
+                    }
+                    else
+                    {
+                        // 正常扫描模式
+                        PerformFullScan(ref windowsFound, ref windowsIntercepted);
+                    }
+
+                    // 更新扫描统计
+                    UpdateScanStatistics(windowsFound, windowsIntercepted, scanStartTime);
+
+                    // 动态调整扫描间隔
+                    AdjustScanInterval();
+                }
+                catch (Exception ex)
+                {
+                    // 记录错误但不中断扫描
+                    LogHelper.WriteLogToFile($"扫描窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
+                    _consecutiveEmptyScans++;
+                }
             }
         }
 
-        private bool EnumWindowsCallback(IntPtr hWnd, IntPtr lParam)
+        /// <summary>
+        /// 执行快速扫描 - 只检查已知进程
+        /// </summary>
+        private void PerformQuickScan(ref int windowsFound, ref int windowsIntercepted)
+        {
+            var targetProcesses = new HashSet<string>();
+            var scanData = new ScanData { WindowsFound = 0, WindowsIntercepted = 0 };
+            
+            // 收集所有启用的规则对应的进程名
+            foreach (var rule in _interceptRules.Values)
+            {
+                if (rule.IsEnabled && !string.IsNullOrEmpty(rule.ProcessName))
+                {
+                    targetProcesses.Add(rule.ProcessName.ToLower());
+                }
+            }
+
+            // 只扫描目标进程的窗口
+            foreach (var processName in targetProcesses)
+            {
+                try
+                {
+                    var processes = Process.GetProcessesByName(processName);
+                    foreach (var process in processes)
+                    {
+                        if (process.MainWindowHandle != IntPtr.Zero)
+                        {
+                            ProcessWindow(process.MainWindowHandle, scanData);
+                        }
+                    }
+                }
+                catch
+                {
+                    // 忽略进程访问错误
+                }
+            }
+            
+            windowsFound = scanData.WindowsFound;
+            windowsIntercepted = scanData.WindowsIntercepted;
+        }
+
+        /// <summary>
+        /// 执行完整扫描
+        /// </summary>
+        private void PerformFullScan(ref int windowsFound, ref int windowsIntercepted)
+        {
+            var scanData = new ScanData { WindowsFound = 0, WindowsIntercepted = 0 };
+            
+            EnumWindows((hWnd, lParam) => 
+            {
+                ProcessWindow(hWnd, scanData);
+                return true;
+            }, IntPtr.Zero);
+            
+            windowsFound = scanData.WindowsFound;
+            windowsIntercepted = scanData.WindowsIntercepted;
+        }
+
+        /// <summary>
+        /// 处理单个窗口
+        /// </summary>
+        private bool ProcessWindow(IntPtr hWnd, ScanData scanData)
         {
             try
             {
-                // 递归枚举子窗口
-                EnumChildWindows(hWnd, EnumWindowsCallback, lParam);
-
                 // 基本检查
                 if (!IsWindow(hWnd) || !IsWindowVisible(hWnd)) return true;
                 
                 // 检查是否已经被拦截
                 if (_interceptedWindows.ContainsKey(hWnd)) return true;
 
+                // 检查缓存，避免重复处理
+                if (_knownWindows.Contains(hWnd))
+                {
+                    var lastScan = _lastScanTime.ContainsKey(hWnd) ? _lastScanTime[hWnd] : DateTime.MinValue;
+                    if (DateTime.Now - lastScan < TimeSpan.FromSeconds(30)) // 30秒内不重复处理
+                    {
+                        return true;
+                    }
+                }
+
+                scanData.WindowsFound++;
+                _knownWindows.Add(hWnd);
+                _lastScanTime[hWnd] = DateTime.Now;
+
                 // 获取窗口信息
                 var windowInfo = GetWindowInfo(hWnd);
                 if (windowInfo == null) return true;
+
+                // 检查进程缓存
+                if (_processLastScanTime.ContainsKey(windowInfo.ProcessName))
+                {
+                    var lastProcessScan = _processLastScanTime[windowInfo.ProcessName];
+                    if (DateTime.Now - lastProcessScan < TimeSpan.FromSeconds(10)) // 10秒内不重复扫描同一进程
+                    {
+                        return true;
+                    }
+                }
+                _processLastScanTime[windowInfo.ProcessName] = DateTime.Now;
 
                 // 检查窗口样式，过滤掉系统窗口和主窗口
                 var exStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
@@ -837,6 +954,7 @@ namespace Ink_Canvas.Helpers
                     if (MatchesRule(windowInfo, rule))
                     {
                         InterceptWindow(hWnd, rule);
+                        scanData.WindowsIntercepted++;
                         break;
                     }
                 }
@@ -848,6 +966,102 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"处理窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
                 return true;
             }
+        }
+
+        /// <summary>
+        /// 清理过期缓存
+        /// </summary>
+        private void CleanupExpiredCache()
+        {
+            var now = DateTime.Now;
+            var expiredWindows = new List<IntPtr>();
+            var expiredProcesses = new List<string>();
+
+            // 清理窗口缓存
+            foreach (var kvp in _lastScanTime)
+            {
+                if (now - kvp.Value > TimeSpan.FromMinutes(5))
+                {
+                    expiredWindows.Add(kvp.Key);
+                }
+            }
+
+            foreach (var hWnd in expiredWindows)
+            {
+                _lastScanTime.Remove(hWnd);
+                _knownWindows.Remove(hWnd);
+            }
+
+            // 清理进程缓存
+            foreach (var kvp in _processLastScanTime)
+            {
+                if (now - kvp.Value > TimeSpan.FromMinutes(2))
+                {
+                    expiredProcesses.Add(kvp.Key);
+                }
+            }
+
+            foreach (var processName in expiredProcesses)
+            {
+                _processLastScanTime.Remove(processName);
+            }
+        }
+
+        /// <summary>
+        /// 更新扫描统计
+        /// </summary>
+        private void UpdateScanStatistics(int windowsFound, int windowsIntercepted, DateTime scanStartTime)
+        {
+            var scanDuration = DateTime.Now - scanStartTime;
+            
+            if (windowsFound == 0)
+            {
+                _consecutiveEmptyScans++;
+            }
+            else
+            {
+                _consecutiveEmptyScans = 0;
+                _lastSuccessfulScan = DateTime.Now;
+            }
+        }
+
+        /// <summary>
+        /// 动态调整扫描间隔
+        /// </summary>
+        private void AdjustScanInterval()
+        {
+            if (!_isRunning) return;
+
+            int newInterval;
+            if (_consecutiveEmptyScans > 5)
+            {
+                // 连续多次空扫描，增加间隔到30秒
+                newInterval = 30000;
+            }
+            else if (_consecutiveEmptyScans > 3)
+            {
+                // 连续多次空扫描，增加间隔到15秒
+                newInterval = 15000;
+            }
+            else if (_consecutiveEmptyScans > 1)
+            {
+                // 连续空扫描，增加间隔到10秒
+                newInterval = 10000;
+            }
+            else
+            {
+                // 正常扫描，使用5秒间隔
+                newInterval = 5000;
+            }
+
+            // 更新定时器间隔
+            _scanTimer.Change(newInterval, newInterval);
+        }
+
+        private bool EnumWindowsCallback(IntPtr hWnd, IntPtr lParam)
+        {
+            // 这个方法现在由ProcessWindow替代，保留用于兼容性
+            return true;
         }
 
         private WindowInfo GetWindowInfo(IntPtr hWnd)
@@ -1027,6 +1241,12 @@ namespace Ink_Canvas.Helpers
             public string WindowTitle { get; set; }
             public string ClassName { get; set; }
             public Process Process { get; set; }
+        }
+
+        private class ScanData
+        {
+            public int WindowsFound { get; set; }
+            public int WindowsIntercepted { get; set; }
         }
 
         #endregion

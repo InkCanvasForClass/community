@@ -470,7 +470,13 @@ namespace Ink_Canvas
         public bool IsEnabled { get; set; } = false;
 
         [JsonProperty("scanIntervalMs")]
-        public int ScanIntervalMs { get; set; } = 1000;
+        public int ScanIntervalMs { get; set; } = 5000; 
+
+        [JsonProperty("autoStart")]
+        public bool AutoStart { get; set; } = false;
+
+        [JsonProperty("showNotifications")]
+        public bool ShowNotifications { get; set; } = true;
 
         [JsonProperty("interceptRules")]
         public Dictionary<string, bool> InterceptRules { get; set; } = new Dictionary<string, bool>
@@ -502,12 +508,6 @@ namespace Ink_Canvas
             { "SeewoDesktopAnnotationFloating", true },
             { "SeewoDesktopSideBarFloating", true }
         };
-
-        [JsonProperty("autoStart")]
-        public bool AutoStart { get; set; } = false;
-
-        [JsonProperty("showNotifications")]
-        public bool ShowNotifications { get; set; } = true;
     }
 
     public class Advanced
