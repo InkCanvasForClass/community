@@ -2961,7 +2961,6 @@ namespace Ink_Canvas
                         }
 
                         // 重新计算浮动栏位置，因为按钮可见性变化会影响浮动栏宽度
-                        // 修复：移除浮动栏收起状态检查，确保在收起状态下也能正确修正位置
                         if (currentMode == 0) // 只在屏幕模式下重新计算浮动栏位置
                         {
                             if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)

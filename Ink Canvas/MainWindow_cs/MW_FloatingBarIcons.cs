@@ -1875,8 +1875,6 @@ namespace Ink_Canvas
             // 更新模式缓存，确保后续的模式检测正确
             UpdateCurrentToolMode("cursor");
 
-            // 修复：在浮动栏收起状态下，仍然需要设置按钮高亮状态
-            // 这样在浮动栏展开时能正确显示高光
             SetFloatingBarHighlightPosition("cursor");
 
             // 切换前自动截图保存墨迹
@@ -2072,8 +2070,6 @@ namespace Ink_Canvas
                     }
                 }
 
-                // 修复：从线擦切换到批注时，保持之前的笔类型状态
-                // 如果之前是荧光笔模式，则保持荧光笔状态；否则重置为默认笔模式
                 forceEraser = false;
                 forcePointEraser = false;
                 drawingShapeMode = 0;
@@ -2101,7 +2097,6 @@ namespace Ink_Canvas
             {
                 if (wasInInkMode)
                 {
-                    // 修复：从线擦切换到批注时，确保正确重置状态
                     if (forceEraser)
                     {
                         // 从橡皮擦模式切换过来，保持之前的笔类型状态
@@ -2179,7 +2174,6 @@ namespace Ink_Canvas
                     // 更新模式缓存
                     UpdateCurrentToolMode("pen");
 
-                    // 修复：从线擦切换到批注时，保持之前的笔类型状态
                     forceEraser = false;
                     forcePointEraser = false;
                     drawingShapeMode = 0;
@@ -2206,7 +2200,6 @@ namespace Ink_Canvas
             }
 
 
-            // 修复：从线擦切换到批注时，保持之前的笔类型状态
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;
@@ -2333,7 +2326,6 @@ namespace Ink_Canvas
 
             drawingShapeMode = 0;
 
-            // 修复：切换到线擦时，保存当前的笔类型状态，而不是强制重置
             // 这样从线擦切换回批注时，可以恢复之前的荧光笔状态
             // penType 和 drawingAttributes 的状态将在 PenIcon_Click 中根据 wasHighlighter 来恢复
 

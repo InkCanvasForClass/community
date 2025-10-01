@@ -1065,7 +1065,6 @@ namespace Ink_Canvas.Helpers
                 // 如果不是自动更新（即版本修复），则应用不同的策略
                 if (!isAutoUpdate)
                 {
-                    // 版本修复：立即允许，不受分级策略影响
                     LogHelper.WriteLogToFile($"DeviceIdentifier | 版本修复 - 版本: {updateVersion}, 类型: {updateType}, 结果: 允许");
                     return true;
                 }

@@ -305,7 +305,6 @@ namespace Ink_Canvas
                 SidePannelMarginAnimation(-50, !unfoldFloatingBarByUser);
             });
 
-            // 修复：在浮动栏展开后，重新设置按钮高亮状态
             await Dispatcher.InvokeAsync(async () =>
             {
                 try
