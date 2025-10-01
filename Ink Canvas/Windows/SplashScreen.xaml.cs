@@ -180,7 +180,7 @@ namespace Ink_Canvas.Windows
                     LoadingText.FontWeight = FontWeights.SemiBold;
                     LoadingText.Foreground = Brushes.White;
                     LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
-                    LoadingText.Margin = new Thickness(0, -135, 145, 140);
+                    LoadingText.Margin = new Thickness(0,200,140,4);
                 }
                 else
                 {
@@ -189,7 +189,7 @@ namespace Ink_Canvas.Windows
                     LoadingText.FontWeight = FontWeights.SemiBold;
                     LoadingText.Foreground = Brushes.White;
                     LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
-                    LoadingText.Margin = new Thickness(0, -150, 0, 140);
+                    LoadingText.Margin = new Thickness(0,200,0,0);
                 }
             });
         }
