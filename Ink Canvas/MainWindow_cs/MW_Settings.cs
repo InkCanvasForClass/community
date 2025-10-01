@@ -2614,6 +2614,45 @@ namespace Ink_Canvas
             }
         }
 
+        public string GetCorrectIcon(string iconType, bool isSolid = false)
+        {
+            if (Settings.Appearance.UseLegacyFloatingBarUI)
+            {
+                // 使用老版图标
+                switch (iconType)
+                {
+                    case "cursor":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidCursorIcon : XamlGraphicsIconGeometries.LegacyLinedCursorIcon;
+                    case "pen":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidPenIcon : XamlGraphicsIconGeometries.LegacyLinedPenIcon;
+                    case "eraserStroke":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidEraserStrokeIcon : XamlGraphicsIconGeometries.LegacyLinedEraserStrokeIcon;
+                    case "eraserCircle":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidEraserCircleIcon : XamlGraphicsIconGeometries.LegacyLinedEraserCircleIcon;
+                    case "lassoSelect":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidLassoSelectIcon : XamlGraphicsIconGeometries.LegacyLinedLassoSelectIcon;
+                }
+            }
+            else
+            {
+                // 使用新版图标
+                switch (iconType)
+                {
+                    case "cursor":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidCursorIcon : XamlGraphicsIconGeometries.LinedCursorIcon;
+                    case "pen":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidPenIcon : XamlGraphicsIconGeometries.LinedPenIcon;
+                    case "eraserStroke":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidEraserStrokeIcon : XamlGraphicsIconGeometries.LinedEraserStrokeIcon;
+                    case "eraserCircle":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidEraserCircleIcon : XamlGraphicsIconGeometries.LinedEraserCircleIcon;
+                    case "lassoSelect":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidLassoSelectIcon : XamlGraphicsIconGeometries.LinedLassoSelectIcon;
+                }
+            }
+            return "";
+        }
+
         #endregion
 
         #region 浮动栏按钮显示控制

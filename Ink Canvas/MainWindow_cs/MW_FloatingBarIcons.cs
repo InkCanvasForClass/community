@@ -429,17 +429,17 @@ namespace Ink_Canvas
                 if (mode != "clear")
                 {
                     CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    CursorIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedCursorIcon);
+                    CursorIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false));
                     PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    PenIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedPenIcon);
+                    PenIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("pen", false));
                     StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
                     StrokeEraserIconGeometry.Geometry =
-                        Geometry.Parse(XamlGraphicsIconGeometries.LinedEraserStrokeIcon);
+                        Geometry.Parse(GetCorrectIcon("eraserStroke", false));
                     CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
                     CircleEraserIconGeometry.Geometry =
-                        Geometry.Parse(XamlGraphicsIconGeometries.LinedEraserCircleIcon);
+                        Geometry.Parse(GetCorrectIcon("eraserCircle", false));
                     LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    LassoSelectIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedLassoSelectIcon);
+                    LassoSelectIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false));
 
                     // 根据主题设置颜色
                     if (Settings.Appearance.Theme == 1) // 深色主题
@@ -482,7 +482,7 @@ namespace Ink_Canvas
                     case "color":
                         {
                             PenIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
-                            PenIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SolidPenIcon);
+                            PenIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
                             BoardPen.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardPenGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -495,7 +495,7 @@ namespace Ink_Canvas
                         {
                             CircleEraserIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
                             CircleEraserIconGeometry.Geometry =
-                                Geometry.Parse(XamlGraphicsIconGeometries.SolidEraserCircleIcon);
+                                Geometry.Parse(GetCorrectIcon("eraserCircle", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraserGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -508,7 +508,7 @@ namespace Ink_Canvas
                         {
                             StrokeEraserIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
                             StrokeEraserIconGeometry.Geometry =
-                                Geometry.Parse(XamlGraphicsIconGeometries.SolidEraserStrokeIcon);
+                                Geometry.Parse(GetCorrectIcon("eraserStroke", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraserGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -521,7 +521,7 @@ namespace Ink_Canvas
                         {
                             LassoSelectIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
                             LassoSelectIconGeometry.Geometry =
-                                Geometry.Parse(XamlGraphicsIconGeometries.SolidLassoSelectIcon);
+                                Geometry.Parse(GetCorrectIcon("lassoSelect", true));
                             BoardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardSelectGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -534,7 +534,7 @@ namespace Ink_Canvas
                         {
                             CursorIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
                             CursorIconGeometry.Geometry =
-                                Geometry.Parse(XamlGraphicsIconGeometries.LinedCursorIcon);
+                                Geometry.Parse(GetCorrectIcon("cursor", true));
                             // 根据主题设置颜色
                             if (Settings.Appearance.Theme == 1) // 深色主题
                             {
