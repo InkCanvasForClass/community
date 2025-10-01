@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using System.IO;
@@ -158,7 +159,54 @@ namespace Ink_Canvas.Windows
             Dispatcher.Invoke(() =>
             {
                 LoadingText.Text = message;
+                
+                // 根据启动动画样式调整加载文本样式
+                int splashStyle = GetCurrentSplashStyle();
+                if (splashStyle == 6) // 马年限定
+                {
+                    // 马年限定样式
+                    LoadingText.FontSize = 12;
+                    LoadingText.FontWeight = FontWeights.SemiBold;
+                    LoadingText.Foreground = Brushes.White;
+                    LoadingText.HorizontalAlignment = HorizontalAlignment.Left;
+                    LoadingText.Margin = new Thickness(0, -133, 160, 140);
+                }
+                else
+                {
+                    // 默认样式
+                    LoadingText.FontSize = 18;
+                    LoadingText.FontWeight = FontWeights.SemiBold;
+                    LoadingText.Foreground = Brushes.White;
+                    LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
+                    LoadingText.Margin = new Thickness(0, -150, 0, 140);
+                }
             });
+        }
+
+        /// <summary>
+        /// 获取当前启动动画样式
+        /// </summary>
+        /// <returns>启动动画样式索引</returns>
+        private int GetCurrentSplashStyle()
+        {
+            try
+            {
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+                if (File.Exists(settingsPath))
+                {
+                    var json = File.ReadAllText(settingsPath);
+                    dynamic obj = JsonConvert.DeserializeObject(json);
+                    if (obj?["appearance"]?["splashScreenStyle"] != null)
+                    {
+                        return (int)obj["appearance"]["splashScreenStyle"];
+                    }
+                }
+                return 1; // 默认跟随四季
+            }
+            catch
+            {
+                return 1; // 默认跟随四季
+            }
         }
 
         /// <summary>
@@ -265,8 +313,6 @@ namespace Ink_Canvas.Windows
                     return "ICC Winter.png";
                 case 6: // 马年限定
                     return "ICC Horse.png";
-                default:
-                    return "ICC Autumn.png"; // 默认秋季
             }
         }
     }
