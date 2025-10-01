@@ -175,7 +175,6 @@ namespace Ink_Canvas
                 lastIsInMultiTouchMode = true;
             }
 
-            // 修复：几何绘制模式下确保不切换到Ink模式，避免触摸轨迹被收集
             if (drawingShapeMode != 0)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
@@ -490,16 +489,16 @@ namespace Ink_Canvas
                 SetCursorBasedOnEditingMode(inkCanvas);
             }
 
-            // 修复：几何绘制模式下完全禁止触摸轨迹收集
             if (drawingShapeMode != 0)
             {
                 // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
 
+                if (!isTouchDown) return;
+
                 if (isWaitUntilNextTouchDown && dec.Count > 1) return;
                 if (dec.Count > 1)
                 {
-                    // 修复：双曲线绘制时，多指触摸不应该删除第一笔的辅助线
                     if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
                     {
                         // 第二笔绘制双曲线时，只删除第二笔的临时笔画，保留第一笔的辅助线
@@ -524,7 +523,6 @@ namespace Ink_Canvas
                     return;
                 }
 
-                // 修复：双曲线绘制时，第二笔应该基于第一笔的起点，而不是触摸实时位置
                 Point touchPoint = e.GetTouchPoint(inkCanvas).Position;
                 if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
                 {
@@ -1004,7 +1002,6 @@ namespace Ink_Canvas
                         drawMultiStepShapeSpecialParameter3 = k;
                         drawMultiStepShapeSpecialStrokeCollection = strokes;
 
-                        // 修复：第一笔绘制的辅助线应该立即显示在画布上
                         try
                         {
                             inkCanvas.Strokes.Remove(lastTempStrokeCollection);
@@ -1097,7 +1094,6 @@ namespace Ink_Canvas
                         }
                     }
 
-                    // 修复：双曲线绘制完成后，需要将第一笔的辅助线和第二笔的双曲线合并
                     try
                     {
                         // 删除第二笔的临时笔画
@@ -1759,6 +1755,7 @@ namespace Ink_Canvas
         }
 
         private bool isMouseDown;
+        private bool isTouchDown;
 
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -2024,7 +2021,6 @@ namespace Ink_Canvas
 
         private bool NeedUpdateIniP()
         {
-            // 修复：双曲线绘制时，第二笔不应该更新起点，保持第一笔的起点
             if (drawingShapeMode == 24 || drawingShapeMode == 25)
             {
                 if (drawMultiStepShapeCurrentStep == 1)
