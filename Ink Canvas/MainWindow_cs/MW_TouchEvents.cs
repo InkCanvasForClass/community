@@ -696,6 +696,11 @@ namespace Ink_Canvas
                         touchPoint = e.GetTouchPoint(inkCanvas);
                         EraserOverlay_PointerDown(sender);
                         EraserOverlay_PointerMove(sender, touchPoint.Position);
+                        if (Settings.Canvas.IsShowCursor)
+                        {
+                            inkCanvas.ForceCursor = false;
+                            inkCanvas.UseCustomCursor = false;
+                        }
                     }
                 }
             }
@@ -840,6 +845,11 @@ namespace Ink_Canvas
                 
                 // 禁用橡皮擦覆盖层
                 DisableEraserOverlay();
+                if (Settings.Canvas.IsShowCursor)
+                {
+                    inkCanvas.ForceCursor = true;
+                    inkCanvas.UseCustomCursor = true;
+                }
 
                 LogHelper.WriteLogToFile("Palm eraser state reset completed");
             }
@@ -948,6 +958,12 @@ namespace Ink_Canvas
                         ViewboxFloatingBar.IsHitTestVisible = true;
                         BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 
+                        DisableEraserOverlay();
+                        if (Settings.Canvas.IsShowCursor)
+                        {
+                            inkCanvas.ForceCursor = true;
+                            inkCanvas.UseCustomCursor = true;
+                        }
 
                         LogHelper.WriteLogToFile("Palm eraser force recovery completed");
                     }
