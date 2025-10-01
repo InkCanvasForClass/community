@@ -103,7 +103,7 @@ namespace Ink_Canvas.Windows
                 {
                     From = LoadingProgress.Value,
                     To = progress,
-                    Duration = TimeSpan.FromMilliseconds(800), 
+                    Duration = TimeSpan.FromMilliseconds(300), 
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
                 

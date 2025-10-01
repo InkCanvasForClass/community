@@ -19,7 +19,7 @@
             <StackPanel>
                 <!-- 启动图片 -->
                 <Image x:Name="StartupImage" 
-                       Source="pack://application:,,,/Resources/ICC Start.png" 
+                       Source="pack://application:,,,/Resources/Startup-animation/ICC Autumn.png" 
                        Width="600" 
                        Height="450"
                        Stretch="Uniform" />
