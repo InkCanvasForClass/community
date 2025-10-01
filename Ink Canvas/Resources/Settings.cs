@@ -199,6 +199,8 @@ namespace Ink_Canvas
         public int UnFoldButtonImageType { get; set; }
         [JsonProperty("isShowLRSwitchButton")]
         public bool IsShowLRSwitchButton { get; set; }
+        [JsonProperty("enableSplashScreen")]
+        public bool EnableSplashScreen { get; set; } = false; 
         [JsonProperty("isShowQuickPanel")]
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]

@@ -420,7 +420,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：关闭启动画面
+        // 关闭启动画面
         public static void CloseSplashScreen()
         {
             if (!_isSplashScreenShown || _splashScreen == null) return;
@@ -437,7 +437,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：设置启动画面进度
+        // 设置启动画面进度
         public static void SetSplashProgress(int progress)
         {
             if (_splashScreen != null)
@@ -446,7 +446,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：设置启动画面消息
+        // 设置启动画面消息
         public static void SetSplashMessage(string message)
         {
             if (_splashScreen != null)
@@ -455,7 +455,33 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：记录崩溃日志
+        private static bool ShouldShowSplashScreen()
+        {
+            try
+            {
+                // 检查设置文件中的启动动画开关
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+                if (File.Exists(settingsPath))
+                {
+                    var json = File.ReadAllText(settingsPath);
+                    dynamic obj = JsonConvert.DeserializeObject(json);
+                    if (obj?["appearance"]?["enableSplashScreen"] != null)
+                    {
+                        return (bool)obj["appearance"]["enableSplashScreen"];
+                    }
+                }
+                
+                // 如果设置文件不存在或没有该设置，返回默认值false
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查启动动画设置失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
+        // 记录崩溃日志
         private static void WriteCrashLog(string message)
         {
             try
@@ -490,7 +516,6 @@ namespace Ink_Canvas
         // 增加字段保存崩溃后操作设置
         public static CrashActionType CrashAction = CrashActionType.SilentRestart;
 
-        // 修正：允许静态调用
         public static void SyncCrashActionFromSettings()
         {
             try
@@ -554,13 +579,16 @@ namespace Ink_Canvas
             // 初始化应用启动时间
             appStartTime = DateTime.Now;
 
-            // 显示启动画面
-            ShowSplashScreen();
-            SetSplashMessage("正在启动 Ink Canvas...");
-            SetSplashProgress(10);
+            // 根据设置决定是否显示启动画面
+            if (ShouldShowSplashScreen())
+            {
+                ShowSplashScreen();
+                SetSplashMessage("正在启动 Ink Canvas...");
+                SetSplashProgress(10);
                 
-            // 强制刷新UI，确保启动画面显示
-            Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                // 强制刷新UI，确保启动画面显示
+                Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+            }
 
             System.Threading.Thread.Sleep(1000);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
@@ -586,9 +614,12 @@ namespace Ink_Canvas
             }
 
             // 在应用启动时自动释放IACore相关DLL
-            SetSplashMessage("正在初始化组件...");
-            SetSplashProgress(20);
-            await Task.Delay(500); 
+            if (_isSplashScreenShown)
+            {
+                SetSplashMessage("正在初始化组件...");
+                SetSplashProgress(20);
+                await Task.Delay(500); 
+            } 
             try
             {
                 IACoreDllExtractor.ExtractIACoreDlls();
@@ -599,9 +630,12 @@ namespace Ink_Canvas
             }
 
             // 记录应用启动（设备标识符）
-            SetSplashMessage("正在加载配置...");
-            SetSplashProgress(40);
-            await Task.Delay(500); 
+            if (_isSplashScreenShown)
+            {
+                SetSplashMessage("正在加载配置...");
+                SetSplashProgress(40);
+                await Task.Delay(500); 
+            } 
             DeviceIdentifier.RecordAppLaunch();
             LogHelper.WriteLogToFile($"App | 设备ID: {DeviceIdentifier.GetDeviceId()}");
             LogHelper.WriteLogToFile($"App | 使用频率: {DeviceIdentifier.GetUsageFrequency()}");
@@ -829,23 +863,28 @@ namespace Ink_Canvas
             StartArgs = e.Args;
 
             // 在非更新模式下创建主窗口
-            SetSplashMessage("正在初始化主界面...");
-            SetSplashProgress(80);
-            await Task.Delay(500); 
+            if (_isSplashScreenShown)
+            {
+                SetSplashMessage("正在初始化主界面...");
+                SetSplashProgress(80);
+                await Task.Delay(500); 
+            } 
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
             
             // 主窗口加载完成后关闭启动画面
             mainWindow.Loaded += (s, args) =>
             {
-                SetSplashMessage("启动完成！");
-                SetSplashProgress(100);
-                
-                // 延迟关闭启动画面，让用户看到完成消息
-                Task.Delay(500).ContinueWith(_ =>
+                if (_isSplashScreenShown)
                 {
-                    Dispatcher.Invoke(() => CloseSplashScreen());
-                });
+                    SetSplashMessage("启动完成！");
+                    SetSplashProgress(500);
+                    
+                    Task.Delay(500).ContinueWith(_ =>
+                    {
+                        Dispatcher.Invoke(() => CloseSplashScreen());
+                    });
+                }
             };
             
             mainWindow.Show();

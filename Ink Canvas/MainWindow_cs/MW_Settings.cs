@@ -186,6 +186,13 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnableSplashScreen_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.EnableSplashScreen = ToggleSwitchEnableSplashScreen.IsOn;
+            SaveSettingsToFile();
+        }
+
         private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
