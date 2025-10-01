@@ -584,13 +584,14 @@ namespace Ink_Canvas
             {
                 ShowSplashScreen();
                 SetSplashMessage("正在启动 Ink Canvas...");
-                SetSplashProgress(10);
+                SetSplashProgress(20);
+                await Task.Delay(500); 
                 
                 // 强制刷新UI，确保启动画面显示
                 Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
             }
 
-            System.Threading.Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(500);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
@@ -617,7 +618,7 @@ namespace Ink_Canvas
             if (_isSplashScreenShown)
             {
                 SetSplashMessage("正在初始化组件...");
-                SetSplashProgress(20);
+                SetSplashProgress(40);
                 await Task.Delay(500); 
             } 
             try
@@ -633,7 +634,7 @@ namespace Ink_Canvas
             if (_isSplashScreenShown)
             {
                 SetSplashMessage("正在加载配置...");
-                SetSplashProgress(40);
+                SetSplashProgress(60);
                 await Task.Delay(500); 
             } 
             DeviceIdentifier.RecordAppLaunch();

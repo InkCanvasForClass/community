@@ -18,6 +18,7 @@ namespace Ink_Canvas.Windows
     {
         private DispatcherTimer _timer;
         private int _loadingStep = 0;
+        private int _actualSplashStyle = 1; 
         private readonly string[] _loadingMessages = {
             "正在启动 Ink Canvas...",
             "正在初始化组件...",
@@ -30,7 +31,6 @@ namespace Ink_Canvas.Windows
         {
             InitializeComponent();
             InitializeSplashScreen();
-            LoadSplashImage();
         }
 
         private void InitializeSplashScreen()
@@ -40,6 +40,9 @@ namespace Ink_Canvas.Windows
             
             // 设置版本号
             SetVersionText();
+            
+            // 加载启动图片并获取实际样式
+            _actualSplashStyle = LoadSplashImageWithStyle();
             
             // 启动加载动画
             StartLoadingAnimation();
@@ -156,20 +159,25 @@ namespace Ink_Canvas.Windows
         /// <param name="message">加载消息</param>
         public void SetLoadingMessage(string message)
         {
+            // 使用实际选择的样式
+            SetLoadingMessage(message, _actualSplashStyle);
+        }
+
+        public void SetLoadingMessage(string message, int actualSplashStyle)
+        {
             Dispatcher.Invoke(() =>
             {
                 LoadingText.Text = message;
                 
-                // 根据启动动画样式调整加载文本样式
-                int splashStyle = GetCurrentSplashStyle();
-                if (splashStyle == 6) // 马年限定
+                // 根据实际启动动画样式调整加载文本样式
+                if (actualSplashStyle == 6) // 马年限定
                 {
                     // 马年限定样式
                     LoadingText.FontSize = 12;
                     LoadingText.FontWeight = FontWeights.SemiBold;
                     LoadingText.Foreground = Brushes.White;
-                    LoadingText.HorizontalAlignment = HorizontalAlignment.Left;
-                    LoadingText.Margin = new Thickness(0, -133, 160, 140);
+                    LoadingText.HorizontalAlignment = HorizontalAlignment.Center;
+                    LoadingText.Margin = new Thickness(0, -135, 145, 140);
                 }
                 else
                 {
@@ -253,6 +261,29 @@ namespace Ink_Canvas.Windows
         }
 
         /// <summary>
+        /// 加载启动图片并返回实际样式
+        /// </summary>
+        /// <returns>实际选择的样式</returns>
+        public int LoadSplashImageWithStyle()
+        {
+            try
+            {
+                int actualStyle;
+                string imagePath = GetSplashImagePath(out actualStyle);
+                if (!string.IsNullOrEmpty(imagePath))
+                {
+                    StartupImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath));
+                }
+                return actualStyle;
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"加载启动图片失败: {ex.Message}");
+                return GetActualStyle(1); 
+            }
+        }
+
+        /// <summary>
         /// 根据设置获取启动图片路径
         /// </summary>
         private string GetSplashImagePath()
@@ -285,6 +316,68 @@ namespace Ink_Canvas.Windows
         }
 
         /// <summary>
+        /// 根据设置获取启动图片路径和实际样式
+        /// </summary>
+        /// <param name="actualStyle">返回实际选择的样式</param>
+        /// <returns>图片路径</returns>
+        private string GetSplashImagePath(out int actualStyle)
+        {
+            try
+            {
+                // 读取设置
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+                int splashStyle = 1; // 默认跟随四季
+                
+                if (File.Exists(settingsPath))
+                {
+                    var json = File.ReadAllText(settingsPath);
+                    dynamic obj = JsonConvert.DeserializeObject(json);
+                    if (obj?["appearance"]?["splashScreenStyle"] != null)
+                    {
+                        splashStyle = (int)obj["appearance"]["splashScreenStyle"];
+                    }
+                }
+
+                // 根据样式选择图片，并获取实际样式
+                actualStyle = GetActualStyle(splashStyle);
+                string imageName = GetImageNameByStyle(splashStyle);
+                return $"pack://application:,,,/Resources/Startup-animation/{imageName}";
+            }
+            catch
+            {
+                actualStyle = GetActualStyle(1);
+                string imageName = GetImageNameByStyle(1); 
+                return $"pack://application:,,,/Resources/Startup-animation/{imageName}";
+            }
+        }
+
+        /// <summary>
+        /// 获取实际样式
+        /// </summary>
+        /// <param name="style">设置中的样式</param>
+        /// <returns>实际选择的样式</returns>
+        private int GetActualStyle(int style)
+        {
+            switch (style)
+            {
+                case 0: // 随机
+                    var random = new Random();
+                    var randomStyles = new[] { 2, 3, 4, 5, 6 }; // 春季、夏季、秋季、冬季、马年限定
+                    return randomStyles[random.Next(randomStyles.Length)];
+                
+                case 1: // 跟随四季
+                    var month = DateTime.Now.Month;
+                    if (month >= 3 && month <= 5) return 2; // 春季
+                    if (month >= 6 && month <= 8) return 3; // 夏季
+                    if (month >= 9 && month <= 11) return 4; // 秋季
+                    return 5; // 冬季
+                
+                default:
+                    return style; 
+            }
+        }
+
+        /// <summary>
         /// 根据样式获取图片名称
         /// </summary>
         private string GetImageNameByStyle(int style)
@@ -313,6 +406,8 @@ namespace Ink_Canvas.Windows
                     return "ICC Winter.png";
                 case 6: // 马年限定
                     return "ICC Horse.png";
+                default:// 默认返回
+                    return "ICC Horse.png"; 
             }
         }
     }
