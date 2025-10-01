@@ -1575,7 +1575,7 @@ namespace Ink_Canvas
                     else
                     {
                         // 双行显示模式，宽度较大
-                        floatingBarWidth = Math.Max(floatingBarWidth, 820 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
@@ -1718,7 +1718,7 @@ namespace Ink_Canvas
                     else
                     {
                         // 双行显示模式，宽度较大
-                        floatingBarWidth = Math.Max(floatingBarWidth, 850 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
@@ -1824,7 +1824,7 @@ namespace Ink_Canvas
                     else
                     {
                         // 双行显示模式，宽度较大
-                        floatingBarWidth = Math.Max(floatingBarWidth, 820 * ViewboxFloatingBarScaleTransform.ScaleX);
+                        floatingBarWidth = Math.Max(floatingBarWidth, 68 * ViewboxFloatingBarScaleTransform.ScaleX);
                     }
                 }
 
