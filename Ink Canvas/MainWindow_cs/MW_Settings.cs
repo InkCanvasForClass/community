@@ -193,6 +193,13 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ComboBoxSplashScreenStyle_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.SplashScreenStyle = ComboBoxSplashScreenStyle.SelectedIndex;
+            SaveSettingsToFile();
+        }
+
         private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;

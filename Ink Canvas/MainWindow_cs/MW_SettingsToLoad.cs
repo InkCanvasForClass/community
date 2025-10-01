@@ -334,6 +334,8 @@ namespace Ink_Canvas
 
                 ToggleSwitchEnableSplashScreen.IsOn = Settings.Appearance.EnableSplashScreen;
 
+                ComboBoxSplashScreenStyle.SelectedIndex = Settings.Appearance.SplashScreenStyle;
+
                 ToggleSwitchEnableTrayIcon.IsOn = Settings.Appearance.EnableTrayIcon;
                 ICCTrayIconExampleImage.Visibility =
                     Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;

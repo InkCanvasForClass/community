@@ -5,6 +5,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas.Windows
 {
@@ -27,6 +29,7 @@ namespace Ink_Canvas.Windows
         {
             InitializeComponent();
             InitializeSplashScreen();
+            LoadSplashImage();
         }
 
         private void InitializeSplashScreen()
@@ -150,6 +153,92 @@ namespace Ink_Canvas.Windows
             catch
             {
                 VersionTextBlock.Text = "v5.0.4.0";
+            }
+        }
+
+        /// <summary>
+        /// 加载启动图片
+        /// </summary>
+        private void LoadSplashImage()
+        {
+            try
+            {
+                string imagePath = GetSplashImagePath();
+                if (!string.IsNullOrEmpty(imagePath))
+                {
+                    StartupImage.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(imagePath));
+                }
+            }
+            catch (Exception ex)
+            {
+                // 如果加载失败，使用默认图片
+                System.Diagnostics.Debug.WriteLine($"加载启动图片失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 根据设置获取启动图片路径
+        /// </summary>
+        private string GetSplashImagePath()
+        {
+            try
+            {
+                // 读取设置
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+                int splashStyle = 1; // 默认跟随四季
+                
+                if (File.Exists(settingsPath))
+                {
+                    var json = File.ReadAllText(settingsPath);
+                    dynamic obj = JsonConvert.DeserializeObject(json);
+                    if (obj?["appearance"]?["splashScreenStyle"] != null)
+                    {
+                        splashStyle = (int)obj["appearance"]["splashScreenStyle"];
+                    }
+                }
+
+                // 根据样式选择图片
+                string imageName = GetImageNameByStyle(splashStyle);
+                return $"pack://application:,,,/Resources/Startup-animation/{imageName}";
+            }
+            catch
+            {
+                string imageName = GetImageNameByStyle(1); 
+                return $"pack://application:,,,/Resources/Startup-animation/{imageName}";
+            }
+        }
+
+        /// <summary>
+        /// 根据样式获取图片名称
+        /// </summary>
+        private string GetImageNameByStyle(int style)
+        {
+            switch (style)
+            {
+                case 0: // 随机
+                    var random = new Random();
+                    var randomStyles = new[] { 2, 3, 4, 5, 6 }; // 春季、夏季、秋季、冬季、马年限定
+                    return GetImageNameByStyle(randomStyles[random.Next(randomStyles.Length)]);
+                
+                case 1: // 跟随四季
+                    var month = DateTime.Now.Month;
+                    if (month >= 3 && month <= 5) return GetImageNameByStyle(2); // 春季
+                    if (month >= 6 && month <= 8) return GetImageNameByStyle(3); // 夏季
+                    if (month >= 9 && month <= 11) return GetImageNameByStyle(4); // 秋季
+                    return GetImageNameByStyle(5); // 冬季
+                
+                case 2: // 春季
+                    return "ICC Spring.png";
+                case 3: // 夏季
+                    return "ICC Summer.png";
+                case 4: // 秋季
+                    return "ICC Autumn.png";
+                case 5: // 冬季
+                    return "ICC Winter.png";
+                case 6: // 马年限定
+                    return "ICC Horse.png";
+                default:
+                    return "ICC Autumn.png"; // 默认秋季
             }
         }
     }

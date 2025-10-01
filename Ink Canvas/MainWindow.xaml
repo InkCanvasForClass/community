@@ -1047,6 +1047,21 @@
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchEnableSplashScreen_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启动动画样式" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxSplashScreenStyle" FontFamily="Microsoft YaHei UI"
+                                                  SelectedIndex="1" Width="150"
+                                                  SelectionChanged="ComboBoxSplashScreenStyle_SelectionChanged">
+                                            <ComboBoxItem Content="随机" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="跟随四季" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="春季" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="夏季" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="秋季" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="冬季" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="马年限定" FontFamily="Microsoft YaHei UI" />
+                                        </ComboBox>
+                                    </ui:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">

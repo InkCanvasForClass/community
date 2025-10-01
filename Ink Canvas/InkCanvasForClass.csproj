@@ -575,7 +575,11 @@
     <Resource Include="Resources\PresentationExample\sidebar-dark.png" />
     <Resource Include="Resources\PresentationExample\sidebar-white.png" />
     <Resource Include="Resources\PresentationExample\toolbar.png" />
+    <Resource Include="Resources\Startup-animation\ICC Spring.png" />
+    <Resource Include="Resources\Startup-animation\ICC Summer.png" />
     <Resource Include="Resources\Startup-animation\ICC Autumn.png" />
+    <Resource Include="Resources\Startup-animation\ICC Winter.png" />
+    <Resource Include="Resources\Startup-animation\ICC Horse.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">

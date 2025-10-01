@@ -200,7 +200,9 @@ namespace Ink_Canvas
         [JsonProperty("isShowLRSwitchButton")]
         public bool IsShowLRSwitchButton { get; set; }
         [JsonProperty("enableSplashScreen")]
-        public bool EnableSplashScreen { get; set; } = false; 
+        public bool EnableSplashScreen { get; set; } = false;
+        [JsonProperty("splashScreenStyle")]
+        public int SplashScreenStyle { get; set; } = 1; // 0-随机, 1-跟随四季, 2-春季, 3-夏季, 4-秋季, 5-冬季, 6-马年限定 
         [JsonProperty("isShowQuickPanel")]
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
