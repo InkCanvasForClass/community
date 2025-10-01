@@ -13,16 +13,17 @@
     <Grid>
         <!-- 背景遮罩 -->
         <Rectangle Fill="#80000000" />
-        
+
         <!-- 启动图片容器 -->
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel>
                 <!-- 启动图片 -->
                 <Image x:Name="StartupImage" 
+                        Source="pack://application:,,,/Resources/Startup-animation/ICC Autumn.png" 
                        Width="600" 
                        Height="450"
                        Stretch="Uniform" />
-                
+
                 <!-- 版本号显示 - 右上角 -->
                 <TextBlock x:Name="VersionTextBlock" 
                         FontSize="12" 
@@ -32,7 +33,7 @@
                         Margin="0,-385,50,0" 
                         Opacity="0.8" 
                         Panel.ZIndex="1000" />
-                
+
                 <!-- 加载文本 -->
                 <TextBlock x:Name="LoadingText" 
                            Text="正在启动 Ink Canvas..." 
@@ -41,39 +42,25 @@
                            Foreground="White"
                            HorizontalAlignment="Center"
                            Margin="0,-150,0,0" />
-                
+
                 <!-- 进度条 -->
-                <ProgressBar x:Name="LoadingProgress" 
-                             Width="530" 
-                             Height="5" 
-                             Margin="0,-170,0,0"
-                             Background="#40000000"
-                             Foreground="#0078D4"
-                             IsIndeterminate="True">
-                    <ProgressBar.Style>
-                        <Style TargetType="ProgressBar">
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="ProgressBar">
-                                        <Grid>
-                                            <Border Name="PART_Track" 
-                                                    Background="{TemplateBinding Background}" 
-                                                    CornerRadius="4"/>
-                                            <Border Name="PART_Indicator" 
-                                                    Background="{TemplateBinding Foreground}" 
-                                                    CornerRadius="4"
-                                                    HorizontalAlignment="Left">
-                                                <Border.RenderTransform>
-                                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
-                                                </Border.RenderTransform>
-                                            </Border>
-                                        </Grid>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </ProgressBar.Style>
-                </ProgressBar>
+                <Grid HorizontalAlignment="Center"
+                       Margin="1,-175,0,0"
+                       Width="530"
+                       Height="10">
+                    <!-- 进度条填充 -->
+                    <Border x:Name="ProgressBarFill"
+                             Background="#0198D4"
+                             CornerRadius="2.5"
+                             HorizontalAlignment="Left"
+                             Width="0">
+                    </Border>
+                    <!-- 进度条背景 -->
+                    <Border x:Name="ProgressBarBackground"
+                             CornerRadius="2.5"
+                             BorderThickness="1"
+                             ClipToBounds="True"/>
+                </Grid>
             </StackPanel>
         </Grid>
     </Grid>

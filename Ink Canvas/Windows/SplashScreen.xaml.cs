@@ -95,29 +95,45 @@ namespace Ink_Canvas.Windows
         {
             Dispatcher.Invoke(() =>
             {
-                if (LoadingProgress.IsIndeterminate)
+                // 获取进度条容器的实际宽度
+                double containerWidth = ProgressBarBackground.ActualWidth;
+                if (containerWidth <= 0)
                 {
-                    LoadingProgress.IsIndeterminate = false;
-                    LoadingProgress.Value = 0; 
+                    // 如果ActualWidth为0，使用设计时宽度
+                    containerWidth = 530;
                 }
                 
-                // 创建平滑过渡动画
-                var animation = new DoubleAnimation
+                // 计算目标宽度
+                double targetWidth = containerWidth * (progress / 100.0);
+                
+                // 创建Storyboard动画
+                var storyboard = new Storyboard();
+                
+                // 创建宽度动画
+                var widthAnimation = new DoubleAnimation
                 {
-                    From = LoadingProgress.Value,
-                    To = progress,
-                    Duration = TimeSpan.FromMilliseconds(300), 
+                    From = ProgressBarFill.Width,
+                    To = targetWidth,
+                    Duration = TimeSpan.FromMilliseconds(300),
                     EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
                 };
                 
+                // 设置动画目标
+                Storyboard.SetTarget(widthAnimation, ProgressBarFill);
+                Storyboard.SetTargetProperty(widthAnimation, new PropertyPath(Border.WidthProperty));
+                
+                // 添加动画到Storyboard
+                storyboard.Children.Add(widthAnimation);
+                
                 // 添加动画完成事件
-                animation.Completed += (s, e) =>
+                storyboard.Completed += (s, e) =>
                 {
                     // 确保最终值正确设置
-                    LoadingProgress.Value = progress;
+                    ProgressBarFill.Width = targetWidth;
                 };
                 
-                LoadingProgress.BeginAnimation(ProgressBar.ValueProperty, animation);
+                // 开始动画
+                storyboard.Begin();
             });
         }
 
