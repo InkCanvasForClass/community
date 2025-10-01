@@ -45,12 +45,36 @@
                 
                 <!-- 进度条 -->
                 <ProgressBar x:Name="LoadingProgress" 
-                             Width="500" 
-                             Height="8" 
+                             Width="530" 
+                             Height="5" 
                              Margin="0,-170,0,0"
                              Background="#40000000"
                              Foreground="#0078D4"
-                             IsIndeterminate="True" />
+                             IsIndeterminate="True">
+                    <ProgressBar.Style>
+                        <Style TargetType="ProgressBar">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ProgressBar">
+                                        <Grid>
+                                            <Border Name="PART_Track" 
+                                                    Background="{TemplateBinding Background}" 
+                                                    CornerRadius="4"/>
+                                            <Border Name="PART_Indicator" 
+                                                    Background="{TemplateBinding Foreground}" 
+                                                    CornerRadius="4"
+                                                    HorizontalAlignment="Left">
+                                                <Border.RenderTransform>
+                                                    <ScaleTransform ScaleX="1" ScaleY="1"/>
+                                                </Border.RenderTransform>
+                                            </Border>
+                                        </Grid>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ProgressBar.Style>
+                </ProgressBar>
             </StackPanel>
         </Grid>
     </Grid>

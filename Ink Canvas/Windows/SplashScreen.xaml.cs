@@ -2,6 +2,7 @@ using System;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 
@@ -91,8 +92,29 @@ namespace Ink_Canvas.Windows
         {
             Dispatcher.Invoke(() =>
             {
-                LoadingProgress.IsIndeterminate = false;
-                LoadingProgress.Value = progress;
+                if (LoadingProgress.IsIndeterminate)
+                {
+                    LoadingProgress.IsIndeterminate = false;
+                    LoadingProgress.Value = 0; 
+                }
+                
+                // 创建平滑过渡动画
+                var animation = new DoubleAnimation
+                {
+                    From = LoadingProgress.Value,
+                    To = progress,
+                    Duration = TimeSpan.FromMilliseconds(800), 
+                    EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+                };
+                
+                // 添加动画完成事件
+                animation.Completed += (s, e) =>
+                {
+                    // 确保最终值正确设置
+                    LoadingProgress.Value = progress;
+                };
+                
+                LoadingProgress.BeginAnimation(ProgressBar.ValueProperty, animation);
             });
         }
 

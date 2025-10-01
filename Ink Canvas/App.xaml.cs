@@ -80,7 +80,7 @@ namespace Ink_Canvas
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             StartHeartbeatMonitor();
 
-            // 新增：初始化全局异常和进程结束处理
+            // 初始化全局异常和进程结束处理
             InitializeCrashListeners();
 
             // 仅在崩溃后操作为静默重启时才启动看门狗
@@ -96,7 +96,7 @@ namespace Ink_Canvas
             Exit += App_Exit; // 注册退出事件
         }
 
-        // 新增：配置TLS协议以支持Windows 7
+        // 配置TLS协议以支持Windows 7
         private void ConfigureTlsForWindows7()
         {
             try
@@ -131,7 +131,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：初始化崩溃监听器
+        // 初始化崩溃监听器
         private void InitializeCrashListeners()
         {
             if (crashListenersInitialized) return;
@@ -179,7 +179,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：动态加载WMI监控（避免直接引用System.Management）
+        // 动态加载WMI监控
         private void TrySetupWmiMonitoring()
         {
             try
@@ -232,7 +232,7 @@ namespace Ink_Canvas
             }
         }
 
-        // WMI事件处理方法（通过反射调用）
+        // WMI事件处理方法
         private void WmiEventHandler(object sender, EventArgs e)
         {
             try
@@ -256,7 +256,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：Windows控制台控制处理程序
+        // Windows控制台控制处理程序
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate handler, bool add);
 
@@ -295,7 +295,7 @@ namespace Ink_Canvas
             return false;
         }
 
-        // 新增：系统会话结束事件处理
+        // 系统会话结束事件处理
         private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
         {
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
@@ -324,14 +324,14 @@ namespace Ink_Canvas
             DeviceIdentifier.SaveUsageStatsOnShutdown();
         }
 
-        // 新增：控制台取消事件处理
+        // 控制台取消事件处理
         private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
             WriteCrashLog($"接收到控制台中断信号: {e.SpecialKey}");
             e.Cancel = true; // 取消默认处理
         }
 
-        // 新增：处理非UI线程的未处理异常
+        // 处理非UI线程的未处理异常
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             try
@@ -361,7 +361,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：处理进程退出事件
+        // 处理进程退出事件
         private void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             TimeSpan runDuration = DateTime.Now - appStartTime;
@@ -375,7 +375,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：格式化时间跨度
+        // 格式化时间跨度
         private static string FormatTimeSpan(TimeSpan timeSpan)
         {
             if (timeSpan.TotalDays >= 1)
@@ -878,9 +878,11 @@ namespace Ink_Canvas
                 if (_isSplashScreenShown)
                 {
                     SetSplashMessage("启动完成！");
+                    SetSplashProgress(100);
                     SetSplashProgress(500);
                     
-                    Task.Delay(500).ContinueWith(_ =>
+                    // 延迟关闭启动画面，让用户看到完成消息
+                    Task.Delay(800).ContinueWith(_ =>
                     {
                         Dispatcher.Invoke(() => CloseSplashScreen());
                     });
@@ -889,7 +891,7 @@ namespace Ink_Canvas
             
             mainWindow.Show();
 
-            // 新增：注册.icstk文件关联
+            // 注册.icstk文件关联
             try
             {
                 LogHelper.WriteLogToFile("开始注册.icstk文件关联");
@@ -901,7 +903,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"注册文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            // 新增：启动IPC监听器
+            // 启动IPC监听器
             try
             {
                 LogHelper.WriteLogToFile("启动IPC监听器");
@@ -912,7 +914,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"启动IPC监听器时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            // 新增：Office注册表检测
+            // Office注册表检测
             try
             {
                 LogHelper.WriteLogToFile("开始Office注册表检测");
@@ -1051,7 +1053,7 @@ namespace Ink_Canvas
             catch { }
         }
 
-        // 新增：用于设置崩溃后操作类型
+        // 用于设置崩溃后操作类型
         public enum CrashActionType
         {
             SilentRestart,
@@ -1113,7 +1115,7 @@ namespace Ink_Canvas
             watchdogProcess = Process.Start(psi);
         }
 
-        // 看门狗主逻辑（在 Main 函数或 App_Startup 入口前加判断）
+        // 看门狗主逻辑
         public static void RunWatchdogIfNeeded()
         {
             var args = Environment.GetCommandLineArgs();
@@ -1160,7 +1162,7 @@ namespace Ink_Canvas
             // 仅在软件内主动退出时关闭看门狗，并写入退出信号
             try
             {
-                // 新增：记录应用退出状态
+                // 记录应用退出状态
                 string exitType = IsAppExitByUser ? "用户主动退出" : "应用程序退出";
                 WriteCrashLog($"{exitType}，退出代码: {e.ApplicationExitCode}");
 
