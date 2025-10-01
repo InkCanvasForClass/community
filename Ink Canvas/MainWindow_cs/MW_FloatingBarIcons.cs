@@ -29,7 +29,6 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        // 添加当前模式的缓存，避免依赖可能过时的inkCanvas.EditingMode状态
         private string _currentToolMode = "cursor";
 
         #region "手勢"按鈕
@@ -1537,7 +1536,6 @@ namespace Ink_Canvas
                 // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
-                // 计算浮动栏位置，考虑快捷调色盘的显示状态
                 // 使用更可靠的方法获取浮动栏宽度
                 double baseWidth = ViewboxFloatingBar.ActualWidth;
 
@@ -1657,7 +1655,7 @@ namespace Ink_Canvas
 
         public async void PureViewboxFloatingBarMarginAnimationInDesktopMode()
         {
-            // 新增：在白板模式下不执行浮动栏动画
+            // 在白板模式下不执行浮动栏动画
             if (currentMode == 1)
             {
                 return;
@@ -1682,8 +1680,6 @@ namespace Ink_Canvas
                 // 仅计算Windows任务栏高度，不考虑其他程序对工作区的影响
                 var toolbarHeight = ForegroundWindowInfo.GetTaskbarHeight(screen, dpiScaleY);
 
-                // 计算浮动栏位置，考虑快捷调色盘的显示状态
-                // 使用更可靠的方法获取浮动栏宽度
                 double baseWidth = ViewboxFloatingBar.ActualWidth;
 
                 // 如果ActualWidth为0，尝试使用DesiredSize
@@ -1728,7 +1724,7 @@ namespace Ink_Canvas
 
                 pos.X = (screenWidth - floatingBarWidth) / 2;
 
-                // 如果任务栏高度为0(隐藏状态),则使用固定边距
+                // 如果任务栏高度为0,则使用固定边距
                 if (toolbarHeight == 0)
                 {
                     pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
