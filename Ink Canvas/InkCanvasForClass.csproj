@@ -208,6 +208,7 @@
     <Resource Include="Resources\DeveloperAvatars\RaspberryKan.jpg" />
     <Resource Include="Resources\DeveloperAvatars\wwei.png" />
     <Resource Include="Resources\DeveloperAvatars\yuwenhui2020.png" />
+    <Resource Include="Resources\DeveloperAvatars\CJKmkp.jpg" />
     <Resource Include="Resources\icc.ico" />
     <Resource Include="Resources\Icons-png\AdmoxBooth.png" />
     <Resource Include="Resources\Icons-png\AdmoxWhiteboard.png" />
@@ -493,6 +494,15 @@
     <Resource Include="Resources\new-icons\zoom.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_person_money_24_regular-light.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_people_money_24_regular-light.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_timer_24_regular-light.png" />
+    <Resource Include="Resources\new-icons\blackboard-light.png" />
+    <Resource Include="Resources\new-icons\end-slides-show-light.png" />
+    <Resource Include="Resources\new-icons\eye-light.png" />
+    <Resource Include="Resources\new-icons\chevron-left-light.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -556,6 +566,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-png\HiteAnnotation.png" />
+    <Resource Include="Resources\Icons-png\AiClass.png" />
+    <Resource Include="Resources\Icons-png\天喻教育云.png" />
+    <Resource Include="Resources\Icons-png\畅言智慧课堂.png" />
     <Resource Include="Resources\PresentationExample\bottombar-dark.png" />
     <Resource Include="Resources\PresentationExample\bottombar-white.png" />
     <Resource Include="Resources\PresentationExample\page.jpg" />

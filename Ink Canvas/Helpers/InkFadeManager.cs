@@ -71,6 +71,11 @@ namespace Ink_Canvas.Helpers
 
             try
             {
+                // 确保主窗口的InkCanvas保持Ink编辑模式，防止墨迹渐隐时切换到鼠标模式
+                if (_mainWindow.inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
+                {
+                    _mainWindow.inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                }
 
                 // 记录墨迹的起点和终点
                 _strokeStartPoints[stroke] = startPoint;

@@ -44,18 +44,18 @@
                         <Grid Name="GridAdjustHour" Visibility="Visible" Margin="-29,-30,0,-30" Width="29">
                             <ui:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_1">
-                                    <TextBlock Text="+5" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="HourPlus5Text" Text="∧∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click">
-                                    <TextBlock Text="+1" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="HourPlus1Text" Text="∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                             </ui:SimpleStackPanel>
                             <ui:SimpleStackPanel Spacing="2" VerticalAlignment="Bottom">
                                 <Button  Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_2">
-                                    <TextBlock Text="-1" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="HourMinus1Text" Text="∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_3">
-                                    <TextBlock Text="-5" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="HourMinus5Text" Text="∨∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                             </ui:SimpleStackPanel>
                         </Grid>
@@ -91,18 +91,18 @@
                         <Grid Visibility="{Binding ElementName=GridAdjustHour, Path=Visibility}" Margin="-29,-30,0,-30" Width="29">
                             <ui:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_5">
-                                    <TextBlock Text="+5" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="MinutePlus5Text" Text="∧∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_4">
-                                    <TextBlock Text="+1" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="MinutePlus1Text" Text="∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                             </ui:SimpleStackPanel>
                             <ui:SimpleStackPanel Spacing="2" VerticalAlignment="Bottom">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_6">
-                                    <TextBlock Text="-1" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="MinuteMinus1Text" Text="∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_7">
-                                    <TextBlock Text="-5" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="MinuteMinus5Text" Text="∨∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                             </ui:SimpleStackPanel>
                             <Border x:Name="BtnTimeSetOkay" MouseUp="Grid_MouseUp"
@@ -151,18 +151,18 @@
                         <Grid Visibility="{Binding ElementName=GridAdjustHour, Path=Visibility}" Margin="-29,-30,0,-30" Width="29">
                             <ui:SimpleStackPanel Spacing="2">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_8">
-                                    <TextBlock Text="+5" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="SecondPlus5Text" Text="∧∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_9">
-                                    <TextBlock Text="+1" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="SecondPlus1Text" Text="∧" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                             </ui:SimpleStackPanel>
                             <ui:SimpleStackPanel Spacing="2" VerticalAlignment="Bottom">
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_10">
-                                    <TextBlock Text="-1" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="SecondMinus1Text" Text="∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                                 <Button Height="13" Width="{Binding ElementName=GridAdjustHour, Path=ActualWidth}" Click="Button_Click_11">
-                                    <TextBlock Text="-5" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="SecondMinus5Text" Text="∨∨" Margin="-10" FontSize="8" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Button>
                             </ui:SimpleStackPanel>
                         </Grid>
@@ -244,3 +244,4 @@
         </Grid>
     </Border>
 </Window>
+

@@ -1,4 +1,4 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
+using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using OSVersionExtension;
@@ -28,12 +28,92 @@ namespace Ink_Canvas
                     {
                         string text = File.ReadAllText(App.RootPath + settingsFileName);
                         Settings = JsonConvert.DeserializeObject<Settings>(text);
+                        
+                        // 验证设置是否成功加载
+                        if (Settings == null)
+                        {
+                            LogHelper.WriteLogToFile("配置文件解析失败，尝试从备份恢复", LogHelper.LogType.Warning);
+                            if (AutoBackupManager.TryRestoreFromBackup())
+                            {
+                                // 重新尝试加载
+                                text = File.ReadAllText(App.RootPath + settingsFileName);
+                                Settings = JsonConvert.DeserializeObject<Settings>(text);
+                                if (Settings != null)
+                                {
+                                }
+                            }
+                            
+                            // 如果仍然失败，使用默认设置
+                            if (Settings == null)
+                            {
+                                LogHelper.WriteLogToFile("从备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
+                                BtnResetToSuggestion_Click(null, null);
+                            }
+                        }
                     }
-                    catch { }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"配置文件加载失败: {ex.Message}", LogHelper.LogType.Error);
+                        
+                        // 尝试从备份恢复
+                        LogHelper.WriteLogToFile("尝试从备份恢复配置文件", LogHelper.LogType.Warning);
+                        if (AutoBackupManager.TryRestoreFromBackup())
+                        {
+                            try
+                            {
+                                string text = File.ReadAllText(App.RootPath + settingsFileName);
+                                Settings = JsonConvert.DeserializeObject<Settings>(text);
+                                if (Settings != null)
+                                {
+                                }
+                            }
+                            catch (Exception restoreEx)
+                            {
+                                LogHelper.WriteLogToFile($"从备份恢复后重新加载失败: {restoreEx.Message}", LogHelper.LogType.Error);
+                                BtnResetToSuggestion_Click(null, null);
+                            }
+                        }
+                        
+                        // 如果仍然失败，使用默认设置
+                        if (Settings == null)
+                        {
+                            LogHelper.WriteLogToFile("从备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
+                            BtnResetToSuggestion_Click(null, null);
+                        }
+                    }
                 }
                 else
                 {
-                    BtnResetToSuggestion_Click(null, null);
+                    LogHelper.WriteLogToFile("配置文件不存在，尝试从备份恢复", LogHelper.LogType.Warning);
+                    if (AutoBackupManager.TryRestoreFromBackup())
+                    {
+                        try
+                        {
+                            string text = File.ReadAllText(App.RootPath + settingsFileName);
+                            Settings = JsonConvert.DeserializeObject<Settings>(text);
+                            if (Settings != null)
+                            {
+                            }
+                        }
+                        catch (Exception restoreEx)
+                        {
+                            LogHelper.WriteLogToFile($"从备份恢复后加载失败: {restoreEx.Message}", LogHelper.LogType.Error);
+                            BtnResetToSuggestion_Click(null, null);
+                        }
+                    }
+                    else
+                    {
+                        // 备份恢复失败（备份目录不存在等），使用默认设置
+                        LogHelper.WriteLogToFile("备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
+                        BtnResetToSuggestion_Click(null, null);
+                    }
+                    
+                    // 如果仍然失败，使用默认设置
+                    if (Settings == null)
+                    {
+                        LogHelper.WriteLogToFile("从备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
+                        BtnResetToSuggestion_Click(null, null);
+                    }
                 }
             }
             catch (Exception ex)
@@ -75,7 +155,7 @@ namespace Ink_Canvas
                             Settings.Automation.AutoDelSavedFilesDaysThreshold);
                     }
 
-                    if (Settings.Startup.IsFoldAtStartup)
+                    if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode)
                     {
                         FoldFloatingBar_MouseUp(Fold_Icon, null);
                     }
@@ -245,6 +325,9 @@ namespace Ink_Canvas
                         break;
                 }
 
+                // 设置主题下拉框
+                ComboBoxTheme.SelectedIndex = Settings.Appearance.Theme;
+
                 ComboBoxChickenSoupSource.SelectedIndex = Settings.Appearance.ChickenSoupSource;
 
                 ToggleSwitchEnableQuickPanel.IsOn = Settings.Appearance.IsShowQuickPanel;
@@ -320,6 +403,7 @@ namespace Ink_Canvas
                     Settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
                 // 浮动栏按钮显示控制开关初始化
+                CheckBoxUseLegacyFloatingBarUI.IsChecked = Settings.Appearance.UseLegacyFloatingBarUI;
                 CheckBoxShowShapeButton.IsChecked = Settings.Appearance.IsShowShapeButton;
                 CheckBoxShowUndoButton.IsChecked = Settings.Appearance.IsShowUndoButton;
                 CheckBoxShowRedoButton.IsChecked = Settings.Appearance.IsShowRedoButton;
@@ -337,6 +421,9 @@ namespace Ink_Canvas
 
                 // 应用浮动栏按钮可见性设置
                 UpdateFloatingBarButtonsVisibility();
+                
+                // 更新浮动栏图标
+                UpdateFloatingBarIcons();
 
                 SystemEvents_UserPreferenceChanged(null, null);
             }
@@ -711,6 +798,17 @@ namespace Ink_Canvas
                 ToggleSwitchIsEnableDPIChangeDetection.IsOn = Settings.Advanced.IsEnableDPIChangeDetection;
                 ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn = Settings.Advanced.IsEnableAvoidFullScreenHelper;
                 ToggleSwitchIsAutoBackupBeforeUpdate.IsOn = Settings.Advanced.IsAutoBackupBeforeUpdate;
+                ToggleSwitchIsAutoBackupEnabled.IsOn = Settings.Advanced.IsAutoBackupEnabled;
+                
+                // 设置备份间隔下拉框
+                foreach (ComboBoxItem item in ComboBoxAutoBackupInterval.Items)
+                {
+                    if (item.Tag != null && int.TryParse(item.Tag.ToString(), out int interval) && interval == Settings.Advanced.AutoBackupIntervalDays)
+                    {
+                        ComboBoxAutoBackupInterval.SelectedItem = item;
+                        break;
+                    }
+                }
                 if (Settings.Advanced.IsEnableFullScreenHelper)
                 {
                     FullScreenHelper.MarkFullscreenWindowTaskbarList(new WindowInteropHelper(this).Handle, true);
@@ -768,6 +866,10 @@ namespace Ink_Canvas
                 RandomDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
                 SingleDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
 
+                // 计时器设置
+                ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
+                TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
+
                 // 加载自定义点名背景
                 UpdatePickNameBackgroundsInComboBox();
 
@@ -786,6 +888,8 @@ namespace Ink_Canvas
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
                 ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
                 ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
+                ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
+                TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
             }
 
             // ModeSettings
@@ -907,6 +1011,9 @@ namespace Ink_Canvas
 
                 // 加载退出收纳模式自动切换至批注模式设置
                 ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode.IsOn = Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode;
+                
+                // 加载退出白板时自动收纳设置
+                ToggleSwitchAutoFoldWhenExitWhiteboard.IsOn = Settings.Automation.IsAutoFoldWhenExitWhiteboard;
             }
             else
             {

@@ -271,7 +271,6 @@ namespace Ink_Canvas
                     if (dopsc[1] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
                     if (dopsc[2] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
                     if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
-                    LogHelper.WriteLogToFile($"从收纳模式恢复时显示PPT翻页按钮 - 放映状态: {PPTManager?.IsInSlideShow}, 页数: {PPTManager?.SlidesCount}", LogHelper.LogType.Trace);
                 }
                 else
                 {
@@ -306,7 +305,6 @@ namespace Ink_Canvas
                 SidePannelMarginAnimation(-50, !unfoldFloatingBarByUser);
             });
 
-            // 修复：在浮动栏展开后，重新设置按钮高亮状态
             await Dispatcher.InvokeAsync(async () =>
             {
                 try

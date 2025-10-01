@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -70,6 +70,11 @@ namespace Ink_Canvas
         private TimeViewModel nowTimeVM = new TimeViewModel();
         private DateTime cachedNetworkTime = DateTime.Now;
         private DateTime lastNtpSyncTime = DateTime.MinValue;
+        private string lastDisplayedTime = ""; 
+        private bool useNetworkTime = false; 
+        private TimeSpan networkTimeOffset = TimeSpan.Zero;
+        private DateTime lastLocalTime = DateTime.Now; // 记录上次的本地时间，用于检测时间跳跃
+        private bool isNtpSyncing = false; // 防止重复NTP同步的标志 
 
         private async Task<DateTime> GetNetworkTimeAsync()
         {
@@ -82,7 +87,7 @@ namespace Ink_Canvas
                 var ipEndPoint = new IPEndPoint(addresses[0], 123);
                 using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
-                    socket.ReceiveTimeout = 2000;
+                    socket.ReceiveTimeout = 5000; 
                     socket.Connect(ipEndPoint);
                     await Task.Factory.FromAsync(socket.BeginSend(ntpData, 0, ntpData.Length, SocketFlags.None, null, socket), socket.EndSend);
                     await Task.Factory.FromAsync(socket.BeginReceive(ntpData, 0, ntpData.Length, SocketFlags.None, null, socket), socket.EndReceive);
@@ -94,7 +99,7 @@ namespace Ink_Canvas
                 var networkDateTime = (new DateTime(1900, 1, 1)).AddMilliseconds((long)milliseconds);
                 return networkDateTime.ToLocalTime();
             }
-            catch
+            catch (Exception)
             {
                 return DateTime.Now;
             }
@@ -114,7 +119,7 @@ namespace Ink_Canvas
             timerCheckAutoUpdateWithSilence.Interval = 1000 * 60 * 10;
             WaterMarkTime.DataContext = nowTimeVM;
             WaterMarkDate.DataContext = nowTimeVM;
-            timerDisplayTime.Elapsed += async (s, e) => await TimerDisplayTime_ElapsedAsync();
+            timerDisplayTime.Elapsed += TimerDisplayTime_Elapsed;
             timerDisplayTime.Interval = 1000;
             timerDisplayTime.Start();
             timerDisplayDate.Elapsed += TimerDisplayDate_Elapsed;
@@ -126,60 +131,124 @@ namespace Ink_Canvas
             timerKillProcess.Start();
             nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
             nowTimeVM.nowTime = DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
+            
+            // 程序启动时立即进行一次NTP同步
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await TimerNtpSync_ElapsedAsync();
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"程序启动时NTP同步失败: {ex.Message}", LogHelper.LogType.Error);
+                }
+            });
         }
 
         // NTP同步定时器事件处理
         private async Task TimerNtpSync_ElapsedAsync()
         {
+            // 防止重复同步
+            if (isNtpSyncing) return;
+            
+            isNtpSyncing = true;
             try
             {
-                DateTime networkTime = await GetNetworkTimeAsync();
+                
+                // 添加超时机制，最多等待10秒
+                var timeoutTask = Task.Delay(10000);
+                var ntpTask = GetNetworkTimeAsync();
+                
+                var completedTask = await Task.WhenAny(ntpTask, timeoutTask);
+                
+                if (completedTask == timeoutTask)
+                {
+                    cachedNetworkTime = DateTime.Now;
+                    lastNtpSyncTime = DateTime.Now;
+                    useNetworkTime = false;
+                    networkTimeOffset = TimeSpan.Zero;
+                    return;
+                }
+                
+                DateTime networkTime = await ntpTask;
+                DateTime localTime = DateTime.Now;
+                
                 cachedNetworkTime = networkTime;
-                lastNtpSyncTime = DateTime.Now;
-            }
-            catch
+                lastNtpSyncTime = localTime;
+                
+                // 计算网络时间与本地时间的偏移量
+                networkTimeOffset = networkTime - localTime;
+                
+                // 如果时间差超过3分钟，则使用网络时间
+                useNetworkTime = Math.Abs(networkTimeOffset.TotalMinutes) > 3.0;
+                
+           }
+            catch (Exception ex)
             {
                 // NTP同步失败时，保持使用本地时间
                 cachedNetworkTime = DateTime.Now;
+                lastNtpSyncTime = DateTime.Now;
+                useNetworkTime = false;
+                networkTimeOffset = TimeSpan.Zero;
+                
+                LogHelper.WriteLogToFile($"NTP同步失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+            finally
+            {
+                isNtpSyncing = false;
             }
         }
 
-        // 修改TimerDisplayTime_ElapsedAsync方法，使用缓存的网络时间
-        private async Task TimerDisplayTime_ElapsedAsync()
+        // 优化后的时间显示方法，仅在NTP同步时计算网络时间偏移
+        private void TimerDisplayTime_Elapsed(object sender, ElapsedEventArgs e)
         {
             DateTime localTime = DateTime.Now;
             DateTime displayTime = localTime; // 默认使用本地时间
 
-            // 如果还没有进行过NTP同步，或者距离上次同步超过2小时，则进行一次同步
-            if (lastNtpSyncTime == DateTime.MinValue || 
-                (DateTime.Now - lastNtpSyncTime).TotalHours >= 2)
+            // 检测系统时间是否发生重大跳跃（超过2分钟）
+            TimeSpan timeJump = localTime - lastLocalTime;
+            double timeJumpMinutes = Math.Abs(timeJump.TotalMinutes);
+            
+            if (timeJumpMinutes > 3 && !isNtpSyncing)
             {
-                try
+                // 系统时间发生重大变化（超过3分钟），立即触发NTP同步
+                // 使用异步方式触发NTP同步，避免阻塞主线程
+                Task.Run(async () =>
                 {
-                    DateTime networkTime = await GetNetworkTimeAsync();
-                    cachedNetworkTime = networkTime;
-                    lastNtpSyncTime = DateTime.Now;
-                }
-                catch
-                {
-                    // 网络时间获取失败时，使用本地时间
-                    cachedNetworkTime = localTime;
-                }
+                    try
+                    {
+                        await TimerNtpSync_ElapsedAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"时间跳跃触发的NTP同步失败: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                });
+            }
+            lastLocalTime = localTime;
+
+            // 如果启用网络时间且偏移量已计算，则应用偏移量
+            if (useNetworkTime && networkTimeOffset != TimeSpan.Zero)
+            {
+                displayTime = localTime + networkTimeOffset;
             }
 
-            // 使用缓存的网络时间进行显示
-            TimeSpan timeDifference = cachedNetworkTime - localTime;
-            double timeDifferenceMinutes = Math.Abs(timeDifference.TotalMinutes);
+            // 格式化时间字符串
+            string timeString = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
 
-            // 如果网络时间与本地时间相差不超过3分钟，则使用本地时间
-            // 否则使用网络时间
-            displayTime = timeDifferenceMinutes <= 3.0 ? localTime : cachedNetworkTime;
-
-            // 只更新时间，日期由原有逻辑定时更新即可
-            Dispatcher.Invoke(() =>
+            
+            // 只有当时间字符串发生变化时才更新UI，避免不必要的UI刷新
+            if (timeString != lastDisplayedTime)
             {
-                nowTimeVM.nowTime = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
-            });
+                lastDisplayedTime = timeString;
+                
+                // 使用BeginInvoke异步更新UI，避免阻塞
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    nowTimeVM.nowTime = timeString;
+                }));
+            }
         }
 
         // 修改TimerDisplayDate_Elapsed方法中的日期格式

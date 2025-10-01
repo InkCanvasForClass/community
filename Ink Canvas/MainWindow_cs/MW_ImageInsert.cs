@@ -237,7 +237,6 @@ namespace Ink_Canvas
                     graphics.CopyFromScreen(x, y, 0, 0, new Size(width, height), CopyPixelOperation.SourceCopy);
                 }
 
-                LogHelper.WriteLogToFile($"成功截取区域: X={x}, Y={y}, Width={width}, Height={height}");
                 return bitmap;
             }
             catch (Exception ex)
@@ -405,6 +404,8 @@ namespace Ink_Canvas
             image.MouseWheel += Element_MouseWheel;
 
             // 触摸事件
+            image.TouchDown += Element_TouchDown;
+            image.TouchUp += Element_TouchUp;
             image.IsManipulationEnabled = true;
             image.ManipulationDelta += Element_ManipulationDelta;
             image.ManipulationCompleted += Element_ManipulationCompleted;
@@ -492,7 +493,6 @@ namespace Ink_Canvas
                     InitializeScreenshotTransform(image);
                 }
 
-                LogHelper.WriteLogToFile($"截图居中完成: 位置({centerX}, {centerY}), 尺寸({newWidth}x{newHeight})");
             }
             catch (Exception ex)
             {

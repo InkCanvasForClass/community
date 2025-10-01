@@ -357,23 +357,21 @@ namespace Ink_Canvas
 
             if (inkCanvas1.EditingMode == InkCanvasEditingMode.Ink) forcePointEraser = !forcePointEraser;
 
-            // 处理高级橡皮擦覆盖层的启用/禁用
-            var eraserOverlay = FindName("AdvancedEraserOverlay") as Border;
+            // 处理橡皮擦覆盖层的启用/禁用
+            var eraserOverlay = FindName("EraserOverlayCanvas") as Canvas;
             if (eraserOverlay != null)
             {
                 if (inkCanvas1.EditingMode == InkCanvasEditingMode.EraseByPoint)
                 {
                     // 橡皮擦模式下启用覆盖层
-                    eraserOverlay.IsHitTestVisible = true;
-                    Trace.WriteLine("Advanced Eraser: Overlay enabled in eraser mode");
+                    EnableEraserOverlay();
+                    Trace.WriteLine("Eraser: Overlay enabled in eraser mode");
                 }
                 else
                 {
                     // 其他模式下禁用覆盖层
-                    eraserOverlay.IsHitTestVisible = false;
-                    // 同时禁用高级橡皮擦系统
-                    DisableAdvancedEraserSystem();
-                    Trace.WriteLine("Advanced Eraser: Overlay disabled in non-eraser mode");
+                    DisableEraserOverlay();
+                    Trace.WriteLine("Eraser: Overlay disabled in non-eraser mode");
                 }
             }
         }
@@ -392,6 +390,8 @@ namespace Ink_Canvas
             loadPenCanvas();
             //加载设置
             LoadSettings(true);
+            AutoBackupManager.Initialize(Settings);
+            
             // 检查保存路径是否可用，不可用则修正
             try
             {
@@ -457,8 +457,30 @@ namespace Ink_Canvas
             // HasNewUpdateWindow hasNewUpdateWindow = new HasNewUpdateWindow();
             if (Environment.Is64BitProcess) GroupBoxInkRecognition.Visibility = Visibility.Collapsed;
 
-            ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
-            SystemEvents_UserPreferenceChanged(null, null);
+            // 根据设置应用主题
+            switch (Settings.Appearance.Theme)
+            {
+                case 0: // 浅色主题
+                    ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                    SetTheme("Light");
+                    break;
+                case 1: // 深色主题
+                    ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                    SetTheme("Dark");
+                    break;
+                case 2: // 跟随系统
+                    if (IsSystemThemeLight())
+                    {
+                        ThemeManager.Current.ApplicationTheme = ApplicationTheme.Light;
+                        SetTheme("Light");
+                    }
+                    else
+                    {
+                        ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
+                        SetTheme("Dark");
+                    }
+                    break;
+            }
 
             //TextBlockVersion.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             LogHelper.WriteLogToFile("Ink Canvas Loaded", LogHelper.LogType.Event);
@@ -489,8 +511,8 @@ namespace Ink_Canvas
             }
 
             SystemEvents.DisplaySettingsChanged += SystemEventsOnDisplaySettingsChanged;
-            // 自动收纳到侧边栏
-            if (Settings.Startup.IsFoldAtStartup)
+            // 自动收纳到侧边栏（若通过 --board 进入白板模式则跳过收纳）
+            if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode)
             {
                 FoldFloatingBar_MouseUp(new object(), null);
             }
@@ -530,10 +552,7 @@ namespace Ink_Canvas
             ApplyNoFocusMode();
             ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
             ApplyAlwaysOnTop();
-
-            // 初始化UIElement选择系统
-
-
+            
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
 
@@ -2737,6 +2756,124 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"切换到白板模式时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #endregion
+
+        #region Theme Toggle
+
+        /// <summary>
+        /// 主题下拉框选择变化事件
+        /// </summary>
+        private void ComboBoxTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded) return;
+            
+            try
+            {
+                System.Windows.Controls.ComboBox comboBox = sender as System.Windows.Controls.ComboBox;
+                if (comboBox != null)
+                {
+                    Settings.Appearance.Theme = comboBox.SelectedIndex;
+                    
+                    // 应用新主题
+                    ApplyTheme(comboBox.SelectedIndex);
+                    
+                    // 保存设置
+                    SaveSettingsToFile();
+                    
+                    // 显示通知
+                    string themeName;
+                    switch (comboBox.SelectedIndex)
+                    {
+                        case 0:
+                            themeName = "浅色主题";
+                            break;
+                        case 1:
+                            themeName = "深色主题";
+                            break;
+                        case 2:
+                            themeName = "跟随系统";
+                            break;
+                        default:
+                            themeName = "未知主题";
+                            break;
+                    }
+                    
+                    ShowNotification($"已切换到{themeName}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换主题时出错: {ex.Message}", LogHelper.LogType.Error);
+                ShowNotification("主题切换失败");
+            }
+        }
+
+        /// <summary>
+        /// 应用指定主题
+        /// </summary>
+        /// <param name="themeIndex">主题索引：0-浅色，1-深色，2-跟随系统</param>
+        private void ApplyTheme(int themeIndex)
+        {
+            try
+            {
+                switch (themeIndex)
+                {
+                    case 0: // 浅色主题
+                        SetTheme("Light");
+                        // 浅色主题下设置浮动栏为完全不透明
+                        ViewboxFloatingBar.Opacity = 1.0;
+                        break;
+                    case 1: // 深色主题
+                        SetTheme("Dark");
+                        // 深色主题下设置浮动栏为完全不透明
+                        ViewboxFloatingBar.Opacity = 1.0;
+                        break;
+                    case 2: // 跟随系统
+                        if (IsSystemThemeLight())
+                        {
+                            SetTheme("Light");
+                            ViewboxFloatingBar.Opacity = 1.0;
+                        }
+                        else
+                        {
+                            SetTheme("Dark");
+                            ViewboxFloatingBar.Opacity = 1.0;
+                        }
+                        break;
+                }
+                
+                // 强制刷新通知框的颜色资源
+                RefreshNotificationColors();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用主题时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 刷新通知框的颜色资源
+        /// </summary>
+        private void RefreshNotificationColors()
+        {
+            try
+            {
+                // 强制刷新通知框的背景和前景色
+                var border = GridNotifications.Children.OfType<Border>().FirstOrDefault();
+                if (border != null)
+                {
+                    border.Background = (Brush)Application.Current.FindResource("SettingsPageBackground");
+                    border.BorderBrush = new SolidColorBrush(Color.FromRgb(185, 28, 28)); // 保持红色边框
+                }
+                
+                TextBlockNotice.Foreground = (Brush)Application.Current.FindResource("SettingsPageForeground");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新通知框颜色时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

@@ -92,7 +92,6 @@ namespace Ink_Canvas.Helpers
                             // 页数无效时清空页码显示
                             _mainWindow.PPTBtnPageNow.Text = "?";
                             _mainWindow.PPTBtnPageTotal.Text = "/ ?";
-                            LogHelper.WriteLogToFile($"PPT页数无效，清空页码显示: 当前页={currentSlide}, 总页数={totalSlides}", LogHelper.LogType.Warning);
                         }
 
                         UpdateNavigationPanelsVisibility();
@@ -132,7 +131,6 @@ namespace Ink_Canvas.Helpers
                         // 页数无效时清空页码显示
                         _mainWindow.PPTBtnPageNow.Text = "?";
                         _mainWindow.PPTBtnPageTotal.Text = "/ ?";
-                        LogHelper.WriteLogToFile($"PPT页数无效，清空页码显示: 当前页={currentSlide}, 总页数={totalSlides}", LogHelper.LogType.Warning);
                     }
                 }
                 catch (Exception ex)
@@ -182,7 +180,8 @@ namespace Ink_Canvas.Helpers
                     bool shouldShowButtons = ShowPPTButton &&
                                           _mainWindow.BtnPPTSlideShowEnd.Visibility == Visibility.Visible &&
                                           isInSlideShow &&
-                                          hasValidPageCount;
+                                          hasValidPageCount &&
+                                          !MainWindow.Settings.Automation.IsAutoFoldInPPTSlideShow;
 
                     if (!shouldShowButtons)
                     {

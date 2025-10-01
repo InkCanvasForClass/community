@@ -10,6 +10,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Threading;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 using Point = System.Windows.Point;
 
@@ -74,9 +75,9 @@ namespace Ink_Canvas
             ToggleSwitchDrawShapeBorderAutoHide.IsOn = !ToggleSwitchDrawShapeBorderAutoHide.IsOn;
 
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-                ((FontIcon)sender).Glyph = "&#xE840;";
+                ((SymbolIcon)sender).Symbol = Symbol.Pin;
             else
-                ((FontIcon)sender).Glyph = "&#xE77A;";
+                ((SymbolIcon)sender).Symbol = Symbol.UnPin;
         }
 
         private object lastMouseDownSender;
@@ -126,10 +127,7 @@ namespace Ink_Canvas
             }
 
             // 禁用高级橡皮擦系统
-            DisableAdvancedEraserSystem();
-
-            // 修复：从橡皮擦切换到批注模式时，退出多指书写模式
-            // 这解决了从橡皮擦切换为批注时被锁定为多指书写的问题
+            DisableEraserOverlay();
             ExitMultiTouchModeIfNeeded();
 
             // 如果当前已是批注模式，再次点击弹出批注子面板
@@ -151,9 +149,11 @@ namespace Ink_Canvas
             }
             inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
 
-            // 修复：确保从橡皮擦切换到笔时，多指手势功能能正确恢复
+
             // 更新lastInkCanvasEditingMode以确保多指手势逻辑正确
             lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+
+            ResetAllShapeButtonsOpacity();
 
             SetCursorBasedOnEditingMode(inkCanvas);
         }
@@ -175,7 +175,6 @@ namespace Ink_Canvas
                 lastIsInMultiTouchMode = true;
             }
 
-            // 修复：几何绘制模式下确保不切换到Ink模式，避免触摸轨迹被收集
             if (drawingShapeMode != 0)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
@@ -344,7 +343,7 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(3);
             CancelSingleFingerDragMode();
-            isLongPressSelected = true; // 设置为选中状态，避免抬笔后切换回笔模式
+            isLongPressSelected = false; 
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -490,27 +489,17 @@ namespace Ink_Canvas
                 SetCursorBasedOnEditingMode(inkCanvas);
             }
 
-            // 修复：几何绘制模式下完全禁止触摸轨迹收集
             if (drawingShapeMode != 0)
             {
-                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
 
-                if (isWaitUntilNextTouchDown && dec.Count > 1) return;
-                if (dec.Count > 1)
-                {
-                    // 修复：双曲线绘制时，多指触摸不应该删除第一笔的辅助线
-                    if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
-                    {
-                        // 第二笔绘制双曲线时，只删除第二笔的临时笔画，保留第一笔的辅助线
-                        try
-                        {
-                            inkCanvas.Strokes.Remove(lastTempStroke);
-                        }
-                        catch { }
-                        return;
-                    }
+                if (!isTouchDown) return;
 
+                if (isWaitUntilNextTouchDown && dec.Count > 1) return;
+                
+                // 对于多笔图形绘制，允许第二笔绘制，即使dec.Count > 1
+                if (dec.Count > 1 && !((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1))
+                {
                     // 其他情况正常删除临时笔画
                     try
                     {
@@ -523,8 +512,18 @@ namespace Ink_Canvas
                     }
                     return;
                 }
+                
+                // 第二笔绘制双曲线时，只删除第二笔的临时笔画，保留第一笔的辅助线
+                if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
+                {
+                    try
+                    {
+                        inkCanvas.Strokes.Remove(lastTempStroke);
+                    }
+                    catch { }
+                    // 不直接返回，继续执行绘制逻辑
+                }
 
-                // 修复：双曲线绘制时，第二笔应该基于第一笔的起点，而不是触摸实时位置
                 Point touchPoint = e.GetTouchPoint(inkCanvas).Position;
                 if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
                 {
@@ -585,44 +584,20 @@ namespace Ink_Canvas
                     {
                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                     };
-                    try
-                    {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
-                    }
-                    catch { }
-
-                    lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    
+                    UpdateTempStrokeSafely(stroke);
                     break;
                 case 8:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     strokes.Add(GenerateDashedLineStrokeCollection(iniP, endP));
-                    try
-                    {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
-                    }
-                    catch
-                    {
-                        Trace.WriteLine("lastTempStrokeCollection failed.");
-                    }
-
-                    lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    
+                    UpdateTempStrokeCollectionSafely(strokes);
                     break;
                 case 18:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     strokes.Add(GenerateDotLineStrokeCollection(iniP, endP));
-                    try
-                    {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
-                    }
-                    catch
-                    {
-                        Trace.WriteLine("lastTempStrokeCollection failed.");
-                    }
-
-                    lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    
+                    UpdateTempStrokeCollectionSafely(strokes);
                     break;
                 case 2:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -643,14 +618,9 @@ namespace Ink_Canvas
                     {
                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                     };
-                    try
-                    {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
-                    }
-                    catch { }
-
-                    lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    
+                    // 优化：使用更安全的临时笔画更新方式，减少闪烁
+                    UpdateTempStrokeSafely(stroke);
                     break;
                 case 15:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1033,7 +1003,6 @@ namespace Ink_Canvas
                         drawMultiStepShapeSpecialParameter3 = k;
                         drawMultiStepShapeSpecialStrokeCollection = strokes;
 
-                        // 修复：第一笔绘制的辅助线应该立即显示在画布上
                         try
                         {
                             inkCanvas.Strokes.Remove(lastTempStrokeCollection);
@@ -1126,7 +1095,6 @@ namespace Ink_Canvas
                         }
                     }
 
-                    // 修复：双曲线绘制完成后，需要将第一笔的辅助线和第二笔的双曲线合并
                     try
                     {
                         // 删除第二笔的临时笔画
@@ -1508,6 +1476,119 @@ namespace Ink_Canvas
 
         private bool isWaitUntilNextTouchDown;
 
+        // 添加节流机制，减少更新频率
+        private DateTime lastUpdateTime = DateTime.MinValue;
+        private const int UpdateThrottleMs = 16; // 约60fps的更新频率
+
+        /// <summary>
+        /// 安全地更新临时笔画，减少预览闪烁
+        /// </summary>
+        /// <param name="newStroke">新的临时笔画</param>
+        private void UpdateTempStrokeSafely(Stroke newStroke)
+        {
+            // 节流机制：限制更新频率
+            var now = DateTime.Now;
+            if ((now - lastUpdateTime).TotalMilliseconds < UpdateThrottleMs)
+            {
+                return;
+            }
+            lastUpdateTime = now;
+
+            try
+            {
+                // 使用Dispatcher.BeginInvoke确保UI更新在UI线程上执行
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        // 先添加新笔画，再删除旧笔画，减少视觉闪烁
+                        inkCanvas.Strokes.Add(newStroke);
+                        
+                        if (lastTempStroke != null && inkCanvas.Strokes.Contains(lastTempStroke))
+                        {
+                            inkCanvas.Strokes.Remove(lastTempStroke);
+                        }
+                        
+                        lastTempStroke = newStroke;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"UpdateTempStrokeSafely 失败: {ex.Message}");
+                        // 如果更新失败，确保清理状态
+                        if (lastTempStroke != null && inkCanvas.Strokes.Contains(lastTempStroke))
+                        {
+                            try { inkCanvas.Strokes.Remove(lastTempStroke); } catch { }
+                        }
+                        lastTempStroke = newStroke;
+                        try { inkCanvas.Strokes.Add(newStroke); } catch { }
+                    }
+                }), DispatcherPriority.Render);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"UpdateTempStrokeSafely Dispatcher 失败: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 安全地更新临时笔画集合，减少预览闪烁
+        /// </summary>
+        /// <param name="newStrokeCollection">新的临时笔画集合</param>
+        private void UpdateTempStrokeCollectionSafely(StrokeCollection newStrokeCollection)
+        {
+            // 节流机制：限制更新频率
+            var now = DateTime.Now;
+            if ((now - lastUpdateTime).TotalMilliseconds < UpdateThrottleMs)
+            {
+                return;
+            }
+            lastUpdateTime = now;
+
+            try
+            {
+                // 使用Dispatcher.BeginInvoke确保UI更新在UI线程上执行
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        // 先添加新笔画集合，再删除旧笔画集合，减少视觉闪烁
+                        inkCanvas.Strokes.Add(newStrokeCollection);
+                        
+                        if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0)
+                        {
+                            foreach (var stroke in lastTempStrokeCollection)
+                            {
+                                if (inkCanvas.Strokes.Contains(stroke))
+                                {
+                                    inkCanvas.Strokes.Remove(stroke);
+                                }
+                            }
+                        }
+                        
+                        lastTempStrokeCollection = newStrokeCollection;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"UpdateTempStrokeCollectionSafely 失败: {ex.Message}");
+                        // 如果更新失败，确保清理状态
+                        if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0)
+                        {
+                            foreach (var stroke in lastTempStrokeCollection)
+                            {
+                                try { inkCanvas.Strokes.Remove(stroke); } catch { }
+                            }
+                        }
+                        lastTempStrokeCollection = newStrokeCollection;
+                        try { inkCanvas.Strokes.Add(newStrokeCollection); } catch { }
+                    }
+                }), DispatcherPriority.Render);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"UpdateTempStrokeCollectionSafely Dispatcher 失败: {ex.Message}");
+            }
+        }
+
         private List<Point> GenerateEllipseGeometry(Point st, Point ed, bool isDrawTop = true,
             bool isDrawBottom = true)
         {
@@ -1675,6 +1756,7 @@ namespace Ink_Canvas
         }
 
         private bool isMouseDown;
+        private bool isTouchDown;
 
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -1940,7 +2022,6 @@ namespace Ink_Canvas
 
         private bool NeedUpdateIniP()
         {
-            // 修复：双曲线绘制时，第二笔不应该更新起点，保持第一笔的起点
             if (drawingShapeMode == 24 || drawingShapeMode == 25)
             {
                 if (drawMultiStepShapeCurrentStep == 1)
@@ -1987,6 +2068,38 @@ namespace Ink_Canvas
             drawingShapeMode = mode;
             inkCanvas.EditingMode = InkCanvasEditingMode.None;
             SetCursorBasedOnEditingMode(inkCanvas);
+            ResetAllShapeButtonsOpacity();
+        }
+
+        /// <summary>
+        /// 重置所有几何绘制按钮的透明度状态
+        /// </summary>
+        private void ResetAllShapeButtonsOpacity()
+        {
+            try
+            {
+                // 重置所有几何绘制按钮的透明度为1（完全不透明）
+                var buttons = new UIElement[] {
+                    ImageDrawLine, BoardImageDrawLine,
+                    ImageDrawDashedLine, BoardImageDrawDashedLine,
+                    ImageDrawDotLine, BoardImageDrawDotLine,
+                    ImageDrawArrow, BoardImageDrawArrow,
+                    ImageDrawParallelLine, BoardImageDrawParallelLine,
+                };
+
+                foreach (var button in buttons)
+                {
+                    if (button != null)
+                    {
+                        var dA = new DoubleAnimation(1, 1, new Duration(TimeSpan.FromMilliseconds(0)));
+                        button.BeginAnimation(OpacityProperty, dA);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"重置几何绘制按钮透明度失败: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>

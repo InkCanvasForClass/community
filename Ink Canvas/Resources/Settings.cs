@@ -99,7 +99,7 @@ namespace Ink_Canvas
 
         // 墨迹渐隐功能设置
         [JsonProperty("enableInkFade")]
-        public bool EnableInkFade { get; set; } // 是否启用墨迹渐隐功能
+        public bool EnableInkFade { get; set; } = false; 
         [JsonProperty("inkFadeTime")]
         public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
 
@@ -209,6 +209,8 @@ namespace Ink_Canvas
         public int Theme { get; set; }
 
         // 浮动栏按钮显示控制
+        [JsonProperty("useLegacyFloatingBarUI")]
+        public bool UseLegacyFloatingBarUI { get; set; } = false;
         [JsonProperty("isShowShapeButton")]
         public bool IsShowShapeButton { get; set; } = true;
         [JsonProperty("isShowUndoButton")]
@@ -339,6 +341,9 @@ namespace Ink_Canvas
         [JsonProperty("isAutoEnterAnnotationModeWhenExitFoldMode")]
         public bool IsAutoEnterAnnotationModeWhenExitFoldMode { get; set; }
 
+        [JsonProperty("isAutoFoldWhenExitWhiteboard")]
+        public bool IsAutoFoldWhenExitWhiteboard { get; set; }
+
         [JsonProperty("isAutoFoldInEasiNote")]
         public bool IsAutoFoldInEasiNote { get; set; }
 
@@ -467,7 +472,13 @@ namespace Ink_Canvas
         public bool IsEnabled { get; set; } = false;
 
         [JsonProperty("scanIntervalMs")]
-        public int ScanIntervalMs { get; set; } = 1000;
+        public int ScanIntervalMs { get; set; } = 5000; 
+
+        [JsonProperty("autoStart")]
+        public bool AutoStart { get; set; } = false;
+
+        [JsonProperty("showNotifications")]
+        public bool ShowNotifications { get; set; } = true;
 
         [JsonProperty("interceptRules")]
         public Dictionary<string, bool> InterceptRules { get; set; } = new Dictionary<string, bool>
@@ -477,21 +488,28 @@ namespace Ink_Canvas
             { "SeewoWhiteboard5CFloating", true },
             { "SeewoPincoSideBarFloating", true },
             { "SeewoPincoDrawingFloating", true },
+            { "SeewoPincoBoardService", true },
             { "SeewoPPTFloating", true },
             { "AiClassFloating", true },
             { "HiteAnnotationFloating", true },
             { "ChangYanFloating", true },
+            { "ChangYanBrushSettings", true },
+            { "ChangYanSwipeClear", true },
+            { "ChangYanInteraction", true },
+            { "ChangYanSubjectApp", true },
+            { "ChangYanControl", true },
+            { "ChangYanCommonTools", true },
+            { "ChangYanSceneToolbar", true },
+            { "ChangYanDrawWindow", true },
             { "ChangYanPptFloating", true },
+            { "ChangYanPptPageControl", true },
+            { "ChangYanPptGoBack", true },
+            { "ChangYanPptPreview", true },
             { "IntelligentClassFloating", true },
+            { "IntelligentClassPptFloating", true },
             { "SeewoDesktopAnnotationFloating", true },
             { "SeewoDesktopSideBarFloating", true }
         };
-
-        [JsonProperty("autoStart")]
-        public bool AutoStart { get; set; } = false;
-
-        [JsonProperty("showNotifications")]
-        public bool ShowNotifications { get; set; } = true;
     }
 
     public class Advanced
@@ -510,6 +528,18 @@ namespace Ink_Canvas
 
         [JsonProperty("fingerModeBoundsWidth")]
         public int FingerModeBoundsWidth { get; set; } = 30;
+
+        [JsonProperty("nibModeBoundsWidthThresholdValue")]
+        public double NibModeBoundsWidthThresholdValue { get; set; } = 2.5;
+
+        [JsonProperty("fingerModeBoundsWidthThresholdValue")]
+        public double FingerModeBoundsWidthThresholdValue { get; set; } = 2.5;
+
+        [JsonProperty("nibModeBoundsWidthEraserSize")]
+        public double NibModeBoundsWidthEraserSize { get; set; } = 0.8;
+
+        [JsonProperty("fingerModeBoundsWidthEraserSize")]
+        public double FingerModeBoundsWidthEraserSize { get; set; } = 0.8;
 
         [JsonProperty("eraserBindTouchMultiplier")]
         public bool EraserBindTouchMultiplier { get; set; }
@@ -546,6 +576,15 @@ namespace Ink_Canvas
 
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;
+
+        [JsonProperty("isAutoBackupEnabled")]
+        public bool IsAutoBackupEnabled { get; set; } = true;
+
+        [JsonProperty("autoBackupIntervalDays")]
+        public int AutoBackupIntervalDays { get; set; } = 7;
+
+        [JsonProperty("lastAutoBackupTime")]
+        public DateTime LastAutoBackupTime { get; set; } = DateTime.MinValue;
 
         [JsonProperty("isNoFocusMode")]
         public bool IsNoFocusMode { get; set; } = true;
@@ -590,6 +629,12 @@ namespace Ink_Canvas
         public int SelectedBackgroundIndex { get; set; }
         [JsonProperty("customPickNameBackgrounds")]
         public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
+        [JsonProperty("useLegacyTimerUI")]
+        public bool UseLegacyTimerUI { get; set; } = false;
+        [JsonProperty("timerVolume")]
+        public double TimerVolume { get; set; } = 1.0;
+        [JsonProperty("customTimerSoundPath")]
+        public string CustomTimerSoundPath { get; set; } = "";
     }
 
     public class CustomPickNameBackground

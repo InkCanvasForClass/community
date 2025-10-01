@@ -26,10 +26,10 @@ jobs:
     - name: Build the Solution
       run: |
         msbuild -t:restore /p:GitFlow="Github Action"
-        msbuild /p:platform="Any CPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj"
+        msbuild /p:platform="AnyCPU" /p:configuration="Debug" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj"
 
     - name: Upload to artifact
       uses: actions/upload-artifact@v4.5.0
       with:
         name: InkCanvasForClass
-        path: "Ink Canvas/bin/Any CPU/Release/net472/"
+        path: "Ink Canvas/bin/Debug/net472"

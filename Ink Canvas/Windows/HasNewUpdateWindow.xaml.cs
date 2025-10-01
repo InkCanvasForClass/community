@@ -1,4 +1,5 @@
 ﻿using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
 using MdXaml;
 using System;
@@ -11,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 
@@ -53,6 +55,128 @@ namespace Ink_Canvas
             return Environment.OSVersion.Version.Major >= 10 && Environment.OSVersion.Version.Build >= build;
         }
 
+        /// <summary>
+        /// 应用当前主题设置
+        /// </summary>
+        private void ApplyCurrentTheme()
+        {
+            try
+            {
+                // 根据主窗口的主题设置应用主题
+                switch (MainWindow.Settings.Appearance.Theme)
+                {
+                    case 0: // 浅色主题
+                        ThemeManager.SetRequestedTheme(this, ElementTheme.Light);
+                        UpdateColorsForLightTheme();
+                        break;
+                    case 1: // 深色主题
+                        ThemeManager.SetRequestedTheme(this, ElementTheme.Dark);
+                        UpdateColorsForDarkTheme();
+                        break;
+                    case 2: // 跟随系统
+                        if (IsSystemThemeLight())
+                        {
+                            ThemeManager.SetRequestedTheme(this, ElementTheme.Light);
+                            UpdateColorsForLightTheme();
+                        }
+                        else
+                        {
+                            ThemeManager.SetRequestedTheme(this, ElementTheme.Dark);
+                            UpdateColorsForDarkTheme();
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用主题时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 更新为浅色主题颜色
+        /// </summary>
+        private void UpdateColorsForLightTheme()
+        {
+            try
+            {
+                // 更新主要颜色资源
+                Resources["UpdateWindowPrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb));
+                Resources["UpdateWindowPrimaryHoverBrush"] = new SolidColorBrush(Color.FromRgb(0x1d, 0x4e, 0xd8));
+                Resources["UpdateWindowPrimaryPressedBrush"] = new SolidColorBrush(Color.FromRgb(0x1e, 0x40, 0xaf));
+                Resources["UpdateWindowCardBackgroundBrush"] = new SolidColorBrush(Color.FromRgb(0xf8, 0xfa, 0xfc));
+                Resources["UpdateWindowCardBorderBrush"] = new SolidColorBrush(Color.FromRgb(0xe5, 0xe7, 0xeb));
+                Resources["UpdateWindowTextPrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0x1f, 0x29, 0x37));
+                Resources["UpdateWindowTextSecondaryBrush"] = new SolidColorBrush(Color.FromRgb(0x6b, 0x72, 0x80));
+                Resources["UpdateWindowCloseButtonBrush"] = new SolidColorBrush(Color.FromRgb(0x66, 0x66, 0x66));
+                
+                // 更新渐变背景
+                var gradient = new LinearGradientBrush();
+                gradient.StartPoint = new Point(0, 0);
+                gradient.EndPoint = new Point(1, 1);
+                gradient.GradientStops.Add(new GradientStop(Color.FromRgb(0x25, 0x63, 0xeb), 0));
+                gradient.GradientStops.Add(new GradientStop(Colors.White, 1));
+                Resources["HeaderGradient"] = gradient;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新浅色主题颜色时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 更新为深色主题颜色
+        /// </summary>
+        private void UpdateColorsForDarkTheme()
+        {
+            try
+            {
+                // 更新主要颜色资源
+                Resources["UpdateWindowPrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0x3b, 0x82, 0xf6));
+                Resources["UpdateWindowPrimaryHoverBrush"] = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb));
+                Resources["UpdateWindowPrimaryPressedBrush"] = new SolidColorBrush(Color.FromRgb(0x1d, 0x4e, 0xd8));
+                Resources["UpdateWindowCardBackgroundBrush"] = new SolidColorBrush(Color.FromRgb(0x2a, 0x2a, 0x2a));
+                Resources["UpdateWindowCardBorderBrush"] = new SolidColorBrush(Color.FromRgb(0x40, 0x40, 0x40));
+                Resources["UpdateWindowTextPrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0xf9, 0xfa, 0xfb));
+                Resources["UpdateWindowTextSecondaryBrush"] = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf));
+                Resources["UpdateWindowCloseButtonBrush"] = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf));
+                
+                // 更新渐变背景
+                var gradient = new LinearGradientBrush();
+                gradient.StartPoint = new Point(0, 0);
+                gradient.EndPoint = new Point(1, 1);
+                gradient.GradientStops.Add(new GradientStop(Color.FromRgb(0x3b, 0x82, 0xf6), 0));
+                gradient.GradientStops.Add(new GradientStop(Color.FromRgb(0x1f, 0x1f, 0x1f), 1));
+                Resources["HeaderGradient"] = gradient;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新深色主题颜色时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 检查系统是否为浅色主题
+        /// </summary>
+        private bool IsSystemThemeLight()
+        {
+            try
+            {
+                using (var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"))
+                {
+                    if (key?.GetValue("AppsUseLightTheme") is int value)
+                    {
+                        return value == 1;
+                    }
+                }
+            }
+            catch
+            {
+                // 如果无法读取注册表，默认返回true（浅色主题）
+            }
+            return true;
+        }
+
         // 存储更新版本信息
         public string CurrentVersion { get; set; }
         public string NewVersion { get; set; }
@@ -72,6 +196,9 @@ namespace Ink_Canvas
         public HasNewUpdateWindow(string currentVersion, string newVersion, string releaseDate, string releaseNotes = null)
         {
             InitializeComponent();
+
+            // 应用当前主题
+            ApplyCurrentTheme();
 
             // 设置版本信息
             CurrentVersion = currentVersion;
@@ -143,7 +270,13 @@ namespace Ink_Canvas
             UpdateLaterButton.IsEnabled = false;
             SkipVersionButton.IsEnabled = false;
             DownloadProgressPanel.Visibility = Visibility.Visible;
-            DownloadProgressBar.Value = 0;
+            
+            // 重置进度条
+            var progressFill = FindName("ProgressFill") as Border;
+            if (progressFill != null)
+            {
+                progressFill.Width = 0;
+            }
             DownloadProgressText.Text = "正在准备下载...";
 
             // 启动多线路下载
@@ -156,7 +289,12 @@ namespace Ink_Canvas
                 {
                     Dispatcher.Invoke(() =>
                     {
-                        DownloadProgressBar.Value = percent;
+                        // 更新自定义进度条
+                        progressFill = FindName("ProgressFill") as Border;
+                        if (progressFill != null)
+                        {
+                            progressFill.Width = (percent / 100.0) * 400; // 400是进度条总宽度
+                        }
                         DownloadProgressText.Text = text;
                     });
                 });
@@ -174,7 +312,12 @@ namespace Ink_Canvas
 
             if (downloadSuccess)
             {
-                DownloadProgressBar.Value = 100;
+                // 设置进度条为100%
+                progressFill = FindName("ProgressFill") as Border;
+                if (progressFill != null)
+                {
+                    progressFill.Width = 400; // 100%完成
+                }
                 DownloadProgressText.Text = "下载完成，准备安装...";
                 await Task.Delay(800);
                 // 设置结果为立即更新
@@ -213,6 +356,27 @@ namespace Ink_Canvas
             // 关闭窗口
             DialogResult = true;
             Close();
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            LogHelper.WriteLogToFile("AutoUpdate | Close button clicked");
+
+            // 设置结果为稍后更新（默认行为）
+            Result = UpdateResult.UpdateLater;
+
+            // 关闭窗口
+            DialogResult = false;
+            Close();
+        }
+
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // 开始拖动窗口
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                DragMove();
+            }
         }
 
 

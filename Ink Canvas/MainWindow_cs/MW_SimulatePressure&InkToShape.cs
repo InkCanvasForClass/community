@@ -9,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Point = System.Windows.Point;
 
 namespace Ink_Canvas
@@ -63,10 +64,10 @@ namespace Ink_Canvas
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();
                 var endPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[e.Stroke.StylusPoints.Count - 1].ToPoint() : new Point();
 
-                // 从InkCanvas中移除墨迹，因为我们要用渐隐管理器来管理它
-                if (inkCanvas.Strokes.Contains(e.Stroke))
+                // 确保InkCanvas保持Ink编辑模式，防止自动切换到鼠标模式
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
                 {
-                    inkCanvas.Strokes.Remove(e.Stroke);
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
 
                 // 添加到墨迹渐隐管理器
@@ -78,6 +79,30 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile("StrokeCollected: 墨迹渐隐管理器为空，无法添加墨迹", LogHelper.LogType.Error);
                 }
+
+                // 延迟移除墨迹，避免立即移除导致模式切换
+                // 使用Dispatcher.BeginInvoke确保在UI线程上异步执行
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    try
+                    {
+                        // 再次确保InkCanvas保持Ink编辑模式
+                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
+                        {
+                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                        }
+
+                        // 从InkCanvas中移除墨迹，因为我们要用渐隐管理器来管理它
+                        if (inkCanvas.Strokes.Contains(e.Stroke))
+                        {
+                            inkCanvas.Strokes.Remove(e.Stroke);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"延迟移除墨迹时出错: {ex}", LogHelper.LogType.Error);
+                    }
+                }), DispatcherPriority.Background);
 
                 // 墨迹渐隐模式下不参与墨迹纠正和其他处理，直接返回
                 return;
@@ -717,16 +742,22 @@ namespace Ink_Canvas
             catch { }
 
             // 应用高级贝塞尔曲线平滑（仅在未进行直线拉直时）
+            Debug.WriteLine($"墨迹平滑检查: UseAdvancedBezierSmoothing={Settings.Canvas.UseAdvancedBezierSmoothing}, wasStraightened={wasStraightened}");
+            Debug.WriteLine($"异步平滑设置: UseAsyncInkSmoothing={Settings.Canvas.UseAsyncInkSmoothing}, _inkSmoothingManager={_inkSmoothingManager != null}");
+            
             if (Settings.Canvas.UseAdvancedBezierSmoothing && !wasStraightened)
             {
                 try
                 {
+                    Debug.WriteLine($"开始墨迹平滑处理: 原始点数={e.Stroke.StylusPoints.Count}, 直线拉直={wasStraightened}");
+                    
                     // 检查原始笔画是否仍然存在于画布中
                     if (inkCanvas.Strokes.Contains(e.Stroke))
                     {
                         // 使用新的异步墨迹平滑管理器
                         if (Settings.Canvas.UseAsyncInkSmoothing && _inkSmoothingManager != null)
                         {
+                            Debug.WriteLine("使用异步墨迹平滑");
                             // 异步处理
                             _ = ProcessStrokeAsync(e.Stroke);
                         }
@@ -745,6 +776,10 @@ namespace Ink_Canvas
                                 _currentCommitType = CommitReason.UserInput;
                             }
                         }
+                    }
+                    else
+                    {
+                        Debug.WriteLine("原始笔画不在画布中，跳过平滑处理");
                     }
                 }
                 catch (Exception ex)
@@ -766,16 +801,26 @@ namespace Ink_Canvas
         {
             try
             {
+                Debug.WriteLine($"异步平滑开始: 原始点数={originalStroke.StylusPoints.Count}");
                 await _inkSmoothingManager.SmoothStrokeAsync(originalStroke, (original, smoothed) =>
                 {
+                    Debug.WriteLine($"异步平滑完成: 原始点数={original.StylusPoints.Count}, 平滑后点数={smoothed.StylusPoints.Count}");
+                    Debug.WriteLine($"墨迹比较: smoothed != original = {smoothed != original}");
+                    Debug.WriteLine($"画布包含原始墨迹: {inkCanvas.Strokes.Contains(original)}");
+                    
                     // 在UI线程上执行笔画替换
                     if (inkCanvas.Strokes.Contains(original) && smoothed != original)
                     {
+                        Debug.WriteLine("异步替换原始笔画为平滑后的笔画");
                         SetNewBackupOfStroke();
                         _currentCommitType = CommitReason.ShapeRecognition;
                         inkCanvas.Strokes.Remove(original);
                         inkCanvas.Strokes.Add(smoothed);
                         _currentCommitType = CommitReason.UserInput;
+                    }
+                    else
+                    {
+                        Debug.WriteLine($"异步平滑后的笔画与原始笔画相同，未进行替换 (contains={inkCanvas.Strokes.Contains(original)}, different={smoothed != original})");
                     }
                 });
             }
@@ -815,20 +860,8 @@ namespace Ink_Canvas
             // 输出当前灵敏度值（调试用）
             Debug.WriteLine($"IsPotentialStraightLine - sensitivity: {sensitivity}, length: {lineLength}");
 
-            // 根据灵敏度调整快速检查阈值
-            double quickThreshold;
-
-            // 如果灵敏度超过1.0，使用更宽松的快速检查标准
-            if (sensitivity > 1.0)
-            {
-                // 高灵敏度模式 - 使用更宽松的阈值
-                quickThreshold = Math.Min(0.2 + (sensitivity - 1.0) * 0.3, 0.5); // 映射到0.2-0.5范围
-            }
-            else
-            {
-                // 常规灵敏度模式
-                quickThreshold = Math.Min(sensitivity * 1.5, 0.20);
-            }
+            // 将灵敏度转换为阈值：灵敏度0.05-2.0映射到阈值0.01-0.4
+            double quickThreshold = Math.Max(0.01, sensitivity * 0.2); // 确保最小阈值为0.01
 
             Debug.WriteLine($"使用快速检查阈值: {quickThreshold}");
 
@@ -854,26 +887,13 @@ namespace Ink_Canvas
                 // 记录检测到的偏差（调试用）
                 Debug.WriteLine($"Deviations: q={quarterDeviation}, m={midDeviation}, tq={threeQuarterDeviation}, threshold={quickRelativeThreshold}");
 
-                // 如果灵敏度超过1.5，则即使有一个点满足条件也认为可能是直线
-                if (sensitivity > 1.5)
+                // 修复后的逻辑：灵敏度越大，容许的偏差越大
+                // 如果任一点偏离太大，直接排除（使用统一的判断标准）
+                if (quarterDeviation > quickRelativeThreshold ||
+                    midDeviation > quickRelativeThreshold ||
+                    threeQuarterDeviation > quickRelativeThreshold)
                 {
-                    // 超高灵敏度模式：只要有一个关键点偏差小，就认为可能是直线
-                    if (quarterDeviation <= quickRelativeThreshold ||
-                        midDeviation <= quickRelativeThreshold ||
-                        threeQuarterDeviation <= quickRelativeThreshold)
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    // 常规判断：如果任一点偏离太大，直接排除
-                    if (quarterDeviation > quickRelativeThreshold ||
-                        midDeviation > quickRelativeThreshold ||
-                        threeQuarterDeviation > quickRelativeThreshold)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
@@ -1308,23 +1328,7 @@ namespace Ink_Canvas
 
             // 支持更广泛的灵敏度范围 (0.05-2.0)
 
-            // 如果灵敏度高于1.0，使用更宽松的判断标准
-            if (sensitivity > 1.0)
-            {
-                // 高灵敏度模式 - 允许更大的偏差
-                double adjustedSensitivity = 0.5 + (sensitivity - 1.0) * 1.5; // 映射到0.5-2.0范围
-
-                // 只判断平均偏差和相对偏差
-                if (maxDeviation / lineLength < adjustedSensitivity && avgDeviation < lineLength * 0.1 * adjustedSensitivity)
-                {
-                    Debug.WriteLine("接受拉直 (高灵敏度模式)");
-                    return true;
-                }
-
-                Debug.WriteLine("拒绝拉直 (高灵敏度模式)");
-                return false;
-            }
-            // 否则使用常规判断标准
+            // 移除特殊的高灵敏度模式，使用统一的阈值计算逻辑
 
             // 检查点分布的一致性 - 如果有些点偏离很大而其他点很接近直线，表明线条有明显弯曲
             double deviationVariance = 0;
@@ -1417,19 +1421,22 @@ namespace Ink_Canvas
             // 输出更多调试信息
             Debug.WriteLine($"Deviation variance: {deviationVariance}, Threshold: {sensitivity * lineLength * 0.05}");
 
-            // 如果最大偏差超过线长的阈值比例，或者偏差方差较大（表示不均匀弯曲），则不拉直
-            // 灵敏度越大，容许的偏差越大，更容易将线条识别为直线
-            if ((maxDeviation / lineLength) > sensitivity)
+            // 修复灵敏度逻辑：灵敏度越大，容许的偏差越大，更容易将线条识别为直线
+            // 将灵敏度转换为阈值：灵敏度0.05-1.0映射到阈值0.01-0.2
+            double threshold = Math.Max(0.01, sensitivity * 0.2); // 确保最小阈值为0.01
+            
+            if ((maxDeviation / lineLength) > threshold)
             {
-                Debug.WriteLine("拒绝拉直：最大偏差过大");
+                Debug.WriteLine($"拒绝拉直：最大偏差过大 {maxDeviation / lineLength:F3} > {threshold:F3}");
                 return false;
             }
 
             // 如果偏差方差大，说明线条弯曲不均匀
             // 灵敏度越大，容许的偏差方差越大
-            if (deviationVariance > (sensitivity * lineLength * 0.05))
+            double varianceThreshold = threshold * lineLength * 0.25; // 调整方差阈值比例
+            if (deviationVariance > varianceThreshold)
             {
-                Debug.WriteLine("拒绝拉直：偏差方差过大");
+                Debug.WriteLine($"拒绝拉直：偏差方差过大 {deviationVariance:F3} > {varianceThreshold:F3}");
                 return false;
             }
 
@@ -1441,13 +1448,14 @@ namespace Ink_Canvas
                 double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
 
                 // 输出中点偏差信息
-                Debug.WriteLine($"Mid deviation: {midDeviation}, Threshold: {lineLength * sensitivity * 0.8}");
+                double midThreshold = lineLength * threshold * 0.8;
+                Debug.WriteLine($"Mid deviation: {midDeviation:F3}, Threshold: {midThreshold:F3}");
 
                 // 如果中点偏离过大，不拉直
-                // 使用灵敏度作为判断基准，灵敏度越大，容许的中点偏离越大
-                if (midDeviation > (lineLength * sensitivity * 0.8))
+                // 使用调整后的阈值，灵敏度越大，容许的中点偏离越大
+                if (midDeviation > midThreshold)
                 {
-                    Debug.WriteLine("拒绝拉直：中点偏差过大");
+                    Debug.WriteLine($"拒绝拉直：中点偏差过大 {midDeviation:F3} > {midThreshold:F3}");
                     return false;
                 }
             }

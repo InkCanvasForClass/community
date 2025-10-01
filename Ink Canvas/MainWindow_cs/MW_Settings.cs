@@ -1000,11 +1000,23 @@ namespace Ink_Canvas
                 PPTBtnPreviewRS.Visibility = Visibility.Collapsed;
             }
 
-            PPTBtnPreviewRSTransform.Y = -(Settings.PowerPointSettings.PPTRSButtonPosition * 0.5);
-            PPTBtnPreviewLSTransform.Y = -(Settings.PowerPointSettings.PPTLSButtonPosition * 0.5);
+            // 计算预览区域的缩放比例
+            double previewScaleY = 182.0 / SystemParameters.PrimaryScreenHeight;
+            double previewScaleX = 324.0 / SystemParameters.PrimaryScreenWidth;
+            
+            double sideButtonScaleFactor = 1.9;
+            
+            double rsPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
+            double lsPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
+        
+            PPTBtnPreviewRSTransform.Y = -(rsPosition * 2 * previewScaleY / sideButtonScaleFactor);
+            PPTBtnPreviewLSTransform.Y = -(lsPosition * 2 * previewScaleY / sideButtonScaleFactor);
 
-            PPTBtnPreviewLBTransform.X = -(Settings.PowerPointSettings.PPTLBButtonPosition * 0.5);
-            PPTBtnPreviewRBTransform.X = -(Settings.PowerPointSettings.PPTRBButtonPosition * 0.5);
+
+            double bottomButtonScaleFactor = 1.2;
+            double leftMarginOffset = 6 * previewScaleX;
+            PPTBtnPreviewLBTransform.X = leftMarginOffset + (Settings.PowerPointSettings.PPTLBButtonPosition * previewScaleX / bottomButtonScaleFactor);
+            PPTBtnPreviewRBTransform.X = -(leftMarginOffset + (Settings.PowerPointSettings.PPTRBButtonPosition * previewScaleX / bottomButtonScaleFactor));
         }
 
         private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
@@ -1406,7 +1418,18 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInPPTSlideShow_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
+            
+            // 记录设置变更前的状态
+            bool previousState = Settings.Automation.IsAutoFoldInPPTSlideShow;
             Settings.Automation.IsAutoFoldInPPTSlideShow = ToggleSwitchAutoFoldInPPTSlideShow.IsOn;
+            
+            // 如果设置状态发生变化，重置PPT相关状态变量
+            if (previousState != Settings.Automation.IsAutoFoldInPPTSlideShow)
+            {
+                ResetPPTStateVariables();
+                LogHelper.WriteLogToFile($"PPT自动收纳设置已变更: {Settings.Automation.IsAutoFoldInPPTSlideShow}, 已重置相关状态变量", LogHelper.LogType.Trace);
+            }
+            
             if (Settings.Automation.IsAutoFoldInPPTSlideShow)
             {
                 SettingsPPTInkingAndAutoFoldExplictBorder.Visibility = Visibility.Visible;
@@ -1540,6 +1563,13 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode = ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Automation.IsAutoFoldWhenExitWhiteboard = ToggleSwitchAutoFoldWhenExitWhiteboard.IsOn;
             SaveSettingsToFile();
         }
 
@@ -1780,6 +1810,18 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTwoFingerZoom_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
+            
+            // 如果多指书写模式启用，强制禁用双指手势
+            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                ToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                Settings.Gesture.IsEnableTwoFingerZoom = false;
+                CheckEnableTwoFingerGestureBtnColorPrompt();
+                SaveSettingsToFile();
+                return;
+            }
+            
             if (sender == ToggleSwitchEnableTwoFingerZoom)
                 BoardToggleSwitchEnableTwoFingerZoom.IsOn = ToggleSwitchEnableTwoFingerZoom.IsOn;
             else
@@ -1859,6 +1901,32 @@ namespace Ink_Canvas
             }
 
             Settings.Gesture.IsEnableMultiTouchMode = ToggleSwitchEnableMultiTouchMode.IsOn;
+            
+            // 如果启用多指书写模式，强制禁用所有双指手势
+            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                // 强制关闭所有双指手势设置
+                Settings.Gesture.IsEnableTwoFingerTranslate = false;
+                Settings.Gesture.IsEnableTwoFingerZoom = false;
+                Settings.Gesture.IsEnableTwoFingerRotation = false;
+
+                // 更新UI开关状态
+                if (ToggleSwitchEnableTwoFingerTranslate != null)
+                    ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                if (ToggleSwitchEnableTwoFingerZoom != null)
+                    ToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                if (ToggleSwitchEnableTwoFingerRotation != null)
+                    ToggleSwitchEnableTwoFingerRotation.IsOn = false;
+
+                // 更新设置窗口中的开关状态
+                if (BoardToggleSwitchEnableTwoFingerTranslate != null)
+                    BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                if (BoardToggleSwitchEnableTwoFingerZoom != null)
+                    BoardToggleSwitchEnableTwoFingerZoom.IsOn = false;
+                if (BoardToggleSwitchEnableTwoFingerRotation != null)
+                    BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
+            }
+            
             CheckEnableTwoFingerGestureBtnColorPrompt();
             SaveSettingsToFile();
         }
@@ -1866,6 +1934,18 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTwoFingerTranslate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
+            
+            // 如果多指书写模式启用，强制禁用双指手势
+            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
+                Settings.Gesture.IsEnableTwoFingerTranslate = false;
+                CheckEnableTwoFingerGestureBtnColorPrompt();
+                SaveSettingsToFile();
+                return;
+            }
+            
             if (sender == ToggleSwitchEnableTwoFingerTranslate)
                 BoardToggleSwitchEnableTwoFingerTranslate.IsOn = ToggleSwitchEnableTwoFingerTranslate.IsOn;
             else
@@ -1878,6 +1958,17 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTwoFingerRotation_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
+
+            // 如果多指书写模式启用，强制禁用双指手势
+            if (ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                ToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
+                Settings.Gesture.IsEnableTwoFingerRotation = false;
+                CheckEnableTwoFingerGestureBtnColorPrompt();
+                SaveSettingsToFile();
+                return;
+            }
 
             if (sender == ToggleSwitchEnableTwoFingerRotation)
                 BoardToggleSwitchEnableTwoFingerRotation.IsOn = ToggleSwitchEnableTwoFingerRotation.IsOn;
@@ -1897,6 +1988,7 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+
         #endregion
 
         #region Reset
@@ -1911,6 +2003,10 @@ namespace Ink_Canvas
             Settings.Advanced.TouchMultiplier = 0.3;
             Settings.Advanced.NibModeBoundsWidth = 5;
             Settings.Advanced.FingerModeBoundsWidth = 20;
+            Settings.Advanced.NibModeBoundsWidthThresholdValue = 2.5;
+            Settings.Advanced.FingerModeBoundsWidthThresholdValue = 2.5;
+            Settings.Advanced.NibModeBoundsWidthEraserSize = 0.8;
+            Settings.Advanced.FingerModeBoundsWidthEraserSize = 0.8;
             Settings.Advanced.EraserBindTouchMultiplier = true;
             Settings.Advanced.IsLogEnabled = true;
             Settings.Advanced.IsSecondConfirmWhenShutdownApp = false;
@@ -2275,6 +2371,26 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchIsAutoBackupEnabled_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Advanced.IsAutoBackupEnabled = ToggleSwitchIsAutoBackupEnabled.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ComboBoxAutoBackupInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded) return;
+            if (ComboBoxAutoBackupInterval.SelectedItem is ComboBoxItem selectedItem && selectedItem.Tag != null)
+            {
+                if (int.TryParse(selectedItem.Tag.ToString(), out int interval))
+                {
+                    Settings.Advanced.AutoBackupIntervalDays = interval;
+                    SaveSettingsToFile();
+                }
+            }
+        }
+
         private void BtnManualBackup_Click(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2400,6 +2516,44 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchUseLegacyTimerUI_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.UseLegacyTimerUI = ToggleSwitchUseLegacyTimerUI.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void TimerVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.TimerVolume = TimerVolumeSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void ButtonSelectCustomTimerSound_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "选择计时器提醒铃声",
+                Filter = "音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*",
+                DefaultExt = "wav"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Settings.RandSettings.CustomTimerSoundPath = openFileDialog.FileName;
+                SaveSettingsToFile();
+                MessageBox.Show("自定义铃声设置成功！", "设置成功", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void ButtonResetTimerSound_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.RandSettings.CustomTimerSoundPath = "";
+            SaveSettingsToFile();
+            MessageBox.Show("已重置为默认铃声！", "重置成功", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
         private void ToggleSwitchShowRandomAndSingleDraw_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2438,9 +2592,86 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        public void UpdateFloatingBarIcons()
+        {
+            if (Settings.Appearance.UseLegacyFloatingBarUI)
+            {
+                // 使用老版图标
+                CursorIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedCursorIcon);
+                PenIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedPenIcon);
+                StrokeEraserIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedEraserStrokeIcon);
+                CircleEraserIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedEraserCircleIcon);
+                LassoSelectIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedLassoSelectIcon);
+            }
+            else
+            {
+                // 使用新版图标
+                CursorIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedCursorIcon);
+                PenIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedPenIcon);
+                StrokeEraserIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedEraserStrokeIcon);
+                CircleEraserIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedEraserCircleIcon);
+                LassoSelectIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedLassoSelectIcon);
+            }
+        }
+
+        public string GetCorrectIcon(string iconType, bool isSolid = false)
+        {
+            if (Settings.Appearance.UseLegacyFloatingBarUI)
+            {
+                // 使用老版图标
+                switch (iconType)
+                {
+                    case "cursor":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidCursorIcon : XamlGraphicsIconGeometries.LegacyLinedCursorIcon;
+                    case "pen":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidPenIcon : XamlGraphicsIconGeometries.LegacyLinedPenIcon;
+                    case "eraserStroke":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidEraserStrokeIcon : XamlGraphicsIconGeometries.LegacyLinedEraserStrokeIcon;
+                    case "eraserCircle":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidEraserCircleIcon : XamlGraphicsIconGeometries.LegacyLinedEraserCircleIcon;
+                    case "lassoSelect":
+                        return isSolid ? XamlGraphicsIconGeometries.LegacySolidLassoSelectIcon : XamlGraphicsIconGeometries.LegacyLinedLassoSelectIcon;
+                }
+            }
+            else
+            {
+                // 使用新版图标
+                switch (iconType)
+                {
+                    case "cursor":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidCursorIcon : XamlGraphicsIconGeometries.LinedCursorIcon;
+                    case "pen":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidPenIcon : XamlGraphicsIconGeometries.LinedPenIcon;
+                    case "eraserStroke":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidEraserStrokeIcon : XamlGraphicsIconGeometries.LinedEraserStrokeIcon;
+                    case "eraserCircle":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidEraserCircleIcon : XamlGraphicsIconGeometries.LinedEraserCircleIcon;
+                    case "lassoSelect":
+                        return isSolid ? XamlGraphicsIconGeometries.SolidLassoSelectIcon : XamlGraphicsIconGeometries.LinedLassoSelectIcon;
+                }
+            }
+            return "";
+        }
+
         #endregion
 
         #region 浮动栏按钮显示控制
+
+        private void CheckBoxUseLegacyFloatingBarUI_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.UseLegacyFloatingBarUI = CheckBoxUseLegacyFloatingBarUI.IsChecked ?? false;
+            UpdateFloatingBarIcons();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxUseLegacyFloatingBarUI_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.UseLegacyFloatingBarUI = CheckBoxUseLegacyFloatingBarUI.IsChecked ?? false;
+            UpdateFloatingBarIcons();
+            SaveSettingsToFile();
+        }
 
         private void CheckBoxShowShapeButton_Checked(object sender, RoutedEventArgs e)
         {
@@ -2730,7 +2961,6 @@ namespace Ink_Canvas
                         }
 
                         // 重新计算浮动栏位置，因为按钮可见性变化会影响浮动栏宽度
-                        // 修复：移除浮动栏收起状态检查，确保在收起状态下也能正确修正位置
                         if (currentMode == 0) // 只在屏幕模式下重新计算浮动栏位置
                         {
                             if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)

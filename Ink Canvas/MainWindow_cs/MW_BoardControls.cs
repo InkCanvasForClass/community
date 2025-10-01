@@ -15,10 +15,10 @@ namespace Ink_Canvas
         private StrokeCollection[] strokeCollections = new StrokeCollection[101];
         private bool[] whiteboadLastModeIsRedo = new bool[101];
         private StrokeCollection lastTouchDownStrokeCollection = new StrokeCollection();
-
         private int CurrentWhiteboardIndex = 1;
         private int WhiteboardTotalCount = 1;
-        private TimeMachineHistory[][] TimeMachineHistories = new TimeMachineHistory[101][]; //最多99页，0用来存储非白板时的墨迹以便还原
+        private TimeMachineHistory[][] TimeMachineHistories = new TimeMachineHistory[101][]; 
+        private bool[] savedMultiTouchModeStates = new bool[101]; 
 
         // 保存每页白板图片信息
         private void SaveStrokes(bool isBackupMain = false)
@@ -97,6 +97,8 @@ namespace Ink_Canvas
             {
                 var timeMachineHistory = timeMachine.ExportTimeMachineHistory();
                 TimeMachineHistories[0] = timeMachineHistory;
+                // 保存多指书写模式状态
+                savedMultiTouchModeStates[0] = isInMultiTouchMode;
                 timeMachine.ClearStrokeHistory();
 
 
@@ -105,6 +107,8 @@ namespace Ink_Canvas
             {
                 var timeMachineHistory = timeMachine.ExportTimeMachineHistory();
                 TimeMachineHistories[CurrentWhiteboardIndex] = timeMachineHistory;
+                // 保存多指书写模式状态
+                savedMultiTouchModeStates[CurrentWhiteboardIndex] = isInMultiTouchMode;
                 timeMachine.ClearStrokeHistory();
 
 
@@ -161,12 +165,16 @@ namespace Ink_Canvas
                 {
                     timeMachine.ImportTimeMachineHistory(TimeMachineHistories[0]);
                     foreach (var item in TimeMachineHistories[0]) ApplyHistoryToCanvas(item);
+                    // 恢复多指书写模式状态
+                    RestoreMultiTouchModeState(0);
                 }
                 else
                 {
                     timeMachine.ImportTimeMachineHistory(TimeMachineHistories[CurrentWhiteboardIndex]);
                     // 通过时间机器历史恢复所有内容（墨迹和图片）
                     foreach (var item in TimeMachineHistories[CurrentWhiteboardIndex]) ApplyHistoryToCanvas(item);
+                    // 恢复多指书写模式状态
+                    RestoreMultiTouchModeState(CurrentWhiteboardIndex);
                 }
 
 
@@ -174,6 +182,45 @@ namespace Ink_Canvas
             catch
             {
                 // ignored
+            }
+        }
+
+        /// <summary>
+        /// 恢复多指书写模式状态
+        /// </summary>
+        private void RestoreMultiTouchModeState(int pageIndex)
+        {
+            try
+            {
+                // 检查是否保存了多指书写模式状态
+                if (savedMultiTouchModeStates[pageIndex])
+                {
+                    // 恢复多指书写模式
+                    EnterMultiTouchModeIfNeeded();
+                    
+                    // 更新UI状态
+                    if (ToggleSwitchEnableMultiTouchMode != null)
+                    {
+                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                    }
+                    
+                    LogHelper.WriteLogToFile($"恢复多指书写模式状态 - 页面索引: {pageIndex}", LogHelper.LogType.Info);
+                }
+                else
+                {
+                    // 确保多指书写模式关闭
+                    ExitMultiTouchModeIfNeeded();
+                    
+                    // 更新UI状态
+                    if (ToggleSwitchEnableMultiTouchMode != null)
+                    {
+                        ToggleSwitchEnableMultiTouchMode.IsOn = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"恢复多指书写模式状态失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -191,9 +238,12 @@ namespace Ink_Canvas
                     RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderLeftPageListView);
                     await Task.Delay(1);
-                    ScrollViewToVerticalTop(
-                        (ListViewItem)BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            CurrentWhiteboardIndex - 1), BlackBoardLeftSidePageListScrollViewer);
+                    var leftContainer = BlackBoardLeftSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                        CurrentWhiteboardIndex - 1) as ListViewItem;
+                    if (leftContainer != null)
+                    {
+                        ScrollViewToVerticalTop(leftContainer, BlackBoardLeftSidePageListScrollViewer);
+                    }
                 }
             }
             else if (sender == BtnRightPageListWB)
@@ -208,9 +258,12 @@ namespace Ink_Canvas
                     RefreshBlackBoardSidePageListView();
                     AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderRightPageListView);
                     await Task.Delay(1);
-                    ScrollViewToVerticalTop(
-                        (ListViewItem)BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
-                            CurrentWhiteboardIndex - 1), BlackBoardRightSidePageListScrollViewer);
+                    var rightContainer = BlackBoardRightSidePageListView.ItemContainerGenerator.ContainerFromIndex(
+                        CurrentWhiteboardIndex - 1) as ListViewItem;
+                    if (rightContainer != null)
+                    {
+                        ScrollViewToVerticalTop(rightContainer, BlackBoardRightSidePageListScrollViewer);
+                    }
                 }
             }
 

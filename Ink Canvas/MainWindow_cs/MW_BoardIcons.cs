@@ -716,7 +716,7 @@ namespace Ink_Canvas
             //}
             //else {
             // 禁用高级橡皮擦系统
-            DisableAdvancedEraserSystem();
+            DisableEraserOverlay();
 
             forceEraser = true;
             forcePointEraser = false;
@@ -726,7 +726,6 @@ namespace Ink_Canvas
             SetCurrentToolMode(InkCanvasEditingMode.EraseByStroke);
             drawingShapeMode = 0;
 
-            // 修复：切换到线擦时，确保重置笔的状态
             penType = 0;
             drawingAttributes.IsHighlighter = false;
             drawingAttributes.StylusTip = StylusTip.Ellipse;
