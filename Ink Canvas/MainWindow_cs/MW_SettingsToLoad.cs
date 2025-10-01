@@ -397,6 +397,7 @@ namespace Ink_Canvas
                     Settings.Appearance.EnableChickenSoupInWhiteboardMode;
 
                 // 浮动栏按钮显示控制开关初始化
+                CheckBoxUseLegacyFloatingBarUI.IsChecked = Settings.Appearance.UseLegacyFloatingBarUI;
                 CheckBoxShowShapeButton.IsChecked = Settings.Appearance.IsShowShapeButton;
                 CheckBoxShowUndoButton.IsChecked = Settings.Appearance.IsShowUndoButton;
                 CheckBoxShowRedoButton.IsChecked = Settings.Appearance.IsShowRedoButton;
@@ -414,6 +415,9 @@ namespace Ink_Canvas
 
                 // 应用浮动栏按钮可见性设置
                 UpdateFloatingBarButtonsVisibility();
+                
+                // 更新浮动栏图标
+                UpdateFloatingBarIcons();
 
                 SystemEvents_UserPreferenceChanged(null, null);
             }

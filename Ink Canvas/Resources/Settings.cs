@@ -209,6 +209,8 @@ namespace Ink_Canvas
         public int Theme { get; set; }
 
         // 浮动栏按钮显示控制
+        [JsonProperty("useLegacyFloatingBarUI")]
+        public bool UseLegacyFloatingBarUI { get; set; } = false;
         [JsonProperty("isShowShapeButton")]
         public bool IsShowShapeButton { get; set; } = true;
         [JsonProperty("isShowUndoButton")]

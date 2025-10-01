@@ -2592,9 +2592,47 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        public void UpdateFloatingBarIcons()
+        {
+            if (Settings.Appearance.UseLegacyFloatingBarUI)
+            {
+                // 使用老版图标
+                CursorIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedCursorIcon);
+                PenIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedPenIcon);
+                StrokeEraserIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedEraserStrokeIcon);
+                CircleEraserIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedEraserCircleIcon);
+                LassoSelectIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LegacyLinedLassoSelectIcon);
+            }
+            else
+            {
+                // 使用新版图标
+                CursorIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedCursorIcon);
+                PenIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedPenIcon);
+                StrokeEraserIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedEraserStrokeIcon);
+                CircleEraserIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedEraserCircleIcon);
+                LassoSelectIconGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.LinedLassoSelectIcon);
+            }
+        }
+
         #endregion
 
         #region 浮动栏按钮显示控制
+
+        private void CheckBoxUseLegacyFloatingBarUI_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.UseLegacyFloatingBarUI = CheckBoxUseLegacyFloatingBarUI.IsChecked ?? false;
+            UpdateFloatingBarIcons();
+            SaveSettingsToFile();
+        }
+
+        private void CheckBoxUseLegacyFloatingBarUI_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Appearance.UseLegacyFloatingBarUI = CheckBoxUseLegacyFloatingBarUI.IsChecked ?? false;
+            UpdateFloatingBarIcons();
+            SaveSettingsToFile();
+        }
 
         private void CheckBoxShowShapeButton_Checked(object sender, RoutedEventArgs e)
         {

@@ -552,10 +552,7 @@ namespace Ink_Canvas
             ApplyNoFocusMode();
             ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
             ApplyAlwaysOnTop();
-
-            // 初始化UIElement选择系统
-
-
+            
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
 

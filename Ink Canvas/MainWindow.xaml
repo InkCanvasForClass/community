@@ -1206,6 +1206,15 @@
                                         </Grid>
                                     </Border>
                                     
+                                    <!-- 老版UI切换开关 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                        <TextBlock Foreground="#fafafa" Text="使用老版浮动栏按钮UI" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,8,0" />
+                                        <CheckBox Name="CheckBoxUseLegacyFloatingBarUI"
+                                                  IsChecked="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                  Checked="CheckBoxUseLegacyFloatingBarUI_Checked" Unchecked="CheckBoxUseLegacyFloatingBarUI_Unchecked" />
+                                    </ui:SimpleStackPanel>
+                                    
                                     <!-- 第一行：形状按钮和撤销按钮 -->
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,0,0,8">
                                         <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Width="190">
