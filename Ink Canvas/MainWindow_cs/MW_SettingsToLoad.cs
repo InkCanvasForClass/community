@@ -70,7 +70,7 @@ namespace Ink_Canvas
                             catch (Exception restoreEx)
                             {
                                 LogHelper.WriteLogToFile($"从备份恢复后重新加载失败: {restoreEx.Message}", LogHelper.LogType.Error);
-                                Settings = null;
+                                BtnResetToSuggestion_Click(null, null);
                             }
                         }
                         
@@ -98,7 +98,7 @@ namespace Ink_Canvas
                         catch (Exception restoreEx)
                         {
                             LogHelper.WriteLogToFile($"从备份恢复后加载失败: {restoreEx.Message}", LogHelper.LogType.Error);
-                            Settings = null;
+                            BtnResetToSuggestion_Click(null, null);
                         }
                     }
                     
