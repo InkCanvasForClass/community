@@ -530,7 +530,7 @@ namespace Ink_Canvas
                     try { crashAction = (int)(obj["startup"]["crashAction"] ?? 0); } catch { }
                     CrashAction = (CrashActionType)crashAction;
                 }
-                // 兜底：从主窗口同步
+                // 从主窗口同步
                 else if (Ink_Canvas.MainWindow.Settings != null && Ink_Canvas.MainWindow.Settings.Startup != null)
                 {
                     CrashAction = (CrashActionType)Ink_Canvas.MainWindow.Settings.Startup.CrashAction;
@@ -544,13 +544,13 @@ namespace Ink_Canvas
             Ink_Canvas.MainWindow.ShowNewMessage("抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。");
             LogHelper.NewLog(e.Exception.ToString());
 
-            // 新增：记录到崩溃日志
+            // 记录到崩溃日志
             lastErrorMessage = e.Exception.ToString();
             WriteCrashLog($"UI线程未处理异常: {e.Exception}");
 
             e.Handled = true;
 
-            SyncCrashActionFromSettings(); // 新增：崩溃时同步最新设置
+            SyncCrashActionFromSettings(); // 崩溃时同步最新设置
 
             if (CrashAction == CrashActionType.SilentRestart && !IsAppExitByUser)
             {
@@ -879,10 +879,8 @@ namespace Ink_Canvas
                 {
                     SetSplashMessage("启动完成！");
                     SetSplashProgress(100);
-                    SetSplashProgress(500);
-                    
                     // 延迟关闭启动画面，让用户看到完成消息
-                    Task.Delay(800).ContinueWith(_ =>
+                    Task.Delay(500).ContinueWith(_ =>
                     {
                         Dispatcher.Invoke(() => CloseSplashScreen());
                     });

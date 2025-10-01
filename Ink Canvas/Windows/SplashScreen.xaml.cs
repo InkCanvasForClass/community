@@ -130,6 +130,18 @@ namespace Ink_Canvas.Windows
                 {
                     // 确保最终值正确设置
                     ProgressBarFill.Width = targetWidth;
+                    
+                    // 根据进度调整圆角
+                    if (progress >= 100)
+                    {
+                        // 进度100%时，底部角都是圆角
+                        ProgressBarFill.CornerRadius = new CornerRadius(0, 0, 7, 7);
+                    }
+                    else
+                    {
+                        // 进度未满时，只有左侧是圆角
+                        ProgressBarFill.CornerRadius = new CornerRadius(0, 0, 0, 7);
+                    }
                 };
                 
                 // 开始动画
