@@ -575,6 +575,7 @@
     <Resource Include="Resources\PresentationExample\sidebar-dark.png" />
     <Resource Include="Resources\PresentationExample\sidebar-white.png" />
     <Resource Include="Resources\PresentationExample\toolbar.png" />
+    <Resource Include="Resources\ICC Start.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
