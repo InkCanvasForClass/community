@@ -99,6 +99,9 @@ namespace Ink_Canvas.Windows
         {
             Dispatcher.Invoke(() =>
             {
+                // 设置进度条颜色
+                SetProgressBarColor();
+                
                 // 获取进度条容器的实际宽度
                 double containerWidth = ProgressBarBackground.ActualWidth;
                 if (containerWidth <= 0)
@@ -409,6 +412,119 @@ namespace Ink_Canvas.Windows
                 default:// 默认返回
                     return "ICC Horse.png"; 
             }
+        }
+
+        /// <summary>
+        /// 根据实际样式设置进度条颜色
+        /// </summary>
+        private void SetProgressBarColor()
+        {
+            Color progressColor;
+            
+            switch (_actualSplashStyle)
+            {
+                case 2: // 春季 - H=136, S=15, L=22
+                    progressColor = HslToRgb(136, 15, 22);
+                    break;
+                case 3: // 夏季 - H=6, S=15, L=22
+                    progressColor = HslToRgb(6, 15, 22);
+                    break;
+                case 4: // 秋季 - H=39, S=15, L=22
+                    progressColor = HslToRgb(39, 15, 22);
+                    break;
+                case 5: // 冬季 - H=204, S=15, L=22
+                    progressColor = HslToRgb(204, 15, 22);
+                    break;
+                case 6: // 马年限定 - 白色
+                    progressColor = Colors.White;
+                    break;
+                default: // 默认使用
+                    progressColor = Colors.White;
+                    break;
+            }
+            
+            // 创建渐变画刷
+            var gradientBrush = new LinearGradientBrush
+            {
+                StartPoint = new System.Windows.Point(0, 0),
+                EndPoint = new System.Windows.Point(1, 0)
+            };
+            
+            // 根据颜色类型设置渐变
+            if (_actualSplashStyle == 6) // 马年限定使用白色渐变
+            {
+                gradientBrush.GradientStops.Add(new GradientStop(Colors.White, 0));
+                gradientBrush.GradientStops.Add(new GradientStop(Color.FromArgb(200, 255, 255, 255), 0.5));
+                gradientBrush.GradientStops.Add(new GradientStop(Color.FromArgb(150, 255, 255, 255), 1));
+            }
+            else // 其他样式使用HSL颜色的渐变
+            {
+                var lighterColor = Color.FromArgb(255, 
+                    (byte)Math.Min(255, progressColor.R + 30),
+                    (byte)Math.Min(255, progressColor.G + 30),
+                    (byte)Math.Min(255, progressColor.B + 30));
+                var darkerColor = Color.FromArgb(255,
+                    (byte)Math.Max(0, progressColor.R - 30),
+                    (byte)Math.Max(0, progressColor.G - 30),
+                    (byte)Math.Max(0, progressColor.B - 30));
+                
+                gradientBrush.GradientStops.Add(new GradientStop(lighterColor, 0));
+                gradientBrush.GradientStops.Add(new GradientStop(progressColor, 0.5));
+                gradientBrush.GradientStops.Add(new GradientStop(darkerColor, 1));
+            }
+            
+            ProgressBarFill.Background = gradientBrush;
+        }
+
+        /// <summary>
+        /// 将HSL颜色转换为RGB颜色
+        /// </summary>
+        /// <param name="h">色相 (0-360)</param>
+        /// <param name="s">饱和度 (0-100)</param>
+        /// <param name="l">亮度 (0-100)</param>
+        /// <returns>RGB颜色</returns>
+        private Color HslToRgb(double h, double s, double l)
+        {
+            // 将HSL值转换为0-1范围
+            h = h / 360.0;
+            s = s / 100.0;
+            l = l / 100.0;
+
+            double r, g, b;
+
+            if (s == 0)
+            {
+                // 无饱和度，为灰度
+                r = g = b = l;
+            }
+            else
+            {
+                double q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+                double p = 2 * l - q;
+
+                r = HueToRgb(p, q, h + 1.0 / 3.0);
+                g = HueToRgb(p, q, h);
+                b = HueToRgb(p, q, h - 1.0 / 3.0);
+            }
+
+            return Color.FromRgb(
+                (byte)Math.Round(r * 255),
+                (byte)Math.Round(g * 255),
+                (byte)Math.Round(b * 255)
+            );
+        }
+
+        /// <summary>
+        /// HSL颜色转换辅助方法
+        /// </summary>
+        private double HueToRgb(double p, double q, double t)
+        {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1.0 / 6.0) return p + (q - p) * 6 * t;
+            if (t < 1.0 / 2.0) return q;
+            if (t < 2.0 / 3.0) return p + (q - p) * (2.0 / 3.0 - t) * 6;
+            return p;
         }
     }
 }
