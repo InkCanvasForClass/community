@@ -54,6 +54,9 @@ namespace Ink_Canvas
 
                 InitializeFloatBarForegroundColor();
                 
+                // 刷新快速面板图标
+                RefreshQuickPanelIcons();
+                
                 // 强制刷新UI
                 window.InvalidateVisual();
             }
@@ -79,6 +82,9 @@ namespace Ink_Canvas
 
                 InitializeFloatBarForegroundColor();
                 
+                // 刷新快速面板图标
+                RefreshQuickPanelIcons();
+                
                 // 强制刷新UI
                 window.InvalidateVisual();
             }
@@ -103,6 +109,35 @@ namespace Ink_Canvas
             }
         }
         
+        /// <summary>
+        /// 刷新快速面板图标
+        /// </summary>
+        private void RefreshQuickPanelIcons()
+        {
+            try
+            {
+                if (LeftUnFoldButtonQuickPanel != null)
+                {
+                    LeftUnFoldButtonQuickPanel.InvalidateVisual();
+                }
+                if (RightUnFoldButtonQuickPanel != null)
+                {
+                    RightUnFoldButtonQuickPanel.InvalidateVisual();
+                }
+                if (LeftSidePanel != null)
+                {
+                    LeftSidePanel.InvalidateVisual();
+                }
+                if (RightSidePanel != null)
+                {
+                    RightSidePanel.InvalidateVisual();
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
         /// <summary>
         /// 刷新浮动工具栏按钮颜色
         /// </summary>

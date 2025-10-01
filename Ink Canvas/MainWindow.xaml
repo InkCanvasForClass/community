@@ -9578,7 +9578,7 @@
             <ui:SimpleStackPanel>
                 <Border Background="#9918181b" Opacity="1" CornerRadius="0,25,25,0" Height="50" Width="32">
                     <Image x:Name="LeftUnFoldBtnImgChevron" Margin="10,0,0,0"
-                           Source="/Resources/new-icons/unfold-chevron.png"
+                           Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
                            RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14" />
                 </Border>
             </ui:SimpleStackPanel>
@@ -9592,7 +9592,7 @@
                         MouseUp="SymbolIconRandOne_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/Icons-Fluent/ic_fluent_person_money_24_regular.png"
+                        <Image Source="{DynamicResource QuickPanelPersonMoneyIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="单次抽" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9600,7 +9600,7 @@
                         MouseUp="SymbolIconRand_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/Icons-Fluent/ic_fluent_people_money_24_regular.png"
+                        <Image Source="{DynamicResource QuickPanelPeopleMoneyIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="随机抽" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9608,7 +9608,7 @@
 
                         MouseUp="ImageCountdownTimer_MouseUp" Background="Transparent"
                         Orientation="Vertical" HorizontalAlignment="Center" Width="32" Margin="0">
-                        <Image Source="/Resources/Icons-Fluent/ic_fluent_timer_24_regular.png"
+                        <Image Source="{DynamicResource QuickPanelTimerIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="计时器" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9616,7 +9616,7 @@
                         MouseUp="ImageBlackboard_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/new-icons/blackboard.png"
+                        <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="白板" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9625,7 +9625,7 @@
                         MouseUp="ExitPPTSlideShow_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0" Visibility="Collapsed">
-                        <Image Source="/Resources/new-icons/end-slides-show.png"
+                        <Image Source="{DynamicResource QuickPanelEndSlideshowIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="退出放映" Foreground="{DynamicResource FloatBarForeground}" FontSize="7" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9634,7 +9634,7 @@
                         MouseUp="UnFoldFloatingBar_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/new-icons/eye.png" RenderOptions.BitmapScalingMode="HighQuality"
+                        <Image Source="{DynamicResource QuickPanelEyeIcon}" RenderOptions.BitmapScalingMode="HighQuality"
                                Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="显示" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9642,7 +9642,7 @@
                         MouseUp="HideQuickPanel_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/new-icons/chevron-left.png"
+                        <Image Source="{DynamicResource QuickPanelChevronLeftIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,3" />
                     </ui:SimpleStackPanel>
                 </ui:SimpleStackPanel>
@@ -9654,7 +9654,7 @@
             <ui:SimpleStackPanel>
                 <Border Background="#9918181b" Opacity="1" CornerRadius="25,0,0,25" Height="50" Width="32">
                     <Image Margin="0,0,10,0" x:Name="RightUnFoldBtnImgChevron"
-                           Source="/Resources/new-icons/unfold-chevron.png"
+                           Source="{DynamicResource QuickPanelUnfoldChevronIcon}"
                            RenderOptions.BitmapScalingMode="HighQuality" Height="14" Width="14"
                            RenderTransformOrigin="0.5,0.5">
                         <Image.RenderTransform>
@@ -9675,7 +9675,7 @@
                         MouseUp="SymbolIconRandOne_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/Icons-Fluent/ic_fluent_person_money_24_regular.png"
+                        <Image Source="{DynamicResource QuickPanelPersonMoneyIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="单次抽" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9683,7 +9683,7 @@
                         MouseUp="SymbolIconRand_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/Icons-Fluent/ic_fluent_people_money_24_regular.png"
+                        <Image Source="{DynamicResource QuickPanelPeopleMoneyIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="随机抽" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9691,7 +9691,7 @@
 
                         MouseUp="ImageCountdownTimer_MouseUp" Background="Transparent"
                         Orientation="Vertical" HorizontalAlignment="Center" Width="32" Margin="0">
-                        <Image Source="/Resources/Icons-Fluent/ic_fluent_timer_24_regular.png"
+                        <Image Source="{DynamicResource QuickPanelTimerIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="计时器" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9699,7 +9699,7 @@
                         MouseUp="ImageBlackboard_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/new-icons/blackboard.png"
+                        <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="白板" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9708,7 +9708,7 @@
                         MouseUp="ExitPPTSlideShow_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0" Visibility="Collapsed">
-                        <Image Source="/Resources/new-icons/end-slides-show.png"
+                        <Image Source="{DynamicResource QuickPanelEndSlideshowIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="退出放映" Foreground="{DynamicResource FloatBarForeground}" FontSize="7" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9717,7 +9717,7 @@
                         MouseUp="UnFoldFloatingBar_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/new-icons/eye.png" RenderOptions.BitmapScalingMode="HighQuality"
+                        <Image Source="{DynamicResource QuickPanelEyeIcon}" RenderOptions.BitmapScalingMode="HighQuality"
                                Height="17" Margin="0,3,0,0" />
                         <TextBlock Text="显示" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
                     </ui:SimpleStackPanel>
@@ -9725,7 +9725,7 @@
                         MouseUp="HideQuickPanel_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
                         Width="32" Margin="0">
-                        <Image Source="/Resources/new-icons/chevron-left.png"
+                        <Image Source="{DynamicResource QuickPanelChevronLeftIcon}"
                                RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,3"
                                RenderTransformOrigin="0.5,0.5">
                             <Image.RenderTransform>

@@ -494,6 +494,15 @@
     <Resource Include="Resources\new-icons\zoom.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_person_money_24_regular-light.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_people_money_24_regular-light.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_timer_24_regular-light.png" />
+    <Resource Include="Resources\new-icons\blackboard-light.png" />
+    <Resource Include="Resources\new-icons\end-slides-show-light.png" />
+    <Resource Include="Resources\new-icons\eye-light.png" />
+    <Resource Include="Resources\new-icons\chevron-left-light.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

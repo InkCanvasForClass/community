@@ -38,4 +38,13 @@
     <SolidColorBrush x:Key="HistoryWindowCardBorderBrush" Color="#e5e7eb"/>
     <SolidColorBrush x:Key="HistoryWindowTextPrimaryBrush" Color="#1f2937"/>
     <SolidColorBrush x:Key="HistoryWindowTextSecondaryBrush" Color="#6b7280"/>
+    
+    <!-- 快速面板图标资源 - 浅色主题 -->
+    <BitmapImage x:Key="QuickPanelPersonMoneyIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_person_money_24_regular.png"/>
+    <BitmapImage x:Key="QuickPanelPeopleMoneyIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_people_money_24_regular.png"/>
+    <BitmapImage x:Key="QuickPanelTimerIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_timer_24_regular.png"/>
+    <BitmapImage x:Key="QuickPanelBlackboardIcon" UriSource="/Resources/new-icons/blackboard.png"/>
+    <BitmapImage x:Key="QuickPanelEndSlideshowIcon" UriSource="/Resources/new-icons/end-slides-show.png"/>
+    <BitmapImage x:Key="QuickPanelEyeIcon" UriSource="/Resources/new-icons/eye.png"/>
+    <BitmapImage x:Key="QuickPanelChevronLeftIcon" UriSource="/Resources/new-icons/chevron-left.png"/>
 </ResourceDictionary>
