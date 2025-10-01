@@ -101,6 +101,12 @@ namespace Ink_Canvas
                             BtnResetToSuggestion_Click(null, null);
                         }
                     }
+                    else
+                    {
+                        // 备份恢复失败（备份目录不存在等），使用默认设置
+                        LogHelper.WriteLogToFile("备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
+                        BtnResetToSuggestion_Click(null, null);
+                    }
                     
                     // 如果仍然失败，使用默认设置
                     if (Settings == null)
