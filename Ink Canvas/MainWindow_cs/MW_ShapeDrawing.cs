@@ -491,25 +491,15 @@ namespace Ink_Canvas
 
             if (drawingShapeMode != 0)
             {
-                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
 
                 if (!isTouchDown) return;
 
                 if (isWaitUntilNextTouchDown && dec.Count > 1) return;
-                if (dec.Count > 1)
+                
+                // 对于多笔图形绘制，允许第二笔绘制，即使dec.Count > 1
+                if (dec.Count > 1 && !((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1))
                 {
-                    if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
-                    {
-                        // 第二笔绘制双曲线时，只删除第二笔的临时笔画，保留第一笔的辅助线
-                        try
-                        {
-                            inkCanvas.Strokes.Remove(lastTempStroke);
-                        }
-                        catch { }
-                        return;
-                    }
-
                     // 其他情况正常删除临时笔画
                     try
                     {
@@ -521,6 +511,17 @@ namespace Ink_Canvas
                         Trace.WriteLine("lastTempStrokeCollection failed.");
                     }
                     return;
+                }
+                
+                // 第二笔绘制双曲线时，只删除第二笔的临时笔画，保留第一笔的辅助线
+                if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
+                {
+                    try
+                    {
+                        inkCanvas.Strokes.Remove(lastTempStroke);
+                    }
+                    catch { }
+                    // 不直接返回，继续执行绘制逻辑
                 }
 
                 Point touchPoint = e.GetTouchPoint(inkCanvas).Position;

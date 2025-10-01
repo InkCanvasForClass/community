@@ -245,7 +245,6 @@ namespace Ink_Canvas
 
             if (drawingShapeMode != 0)
             {
-                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 
                 isTouchDown = true;
@@ -538,7 +537,6 @@ namespace Ink_Canvas
             }
             if (drawingShapeMode != 0)
             {
-                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹被收集
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
                 
                 // 设置触摸状态，类似鼠标事件处理
@@ -601,13 +599,13 @@ namespace Ink_Canvas
             }
             if (drawingShapeMode != 0)
             {
-                // 确保几何绘制模式下不切换到Ink模式，避免触摸轨迹收集
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                // 几何绘制模式下不记录触摸点，避免触摸轨迹被收集
                 SetCursorBasedOnEditingMode(inkCanvas);
                 inkCanvas.CaptureTouch(e.TouchDevice);
                 ViewboxFloatingBar.IsHitTestVisible = false;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                
+                isTouchDown = true;
 
                 if (dec.Count == 0)
                 {

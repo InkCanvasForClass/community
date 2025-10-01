@@ -1866,13 +1866,9 @@ namespace Ink_Canvas
             if (sender == Cursor_Icon && lastBorderMouseDownObject != Cursor_Icon) return;
 
             // 禁用高级橡皮擦系统
-                DisableEraserOverlay();
-
-            // 使用集中化的工具模式切换方法，确保快捷键状态正确更新
-            // 鼠标模式下应该禁用快捷键以放行键盘操作
+            DisableEraserOverlay();
             SetCurrentToolMode(InkCanvasEditingMode.None);
 
-            // 更新模式缓存，确保后续的模式检测正确
             UpdateCurrentToolMode("cursor");
 
             SetFloatingBarHighlightPosition("cursor");
@@ -2312,7 +2308,7 @@ namespace Ink_Canvas
             if (sender == EraserByStrokes_Icon && lastBorderMouseDownObject != EraserByStrokes_Icon) return;
 
             // 禁用高级橡皮擦系统
-                DisableEraserOverlay();
+            DisableEraserOverlay();
 
             forceEraser = true;
             forcePointEraser = false;
