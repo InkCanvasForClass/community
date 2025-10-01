@@ -18,6 +18,11 @@ namespace Ink_Canvas.Helpers
         private readonly object _frameLock = new object();
         private Dispatcher _dispatcher;
 
+        // 新增属性
+        private int _rotationAngle = 0; // 0=0度，1=90度，2=180度，3=270度
+        private int _resolutionWidth = 640;
+        private int _resolutionHeight = 480;
+
         public event EventHandler<Bitmap> FrameReceived;
         public event EventHandler<string> ErrorOccurred;
 
@@ -25,10 +30,39 @@ namespace Ink_Canvas.Helpers
         public List<FilterInfo> AvailableCameras { get; private set; }
         public FilterInfo CurrentCamera { get; private set; }
 
+        // 新增属性
+        public int RotationAngle 
+        { 
+            get => _rotationAngle; 
+            set => _rotationAngle = Math.Max(0, Math.Min(3, value)); 
+        }
+        
+        public int ResolutionWidth 
+        { 
+            get => _resolutionWidth; 
+            set => _resolutionWidth = Math.Max(320, Math.Min(1920, value)); 
+        }
+        
+        public int ResolutionHeight 
+        { 
+            get => _resolutionHeight; 
+            set => _resolutionHeight = Math.Max(240, Math.Min(1080, value)); 
+        }
+
         public CameraService()
         {
             _dispatcher = Dispatcher.CurrentDispatcher;
             AvailableCameras = new List<FilterInfo>();
+            RefreshCameraList();
+        }
+
+        public CameraService(int rotationAngle, int resolutionWidth, int resolutionHeight)
+        {
+            _dispatcher = Dispatcher.CurrentDispatcher;
+            AvailableCameras = new List<FilterInfo>();
+            _rotationAngle = rotationAngle;
+            _resolutionWidth = resolutionWidth;
+            _resolutionHeight = resolutionHeight;
             RefreshCameraList();
         }
 
@@ -242,14 +276,16 @@ namespace Ink_Canvas.Helpers
                             var width = sourceFrame.Width;
                             var height = sourceFrame.Height;
                             
-                            if (width > 0 && height > 0)
-                            {
-                                _currentFrame = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-                                using (var graphics = Graphics.FromImage(_currentFrame))
-                                {
-                                    graphics.DrawImage(sourceFrame, 0, 0);
-                                }
-                            }
+                        if (width > 0 && height > 0)
+                        {
+                            // 应用旋转
+                            Bitmap rotatedFrame = ApplyRotation(sourceFrame);
+                            
+                            // 应用分辨率调整
+                            _currentFrame = ResizeImage(rotatedFrame, _resolutionWidth, _resolutionHeight);
+                            
+                            rotatedFrame?.Dispose();
+                        }
                             else
                             {
                                 _currentFrame = null;
@@ -298,6 +334,46 @@ namespace Ink_Canvas.Helpers
                 RefreshCameraList();
             }
             return AvailableCameras.Count > 0;
+        }
+
+        /// <summary>
+        /// 应用旋转到图像
+        /// </summary>
+        private Bitmap ApplyRotation(Bitmap source)
+        {
+            if (_rotationAngle == 0)
+                return new Bitmap(source);
+
+            var rotationType = RotateFlipType.RotateNoneFlipNone;
+            switch (_rotationAngle)
+            {
+                case 1: rotationType = RotateFlipType.Rotate90FlipNone; break;
+                case 2: rotationType = RotateFlipType.Rotate180FlipNone; break;
+                case 3: rotationType = RotateFlipType.Rotate270FlipNone; break;
+            }
+
+            var rotated = new Bitmap(source);
+            rotated.RotateFlip(rotationType);
+            return rotated;
+        }
+
+        /// <summary>
+        /// 调整图像大小
+        /// </summary>
+        private Bitmap ResizeImage(Bitmap source, int width, int height)
+        {
+            if (source.Width == width && source.Height == height)
+                return new Bitmap(source);
+
+            var resized = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+            using (var graphics = Graphics.FromImage(resized))
+            {
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                graphics.DrawImage(source, 0, 0, width, height);
+            }
+            return resized;
         }
 
         public void Dispose()
