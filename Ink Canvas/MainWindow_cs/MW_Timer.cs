@@ -275,6 +275,8 @@ namespace Ink_Canvas
                 {
                     var processes = Process.GetProcessesByName("EasiNote");
                     if (processes.Length > 0) arg += " /IM EasiNote.exe";
+                    var seewoStartProcesses = Process.GetProcessesByName("SeewoStart");
+                    if (seewoStartProcesses.Length > 0) arg += " /IM SeewoStart.exe";
                 }
 
                 if (Settings.Automation.IsAutoKillHiteAnnotation)
