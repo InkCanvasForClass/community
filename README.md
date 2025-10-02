@@ -110,3 +110,6 @@
 
 ## License
 GPLv3
+
+## 项目引用
+[Alan-CRL/DesktopDrawpadBlocker](https://github.com/Alan-CRL/DesktopDrawpadBlocker)  
