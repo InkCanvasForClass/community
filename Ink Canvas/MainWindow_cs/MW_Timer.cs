@@ -275,6 +275,8 @@ namespace Ink_Canvas
                 {
                     var processes = Process.GetProcessesByName("EasiNote");
                     if (processes.Length > 0) arg += " /IM EasiNote.exe";
+                    var seewoStartProcesses = Process.GetProcessesByName("SeewoStart");
+                    if (seewoStartProcesses.Length > 0) arg += " /IM SeewoStart.exe";
                 }
 
                 if (Settings.Automation.IsAutoKillHiteAnnotation)
@@ -471,10 +473,22 @@ namespace Ink_Canvas
                         Trace.WriteLine(ForegroundWindowInfo.ProcessPath());
                         Trace.WriteLine(version);
                         Trace.WriteLine(prodName);
-                        if (version.StartsWith("5.") && Settings.Automation.IsAutoFoldInEasiNote && (!(windowTitle.Length == 0 && ForegroundWindowInfo.WindowRect().Height < 500) ||
-                                                         !Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno))
+                        if (version.StartsWith("5.") && Settings.Automation.IsAutoFoldInEasiNote)
                         { // EasiNote5
-                            if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                            // 检查是否是桌面批注窗口
+                            bool isAnnotationWindow = windowTitle.Length == 0 && ForegroundWindowInfo.WindowRect().Height < 500;
+                            
+                            // 如果启用了忽略桌面批注窗口功能，且当前是批注窗口
+                            if (Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno && isAnnotationWindow)
+                            {
+                                // 强制保持收纳状态
+                                if (!isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                            }
+                            else if (!isAnnotationWindow)
+                            {
+                                // 非批注窗口时正常收纳
+                                if (!unfoldFloatingBarByUser && !isFloatingBarFolded) FoldFloatingBar_MouseUp(null, null);
+                            }
                         }
                         else if (version.StartsWith("3.") && Settings.Automation.IsAutoFoldInEasiNote3)
                         { // EasiNote3

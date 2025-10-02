@@ -181,29 +181,65 @@
                        VerticalAlignment="Center" />
                 
                 <!-- 摄像头控制面板 -->
-                <StackPanel Orientation="Horizontal"
+                <StackPanel Orientation="Vertical"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Bottom"
                            Margin="0,0,0,8">
-                    <!-- 摄像头选择下拉框 -->
-                    <ComboBox Name="CameraSelectionComboBox"
-                             Width="200"
-                             Margin="4,0"
-                             Background="#2d2d2d"
-                             Foreground="White"
-                             BorderBrush="#404040"
-                             SelectionChanged="CameraSelectionComboBox_SelectionChanged" />
+                    <!-- 第一行：摄像头选择和切换 -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <!-- 摄像头选择下拉框 -->
+                        <ComboBox Name="CameraSelectionComboBox"
+                                 Width="200"
+                                 Margin="4,0"
+                                 Background="#2d2d2d"
+                                 Foreground="White"
+                                 BorderBrush="#404040"
+                                 SelectionChanged="CameraSelectionComboBox_SelectionChanged" />
+                        
+                        <!-- 切换摄像头按钮 -->
+                        <Button Name="SwitchCameraButton"
+                               Content="切换摄像头"
+                               Margin="4,0"
+                               Padding="8,4"
+                               Background="#3b82f6"
+                               Foreground="White"
+                               BorderThickness="0"
+                               FontWeight="Medium"
+                               Click="SwitchCameraButton_Click" />
+                    </StackPanel>
                     
-                    <!-- 切换摄像头按钮 -->
-                    <Button Name="SwitchCameraButton"
-                           Content="切换摄像头"
-                           Margin="4,0"
-                           Padding="8,4"
-                           Background="#3b82f6"
-                           Foreground="White"
-                           BorderThickness="0"
-                           FontWeight="Medium"
-                           Click="SwitchCameraButton_Click" />
+                    <!-- 第二行：旋转和分辨率控制 -->
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,4,0,0">
+                        <!-- 旋转控制 -->
+                        <StackPanel Orientation="Horizontal" Margin="4,0">
+                            <TextBlock Text="旋转:" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="12"/>
+                            <Button Name="RotateLeftButton" Content="⟲" Width="30" Height="30" Margin="2,0" 
+                                   Background="#4b5563" Foreground="White" BorderThickness="0" 
+                                   Click="RotateLeftButton_Click" FontSize="10" FontWeight="10"/>
+                            <TextBlock Name="RotationAngleText" Text="0°" Foreground="White" VerticalAlignment="Center" 
+                                      Margin="4,0" FontSize="12" MinWidth="30" TextAlignment="Center"/>
+                            <Button Name="RotateRightButton" Content="⟳" Width="30" Height="30" Margin="2,0" 
+                                   Background="#4b5563" Foreground="White" BorderThickness="0" 
+                                   Click="RotateRightButton_Click" FontSize="10" FontWeight="10"/>
+                        </StackPanel>
+                        
+                        <!-- 分隔线 -->
+                        <Rectangle Width="1" Height="20" Fill="#404040" Margin="8,0"/>
+                        
+                        <!-- 分辨率控制 -->
+                        <StackPanel Orientation="Horizontal" Margin="4,0">
+                            <TextBlock Text="分辨率:" Foreground="White" VerticalAlignment="Center" Margin="0,0,4,0" FontSize="12"/>
+                            <ComboBox Name="ResolutionComboBox" Width="120" Margin="2,0"
+                                     Background="#2d2d2d" Foreground="White" BorderBrush="#404040"
+                                     SelectionChanged="ResolutionComboBox_SelectionChanged">
+                                <ComboBoxItem Content="640x480" Tag="640,480"/>
+                                <ComboBoxItem Content="800x600" Tag="800,600"/>
+                                <ComboBoxItem Content="1024x768" Tag="1024,768"/>
+                                <ComboBoxItem Content="1280x720" Tag="1280,720"/>
+                                <ComboBoxItem Content="1920x1080" Tag="1920,1080"/>
+                            </ComboBox>
+                        </StackPanel>
+                    </StackPanel>
                 </StackPanel>
                 
                 <!-- 摄像头状态指示 -->

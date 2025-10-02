@@ -104,16 +104,44 @@ namespace Ink_Canvas
         {
             try
             {
-                _cameraService = new CameraService();
+                // 从设置中加载摄像头配置
+                var cameraSettings = MainWindow.Settings.Camera;
+                _cameraService = new CameraService(
+                    cameraSettings.RotationAngle,
+                    cameraSettings.ResolutionWidth,
+                    cameraSettings.ResolutionHeight);
                 _cameraService.FrameReceived += CameraService_FrameReceived;
                 _cameraService.ErrorOccurred += CameraService_ErrorOccurred;
 
                 // 初始化摄像头选择下拉框
                 RefreshCameraComboBox();
+                
+                // 初始化旋转和分辨率显示
+                InitializeCameraControls();
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"初始化摄像头服务失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void InitializeCameraControls()
+        {
+            if (_cameraService != null)
+            {
+                // 更新旋转角度显示
+                UpdateRotationDisplay();
+                
+                // 设置分辨率下拉框
+                var currentResolution = $"{_cameraService.ResolutionWidth}x{_cameraService.ResolutionHeight}";
+                foreach (ComboBoxItem item in ResolutionComboBox.Items)
+                {
+                    if (item.Tag?.ToString() == $"{_cameraService.ResolutionWidth},{_cameraService.ResolutionHeight}")
+                    {
+                        ResolutionComboBox.SelectedItem = item;
+                        break;
+                    }
+                }
             }
         }
 
@@ -1212,6 +1240,70 @@ namespace Ink_Canvas
             FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
         }
+
+        #region 摄像头旋转和分辨率控制
+
+        private void RotateLeftButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_cameraService != null)
+            {
+                _cameraService.RotationAngle = (_cameraService.RotationAngle - 1 + 4) % 4;
+                UpdateRotationDisplay();
+                SaveCameraSettings();
+            }
+        }
+
+        private void RotateRightButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (_cameraService != null)
+            {
+                _cameraService.RotationAngle = (_cameraService.RotationAngle + 1) % 4;
+                UpdateRotationDisplay();
+                SaveCameraSettings();
+            }
+        }
+
+        private void ResolutionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_cameraService != null && ResolutionComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                var resolution = selectedItem.Tag?.ToString();
+                if (!string.IsNullOrEmpty(resolution))
+                {
+                    var parts = resolution.Split(',');
+                    if (parts.Length == 2 && 
+                        int.TryParse(parts[0], out int width) && 
+                        int.TryParse(parts[1], out int height))
+                    {
+                        _cameraService.ResolutionWidth = width;
+                        _cameraService.ResolutionHeight = height;
+                        SaveCameraSettings();
+                    }
+                }
+            }
+        }
+
+        private void UpdateRotationDisplay()
+        {
+            if (_cameraService != null)
+            {
+                var angle = _cameraService.RotationAngle * 90;
+                RotationAngleText.Text = $"{angle}°";
+            }
+        }
+
+        private void SaveCameraSettings()
+        {
+            if (_cameraService != null)
+            {
+                MainWindow.Settings.Camera.RotationAngle = _cameraService.RotationAngle;
+                MainWindow.Settings.Camera.ResolutionWidth = _cameraService.ResolutionWidth;
+                MainWindow.Settings.Camera.ResolutionHeight = _cameraService.ResolutionHeight;
+                MainWindow.SaveSettingsToFile();
+            }
+        }
+
+        #endregion
 
         protected override void OnClosed(EventArgs e)
         {

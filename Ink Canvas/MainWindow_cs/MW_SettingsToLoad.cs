@@ -332,6 +332,10 @@ namespace Ink_Canvas
 
                 ToggleSwitchEnableQuickPanel.IsOn = Settings.Appearance.IsShowQuickPanel;
 
+                ToggleSwitchEnableSplashScreen.IsOn = Settings.Appearance.EnableSplashScreen;
+
+                ComboBoxSplashScreenStyle.SelectedIndex = Settings.Appearance.SplashScreenStyle;
+
                 ToggleSwitchEnableTrayIcon.IsOn = Settings.Appearance.EnableTrayIcon;
                 ICCTrayIconExampleImage.Visibility =
                     Settings.Appearance.EnableTrayIcon ? Visibility.Visible : Visibility.Collapsed;

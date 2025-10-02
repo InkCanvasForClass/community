@@ -27,6 +27,8 @@ namespace Ink_Canvas
         public RandSettings RandSettings { get; set; } = new RandSettings();
         [JsonProperty("modeSettings")]
         public ModeSettings ModeSettings { get; set; } = new ModeSettings();
+        [JsonProperty("camera")]
+        public CameraSettings Camera { get; set; } = new CameraSettings();
     }
 
     public class Canvas
@@ -199,6 +201,10 @@ namespace Ink_Canvas
         public int UnFoldButtonImageType { get; set; }
         [JsonProperty("isShowLRSwitchButton")]
         public bool IsShowLRSwitchButton { get; set; }
+        [JsonProperty("enableSplashScreen")]
+        public bool EnableSplashScreen { get; set; } = false;
+        [JsonProperty("splashScreenStyle")]
+        public int SplashScreenStyle { get; set; } = 1; // 0-随机, 1-跟随四季, 2-春季, 3-夏季, 4-秋季, 5-冬季, 6-马年限定 
         [JsonProperty("isShowQuickPanel")]
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
@@ -677,5 +683,20 @@ namespace Ink_Canvas
     {
         [JsonProperty("isPPTOnlyMode")]
         public bool IsPPTOnlyMode { get; set; } = false; // 是否为仅PPT模式，默认为false（正常模式）
+    }
+
+    public class CameraSettings
+    {
+        [JsonProperty("rotationAngle")]
+        public int RotationAngle { get; set; } = 0; 
+
+        [JsonProperty("resolutionWidth")]
+        public int ResolutionWidth { get; set; } = 1920; 
+
+        [JsonProperty("resolutionHeight")]
+        public int ResolutionHeight { get; set; } = 1080; 
+
+        [JsonProperty("selectedCameraIndex")]
+        public int SelectedCameraIndex { get; set; } = 0; 
     }
 }

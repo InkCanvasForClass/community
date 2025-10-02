@@ -511,8 +511,8 @@ namespace Ink_Canvas
             }
 
             SystemEvents.DisplaySettingsChanged += SystemEventsOnDisplaySettingsChanged;
-            // 自动收纳到侧边栏（若通过 --board 进入白板模式则跳过收纳）
-            if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode)
+            // 自动收纳到侧边栏（若通过 --board 进入白板模式或 --show 参数则跳过收纳）
+            if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode && !App.StartWithShowMode)
             {
                 FoldFloatingBar_MouseUp(new object(), null);
             }
@@ -522,8 +522,6 @@ namespace Ink_Canvas
                 RadioCrashSilentRestart.IsChecked = true;
             else
                 RadioCrashNoAction.IsChecked = true;
-
-
 
             // 如果当前不是黑板模式，则切换到黑板模式
             if (currentMode == 0)
@@ -582,6 +580,21 @@ namespace Ink_Canvas
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     SwitchToBoardMode();
+                }), DispatcherPriority.Loaded);
+            }
+
+            // 检查是否通过--show参数启动，如果是则确保退出收纳模式并恢复浮动栏
+            if (App.StartWithShowMode)
+            {
+                LogHelper.WriteLogToFile("检测到--show参数，退出收纳模式并恢复浮动栏", LogHelper.LogType.Event);
+                // 延迟执行，确保UI已完全加载
+                Dispatcher.BeginInvoke(new Action(async () =>
+                {
+                    // 如果当前处于收纳模式，则展开浮动栏
+                    if (isFloatingBarFolded)
+                    {
+                        await UnFoldFloatingBar(new object());
+                    }
                 }), DispatcherPriority.Loaded);
             }
         }
@@ -725,6 +738,13 @@ namespace Ink_Canvas
             {
                 _inkFadeManager.ClearAllFadingStrokes();
                 _inkFadeManager = null;
+            }
+
+            // 清理悬浮窗拦截管理器
+            if (_floatingWindowInterceptorManager != null)
+            {
+                _floatingWindowInterceptorManager.Dispose();
+                _floatingWindowInterceptorManager = null;
             }
 
             // 停止置顶维护定时器

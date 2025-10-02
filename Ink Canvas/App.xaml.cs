@@ -1,5 +1,6 @@
 using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -14,12 +15,14 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
+using SplashScreen = Ink_Canvas.Windows.SplashScreen;
 using Timer = System.Threading.Timer;
 
 namespace Ink_Canvas
@@ -36,6 +39,8 @@ namespace Ink_Canvas
         
         // 新增：标记是否通过--board参数启动
         public static bool StartWithBoardMode = false;
+        // 新增：标记是否通过--show参数启动
+        public static bool StartWithShowMode = false;
         // 新增：保存看门狗进程对象
         private static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
@@ -52,6 +57,9 @@ namespace Ink_Canvas
         private static string lastErrorMessage = string.Empty;
         // 新增：是否已初始化崩溃监听器
         private static bool crashListenersInitialized;
+        // 新增：启动画面相关
+        private static SplashScreen _splashScreen;
+        private static bool _isSplashScreenShown = false;
 
         public App()
         {
@@ -74,7 +82,7 @@ namespace Ink_Canvas
             DispatcherUnhandledException += App_DispatcherUnhandledException;
             StartHeartbeatMonitor();
 
-            // 新增：初始化全局异常和进程结束处理
+            // 初始化全局异常和进程结束处理
             InitializeCrashListeners();
 
             // 仅在崩溃后操作为静默重启时才启动看门狗
@@ -90,7 +98,7 @@ namespace Ink_Canvas
             Exit += App_Exit; // 注册退出事件
         }
 
-        // 新增：配置TLS协议以支持Windows 7
+        // 配置TLS协议以支持Windows 7
         private void ConfigureTlsForWindows7()
         {
             try
@@ -125,7 +133,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：初始化崩溃监听器
+        // 初始化崩溃监听器
         private void InitializeCrashListeners()
         {
             if (crashListenersInitialized) return;
@@ -173,7 +181,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：动态加载WMI监控（避免直接引用System.Management）
+        // 动态加载WMI监控
         private void TrySetupWmiMonitoring()
         {
             try
@@ -226,7 +234,7 @@ namespace Ink_Canvas
             }
         }
 
-        // WMI事件处理方法（通过反射调用）
+        // WMI事件处理方法
         private void WmiEventHandler(object sender, EventArgs e)
         {
             try
@@ -250,7 +258,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：Windows控制台控制处理程序
+        // Windows控制台控制处理程序
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate handler, bool add);
 
@@ -289,43 +297,52 @@ namespace Ink_Canvas
             return false;
         }
 
-        // 新增：系统会话结束事件处理
+        // 系统会话结束事件处理
         private void SystemEvents_SessionEnding(object sender, SessionEndingEventArgs e)
         {
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
             
-            // 清理PowerPoint进程守护
+            // 清理PowerPoint进程守护和悬浮窗拦截器
             try
             {
-                // 获取主窗口实例并清理PowerPoint进程守护
+                // 获取主窗口实例
                 var mainWindow = Current.MainWindow as MainWindow;
                 if (mainWindow != null)
                 {
-                    // 通过反射调用StopPowerPointProcessMonitoring方法
+                    // 清理PowerPoint进程守护
                     var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring", 
                         BindingFlags.NonPublic | BindingFlags.Instance);
                     method?.Invoke(mainWindow, null);
-                    
                     WriteCrashLog("PowerPoint进程守护已在系统关机时清理");
+                    
+                    // 清理悬浮窗拦截器
+                    var interceptorField = mainWindow.GetType().GetField("_floatingWindowInterceptorManager", 
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                    var interceptorManager = interceptorField?.GetValue(mainWindow);
+                    if (interceptorManager != null)
+                    {
+                        var disposeMethod = interceptorManager.GetType().GetMethod("Dispose");
+                        disposeMethod?.Invoke(interceptorManager, null);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                WriteCrashLog($"清理PowerPoint进程守护失败: {ex.Message}");
+                WriteCrashLog($"清理资源失败: {ex.Message}");
             }
             
             DeviceIdentifier.SaveUsageStatsOnShutdown();
         }
 
-        // 新增：控制台取消事件处理
+        // 控制台取消事件处理
         private void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
         {
             WriteCrashLog($"接收到控制台中断信号: {e.SpecialKey}");
             e.Cancel = true; // 取消默认处理
         }
 
-        // 新增：处理非UI线程的未处理异常
+        // 处理非UI线程的未处理异常
         private void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             try
@@ -355,7 +372,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：处理进程退出事件
+        // 处理进程退出事件
         private void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             TimeSpan runDuration = DateTime.Now - appStartTime;
@@ -369,7 +386,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：格式化时间跨度
+        // 格式化时间跨度
         private static string FormatTimeSpan(TimeSpan timeSpan)
         {
             if (timeSpan.TotalDays >= 1)
@@ -390,7 +407,92 @@ namespace Ink_Canvas
             return $"{timeSpan.Seconds}秒";
         }
 
-        // 新增：记录崩溃日志
+        public static void ShowSplashScreen()
+        {
+            if (_isSplashScreenShown) 
+            {
+                LogHelper.WriteLogToFile("启动画面已经显示，跳过重复显示");
+                return;
+            }
+            
+            try
+            {
+                LogHelper.WriteLogToFile("开始创建启动画面...");
+                _splashScreen = new SplashScreen();
+                LogHelper.WriteLogToFile("启动画面对象创建成功，准备显示...");
+                _splashScreen.Show();
+                _isSplashScreenShown = true;
+                LogHelper.WriteLogToFile("启动画面已显示");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"显示启动画面失败: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"异常堆栈: {ex.StackTrace}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 关闭启动画面
+        public static void CloseSplashScreen()
+        {
+            if (!_isSplashScreenShown || _splashScreen == null) return;
+            
+            try
+            {
+                _splashScreen.CloseSplashScreen();
+                _isSplashScreenShown = false;
+                LogHelper.WriteLogToFile("启动画面已关闭");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"关闭启动画面失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        // 设置启动画面进度
+        public static void SetSplashProgress(int progress)
+        {
+            if (_splashScreen != null)
+            {
+                _splashScreen.SetProgress(progress);
+            }
+        }
+
+        // 设置启动画面消息
+        public static void SetSplashMessage(string message)
+        {
+            if (_splashScreen != null)
+            {
+                _splashScreen.SetLoadingMessage(message);
+            }
+        }
+
+        private static bool ShouldShowSplashScreen()
+        {
+            try
+            {
+                // 检查设置文件中的启动动画开关
+                var settingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs", "Settings.json");
+                if (File.Exists(settingsPath))
+                {
+                    var json = File.ReadAllText(settingsPath);
+                    dynamic obj = JsonConvert.DeserializeObject(json);
+                    if (obj?["appearance"]?["enableSplashScreen"] != null)
+                    {
+                        return (bool)obj["appearance"]["enableSplashScreen"];
+                    }
+                }
+                
+                // 如果设置文件不存在或没有该设置，返回默认值false
+                return false;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"检查启动动画设置失败: {ex.Message}", LogHelper.LogType.Warning);
+                return false;
+            }
+        }
+
+        // 记录崩溃日志
         private static void WriteCrashLog(string message)
         {
             try
@@ -425,7 +527,6 @@ namespace Ink_Canvas
         // 增加字段保存崩溃后操作设置
         public static CrashActionType CrashAction = CrashActionType.SilentRestart;
 
-        // 修正：允许静态调用
         public static void SyncCrashActionFromSettings()
         {
             try
@@ -440,7 +541,7 @@ namespace Ink_Canvas
                     try { crashAction = (int)(obj["startup"]["crashAction"] ?? 0); } catch { }
                     CrashAction = (CrashActionType)crashAction;
                 }
-                // 兜底：从主窗口同步
+                // 从主窗口同步
                 else if (Ink_Canvas.MainWindow.Settings != null && Ink_Canvas.MainWindow.Settings.Startup != null)
                 {
                     CrashAction = (CrashActionType)Ink_Canvas.MainWindow.Settings.Startup.CrashAction;
@@ -454,13 +555,13 @@ namespace Ink_Canvas
             Ink_Canvas.MainWindow.ShowNewMessage("抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。");
             LogHelper.NewLog(e.Exception.ToString());
 
-            // 新增：记录到崩溃日志
+            // 记录到崩溃日志
             lastErrorMessage = e.Exception.ToString();
             WriteCrashLog($"UI线程未处理异常: {e.Exception}");
 
             e.Handled = true;
 
-            SyncCrashActionFromSettings(); // 新增：崩溃时同步最新设置
+            SyncCrashActionFromSettings(); // 崩溃时同步最新设置
 
             if (CrashAction == CrashActionType.SilentRestart && !IsAppExitByUser)
             {
@@ -484,12 +585,24 @@ namespace Ink_Canvas
 
         private TaskbarIcon _taskbar;
 
-        void App_Startup(object sender, StartupEventArgs e)
+        async void App_Startup(object sender, StartupEventArgs e)
         {
             // 初始化应用启动时间
             appStartTime = DateTime.Now;
 
-            /*if (!StoreHelper.IsStoreApp) */
+            // 根据设置决定是否显示启动画面
+            if (ShouldShowSplashScreen())
+            {
+                ShowSplashScreen();
+                SetSplashMessage("正在启动 Ink Canvas...");
+                SetSplashProgress(20);
+                await Task.Delay(500); 
+                
+                // 强制刷新UI，确保启动画面显示
+                Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+            }
+
+            System.Threading.Thread.Sleep(500);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
@@ -506,6 +619,14 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("App | 检测到--board参数，将直接进入白板模式");
             }
 
+            // 检查是否通过--show参数启动
+            bool hasShowArg = e.Args.Contains("--show");
+            if (hasShowArg)
+            {
+                StartWithShowMode = true;
+                LogHelper.WriteLogToFile("App | 检测到--show参数，将退出收纳模式并恢复浮动栏");
+            }
+
             // 记录最终应用启动状态
             if (isFinalApp)
             {
@@ -513,6 +634,12 @@ namespace Ink_Canvas
             }
 
             // 在应用启动时自动释放IACore相关DLL
+            if (_isSplashScreenShown)
+            {
+                SetSplashMessage("正在初始化组件...");
+                SetSplashProgress(40);
+                await Task.Delay(500); 
+            } 
             try
             {
                 IACoreDllExtractor.ExtractIACoreDlls();
@@ -523,6 +650,12 @@ namespace Ink_Canvas
             }
 
             // 记录应用启动（设备标识符）
+            if (_isSplashScreenShown)
+            {
+                SetSplashMessage("正在加载配置...");
+                SetSplashProgress(60);
+                await Task.Delay(500); 
+            } 
             DeviceIdentifier.RecordAppLaunch();
             LogHelper.WriteLogToFile($"App | 设备ID: {DeviceIdentifier.GetDeviceId()}");
             LogHelper.WriteLogToFile($"App | 使用频率: {DeviceIdentifier.GetUsageFrequency()}");
@@ -696,6 +829,21 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile("通过IPC发送白板模式命令失败", LogHelper.LogType.Warning);
                         }
                     }
+                    // 检查是否有--show参数
+                    else if (hasShowArg)
+                    {
+                        LogHelper.WriteLogToFile("检测到已运行实例且有--show参数，尝试通过IPC发送展开浮动栏命令", LogHelper.LogType.Event);
+
+                        // 尝试通过IPC发送展开浮动栏命令给已运行实例
+                        if (FileAssociationManager.TrySendShowModeCommandToExistingInstance())
+                        {
+                            LogHelper.WriteLogToFile("展开浮动栏命令已通过IPC发送给已运行实例", LogHelper.LogType.Event);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("通过IPC发送展开浮动栏命令失败", LogHelper.LogType.Warning);
+                        }
+                    }
                     else
                     {
                         LogHelper.WriteLogToFile("检测到已运行实例，但无文件参数", LogHelper.LogType.Event);
@@ -750,11 +898,33 @@ namespace Ink_Canvas
             StartArgs = e.Args;
 
             // 在非更新模式下创建主窗口
+            if (_isSplashScreenShown)
+            {
+                SetSplashMessage("正在初始化主界面...");
+                SetSplashProgress(80);
+                await Task.Delay(500); 
+            } 
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
+            
+            // 主窗口加载完成后关闭启动画面
+            mainWindow.Loaded += (s, args) =>
+            {
+                if (_isSplashScreenShown)
+                {
+                    SetSplashMessage("启动完成！");
+                    SetSplashProgress(100);
+                    // 延迟关闭启动画面，让用户看到完成消息
+                    Task.Delay(500).ContinueWith(_ =>
+                    {
+                        Dispatcher.Invoke(() => CloseSplashScreen());
+                    });
+                }
+            };
+            
             mainWindow.Show();
 
-            // 新增：注册.icstk文件关联
+            // 注册.icstk文件关联
             try
             {
                 LogHelper.WriteLogToFile("开始注册.icstk文件关联");
@@ -766,7 +936,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"注册文件关联时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            // 新增：启动IPC监听器
+            // 启动IPC监听器
             try
             {
                 LogHelper.WriteLogToFile("启动IPC监听器");
@@ -777,125 +947,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"启动IPC监听器时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            // 新增：Office注册表检测
-            try
-            {
-                LogHelper.WriteLogToFile("开始Office注册表检测");
-
-                // 检查Office安装
-                if (!IsOfficeInstalled())
-                {
-                    LogHelper.WriteLogToFile("未检测到Office安装", LogHelper.LogType.Warning);
-                    return;
-                }
-
-                // 尝试获取所有可能的Office版本路径
-                var officeVersions = GetOfficeVersions();
-                if (officeVersions.Count == 0)
-                {
-                    LogHelper.WriteLogToFile("未找到任何Office版本", LogHelper.LogType.Warning);
-                    return;
-                }
-
-                foreach (var version in officeVersions)
-                {
-                    string regPath = $"Software\\Microsoft\\Office\\{version}\\Common\\Security";
-                    LogHelper.WriteLogToFile($"正在处理Office版本 {version}, 注册表路径: {regPath}");
-
-                    try
-                    {
-                        using (RegistryKey baseKey = Registry.CurrentUser.OpenSubKey(regPath))
-                        {
-                            if (baseKey == null)
-                            {
-                                LogHelper.WriteLogToFile($"注册表路径不存在: {regPath}", LogHelper.LogType.Warning);
-                                // 尝试创建路径
-                                try
-                                {
-                                    using (RegistryKey createKey = Registry.CurrentUser.CreateSubKey(regPath, true))
-                                    {
-                                        if (createKey != null)
-                                        {
-                                            createKey.SetValue("DisableProtectedView", 1, RegistryValueKind.DWord);
-                                            LogHelper.WriteLogToFile($"创建并设置注册表路径: {regPath}");
-                                        }
-                                    }
-                                }
-                                catch (Exception createEx)
-                                {
-                                    LogHelper.WriteLogToFile($"创建注册表路径失败: {createEx.Message}", LogHelper.LogType.Error);
-                                }
-                                continue;
-                            }
-
-                            // 备份路径更改为软件根目录下的saves/RegistryBackups文件夹
-                            string backupPath = Path.Combine(RootPath, "Saves", "RegistryBackups");
-                            LogHelper.WriteLogToFile($"备份路径: {backupPath}");
-
-                            if (!Directory.Exists(backupPath))
-                            {
-                                Directory.CreateDirectory(backupPath);
-                                LogHelper.WriteLogToFile($"创建备份目录: {backupPath}");
-                            }
-
-                            string backupFile = Path.Combine(backupPath, $"SecurityBackup_{version}_{DateTime.Now:yyyyMMddHHmmss}.reg");
-                            LogHelper.WriteLogToFile($"创建备份文件: {backupFile}");
-
-                            // 使用UTF8编码写入注册表文件
-                            using (StreamWriter sw = new StreamWriter(backupFile, false, Encoding.UTF8))
-                            {
-                                sw.WriteLine("Windows Registry Editor Version 5.00\n");
-                                sw.WriteLine();
-                                sw.WriteLine($"[{Registry.CurrentUser.Name}\\{regPath}]");
-
-                                foreach (string valueName in baseKey.GetValueNames())
-                                {
-                                    object value = baseKey.GetValue(valueName);
-                                    sw.WriteLine($"\"{valueName}\"=dword:{((int)value):x8}");
-                                    LogHelper.WriteLogToFile($"备份注册表值: {valueName} = {value}");
-                                }
-                            }
-
-                            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(regPath, true))
-                            {
-                                // 仅在值不存在或不等于1时更新
-                                object currentValue = key.GetValue("DisableProtectedView");
-                                if (currentValue == null || (int)currentValue != 1)
-                                {
-                                    key.SetValue("DisableProtectedView", 1, RegistryValueKind.DWord);
-                                    LogHelper.WriteLogToFile($"Office {version} 注册表值已设置: DisableProtectedView = 1");
-                                }
-                                else
-                                {
-                                    LogHelper.WriteLogToFile($"Office {version} 注册表值已存在且无需更改: DisableProtectedView = 1");
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"处理Office版本 {version} 时出错: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                }
-
-                // 处理Office 365的特殊路径
-                TryModifyOffice365Registry();
-            }
-            catch (SecurityException secEx)
-            {
-                LogHelper.WriteLogToFile($"安全异常: {secEx.Message}", LogHelper.LogType.Error);
-                ShowPermissionError();
-            }
-            catch (UnauthorizedAccessException authEx)
-            {
-                LogHelper.WriteLogToFile($"访问被拒绝: {authEx.Message}", LogHelper.LogType.Error);
-                ShowPermissionError();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"未知错误: {ex.GetType().FullName} - {ex.Message}", LogHelper.LogType.Error);
-                LogHelper.WriteLogToFile(ex.StackTrace);
-            }
         }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -916,7 +967,7 @@ namespace Ink_Canvas
             catch { }
         }
 
-        // 新增：用于设置崩溃后操作类型
+        // 用于设置崩溃后操作类型
         public enum CrashActionType
         {
             SilentRestart,
@@ -978,7 +1029,7 @@ namespace Ink_Canvas
             watchdogProcess = Process.Start(psi);
         }
 
-        // 看门狗主逻辑（在 Main 函数或 App_Startup 入口前加判断）
+        // 看门狗主逻辑
         public static void RunWatchdogIfNeeded()
         {
             var args = Environment.GetCommandLineArgs();
@@ -1025,7 +1076,7 @@ namespace Ink_Canvas
             // 仅在软件内主动退出时关闭看门狗，并写入退出信号
             try
             {
-                // 新增：记录应用退出状态
+                // 记录应用退出状态
                 string exitType = IsAppExitByUser ? "用户主动退出" : "应用程序退出";
                 WriteCrashLog($"{exitType}，退出代码: {e.ApplicationExitCode}");
 
@@ -1059,451 +1110,6 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"退出处理时发生错误: {ex.Message}", LogHelper.LogType.Error);
                 }
                 catch { }
-            }
-        }
-
-        /// <summary>
-        /// 检查Office是否安装
-        /// </summary>
-        private bool IsOfficeInstalled()
-        {
-            try
-            {
-                // 检查多个可能的注册表路径
-                // 1. 检查传统的Office版本
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office"))
-                {
-                    if (key != null && key.GetSubKeyNames().Any(name => name.Contains(".0")))
-                    {
-                        LogHelper.WriteLogToFile("检测到传统Office安装");
-                        return true;
-                    }
-                }
-
-                // 2. 检查64位注册表中的Office
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Microsoft\\Office"))
-                {
-                    if (key != null && key.GetSubKeyNames().Any(name => name.Contains(".0")))
-                    {
-                        LogHelper.WriteLogToFile("检测到64位注册表中的Office安装");
-                        return true;
-                    }
-                }
-
-                // 3. 检查Office 365/Click-to-Run安装
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\ClickToRun"))
-                {
-                    if (key != null)
-                    {
-                        LogHelper.WriteLogToFile("检测到Office 365 Click-to-Run");
-                        return true;
-                    }
-                }
-
-                // 4. 检查Office 365部署配置
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\15.0\\ClickToRun"))
-                {
-                    if (key != null)
-                    {
-                        LogHelper.WriteLogToFile("检测到Office 365 (15.0)");
-                        return true;
-                    }
-                }
-
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\16.0\\ClickToRun"))
-                {
-                    if (key != null)
-                    {
-                        LogHelper.WriteLogToFile("检测到Office 365 (16.0)");
-                        return true;
-                    }
-                }
-
-                // 5. 检查Office 365零售订阅信息
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\ClickToRun\\Configuration"))
-                {
-                    if (key != null)
-                    {
-                        LogHelper.WriteLogToFile("检测到Office 365配置");
-                        return true;
-                    }
-                }
-
-                LogHelper.WriteLogToFile("未检测到任何Office安装", LogHelper.LogType.Warning);
-                return false;
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"检查Office安装时出错: {ex.Message}", LogHelper.LogType.Error);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 显示权限不足的错误提示
-        /// </summary>
-        private void ShowPermissionError()
-        {
-            const string message = "需要管理员权限才能完成此操作\n请以管理员身份重新启动应用程序";
-            LogHelper.WriteLogToFile(message, LogHelper.LogType.Error);
-            MessageBox.Show(message, "权限错误", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-
-        /// <summary>
-        /// 获取所有已安装的Office版本
-        /// </summary>
-        private List<string> GetOfficeVersions()
-        {
-            var versions = new List<string>();
-            try
-            {
-                // 检查HKLM
-                using (var key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office"))
-                {
-                    if (key != null)
-                    {
-                        foreach (var subKeyName in key.GetSubKeyNames())
-                        {
-                            if (subKeyName.Contains(".0"))
-                            {
-                                versions.Add(subKeyName);
-                                LogHelper.WriteLogToFile($"在HKLM中找到Office版本: {subKeyName}");
-                            }
-                        }
-                    }
-                }
-
-                // 检查HKCU
-                using (var key = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Office"))
-                {
-                    if (key != null)
-                    {
-                        foreach (var subKeyName in key.GetSubKeyNames())
-                        {
-                            if (subKeyName.Contains(".0") && !versions.Contains(subKeyName))
-                            {
-                                versions.Add(subKeyName);
-                                LogHelper.WriteLogToFile($"在HKCU中找到Office版本: {subKeyName}");
-                            }
-                        }
-                    }
-                }
-
-                // 检查64位注册表
-                using (var key = Registry.LocalMachine.OpenSubKey("Software\\Wow6432Node\\Microsoft\\Office"))
-                {
-                    if (key != null)
-                    {
-                        foreach (var subKeyName in key.GetSubKeyNames())
-                        {
-                            if (subKeyName.Contains(".0") && !versions.Contains(subKeyName))
-                            {
-                                versions.Add(subKeyName);
-                                LogHelper.WriteLogToFile($"在64位注册表中找到Office版本: {subKeyName}");
-                            }
-                        }
-                    }
-                }
-
-                // 检查Office 365的特殊路径
-                CheckOffice365Versions(versions);
-
-                // 如果没有找到任何版本，添加默认的Office 365版本号
-                if (versions.Count == 0 && IsOffice365Installed())
-                {
-                    versions.Add("16.0");
-                    LogHelper.WriteLogToFile("未找到具体版本，添加默认Office 365版本: 16.0");
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"获取Office版本时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-
-            // 按版本号排序
-            versions.Sort((a, b) =>
-            {
-                try
-                {
-                    double va = double.Parse(a.Replace(".0", ""));
-                    double vb = double.Parse(b.Replace(".0", ""));
-                    return vb.CompareTo(va); // 降序排列，最新版本在前
-                }
-                catch
-                {
-                    return 0;
-                }
-            });
-
-            return versions;
-        }
-
-        /// <summary>
-        /// 检测Office 365是否已安装
-        /// </summary>
-        private bool IsOffice365Installed()
-        {
-            try
-            {
-                // 检查多个Office 365特定路径
-                using (var key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\ClickToRun"))
-                {
-                    if (key != null)
-                        return true;
-                }
-
-                using (var key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\15.0\\ClickToRun"))
-                {
-                    if (key != null)
-                        return true;
-                }
-
-                using (var key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\16.0\\ClickToRun"))
-                {
-                    if (key != null)
-                        return true;
-                }
-
-                using (var key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\ClickToRun\\Configuration"))
-                {
-                    if (key != null)
-                        return true;
-                }
-
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// 检查Office 365特有的版本信息
-        /// </summary>
-        private void CheckOffice365Versions(List<string> versions)
-        {
-            try
-            {
-                // 检查Click-to-Run版本路径
-                using (var key = Registry.LocalMachine.OpenSubKey("Software\\Microsoft\\Office\\ClickToRun\\Configuration"))
-                {
-                    if (key != null)
-                    {
-                        var platformVersion = key.GetValue("Platform") as string;
-                        var clickToRunVersion = key.GetValue("VersionToReport") as string;
-
-                        if (!string.IsNullOrEmpty(platformVersion))
-                        {
-                            var majorVersion = platformVersion.Split('.').FirstOrDefault();
-                            if (!string.IsNullOrEmpty(majorVersion) && !versions.Contains($"{majorVersion}.0"))
-                            {
-                                versions.Add($"{majorVersion}.0");
-                                LogHelper.WriteLogToFile($"在Office 365配置中找到平台版本: {majorVersion}.0");
-                            }
-                        }
-
-                        if (!string.IsNullOrEmpty(clickToRunVersion))
-                        {
-                            var majorVersion = clickToRunVersion.Split('.').FirstOrDefault();
-                            if (!string.IsNullOrEmpty(majorVersion) && !versions.Contains($"{majorVersion}.0"))
-                            {
-                                versions.Add($"{majorVersion}.0");
-                                LogHelper.WriteLogToFile($"在Office 365配置中找到报告版本: {majorVersion}.0");
-                            }
-                        }
-                    }
-                }
-
-                // 检查安装路径来确认版本
-                var possibleVersions = new[] { "15.0", "16.0" }; // Office 2013 (15.0) 和 Office 2016/2019/365 (16.0)
-                foreach (var version in possibleVersions)
-                {
-                    using (var key = Registry.LocalMachine.OpenSubKey($"Software\\Microsoft\\Office\\{version}\\Common\\InstallRoot"))
-                    {
-                        if (key != null && key.GetValue("Path") != null && !versions.Contains(version))
-                        {
-                            versions.Add(version);
-                            LogHelper.WriteLogToFile($"在InstallRoot中找到Office版本: {version}");
-                        }
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"检查Office 365版本时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 尝试修改Office 365的特殊注册表路径
-        /// </summary>
-        private void TryModifyOffice365Registry()
-        {
-            try
-            {
-                // 准备备份目录
-                string backupPath = Path.Combine(RootPath, "Saves", "RegistryBackups");
-                if (!Directory.Exists(backupPath))
-                {
-                    Directory.CreateDirectory(backupPath);
-                    LogHelper.WriteLogToFile($"创建Office 365备份目录: {backupPath}");
-                }
-
-                // 检查Office 365 Outlook和PowerPoint的特定路径
-                string[] apps = { "outlook", "powerpoint" };
-
-                foreach (var app in apps)
-                {
-                    // 检查用户级别的注册表
-                    string regPath = $"Software\\Microsoft\\Office\\16.0\\{app}\\Security";
-                    LogHelper.WriteLogToFile($"检查Office 365特定应用注册表: {regPath}");
-
-                    try
-                    {
-                        // 先检查是否存在该路径
-                        using (var baseKey = Registry.CurrentUser.OpenSubKey(regPath))
-                        {
-                            // 如果路径存在，先备份
-                            if (baseKey != null)
-                            {
-                                string backupFile = Path.Combine(backupPath, $"SecurityBackup_365_{app}_{DateTime.Now:yyyyMMddHHmmss}.reg");
-                                LogHelper.WriteLogToFile($"创建Office 365 {app}备份文件: {backupFile}");
-
-                                // 使用UTF8编码写入注册表文件
-                                using (StreamWriter sw = new StreamWriter(backupFile, false, Encoding.UTF8))
-                                {
-                                    sw.WriteLine("Windows Registry Editor Version 5.00\n");
-                                    sw.WriteLine();
-                                    sw.WriteLine($"[{Registry.CurrentUser.Name}\\{regPath}]");
-
-                                    foreach (string valueName in baseKey.GetValueNames())
-                                    {
-                                        object value = baseKey.GetValue(valueName);
-                                        sw.WriteLine($"\"{valueName}\"=dword:{((int)value):x8}");
-                                        LogHelper.WriteLogToFile($"备份Office 365 {app}注册表值: {valueName} = {value}");
-                                    }
-                                }
-                            }
-                        }
-
-                        // 修改或创建注册表项
-                        using (var key = Registry.CurrentUser.CreateSubKey(regPath, true))
-                        {
-                            if (key != null)
-                            {
-                                object currentValue = key.GetValue("DisableProtectedView");
-                                if (currentValue == null || (int)currentValue != 1)
-                                {
-                                    key.SetValue("DisableProtectedView", 1, RegistryValueKind.DWord);
-                                    LogHelper.WriteLogToFile($"Office 365 {app} 注册表值已设置: DisableProtectedView = 1");
-                                }
-                                else
-                                {
-                                    LogHelper.WriteLogToFile($"Office 365 {app} 注册表值已存在且无需更改");
-                                }
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"修改 {app} 注册表时出错: {ex.Message}", LogHelper.LogType.Error);
-                    }
-                }
-
-                // 尝试通过Office信任中心路径修改
-                string trustCenterPath = "Software\\Microsoft\\Office\\16.0\\Common\\Security\\FileValidation";
-                LogHelper.WriteLogToFile($"检查信任中心路径: {trustCenterPath}");
-
-                try
-                {
-                    // 先检查是否存在该路径
-                    using (var baseKey = Registry.CurrentUser.OpenSubKey(trustCenterPath))
-                    {
-                        // 如果路径存在，先备份
-                        if (baseKey != null)
-                        {
-                            string backupFile = Path.Combine(backupPath, $"SecurityBackup_365_TrustCenter_{DateTime.Now:yyyyMMddHHmmss}.reg");
-                            LogHelper.WriteLogToFile($"创建信任中心备份文件: {backupFile}");
-
-                            // 使用UTF8编码写入注册表文件
-                            using (StreamWriter sw = new StreamWriter(backupFile, false, Encoding.UTF8))
-                            {
-                                sw.WriteLine("Windows Registry Editor Version 5.00\n");
-                                sw.WriteLine();
-                                sw.WriteLine($"[{Registry.CurrentUser.Name}\\{trustCenterPath}]");
-
-                                foreach (string valueName in baseKey.GetValueNames())
-                                {
-                                    object value = baseKey.GetValue(valueName);
-                                    sw.WriteLine($"\"{valueName}\"=dword:{((int)value):x8}");
-                                    LogHelper.WriteLogToFile($"备份信任中心注册表值: {valueName} = {value}");
-                                }
-                            }
-                        }
-                    }
-
-                    using (var key = Registry.CurrentUser.CreateSubKey(trustCenterPath, true))
-                    {
-                        if (key != null)
-                        {
-                            key.SetValue("DisableEditFromPV", 1, RegistryValueKind.DWord);
-                            LogHelper.WriteLogToFile("已禁用受保护视图中的编辑");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"修改信任中心路径时出错: {ex.Message}", LogHelper.LogType.Error);
-                }
-
-                // 尝试修改EnableEditWhileViewingPolicy
-                string policyPath = "Software\\Policies\\Microsoft\\Office\\16.0\\Common\\Security";
-                try
-                {
-                    // 先检查是否存在该路径
-                    using (var baseKey = Registry.CurrentUser.OpenSubKey(policyPath))
-                    {
-                        // 如果路径存在，先备份
-                        if (baseKey != null)
-                        {
-                            string backupFile = Path.Combine(backupPath, $"SecurityBackup_365_Policy_{DateTime.Now:yyyyMMddHHmmss}.reg");
-                            LogHelper.WriteLogToFile($"创建策略备份文件: {backupFile}");
-
-                            // 使用UTF8编码写入注册表文件
-                            using (StreamWriter sw = new StreamWriter(backupFile, false, Encoding.UTF8))
-                            {
-                                sw.WriteLine("Windows Registry Editor Version 5.00\n");
-                                sw.WriteLine();
-                                sw.WriteLine($"[{Registry.CurrentUser.Name}\\{policyPath}]");
-
-                                foreach (string valueName in baseKey.GetValueNames())
-                                {
-                                    object value = baseKey.GetValue(valueName);
-                                    sw.WriteLine($"\"{valueName}\"=dword:{((int)value):x8}");
-                                    LogHelper.WriteLogToFile($"备份策略注册表值: {valueName} = {value}");
-                                }
-                            }
-                        }
-                    }
-
-                    using (var key = Registry.CurrentUser.CreateSubKey(policyPath, true))
-                    {
-                        if (key != null)
-                        {
-                            key.SetValue("EnableEditWhileViewingPolicy", 1, RegistryValueKind.DWord);
-                            LogHelper.WriteLogToFile("已启用查看时编辑策略");
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"修改策略路径时出错: {ex.Message}", LogHelper.LogType.Error);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"修改Office 365注册表时发生未知错误: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }
