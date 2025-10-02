@@ -652,6 +652,7 @@ namespace Ink_Canvas
 
                 // 初始化屏蔽压感开关状态
                 ToggleSwitchDisablePressure.IsOn = Settings.Canvas.DisablePressure;
+                inkCanvas.DefaultDrawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
 
                 ComboBoxPenStyle.SelectedIndex = Settings.Canvas.InkStyle;
                 BoardComboBoxPenStyle.SelectedIndex = Settings.Canvas.InkStyle;

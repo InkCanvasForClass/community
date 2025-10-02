@@ -1064,6 +1064,7 @@ namespace Ink_Canvas
             if (!isLoaded) return;
 
             Settings.Canvas.DisablePressure = ToggleSwitchDisablePressure.IsOn;
+            inkCanvas.DefaultDrawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
 
             // 如果启用了屏蔽压感，则自动关闭压感触屏模式
             if (Settings.Canvas.DisablePressure && Settings.Canvas.EnablePressureTouchMode)
