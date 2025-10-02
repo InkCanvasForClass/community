@@ -1587,7 +1587,6 @@ namespace Ink_Canvas
                     if (toolbarHeight == 0)
                     {
                         pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
-                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定边距: {MarginFromEdge}");
                     }
                     else
                     {
@@ -1601,7 +1600,6 @@ namespace Ink_Canvas
                     {
                         pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
                                3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}");
                     }
                     else
                     {
