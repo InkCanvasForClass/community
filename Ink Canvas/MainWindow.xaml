@@ -1070,9 +1070,10 @@
                                         <ComboBox Name="ComboBoxFloatingBarImg" FontFamily="Microsoft YaHei UI"
                                                   SelectedIndex="0"
                                                   SelectionChanged="ComboBoxFloatingBarImg_SelectionChanged">
-                                            <ComboBoxItem Content=""ICC-CE"默认" FontFamily="Microsoft YaHei UI" />
-                                            <ComboBoxItem Content=""ICC-CE"黑色透明版" FontFamily="Microsoft YaHei UI" />
-                                            <ComboBoxItem Content=""ICC-CE"无阴影" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="“ICC-CE”默认" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="“ICC-CE”黑色透明版" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="“ICC-CE”无阴影" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="“ICC-CE”深色" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="酷安斗鸡眼滑稽" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="酷安受虐滑稽" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="酷安呲牙笑" FontFamily="Microsoft YaHei UI" />
