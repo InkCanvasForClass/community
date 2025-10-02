@@ -11,9 +11,6 @@
         ResizeMode="NoResize"
         WindowStartupLocation="CenterScreen">
     <Grid>
-        <!-- 背景遮罩 -->
-        <Rectangle Fill="#80000000" />
-
         <!-- 启动图片容器 -->
         <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
             <!-- 启动图片 -->
