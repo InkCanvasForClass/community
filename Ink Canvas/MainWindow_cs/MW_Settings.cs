@@ -356,43 +356,49 @@ namespace Ink_Canvas
             else if (index == 2)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandoujiyanhuaji.png"));
-                FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
+                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-noshadow.png"));
+                FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
             else if (index == 3)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanshounvhuaji.png"));
+                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandoujiyanhuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
             else if (index == 4)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanciya.png"));
+                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanshounvhuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
             else if (index == 5)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanneikuhuaji.png"));
+                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanciya.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
             else if (index == 6)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandogeyuanliangwo.png"));
+                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanneikuhuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
             else if (index == 7)
             {
                 FloatingbarHeadIconImg.Source =
+                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandogeyuanliangwo.png"));
+                FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
+            }
+            else if (index == 8)
+            {
+                FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/tiebahuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1);
             }
-            else if (index >= 8 && index - 8 < Settings.Appearance.CustomFloatingBarImgs.Count)
+            else if (index >= 9 && index - 9 < Settings.Appearance.CustomFloatingBarImgs.Count)
             {
                 // 使用自定义图标
-                var customIcon = Settings.Appearance.CustomFloatingBarImgs[index - 8];
+                var customIcon = Settings.Appearance.CustomFloatingBarImgs[index - 9];
                 try
                 {
                     FloatingbarHeadIconImg.Source = new BitmapImage(new Uri(customIcon.FilePath));
@@ -409,8 +415,8 @@ namespace Ink_Canvas
 
         public void UpdateCustomIconsInComboBox()
         {
-            // 保留前8个内置图标选项
-            while (ComboBoxFloatingBarImg.Items.Count > 8)
+            // 保留前9个内置图标选项
+            while (ComboBoxFloatingBarImg.Items.Count > 9)
             {
                 ComboBoxFloatingBarImg.Items.RemoveAt(ComboBoxFloatingBarImg.Items.Count - 1);
             }
