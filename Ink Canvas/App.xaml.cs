@@ -912,8 +912,8 @@ namespace Ink_Canvas
             {
                 if (_isSplashScreenShown)
                 {
-                    SetSplashMessage("正在完成初始化...");
-                    SetSplashProgress(90);
+                    SetSplashMessage("完成初始化...");
+                    SetSplashProgress(80);
                     Task.Delay(300).ContinueWith(_ =>
                     {
                         Dispatcher.Invoke(() =>
