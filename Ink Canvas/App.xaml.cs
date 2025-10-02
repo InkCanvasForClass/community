@@ -39,6 +39,8 @@ namespace Ink_Canvas
         
         // 新增：标记是否通过--board参数启动
         public static bool StartWithBoardMode = false;
+        // 新增：标记是否通过--show参数启动
+        public static bool StartWithShowMode = false;
         // 新增：保存看门狗进程对象
         private static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
@@ -617,6 +619,14 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("App | 检测到--board参数，将直接进入白板模式");
             }
 
+            // 检查是否通过--show参数启动
+            bool hasShowArg = e.Args.Contains("--show");
+            if (hasShowArg)
+            {
+                StartWithShowMode = true;
+                LogHelper.WriteLogToFile("App | 检测到--show参数，将退出收纳模式并恢复浮动栏");
+            }
+
             // 记录最终应用启动状态
             if (isFinalApp)
             {
@@ -817,6 +827,21 @@ namespace Ink_Canvas
                         else
                         {
                             LogHelper.WriteLogToFile("通过IPC发送白板模式命令失败", LogHelper.LogType.Warning);
+                        }
+                    }
+                    // 检查是否有--show参数
+                    else if (hasShowArg)
+                    {
+                        LogHelper.WriteLogToFile("检测到已运行实例且有--show参数，尝试通过IPC发送展开浮动栏命令", LogHelper.LogType.Event);
+
+                        // 尝试通过IPC发送展开浮动栏命令给已运行实例
+                        if (FileAssociationManager.TrySendShowModeCommandToExistingInstance())
+                        {
+                            LogHelper.WriteLogToFile("展开浮动栏命令已通过IPC发送给已运行实例", LogHelper.LogType.Event);
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("通过IPC发送展开浮动栏命令失败", LogHelper.LogType.Warning);
                         }
                     }
                     else
