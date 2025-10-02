@@ -910,6 +910,27 @@ namespace Ink_Canvas.Helpers
 
         #region 私有方法
 
+        /// <summary>
+        /// 清理无效的窗口句柄
+        /// </summary>
+        private void CleanupInvalidWindows()
+        {
+            var invalidWindows = new List<IntPtr>();
+            
+            foreach (var kvp in _interceptedWindows)
+            {
+                var hWnd = kvp.Key;
+                if (!IsWindow(hWnd))
+                {
+                    invalidWindows.Add(hWnd);
+                }
+            }
+            foreach (var hWnd in invalidWindows)
+            {
+                _interceptedWindows.Remove(hWnd);
+            }
+        }
+
         private void ScanForWindows(object state)
         {
             if (!_isRunning) return;
@@ -918,6 +939,7 @@ namespace Ink_Canvas.Helpers
             {
                 // 简化的扫描逻辑
                 var interceptedCount = 0;
+                CleanupInvalidWindows();
                 
                 // 重置所有规则的发现状态
                 foreach (var rule in _interceptRules.Values)
@@ -936,7 +958,10 @@ namespace Ink_Canvas.Helpers
                 {
                     if (rule.IsEnabled && rule.foundHwnd && rule.outHwnd != IntPtr.Zero)
                     {
-                        if (!_interceptedWindows.ContainsKey(rule.outHwnd))
+                        bool shouldIntercept = !_interceptedWindows.ContainsKey(rule.outHwnd) || 
+                                             (_interceptedWindows.ContainsKey(rule.outHwnd) && IsWindowVisible(rule.outHwnd));
+                        
+                        if (shouldIntercept)
                         {
                             InterceptWindow(rule.outHwnd, rule);
                             interceptedCount++;
@@ -1124,7 +1149,6 @@ namespace Ink_Canvas.Helpers
 
         private bool MatchesRule(WindowInfo windowInfo, InterceptRule rule)
         {
-            // 保留旧方法用于兼容性
             return MatchesRulePrecise(windowInfo.Handle, rule);
         }
 
@@ -1132,6 +1156,15 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
+                if (!IsWindow(hWnd) || !IsWindowVisible(hWnd))
+                {
+                    if (_interceptedWindows.ContainsKey(hWnd))
+                    {
+                        _interceptedWindows.Remove(hWnd);
+                    }
+                    return;
+                }
+                
                 // 直接隐藏窗口，不发送关闭消息
                 ShowWindow(hWnd, SW_HIDE);
                 
