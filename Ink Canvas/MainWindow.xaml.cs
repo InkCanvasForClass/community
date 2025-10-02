@@ -727,6 +727,13 @@ namespace Ink_Canvas
                 _inkFadeManager = null;
             }
 
+            // 清理悬浮窗拦截管理器
+            if (_floatingWindowInterceptorManager != null)
+            {
+                _floatingWindowInterceptorManager.Dispose();
+                _floatingWindowInterceptorManager = null;
+            }
+
             // 停止置顶维护定时器
             StopTopmostMaintenance();
 

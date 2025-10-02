@@ -301,24 +301,33 @@ namespace Ink_Canvas
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
             
-            // 清理PowerPoint进程守护
+            // 清理PowerPoint进程守护和悬浮窗拦截器
             try
             {
-                // 获取主窗口实例并清理PowerPoint进程守护
+                // 获取主窗口实例
                 var mainWindow = Current.MainWindow as MainWindow;
                 if (mainWindow != null)
                 {
-                    // 通过反射调用StopPowerPointProcessMonitoring方法
+                    // 清理PowerPoint进程守护
                     var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring", 
                         BindingFlags.NonPublic | BindingFlags.Instance);
                     method?.Invoke(mainWindow, null);
-                    
                     WriteCrashLog("PowerPoint进程守护已在系统关机时清理");
+                    
+                    // 清理悬浮窗拦截器
+                    var interceptorField = mainWindow.GetType().GetField("_floatingWindowInterceptorManager", 
+                        BindingFlags.NonPublic | BindingFlags.Instance);
+                    var interceptorManager = interceptorField?.GetValue(mainWindow);
+                    if (interceptorManager != null)
+                    {
+                        var disposeMethod = interceptorManager.GetType().GetMethod("Dispose");
+                        disposeMethod?.Invoke(interceptorManager, null);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                WriteCrashLog($"清理PowerPoint进程守护失败: {ex.Message}");
+                WriteCrashLog($"清理资源失败: {ex.Message}");
             }
             
             DeviceIdentifier.SaveUsageStatsOnShutdown();
