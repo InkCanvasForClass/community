@@ -10,6 +10,8 @@ using System.Windows.Ink;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using WinForms = System.Windows.Forms;
 using File = System.IO.File;
 using OperatingSystem = OSVersionExtension.OperatingSystem;
 
@@ -821,6 +823,14 @@ namespace Ink_Canvas
                 if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
                 {
                     AvoidFullScreenHelper.StartAvoidFullScreen(this);
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        if (isLoaded)
+                        {
+                            MoveWindow(new WindowInteropHelper(this).Handle, 0, 0,
+                                WinForms.Screen.PrimaryScreen.Bounds.Width, WinForms.Screen.PrimaryScreen.Bounds.Height, true);
+                        }
+                    }), DispatcherPriority.ApplicationIdle);
                 }
                 if (Settings.Advanced.IsEnableEdgeGestureUtil)
                 {
