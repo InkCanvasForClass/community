@@ -565,6 +565,9 @@
     <Resource Include="Resources\Icons-png\idt.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Fonts\LXGWWenKaiTC-Regular.ttf" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Resources\Icons-png\HiteAnnotation.png" />
     <Resource Include="Resources\Icons-png\AiClass.png" />
     <Resource Include="Resources\Icons-png\天喻教育云.png" />

@@ -34,6 +34,7 @@
         <TextBlock x:Name="LoadingText" 
                    Text="正在启动 Ink Canvas..." 
                    FontSize="18" 
+                   FontFamily="pack://application:,,,/Resources/Fonts/#LXGW WenKai TC"
                    FontWeight="SemiBold"
                    Foreground="White"
                    HorizontalAlignment="Center"
