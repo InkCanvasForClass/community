@@ -46,7 +46,7 @@
         <!-- 进度条 -->
         <Grid HorizontalAlignment="Center"
                VerticalAlignment="Center"
-               Margin="0,276,0,0"
+               Margin="0,277,0,0"
                Width="532"
                Height="10">
              <!-- 进度条填充 -->
