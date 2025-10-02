@@ -55,6 +55,27 @@ namespace Ink_Canvas.Helpers
         [DllImport("user32.dll")]
         private static extern bool GetWindowRect(IntPtr hWnd, out ForegroundWindowInfo.RECT lpRect);
 
+        [DllImport("user32.dll")]
+        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("dwmapi.dll")]
+        private static extern int DwmGetWindowAttribute(IntPtr hWnd, int dwAttribute, out ForegroundWindowInfo.RECT pvAttribute, int cbAttribute);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetDC(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern int ReleaseDC(IntPtr hWnd, IntPtr hDC);
+
+        [DllImport("gdi32.dll")]
+        private static extern int GetDeviceCaps(IntPtr hdc, int nIndex);
+
+        [DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern bool BringWindowToTop(IntPtr hWnd);
+
         [DllImport("kernel32.dll")]
         private static extern IntPtr OpenProcess(uint dwDesiredAccess, bool bInheritHandle, uint dwProcessId);
 
@@ -68,9 +89,11 @@ namespace Ink_Canvas.Helpers
 
         private const int SW_HIDE = 0;
         private const int SW_SHOW = 1;
+        private const int SW_SHOWNORMAL = 1;
         private const int SW_MINIMIZE = 6;
         private const int SW_RESTORE = 9;
 
+        private const int GWL_STYLE = -16;
         private const int GWL_EXSTYLE = -20;
         private const uint WS_EX_TOOLWINDOW = 0x00000080;
         private const uint WS_EX_APPWINDOW = 0x00040000;
@@ -79,9 +102,16 @@ namespace Ink_Canvas.Helpers
         private const uint SWP_NOSIZE = 0x0001;
         private const uint SWP_NOZORDER = 0x0004;
         private const uint SWP_HIDEWINDOW = 0x0080;
+        private const uint SWP_SHOWWINDOW = 0x0040;
 
         private const uint PROCESS_QUERY_INFORMATION = 0x0400;
         private const uint PROCESS_VM_READ = 0x0010;
+
+        private const uint WM_CLOSE = 0x0010;
+        private const int DWMWA_EXTENDED_FRAME_BOUNDS = 9;
+        private const int LOGPIXELSX = 88;
+        private const int LOGPIXELSY = 90;
+
 
         #endregion
 
@@ -212,6 +242,19 @@ namespace Ink_Canvas.Helpers
             public string Description { get; set; }
             public InterceptType? ParentType { get; set; }
             public List<InterceptType> ChildTypes { get; set; } = new List<InterceptType>();
+            
+            // 新增的精确匹配字段
+            public bool HasWindowStyle { get; set; }
+            public uint WindowStyle { get; set; }
+            public bool HasWindowSize { get; set; }
+            public int WindowWidth { get; set; }
+            public int WindowHeight { get; set; }
+            public bool ExactTitleMatch { get; set; } = false;
+            public bool ExactClassNameMatch { get; set; } = false;
+            
+            // 运行时状态字段
+            public bool foundHwnd { get; set; } = false;
+            public IntPtr outHwnd { get; set; } = IntPtr.Zero;
         }
 
         #endregion
@@ -225,13 +268,9 @@ namespace Ink_Canvas.Helpers
         private bool _isRunning;
         private bool _disposed;
         
-        // 性能优化字段
-        private readonly Dictionary<IntPtr, DateTime> _lastScanTime = new Dictionary<IntPtr, DateTime>();
-        private readonly HashSet<IntPtr> _knownWindows = new HashSet<IntPtr>();
-        private readonly Dictionary<string, DateTime> _processLastScanTime = new Dictionary<string, DateTime>();
+        // 简化的性能统计
         private int _consecutiveEmptyScans = 0;
         private DateTime _lastSuccessfulScan = DateTime.Now;
-        private readonly object _scanLock = new object();
 
         #endregion
 
@@ -275,7 +314,14 @@ namespace Ink_Canvas.Helpers
                 ClassNamePattern = "HwndWrapper[EasiNote.exe;;",
                 IsEnabled = true,
                 RequiresAdmin = false,
-                Description = "希沃白板3 桌面悬浮窗"
+                Description = "希沃白板3 桌面悬浮窗",
+                HasWindowStyle = true,
+                WindowStyle = 370081792,
+                HasWindowSize = true,
+                WindowWidth = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
+                WindowHeight = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height,
+                ExactTitleMatch = true,
+                ExactClassNameMatch = false
             };
 
             // 希沃白板5 桌面悬浮窗
@@ -287,7 +333,14 @@ namespace Ink_Canvas.Helpers
                 ClassNamePattern = "HwndWrapper[EasiNote;;",
                 IsEnabled = true,
                 RequiresAdmin = false,
-                Description = "希沃白板5 桌面悬浮窗"
+                Description = "希沃白板5 桌面悬浮窗",
+                HasWindowStyle = true,
+                WindowStyle = 369623040,
+                HasWindowSize = true,
+                WindowWidth = 550,
+                WindowHeight = 200,
+                ExactTitleMatch = false,
+                ExactClassNameMatch = false
             };
 
             // 希沃白板5C 桌面悬浮窗
@@ -299,7 +352,14 @@ namespace Ink_Canvas.Helpers
                 ClassNamePattern = "HwndWrapper[EasiNote5C;;",
                 IsEnabled = true,
                 RequiresAdmin = false,
-                Description = "希沃白板5C 桌面悬浮窗"
+                Description = "希沃白板5C 桌面悬浮窗",
+                HasWindowStyle = true,
+                WindowStyle = 369623040,
+                HasWindowSize = true,
+                WindowWidth = 550,
+                WindowHeight = 200,
+                ExactTitleMatch = false,
+                ExactClassNameMatch = false
             };
 
             // 希沃品课教师端 桌面悬浮窗（父规则）
@@ -313,7 +373,11 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = false,
                 Description = "希沃品课教师端 桌面悬浮窗",
                 ParentType = null,
-                ChildTypes = new List<InterceptType> { InterceptType.SeewoPincoDrawingFloating, InterceptType.SeewoPincoBoardService }
+                ChildTypes = new List<InterceptType> { InterceptType.SeewoPincoDrawingFloating, InterceptType.SeewoPincoBoardService },
+                HasWindowStyle = true,
+                WindowStyle = 0x16CF0000,
+                ExactTitleMatch = true,
+                ExactClassNameMatch = true
             };
 
             // 希沃品课教师端 画笔悬浮窗（子规则）
@@ -327,7 +391,11 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = false,
                 Description = "希沃品课教师端 画笔悬浮窗（包括PPT控件）",
                 ParentType = InterceptType.SeewoPincoSideBarFloating,
-                ChildTypes = new List<InterceptType>()
+                ChildTypes = new List<InterceptType>(),
+                HasWindowStyle = true,
+                WindowStyle = 335675392,
+                ExactTitleMatch = true,
+                ExactClassNameMatch = true
             };
 
             // 希沃品课教师端 桌面画板（子规则）
@@ -341,7 +409,14 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = false,
                 Description = "希沃品课教师端 桌面画板",
                 ParentType = InterceptType.SeewoPincoSideBarFloating,
-                ChildTypes = new List<InterceptType>()
+                ChildTypes = new List<InterceptType>(),
+                HasWindowStyle = true,
+                WindowStyle = 369623040,
+                HasWindowSize = true,
+                WindowWidth = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
+                WindowHeight = System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height,
+                ExactTitleMatch = false,
+                ExactClassNameMatch = false
             };
 
             // 希沃PPT小工具
@@ -665,6 +740,12 @@ namespace Ink_Canvas.Helpers
                 var rule = _interceptRules[type];
                 rule.IsEnabled = enabled;
 
+                // 如果规则被禁用，恢复相关的被拦截窗口
+                if (!enabled)
+                {
+                    RestoreWindowsByType(type);
+                }
+
                 // 如果是父规则被禁用，则禁用所有子规则
                 if (!enabled && rule.ChildTypes.Count > 0)
                 {
@@ -673,6 +754,7 @@ namespace Ink_Canvas.Helpers
                         if (_interceptRules.ContainsKey(childType))
                         {
                             _interceptRules[childType].IsEnabled = false;
+                            RestoreWindowsByType(childType);
                         }
                     }
                 }
@@ -727,6 +809,14 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 获取当前被拦截的窗口数量
+        /// </summary>
+        public int GetInterceptedWindowsCount()
+        {
+            return _interceptedWindows.Count;
+        }
+
+        /// <summary>
         /// 手动扫描一次
         /// </summary>
         public void ScanOnce()
@@ -740,10 +830,41 @@ namespace Ink_Canvas.Helpers
         public void RestoreAllWindows()
         {
             var windowsToRestore = new List<IntPtr>(_interceptedWindows.Keys);
+            var restoredCount = 0;
+            
             foreach (var hWnd in windowsToRestore)
             {
-                RestoreWindow(hWnd);
+                if (RestoreWindow(hWnd))
+                {
+                    restoredCount++;
+                }
             }
+            
+        }
+
+        /// <summary>
+        /// 恢复指定类型的被拦截窗口
+        /// </summary>
+        public void RestoreWindowsByType(InterceptType type)
+        {
+            var windowsToRestore = new List<IntPtr>();
+            foreach (var kvp in _interceptedWindows)
+            {
+                if (kvp.Value == type)
+                {
+                    windowsToRestore.Add(kvp.Key);
+                }
+            }
+
+            var restoredCount = 0;
+            foreach (var hWnd in windowsToRestore)
+            {
+                if (RestoreWindow(hWnd))
+                {
+                    restoredCount++;
+                }
+            }
+            
         }
 
         /// <summary>
@@ -753,15 +874,29 @@ namespace Ink_Canvas.Helpers
         {
             if (!_interceptedWindows.ContainsKey(hWnd)) return false;
 
+            var interceptType = _interceptedWindows[hWnd];
+            
             if (IsWindow(hWnd))
             {
+                // 使用多种方法确保窗口恢复显示
                 ShowWindow(hWnd, SW_RESTORE);
+                ShowWindow(hWnd, SW_SHOW);
+                ShowWindow(hWnd, SW_SHOWNORMAL);
+                
+                // 将窗口置于前台并显示
+                SetWindowPos(hWnd, IntPtr.Zero, 0, 0, 0, 0, 
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
+                
+                // 强制将窗口带到前台
+                BringWindowToTop(hWnd);
+                SetForegroundWindow(hWnd);
+                
                 _interceptedWindows.Remove(hWnd);
 
                 WindowRestored?.Invoke(this, new WindowRestoredEventArgs
                 {
                     WindowHandle = hWnd,
-                    InterceptType = _interceptedWindows[hWnd]
+                    InterceptType = interceptType
                 });
 
                 return true;
@@ -779,183 +914,74 @@ namespace Ink_Canvas.Helpers
         {
             if (!_isRunning) return;
 
-            lock (_scanLock)
+            try
             {
-                try
+                // 简化的扫描逻辑
+                var interceptedCount = 0;
+                
+                // 重置所有规则的发现状态
+                foreach (var rule in _interceptRules.Values)
                 {
-                    var scanStartTime = DateTime.Now;
-                    var windowsFound = 0;
-                    var windowsIntercepted = 0;
-
-                    // 清理过期的缓存
-                    CleanupExpiredCache();
-
-                    // 使用优化的扫描策略
-                    if (_consecutiveEmptyScans > 3)
+                    if (rule.IsEnabled)
                     {
-                        // 如果连续多次扫描没有发现新窗口，使用快速扫描模式
-                        PerformQuickScan(ref windowsFound, ref windowsIntercepted);
+                        rule.foundHwnd = false;
                     }
-                    else
+                }
+
+                // 枚举所有窗口
+                EnumWindows(EnumWindowsCallback, IntPtr.Zero);
+
+                // 处理找到的窗口
+                foreach (var rule in _interceptRules.Values)
+                {
+                    if (rule.IsEnabled && rule.foundHwnd && rule.outHwnd != IntPtr.Zero)
                     {
-                        // 正常扫描模式
-                        PerformFullScan(ref windowsFound, ref windowsIntercepted);
-                    }
-
-                    // 更新扫描统计
-                    UpdateScanStatistics(windowsFound, windowsIntercepted, scanStartTime);
-
-                    // 动态调整扫描间隔
-                    AdjustScanInterval();
-                }
-                catch (Exception ex)
-                {
-                    // 记录错误但不中断扫描
-                    LogHelper.WriteLogToFile($"扫描窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
-                    _consecutiveEmptyScans++;
-                }
-            }
-        }
-
-        /// <summary>
-        /// 执行快速扫描 - 只检查已知进程
-        /// </summary>
-        private void PerformQuickScan(ref int windowsFound, ref int windowsIntercepted)
-        {
-            var targetProcesses = new HashSet<string>();
-            var scanData = new ScanData { WindowsFound = 0, WindowsIntercepted = 0 };
-            
-            // 收集所有启用的规则对应的进程名
-            foreach (var rule in _interceptRules.Values)
-            {
-                if (rule.IsEnabled && !string.IsNullOrEmpty(rule.ProcessName))
-                {
-                    targetProcesses.Add(rule.ProcessName.ToLower());
-                }
-            }
-
-            // 只扫描目标进程的窗口
-            foreach (var processName in targetProcesses)
-            {
-                try
-                {
-                    var processes = Process.GetProcessesByName(processName);
-                    foreach (var process in processes)
-                    {
-                        if (process.MainWindowHandle != IntPtr.Zero)
+                        if (!_interceptedWindows.ContainsKey(rule.outHwnd))
                         {
-                            ProcessWindow(process.MainWindowHandle, scanData);
+                            InterceptWindow(rule.outHwnd, rule);
+                            interceptedCount++;
                         }
                     }
                 }
-                catch
+
+                // 更新统计
+                if (interceptedCount == 0)
                 {
-                    // 忽略进程访问错误
+                    _consecutiveEmptyScans++;
+                }
+                else
+                {
+                    _consecutiveEmptyScans = 0;
+                    _lastSuccessfulScan = DateTime.Now;
                 }
             }
-            
-            windowsFound = scanData.WindowsFound;
-            windowsIntercepted = scanData.WindowsIntercepted;
-        }
-
-        /// <summary>
-        /// 执行完整扫描
-        /// </summary>
-        private void PerformFullScan(ref int windowsFound, ref int windowsIntercepted)
-        {
-            var scanData = new ScanData { WindowsFound = 0, WindowsIntercepted = 0 };
-            
-            EnumWindows((hWnd, lParam) => 
+            catch (Exception ex)
             {
-                ProcessWindow(hWnd, scanData);
-                return true;
-            }, IntPtr.Zero);
-            
-            windowsFound = scanData.WindowsFound;
-            windowsIntercepted = scanData.WindowsIntercepted;
+                LogHelper.WriteLogToFile($"扫描窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
+                _consecutiveEmptyScans++;
+            }
         }
 
-        /// <summary>
-        /// 处理单个窗口
-        /// </summary>
-        private bool ProcessWindow(IntPtr hWnd, ScanData scanData)
+
+        private bool EnumWindowsCallback(IntPtr hWnd, IntPtr lParam)
         {
             try
             {
+                // 递归枚举子窗口
+                EnumChildWindows(hWnd, EnumWindowsCallback, lParam);
+
                 // 基本检查
                 if (!IsWindow(hWnd) || !IsWindowVisible(hWnd)) return true;
-                
-                // 检查是否已经被拦截
-                if (_interceptedWindows.ContainsKey(hWnd)) return true;
 
-                // 检查缓存，避免重复处理
-                if (_knownWindows.Contains(hWnd))
-                {
-                    var lastScan = _lastScanTime.ContainsKey(hWnd) ? _lastScanTime[hWnd] : DateTime.MinValue;
-                    if (DateTime.Now - lastScan < TimeSpan.FromSeconds(30)) // 30秒内不重复处理
-                    {
-                        return true;
-                    }
-                }
-
-                scanData.WindowsFound++;
-                _knownWindows.Add(hWnd);
-                _lastScanTime[hWnd] = DateTime.Now;
-
-                // 获取窗口信息
-                var windowInfo = GetWindowInfo(hWnd);
-                if (windowInfo == null) return true;
-
-                // 检查进程缓存
-                if (_processLastScanTime.ContainsKey(windowInfo.ProcessName))
-                {
-                    var lastProcessScan = _processLastScanTime[windowInfo.ProcessName];
-                    if (DateTime.Now - lastProcessScan < TimeSpan.FromSeconds(10)) // 10秒内不重复扫描同一进程
-                    {
-                        return true;
-                    }
-                }
-                _processLastScanTime[windowInfo.ProcessName] = DateTime.Now;
-
-                // 检查窗口样式，过滤掉系统窗口和主窗口
-                var exStyle = GetWindowLong(hWnd, GWL_EXSTYLE);
-                var style = GetWindowLong(hWnd, -16); // GWL_STYLE
-
-                // 跳过工具窗口
-                if ((exStyle & WS_EX_TOOLWINDOW) != 0) 
-                {
-                    return true;
-                }
-
-                // 跳过主窗口（有标题栏和系统菜单的窗口）
-                const uint WS_CAPTION = 0x00C00000;
-                const uint WS_SYSMENU = 0x00080000;
-                if ((style & WS_CAPTION) != 0 && (style & WS_SYSMENU) != 0)
-                {
-                    return true;
-                }
-
-                // 检查窗口大小，跳过过大的窗口
-                var rect = new ForegroundWindowInfo.RECT();
-                GetWindowRect(hWnd, out rect);
-                var width = rect.Right - rect.Left;
-                var height = rect.Bottom - rect.Top;
-
-                if (width > 600 || height > 400)
-                {
-                    return true;
-                }
-
-                // 检查是否匹配拦截规则
+                // 检查每个启用的规则
                 foreach (var rule in _interceptRules.Values)
                 {
-                    if (!rule.IsEnabled) continue;
+                    if (!rule.IsEnabled || rule.foundHwnd) continue;
 
-                    if (MatchesRule(windowInfo, rule))
+                    if (MatchesRulePrecise(hWnd, rule))
                     {
-                        InterceptWindow(hWnd, rule);
-                        scanData.WindowsIntercepted++;
-                        break;
+                        rule.outHwnd = hWnd;
+                        rule.foundHwnd = true;
                     }
                 }
 
@@ -963,105 +989,9 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"处理窗口时发生错误: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"枚举窗口回调错误: {ex.Message}", LogHelper.LogType.Error);
                 return true;
             }
-        }
-
-        /// <summary>
-        /// 清理过期缓存
-        /// </summary>
-        private void CleanupExpiredCache()
-        {
-            var now = DateTime.Now;
-            var expiredWindows = new List<IntPtr>();
-            var expiredProcesses = new List<string>();
-
-            // 清理窗口缓存
-            foreach (var kvp in _lastScanTime)
-            {
-                if (now - kvp.Value > TimeSpan.FromMinutes(5))
-                {
-                    expiredWindows.Add(kvp.Key);
-                }
-            }
-
-            foreach (var hWnd in expiredWindows)
-            {
-                _lastScanTime.Remove(hWnd);
-                _knownWindows.Remove(hWnd);
-            }
-
-            // 清理进程缓存
-            foreach (var kvp in _processLastScanTime)
-            {
-                if (now - kvp.Value > TimeSpan.FromMinutes(2))
-                {
-                    expiredProcesses.Add(kvp.Key);
-                }
-            }
-
-            foreach (var processName in expiredProcesses)
-            {
-                _processLastScanTime.Remove(processName);
-            }
-        }
-
-        /// <summary>
-        /// 更新扫描统计
-        /// </summary>
-        private void UpdateScanStatistics(int windowsFound, int windowsIntercepted, DateTime scanStartTime)
-        {
-            var scanDuration = DateTime.Now - scanStartTime;
-            
-            if (windowsFound == 0)
-            {
-                _consecutiveEmptyScans++;
-            }
-            else
-            {
-                _consecutiveEmptyScans = 0;
-                _lastSuccessfulScan = DateTime.Now;
-            }
-        }
-
-        /// <summary>
-        /// 动态调整扫描间隔
-        /// </summary>
-        private void AdjustScanInterval()
-        {
-            if (!_isRunning) return;
-
-            int newInterval;
-            if (_consecutiveEmptyScans > 5)
-            {
-                // 连续多次空扫描，增加间隔到30秒
-                newInterval = 30000;
-            }
-            else if (_consecutiveEmptyScans > 3)
-            {
-                // 连续多次空扫描，增加间隔到15秒
-                newInterval = 15000;
-            }
-            else if (_consecutiveEmptyScans > 1)
-            {
-                // 连续空扫描，增加间隔到10秒
-                newInterval = 10000;
-            }
-            else
-            {
-                // 正常扫描，使用5秒间隔
-                newInterval = 5000;
-            }
-
-            // 更新定时器间隔
-            _scanTimer.Change(newInterval, newInterval);
-        }
-
-        private bool EnumWindowsCallback(IntPtr hWnd, IntPtr lParam)
-        {
-            // 这个方法现在由ProcessWindow替代，保留用于兼容性
-            return true;
         }
 
         private WindowInfo GetWindowInfo(IntPtr hWnd)
@@ -1100,62 +1030,111 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        private bool MatchesRule(WindowInfo windowInfo, InterceptRule rule)
+        /// <summary>
+        /// 精确匹配规则
+        /// </summary>
+        private bool MatchesRulePrecise(IntPtr hWnd, InterceptRule rule)
         {
             try
             {
-                // 检查进程名（如果指定了进程名）
-                if (!string.IsNullOrEmpty(rule.ProcessName))
-                {
-                    if (!windowInfo.ProcessName.ToLower().Contains(rule.ProcessName.ToLower()))
-                    {
-                        return false;
-                    }
-                }
-
-                // 检查窗口标题（如果指定了模式）
-                if (!string.IsNullOrEmpty(rule.WindowTitlePattern))
-                {
-                    if (!windowInfo.WindowTitle.ToLower().Contains(rule.WindowTitlePattern.ToLower()))
-                    {
-                        return false;
-                    }
-                }
-
-                // 检查类名（如果指定了模式）
+                // 检查类名
                 if (!string.IsNullOrEmpty(rule.ClassNamePattern))
                 {
-                    if (!windowInfo.ClassName.ToLower().Contains(rule.ClassNamePattern.ToLower()))
+                    var className = new StringBuilder(256);
+                    GetClassName(hWnd, className, className.Capacity);
+                    var classNameStr = className.ToString();
+                    
+                    if (rule.ExactClassNameMatch)
                     {
+                        if (!classNameStr.Equals(rule.ClassNamePattern, StringComparison.OrdinalIgnoreCase))
+                            return false;
+                    }
+                    else
+                    {
+                        if (!classNameStr.Contains(rule.ClassNamePattern))
+                            return false;
+                    }
+                }
+
+                // 检查窗口标题
+                if (!string.IsNullOrEmpty(rule.WindowTitlePattern))
+                {
+                    var windowTitle = new StringBuilder(256);
+                    GetWindowText(hWnd, windowTitle, windowTitle.Capacity);
+                    var titleStr = windowTitle.ToString();
+                    
+                    if (rule.ExactTitleMatch)
+                    {
+                        if (!titleStr.Equals(rule.WindowTitlePattern, StringComparison.OrdinalIgnoreCase))
+                            return false;
+                    }
+                    else
+                    {
+                        if (!titleStr.Contains(rule.WindowTitlePattern))
+                            return false;
+                    }
+                }
+
+                // 检查窗口样式
+                if (rule.HasWindowStyle)
+                {
+                    var style = GetWindowLong(hWnd, GWL_STYLE);
+                    if (style != rule.WindowStyle)
+                        return false;
+                }
+
+                // 检查窗口尺寸
+                if (rule.HasWindowSize)
+                {
+                    var rect = new ForegroundWindowInfo.RECT();
+                    if (DwmGetWindowAttribute(hWnd, DWMWA_EXTENDED_FRAME_BOUNDS, out rect, Marshal.SizeOf(rect)) == 0)
+                    {
+                        var width = rect.Right - rect.Left;
+                        var height = rect.Bottom - rect.Top;
+
+                        // 检查精确匹配
+                        if (rule.WindowWidth == width && rule.WindowHeight == height)
+                            return true;
+
+                        // 检查缩放匹配
+                        var hdc = GetDC(IntPtr.Zero);
+                        var horizontalDPI = GetDeviceCaps(hdc, LOGPIXELSX);
+                        var verticalDPI = GetDeviceCaps(hdc, LOGPIXELSY);
+                        ReleaseDC(IntPtr.Zero, hdc);
+                        
+                        var scale = (horizontalDPI + verticalDPI) / 2.0f / 96.0f;
+                        var scaledWidth = (int)(rule.WindowWidth * scale);
+                        var scaledHeight = (int)(rule.WindowHeight * scale);
+
+                        if (Math.Abs(scaledWidth - width) <= 1 && Math.Abs(scaledHeight - height) <= 1)
+                            return true;
+
                         return false;
                     }
                 }
 
-                // 如果所有检查都通过，就认为是目标窗口
                 return true;
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"匹配规则时发生错误: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"精确匹配规则时发生错误: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
+        }
+
+        private bool MatchesRule(WindowInfo windowInfo, InterceptRule rule)
+        {
+            // 保留旧方法用于兼容性
+            return MatchesRulePrecise(windowInfo.Handle, rule);
         }
 
         private void InterceptWindow(IntPtr hWnd, InterceptRule rule)
         {
             try
             {
-                // 使用多种方法隐藏窗口
-                // 方法1：移动到屏幕外
-                SetWindowPos(hWnd, IntPtr.Zero, -2000, -2000, 0, 0, 
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_HIDEWINDOW);
-
-                // 方法2：最小化窗口
-                ShowWindow(hWnd, SW_MINIMIZE);
-
-                // 方法3：隐藏窗口
+                // 直接隐藏窗口，不发送关闭消息
                 ShowWindow(hWnd, SW_HIDE);
-
+                
                 // 记录拦截的窗口
                 _interceptedWindows[hWnd] = rule.Type;
 
@@ -1167,6 +1146,7 @@ namespace Ink_Canvas.Helpers
                     Rule = rule,
                     WindowTitle = GetWindowTitle(hWnd)
                 });
+
             }
             catch (Exception ex)
             {
@@ -1241,12 +1221,6 @@ namespace Ink_Canvas.Helpers
             public string WindowTitle { get; set; }
             public string ClassName { get; set; }
             public Process Process { get; set; }
-        }
-
-        private class ScanData
-        {
-            public int WindowsFound { get; set; }
-            public int WindowsIntercepted { get; set; }
         }
 
         #endregion
