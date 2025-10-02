@@ -9428,7 +9428,7 @@
                         <ui:SimpleStackPanel Background="Transparent" Orientation="Vertical"
                                              HorizontalAlignment="Center"
                                              Width="28" Margin="0,0">
-                            <Image Source="/Resources/new-icons/end-slides-show.png"
+                            <Image Source="{DynamicResource QuickPanelEndSlideshowIcon}"
                                    RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="17"
                                    Margin="0,3,0,0" />
                             <TextBlock Text="退出" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,1,0,0"
