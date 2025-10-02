@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -96,12 +97,30 @@ namespace Ink_Canvas.Helpers
 
                         UpdateNavigationPanelsVisibility();
                         UpdateNavigationButtonStyles();
+                        if (MainWindow.Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                        {
+                            _dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                MainWindow.MoveWindow(new WindowInteropHelper(_mainWindow).Handle, 0, 0,
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width, 
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);                               
+                            }), DispatcherPriority.ApplicationIdle);
+                        }
                     }
                     else
                     {
                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
                         _mainWindow.BtnPPTSlideShowEnd.Visibility = Visibility.Collapsed;
                         HideAllNavigationPanels();
+                        if (MainWindow.Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                        {
+                            _dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                MainWindow.MoveWindow(new WindowInteropHelper(_mainWindow).Handle, 0, 0,
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width, 
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
+                            }), DispatcherPriority.ApplicationIdle);
+                        }
                     }
                 }
                 catch (Exception ex)
