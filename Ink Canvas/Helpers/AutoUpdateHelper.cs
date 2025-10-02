@@ -213,20 +213,20 @@ namespace Ink_Canvas.Helpers
                 .Select(x => x.group)
                 .ToList();
 
-            // 将"智教联盟"线路组插入到最前面（如果存在）
-            var zhiJiaoGroup = groups.FirstOrDefault(g => g.GroupName == "智教联盟");
-            if (zhiJiaoGroup != null)
-            {
-                orderedGroups.Insert(0, zhiJiaoGroup);
-                LogHelper.WriteLogToFile("AutoUpdate | 智教联盟线路组已插入到首位");
-            }
-
-            // 将"inkeys"线路组插入到第二位（如果存在）
+            // 将"inkeys"线路组插入到最前面（如果存在）
             var inkeysGroup = groups.FirstOrDefault(g => g.GroupName == "inkeys");
             if (inkeysGroup != null)
             {
-                orderedGroups.Insert(1, inkeysGroup);
-                LogHelper.WriteLogToFile("AutoUpdate | inkeys线路组已插入到第二位");
+                orderedGroups.Insert(0, inkeysGroup);
+                LogHelper.WriteLogToFile("AutoUpdate | inkeys线路组已插入到首位");
+            }
+
+            // 将"智教联盟"线路组插入到第二位（如果存在）
+            var zhiJiaoGroup = groups.FirstOrDefault(g => g.GroupName == "智教联盟");
+            if (zhiJiaoGroup != null)
+            {
+                orderedGroups.Insert(1, zhiJiaoGroup);
+                LogHelper.WriteLogToFile("AutoUpdate | 智教联盟线路组已插入到第二位");
             }
 
             if (orderedGroups.Count > 0)
@@ -671,21 +671,21 @@ namespace Ink_Canvas.Helpers
 
                 SaveDownloadStatus(false);
 
-                // 优先尝试“智教联盟”线路组
+                // 优先尝试"inkeys"线路组和"智教联盟"线路组
                 var zhiJiaoGroup = groups.FirstOrDefault(g => g.GroupName == "智教联盟");
                 var inkeysGroup = groups.FirstOrDefault(g => g.GroupName == "inkeys");
-                if (zhiJiaoGroup != null || inkeysGroup != null)
+                if (inkeysGroup != null || zhiJiaoGroup != null)
                 {
                     var priorityGroups = new List<UpdateLineGroup>();
-                    if (zhiJiaoGroup != null)
-                    {
-                        priorityGroups.Add(zhiJiaoGroup);
-                        LogHelper.WriteLogToFile("AutoUpdate | 下载时优先尝试智教联盟线路组");
-                    }
                     if (inkeysGroup != null)
                     {
                         priorityGroups.Add(inkeysGroup);
                         LogHelper.WriteLogToFile("AutoUpdate | 下载时优先尝试inkeys线路组");
+                    }
+                    if (zhiJiaoGroup != null)
+                    {
+                        priorityGroups.Add(zhiJiaoGroup);
+                        LogHelper.WriteLogToFile("AutoUpdate | 下载时优先尝试智教联盟线路组");
                     }
                     groups = priorityGroups.Concat(groups.Where(g => g.GroupName != "智教联盟" && g.GroupName != "inkeys")).ToList();
                 }
