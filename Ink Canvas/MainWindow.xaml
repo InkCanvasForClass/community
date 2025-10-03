@@ -1465,45 +1465,43 @@
                                     <TextBlock Margin="0,0,0,8" Text="PPT翻页按钮" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="20" />
                                     <Border ClipToBounds="True" Width="324" Height="182">
-                                        <Viewbox Stretch="Uniform" StretchDirection="Both">
-                                            <Grid Width="324" Height="182">
-                                                <Image Source="Resources/PresentationExample/page.jpg" Width="324" Height="182" Stretch="Fill"></Image>
-                                                <Image Source="Resources/PresentationExample/toolbar.png" Height="16" Width="324"
-                                                       VerticalAlignment="Bottom" HorizontalAlignment="Center" Stretch="Fill" />
-                                                <Image Name="PPTBtnPreviewLS" Source="Resources/PresentationExample/sidebar-white.png" Width="10" Height="40"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
-                                                    <Image.RenderTransform>
-                                                        <TransformGroup>
-                                                            <TranslateTransform x:Name="PPTBtnPreviewLSTransform"/>
-                                                        </TransformGroup>
-                                                    </Image.RenderTransform>
-                                                </Image>
-                                                <Image Name="PPTBtnPreviewRS" Source="Resources/PresentationExample/sidebar-white.png" Width="10" Height="40"
-                                                       VerticalAlignment="Center" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
-                                                    <Image.RenderTransform>
-                                                        <TransformGroup>
-                                                            <TranslateTransform x:Name="PPTBtnPreviewRSTransform"/>
-                                                        </TransformGroup>
-                                                    </Image.RenderTransform>
-                                                </Image>
-                                                <Image Name="PPTBtnPreviewLB" Source="Resources/PresentationExample/bottombar-white.png" Height="10" Width="40"
-                                                       VerticalAlignment="Bottom" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
-                                                    <Image.RenderTransform>
-                                                        <TransformGroup>
-                                                            <TranslateTransform x:Name="PPTBtnPreviewLBTransform"/>
-                                                        </TransformGroup>
-                                                    </Image.RenderTransform>
-                                                </Image>
-                                                <Image Name="PPTBtnPreviewRB" Source="Resources/PresentationExample/bottombar-white.png" Height="12" Width="40"
-                                                       VerticalAlignment="Bottom" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
-                                                    <Image.RenderTransform>
-                                                        <TransformGroup>
-                                                            <TranslateTransform x:Name="PPTBtnPreviewRBTransform"/>
-                                                        </TransformGroup>
-                                                    </Image.RenderTransform>
-                                                </Image>
-                                            </Grid>
-                                        </Viewbox>
+                                        <Grid>
+                                            <Image Source="Resources/PresentationExample/page.jpg" Width="324" Height="182" Stretch="Fill"></Image>
+                                            <Image Source="Resources/PresentationExample/toolbar.png" Height="16" Width="324"
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Center" Stretch="Fill" />
+                                            <Image Name="PPTBtnPreviewLS" Source="Resources/PresentationExample/sidebar-white.png" Width="10" Height="30"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <TranslateTransform x:Name="PPTBtnPreviewLSTransform"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
+                                            <Image Name="PPTBtnPreviewRS" Source="Resources/PresentationExample/sidebar-white.png" Width="10" Height="30"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <TranslateTransform x:Name="PPTBtnPreviewRSTransform"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
+                                            <Image Name="PPTBtnPreviewLB" Source="Resources/PresentationExample/bottombar-white.png" Height="10" Width="30"
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <TranslateTransform x:Name="PPTBtnPreviewLBTransform"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
+                                            <Image Name="PPTBtnPreviewRB" Source="Resources/PresentationExample/bottombar-white.png" Height="10" Width="30"
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
+                                                <Image.RenderTransform>
+                                                    <TransformGroup>
+                                                        <TranslateTransform x:Name="PPTBtnPreviewRBTransform"/>
+                                                    </TransformGroup>
+                                                </Image.RenderTransform>
+                                            </Image>
+                                        </Grid>
                                     </Border>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="在 PPT 模式下显示翻页按钮"
