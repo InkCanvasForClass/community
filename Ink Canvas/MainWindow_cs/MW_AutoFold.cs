@@ -103,7 +103,6 @@ namespace Ink_Canvas
                 HideSubPanels("cursor");
                 SidePannelMarginAnimation(-10);
             });
-            isFloatingBarChangingHideMode = false;
         }
 
         private async void LeftUnFoldButtonDisplayQuickPanel_MouseUp(object sender, MouseButtonEventArgs e)
@@ -325,7 +324,6 @@ namespace Ink_Canvas
                 }
             });
 
-            isFloatingBarChangingHideMode = false;
         }
 
         private async void SidePannelMarginAnimation(int MarginFromEdge, bool isNoAnimation = false) // Possible value: -50, -10

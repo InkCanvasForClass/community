@@ -1,0 +1,298 @@
+name: Pre-release and Changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      prerelease:
+        description: 'Create as pre-release'
+        required: true
+        default: true
+        type: boolean
+
+jobs:
+  prerelease:
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # 获取所有历史记录用于生成changelog
+        
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '6.0.x'
+        
+    - name: Setup MSbuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v2.0.1
+      
+    - name: Restore NuGet Packages
+      run: nuget restore "Ink Canvas.sln"
+      
+    - name: Get current version
+      id: get_version
+      run: |
+        $version = (Get-Content "Ink Canvas\Properties\AssemblyInfo.cs" | Select-String "AssemblyVersion\(""([^""]+)""\)").Matches[0].Groups[1].Value
+        echo "current_version=$version" >> $env:GITHUB_OUTPUT
+        echo "Current version: $version"
+        
+    - name: Calculate new version
+      id: calc_version
+      run: |
+        $currentVersion = "${{ steps.get_version.outputs.current_version }}"
+        $versionParts = $currentVersion.Split('.')
+        $major = [int]$versionParts[0]
+        $minor = [int]$versionParts[1]
+        $patch = [int]$versionParts[2]
+        
+        $versionType = "${{ github.event.inputs.version_type }}"
+        
+        switch ($versionType) {
+          "major" { 
+            $major++
+            $minor = 0
+            $patch = 0
+          }
+          "minor" { 
+            $minor++
+            $patch = 0
+          }
+          "patch" { 
+            $patch++
+          }
+        }
+        
+        $newVersion = "$major.$minor.$patch.0"
+        echo "new_version=$newVersion" >> $env:GITHUB_OUTPUT
+        echo "New version: $newVersion"
+        
+    - name: Generate Changelog
+      id: changelog
+      run: |
+        # 获取上次tag到现在的所有commit
+        $lastTag = git describe --tags --abbrev=0 2>$null
+        if ($lastTag) {
+          $commits = git log --pretty=format:"%h|%s|%an|%ad" --date=short "$lastTag..HEAD"
+        } else {
+          $commits = git log --pretty=format:"%h|%s|%an|%ad" --date=short
+        }
+        
+        # 初始化分类数组
+        $fixes = @()
+        $improvements = @()
+        $additions = @()
+        $deletions = @()
+        $versionChanges = @()
+        $others = @()
+        
+        # 解析每个commit
+        foreach ($commit in $commits) {
+          if ($commit -match "^([^|]+)\|([^|]+)\|([^|]+)\|([^|]+)$") {
+            $hash = $matches[1]
+            $message = $matches[2]
+            $author = $matches[3]
+            $date = $matches[4]
+            
+            $commitInfo = @{
+              Hash = $hash
+              Message = $message
+              Author = $author
+              Date = $date
+            }
+            
+            # 根据commit消息分类
+            if ($message -match "^(fix|修复)") {
+              $fixes += $commitInfo
+            } elseif ($message -match "^(improve|改进|优化)") {
+              $improvements += $commitInfo
+            } elseif ($message -match "^(add|新增|添加)") {
+              $additions += $commitInfo
+            } elseif ($message -match "^(delete|删除|移除)") {
+              $deletions += $commitInfo
+            } elseif ($message -match "(版本|version|更新版本号)") {
+              $versionChanges += $commitInfo
+            } else {
+              $others += $commitInfo
+            }
+          }
+        }
+        
+        # 生成changelog内容
+        $version = "${{ steps.calc_version.outputs.new_version }}"
+        $changelog = "# ICC CE $version 更新日志`n`n## 修复 (Fixes)"
+        
+        if ($fixes.Count -gt 0) {
+          foreach ($fix in $fixes) {
+            $changelog += "`n- $($fix.Message) ($($fix.Author), $($fix.Date))"
+          }
+        } else {
+          $changelog += "`n- 无"
+        }
+        
+        $changelog += "`n`n## 改进 (Improvements)"
+        
+        if ($improvements.Count -gt 0) {
+          foreach ($improvement in $improvements) {
+            $changelog += "`n- $($improvement.Message) ($($improvement.Author), $($improvement.Date))"
+          }
+        } else {
+          $changelog += "`n- 无"
+        }
+        
+        $changelog += "`n`n## 新增功能 (New Features)"
+        
+        if ($additions.Count -gt 0) {
+          foreach ($addition in $additions) {
+            $changelog += "`n- $($addition.Message) ($($addition.Author), $($addition.Date))"
+          }
+        } else {
+          $changelog += "`n- 无"
+        }
+        
+        $changelog += "`n`n## 删除功能 (Removed Features)"
+        
+        if ($deletions.Count -gt 0) {
+          foreach ($deletion in $deletions) {
+            $changelog += "`n- $($deletion.Message) ($($deletion.Author), $($deletion.Date))"
+          }
+        } else {
+          $changelog += "`n- 无"
+        }
+        
+        $changelog += "`n`n## 版本更新 (Version Updates)"
+        
+        if ($versionChanges.Count -gt 0) {
+          foreach ($versionChange in $versionChanges) {
+            $changelog += "`n- $($versionChange.Message) ($($versionChange.Author), $($versionChange.Date))"
+          }
+        } else {
+          $changelog += "`n- 无"
+        }
+        
+        $changelog += "`n`n## 其他更改 (Other Changes)"
+        
+        if ($others.Count -gt 0) {
+          foreach ($other in $others) {
+            $changelog += "`n- $($other.Message) ($($other.Author), $($other.Date))"
+          }
+        } else {
+          $changelog += "`n- 无"
+        }
+        
+        $changelog += "`n`n---`n*此更新日志由GitHub Actions自动生成*"
+        
+        # 保存changelog到文件
+        $changelog | Out-File -FilePath "CHANGELOG_${{ steps.calc_version.outputs.new_version }}.md" -Encoding UTF8
+        
+        # 输出changelog内容到步骤输出
+        echo "changelog<<EOF" >> $env:GITHUB_OUTPUT
+        echo $changelog >> $env:GITHUB_OUTPUT
+        echo "EOF" >> $env:GITHUB_OUTPUT
+        
+        echo "Changelog generated successfully"
+        
+    - name: Display version info
+      run: |
+        echo "Current version: ${{ steps.get_version.outputs.current_version }}"
+        echo "New version: ${{ steps.calc_version.outputs.new_version }}"
+        echo "Note: Version will not be automatically updated in repository files"
+        
+    - name: Build the Solution
+      run: |
+        msbuild -t:restore /p:GitFlow="Github Action"
+        msbuild /p:platform="AnyCPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj"
+        
+    - name: Create Release Archive
+      run: |
+        $version = "${{ steps.calc_version.outputs.new_version }}"
+        $archiveName = "ICC_CE_$version.zip"
+        
+        # 创建发布目录
+        New-Item -ItemType Directory -Path "release" -Force
+        
+        # 复制发布文件
+        Copy-Item "Ink Canvas\bin\Release\net472\*" "release\" -Recurse -Force
+        
+        # 创建压缩包
+        Compress-Archive -Path "release\*" -DestinationPath $archiveName -Force
+        
+        echo "archive_name=$archiveName" >> $env:GITHUB_OUTPUT
+        
+    - name: Upload Release Assets
+      uses: actions/upload-artifact@v4
+      with:
+        name: release-files-${{ steps.calc_version.outputs.new_version }}
+        path: |
+          ICC_CE_${{ steps.calc_version.outputs.new_version }}.zip
+          CHANGELOG_${{ steps.calc_version.outputs.new_version }}.md
+          
+    - name: Create Git Tag
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        $version = "${{ steps.calc_version.outputs.new_version }}"
+        git tag -a "v$version" -m "Release version $version"
+        git push origin "v$version"
+        
+    - name: Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ steps.calc_version.outputs.new_version }}
+        release_name: ICC CE v${{ steps.calc_version.outputs.new_version }}
+        body: |
+          ${{ steps.changelog.outputs.changelog }}
+        draft: false
+        prerelease: ${{ github.event.inputs.prerelease }}
+      id: create_release
+      
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./ICC_CE_${{ steps.calc_version.outputs.new_version }}.zip
+        asset_name: ICC_CE_${{ steps.calc_version.outputs.new_version }}.zip
+        asset_content_type: application/zip
+        
+    - name: Generate UpdateLog preview
+      run: |
+        $version = "${{ steps.calc_version.outputs.new_version }}"
+        $changelogFile = "CHANGELOG_$version.md"
+        
+        # 读取生成的changelog
+        $changelogContent = Get-Content $changelogFile -Raw
+        
+        # 生成预览内容
+        $previewContent = "ICC CE $version 更新日志`n" + $changelogContent
+        
+        echo "UpdateLog preview generated (not written to file):"
+        echo $previewContent
+        
+    - name: Display Summary
+      run: |
+        echo "=== Release Summary ==="
+        echo "Version: ${{ steps.calc_version.outputs.new_version }}"
+        echo "Pre-release: ${{ github.event.inputs.prerelease }}"
+        echo "Changelog: Generated and attached to release"
+        echo "Archive: ICC_CE_${{ steps.calc_version.outputs.new_version }}.zip"
+        echo ""
+        echo "Note: No repository files were modified"
+        echo "You can manually update version numbers and changelog as needed"

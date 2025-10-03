@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Threading;
 
@@ -96,12 +97,37 @@ namespace Ink_Canvas.Helpers
 
                         UpdateNavigationPanelsVisibility();
                         UpdateNavigationButtonStyles();
+                        if (MainWindow.Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                        {
+                            // 设置为画板模式，允许全屏操作
+                            AvoidFullScreenHelper.SetBoardMode(true);
+                            _dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                MainWindow.MoveWindow(new WindowInteropHelper(_mainWindow).Handle, 0, 0,
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width, 
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);                               
+                            }), DispatcherPriority.ApplicationIdle);
+                        }
                     }
                     else
                     {
                         _mainWindow.BtnPPTSlideShow.Visibility = Visibility.Visible;
                         _mainWindow.BtnPPTSlideShowEnd.Visibility = Visibility.Collapsed;
                         HideAllNavigationPanels();
+                        if (MainWindow.Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                        {
+                            // 恢复为非画板模式，重新启用全屏限制
+                            AvoidFullScreenHelper.SetBoardMode(false);
+                            
+                            _dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                // 退出PPT放映模式，恢复到工作区域大小
+                                var workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+                                MainWindow.MoveWindow(new WindowInteropHelper(_mainWindow).Handle, 
+                                    workingArea.X, workingArea.Y,
+                                    workingArea.Width, workingArea.Height, true);
+                            }), DispatcherPriority.ApplicationIdle);
+                        }
                     }
                 }
                 catch (Exception ex)

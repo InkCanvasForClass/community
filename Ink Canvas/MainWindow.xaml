@@ -1072,6 +1072,8 @@
                                                   SelectionChanged="ComboBoxFloatingBarImg_SelectionChanged">
                                             <ComboBoxItem Content="“ICC-CE”默认" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="“ICC-CE”黑色透明版" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="“ICC-CE”无阴影" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="“ICC-CE”深色" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="酷安斗鸡眼滑稽" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="酷安受虐滑稽" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="酷安呲牙笑" FontFamily="Microsoft YaHei UI" />
@@ -1464,35 +1466,35 @@
                                                FontSize="20" />
                                     <Border ClipToBounds="True" Width="324" Height="182">
                                         <Grid>
-                                            <Image Source="Resources/PresentationExample/page.jpg"></Image>
-                                            <Image Source="Resources/PresentationExample/toolbar.png" Height="16"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Center" />
-                                            <Image Name="PPTBtnPreviewLS" Source="Resources/PresentationExample/sidebar-white.png" Width="10"
-                                                   VerticalAlignment="Center" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" >
+                                            <Image Source="Resources/PresentationExample/page.jpg" Width="324" Height="182" Stretch="Fill"></Image>
+                                            <Image Name="PPTBtnPreviewToolbar" Source="Resources/PresentationExample/toolbar.png" Height="16"
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Center" Stretch="Uniform" />
+                                            <Image Name="PPTBtnPreviewLS" Source="Resources/PresentationExample/sidebar-white.png" Width="10" Height="30"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
                                                 <Image.RenderTransform>
                                                     <TransformGroup>
                                                         <TranslateTransform x:Name="PPTBtnPreviewLSTransform"/>
                                                     </TransformGroup>
                                                 </Image.RenderTransform>
                                             </Image>
-                                            <Image Name="PPTBtnPreviewRS" Source="Resources/PresentationExample/sidebar-white.png" Width="10"
-                                                   VerticalAlignment="Center" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" >
+                                            <Image Name="PPTBtnPreviewRS" Source="Resources/PresentationExample/sidebar-white.png" Width="10" Height="30"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
                                                 <Image.RenderTransform>
                                                     <TransformGroup>
                                                         <TranslateTransform x:Name="PPTBtnPreviewRSTransform"/>
                                                     </TransformGroup>
                                                 </Image.RenderTransform>
                                             </Image>
-                                            <Image Name="PPTBtnPreviewLB" Source="Resources/PresentationExample/bottombar-white.png" Height="10"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5">
+                                            <Image Name="PPTBtnPreviewLB" Source="Resources/PresentationExample/bottombar-white.png" Height="10" Width="30"
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
                                                 <Image.RenderTransform>
                                                     <TransformGroup>
                                                         <TranslateTransform x:Name="PPTBtnPreviewLBTransform"/>
                                                     </TransformGroup>
                                                 </Image.RenderTransform>
                                             </Image>
-                                            <Image Name="PPTBtnPreviewRB" Source="Resources/PresentationExample/bottombar-white.png" Height="12"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5">
+                                            <Image Name="PPTBtnPreviewRB" Source="Resources/PresentationExample/bottombar-white.png" Height="10" Width="30"
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Right" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
                                                 <Image.RenderTransform>
                                                     <TransformGroup>
                                                         <TranslateTransform x:Name="PPTBtnPreviewRBTransform"/>
@@ -9428,7 +9430,7 @@
                         <ui:SimpleStackPanel Background="Transparent" Orientation="Vertical"
                                              HorizontalAlignment="Center"
                                              Width="28" Margin="0,0">
-                            <Image Source="/Resources/new-icons/end-slides-show.png"
+                            <Image Source="{DynamicResource QuickPanelEndSlideshowIcon}"
                                    RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="17"
                                    Margin="0,3,0,0" />
                             <TextBlock Text="退出" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,1,0,0"
@@ -9771,3 +9773,4 @@
         </Viewbox>
     </Grid>
 </Window>
+

@@ -912,12 +912,20 @@ namespace Ink_Canvas
             {
                 if (_isSplashScreenShown)
                 {
-                    SetSplashMessage("启动完成！");
-                    SetSplashProgress(100);
-                    // 延迟关闭启动画面，让用户看到完成消息
-                    Task.Delay(500).ContinueWith(_ =>
+                    SetSplashMessage("完成初始化...");
+                    SetSplashProgress(80);
+                    Task.Delay(300).ContinueWith(_ =>
                     {
-                        Dispatcher.Invoke(() => CloseSplashScreen());
+                        Dispatcher.Invoke(() =>
+                        {
+                            SetSplashMessage("启动完成！");
+                            SetSplashProgress(100);
+                            // 延迟关闭启动画面，让用户看到完成消息
+                            Task.Delay(500).ContinueWith(__ =>
+                            {
+                                Dispatcher.Invoke(() => CloseSplashScreen());
+                            });
+                        });
                     });
                 }
             };

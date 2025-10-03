@@ -464,7 +464,7 @@ namespace Ink_Canvas
                 var strokeVisual = GetStrokeVisual(e.StylusDevice.Id);
                 var stylusPointCollection = e.GetStylusPoints(this);
                 foreach (var stylusPoint in stylusPointCollection)
-                    strokeVisual.Add(new StylusPoint(stylusPoint.X, stylusPoint.Y, stylusPoint.PressureFactor));
+                strokeVisual.Add(new StylusPoint(stylusPoint.X, stylusPoint.Y, stylusPoint.PressureFactor));
                 strokeVisual.Redraw();
             }
             catch { }

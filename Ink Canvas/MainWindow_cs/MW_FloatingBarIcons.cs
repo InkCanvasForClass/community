@@ -1587,7 +1587,6 @@ namespace Ink_Canvas
                     if (toolbarHeight == 0)
                     {
                         pos.Y = screenHeight - MarginFromEdge * ViewboxFloatingBarScaleTransform.ScaleY;
-                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定边距: {MarginFromEdge}");
                     }
                     else
                     {
@@ -1601,7 +1600,6 @@ namespace Ink_Canvas
                     {
                         pos.Y = screenHeight - ViewboxFloatingBar.ActualHeight * ViewboxFloatingBarScaleTransform.ScaleY -
                                3 * ViewboxFloatingBarScaleTransform.ScaleY;
-                        LogHelper.WriteLogToFile($"任务栏隐藏,使用固定高度: {ViewboxFloatingBar.ActualHeight}");
                     }
                     else
                     {
@@ -3003,10 +3001,18 @@ namespace Ink_Canvas
                         // 新增：在屏幕模式下恢复基础浮动栏的显示
                         ViewboxFloatingBar.Visibility = Visibility.Visible;
 
-                        // 新增：退出白板时自动收纳功能
+                        // 新增：退出白板时自动收纳功能 - 等待浮动栏完全展开后再收纳
                         if (Settings.Automation.IsAutoFoldWhenExitWhiteboard && !isFloatingBarFolded)
                         {
-                            FoldFloatingBar_MouseUp(null, null);
+                            // 使用异步延迟，等待浮动栏展开动画完成后再收纳
+                            Task.Run(async () =>
+                            {
+                                await Task.Delay(700); 
+                                await Dispatcher.InvokeAsync(() =>
+                                {
+                                    FoldFloatingBar_MouseUp(new object(), null);
+                                });
+                            });
                         }
 
                         if (BtnSwitchTheme.Content.ToString() == "浅色")
