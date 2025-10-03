@@ -209,15 +209,15 @@ namespace Ink_Canvas
                 try
                 {
                     // 获取全局快捷键管理器
-                    var hotkeyManagerField = typeof(MainWindow).GetField("_globalHotkeyManager", 
+                    var hotkeyManagerField = typeof(MainWindow).GetField("_globalHotkeyManager",
                         System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                     var hotkeyManager = hotkeyManagerField?.GetValue(mainWin) as GlobalHotkeyManager;
-                    
+
                     if (hotkeyManager != null)
                     {
                         // 禁用所有快捷键
                         hotkeyManager.DisableHotkeyRegistration();
-                        
+
                         // 更新菜单项文本和状态
                         var menuItem = sender as MenuItem;
                         if (menuItem != null)

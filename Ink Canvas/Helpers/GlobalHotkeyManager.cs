@@ -6,8 +6,8 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Windows;
-using System.Windows.Input;
 using System.Windows.Forms;
+using System.Windows.Input;
 
 namespace Ink_Canvas.Helpers
 {
@@ -21,12 +21,12 @@ namespace Ink_Canvas.Helpers
         private readonly MainWindow _mainWindow;
         private bool _isDisposed;
         private bool _hotkeysShouldBeRegistered = true; // 启动时注册热键
-        
+
         // 多屏幕支持相关字段
         private Screen _currentScreen;
         private bool _isMultiScreenMode = false;
         private bool _enableScreenSpecificHotkeys = true; // 是否启用基于屏幕的热键注册
-        
+
         // 智能热键管理相关字段
         private bool _isWindowFocused = false;
         private bool _isMouseOverWindow = false;
@@ -42,10 +42,10 @@ namespace Ink_Canvas.Helpers
             _mainWindow = mainWindow ?? throw new ArgumentNullException(nameof(mainWindow));
             _registeredHotkeys = new Dictionary<string, HotkeyInfo>();
             _hotkeysShouldBeRegistered = true; // 启动时注册热键
-            
+
             // 初始化多屏幕支持
             InitializeMultiScreenSupport();
-            
+
             // 启动时确保配置文件存在
             EnsureConfigFileExists();
         }
@@ -106,10 +106,10 @@ namespace Ink_Canvas.Helpers
                 });
 
                 _registeredHotkeys[hotkeyName] = hotkeyInfo;
-                
+
                 // 记录注册信息
                 var screenInfo = _isMultiScreenMode ? $" (屏幕: {_currentScreen?.DeviceName})" : "";
-                
+
                 return true;
             }
             catch (Exception ex)
@@ -506,7 +506,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 _enableScreenSpecificHotkeys = true;
-                
+
                 // 如果当前在多屏幕环境下，刷新热键注册
                 if (_isMultiScreenMode)
                 {
@@ -527,7 +527,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 _enableScreenSpecificHotkeys = false;
-                
+
                 // 重新注册热键（全局模式）
                 if (_hotkeysShouldBeRegistered)
                 {
@@ -599,15 +599,15 @@ namespace Ink_Canvas.Helpers
             {
                 // 检测是否有多个屏幕
                 _isMultiScreenMode = ScreenDetectionHelper.HasMultipleScreens();
-                
+
                 if (_isMultiScreenMode)
                 {
                     // 获取当前窗口所在的屏幕
                     _currentScreen = ScreenDetectionHelper.GetWindowScreen(_mainWindow);
-                    
+
                     // 监听窗口位置变化事件
                     _mainWindow.LocationChanged += OnWindowLocationChanged;
-                    
+
                     // 初始化智能热键管理
                     InitializeSmartHotkeyManagement();
                 }
@@ -634,16 +634,16 @@ namespace Ink_Canvas.Helpers
                 // 监听窗口焦点事件
                 _mainWindow.GotFocus += OnWindowGotFocus;
                 _mainWindow.LostFocus += OnWindowLostFocus;
-                
+
                 // 监听鼠标进入/离开事件
                 _mainWindow.MouseEnter += OnMouseEnterWindow;
                 _mainWindow.MouseLeave += OnMouseLeaveWindow;
-                
+
                 // 初始化鼠标位置监控定时器
                 _mousePositionTimer = new System.Windows.Threading.DispatcherTimer();
                 _mousePositionTimer.Interval = TimeSpan.FromMilliseconds(500); // 每500ms检查一次
                 _mousePositionTimer.Tick += OnMousePositionTimerTick;
-                
+
             }
             catch (Exception ex)
             {
@@ -665,7 +665,7 @@ namespace Ink_Canvas.Helpers
                 if (newScreen != null && newScreen != _currentScreen)
                 {
                     _currentScreen = newScreen;
-                    
+
                     // 重新注册热键以适应新屏幕
                     RefreshHotkeysForCurrentScreen();
                 }
@@ -691,7 +691,7 @@ namespace Ink_Canvas.Helpers
 
                 // 重新注册热键
                 LoadHotkeysFromSettings();
-                
+
             }
             catch (Exception ex)
             {
@@ -776,12 +776,12 @@ namespace Ink_Canvas.Helpers
                 // 检查鼠标是否在当前窗口所在的屏幕上
                 var mousePosition = Control.MousePosition;
                 var currentScreen = Screen.FromPoint(mousePosition);
-                
+
                 // 无论屏幕是否变化，都检查热键状态
                 // 这样可以确保热键状态始终与当前上下文保持一致
                 bool shouldEnableHotkeys = ShouldEnableHotkeysBasedOnContext();
                 bool currentlyHasHotkeys = _registeredHotkeys.Count > 0;
-                
+
                 if (shouldEnableHotkeys && !currentlyHasHotkeys)
                 {
                     UpdateHotkeyStateBasedOnContext();
@@ -808,7 +808,7 @@ namespace Ink_Canvas.Helpers
                     return;
 
                 bool shouldEnableHotkeys = ShouldEnableHotkeysBasedOnContext();
-                
+
                 if (shouldEnableHotkeys)
                 {
                     // 如果热键未注册，则注册
@@ -823,7 +823,7 @@ namespace Ink_Canvas.Helpers
                     if (_registeredHotkeys.Count > 0)
                     {
                         UnregisterAllHotkeys();
-                        
+
                         // 注意：这里不设置 _hotkeysShouldBeRegistered = false
                         // 因为我们需要保持热键系统的启用状态，只是暂时注销热键
                         // 这样当上下文变化时，热键可以重新注册
@@ -882,7 +882,7 @@ namespace Ink_Canvas.Helpers
                 {
                     var mousePosition = Control.MousePosition;
                     var mouseScreen = Screen.FromPoint(mousePosition);
-                    
+
                     if (mouseScreen == _currentScreen)
                     {
                         return true;
@@ -1344,14 +1344,14 @@ namespace Ink_Canvas.Helpers
             {
                 // 注销所有快捷键
                 UnregisterAllHotkeys();
-                
+
                 // 停止定时器
                 if (_mousePositionTimer != null)
                 {
                     _mousePositionTimer.Stop();
                     _mousePositionTimer = null;
                 }
-                
+
                 // 移除事件监听器
                 if (_mainWindow != null)
                 {
@@ -1359,7 +1359,7 @@ namespace Ink_Canvas.Helpers
                     {
                         _mainWindow.LocationChanged -= OnWindowLocationChanged;
                     }
-                    
+
                     _mainWindow.GotFocus -= OnWindowGotFocus;
                     _mainWindow.LostFocus -= OnWindowLostFocus;
                     _mainWindow.MouseEnter -= OnMouseEnterWindow;

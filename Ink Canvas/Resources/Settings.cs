@@ -101,7 +101,7 @@ namespace Ink_Canvas
 
         // 墨迹渐隐功能设置
         [JsonProperty("enableInkFade")]
-        public bool EnableInkFade { get; set; } = false; 
+        public bool EnableInkFade { get; set; } = false;
         [JsonProperty("inkFadeTime")]
         public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
 
@@ -233,16 +233,12 @@ namespace Ink_Canvas
         public bool IsShowLassoSelectButton { get; set; } = true;
         [JsonProperty("isShowClearAndMouseButton")]
         public bool IsShowClearAndMouseButton { get; set; } = true;
-
         [JsonProperty("eraserDisplayOption")]
         public int EraserDisplayOption { get; set; }
-
         [JsonProperty("isShowQuickColorPalette")]
         public bool IsShowQuickColorPalette { get; set; }
-
         [JsonProperty("quickColorPaletteDisplayMode")]
         public int QuickColorPaletteDisplayMode { get; set; } = 1;
-
         [JsonProperty("enableHotkeysInMouseMode")]
         public bool EnableHotkeysInMouseMode { get; set; } = false;
 
@@ -250,8 +246,6 @@ namespace Ink_Canvas
 
     public class PowerPointSettings
     {
-        // -- new --
-
         [JsonProperty("showPPTButton")]
         public bool ShowPPTButton { get; set; } = true;
 
@@ -478,7 +472,7 @@ namespace Ink_Canvas
         public bool IsEnabled { get; set; } = false;
 
         [JsonProperty("scanIntervalMs")]
-        public int ScanIntervalMs { get; set; } = 5000; 
+        public int ScanIntervalMs { get; set; } = 5000;
 
         [JsonProperty("autoStart")]
         public bool AutoStart { get; set; } = false;
@@ -630,7 +624,7 @@ namespace Ink_Canvas
         [JsonProperty("directCallCiRand")]
         public bool DirectCallCiRand { get; set; }
         [JsonProperty("externalCallerType")]
-        public int ExternalCallerType { get; set; } = 0; 
+        public int ExternalCallerType { get; set; } = 0;
         [JsonProperty("selectedBackgroundIndex")]
         public int SelectedBackgroundIndex { get; set; }
         [JsonProperty("customPickNameBackgrounds")]
@@ -688,15 +682,15 @@ namespace Ink_Canvas
     public class CameraSettings
     {
         [JsonProperty("rotationAngle")]
-        public int RotationAngle { get; set; } = 0; 
+        public int RotationAngle { get; set; } = 0;
 
         [JsonProperty("resolutionWidth")]
-        public int ResolutionWidth { get; set; } = 1920; 
+        public int ResolutionWidth { get; set; } = 1920;
 
         [JsonProperty("resolutionHeight")]
-        public int ResolutionHeight { get; set; } = 1080; 
+        public int ResolutionHeight { get; set; } = 1080;
 
         [JsonProperty("selectedCameraIndex")]
-        public int SelectedCameraIndex { get; set; } = 0; 
+        public int SelectedCameraIndex { get; set; } = 0;
     }
 }

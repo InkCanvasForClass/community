@@ -18,17 +18,17 @@ namespace Ink_Canvas
             try
             {
                 _floatingWindowInterceptorManager = new FloatingWindowInterceptorManager();
-                
+
                 // 订阅事件
                 _floatingWindowInterceptorManager.WindowIntercepted += OnFloatingWindowIntercepted;
                 _floatingWindowInterceptorManager.WindowRestored += OnFloatingWindowRestored;
-                
+
                 // 初始化拦截器
                 _floatingWindowInterceptorManager.Initialize(Settings.Automation.FloatingWindowInterceptor);
-                
+
                 // 加载UI状态
                 LoadFloatingWindowInterceptorUI();
-                
+
                 LogHelper.WriteLogToFile("悬浮窗拦截管理器初始化完成", LogHelper.LogType.Event);
             }
             catch (Exception ex)
@@ -48,7 +48,7 @@ namespace Ink_Canvas
 
                 // 设置主开关状态
                 ToggleSwitchFloatingWindowInterceptorEnabled.IsOn = Settings.Automation.FloatingWindowInterceptor.IsEnabled;
-                
+
                 // 设置各个拦截规则的状态
                 foreach (var kvp in Settings.Automation.FloatingWindowInterceptor.InterceptRules)
                 {
@@ -59,7 +59,7 @@ namespace Ink_Canvas
                         toggle.IsOn = kvp.Value;
                     }
                 }
-                
+
                 // 更新UI可见性
                 UpdateFloatingWindowInterceptorUI();
             }
@@ -78,16 +78,16 @@ namespace Ink_Canvas
             {
                 var isEnabled = Settings.Automation.FloatingWindowInterceptor.IsEnabled;
                 FloatingWindowInterceptorGrid.Visibility = isEnabled ? Visibility.Visible : Visibility.Collapsed;
-                
+
                 // 计算启用的规则数量
                 var enabledRulesCount = Settings.Automation.FloatingWindowInterceptor.InterceptRules.Where(kvp => kvp.Value).Count();
                 var totalRulesCount = Settings.Automation.FloatingWindowInterceptor.InterceptRules.Count;
-                
+
                 // 更新状态文本
                 if (_floatingWindowInterceptorManager != null)
                 {
                     var stats = _floatingWindowInterceptorManager.GetStatistics();
-                    TextBlockFloatingWindowInterceptorStatus.Text = stats.IsRunning 
+                    TextBlockFloatingWindowInterceptorStatus.Text = stats.IsRunning
                         ? $"拦截器运行中 - 已启用 {enabledRulesCount}/{totalRulesCount} 个规则"
                         : $"拦截器未启动 - 已启用 {enabledRulesCount}/{totalRulesCount} 个规则";
                 }
@@ -150,11 +150,11 @@ namespace Ink_Canvas
         private void ToggleSwitchFloatingWindowInterceptorEnabled_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            
+
             try
             {
                 Settings.Automation.FloatingWindowInterceptor.IsEnabled = ToggleSwitchFloatingWindowInterceptorEnabled.IsOn;
-                
+
                 if (_floatingWindowInterceptorManager != null)
                 {
                     if (Settings.Automation.FloatingWindowInterceptor.IsEnabled)
@@ -166,7 +166,7 @@ namespace Ink_Canvas
                         _floatingWindowInterceptorManager.Stop();
                     }
                 }
-                
+
                 UpdateFloatingWindowInterceptorUI();
                 SaveSettingsToFile();
             }
@@ -304,7 +304,7 @@ namespace Ink_Canvas
                 {
                     _floatingWindowInterceptorManager.SetInterceptRule(type, enabled);
                 }
-                
+
                 // 更新设置
                 var ruleName = type.ToString();
                 if (Settings.Automation.FloatingWindowInterceptor.InterceptRules.ContainsKey(ruleName))
@@ -342,10 +342,10 @@ namespace Ink_Canvas
                         }
                     }
                 }
-                
+
                 // 更新UI显示
                 UpdateFloatingWindowInterceptorUI();
-                
+
                 SaveSettingsToFile();
             }
             catch (Exception ex)

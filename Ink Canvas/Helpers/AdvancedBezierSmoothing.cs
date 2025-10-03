@@ -732,9 +732,9 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public class AdvancedBezierSmoothing
     {
-        public double SmoothingStrength { get; set; } = 0.6; 
-        public double ResampleInterval { get; set; } = 2.0; 
-        public int InterpolationSteps { get; set; } = 12; 
+        public double SmoothingStrength { get; set; } = 0.6;
+        public double ResampleInterval { get; set; } = 2.0;
+        public int InterpolationSteps { get; set; } = 12;
 
         public Stroke SmoothStroke(Stroke stroke)
         {
@@ -764,7 +764,7 @@ namespace Ink_Canvas.Helpers
             {
                 DrawingAttributes = stroke.DrawingAttributes.Clone()
             };
-            
+
             System.Diagnostics.Debug.WriteLine($"AdvancedBezierSmoothing: 创建平滑笔画成功");
             return smoothedStroke;
         }
@@ -797,7 +797,7 @@ namespace Ink_Canvas.Helpers
 
                 // 只生成2-3个插值点
                 int steps = 2;
-                
+
                 // 生成贝塞尔曲线点
                 for (int j = 1; j <= steps; j++)
                 {
@@ -808,7 +808,7 @@ namespace Ink_Canvas.Helpers
             }
 
             result.Add(points[points.Length - 1]);
-            
+
             // 去重处理
             return RemoveDuplicatePoints(result.ToArray());
         }
@@ -827,10 +827,10 @@ namespace Ink_Canvas.Helpers
             {
                 var lastPoint = result[result.Count - 1];
                 var currentPoint = points[i];
-                
-                double distance = Math.Sqrt(Math.Pow(currentPoint.X - lastPoint.X, 2) + 
+
+                double distance = Math.Sqrt(Math.Pow(currentPoint.X - lastPoint.X, 2) +
                                           Math.Pow(currentPoint.Y - lastPoint.Y, 2));
-                
+
                 if (distance > minDistance)
                 {
                     result.Add(currentPoint);

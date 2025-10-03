@@ -1585,7 +1585,7 @@ namespace Ink_Canvas
                 {
                     isResizingImage = true;
                     imageResizeStartPoint = e.GetPosition(inkCanvas);
-                    
+
                     // 确定是哪个控制点
                     activeResizeHandle = ellipse.Name;
 

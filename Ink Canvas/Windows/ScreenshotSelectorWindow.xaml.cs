@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Ink_Canvas.Helpers;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -7,15 +9,13 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Threading;
-using System.Drawing;
-using Ink_Canvas.Helpers;
 using Brushes = System.Windows.Media.Brushes;
 using Color = System.Windows.Media.Color;
 using DrawingRectangle = System.Drawing.Rectangle;
-using WpfPoint = System.Windows.Point;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MouseEventArgs = System.Windows.Input.MouseEventArgs;
 using WpfCanvas = System.Windows.Controls.Canvas;
+using WpfPoint = System.Windows.Point;
 
 namespace Ink_Canvas
 {
@@ -115,7 +115,7 @@ namespace Ink_Canvas
 
                 // 初始化摄像头选择下拉框
                 RefreshCameraComboBox();
-                
+
                 // 初始化旋转和分辨率显示
                 InitializeCameraControls();
             }
@@ -131,7 +131,7 @@ namespace Ink_Canvas
             {
                 // 更新旋转角度显示
                 UpdateRotationDisplay();
-                
+
                 // 设置分辨率下拉框
                 var currentResolution = $"{_cameraService.ResolutionWidth}x{_cameraService.ResolutionHeight}";
                 foreach (ComboBoxItem item in ResolutionComboBox.Items)
@@ -150,7 +150,7 @@ namespace Ink_Canvas
             try
             {
                 CameraSelectionComboBox.Items.Clear();
-                
+
                 if (_cameraService.HasAvailableCameras())
                 {
                     var cameraNames = _cameraService.GetCameraNames();
@@ -158,7 +158,7 @@ namespace Ink_Canvas
                     {
                         CameraSelectionComboBox.Items.Add(name);
                     }
-                    
+
                     if (cameraNames.Count > 0)
                     {
                         CameraSelectionComboBox.SelectedIndex = 0;
@@ -203,7 +203,7 @@ namespace Ink_Canvas
                                 CameraPreviewImage.Source = bitmapSource;
                                 CameraStatusText.Text = "摄像头已连接";
                             }
-                            
+
                             // 释放临时位图
                             clonedFrame.Dispose();
                         }
@@ -393,10 +393,10 @@ namespace Ink_Canvas
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
-            
+
             // 隐藏摄像头预览
             CameraPreviewBorder.Visibility = Visibility.Collapsed;
-            
+
             // 直接执行全屏截图
             PerformFullScreenCapture();
         }
@@ -512,10 +512,10 @@ namespace Ink_Canvas
                     {
                         // 保存BitmapSource而不是Bitmap
                         CameraBitmapSource = bitmapSource;
-                        
+
                         // 停止摄像头预览
                         _cameraService.StopPreview();
-                        
+
                         // 设置结果并关闭窗口
                         DialogResult = true;
                         Close();
@@ -1164,11 +1164,11 @@ namespace Ink_Canvas
             {
                 // 获取虚拟屏幕边界
                 var virtualScreen = SystemInformation.VirtualScreen;
-                
+
                 // 设置全屏截图区域
                 SelectedArea = new DrawingRectangle(virtualScreen.X, virtualScreen.Y, virtualScreen.Width, virtualScreen.Height);
                 SelectedPath = null; // 全屏截图不需要路径
-                
+
                 // 直接关闭窗口并返回结果
                 DialogResult = true;
                 Close();
@@ -1271,8 +1271,8 @@ namespace Ink_Canvas
                 if (!string.IsNullOrEmpty(resolution))
                 {
                     var parts = resolution.Split(',');
-                    if (parts.Length == 2 && 
-                        int.TryParse(parts[0], out int width) && 
+                    if (parts.Length == 2 &&
+                        int.TryParse(parts[0], out int width) &&
                         int.TryParse(parts[1], out int height))
                     {
                         _cameraService.ResolutionWidth = width;

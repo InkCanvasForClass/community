@@ -104,8 +104,8 @@ namespace Ink_Canvas.Helpers
                             _dispatcher.BeginInvoke(new Action(() =>
                             {
                                 MainWindow.MoveWindow(new WindowInteropHelper(_mainWindow).Handle, 0, 0,
-                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width, 
-                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);                               
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
                             }), DispatcherPriority.ApplicationIdle);
                         }
                     }
@@ -118,12 +118,12 @@ namespace Ink_Canvas.Helpers
                         {
                             // 恢复为非画板模式，重新启用全屏限制
                             AvoidFullScreenHelper.SetBoardMode(false);
-                            
+
                             _dispatcher.BeginInvoke(new Action(() =>
                             {
                                 // 退出PPT放映模式，恢复到工作区域大小
                                 var workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
-                                MainWindow.MoveWindow(new WindowInteropHelper(_mainWindow).Handle, 
+                                MainWindow.MoveWindow(new WindowInteropHelper(_mainWindow).Handle,
                                     workingArea.X, workingArea.Y,
                                     workingArea.Width, workingArea.Height, true);
                             }), DispatcherPriority.ApplicationIdle);

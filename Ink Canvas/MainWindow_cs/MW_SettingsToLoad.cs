@@ -11,9 +11,9 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using WinForms = System.Windows.Forms;
 using File = System.IO.File;
 using OperatingSystem = OSVersionExtension.OperatingSystem;
+using WinForms = System.Windows.Forms;
 
 namespace Ink_Canvas
 {
@@ -30,7 +30,7 @@ namespace Ink_Canvas
                     {
                         string text = File.ReadAllText(App.RootPath + settingsFileName);
                         Settings = JsonConvert.DeserializeObject<Settings>(text);
-                        
+
                         // 验证设置是否成功加载
                         if (Settings == null)
                         {
@@ -44,7 +44,7 @@ namespace Ink_Canvas
                                 {
                                 }
                             }
-                            
+
                             // 如果仍然失败，使用默认设置
                             if (Settings == null)
                             {
@@ -56,7 +56,7 @@ namespace Ink_Canvas
                     catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"配置文件加载失败: {ex.Message}", LogHelper.LogType.Error);
-                        
+
                         // 尝试从备份恢复
                         LogHelper.WriteLogToFile("尝试从备份恢复配置文件", LogHelper.LogType.Warning);
                         if (AutoBackupManager.TryRestoreFromBackup())
@@ -75,7 +75,7 @@ namespace Ink_Canvas
                                 BtnResetToSuggestion_Click(null, null);
                             }
                         }
-                        
+
                         // 如果仍然失败，使用默认设置
                         if (Settings == null)
                         {
@@ -109,7 +109,7 @@ namespace Ink_Canvas
                         LogHelper.WriteLogToFile("备份恢复失败，使用默认设置", LogHelper.LogType.Warning);
                         BtnResetToSuggestion_Click(null, null);
                     }
-                    
+
                     // 如果仍然失败，使用默认设置
                     if (Settings == null)
                     {
@@ -427,7 +427,7 @@ namespace Ink_Canvas
 
                 // 应用浮动栏按钮可见性设置
                 UpdateFloatingBarButtonsVisibility();
-                
+
                 // 更新浮动栏图标
                 UpdateFloatingBarIcons();
 
@@ -806,7 +806,7 @@ namespace Ink_Canvas
                 ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn = Settings.Advanced.IsEnableAvoidFullScreenHelper;
                 ToggleSwitchIsAutoBackupBeforeUpdate.IsOn = Settings.Advanced.IsAutoBackupBeforeUpdate;
                 ToggleSwitchIsAutoBackupEnabled.IsOn = Settings.Advanced.IsAutoBackupEnabled;
-                
+
                 // 设置备份间隔下拉框
                 foreach (ComboBoxItem item in ComboBoxAutoBackupInterval.Items)
                 {
@@ -911,7 +911,7 @@ namespace Ink_Canvas
             if (Settings.ModeSettings != null)
             {
                 ToggleSwitchMode.IsOn = Settings.ModeSettings.IsPPTOnlyMode;
-                
+
                 // 根据加载的配置状态执行相应的窗口显示/隐藏逻辑
                 if (isStartup && Settings.ModeSettings.IsPPTOnlyMode)
                 {
@@ -1026,7 +1026,7 @@ namespace Ink_Canvas
 
                 // 加载退出收纳模式自动切换至批注模式设置
                 ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode.IsOn = Settings.Automation.IsAutoEnterAnnotationModeWhenExitFoldMode;
-                
+
                 // 加载退出白板时自动收纳设置
                 ToggleSwitchAutoFoldWhenExitWhiteboard.IsOn = Settings.Automation.IsAutoFoldWhenExitWhiteboard;
             }

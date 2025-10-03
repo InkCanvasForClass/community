@@ -391,7 +391,7 @@ namespace Ink_Canvas
             //加载设置
             LoadSettings(true);
             AutoBackupManager.Initialize(Settings);
-            
+
             // 检查保存路径是否可用，不可用则修正
             try
             {
@@ -486,7 +486,6 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("Ink Canvas Loaded", LogHelper.LogType.Event);
 
             isLoaded = true;
-
             BlackBoardLeftSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
             BlackBoardRightSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
 
@@ -550,7 +549,7 @@ namespace Ink_Canvas
             ApplyNoFocusMode();
             ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
             ApplyAlwaysOnTop();
-            
+
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
 
@@ -2697,7 +2696,7 @@ namespace Ink_Canvas
                 if (toggle != null)
                 {
                     Settings.ModeSettings.IsPPTOnlyMode = toggle.IsOn;
-                    
+
                     // 保存设置到文件
                     SaveSettingsToFile();
 
@@ -2789,20 +2788,20 @@ namespace Ink_Canvas
         private void ComboBoxTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
-            
+
             try
             {
                 System.Windows.Controls.ComboBox comboBox = sender as System.Windows.Controls.ComboBox;
                 if (comboBox != null)
                 {
                     Settings.Appearance.Theme = comboBox.SelectedIndex;
-                    
+
                     // 应用新主题
                     ApplyTheme(comboBox.SelectedIndex);
-                    
+
                     // 保存设置
                     SaveSettingsToFile();
-                    
+
                     // 显示通知
                     string themeName;
                     switch (comboBox.SelectedIndex)
@@ -2820,7 +2819,7 @@ namespace Ink_Canvas
                             themeName = "未知主题";
                             break;
                     }
-                    
+
                     ShowNotification($"已切换到{themeName}");
                 }
             }
@@ -2864,7 +2863,7 @@ namespace Ink_Canvas
                         }
                         break;
                 }
-                
+
                 // 强制刷新通知框的颜色资源
                 RefreshNotificationColors();
             }
@@ -2873,7 +2872,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"应用主题时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
         /// <summary>
         /// 刷新通知框的颜色资源
         /// </summary>
@@ -2888,7 +2887,7 @@ namespace Ink_Canvas
                     border.Background = (Brush)Application.Current.FindResource("SettingsPageBackground");
                     border.BorderBrush = new SolidColorBrush(Color.FromRgb(185, 28, 28)); // 保持红色边框
                 }
-                
+
                 TextBlockNotice.Foreground = (Brush)Application.Current.FindResource("SettingsPageForeground");
             }
             catch (Exception ex)

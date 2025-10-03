@@ -1,7 +1,7 @@
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Ink_Canvas.Helpers;
 
 namespace Ink_Canvas
 {
@@ -46,7 +46,7 @@ namespace Ink_Canvas
             {
                 _settings = settings ?? new FloatingWindowInterceptorSettings();
                 _interceptor = new FloatingWindowInterceptor();
-                
+
                 // 订阅事件
                 _interceptor.WindowIntercepted += OnWindowIntercepted;
                 _interceptor.WindowRestored += OnWindowRestored;
@@ -116,7 +116,7 @@ namespace Ink_Canvas
             try
             {
                 _interceptor.SetInterceptRule(type, enabled);
-                
+
                 // 更新设置
                 var ruleName = type.ToString();
                 if (_settings.InterceptRules.ContainsKey(ruleName))
@@ -258,7 +258,7 @@ namespace Ink_Canvas
             try
             {
                 _settings.ScanIntervalMs = intervalMs;
-                
+
                 // 如果正在运行，重启以应用新间隔
                 if (IsRunning)
                 {

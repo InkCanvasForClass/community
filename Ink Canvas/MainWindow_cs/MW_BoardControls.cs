@@ -17,8 +17,8 @@ namespace Ink_Canvas
         private StrokeCollection lastTouchDownStrokeCollection = new StrokeCollection();
         private int CurrentWhiteboardIndex = 1;
         private int WhiteboardTotalCount = 1;
-        private TimeMachineHistory[][] TimeMachineHistories = new TimeMachineHistory[101][]; 
-        private bool[] savedMultiTouchModeStates = new bool[101]; 
+        private TimeMachineHistory[][] TimeMachineHistories = new TimeMachineHistory[101][];
+        private bool[] savedMultiTouchModeStates = new bool[101];
 
         // 保存每页白板图片信息
         private void SaveStrokes(bool isBackupMain = false)
@@ -197,20 +197,20 @@ namespace Ink_Canvas
                 {
                     // 恢复多指书写模式
                     EnterMultiTouchModeIfNeeded();
-                    
+
                     // 更新UI状态
                     if (ToggleSwitchEnableMultiTouchMode != null)
                     {
                         ToggleSwitchEnableMultiTouchMode.IsOn = true;
                     }
-                    
+
                     LogHelper.WriteLogToFile($"恢复多指书写模式状态 - 页面索引: {pageIndex}", LogHelper.LogType.Info);
                 }
                 else
                 {
                     // 确保多指书写模式关闭
                     ExitMultiTouchModeIfNeeded();
-                    
+
                     // 更新UI状态
                     if (ToggleSwitchEnableMultiTouchMode != null)
                     {

@@ -242,7 +242,7 @@ namespace Ink_Canvas.Helpers
             public string Description { get; set; }
             public InterceptType? ParentType { get; set; }
             public List<InterceptType> ChildTypes { get; set; } = new List<InterceptType>();
-            
+
             // 新增的精确匹配字段
             public bool HasWindowStyle { get; set; }
             public uint WindowStyle { get; set; }
@@ -251,7 +251,7 @@ namespace Ink_Canvas.Helpers
             public int WindowHeight { get; set; }
             public bool ExactTitleMatch { get; set; } = false;
             public bool ExactClassNameMatch { get; set; } = false;
-            
+
             // 运行时状态字段
             public bool foundHwnd { get; set; } = false;
             public IntPtr outHwnd { get; set; } = IntPtr.Zero;
@@ -267,7 +267,7 @@ namespace Ink_Canvas.Helpers
         private readonly Dispatcher _dispatcher;
         private bool _isRunning;
         private bool _disposed;
-        
+
         // 简化的性能统计
         private int _consecutiveEmptyScans = 0;
         private DateTime _lastSuccessfulScan = DateTime.Now;
@@ -466,15 +466,15 @@ namespace Ink_Canvas.Helpers
                 RequiresAdmin = true,
                 Description = "畅言智慧课堂 主栏悬浮窗",
                 ParentType = null,
-                ChildTypes = new List<InterceptType> 
-                { 
-                    InterceptType.ChangYanBrushSettings, 
-                    InterceptType.ChangYanSwipeClear, 
-                    InterceptType.ChangYanInteraction, 
-                    InterceptType.ChangYanSubjectApp, 
-                    InterceptType.ChangYanControl, 
-                    InterceptType.ChangYanCommonTools, 
-                    InterceptType.ChangYanSceneToolbar, 
+                ChildTypes = new List<InterceptType>
+                {
+                    InterceptType.ChangYanBrushSettings,
+                    InterceptType.ChangYanSwipeClear,
+                    InterceptType.ChangYanInteraction,
+                    InterceptType.ChangYanSubjectApp,
+                    InterceptType.ChangYanControl,
+                    InterceptType.ChangYanCommonTools,
+                    InterceptType.ChangYanSceneToolbar,
                     InterceptType.ChangYanDrawWindow
                 }
             };
@@ -713,7 +713,7 @@ namespace Ink_Canvas.Helpers
             if (_isRunning) return;
 
             _isRunning = true;
-            _scanTimer.Change(0, Math.Max(scanIntervalMs, 2000)); 
+            _scanTimer.Change(0, Math.Max(scanIntervalMs, 2000));
         }
 
         /// <summary>
@@ -725,7 +725,7 @@ namespace Ink_Canvas.Helpers
 
             _isRunning = false;
             _scanTimer.Change(Timeout.Infinite, Timeout.Infinite);
-            
+
             // 恢复所有被拦截的窗口
             RestoreAllWindows();
         }
@@ -774,9 +774,9 @@ namespace Ink_Canvas.Helpers
                 {
                     var parentRule = _interceptRules[rule.ParentType.Value];
                     // 检查是否还有其他启用的子规则
-                    bool hasEnabledChildren = parentRule.ChildTypes.Any(childType => 
+                    bool hasEnabledChildren = parentRule.ChildTypes.Any(childType =>
                         _interceptRules.ContainsKey(childType) && _interceptRules[childType].IsEnabled);
-                    
+
                     // 如果没有启用的子规则，则禁用父规则
                     if (!hasEnabledChildren)
                     {
@@ -831,7 +831,7 @@ namespace Ink_Canvas.Helpers
         {
             var windowsToRestore = new List<IntPtr>(_interceptedWindows.Keys);
             var restoredCount = 0;
-            
+
             foreach (var hWnd in windowsToRestore)
             {
                 if (RestoreWindow(hWnd))
@@ -839,7 +839,7 @@ namespace Ink_Canvas.Helpers
                     restoredCount++;
                 }
             }
-            
+
         }
 
         /// <summary>
@@ -864,7 +864,7 @@ namespace Ink_Canvas.Helpers
                     restoredCount++;
                 }
             }
-            
+
         }
 
         /// <summary>
@@ -875,22 +875,22 @@ namespace Ink_Canvas.Helpers
             if (!_interceptedWindows.ContainsKey(hWnd)) return false;
 
             var interceptType = _interceptedWindows[hWnd];
-            
+
             if (IsWindow(hWnd))
             {
                 // 使用多种方法确保窗口恢复显示
                 ShowWindow(hWnd, SW_RESTORE);
                 ShowWindow(hWnd, SW_SHOW);
                 ShowWindow(hWnd, SW_SHOWNORMAL);
-                
+
                 // 将窗口置于前台并显示
-                SetWindowPos(hWnd, IntPtr.Zero, 0, 0, 0, 0, 
+                SetWindowPos(hWnd, IntPtr.Zero, 0, 0, 0, 0,
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
-                
+
                 // 强制将窗口带到前台
                 BringWindowToTop(hWnd);
                 SetForegroundWindow(hWnd);
-                
+
                 _interceptedWindows.Remove(hWnd);
 
                 WindowRestored?.Invoke(this, new WindowRestoredEventArgs
@@ -916,7 +916,7 @@ namespace Ink_Canvas.Helpers
         private void CleanupInvalidWindows()
         {
             var invalidWindows = new List<IntPtr>();
-            
+
             foreach (var kvp in _interceptedWindows)
             {
                 var hWnd = kvp.Key;
@@ -940,7 +940,7 @@ namespace Ink_Canvas.Helpers
                 // 简化的扫描逻辑
                 var interceptedCount = 0;
                 CleanupInvalidWindows();
-                
+
                 // 重置所有规则的发现状态
                 foreach (var rule in _interceptRules.Values)
                 {
@@ -958,9 +958,9 @@ namespace Ink_Canvas.Helpers
                 {
                     if (rule.IsEnabled && rule.foundHwnd && rule.outHwnd != IntPtr.Zero)
                     {
-                        bool shouldIntercept = !_interceptedWindows.ContainsKey(rule.outHwnd) || 
+                        bool shouldIntercept = !_interceptedWindows.ContainsKey(rule.outHwnd) ||
                                              (_interceptedWindows.ContainsKey(rule.outHwnd) && IsWindowVisible(rule.outHwnd));
-                        
+
                         if (shouldIntercept)
                         {
                             InterceptWindow(rule.outHwnd, rule);
@@ -1068,7 +1068,7 @@ namespace Ink_Canvas.Helpers
                     var className = new StringBuilder(256);
                     GetClassName(hWnd, className, className.Capacity);
                     var classNameStr = className.ToString();
-                    
+
                     if (rule.ExactClassNameMatch)
                     {
                         if (!classNameStr.Equals(rule.ClassNamePattern, StringComparison.OrdinalIgnoreCase))
@@ -1087,7 +1087,7 @@ namespace Ink_Canvas.Helpers
                     var windowTitle = new StringBuilder(256);
                     GetWindowText(hWnd, windowTitle, windowTitle.Capacity);
                     var titleStr = windowTitle.ToString();
-                    
+
                     if (rule.ExactTitleMatch)
                     {
                         if (!titleStr.Equals(rule.WindowTitlePattern, StringComparison.OrdinalIgnoreCase))
@@ -1126,7 +1126,7 @@ namespace Ink_Canvas.Helpers
                         var horizontalDPI = GetDeviceCaps(hdc, LOGPIXELSX);
                         var verticalDPI = GetDeviceCaps(hdc, LOGPIXELSY);
                         ReleaseDC(IntPtr.Zero, hdc);
-                        
+
                         var scale = (horizontalDPI + verticalDPI) / 2.0f / 96.0f;
                         var scaledWidth = (int)(rule.WindowWidth * scale);
                         var scaledHeight = (int)(rule.WindowHeight * scale);
@@ -1164,10 +1164,10 @@ namespace Ink_Canvas.Helpers
                     }
                     return;
                 }
-                
+
                 // 直接隐藏窗口，不发送关闭消息
                 ShowWindow(hWnd, SW_HIDE);
-                
+
                 // 记录拦截的窗口
                 _interceptedWindows[hWnd] = rule.Type;
 

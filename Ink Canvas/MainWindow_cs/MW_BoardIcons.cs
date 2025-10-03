@@ -61,7 +61,7 @@ namespace Ink_Canvas
                 ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
 
                 // 设置为白板默认背景色
-                Color defaultWhiteboardColor = Color.FromRgb(234, 235, 237);
+                Color defaultWhiteboardColor = Color.FromRgb(255, 255, 255);
 
                 if (currentMode == 1) // 白板模式
                 {
@@ -233,7 +233,7 @@ namespace Ink_Canvas
                 ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
 
                 // 设置为白板默认背景色
-                Color defaultWhiteboardColor = Color.FromRgb(234, 235, 237);
+                Color defaultWhiteboardColor = Color.FromRgb(255, 255, 255);
 
                 if (currentMode == 1) // 白板模式
                 {

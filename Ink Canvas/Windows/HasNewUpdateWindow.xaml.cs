@@ -92,7 +92,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"应用主题时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
         /// <summary>
         /// 更新为浅色主题颜色
         /// </summary>
@@ -109,7 +109,7 @@ namespace Ink_Canvas
                 Resources["UpdateWindowTextPrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0x1f, 0x29, 0x37));
                 Resources["UpdateWindowTextSecondaryBrush"] = new SolidColorBrush(Color.FromRgb(0x6b, 0x72, 0x80));
                 Resources["UpdateWindowCloseButtonBrush"] = new SolidColorBrush(Color.FromRgb(0x66, 0x66, 0x66));
-                
+
                 // 更新渐变背景
                 var gradient = new LinearGradientBrush();
                 gradient.StartPoint = new Point(0, 0);
@@ -123,7 +123,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"更新浅色主题颜色时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
         /// <summary>
         /// 更新为深色主题颜色
         /// </summary>
@@ -140,7 +140,7 @@ namespace Ink_Canvas
                 Resources["UpdateWindowTextPrimaryBrush"] = new SolidColorBrush(Color.FromRgb(0xf9, 0xfa, 0xfb));
                 Resources["UpdateWindowTextSecondaryBrush"] = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf));
                 Resources["UpdateWindowCloseButtonBrush"] = new SolidColorBrush(Color.FromRgb(0x9c, 0xa3, 0xaf));
-                
+
                 // 更新渐变背景
                 var gradient = new LinearGradientBrush();
                 gradient.StartPoint = new Point(0, 0);
@@ -154,7 +154,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"更新深色主题颜色时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
         /// <summary>
         /// 检查系统是否为浅色主题
         /// </summary>
@@ -270,7 +270,7 @@ namespace Ink_Canvas
             UpdateLaterButton.IsEnabled = false;
             SkipVersionButton.IsEnabled = false;
             DownloadProgressPanel.Visibility = Visibility.Visible;
-            
+
             // 重置进度条
             var progressFill = FindName("ProgressFill") as Border;
             if (progressFill != null)
