@@ -265,8 +265,8 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: v${{ steps.calc_version.outputs.new_version }}
-        name: ICC CE v${{ steps.calc_version.outputs.new_version }}
+        tag_name: ${{ steps.calc_version.outputs.new_version }}
+        name: ICC CE ${{ steps.calc_version.outputs.new_version }}
         body: |
           ${{ steps.changelog.outputs.changelog }}
         draft: false
