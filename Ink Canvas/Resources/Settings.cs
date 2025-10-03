@@ -233,16 +233,12 @@ namespace Ink_Canvas
         public bool IsShowLassoSelectButton { get; set; } = true;
         [JsonProperty("isShowClearAndMouseButton")]
         public bool IsShowClearAndMouseButton { get; set; } = true;
-
         [JsonProperty("eraserDisplayOption")]
         public int EraserDisplayOption { get; set; }
-
         [JsonProperty("isShowQuickColorPalette")]
         public bool IsShowQuickColorPalette { get; set; }
-
         [JsonProperty("quickColorPaletteDisplayMode")]
         public int QuickColorPaletteDisplayMode { get; set; } = 1;
-
         [JsonProperty("enableHotkeysInMouseMode")]
         public bool EnableHotkeysInMouseMode { get; set; } = false;
 
@@ -250,8 +246,6 @@ namespace Ink_Canvas
 
     public class PowerPointSettings
     {
-        // -- new --
-
         [JsonProperty("showPPTButton")]
         public bool ShowPPTButton { get; set; } = true;
 
