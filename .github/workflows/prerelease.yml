@@ -38,22 +38,19 @@ jobs:
     - name: Restore NuGet Packages
       run: nuget restore "Ink Canvas.sln"
       
-    - name: Get current version
+    - name: Get current version from Git tag
       id: get_version
       run: |
-        $versionLine = Get-Content "Ink Canvas\Properties\AssemblyInfo.cs" | Select-String "AssemblyVersion\(""([^""]+)""\)"
-        if ($versionLine) {
-          $version = $versionLine.Matches[0].Groups[1].Value
-          # 处理通配符版本号
-          if ($version -match "(\d+)\.(\d+)\.(\*|\d+)\.(\*|\d+)") {
-            $major = $matches[1]
-            $minor = $matches[2]
-            $patch = if ($matches[3] -eq "*") { "0" } else { $matches[3] }
-            $revision = if ($matches[4] -eq "*") { "0" } else { $matches[4] }
-            $version = "$major.$minor.$patch.$revision"
-          }
+        # 获取最新的tag
+        $latestTag = git describe --tags --abbrev=0 2>$null
+        if ($latestTag) {
+          # 移除v前缀（如果有的话）
+          $version = $latestTag -replace "^v", ""
+          echo "Found latest tag: $latestTag"
         } else {
-          $version = "1.0.0.0"
+          # 如果没有tag，使用默认版本
+          $version = "1.0.0"
+          echo "No tags found, using default version"
         }
         echo "current_version=$version" >> $env:GITHUB_OUTPUT
         echo "Current version: $version"
@@ -64,12 +61,13 @@ jobs:
         $currentVersion = "${{ steps.get_version.outputs.current_version }}"
         $versionParts = $currentVersion.Split('.')
         
-        # 确保版本号格式正确
+        # 确保版本号格式正确（至少3部分）
         if ($versionParts.Length -ge 3) {
           $major = [int]$versionParts[0]
           $minor = [int]$versionParts[1]
           $patch = [int]$versionParts[2]
         } else {
+          # 如果版本号格式不正确，使用默认值
           $major = 1
           $minor = 0
           $patch = 0
@@ -92,7 +90,8 @@ jobs:
           }
         }
         
-        $newVersion = "$major.$minor.$patch.0"
+        # 生成新版本号（保持3位格式，如1.7.13）
+        $newVersion = "$major.$minor.$patch"
         echo "new_version=$newVersion" >> $env:GITHUB_OUTPUT
         echo "New version: $newVersion"
         
