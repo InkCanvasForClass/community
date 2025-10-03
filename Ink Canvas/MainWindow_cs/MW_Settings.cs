@@ -1026,23 +1026,34 @@ namespace Ink_Canvas
                 PPTBtnPreviewRS.Visibility = Visibility.Collapsed;
             }
 
-            // 计算预览区域的缩放比例
-            double previewScaleY = 182.0 / SystemParameters.PrimaryScreenHeight;
-            double previewScaleX = 324.0 / SystemParameters.PrimaryScreenWidth;
+            // 获取当前屏幕的实际尺寸（考虑DPI缩放）
+            var actualScreenWidth = SystemParameters.PrimaryScreenWidth;
+            var actualScreenHeight = SystemParameters.PrimaryScreenHeight;
             
-            double sideButtonScaleFactor = 1.9;
+            // 预览区域固定尺寸
+            const double previewWidth = 324.0;
+            const double previewHeight = 182.0;
             
+            // 计算缩放比例（预览区域与实际屏幕的比例）
+            double scaleX = previewWidth / actualScreenWidth;
+            double scaleY = previewHeight / actualScreenHeight;
+            
+            // 获取按钮位置设置
             double rsPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
             double lsPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
-        
-            PPTBtnPreviewRSTransform.Y = -(rsPosition * 2 * previewScaleY / sideButtonScaleFactor);
-            PPTBtnPreviewLSTransform.Y = -(lsPosition * 2 * previewScaleY / sideButtonScaleFactor);
-
-
-            double bottomButtonScaleFactor = 1.2;
-            double leftMarginOffset = 6 * previewScaleX;
-            PPTBtnPreviewLBTransform.X = leftMarginOffset + (Settings.PowerPointSettings.PPTLBButtonPosition * previewScaleX / bottomButtonScaleFactor);
-            PPTBtnPreviewRBTransform.X = -(leftMarginOffset + (Settings.PowerPointSettings.PPTRBButtonPosition * previewScaleX / bottomButtonScaleFactor));
+            double lbPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
+            double rbPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
+            
+            // 计算侧边按钮位置（Y轴偏移）
+            PPTBtnPreviewRSTransform.Y = -(rsPosition * scaleY);
+            PPTBtnPreviewLSTransform.Y = -(lsPosition * scaleY);
+            
+            // 计算底部按钮位置（X轴偏移）
+            const double bottomMarginOffset = 6.0; 
+            double scaledMarginOffset = bottomMarginOffset * scaleX;
+            
+            PPTBtnPreviewLBTransform.X = scaledMarginOffset + (lbPosition * scaleX);
+            PPTBtnPreviewRBTransform.X = -(scaledMarginOffset + (rbPosition * scaleX));
         }
 
         private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
