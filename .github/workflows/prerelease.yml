@@ -255,14 +255,10 @@ jobs:
           ICC_CE_${{ steps.calc_version.outputs.new_version }}.zip
           CHANGELOG_${{ steps.calc_version.outputs.new_version }}.md
           
-    - name: Create Git Tag
+    - name: Prepare Release Info
       run: |
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        
         $version = "${{ steps.calc_version.outputs.new_version }}"
-        git tag -a "v$version" -m "Release version $version"
-        git push origin "v$version"
+        echo "Preparing release for version: $version"
         
     - name: Create GitHub Release
       uses: actions/create-release@v1
