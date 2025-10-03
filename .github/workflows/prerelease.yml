@@ -25,14 +25,9 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.2.2
       with:
         fetch-depth: 0  # 获取所有历史记录用于生成changelog
-        
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '6.0.x'
         
     - name: Setup MSbuild
       uses: microsoft/setup-msbuild@v2
@@ -254,7 +249,7 @@ jobs:
         echo "archive_name=$archiveName" >> $env:GITHUB_OUTPUT
         
     - name: Upload Release Assets
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4.5.0
       with:
         name: release-files-${{ steps.calc_version.outputs.new_version }}
         path: |
