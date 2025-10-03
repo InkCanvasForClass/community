@@ -343,7 +343,7 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(3);
             CancelSingleFingerDragMode();
-            isLongPressSelected = false; 
+            isLongPressSelected = false;
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -496,7 +496,7 @@ namespace Ink_Canvas
                 if (!isTouchDown) return;
 
                 if (isWaitUntilNextTouchDown && dec.Count > 1) return;
-                
+
                 // 对于多笔图形绘制，允许第二笔绘制，即使dec.Count > 1
                 if (dec.Count > 1 && !((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1))
                 {
@@ -512,7 +512,7 @@ namespace Ink_Canvas
                     }
                     return;
                 }
-                
+
                 // 第二笔绘制双曲线时，只删除第二笔的临时笔画，保留第一笔的辅助线
                 if ((drawingShapeMode == 24 || drawingShapeMode == 25) && drawMultiStepShapeCurrentStep == 1)
                 {
@@ -584,19 +584,19 @@ namespace Ink_Canvas
                     {
                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                     };
-                    
+
                     UpdateTempStrokeSafely(stroke);
                     break;
                 case 8:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     strokes.Add(GenerateDashedLineStrokeCollection(iniP, endP));
-                    
+
                     UpdateTempStrokeCollectionSafely(strokes);
                     break;
                 case 18:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     strokes.Add(GenerateDotLineStrokeCollection(iniP, endP));
-                    
+
                     UpdateTempStrokeCollectionSafely(strokes);
                     break;
                 case 2:
@@ -618,7 +618,7 @@ namespace Ink_Canvas
                     {
                         DrawingAttributes = inkCanvas.DefaultDrawingAttributes.Clone()
                     };
-                    
+
                     // 优化：使用更安全的临时笔画更新方式，减少闪烁
                     UpdateTempStrokeSafely(stroke);
                     break;
@@ -1503,12 +1503,12 @@ namespace Ink_Canvas
                     {
                         // 先添加新笔画，再删除旧笔画，减少视觉闪烁
                         inkCanvas.Strokes.Add(newStroke);
-                        
+
                         if (lastTempStroke != null && inkCanvas.Strokes.Contains(lastTempStroke))
                         {
                             inkCanvas.Strokes.Remove(lastTempStroke);
                         }
-                        
+
                         lastTempStroke = newStroke;
                     }
                     catch (Exception ex)
@@ -1553,7 +1553,7 @@ namespace Ink_Canvas
                     {
                         // 先添加新笔画集合，再删除旧笔画集合，减少视觉闪烁
                         inkCanvas.Strokes.Add(newStrokeCollection);
-                        
+
                         if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0)
                         {
                             foreach (var stroke in lastTempStrokeCollection)
@@ -1564,7 +1564,7 @@ namespace Ink_Canvas
                                 }
                             }
                         }
-                        
+
                         lastTempStrokeCollection = newStrokeCollection;
                     }
                     catch (Exception ex)

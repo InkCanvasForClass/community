@@ -419,7 +419,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 string tempDir = Path.GetTempPath();
-                
+
                 // 处理文件路径IPC文件
                 string[] ipcFiles = Directory.GetFiles(tempDir, IpcFilePrefix + "*.tmp");
                 foreach (string ipcFile in ipcFiles)

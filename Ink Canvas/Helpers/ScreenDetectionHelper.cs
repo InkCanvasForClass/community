@@ -31,7 +31,7 @@ namespace Ink_Canvas.Helpers
 
                 // 获取窗口在屏幕上的位置
                 var windowRect = GetWindowScreenBounds(window);
-                
+
                 // 查找与窗口重叠最多的屏幕
                 Screen targetScreen = null;
                 double maxIntersection = 0;
@@ -66,10 +66,10 @@ namespace Ink_Canvas.Helpers
             {
                 // 获取窗口左上角在屏幕上的位置
                 var topLeft = window.PointToScreen(new Point(0, 0));
-                
+
                 // 获取窗口右下角在屏幕上的位置
                 var bottomRight = window.PointToScreen(new Point(window.ActualWidth, window.ActualHeight));
-                
+
                 return new Rectangle(
                     (int)topLeft.X,
                     (int)topLeft.Y,

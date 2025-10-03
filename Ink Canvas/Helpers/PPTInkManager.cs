@@ -30,12 +30,12 @@ namespace Ink_Canvas.Helpers
         private DateTime _inkLockUntil = DateTime.MinValue;
         private int _lockedSlideIndex = -1;
         private const int InkLockMilliseconds = 500;
-        
+
         // 添加快速切换保护机制
         private DateTime _lastSwitchTime = DateTime.MinValue;
         private int _lastSwitchSlideIndex = -1;
         private const int MinSwitchIntervalMs = 100; // 最小切换间隔100毫秒
-        
+
         // 内存管理相关字段
         private long _totalMemoryUsage = 0;
         private const long MaxMemoryUsageBytes = 100 * 1024 * 1024; // 100MB限制
@@ -90,7 +90,7 @@ namespace Ink_Canvas.Helpers
                         {
                             return;
                         }
-                        throw; 
+                        throw;
                     }
                     _memoryStreams = new MemoryStream[slideCount + 2];
 
@@ -238,7 +238,7 @@ namespace Ink_Canvas.Helpers
                 {
                     // 检查快速切换保护
                     var now = DateTime.Now;
-                    if (now - _lastSwitchTime < TimeSpan.FromMilliseconds(MinSwitchIntervalMs) && 
+                    if (now - _lastSwitchTime < TimeSpan.FromMilliseconds(MinSwitchIntervalMs) &&
                         _lastSwitchSlideIndex == slideIndex)
                     {
                         LogHelper.WriteLogToFile($"快速切换保护：忽略重复的页面切换请求 {slideIndex}", LogHelper.LogType.Warning);
@@ -251,11 +251,11 @@ namespace Ink_Canvas.Helpers
 
                     // 加载新页面的墨迹
                     var newStrokes = LoadSlideStrokes(slideIndex);
-                    
+
                     // 更新切换记录
                     _lastSwitchTime = now;
                     _lastSwitchSlideIndex = slideIndex;
-                    
+
                     if (newStrokes.Count > 0)
                     {
                     }
@@ -300,7 +300,7 @@ namespace Ink_Canvas.Helpers
                     // 保存所有页面的墨迹
                     int savedCount = 0;
                     int slideCount = 0;
-                    
+
                     try
                     {
                         slideCount = presentation.Slides.Count;
@@ -308,13 +308,13 @@ namespace Ink_Canvas.Helpers
                     catch (COMException comEx)
                     {
                         var hr = (uint)comEx.HResult;
-                        if (hr == 0x80048010) 
+                        if (hr == 0x80048010)
                         {
                             return;
                         }
-                        throw; 
+                        throw;
                     }
-                    
+
                     for (int i = 1; i <= slideCount && i < _memoryStreams.Length; i++)
                     {
                         if (_memoryStreams[i] != null)
@@ -430,7 +430,7 @@ namespace Ink_Canvas.Helpers
                                 _memoryStreams[i] = null;
                             }
                         }
-                        
+
                         // 重新初始化数组
                         _memoryStreams = new MemoryStream[_maxSlides + 2];
                     }
@@ -464,20 +464,20 @@ namespace Ink_Canvas.Helpers
             {
                 return true;
             }
-            
+
             // 如果当前页面与锁定页面相同，允许写入（用户在当前页面绘制）
             if (currentSlideIndex == _lockedSlideIndex)
             {
                 return true;
             }
-            
+
             // 如果当前页面不是锁定页面，但锁定时间很短（小于50ms），允许写入
             // 这样可以确保旧页面的墨迹能够及时保存
             if (DateTime.Now - (_inkLockUntil.AddMilliseconds(-InkLockMilliseconds)) < TimeSpan.FromMilliseconds(50))
             {
                 return true;
             }
-            
+
             // 只有在快速切换且页面不同时才锁定
             return false;
         }
@@ -504,7 +504,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var now = DateTime.Now;
-                
+
                 // 检查是否需要执行内存清理
                 if (now - _lastMemoryCleanup < TimeSpan.FromMinutes(MemoryCleanupIntervalMinutes))
                 {
@@ -530,10 +530,10 @@ namespace Ink_Canvas.Helpers
                 if (currentMemoryUsage > MaxMemoryUsageBytes)
                 {
                     LogHelper.WriteLogToFile($"内存使用量超限 ({currentMemoryUsage / 1024 / 1024}MB)，开始清理", LogHelper.LogType.Warning);
-                    
+
                     // 清理非当前页面的墨迹
                     CleanupInactiveSlideStrokes();
-                    
+
                     _lastMemoryCleanup = now;
                     LogHelper.WriteLogToFile($"内存清理完成，当前使用量: {_totalMemoryUsage / 1024 / 1024}MB", LogHelper.LogType.Trace);
                 }
@@ -571,7 +571,7 @@ namespace Ink_Canvas.Helpers
                     if (_memoryStreams[i] != null)
                     {
                         long memorySize = _memoryStreams[i].Length;
-                        
+
                         try
                         {
                             _memoryStreams[i].Dispose();

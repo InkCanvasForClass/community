@@ -80,7 +80,7 @@ namespace Ink_Canvas
             {
                 return;
             }
-            
+
             var tarPos = transform.Transform(point);
             scrollViewer.ScrollToVerticalOffset(tarPos.Y);
         }

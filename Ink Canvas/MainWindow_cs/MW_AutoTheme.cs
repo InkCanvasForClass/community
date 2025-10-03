@@ -18,14 +18,14 @@ namespace Ink_Canvas
             var resourcesToRemove = new List<ResourceDictionary>();
             foreach (var dict in Application.Current.Resources.MergedDictionaries)
             {
-                if (dict.Source != null && 
-                    (dict.Source.ToString().Contains("Light.xaml") || 
+                if (dict.Source != null &&
+                    (dict.Source.ToString().Contains("Light.xaml") ||
                      dict.Source.ToString().Contains("Dark.xaml")))
                 {
                     resourcesToRemove.Add(dict);
                 }
             }
-            
+
             foreach (var dict in resourcesToRemove)
             {
                 Application.Current.Resources.MergedDictionaries.Remove(dict);
@@ -36,7 +36,7 @@ namespace Ink_Canvas
                 var rd1 = new ResourceDictionary
                 { Source = new Uri("Resources/Styles/Light.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
-                
+
                 // 在主题资源之后添加其他资源
                 var rd2 = new ResourceDictionary
                 { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
@@ -53,10 +53,10 @@ namespace Ink_Canvas
                 ThemeManager.SetRequestedTheme(window, ElementTheme.Light);
 
                 InitializeFloatBarForegroundColor();
-                
+
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
-                
+
                 // 强制刷新UI
                 window.InvalidateVisual();
             }
@@ -64,7 +64,7 @@ namespace Ink_Canvas
             {
                 var rd1 = new ResourceDictionary { Source = new Uri("Resources/Styles/Dark.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
-                
+
                 // 在主题资源之后添加其他资源
                 var rd2 = new ResourceDictionary
                 { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
@@ -81,10 +81,10 @@ namespace Ink_Canvas
                 ThemeManager.SetRequestedTheme(window, ElementTheme.Dark);
 
                 InitializeFloatBarForegroundColor();
-                
+
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
-                
+
                 // 强制刷新UI
                 window.InvalidateVisual();
             }
@@ -98,17 +98,17 @@ namespace Ink_Canvas
             try
             {
                 FloatBarForegroundColor = (Color)Application.Current.FindResource("FloatBarForegroundColor");
-                
+
                 // 强制刷新浮动工具栏按钮颜色
                 RefreshFloatingBarButtonColors();
             }
             catch (Exception)
             {
                 // 如果无法从资源中加载，使用默认颜色
-                FloatBarForegroundColor = Color.FromRgb(0, 0, 0); 
+                FloatBarForegroundColor = Color.FromRgb(0, 0, 0);
             }
         }
-        
+
         /// <summary>
         /// 刷新快速面板图标
         /// </summary>
@@ -147,7 +147,7 @@ namespace Ink_Canvas
             {
                 // 选中状态的颜色（蓝底）
                 var selectedColor = Color.FromRgb(30, 58, 138);
-                
+
                 // 根据当前模式设置按钮颜色
                 switch (_currentToolMode)
                 {

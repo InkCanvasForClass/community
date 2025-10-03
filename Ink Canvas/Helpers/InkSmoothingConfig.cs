@@ -77,40 +77,40 @@ namespace Ink_Canvas.Helpers
         {
             // 保存用户设置的异步处理偏好
             bool userAsyncPreference = UseAsyncProcessing;
-            
+
             switch (Quality)
             {
                 case SmoothingQuality.Performance:
-                    SmoothingStrength = 0.15; 
-                    ResampleInterval = 5.0;   
-                    InterpolationSteps = 4;   
+                    SmoothingStrength = 0.15;
+                    ResampleInterval = 5.0;
+                    InterpolationSteps = 4;
                     UseAdaptiveInterpolation = false;
-                    CurveTension = 0.15;      
+                    CurveTension = 0.15;
                     MaxConcurrentTasks = Math.Max(1, Environment.ProcessorCount / 2);
-                    UseHardwareAcceleration = true; 
-                    UseAsyncProcessing = userAsyncPreference; 
+                    UseHardwareAcceleration = true;
+                    UseAsyncProcessing = userAsyncPreference;
                     break;
 
                 case SmoothingQuality.Balanced:
-                    SmoothingStrength = 0.3;  
-                    ResampleInterval = 3.0;   
-                    InterpolationSteps = 8;   
+                    SmoothingStrength = 0.3;
+                    ResampleInterval = 3.0;
+                    InterpolationSteps = 8;
                     UseAdaptiveInterpolation = true;
-                    CurveTension = 0.25;     
+                    CurveTension = 0.25;
                     MaxConcurrentTasks = Environment.ProcessorCount;
                     UseHardwareAcceleration = true;
-                    UseAsyncProcessing = userAsyncPreference; 
+                    UseAsyncProcessing = userAsyncPreference;
                     break;
 
                 case SmoothingQuality.Quality:
-                    SmoothingStrength = 0.5;  
-                    ResampleInterval = 2.0; 
-                    InterpolationSteps = 15; 
+                    SmoothingStrength = 0.5;
+                    ResampleInterval = 2.0;
+                    InterpolationSteps = 15;
                     UseAdaptiveInterpolation = true;
-                    CurveTension = 0.35;     
+                    CurveTension = 0.35;
                     MaxConcurrentTasks = Environment.ProcessorCount;
                     UseHardwareAcceleration = true;
-                    UseAsyncProcessing = userAsyncPreference; 
+                    UseAsyncProcessing = userAsyncPreference;
                     break;
             }
         }

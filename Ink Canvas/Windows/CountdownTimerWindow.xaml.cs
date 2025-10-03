@@ -1,5 +1,4 @@
 ﻿using Ink_Canvas.Helpers;
-using Ink_Canvas.Resources;
 using System;
 using System.Media;
 using System.Timers;
@@ -7,7 +6,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas
 {
@@ -362,12 +360,12 @@ namespace Ink_Canvas
                 HourPlus1Text.Text = "+1";
                 HourMinus1Text.Text = "-1";
                 HourMinus5Text.Text = "-5";
-                
+
                 MinutePlus5Text.Text = "+5";
                 MinutePlus1Text.Text = "+1";
                 MinuteMinus1Text.Text = "-1";
                 MinuteMinus5Text.Text = "-5";
-                
+
                 SecondPlus5Text.Text = "+5";
                 SecondPlus1Text.Text = "+1";
                 SecondMinus1Text.Text = "-1";
@@ -380,12 +378,12 @@ namespace Ink_Canvas
                 HourPlus1Text.Text = "∧";
                 HourMinus1Text.Text = "∨";
                 HourMinus5Text.Text = "∨∨";
-                
+
                 MinutePlus5Text.Text = "∧∧";
                 MinutePlus1Text.Text = "∧";
                 MinuteMinus1Text.Text = "∨";
                 MinuteMinus5Text.Text = "∨∨";
-                
+
                 SecondPlus5Text.Text = "∧∧";
                 SecondPlus1Text.Text = "∧";
                 SecondMinus1Text.Text = "∨";
@@ -399,8 +397,8 @@ namespace Ink_Canvas
             {
                 double volume = MainWindow.Settings.RandSettings?.TimerVolume ?? 1.0;
                 mediaPlayer.Volume = volume;
-                
-                if (!string.IsNullOrEmpty(MainWindow.Settings.RandSettings?.CustomTimerSoundPath) && 
+
+                if (!string.IsNullOrEmpty(MainWindow.Settings.RandSettings?.CustomTimerSoundPath) &&
                     System.IO.File.Exists(MainWindow.Settings.RandSettings.CustomTimerSoundPath))
                 {
                     // 播放自定义铃声
@@ -419,7 +417,7 @@ namespace Ink_Canvas
                     }
                     mediaPlayer.Open(new Uri(tempPath));
                 }
-                
+
                 mediaPlayer.Play();
             }
             catch (Exception ex)

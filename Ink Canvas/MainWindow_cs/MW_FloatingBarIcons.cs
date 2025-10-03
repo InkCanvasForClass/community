@@ -86,19 +86,19 @@ namespace Ink_Canvas
                 // 根据主题设置颜色
                 if (Settings.Appearance.Theme == 1) // 深色主题
                 {
-                    BoardGesture.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); 
-                    BoardGestureGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                    BoardGestureGeometry2.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                    BoardGestureLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                    BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); 
+                    BoardGesture.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                    BoardGestureGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                    BoardGestureGeometry2.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                    BoardGestureLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                    BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                 }
                 else // 浅色主题或跟随系统
                 {
-                    BoardGesture.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); 
-                    BoardGestureGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                    BoardGestureGeometry2.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                    BoardGestureLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                    BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); 
+                    BoardGesture.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                    BoardGestureGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                    BoardGestureGeometry2.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                    BoardGestureLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                    BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                 }
                 BoardGestureGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
                 BoardGestureGeometry2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
@@ -111,10 +111,10 @@ namespace Ink_Canvas
                 // 多指书写模式禁用时，根据实际手势功能状态显示
                 TwoFingerGestureSimpleStackPanel.Opacity = 1;
                 TwoFingerGestureSimpleStackPanel.IsHitTestVisible = true;
-                
+
                 // 检查是否有任何手势功能启用
                 bool hasGestureEnabled = Settings.Gesture.IsEnableTwoFingerGesture;
-                
+
                 if (hasGestureEnabled)
                 {
                     EnableTwoFingerGestureBtn.Source =
@@ -136,19 +136,19 @@ namespace Ink_Canvas
                     // 根据主题设置颜色
                     if (Settings.Appearance.Theme == 1) // 深色主题
                     {
-                        BoardGesture.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); 
-                        BoardGestureGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                        BoardGestureGeometry2.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                        BoardGestureLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                        BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); 
+                        BoardGesture.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                        BoardGestureGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardGestureGeometry2.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardGestureLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                     }
                     else // 浅色主题或跟随系统
                     {
                         BoardGesture.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                        BoardGestureGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                        BoardGestureGeometry2.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                        BoardGestureLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                        BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); 
+                        BoardGestureGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardGestureGeometry2.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardGestureLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                     }
                     BoardGestureGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
                     BoardGestureGeometry2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
@@ -443,33 +443,33 @@ namespace Ink_Canvas
                     // 根据主题设置颜色
                     if (Settings.Appearance.Theme == 1) // 深色主题
                     {
-                        BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); 
-                        BoardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); 
-                        BoardEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); 
-                        BoardSelectGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                        BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                        BoardEraserGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                        BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                        BoardSelectLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                        BoardEraserLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                        BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); 
-                        BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); 
-                        BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); 
+                        BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                        BoardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                        BoardEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                        BoardSelectGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardEraserGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardSelectLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardEraserLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                        BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                        BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                     }
                     else // 浅色主题或跟随系统
                     {
-                        BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); 
-                        BoardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); 
-                        BoardEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); 
-                        BoardSelectGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                        BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                        BoardEraserGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                        BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                        BoardSelectLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                        BoardEraserLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                        BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); 
-                        BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); 
-                        BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); 
+                        BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                        BoardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                        BoardEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                        BoardSelectGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardEraserGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardSelectLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardEraserLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                        BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                        BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                     }
 
                     HideFloatingBarHighlight();
@@ -537,17 +537,17 @@ namespace Ink_Canvas
                             // 根据主题设置颜色
                             if (Settings.Appearance.Theme == 1) // 深色主题
                             {
-                                BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42)); 
-                                BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85)); 
-                                BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
-                                BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255)); 
+                                BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
+                                BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
+                                BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                                BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                             }
                             else // 浅色主题或跟随系统
                             {
-                                BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245)); 
-                                BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170)); 
-                                BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
-                                BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27)); 
+                                BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
+                                BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
+                                BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                                BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                             }
 
                             SetFloatingBarHighlightPosition("cursor");
@@ -1357,12 +1357,12 @@ namespace Ink_Canvas
                     BlackboardUIGridForInkReplay.IsHitTestVisible = true;
                     inkCanvas.IsHitTestVisible = true;
                     inkCanvas.IsManipulationEnabled = true;
-                    
+
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                     {
                         inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                     }
-                    
+
                     ResetTouchStates();
                 });
             }).Start();
@@ -1388,12 +1388,12 @@ namespace Ink_Canvas
                 isStopInkReplay = true;
                 inkCanvas.IsHitTestVisible = true;
                 inkCanvas.IsManipulationEnabled = true;
-                
+
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
-                
+
                 ResetTouchStates();
             }
         }
@@ -1975,7 +1975,7 @@ namespace Ink_Canvas
             }
 
             // 禁用高级橡皮擦系统
-                DisableEraserOverlay();
+            DisableEraserOverlay();
 
             ExitMultiTouchModeIfNeeded();
 
@@ -2222,7 +2222,7 @@ namespace Ink_Canvas
             }
 
             // 启用新的高级橡皮擦系统
-                EnableEraserOverlay();
+            EnableEraserOverlay();
 
             // 使用新的高级橡皮擦系统
             // 使用集中化的工具模式切换方法
@@ -2234,7 +2234,7 @@ namespace Ink_Canvas
             ApplyAdvancedEraserShape(); // 使用新的橡皮擦形状应用方法
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
-                Trace.WriteLine($"Eraser: Eraser button clicked, current size: {eraserWidth}, circle: {isEraserCircleShape}");
+            Trace.WriteLine($"Eraser: Eraser button clicked, current size: {eraserWidth}, circle: {isEraserCircleShape}");
 
             if (isAlreadyEraser)
             {
@@ -2263,7 +2263,7 @@ namespace Ink_Canvas
             drawingShapeMode = 0;
 
             // 启用新的高级橡皮擦系统
-                EnableEraserOverlay();
+            EnableEraserOverlay();
 
             // 使用新的高级橡皮擦系统
             // 使用集中化的工具模式切换方法
@@ -2578,7 +2578,7 @@ namespace Ink_Canvas
         private void SelectIcon_MouseUp(object sender, RoutedEventArgs e)
         {
             // 禁用高级橡皮擦系统
-                DisableEraserOverlay();
+            DisableEraserOverlay();
 
             forceEraser = true;
             drawingShapeMode = 0;
@@ -2687,12 +2687,12 @@ namespace Ink_Canvas
                 if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
                 {
                     Settings.Advanced.IsNoFocusMode = true;
-                    ToggleSwitchNoFocusMode.IsOn = true; 
+                    ToggleSwitchNoFocusMode.IsOn = true;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
             }
-            
+
             App.IsAppExitByUser = true;
             // 不设置 CloseIsFromButton = true，让它也经过确认流程
             Close();
@@ -2706,12 +2706,12 @@ namespace Ink_Canvas
                 if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
                 {
                     Settings.Advanced.IsNoFocusMode = true;
-                    ToggleSwitchNoFocusMode.IsOn = true; 
+                    ToggleSwitchNoFocusMode.IsOn = true;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
             }
-            
+
             Process.Start(System.Windows.Forms.Application.ExecutablePath, "-m");
             App.IsAppExitByUser = true;
             // 不设置 CloseIsFromButton = true，让它也经过确认流程
@@ -2847,7 +2847,7 @@ namespace Ink_Canvas
                 {
                     // 先关闭多指书写模式
                     ToggleSwitchEnableMultiTouchMode.IsOn = false;
-                    
+
                     // 使用Dispatcher.BeginInvoke确保UI更新完成后再重新开启
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
@@ -2873,7 +2873,7 @@ namespace Ink_Canvas
 
             ResetTouchStates();
         }
-        
+
         /// <summary>
         /// 重置所有触摸相关状态，
         /// </summary>
@@ -2883,8 +2883,8 @@ namespace Ink_Canvas
             {
                 // 清空触摸点计数器
                 dec.Clear();
-            
-                
+
+
                 // 重置单指拖动模式状态
                 if (isSingleFingerDragMode)
                 {
@@ -2894,25 +2894,25 @@ namespace Ink_Canvas
                         BtnFingerDragMode.Content = "单指\n拖动";
                     }
                 }
-                
+
                 // 重置手掌擦状态
                 if (isPalmEraserActive)
                 {
                     isPalmEraserActive = false;
                 }
-                
+
                 // 确保触摸事件能正常响应
                 inkCanvas.IsHitTestVisible = true;
                 inkCanvas.IsManipulationEnabled = true;
-                
+
                 // 释放所有触摸捕获
                 inkCanvas.ReleaseAllTouchCaptures();
-                
+
                 // 恢复UI元素的触摸响应
                 ViewboxFloatingBar.IsHitTestVisible = true;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
-                
-                
+
+
             }
             catch (Exception ex)
             {
@@ -3007,7 +3007,7 @@ namespace Ink_Canvas
                             // 使用异步延迟，等待浮动栏展开动画完成后再收纳
                             Task.Run(async () =>
                             {
-                                await Task.Delay(700); 
+                                await Task.Delay(700);
                                 await Dispatcher.InvokeAsync(() =>
                                 {
                                     FoldFloatingBar_MouseUp(new object(), null);

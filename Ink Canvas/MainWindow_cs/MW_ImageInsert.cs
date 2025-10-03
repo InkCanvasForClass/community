@@ -260,7 +260,7 @@ namespace Ink_Canvas
 
                 // 将Bitmap转换为WPF BitmapSource
                 var bitmapSource = ConvertBitmapToBitmapSource(bitmap);
-                
+
                 if (bitmapSource == null)
                 {
                     ShowNotification("转换截图失败");
@@ -649,7 +649,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"转换位图失败: {ex.Message}", LogHelper.LogType.Error);
-                
+
                 // 尝试使用备用方法：内存流转换
                 try
                 {
@@ -658,7 +658,7 @@ namespace Ink_Canvas
                 catch (Exception fallbackEx)
                 {
                     LogHelper.WriteLogToFile($"备用转换方法也失败: {fallbackEx.Message}", LogHelper.LogType.Error);
-                    
+
                     // 最后尝试：使用最简单的转换方法
                     try
                     {
@@ -723,18 +723,18 @@ namespace Ink_Canvas
 
                 // 使用最基础的方法：直接保存为PNG然后加载
                 var tempFile = Path.GetTempFileName() + ".png";
-                
+
                 try
                 {
                     bitmap.Save(tempFile, ImageFormat.Png);
-                    
+
                     var bitmapImage = new BitmapImage();
                     bitmapImage.BeginInit();
                     bitmapImage.UriSource = new Uri(tempFile);
                     bitmapImage.CacheOption = BitmapCacheOption.OnLoad;
                     bitmapImage.EndInit();
                     bitmapImage.Freeze();
-                    
+
                     return bitmapImage;
                 }
                 finally

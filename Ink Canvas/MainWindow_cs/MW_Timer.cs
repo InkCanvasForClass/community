@@ -70,8 +70,8 @@ namespace Ink_Canvas
         private TimeViewModel nowTimeVM = new TimeViewModel();
         private DateTime cachedNetworkTime = DateTime.Now;
         private DateTime lastNtpSyncTime = DateTime.MinValue;
-        private string lastDisplayedTime = ""; 
-        private bool useNetworkTime = false; 
+        private string lastDisplayedTime = "";
+        private bool useNetworkTime = false;
         private TimeSpan networkTimeOffset = TimeSpan.Zero;
         private DateTime lastLocalTime = DateTime.Now; // 记录上次的本地时间，用于检测时间跳跃
         private bool isNtpSyncing = false; // 防止重复NTP同步的标志 
@@ -87,7 +87,7 @@ namespace Ink_Canvas
                 var ipEndPoint = new IPEndPoint(addresses[0], 123);
                 using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
-                    socket.ReceiveTimeout = 5000; 
+                    socket.ReceiveTimeout = 5000;
                     socket.Connect(ipEndPoint);
                     await Task.Factory.FromAsync(socket.BeginSend(ntpData, 0, ntpData.Length, SocketFlags.None, null, socket), socket.EndSend);
                     await Task.Factory.FromAsync(socket.BeginReceive(ntpData, 0, ntpData.Length, SocketFlags.None, null, socket), socket.EndReceive);
@@ -131,7 +131,7 @@ namespace Ink_Canvas
             timerKillProcess.Start();
             nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
             nowTimeVM.nowTime = DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
-            
+
             // 程序启动时立即进行一次NTP同步
             Task.Run(async () =>
             {
@@ -151,17 +151,17 @@ namespace Ink_Canvas
         {
             // 防止重复同步
             if (isNtpSyncing) return;
-            
+
             isNtpSyncing = true;
             try
             {
-                
+
                 // 添加超时机制，最多等待10秒
                 var timeoutTask = Task.Delay(10000);
                 var ntpTask = GetNetworkTimeAsync();
-                
+
                 var completedTask = await Task.WhenAny(ntpTask, timeoutTask);
-                
+
                 if (completedTask == timeoutTask)
                 {
                     cachedNetworkTime = DateTime.Now;
@@ -170,20 +170,20 @@ namespace Ink_Canvas
                     networkTimeOffset = TimeSpan.Zero;
                     return;
                 }
-                
+
                 DateTime networkTime = await ntpTask;
                 DateTime localTime = DateTime.Now;
-                
+
                 cachedNetworkTime = networkTime;
                 lastNtpSyncTime = localTime;
-                
+
                 // 计算网络时间与本地时间的偏移量
                 networkTimeOffset = networkTime - localTime;
-                
+
                 // 如果时间差超过3分钟，则使用网络时间
                 useNetworkTime = Math.Abs(networkTimeOffset.TotalMinutes) > 3.0;
-                
-           }
+
+            }
             catch (Exception ex)
             {
                 // NTP同步失败时，保持使用本地时间
@@ -191,7 +191,7 @@ namespace Ink_Canvas
                 lastNtpSyncTime = DateTime.Now;
                 useNetworkTime = false;
                 networkTimeOffset = TimeSpan.Zero;
-                
+
                 LogHelper.WriteLogToFile($"NTP同步失败: {ex.Message}", LogHelper.LogType.Warning);
             }
             finally
@@ -209,7 +209,7 @@ namespace Ink_Canvas
             // 检测系统时间是否发生重大跳跃（超过2分钟）
             TimeSpan timeJump = localTime - lastLocalTime;
             double timeJumpMinutes = Math.Abs(timeJump.TotalMinutes);
-            
+
             if (timeJumpMinutes > 3 && !isNtpSyncing)
             {
                 // 系统时间发生重大变化（超过3分钟），立即触发NTP同步
@@ -237,12 +237,12 @@ namespace Ink_Canvas
             // 格式化时间字符串
             string timeString = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
 
-            
+
             // 只有当时间字符串发生变化时才更新UI，避免不必要的UI刷新
             if (timeString != lastDisplayedTime)
             {
                 lastDisplayedTime = timeString;
-                
+
                 // 使用BeginInvoke异步更新UI，避免阻塞
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -477,7 +477,7 @@ namespace Ink_Canvas
                         { // EasiNote5
                             // 检查是否是桌面批注窗口
                             bool isAnnotationWindow = windowTitle.Length == 0 && ForegroundWindowInfo.WindowRect().Height < 500;
-                            
+
                             // 如果启用了忽略桌面批注窗口功能，且当前是批注窗口
                             if (Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno && isAnnotationWindow)
                             {
