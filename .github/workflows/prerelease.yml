@@ -20,6 +20,7 @@ on:
 
 jobs:
   prerelease:
+    if: github.ref == 'refs/heads/main'
     runs-on: windows-latest
     
     steps:
