@@ -236,7 +236,7 @@ jobs:
     - name: Create Release Archive
       run: |
         $version = "${{ steps.calc_version.outputs.new_version }}"
-        $archiveName = "InkCanvasForClass.CE.$version.zip"
+        $archiveName = "InkCanvasForClass.CE.$version.0.zip"
         
         # 创建发布目录
         New-Item -ItemType Directory -Path "release" -Force
@@ -254,7 +254,7 @@ jobs:
       with:
         name: release-files-${{ steps.calc_version.outputs.new_version }}
         path: |
-          InkCanvasForClass.CE.${{ steps.calc_version.outputs.new_version }}.zip
+          InkCanvasForClass.CE.${{ steps.calc_version.outputs.new_version }}.0.zip
           CHANGELOG_${{ steps.calc_version.outputs.new_version }}.md
           
     - name: Prepare Release Info
@@ -265,14 +265,14 @@ jobs:
     - name: Create GitHub Release
       uses: softprops/action-gh-release@v1
       with:
-        tag_name: ${{ steps.calc_version.outputs.new_version }}
-        name: ICC CE ${{ steps.calc_version.outputs.new_version }}
+        tag_name: ${{ steps.calc_version.outputs.new_version }}.0
+        name: ICC CE ${{ steps.calc_version.outputs.new_version }}.0
         body: |
           ${{ steps.changelog.outputs.changelog }}
         draft: false
         prerelease: ${{ github.event.inputs.prerelease }}
         files: |
-          InkCanvasForClass.CE.${{ steps.calc_version.outputs.new_version }}.zip
+          InkCanvasForClass.CE.${{ steps.calc_version.outputs.new_version }}.0.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
