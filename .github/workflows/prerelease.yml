@@ -150,7 +150,7 @@ jobs:
         
         # 生成changelog内容
         $version = "${{ steps.calc_version.outputs.new_version }}"
-        $changelog = "# ICC CE $version 更新日志`n`n## 修复 (Fixes)"
+        $changelog = "# ICC CE $version.0 更新日志`n`n## 修复 (Fixes)"
         
         if ($fixes.Count -gt 0) {
           foreach ($fix in $fixes) {
@@ -285,7 +285,7 @@ jobs:
         $changelogContent = Get-Content $changelogFile -Raw
         
         # 生成预览内容
-        $previewContent = "ICC CE $version 更新日志`n" + $changelogContent
+        $previewContent = "ICC CE $version.0 更新日志`n" + $changelogContent
         
         echo "UpdateLog preview generated (not written to file):"
         echo $previewContent
