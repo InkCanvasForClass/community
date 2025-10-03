@@ -1467,8 +1467,8 @@
                                     <Border ClipToBounds="True" Width="324" Height="182">
                                         <Grid>
                                             <Image Source="Resources/PresentationExample/page.jpg" Width="324" Height="182" Stretch="Fill"></Image>
-                                            <Image Source="Resources/PresentationExample/toolbar.png" Height="16" Width="324"
-                                                   VerticalAlignment="Bottom" HorizontalAlignment="Center" Stretch="Fill" />
+                                            <Image Name="PPTBtnPreviewToolbar" Source="Resources/PresentationExample/toolbar.png" Height="16" Width="324"
+                                                   VerticalAlignment="Bottom" HorizontalAlignment="Center" Stretch="Uniform" />
                                             <Image Name="PPTBtnPreviewLS" Source="Resources/PresentationExample/sidebar-white.png" Width="10" Height="30"
                                                    VerticalAlignment="Center" HorizontalAlignment="Left" RenderTransformOrigin="0.5,0.5" Stretch="Fill">
                                                 <Image.RenderTransform>

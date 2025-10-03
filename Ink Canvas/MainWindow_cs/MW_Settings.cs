@@ -1054,6 +1054,34 @@ namespace Ink_Canvas
             
             PPTBtnPreviewLBTransform.X = scaledMarginOffset + (lbPosition * scaleX);
             PPTBtnPreviewRBTransform.X = -(scaledMarginOffset + (rbPosition * scaleX));
+            
+            // 计算工具栏尺寸
+            var dpiScaleX = 1.0;
+            var dpiScaleY = 1.0;
+            try
+            {
+                var source = PresentationSource.FromVisual(this);
+                if (source?.CompositionTarget != null)
+                {
+                    var transform = source.CompositionTarget.TransformToDevice;
+                    dpiScaleX = transform.M11;
+                    dpiScaleY = transform.M22;
+                }
+            }
+            catch
+            {
+                dpiScaleX = 1.0;
+                dpiScaleY = 1.0;
+            }
+            
+            // 计算工具栏的实际尺寸
+            const double baseToolbarHeight = 20.0; 
+            double actualToolbarHeight = baseToolbarHeight * dpiScaleY;
+            double scaledToolbarHeight = actualToolbarHeight * scaleY;
+            
+            // 设置工具栏尺寸
+            PPTBtnPreviewToolbar.Height = scaledToolbarHeight;
+            PPTBtnPreviewToolbar.Width = previewWidth; 
         }
 
         private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
