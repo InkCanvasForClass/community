@@ -131,11 +131,8 @@ jobs:
         }
         
         # 生成changelog内容
-        $changelog = @"
-# ICC CE ${{ steps.calc_version.outputs.new_version }} 更新日志
-
-## 修复 (Fixes)
-"@
+        $version = "${{ steps.calc_version.outputs.new_version }}"
+        $changelog = "# ICC CE $version 更新日志`n`n## 修复 (Fixes)"
         
         if ($fixes.Count -gt 0) {
           foreach ($fix in $fixes) {
@@ -145,10 +142,7 @@ jobs:
           $changelog += "`n- 无"
         }
         
-        $changelog += @"
-
-## 改进 (Improvements)
-"@
+        $changelog += "`n`n## 改进 (Improvements)"
         
         if ($improvements.Count -gt 0) {
           foreach ($improvement in $improvements) {
@@ -158,10 +152,7 @@ jobs:
           $changelog += "`n- 无"
         }
         
-        $changelog += @"
-
-## 新增功能 (New Features)
-"@
+        $changelog += "`n`n## 新增功能 (New Features)"
         
         if ($additions.Count -gt 0) {
           foreach ($addition in $additions) {
@@ -171,10 +162,7 @@ jobs:
           $changelog += "`n- 无"
         }
         
-        $changelog += @"
-
-## 删除功能 (Removed Features)
-"@
+        $changelog += "`n`n## 删除功能 (Removed Features)"
         
         if ($deletions.Count -gt 0) {
           foreach ($deletion in $deletions) {
@@ -184,10 +172,7 @@ jobs:
           $changelog += "`n- 无"
         }
         
-        $changelog += @"
-
-## 版本更新 (Version Updates)
-"@
+        $changelog += "`n`n## 版本更新 (Version Updates)"
         
         if ($versionChanges.Count -gt 0) {
           foreach ($versionChange in $versionChanges) {
@@ -197,10 +182,7 @@ jobs:
           $changelog += "`n- 无"
         }
         
-        $changelog += @"
-
-## 其他更改 (Other Changes)
-"@
+        $changelog += "`n`n## 其他更改 (Other Changes)"
         
         if ($others.Count -gt 0) {
           foreach ($other in $others) {
@@ -210,11 +192,7 @@ jobs:
           $changelog += "`n- 无"
         }
         
-        $changelog += @"
-
----
-*此更新日志由GitHub Actions自动生成*
-"@
+        $changelog += "`n`n---`n*此更新日志由GitHub Actions自动生成*"
         
         # 保存changelog到文件
         $changelog | Out-File -FilePath "CHANGELOG_${{ steps.calc_version.outputs.new_version }}.md" -Encoding UTF8
