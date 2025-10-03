@@ -1044,16 +1044,25 @@ namespace Ink_Canvas
             double lbPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
             double rbPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
             
+            bool showSidePageButton = sopt.Length >= 1 && sopt[0] == '2';
+            bool showBottomPageButton = bopt.Length >= 1 && bopt[0] == '2';
+            
+            // 页码按钮的实际尺寸
+            const double pageButtonWidth = 50.0; 
+            const double pageButtonHeight = 50.0; 
+            
             // 计算侧边按钮位置（Y轴偏移）
-            PPTBtnPreviewRSTransform.Y = -(rsPosition * scaleY);
-            PPTBtnPreviewLSTransform.Y = -(lsPosition * scaleY);
+            double sideOffsetY = showSidePageButton ? pageButtonHeight * scaleY : 0;
+            PPTBtnPreviewRSTransform.Y = -(rsPosition * scaleY) - sideOffsetY;
+            PPTBtnPreviewLSTransform.Y = -(lsPosition * scaleY) - sideOffsetY;
             
             // 计算底部按钮位置（X轴偏移）
             const double bottomMarginOffset = 6.0; 
             double scaledMarginOffset = bottomMarginOffset * scaleX;
             
-            PPTBtnPreviewLBTransform.X = scaledMarginOffset + (lbPosition * scaleX);
-            PPTBtnPreviewRBTransform.X = -(scaledMarginOffset + (rbPosition * scaleX));
+            double bottomOffsetX = showBottomPageButton ? pageButtonWidth * scaleX : 0;
+            PPTBtnPreviewLBTransform.X = scaledMarginOffset + (lbPosition * scaleX) + bottomOffsetX;
+            PPTBtnPreviewRBTransform.X = -(scaledMarginOffset + (rbPosition * scaleX) + bottomOffsetX);
             
             // 计算工具栏尺寸
             var dpiScaleX = 1.0;
