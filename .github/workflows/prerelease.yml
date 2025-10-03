@@ -25,14 +25,9 @@ jobs:
     
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v4.2.2
       with:
         fetch-depth: 0  # 获取所有历史记录用于生成changelog
-        
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '6.0.x'
         
     - name: Setup MSbuild
       uses: microsoft/setup-msbuild@v2
@@ -46,7 +41,20 @@ jobs:
     - name: Get current version
       id: get_version
       run: |
-        $version = (Get-Content "Ink Canvas\Properties\AssemblyInfo.cs" | Select-String "AssemblyVersion\(""([^""]+)""\)").Matches[0].Groups[1].Value
+        $versionLine = Get-Content "Ink Canvas\Properties\AssemblyInfo.cs" | Select-String "AssemblyVersion\(""([^""]+)""\)"
+        if ($versionLine) {
+          $version = $versionLine.Matches[0].Groups[1].Value
+          # 处理通配符版本号
+          if ($version -match "(\d+)\.(\d+)\.(\*|\d+)\.(\*|\d+)") {
+            $major = $matches[1]
+            $minor = $matches[2]
+            $patch = if ($matches[3] -eq "*") { "0" } else { $matches[3] }
+            $revision = if ($matches[4] -eq "*") { "0" } else { $matches[4] }
+            $version = "$major.$minor.$patch.$revision"
+          }
+        } else {
+          $version = "1.0.0.0"
+        }
         echo "current_version=$version" >> $env:GITHUB_OUTPUT
         echo "Current version: $version"
         
@@ -55,9 +63,17 @@ jobs:
       run: |
         $currentVersion = "${{ steps.get_version.outputs.current_version }}"
         $versionParts = $currentVersion.Split('.')
-        $major = [int]$versionParts[0]
-        $minor = [int]$versionParts[1]
-        $patch = [int]$versionParts[2]
+        
+        # 确保版本号格式正确
+        if ($versionParts.Length -ge 3) {
+          $major = [int]$versionParts[0]
+          $minor = [int]$versionParts[1]
+          $patch = [int]$versionParts[2]
+        } else {
+          $major = 1
+          $minor = 0
+          $patch = 0
+        }
         
         $versionType = "${{ github.event.inputs.version_type }}"
         
@@ -233,7 +249,7 @@ jobs:
         echo "archive_name=$archiveName" >> $env:GITHUB_OUTPUT
         
     - name: Upload Release Assets
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v4.5.0
       with:
         name: release-files-${{ steps.calc_version.outputs.new_version }}
         path: |
