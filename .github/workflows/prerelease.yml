@@ -236,7 +236,7 @@ jobs:
     - name: Create Release Archive
       run: |
         $version = "${{ steps.calc_version.outputs.new_version }}"
-        $archiveName = "ICC_CE_$version.zip"
+        $archiveName = "InkCanvasForClass.CE.$version.zip"
         
         # 创建发布目录
         New-Item -ItemType Directory -Path "release" -Force
@@ -254,7 +254,7 @@ jobs:
       with:
         name: release-files-${{ steps.calc_version.outputs.new_version }}
         path: |
-          ICC_CE_${{ steps.calc_version.outputs.new_version }}.zip
+          InkCanvasForClass.CE.${{ steps.calc_version.outputs.new_version }}.zip
           CHANGELOG_${{ steps.calc_version.outputs.new_version }}.md
           
     - name: Prepare Release Info
@@ -272,8 +272,7 @@ jobs:
         draft: false
         prerelease: ${{ github.event.inputs.prerelease }}
         files: |
-          ICC_CE_${{ steps.calc_version.outputs.new_version }}.zip
-          CHANGELOG_${{ steps.calc_version.outputs.new_version }}.md
+          InkCanvasForClass.CE.${{ steps.calc_version.outputs.new_version }}.zip
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
