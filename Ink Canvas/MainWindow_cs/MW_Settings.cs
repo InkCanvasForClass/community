@@ -1075,13 +1075,15 @@ namespace Ink_Canvas
             }
             
             // 计算工具栏的实际尺寸
-            const double baseToolbarHeight = 20.0; 
+            const double baseToolbarHeight = 24.0; 
+            
             double actualToolbarHeight = baseToolbarHeight * dpiScaleY;
             double scaledToolbarHeight = actualToolbarHeight * scaleY;
+            double scaledToolbarWidth = previewWidth;
             
             // 设置工具栏尺寸
             PPTBtnPreviewToolbar.Height = scaledToolbarHeight;
-            PPTBtnPreviewToolbar.Width = previewWidth; 
+            PPTBtnPreviewToolbar.Width = scaledToolbarWidth; 
         }
 
         private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
