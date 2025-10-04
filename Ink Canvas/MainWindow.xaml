@@ -189,12 +189,18 @@
                                     <!-- Crash Action -->
                                     <Button Width="40" Height="40" Margin="0,5,0,0" Style="{StaticResource NavButton}"
                                             Click="NavCrashAction_Click" Tag="crashaction" ToolTip="崩溃处理">
-                                        <Image Width="24" Height="24">
+                                        <Image Width="22" Height="22">
                                             <Image.Source>
                                                 <DrawingImage>
                                                     <DrawingImage.Drawing>
-                                                        <GeometryDrawing Brush="White"
-                                                            Geometry="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z"/>
+                                                        <GeometryDrawing>
+                                                            <GeometryDrawing.Pen>
+                                                                <Pen Brush="White" Thickness="2" StartLineCap="Round" EndLineCap="Round" LineJoin="Round"/>
+                                                            </GeometryDrawing.Pen>
+                                                            <GeometryDrawing.Geometry>
+                                                                <PathGeometry Figures="M10.863 4.09101L2.75699 17.625C2.58988 17.9144 2.50145 18.2425 2.5005 18.5766C2.49954 18.9108 2.58609 19.2394 2.75153 19.5297C2.91698 19.8201 3.15555 20.062 3.44353 20.2316C3.7315 20.4011 4.05884 20.4923 4.39299 20.496H20.607C20.941 20.4922 21.2682 20.401 21.556 20.2315C21.8438 20.062 22.0823 19.8202 22.2477 19.53C22.4131 19.2398 22.4997 18.9114 22.4989 18.5774C22.4981 18.2434 22.4098 17.9154 22.243 17.626L14.137 4.09001C13.9664 3.80851 13.7262 3.57575 13.4394 3.4142C13.1527 3.25266 12.8291 3.16779 12.5 3.16779C12.1709 3.16779 11.8473 3.25266 11.5605 3.4142C11.2738 3.57575 11.0335 3.80851 10.863 4.09001V4.09101Z M9.5 13.5H15.5"/>
+                                                            </GeometryDrawing.Geometry>
+                                                        </GeometryDrawing>
                                                     </DrawingImage.Drawing>
                                                 </DrawingImage>
                                             </Image.Source>
