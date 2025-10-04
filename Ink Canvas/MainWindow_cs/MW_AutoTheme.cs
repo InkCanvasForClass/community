@@ -262,8 +262,25 @@ namespace Ink_Canvas
                     Settings.Appearance.FloatingBarImg = 3;
                 }
 
-                // 更新浮动栏图标
                 UpdateFloatingBarIcon();
+                UpdateFloatingBarIconComboBox();
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        /// <summary>
+        /// 更新设置界面中的浮动栏图标选择下拉框显示
+        /// </summary>
+        private void UpdateFloatingBarIconComboBox()
+        {
+            try
+            {
+                if (ComboBoxFloatingBarImg != null)
+                {
+                    ComboBoxFloatingBarImg.SelectedIndex = Settings.Appearance.FloatingBarImg;
+                }
             }
             catch (Exception)
             {
