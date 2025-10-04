@@ -8917,14 +8917,14 @@
                                             <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center"
                                                                  Margin="0,0,0,0" Spacing="4">
                                                 <Border x:Name="CircleEraserTabButton" MouseDown="SwitchToCircleEraser"
-                                                        Background="#553b82f6" Height="20" Width="40" CornerRadius="3">
+                                                        Background="{DynamicResource FloatBarButtonBackgroundPointerOverKey}" Height="20" Width="40" CornerRadius="3">
                                                     <Canvas>
                                                         <ui:SimpleStackPanel x:Name="CircleEraserTabButtonIndicator"
                                                                              Visibility="Visible"
                                                                              Orientation="Horizontal"
                                                                              Canvas.Left="11" Canvas.Right="11"
                                                                              Canvas.Bottom="0">
-                                                            <Border Width="18" Height="2" Background="#2563eb"
+                                                            <Border Width="18" Height="2" Background="{DynamicResource FloatBarButtonButtonBackgroundPressedKey}"
                                                                     CornerRadius="1" />
                                                         </ui:SimpleStackPanel>
                                                         <ui:SimpleStackPanel Orientation="Vertical" Height="20"
@@ -8933,7 +8933,7 @@
                                                                 Orientation="Horizontal"
                                                                 HorizontalAlignment="Center" Margin="0,3">
                                                                 <TextBlock x:Name="CircleEraserTabButtonText"
-                                                                           Foreground="#172554" FontWeight="Medium"
+                                                                           Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                            FontSize="9" TextAlignment="Center"
                                                                            Text="圆形擦"
                                                                            Margin="2,1,0,0" />
@@ -8949,7 +8949,7 @@
                                                                              x:Name="RectangleEraserTabButtonIndicator"
                                                                              Orientation="Horizontal" Canvas.Left="11"
                                                                              Canvas.Right="11" Canvas.Bottom="0">
-                                                            <Border Width="18" Height="2" Background="#2563eb"
+                                                            <Border Width="18" Height="2" Background="{DynamicResource FloatBarButtonButtonBackgroundPressedKey}"
                                                                     CornerRadius="1" />
                                                         </ui:SimpleStackPanel>
                                                         <ui:SimpleStackPanel Orientation="Vertical" Height="20"
@@ -8958,7 +8958,7 @@
                                                                 Orientation="Horizontal"
                                                                 HorizontalAlignment="Center" Margin="0,3">
                                                                 <TextBlock x:Name="RectangleEraserTabButtonText"
-                                                                           Foreground="#172554" FontWeight="Medium"
+                                                                           Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                            FontSize="9" TextAlignment="Center"
                                                                            Text="黑板擦"
                                                                            Margin="2,1,0,0" />
