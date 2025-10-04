@@ -14,7 +14,7 @@
     <SolidColorBrush x:Key="IconForeground" Color="White" />
     <SolidColorBrush x:Key="TextForeground" Color="White" />
 
-    <SolidColorBrush x:Key="RedBrush" Color="IndianRed" />
+    <SolidColorBrush x:Key="RedBrush" Color="#FF4444" />
     <SolidColorBrush x:Key="PurpleBrush" Color="MediumPurple" />
 
     <SolidColorBrush x:Key="FloatBarButtonBackgroundKey" Color="Transparent" />
