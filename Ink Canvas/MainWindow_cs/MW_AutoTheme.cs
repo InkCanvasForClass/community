@@ -3,6 +3,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 using Application = System.Windows.Application;
 
@@ -57,6 +58,8 @@ namespace Ink_Canvas
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
 
+                RefreshFloatingBarHighlightColors();
+
                 if (autoSwitchIcon)
                 {
                     AutoSwitchFloatingBarIconForTheme("Light");
@@ -89,6 +92,8 @@ namespace Ink_Canvas
 
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
+
+                RefreshFloatingBarHighlightColors();
 
                 if (autoSwitchIcon)
                 {
@@ -141,6 +146,49 @@ namespace Ink_Canvas
                 if (RightSidePanel != null)
                 {
                     RightSidePanel.InvalidateVisual();
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        /// <summary>
+        /// 刷新浮动栏高光条颜色
+        /// </summary>
+        private void RefreshFloatingBarHighlightColors()
+        {
+            try
+            {
+                if (FloatingbarSelectionBG != null && FloatingbarSelectionBG.Visibility == Visibility.Visible)
+                {
+                    // 根据主题设置高光颜色
+                    Color highlightBackgroundColor;
+                    Color highlightBarColor;
+                    bool isDarkTheme = Settings.Appearance.Theme == 1 || 
+                                       (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+                    
+                    if (isDarkTheme)
+                    {
+                        highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255); 
+                        highlightBarColor = Color.FromRgb(102, 204, 255); 
+                    }
+                    else
+                    {
+                        highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246); 
+                        highlightBarColor = Color.FromRgb(37, 99, 235); 
+                    }
+
+                    // 设置高光背景颜色
+                    FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
+                    if (FloatingbarSelectionBG.Child is System.Windows.Controls.Canvas canvas && canvas.Children.Count > 0)
+                    {
+                        var firstChild = canvas.Children[0];
+                        if (firstChild is Border innerBorder)
+                        {
+                            innerBorder.Background = new SolidColorBrush(highlightBarColor);
+                        }
+                    }
                 }
             }
             catch (Exception)

@@ -3733,7 +3733,6 @@ namespace Ink_Canvas
 
                 // 设置高光背景颜色
                 FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
-                
                 if (FloatingbarSelectionBG.Child is System.Windows.Controls.Canvas canvas && canvas.Children.Count > 0)
                 {
                     var firstChild = canvas.Children[0];
