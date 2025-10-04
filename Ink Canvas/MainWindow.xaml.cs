@@ -2855,24 +2855,24 @@ namespace Ink_Canvas
                 switch (themeIndex)
                 {
                     case 0: // 浅色主题
-                        SetTheme("Light");
+                        SetTheme("Light", true);
                         // 浅色主题下设置浮动栏为完全不透明
                         ViewboxFloatingBar.Opacity = 1.0;
                         break;
                     case 1: // 深色主题
-                        SetTheme("Dark");
+                        SetTheme("Dark", true);
                         // 深色主题下设置浮动栏为完全不透明
                         ViewboxFloatingBar.Opacity = 1.0;
                         break;
                     case 2: // 跟随系统
                         if (IsSystemThemeLight())
                         {
-                            SetTheme("Light");
+                            SetTheme("Light", true);
                             ViewboxFloatingBar.Opacity = 1.0;
                         }
                         else
                         {
-                            SetTheme("Dark");
+                            SetTheme("Dark", true);
                             ViewboxFloatingBar.Opacity = 1.0;
                         }
                         break;

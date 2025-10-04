@@ -12,7 +12,7 @@ namespace Ink_Canvas
     {
         private Color FloatBarForegroundColor;
 
-        private void SetTheme(string theme)
+        private void SetTheme(string theme, bool autoSwitchIcon = false)
         {
             // 清理现有的主题资源
             var resourcesToRemove = new List<ResourceDictionary>();
@@ -56,8 +56,11 @@ namespace Ink_Canvas
 
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
-                
-                AutoSwitchFloatingBarIconForTheme("Light");
+
+                if (autoSwitchIcon)
+                {
+                    AutoSwitchFloatingBarIconForTheme("Light");
+                }
 
                 // 强制刷新UI
                 window.InvalidateVisual();
@@ -87,8 +90,10 @@ namespace Ink_Canvas
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
 
-                // 自动切换浮动栏图标为深色呼吸版图标
-                AutoSwitchFloatingBarIconForTheme("Dark");
+                if (autoSwitchIcon)
+                {
+                    AutoSwitchFloatingBarIconForTheme("Dark");
+                }
 
                 // 强制刷新UI
                 window.InvalidateVisual();
