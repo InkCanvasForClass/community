@@ -34,6 +34,9 @@ namespace Ink_Canvas
             // 加载背景
             LoadBackground(settings);
 
+            // 应用主题
+            ApplyTheme(settings);
+
             // 设置窗口为置顶
             Topmost = true;
 
@@ -75,6 +78,27 @@ namespace Ink_Canvas
             }
         }
 
+        private void ApplyTheme(Settings settings)
+        {
+            try
+            {
+                // 根据主题设置窗口背景
+                if (settings.RandSettings.SelectedBackgroundIndex <= 0)
+                {
+                    // 没有自定义背景时，使用主题背景色
+                    var backgroundBrush = Application.Current.FindResource("RandWindowBackground") as SolidColorBrush;
+                    if (backgroundBrush != null)
+                    {
+                        MainBorder.Background = backgroundBrush;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用点名窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         public RandWindow(Settings settings, bool IsAutoClose)
         {
             InitializeComponent();
@@ -87,6 +111,9 @@ namespace Ink_Canvas
 
             // 加载背景
             LoadBackground(settings);
+
+            // 应用主题
+            ApplyTheme(settings);
 
             // 设置窗口为置顶
             Topmost = true;

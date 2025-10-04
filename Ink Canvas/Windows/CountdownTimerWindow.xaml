@@ -10,7 +10,7 @@
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
         Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
         Title="Ink Canvas 画板 - 计时器" Height="700" Width="1100">
-    <Border Background="#F0F3F9" CornerRadius="10" BorderThickness="1" BorderBrush="#0066BF" Margin="60">
+    <Border Background="{DynamicResource TimerWindowBackground}" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource TimerWindowBorderBrush}" Margin="60">
         <Grid>
             <TextBlock x:Name="TbCurrentTime" MouseDown="BtnMinimal_OnMouseUp" Visibility="Collapsed" FontSize="56" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
             <Border MouseMove="WindowDragMove" Visibility="{Binding ElementName=TbCurrentTime, Path=Visibility}" Width="64" Height="15" CornerRadius="8" Background="Gray" Margin="0,0,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
@@ -22,7 +22,7 @@
                                          HorizontalAlignment="Center">
                         <TextBlock Name="TextBlockHour" FontFamily="Segeo UI"
                                    Margin="0,0,0,0" Visibility="Collapsed"
-                                   Foreground="#5B5D5F"
+                                   Foreground="{DynamicResource TimerWindowTextForeground}"
                                    Text="00" FontSize="26"/>
                         <ItemsControl Name="TextControlHour" ItemsSource="{Binding ElementName=TextBlockHour, Path=Text}">
                             <ItemsControl.ItemsPanel>
@@ -69,7 +69,7 @@
                                    FontWeight="DemiBold"/>
                         <TextBlock Name="TextBlockMinute" FontFamily="{Binding ElementName=TextBlockHour, Path=FontFamily}"
                                    Margin="0,0,0,0" Visibility="Collapsed"
-                                   Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
+                                   Foreground="{DynamicResource TimerWindowTextForeground}"
                                    Text="01" FontSize="26"/>
                         <ItemsControl Name="TextControlMinute" ItemsSource="{Binding ElementName=TextBlockMinute, Path=Text}">
                             <ItemsControl.ItemsPanel>
@@ -128,7 +128,7 @@
                                    FontWeight="DemiBold"/>
                         <TextBlock Name="TextBlockSecond" FontFamily="{Binding ElementName=TextBlockHour, Path=FontFamily}"
                                    Margin="0,0,0,0" Visibility="Collapsed"
-                                   Foreground="{Binding ElementName=TextBlockHour, Path=Foreground}"
+                                   Foreground="{DynamicResource TimerWindowTextForeground}"
                                    Text="00" FontSize="26"/>
                         <ItemsControl Name="TextControlSecond" ItemsSource="{Binding ElementName=TextBlockSecond, Path=Text}">
                             <ItemsControl.ItemsPanel>
@@ -167,17 +167,17 @@
                             </ui:SimpleStackPanel>
                         </Grid>
                     </ui:SimpleStackPanel>
-                    <Border x:Name="BorderStopTime" Background="#E8EAF0" Margin="0,23,0,0"
+                    <Border x:Name="BorderStopTime" Background="{DynamicResource TimerWindowStopTimeBackground}" Margin="0,23,0,0"
                             Height="18" CornerRadius="9"
                             VerticalAlignment="Center" HorizontalAlignment="Center">
                         <ui:SimpleStackPanel Margin="6,0" Spacing="0" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Image Margin="0,0,2,0" Source="/Resources/Icons-Fluent/ic_fluent_clock_24_regular.png" RenderOptions.BitmapScalingMode="HighQuality" Height="10" Width="10"/>
-                            <TextBlock Name="TextBlockStopTime" Text="12:30 PM" FontSize="9" VerticalAlignment="Center"/>
+                            <TextBlock Name="TextBlockStopTime" Text="12:30 PM" FontSize="9" VerticalAlignment="Center" Foreground="{DynamicResource TimerWindowStopTimeForeground}"/>
                         </ui:SimpleStackPanel>
                     </Border>
                     <ui:SimpleStackPanel Visibility="{Binding ElementName=ProcessBarTime, Path=Visibility}" Spacing="10" Orientation="Horizontal" Height="30" HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <Grid>
-                            <Border x:Name="BtnStart" MouseUp="BtnStart_MouseUp" Background="#0066BF" Height="20" Width="20" CornerRadius="100">
+                            <Border x:Name="BtnStart" MouseUp="BtnStart_MouseUp" Background="{DynamicResource TimerWindowPrimaryButtonBackground}" Height="20" Width="20" CornerRadius="100">
                                 <Viewbox Margin="5">
                                     <ui:SymbolIcon Name="SymbolIconStart" Symbol="Play" Foreground="White"/>
                                 </Viewbox>
@@ -189,12 +189,12 @@
                             </Border>
                         </Grid>
                         <Grid>
-                            <Border x:Name="BtnReset" MouseUp="BtnReset_MouseUp" Background="#FBFBFD" Height="20" Width="20" CornerRadius="100">
+                            <Border x:Name="BtnReset" MouseUp="BtnReset_MouseUp" Background="{DynamicResource TimerWindowButtonBackground}" Height="20" Width="20" CornerRadius="100">
                                 <Border.Effect>
                                     <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.15" BlurRadius="3"/>
                                 </Border.Effect>
                                 <Viewbox Margin="5.5">
-                                    <ui:SymbolIcon Symbol="Refresh" Foreground="Black"/>
+                                    <ui:SymbolIcon Symbol="Refresh" Foreground="{DynamicResource TimerWindowButtonForeground}"/>
                                 </Viewbox>
                             </Border>
                             <Border x:Name="BtnResetCover" Background="#F3F5F9" Height="20" Width="20" CornerRadius="100">
@@ -210,22 +210,22 @@
                 <ui:SimpleStackPanel Height="180" Orientation="Horizontal">
                     <Border x:Name="BtnMinimal" Visibility="{Binding ElementName=BorderStopTime, Path=Visibility}" MouseUp="BtnMinimal_OnMouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                             Margin="5"
-                            Background="#FBFBFD" Height="20" Width="20" CornerRadius="100">
+                            Background="{DynamicResource TimerWindowButtonBackground}" Height="20" Width="20" CornerRadius="100">
                         <Border.Effect>
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:SymbolIcon Name="SymbolIconMinimal" Symbol="HideBcc" Foreground="Black"/>
+                            <ui:SymbolIcon Name="SymbolIconMinimal" Symbol="HideBcc" Foreground="{DynamicResource TimerWindowButtonForeground}"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnFullscreen" MouseUp="BtnFullscreen_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
                             Margin="5"
-                            Background="#FBFBFD" Height="20" Width="20" CornerRadius="100">
+                            Background="{DynamicResource TimerWindowButtonBackground}" Height="20" Width="20" CornerRadius="100">
                         <Border.Effect>
                             <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
                         </Border.Effect>
                         <Viewbox Margin="5.5">
-                            <ui:SymbolIcon Name="SymbolIconFullscreen" Symbol="FullScreen" Foreground="Black"/>
+                            <ui:SymbolIcon Name="SymbolIconFullscreen" Symbol="FullScreen" Foreground="{DynamicResource TimerWindowButtonForeground}"/>
                         </Viewbox>
                     </Border>
                     <Border x:Name="BtnClose" MouseUp="BtnClose_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"

@@ -23,6 +23,9 @@ namespace Ink_Canvas
             timer.Elapsed += Timer_Elapsed;
             timer.Interval = 50;
             InitializeUI();
+            
+            // 应用主题
+            ApplyTheme();
         }
 
 
@@ -82,6 +85,28 @@ namespace Ink_Canvas
         private void InitializeUI()
         {
             UpdateDigitDisplays();
+        }
+
+        private void ApplyTheme()
+        {
+            try
+            {
+                // 根据主题设置数字显示颜色
+                var digitForeground = Application.Current.FindResource("SeewoTimerWindowDigitForeground") as SolidColorBrush;
+                if (digitForeground != null)
+                {
+                    Digit1Display.Foreground = digitForeground;
+                    Digit2Display.Foreground = digitForeground;
+                    Digit3Display.Foreground = digitForeground;
+                    Digit4Display.Foreground = digitForeground;
+                    Digit5Display.Foreground = digitForeground;
+                    Digit6Display.Foreground = digitForeground;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用仿希沃倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void UpdateDigitDisplays()

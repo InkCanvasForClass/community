@@ -22,6 +22,9 @@ namespace Ink_Canvas
             timer.Elapsed += Timer_Elapsed;
             timer.Interval = 50;
             InitializeUI();
+            
+            // 应用主题
+            ApplyTheme();
         }
 
         public static Window CreateTimerWindow()
@@ -355,6 +358,25 @@ namespace Ink_Canvas
             {
                 useLegacyUI = MainWindow.Settings.RandSettings.UseLegacyTimerUI;
                 UpdateButtonTexts();
+            }
+        }
+
+        private void ApplyTheme()
+        {
+            try
+            {
+                // 根据主题设置文本颜色
+                var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground != null)
+                {
+                    TextBlockHour.Foreground = textForeground;
+                    TextBlockMinute.Foreground = textForeground;
+                    TextBlockSecond.Foreground = textForeground;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

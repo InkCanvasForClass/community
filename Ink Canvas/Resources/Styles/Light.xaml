@@ -67,4 +67,39 @@
     <BitmapImage x:Key="GeoIconRectangle" UriSource="/Resources/Icons-png/geo-icons/square.png"/>
     <BitmapImage x:Key="GeoIconCylinder" UriSource="/Resources/Icons-png/geo-icons/cylinder.png"/>
     <BitmapImage x:Key="GeoIconCone" UriSource="/Resources/Icons-png/geo-icons/cone.png"/>
+    
+    <!-- 点名窗口主题颜色 -->
+    <SolidColorBrush x:Key="RandWindowBackground" Color="#F0F3F9"/>
+    <SolidColorBrush x:Key="RandWindowBorderBrush" Color="#0066BF"/>
+    <SolidColorBrush x:Key="RandWindowTextForeground" Color="Black"/>
+    <SolidColorBrush x:Key="RandWindowButtonBackground" Color="#FBFBFD"/>
+    <SolidColorBrush x:Key="RandWindowButtonForeground" Color="Black"/>
+    <SolidColorBrush x:Key="RandWindowPrimaryButtonBackground" Color="#0066BF"/>
+    <SolidColorBrush x:Key="RandWindowPrimaryButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="RandWindowSecondaryButtonBackground" Color="#00B894"/>
+    <SolidColorBrush x:Key="RandWindowSecondaryButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="RandWindowCloseButtonBackground" Color="#E32A34"/>
+    <SolidColorBrush x:Key="RandWindowCloseButtonForeground" Color="White"/>
+    
+    <!-- 倒计时窗口主题颜色 -->
+    <SolidColorBrush x:Key="TimerWindowBackground" Color="#F0F3F9"/>
+    <SolidColorBrush x:Key="TimerWindowBorderBrush" Color="#0066BF"/>
+    <SolidColorBrush x:Key="TimerWindowTextForeground" Color="#5B5D5F"/>
+    <SolidColorBrush x:Key="TimerWindowButtonBackground" Color="#FBFBFD"/>
+    <SolidColorBrush x:Key="TimerWindowButtonForeground" Color="Black"/>
+    <SolidColorBrush x:Key="TimerWindowPrimaryButtonBackground" Color="#0066BF"/>
+    <SolidColorBrush x:Key="TimerWindowPrimaryButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="TimerWindowStopTimeBackground" Color="#E8EAF0"/>
+    <SolidColorBrush x:Key="TimerWindowStopTimeForeground" Color="Black"/>
+    
+    <!-- 倒计时窗口主题颜色 -->
+    <SolidColorBrush x:Key="SeewoTimerWindowBackground" Color="White"/>
+    <SolidColorBrush x:Key="SeewoTimerWindowBorderBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="SeewoTimerWindowTextForeground" Color="#333333"/>
+    <SolidColorBrush x:Key="SeewoTimerWindowButtonBackground" Color="#F0F0F0"/>
+    <SolidColorBrush x:Key="SeewoTimerWindowButtonForeground" Color="#666666"/>
+    <SolidColorBrush x:Key="SeewoTimerWindowDigitForeground" Color="#333333"/>
+    <SolidColorBrush x:Key="SeewoTimerWindowTitleForeground" Color="#333333"/>
+    <SolidColorBrush x:Key="SeewoTimerWindowPrimaryButtonBackground" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="SeewoTimerWindowPrimaryButtonForeground" Color="White"/>
 </ResourceDictionary>
