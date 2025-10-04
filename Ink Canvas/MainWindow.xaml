@@ -3296,6 +3296,15 @@
                                                          Toggled="ToggleSwitchUseLegacyTimerUI_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用仿希沃UI"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchUseSeewoStyleUI"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchUseSeewoStyleUI_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="计时器提醒音量" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <Slider x:Name="TimerVolumeSlider" Minimum="0"

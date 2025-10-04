@@ -631,6 +631,8 @@ namespace Ink_Canvas
         public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
         [JsonProperty("useLegacyTimerUI")]
         public bool UseLegacyTimerUI { get; set; } = false;
+        [JsonProperty("useSeewoStyleUI")]
+        public bool UseSeewoStyleUI { get; set; } = false;
         [JsonProperty("timerVolume")]
         public double TimerVolume { get; set; } = 1.0;
         [JsonProperty("customTimerSoundPath")]

@@ -1041,7 +1041,7 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            new CountdownTimerWindow().Show();
+            CountdownTimerWindow.CreateTimerWindow().Show();
         }
 
         private void OperatingGuideWindowIcon_MouseUp(object sender, MouseButtonEventArgs e)

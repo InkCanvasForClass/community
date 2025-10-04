@@ -24,6 +24,18 @@ namespace Ink_Canvas
             InitializeUI();
         }
 
+        public static Window CreateTimerWindow()
+        {
+            if (MainWindow.Settings.RandSettings?.UseSeewoStyleUI == true)
+            {
+                return new SeewoStyleTimerWindow();
+            }
+            else
+            {
+                return new CountdownTimerWindow();
+            }
+        }
+
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (!isTimerRunning || isPaused)

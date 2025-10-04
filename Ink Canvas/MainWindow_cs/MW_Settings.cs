@@ -2603,6 +2603,23 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             Settings.RandSettings.UseLegacyTimerUI = ToggleSwitchUseLegacyTimerUI.IsOn;
+            if (ToggleSwitchUseLegacyTimerUI.IsOn)
+            {
+                ToggleSwitchUseSeewoStyleUI.IsOn = false;
+                Settings.RandSettings.UseSeewoStyleUI = false;
+            }
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchUseSeewoStyleUI_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.UseSeewoStyleUI = ToggleSwitchUseSeewoStyleUI.IsOn;
+            if (ToggleSwitchUseSeewoStyleUI.IsOn)
+            {
+                ToggleSwitchUseLegacyTimerUI.IsOn = false;
+                Settings.RandSettings.UseLegacyTimerUI = false;
+            }
             SaveSettingsToFile();
         }
 
