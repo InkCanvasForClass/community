@@ -4,7 +4,7 @@
     <SolidColorBrush x:Key="FloatBarTitleBackground" Opacity="1.0" Color="#2156c9" />
     <SolidColorBrush x:Key="FloatBarBorderBrush" Opacity="1.0" Color="White" />
     <SolidColorBrush x:Key="FloatBarForeground" Color="White" />
-    <Color x:Key="FloatBarForegroundColor">#FFcccccc</Color>
+    <Color x:Key="FloatBarForegroundColor">#FFFFFFFF</Color>
 
     <SolidColorBrush x:Key="SettingsPageForeground" Color="White" />
     <SolidColorBrush x:Key="SettingsPageAnnotationForeground" Opacity="1.0" Color="White" />
