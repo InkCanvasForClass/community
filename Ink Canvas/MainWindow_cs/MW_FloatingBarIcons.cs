@@ -475,12 +475,26 @@ namespace Ink_Canvas
                     HideFloatingBarHighlight();
                 }
 
+                // 根据主题选择高光颜色
+                Color highlightColor;
+                bool isDarkTheme = Settings.Appearance.Theme == 1 || 
+                                   (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+                
+                if (isDarkTheme)
+                {
+                    highlightColor = Color.FromRgb(102, 204, 255); // #66ccff for dark theme
+                }
+                else
+                {
+                    highlightColor = Color.FromRgb(30, 58, 138); // Keep current color for light theme
+                }
+
                 switch (mode)
                 {
                     case "pen":
                     case "color":
                         {
-                            PenIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            PenIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             PenIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
                             BoardPen.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -492,7 +506,7 @@ namespace Ink_Canvas
                         }
                     case "eraser":
                         {
-                            CircleEraserIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            CircleEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             CircleEraserIconGeometry.Geometry =
                                 Geometry.Parse(GetCorrectIcon("eraserCircle", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -505,7 +519,7 @@ namespace Ink_Canvas
                         }
                     case "eraserByStrokes":
                         {
-                            StrokeEraserIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            StrokeEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             StrokeEraserIconGeometry.Geometry =
                                 Geometry.Parse(GetCorrectIcon("eraserStroke", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -518,7 +532,7 @@ namespace Ink_Canvas
                         }
                     case "select":
                         {
-                            LassoSelectIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            LassoSelectIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             LassoSelectIconGeometry.Geometry =
                                 Geometry.Parse(GetCorrectIcon("lassoSelect", true));
                             BoardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -531,7 +545,7 @@ namespace Ink_Canvas
                         }
                     case "cursor":
                         {
-                            CursorIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            CursorIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             CursorIconGeometry.Geometry =
                                 Geometry.Parse(GetCorrectIcon("cursor", true));
                             // 根据主题设置颜色

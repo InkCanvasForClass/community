@@ -155,8 +155,19 @@ namespace Ink_Canvas
         {
             try
             {
-                // 选中状态的颜色（蓝底）
-                var selectedColor = Color.FromRgb(30, 58, 138);
+                // 根据主题选择高光颜色
+                Color selectedColor;
+                bool isDarkTheme = Settings.Appearance.Theme == 1 || 
+                                   (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+                
+                if (isDarkTheme)
+                {
+                    selectedColor = Color.FromRgb(102, 204, 255); 
+                }
+                else
+                {
+                    selectedColor = Color.FromRgb(30, 58, 138); 
+                }
 
                 // 根据当前模式设置按钮颜色
                 switch (_currentToolMode)
