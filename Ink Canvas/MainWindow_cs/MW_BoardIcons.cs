@@ -135,7 +135,7 @@ namespace Ink_Canvas
             {
                 Name = "BackgroundPalette",
                 Visibility = Visibility.Collapsed,
-                Background = new SolidColorBrush(Colors.White),
+                Background = (SolidColorBrush)Application.Current.FindResource("SettingsPageBackground"),
                 Opacity = 1,
                 BorderBrush = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)),
                 BorderThickness = new Thickness(1),
@@ -319,7 +319,7 @@ namespace Ink_Canvas
             var separator = new Border
             {
                 Height = 1,
-                Background = new SolidColorBrush(Color.FromRgb(0xd4, 0xd4, 0xd8)),
+                Background = (SolidColorBrush)Application.Current.FindResource("SettingsPageBorderBrush"),
                 Margin = new Thickness(0, 12, 0, 12)
             };
             contentPanel.Children.Add(separator);
@@ -342,7 +342,7 @@ namespace Ink_Canvas
                 Width = 100,
                 Height = 40,
                 BorderThickness = new Thickness(1),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0xd4, 0xd4, 0xd8)),
+                BorderBrush = (SolidColorBrush)Application.Current.FindResource("SettingsPageBorderBrush"),
                 Background = new SolidColorBrush(Colors.White),
                 CornerRadius = new CornerRadius(4),
                 Margin = new Thickness(0, 0, 0, 10),
