@@ -8579,7 +8579,7 @@
                                                                          MouseDown="Image_MouseDown"
                                                                          MouseUp="BtnDrawLine_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/line.png"
+                                                        <Image Source="{DynamicResource GeoIconLine}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画直线" FontSize="8" HorizontalAlignment="Center" />
@@ -8589,7 +8589,7 @@
                                                                          MouseUp="BtnDrawDashedLine_Click"
                                                                          Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/dashed-line.png"
+                                                        <Image Source="{DynamicResource GeoIconDashedLine}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画虚线" FontSize="8" HorizontalAlignment="Center" />
@@ -8599,7 +8599,7 @@
                                                                          MouseUp="BtnDrawDotLine_Click"
                                                                          Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/dotted-line.png"
+                                                        <Image Source="{DynamicResource GeoIconDotLine}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画点线" FontSize="8" HorizontalAlignment="Center" />
@@ -8608,7 +8608,7 @@
                                                                          MouseDown="Image_MouseDown"
                                                                          MouseUp="BtnDrawArrow_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/arrow.png"
+                                                        <Image Source="{DynamicResource GeoIconArrow}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画箭头" FontSize="8" HorizontalAlignment="Center" />
@@ -8619,7 +8619,7 @@
                                                                          Margin="0,0,0,0" Height="38" Width="32"
                                                                          Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/paralle-lines.png"
+                                                            Source="{DynamicResource GeoIconParallelLine}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="4平行线" FontSize="8" HorizontalAlignment="Center" />
@@ -8628,7 +8628,7 @@
                                                                          Margin="0,0,0,0" Height="38" Width="32"
                                                                          Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/centered-square.png"
+                                                            Source="{DynamicResource GeoIconRectangleCenter}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="中心正方" FontSize="8" HorizontalAlignment="Center" />
@@ -8636,7 +8636,7 @@
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawCircle_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/centered-circle.png"
+                                                            Source="{DynamicResource GeoIconCircle}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="中心圆" FontSize="8" HorizontalAlignment="Center" />
@@ -8645,7 +8645,7 @@
                                                                          Margin="0,0,0,0" Height="38" Width="32"
                                                                          Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/centered-circle-dashed.png"
+                                                            Source="{DynamicResource GeoIconDashedCircle}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2"
                                                             Height="19" Width="19" />
@@ -8655,7 +8655,7 @@
                                                                          Margin="0,0,0,0" Height="38" Width="32"
                                                                          Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/centered-oval.png"
+                                                            Source="{DynamicResource GeoIconEllipseCenter}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="中心椭圆" FontSize="8" HorizontalAlignment="Center" />
@@ -8685,7 +8685,7 @@
                                                                      Margin="4,0,4,6">
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawCuboid_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/cube.png"
+                                                        <Image Source="{DynamicResource GeoIconCuboid}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="长方体" FontSize="8" HorizontalAlignment="Center" />
@@ -8693,7 +8693,7 @@
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawRectangle_Click"
                                                                          Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/square.png"
+                                                        <Image Source="{DynamicResource GeoIconRectangle}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="正方形" FontSize="8" HorizontalAlignment="Center" />
@@ -8701,14 +8701,14 @@
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawCylinder_Click"
                                                                          Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/cylinder.png"
+                                                        <Image Source="{DynamicResource GeoIconCylinder}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画圆柱" FontSize="8" HorizontalAlignment="Center" />
                                                     </ui:SimpleStackPanel>
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawCone_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/cone.png"
+                                                        <Image Source="{DynamicResource GeoIconCone}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画圆锥" FontSize="8" HorizontalAlignment="Center" />

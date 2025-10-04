@@ -44,7 +44,7 @@
     <SolidColorBrush x:Key="HistoryWindowTextPrimaryBrush" Color="#1f2937"/>
     <SolidColorBrush x:Key="HistoryWindowTextSecondaryBrush" Color="#6b7280"/>
     
-    <!-- 快速面板图标资源 - 浅色主题 -->
+    <!-- 快速面板图标资源 -->
     <BitmapImage x:Key="QuickPanelPersonMoneyIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_person_money_24_regular.png"/>
     <BitmapImage x:Key="QuickPanelPeopleMoneyIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_people_money_24_regular.png"/>
     <BitmapImage x:Key="QuickPanelTimerIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_timer_24_regular.png"/>
@@ -52,4 +52,19 @@
     <BitmapImage x:Key="QuickPanelEndSlideshowIcon" UriSource="/Resources/new-icons/end-slides-show.png"/>
     <BitmapImage x:Key="QuickPanelEyeIcon" UriSource="/Resources/new-icons/eye.png"/>
     <BitmapImage x:Key="QuickPanelChevronLeftIcon" UriSource="/Resources/new-icons/chevron-left.png"/>
+    
+    <!-- 几何面板图标资源 -->
+    <BitmapImage x:Key="GeoIconLine" UriSource="/Resources/Icons-png/geo-icons/line.png"/>
+    <BitmapImage x:Key="GeoIconDashedLine" UriSource="/Resources/Icons-png/geo-icons/dashed-line.png"/>
+    <BitmapImage x:Key="GeoIconDotLine" UriSource="/Resources/Icons-png/geo-icons/dotted-line.png"/>
+    <BitmapImage x:Key="GeoIconArrow" UriSource="/Resources/Icons-png/geo-icons/arrow.png"/>
+    <BitmapImage x:Key="GeoIconParallelLine" UriSource="/Resources/Icons-png/geo-icons/paralle-lines.png"/>
+    <BitmapImage x:Key="GeoIconRectangleCenter" UriSource="/Resources/Icons-png/geo-icons/centered-square.png"/>
+    <BitmapImage x:Key="GeoIconCircle" UriSource="/Resources/Icons-png/geo-icons/centered-circle.png"/>
+    <BitmapImage x:Key="GeoIconDashedCircle" UriSource="/Resources/Icons-png/geo-icons/centered-circle-dashed.png"/>
+    <BitmapImage x:Key="GeoIconEllipseCenter" UriSource="/Resources/Icons-png/geo-icons/centered-oval.png"/>
+    <BitmapImage x:Key="GeoIconCuboid" UriSource="/Resources/Icons-png/geo-icons/cube.png"/>
+    <BitmapImage x:Key="GeoIconRectangle" UriSource="/Resources/Icons-png/geo-icons/square.png"/>
+    <BitmapImage x:Key="GeoIconCylinder" UriSource="/Resources/Icons-png/geo-icons/cylinder.png"/>
+    <BitmapImage x:Key="GeoIconCone" UriSource="/Resources/Icons-png/geo-icons/cone.png"/>
 </ResourceDictionary>

@@ -462,6 +462,37 @@
     <Resource Include="Resources\Icons-png\geo-icons\cube.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\arrow_white.png" />
+    <Resource Include="Resources\Icons-png\geo-icons\dashed-line_white.png" />
+    <Resource Include="Resources\Icons-png\geo-icons\dotted-line_white.png" />
+    <Resource Include="Resources\Icons-png\geo-icons\line_white.png" />
+    <Resource Include="Resources\Icons-png\geo-icons\paralle-lines_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\centered-square_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\centered-circle_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\centered-circle-dashed_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\centered-oval_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\square_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\cylinder_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\cone_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\cube_white.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Resources\Icons-png\EasiNote.png" />
     <Resource Include="Resources\Icons-png\EasiNote3C.png" />
     <Resource Include="Resources\Icons-png\EasiNote5C.png" />
