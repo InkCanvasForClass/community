@@ -69,7 +69,15 @@ namespace Ink_Canvas
                     isTimerRunning = false;
                     SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                     BtnStartCover.Visibility = Visibility.Visible;
-                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                    var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                    if (textForeground != null)
+                    {
+                        TextBlockHour.Foreground = textForeground;
+                    }
+                    else
+                    {
+                        TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                    }
                     BorderStopTime.Visibility = Visibility.Collapsed;
                 }
             });
@@ -103,17 +111,34 @@ namespace Ink_Canvas
         private void Grid_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (isTimerRunning) return;
+            
+            var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+            
             if (ProcessBarTime.Visibility == Visibility.Visible && isTimerRunning == false)
             {
                 ProcessBarTime.Visibility = Visibility.Collapsed;
                 GridAdjustHour.Visibility = Visibility.Visible;
-                TextBlockHour.Foreground = Brushes.Black;
+                if (textForeground != null)
+                {
+                    TextBlockHour.Foreground = textForeground;
+                }
+                else
+                {
+                    TextBlockHour.Foreground = Brushes.Black;
+                }
             }
             else
             {
                 ProcessBarTime.Visibility = Visibility.Visible;
                 GridAdjustHour.Visibility = Visibility.Collapsed;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                if (textForeground != null)
+                {
+                    TextBlockHour.Foreground = textForeground;
+                }
+                else
+                {
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                }
 
                 if (hour == 0 && minute == 0 && second == 0)
                 {
@@ -238,7 +263,11 @@ namespace Ink_Canvas
                 BtnResetCover.Visibility = Visibility.Visible;
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground3 != null)
+                    TextBlockHour.Foreground = textForeground3;
+                else
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
             }
             else if (isTimerRunning && isPaused)
             {
@@ -248,7 +277,11 @@ namespace Ink_Canvas
                 BtnResetCover.Visibility = Visibility.Visible;
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground3 != null)
+                    TextBlockHour.Foreground = textForeground3;
+                else
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 isTimerRunning = false;
                 timer.Stop();
@@ -298,7 +331,11 @@ namespace Ink_Canvas
                 //继续
                 startTime += DateTime.Now - pauseTime;
                 ProcessBarTime.IsPaused = false;
-                TextBlockHour.Foreground = Brushes.Black;
+                var textForeground1 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground1 != null)
+                    TextBlockHour.Foreground = textForeground1;
+                else
+                    TextBlockHour.Foreground = Brushes.Black;
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 isPaused = false;
                 timer.Start();
@@ -310,7 +347,11 @@ namespace Ink_Canvas
                 //暂停
                 pauseTime = DateTime.Now;
                 ProcessBarTime.IsPaused = true;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground3 != null)
+                    TextBlockHour.Foreground = textForeground3;
+                else
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 isPaused = true;
@@ -322,7 +363,11 @@ namespace Ink_Canvas
                 startTime = DateTime.Now;
                 totalSeconds = ((hour * 60) + minute) * 60 + second;
                 ProcessBarTime.IsPaused = false;
-                TextBlockHour.Foreground = Brushes.Black;
+                var textForeground2 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground2 != null)
+                    TextBlockHour.Foreground = textForeground2;
+                else
+                    TextBlockHour.Foreground = Brushes.Black;
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 BtnResetCover.Visibility = Visibility.Collapsed;
 

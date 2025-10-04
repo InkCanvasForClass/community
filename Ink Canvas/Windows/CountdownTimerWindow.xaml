@@ -12,7 +12,7 @@
         Title="Ink Canvas 画板 - 计时器" Height="700" Width="1100">
     <Border Background="{DynamicResource TimerWindowBackground}" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource TimerWindowBorderBrush}" Margin="60">
         <Grid>
-            <TextBlock x:Name="TbCurrentTime" MouseDown="BtnMinimal_OnMouseUp" Visibility="Collapsed" FontSize="56" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock x:Name="TbCurrentTime" MouseDown="BtnMinimal_OnMouseUp" Visibility="Collapsed" FontSize="56" FontWeight="Black" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TimerWindowTextForeground}" />
             <Border MouseMove="WindowDragMove" Visibility="{Binding ElementName=TbCurrentTime, Path=Visibility}" Width="64" Height="15" CornerRadius="8" Background="Gray" Margin="0,0,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
             <Viewbox x:Name="BigViewController" Margin="20,20,20,20">
                 <Grid Height="180" Width="200">
@@ -171,7 +171,7 @@
                             Height="18" CornerRadius="9"
                             VerticalAlignment="Center" HorizontalAlignment="Center">
                         <ui:SimpleStackPanel Margin="6,0" Spacing="0" Orientation="Horizontal" HorizontalAlignment="Center">
-                            <Image Margin="0,0,2,0" Source="/Resources/Icons-Fluent/ic_fluent_clock_24_regular.png" RenderOptions.BitmapScalingMode="HighQuality" Height="10" Width="10"/>
+                            <Image Margin="0,0,2,0" Source="{DynamicResource TimerWindowClockIcon}" RenderOptions.BitmapScalingMode="HighQuality" Height="10" Width="10"/>
                             <TextBlock Name="TextBlockStopTime" Text="12:30 PM" FontSize="9" VerticalAlignment="Center" Foreground="{DynamicResource TimerWindowStopTimeForeground}"/>
                         </ui:SimpleStackPanel>
                     </Border>

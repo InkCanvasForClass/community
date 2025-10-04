@@ -81,6 +81,7 @@
     <SolidColorBrush x:Key="RandWindowCloseButtonBackground" Color="#E32A34"/>
     <SolidColorBrush x:Key="RandWindowCloseButtonForeground" Color="White"/>
     
+    
     <!-- 倒计时窗口主题颜色 -->
     <SolidColorBrush x:Key="TimerWindowBackground" Color="#F0F3F9"/>
     <SolidColorBrush x:Key="TimerWindowBorderBrush" Color="#0066BF"/>
@@ -91,6 +92,9 @@
     <SolidColorBrush x:Key="TimerWindowPrimaryButtonForeground" Color="White"/>
     <SolidColorBrush x:Key="TimerWindowStopTimeBackground" Color="#E8EAF0"/>
     <SolidColorBrush x:Key="TimerWindowStopTimeForeground" Color="Black"/>
+    
+    <!-- 倒计时窗口时钟图标 -->
+    <BitmapImage x:Key="TimerWindowClockIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_timer_24_regular.png"/>
     
     <!-- 倒计时窗口主题颜色 -->
     <SolidColorBrush x:Key="SeewoTimerWindowBackground" Color="White"/>
