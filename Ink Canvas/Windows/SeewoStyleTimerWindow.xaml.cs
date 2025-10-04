@@ -61,7 +61,7 @@ namespace Ink_Canvas
                     Digit6Display.Text = "0";
                     timer.Stop();
                     isTimerRunning = false;
-                    StartPauseIcon.Text = "▶";
+                    StartPauseIcon.Data = Geometry.Parse(PlayIconData);
                     PlayTimerSound();
                 }
             });
@@ -221,13 +221,17 @@ namespace Ink_Canvas
             UpdateDigitDisplays();
         }
 
+        // 图标数据常量
+        private const string PlayIconData = "M6.5 4.00004V20C6.49995 20.178 6.54737 20.3527 6.63738 20.5062C6.72739 20.6597 6.85672 20.7864 7.01202 20.8732C7.16733 20.96 7.34299 21.0038 7.52088 21.0001C7.69878 20.9964 7.87245 20.9453 8.024 20.852L21.024 12.852C21.1696 12.7626 21.2898 12.6373 21.3733 12.4881C21.4567 12.339 21.5005 12.1709 21.5005 12C21.5005 11.8291 21.4567 11.6611 21.3733 11.512C21.2898 11.3628 21.1696 11.2375 21.024 11.148L8.024 3.14804C7.87245 3.0548 7.69878 3.00369 7.52088 2.99997C7.34299 2.99626 7.16733 3.04007 7.01202 3.1269C6.85672 3.21372 6.72739 3.34042 6.63738 3.4939C6.54737 3.64739 6.49995 3.82211 6.5 4.00004Z";
+        private const string PauseIconData = "M9.5 4H7.5C6.96957 4 6.46086 4.21071 6.08579 4.58579C5.71071 4.96086 5.5 5.46957 5.5 6V18C5.5 18.5304 5.71071 19.0391 6.08579 19.4142C6.46086 19.7893 6.96957 20 7.5 20H9.5C10.0304 20 10.5391 19.7893 10.9142 19.4142C11.2893 19.0391 11.5 18.5304 11.5 18V6C11.5 5.46957 11.2893 4.96086 10.9142 4.58579C10.5391 4.21071 10.0304 4 9.5 4Z M17.5 4H15.5C14.9696 4 14.4609 4.21071 14.0858 4.58579C13.7107 4.96086 13.5 5.46957 13.5 6V18C13.5 18.5304 13.7107 19.0391 14.0858 19.4142C14.4609 19.7893 14.9696 20 15.5 20H17.5C18.0304 20 18.5391 19.7893 18.9142 19.4142C19.2893 19.0391 19.5 18.5304 19.5 18V6C19.5 5.46957 19.2893 4.96086 18.9142 4.58579C18.5391 4.21071 18.0304 4 17.5 4Z";
+
         private void StartPause_Click(object sender, RoutedEventArgs e)
         {
             if (isPaused && isTimerRunning)
             {
                 // 继续计时
                 startTime += DateTime.Now - pauseTime;
-                StartPauseIcon.Text = "⏸";
+                StartPauseIcon.Data = Geometry.Parse(PauseIconData);
                 isPaused = false;
                 timer.Start();
             }
@@ -235,7 +239,7 @@ namespace Ink_Canvas
             {
                 // 暂停计时
                 pauseTime = DateTime.Now;
-                StartPauseIcon.Text = "▶";
+                StartPauseIcon.Data = Geometry.Parse(PlayIconData);
                 isPaused = true;
                 timer.Stop();
             }
@@ -249,7 +253,7 @@ namespace Ink_Canvas
                 }
                 
                 startTime = DateTime.Now;
-                StartPauseIcon.Text = "⏸";
+                StartPauseIcon.Data = Geometry.Parse(PauseIconData);
                 isPaused = false;
                 isTimerRunning = true;
                 timer.Start();
@@ -265,7 +269,7 @@ namespace Ink_Canvas
             else if (isTimerRunning && isPaused)
             {
                 UpdateDigitDisplays();
-                StartPauseIcon.Text = "▶";
+                StartPauseIcon.Data = Geometry.Parse(PlayIconData);
                 isTimerRunning = false;
                 timer.Stop();
                 isPaused = false;
