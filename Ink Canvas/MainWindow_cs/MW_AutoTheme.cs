@@ -56,6 +56,8 @@ namespace Ink_Canvas
 
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
+                
+                AutoSwitchFloatingBarIconForTheme("Light");
 
                 // 强制刷新UI
                 window.InvalidateVisual();
@@ -84,6 +86,9 @@ namespace Ink_Canvas
 
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
+
+                // 自动切换浮动栏图标为深色呼吸版图标
+                AutoSwitchFloatingBarIconForTheme("Dark");
 
                 // 强制刷新UI
                 window.InvalidateVisual();
@@ -234,6 +239,30 @@ namespace Ink_Canvas
             catch { }
 
             return light;
+        }
+
+        /// <summary>
+        /// 根据主题自动切换浮动栏图标
+        /// </summary>
+        private void AutoSwitchFloatingBarIconForTheme(string theme)
+        {
+            try
+            {
+                if (theme == "Light")
+                {
+                    Settings.Appearance.FloatingBarImg = 0;
+                }
+                else if (theme == "Dark")
+                {
+                    Settings.Appearance.FloatingBarImg = 3;
+                }
+
+                // 更新浮动栏图标
+                UpdateFloatingBarIcon();
+            }
+            catch (Exception)
+            {
+            }
         }
     }
 }
