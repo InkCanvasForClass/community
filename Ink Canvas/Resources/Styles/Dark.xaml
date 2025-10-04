@@ -18,8 +18,8 @@
     <SolidColorBrush x:Key="PurpleBrush" Color="MediumPurple" />
 
     <SolidColorBrush x:Key="FloatBarButtonBackgroundKey" Color="Transparent" />
-    <SolidColorBrush x:Key="FloatBarButtonBackgroundPointerOverKey" Color="#2200CDCD" />
-    <SolidColorBrush x:Key="FloatBarButtonButtonBackgroundPressedKey" Color="#4400CDCD" />
+    <SolidColorBrush x:Key="FloatBarButtonBackgroundPointerOverKey" Color="#2266CCFF" />
+    <SolidColorBrush x:Key="FloatBarButtonButtonBackgroundPressedKey" Color="#4466CCFF" />
     
     <!-- 白板模式浮动栏颜色 -->
     <SolidColorBrush x:Key="BoardFloatBarBackground" Color="#2a2a2a" />
@@ -29,6 +29,11 @@
     <SolidColorBrush x:Key="BoardFloatBarSelectedBackground" Color="#2563eb" />
     <SolidColorBrush x:Key="BoardFloatBarSelectedBorderBrush" Color="#2563eb" />
     <SolidColorBrush x:Key="BoardFloatBarSelectedForeground" Color="White" />
+    
+    <!-- 橡皮擦按钮颜色 -->
+    <SolidColorBrush x:Key="BoardFloatBarButtonBackgroundKey" Color="Transparent" />
+    <SolidColorBrush x:Key="BoardFloatBarButtonBackgroundPointerOverKey" Color="#2266CCFF" />
+    <SolidColorBrush x:Key="BoardFloatBarButtonButtonBackgroundPressedKey" Color="#4466CCFF" />
     
     <!-- 历史回滚窗口主题颜色 -->
     <SolidColorBrush x:Key="HistoryWindowPrimaryBrush" Color="#3b82f6"/>
