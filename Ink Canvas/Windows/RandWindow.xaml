@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:local="clr-namespace:Ink_Canvas" FontFamily="Microsoft YaHei UI"
-        ui:ThemeManager.RequestedTheme="Light" Topmost="True" Background="Transparent"
+        Topmost="True" Background="Transparent"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True" Loaded="Window_Loaded"
         WindowStartupLocation="CenterScreen"
         Title="Ink Canvas 抽奖" Height="500" Width="900">

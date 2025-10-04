@@ -82,6 +82,27 @@ namespace Ink_Canvas
         {
             try
             {
+                if (settings.Appearance.Theme == 0) // 浅色主题
+                {
+                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
+                }
+                else if (settings.Appearance.Theme == 1) // 深色主题
+                {
+                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
+                }
+                else // 跟随系统主题
+                {
+                    bool isSystemLight = IsSystemThemeLight();
+                    if (isSystemLight)
+                    {
+                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
+                    }
+                    else
+                    {
+                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
+                    }
+                }
+
                 // 根据主题设置窗口背景
                 if (settings.RandSettings.SelectedBackgroundIndex <= 0)
                 {
@@ -97,6 +118,23 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"应用点名窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        private bool IsSystemThemeLight()
+        {
+            var light = false;
+            try
+            {
+                var registryKey = Microsoft.Win32.Registry.CurrentUser;
+                var themeKey =
+                    registryKey.OpenSubKey("software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
+                var keyValue = 0;
+                if (themeKey != null) keyValue = (int)themeKey.GetValue("SystemUsesLightTheme");
+                if (keyValue == 1) light = true;
+            }
+            catch { }
+
+            return light;
         }
 
         public RandWindow(Settings settings, bool IsAutoClose)
