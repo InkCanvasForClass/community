@@ -91,22 +91,72 @@ namespace Ink_Canvas
         {
             try
             {
-                // 根据主题设置数字显示颜色
-                var digitForeground = Application.Current.FindResource("SeewoTimerWindowDigitForeground") as SolidColorBrush;
-                if (digitForeground != null)
+                // 应用主题设置
+                if (MainWindow.Settings != null)
                 {
-                    Digit1Display.Foreground = digitForeground;
-                    Digit2Display.Foreground = digitForeground;
-                    Digit3Display.Foreground = digitForeground;
-                    Digit4Display.Foreground = digitForeground;
-                    Digit5Display.Foreground = digitForeground;
-                    Digit6Display.Foreground = digitForeground;
+                    ApplyTheme(MainWindow.Settings);
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"应用仿希沃倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        private void ApplyTheme(Settings settings)
+        {
+            try
+            {
+                if (settings.Appearance.Theme == 0) // 浅色主题
+                {
+                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
+                }
+                else if (settings.Appearance.Theme == 1) // 深色主题
+                {
+                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
+                }
+                else // 跟随系统主题
+                {
+                    bool isSystemLight = IsSystemThemeLight();
+                    if (isSystemLight)
+                    {
+                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
+                    }
+                    else
+                    {
+                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用仿希沃倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private bool IsSystemThemeLight()
+        {
+            var light = false;
+            try
+            {
+                var registryKey = Microsoft.Win32.Registry.CurrentUser;
+                var themeKey = registryKey.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                if (themeKey != null)
+                {
+                    var value = themeKey.GetValue("AppsUseLightTheme");
+                    if (value != null)
+                    {
+                        light = (int)value == 1;
+                    }
+                    themeKey.Close();
+                }
+            }
+            catch
+            {
+                // 如果读取注册表失败，默认为浅色主题
+                light = true;
+            }
+            return light;
         }
 
         private void UpdateDigitDisplays()
