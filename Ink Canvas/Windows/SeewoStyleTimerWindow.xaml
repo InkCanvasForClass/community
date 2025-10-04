@@ -284,7 +284,7 @@
                                     </Button.Template>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="⛶" FontSize="16" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,0,5,0"/>
-                                        <TextBlock Text="全屏" FontSize="12" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                        <TextBlock Text="全屏" FontSize="16" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                     </StackPanel>
                                 </Button>
 
@@ -316,7 +316,7 @@
                                     </Button.Template>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                         <TextBlock Text="↻" FontSize="16" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,0,5,0"/>
-                                        <TextBlock Text="重置" FontSize="12" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                        <TextBlock Text="重置" FontSize="16" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
