@@ -226,6 +226,7 @@
     <Resource Include="Resources\Icons-png\icc-dark.png" />
     <Resource Include="Resources\Icons-png\icc-noshadow.png" />
     <Resource Include="Resources\Icons-png\icc-sharpdark.png" />
+    <Resource Include="Resources\Icons-png\icc-transparent-light-small.png" />
     <Resource Include="Resources\Icons-png\InkCanvas.png" />
     <Resource Include="Resources\Icons-png\kuanciya.png" />
     <Resource Include="Resources\Icons-png\kuandogeyuanliangwo.png" />
@@ -534,6 +535,7 @@
     <None Remove="Resources\Icons-png\icc-dark.png" />
     <None Remove="Resources\Icons-png\icc-noshadow.png" />
     <None Remove="Resources\Icons-png\icc-sharpdark.png" />
+    <None Remove="Resources\Icons-png\icc-transparent-light-small.png" />
     <None Remove="Resources\Icons-png\idt.png" />
     <None Remove="Resources\Icons-png\InkCanvas.png" />
     <None Remove="Resources\Icons-png\kuanciya.png" />
