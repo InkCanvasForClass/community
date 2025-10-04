@@ -349,33 +349,33 @@ namespace Ink_Canvas
             else if (index == 1)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(
-                        new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-dark-small.png"));
-                FloatingbarHeadIconImg.Margin = new Thickness(1.2);
-            }
-            else if (index == 2)
-            {
-                FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-noshadow.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
-            else if (index == 3)
+            else if (index == 2)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-dark.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
-            else if (index == 4)
+            else if (index == 3)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-sharpdark.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
-            else if (index == 5)
+            else if (index == 4)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-light-small.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
+            }
+            else if (index == 5)
+            {
+                FloatingbarHeadIconImg.Source =
+                    new BitmapImage(
+                        new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-dark-small.png"));
+                FloatingbarHeadIconImg.Margin = new Thickness(1.2);
             }
             else if (index == 6)
             {
