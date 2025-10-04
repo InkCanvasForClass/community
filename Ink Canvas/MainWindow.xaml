@@ -4878,7 +4878,7 @@
                                                                             <Controls:UniformGrid Columns="5"
                                                                                 Width="270"
                                                                                 Margin="0">
-                                                                                <Border BorderBrush="Black"
+                                                                                <Border BorderBrush="{DynamicResource FloatBarBorderBrush}"
                                                                                     BorderThickness="1"
                                                                                     CornerRadius="100" Width="45"
                                                                                     MouseDown="Border_MouseDown"
@@ -4904,7 +4904,7 @@
                                                                                 <Border
                                                                                     x:Name="BoardBorderPenColorBlack"
                                                                                     Background="Black"
-                                                                                    BorderBrush="Black"
+                                                                                    BorderBrush="#D3D3D3"
                                                                                     BorderThickness="1.5"
                                                                                     CornerRadius="100"
                                                                                     Width="45"
@@ -7888,7 +7888,7 @@
                                                                         Orientation="Horizontal" Width="270">
                                                                         <Controls:UniformGrid Columns="5" Width="270"
                                                                             Margin="0">
-                                                                            <Border BorderBrush="Black"
+                                                                            <Border BorderBrush="{DynamicResource FloatBarBorderBrush}"
                                                                                 BorderThickness="1"
                                                                                 CornerRadius="100" Width="45"
                                                                                 MouseDown="Border_MouseDown"
@@ -7910,7 +7910,7 @@
                                                                                 </Grid>
                                                                             </Border>
                                                                             <Border x:Name="BorderPenColorBlack"
-                                                                                Background="Black" BorderBrush="Black"
+                                                                                Background="Black" BorderBrush="#D3D3D3"
                                                                                 BorderThickness="1.5"
                                                                                 CornerRadius="100"
                                                                                 Width="45"
