@@ -1041,7 +1041,18 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            CountdownTimerWindow.CreateTimerWindow().Show();
+            // 参考老计时器的窗口置顶功能：在白板模式下停止窗口置顶
+            if (currentMode == 1) // 白板模式
+            {
+                Topmost = false;
+            }
+
+            var timerWindow = CountdownTimerWindow.CreateTimerWindow();
+            timerWindow.Show();
+            if (currentMode == 1) // 白板模式
+            {
+                timerWindow.Topmost = true;
+            }
         }
 
         private void OperatingGuideWindowIcon_MouseUp(object sender, MouseButtonEventArgs e)

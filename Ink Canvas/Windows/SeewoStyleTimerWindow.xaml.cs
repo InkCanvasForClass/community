@@ -309,6 +309,36 @@ namespace Ink_Canvas
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             isTimerRunning = false;
+            
+            if (MainWindow.Settings != null)
+            {
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow != null)
+                {
+                    try
+                    {
+                        var currentModeField = mainWindow.GetType().GetField("currentMode", 
+                            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                        if (currentModeField != null)
+                        {
+                            int currentMode = (int)currentModeField.GetValue(mainWindow);
+                            if (currentMode == 1) // 白板模式
+                            {
+                                mainWindow.Topmost = false; // 保持白板模式下的非置顶状态
+                            }
+                            else
+                            {
+                                mainWindow.Topmost = true; // 其他模式恢复置顶
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // 如果反射失败，使用默认行为
+                        mainWindow.Topmost = true;
+                    }
+                }
+            }
         }
 
         private void BtnClose_MouseUp(object sender, MouseButtonEventArgs e)
