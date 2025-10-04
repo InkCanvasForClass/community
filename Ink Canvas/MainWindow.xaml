@@ -5587,7 +5587,7 @@
                                                                          Margin="0,0,0,0" Spacing="4">
                                                         <Border x:Name="BoardCircleEraserTabButton"
                                                                 MouseDown="SwitchToCircleEraser"
-                                                                Background="#553b82f6" Height="20" Width="40"
+                                                                Background="{DynamicResource BoardFloatBarButtonBackgroundPointerOverKey}" Height="20" Width="40"
                                                                 CornerRadius="3">
                                                             <Canvas>
                                                                 <ui:SimpleStackPanel
@@ -5595,7 +5595,7 @@
                                                                     Visibility="Visible" Orientation="Horizontal"
                                                                     Canvas.Left="11" Canvas.Right="11"
                                                                     Canvas.Bottom="0">
-                                                                    <Border Width="18" Height="2" Background="#2563eb"
+                                                                    <Border Width="18" Height="2" Background="{DynamicResource BoardFloatBarButtonButtonBackgroundPressedKey}"
                                                                             CornerRadius="1" />
                                                                 </ui:SimpleStackPanel>
                                                                 <ui:SimpleStackPanel Orientation="Vertical" Height="20"
@@ -5605,7 +5605,7 @@
                                                                         HorizontalAlignment="Center" Margin="0,3">
                                                                         <TextBlock
                                                                             x:Name="BoardCircleEraserTabButtonText"
-                                                                            Foreground="#172554" FontWeight="Medium"
+                                                                            Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                             FontSize="9" TextAlignment="Center"
                                                                             Text="圆形擦"
                                                                             Margin="2,1,0,0" />
@@ -5615,14 +5615,14 @@
                                                         </Border>
                                                         <Border x:Name="BoardRectangleEraserTabButton"
                                                                 MouseDown="SwitchToRectangleEraser"
-                                                                Background="Transparent"
+                                                                Background="{DynamicResource BoardFloatBarButtonBackgroundKey}"
                                                                 Height="20" Width="40" CornerRadius="3">
                                                             <Canvas>
                                                                 <ui:SimpleStackPanel Visibility="Collapsed"
                                                                     x:Name="BoardRectangleEraserTabButtonIndicator"
                                                                     Orientation="Horizontal" Canvas.Left="11"
                                                                     Canvas.Right="11" Canvas.Bottom="0">
-                                                                    <Border Width="18" Height="2" Background="#2563eb"
+                                                                    <Border Width="18" Height="2" Background="{DynamicResource BoardFloatBarButtonButtonBackgroundPressedKey}"
                                                                             CornerRadius="1" />
                                                                 </ui:SimpleStackPanel>
                                                                 <ui:SimpleStackPanel Orientation="Vertical" Height="20"
@@ -5632,7 +5632,7 @@
                                                                         HorizontalAlignment="Center" Margin="0,3">
                                                                         <TextBlock
                                                                             x:Name="BoardRectangleEraserTabButtonText"
-                                                                            Foreground="#172554" FontWeight="Medium"
+                                                                            Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                             FontSize="9" TextAlignment="Center"
                                                                             Text="黑板擦"
                                                                             Margin="2,1,0,0" />
