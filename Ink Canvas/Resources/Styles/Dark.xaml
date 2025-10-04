@@ -1,5 +1,5 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <SolidColorBrush x:Key="FloatBarBackground" Opacity="0.9" Color="#1A1C1E" />
+    <SolidColorBrush x:Key="FloatBarBackground" Opacity="0.9" Color="#212325" />
     <SolidColorBrush x:Key="FloatBarBackgroundWithoutOpacity" Opacity="1.0" Color="Black" />
     <SolidColorBrush x:Key="FloatBarTitleBackground" Opacity="1.0" Color="#2156c9" />
     <SolidColorBrush x:Key="FloatBarBorderBrush" Opacity="1.0" Color="White" />
