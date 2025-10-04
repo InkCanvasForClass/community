@@ -3126,6 +3126,7 @@ namespace Ink_Canvas
                 if (Settings.Startup.IsAutoUpdate)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, performing immediate update check");
+                    ResetUpdateCheckRetry();
 
                     // 执行完整的更新检查
                     await Task.Run(async () =>
