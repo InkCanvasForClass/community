@@ -23,23 +23,8 @@ namespace Ink_Canvas
             timer.Elapsed += Timer_Elapsed;
             timer.Interval = 50;
             InitializeUI();
-            
-            // 监听窗口大小变化
-            this.SizeChanged += SeewoStyleTimerWindow_SizeChanged;
         }
 
-        private void SeewoStyleTimerWindow_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            // 根据窗口大小动态调整控件
-            if (WindowState == WindowState.Maximized)
-            {
-                AdjustFontSizesForFullscreen(true);
-            }
-            else
-            {
-                AdjustFontSizesForFullscreen(false);
-            }
-        }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
         {
@@ -272,148 +257,13 @@ namespace Ink_Canvas
             if (WindowState == WindowState.Normal)
             {
                 WindowState = WindowState.Maximized;
-                // 全屏时调整字体大小
-                AdjustFontSizesForFullscreen(true);
             }
             else
             {
                 WindowState = WindowState.Normal;
-                // 恢复普通窗口时的字体大小
-                AdjustFontSizesForFullscreen(false);
             }
         }
 
-        private void AdjustFontSizesForFullscreen(bool isFullscreen)
-        {
-            if (isFullscreen)
-            {
-                // 全屏时增大字体
-                Digit1Display.FontSize = 120;
-                Digit2Display.FontSize = 120;
-                Digit3Display.FontSize = 120;
-                Digit4Display.FontSize = 120;
-                Digit5Display.FontSize = 120;
-                Digit6Display.FontSize = 120;
-                
-                // 增大按钮尺寸
-                Digit1PlusBtn.Width = 50;
-                Digit1PlusBtn.Height = 50;
-                Digit1MinusBtn.Width = 50;
-                Digit1MinusBtn.Height = 50;
-                
-                Digit2PlusBtn.Width = 50;
-                Digit2PlusBtn.Height = 50;
-                Digit2MinusBtn.Width = 50;
-                Digit2MinusBtn.Height = 50;
-                
-                Digit3PlusBtn.Width = 50;
-                Digit3PlusBtn.Height = 50;
-                Digit3MinusBtn.Width = 50;
-                Digit3MinusBtn.Height = 50;
-                
-                Digit4PlusBtn.Width = 50;
-                Digit4PlusBtn.Height = 50;
-                Digit4MinusBtn.Width = 50;
-                Digit4MinusBtn.Height = 50;
-                
-                Digit5PlusBtn.Width = 50;
-                Digit5PlusBtn.Height = 50;
-                Digit5MinusBtn.Width = 50;
-                Digit5MinusBtn.Height = 50;
-                
-                Digit6PlusBtn.Width = 50;
-                Digit6PlusBtn.Height = 50;
-                Digit6MinusBtn.Width = 50;
-                Digit6MinusBtn.Height = 50;
-                
-                // 增大控制按钮
-                StartPauseBtn.Width = 150;
-                StartPauseBtn.Height = 150;
-                FullscreenBtn.Width = 150;
-                FullscreenBtn.Height = 60;
-                ResetBtn.Width = 150;
-                ResetBtn.Height = 60;
-                
-                // 调整按钮字体大小
-                StartPauseIcon.FontSize = 48;
-                
-                // 调整标题栏和关闭按钮在全屏时的位置
-                TitleBar.Height = 80;
-                TitleText.FontSize = 32;
-                BtnClose.Width = 50;
-                BtnClose.Height = 50;
-                
-                // 调整数字显示区域的间距
-                MainDisplayGrid.Margin = new Thickness(0, 20, 0, 20);
-                
-                // 调整时间单位标签的字体大小（现在每个时间组都有自己的标签）
-                // 这些标签现在直接在每个时间组内，不需要单独处理
-            }
-            else
-            {
-                // 恢复普通窗口时的尺寸
-                Digit1Display.FontSize = 64;
-                Digit2Display.FontSize = 64;
-                Digit3Display.FontSize = 64;
-                Digit4Display.FontSize = 64;
-                Digit5Display.FontSize = 64;
-                Digit6Display.FontSize = 64;
-                
-                // 恢复按钮尺寸
-                Digit1PlusBtn.Width = 30;
-                Digit1PlusBtn.Height = 30;
-                Digit1MinusBtn.Width = 30;
-                Digit1MinusBtn.Height = 30;
-                
-                Digit2PlusBtn.Width = 30;
-                Digit2PlusBtn.Height = 30;
-                Digit2MinusBtn.Width = 30;
-                Digit2MinusBtn.Height = 30;
-                
-                Digit3PlusBtn.Width = 30;
-                Digit3PlusBtn.Height = 30;
-                Digit3MinusBtn.Width = 30;
-                Digit3MinusBtn.Height = 30;
-                
-                Digit4PlusBtn.Width = 30;
-                Digit4PlusBtn.Height = 30;
-                Digit4MinusBtn.Width = 30;
-                Digit4MinusBtn.Height = 30;
-                
-                Digit5PlusBtn.Width = 30;
-                Digit5PlusBtn.Height = 30;
-                Digit5MinusBtn.Width = 30;
-                Digit5MinusBtn.Height = 30;
-                
-                Digit6PlusBtn.Width = 30;
-                Digit6PlusBtn.Height = 30;
-                Digit6MinusBtn.Width = 30;
-                Digit6MinusBtn.Height = 30;
-                
-                // 恢复控制按钮尺寸
-                StartPauseBtn.Width = 80;
-                StartPauseBtn.Height = 80;
-                FullscreenBtn.Width = 80;
-                FullscreenBtn.Height = 40;
-                ResetBtn.Width = 80;
-                ResetBtn.Height = 40;
-                
-                // 恢复按钮字体大小
-                StartPauseIcon.FontSize = 32;
-                
-                // 恢复标题栏和关闭按钮的普通尺寸
-                TitleBar.Height = 50;
-                TitleText.FontSize = 20;
-                BtnClose.Width = 30;
-                BtnClose.Height = 30;
-                
-                // 恢复数字显示区域的间距
-                MainDisplayGrid.Margin = new Thickness(0, 0, 0, 0);
-                
-                // 恢复时间单位标签的字体大小（现在每个时间组都有自己的标签）
-                // 这些标签现在直接在每个时间组内，不需要单独处理
-            }
-        }
 
         private void PlayTimerSound()
         {

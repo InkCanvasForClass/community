@@ -11,304 +11,308 @@
         Title="Ink Canvas 画板 - 计时器" Height="400" Width="600">
     <Border Background="White" CornerRadius="15" BorderThickness="1" BorderBrush="#E0E0E0" Margin="10">
         <Grid>
-            <!-- 顶部标题栏 -->
-            <Grid Height="50" Background="White" x:Name="TitleBar" Margin="0,19,0,309">
-                <TextBlock Text="计时" FontSize="20" FontWeight="Bold" 
-                           HorizontalAlignment="Left" VerticalAlignment="Center" 
-                           Margin="22,0,0,0" Foreground="#333333" x:Name="TitleText"/>
-                <Border x:Name="BtnClose" MouseUp="BtnClose_MouseUp" 
-                        HorizontalAlignment="Right" VerticalAlignment="Center"
-                        Margin="0,0,22,0" Background="#F5F5F5" Height="30" Width="30" 
-                        CornerRadius="15" Cursor="Hand">
-                    <TextBlock Text="×" FontSize="16" FontWeight="Bold" 
-                               HorizontalAlignment="Center" VerticalAlignment="Center" 
-                               Foreground="#666666"/>
-                </Border>
-            </Grid>
-
             <!-- 主要内容区域 -->
-            <Grid Margin="0,50,0,0">
-                <!-- 6位数字显示区域 -->
-                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" 
-                      x:Name="MainDisplayGrid">
-                    <!-- 6位数字水平排列 -->
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" 
-                               x:Name="DigitsPanel" Margin="0,-43,0,41">
-                        <!-- 小时组（十位和个位） -->
-                        <Grid Margin="0,0,30,0" HorizontalAlignment="Center" Width="120">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <!-- 第1位数字（小时十位） -->
-                                <Grid Margin="0,0,15,0">
-                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                        <!-- 上方+按钮 -->
-                                        <Button x:Name="Digit1PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
+            <Grid>
+                <!-- 使用Viewbox自动缩放内容 -->
+                <Viewbox x:Name="MainViewController" Margin="20,20,20,20">
+                    <Grid Height="350" Width="600">
+                        <!-- 顶部标题栏 -->
+                        <Grid Height="50" Background="White" x:Name="TitleBar" HorizontalAlignment="Stretch" VerticalAlignment="Top">
+                            <TextBlock Text="计时" FontSize="20" FontWeight="Bold" 
+                                       HorizontalAlignment="Left" VerticalAlignment="Center" 
+                                       Margin="22,0,0,0" Foreground="#333333" x:Name="TitleText"/>
+                            <Border x:Name="BtnClose" MouseUp="BtnClose_MouseUp" 
+                                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                                    Margin="0,0,22,0" Background="#F5F5F5" Height="30" Width="30" 
+                                    CornerRadius="15" Cursor="Hand">
+                                <TextBlock Text="×" FontSize="16" FontWeight="Bold" 
+                                           HorizontalAlignment="Center" VerticalAlignment="Center" 
+                                           Foreground="#666666"/>
+                            </Border>
+                        </Grid>
+                        <!-- 6位数字显示区域 -->
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" 
+                              x:Name="MainDisplayGrid">
+                            <!-- 6位数字水平排列 -->
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" 
+                                       x:Name="DigitsPanel" Margin="0,-25,0,25">
+                                <!-- 小时组（十位和个位） -->
+                                <Grid Margin="0,0,30,0" HorizontalAlignment="Center" Width="120">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <!-- 第1位数字（小时十位） -->
+                                        <Grid Margin="0,0,15,0">
+                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                                <!-- 上方+按钮 -->
+                                                <Button x:Name="Digit1PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit1Plus_Click" Cursor="Hand" Margin="0,0,0,8">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
-                                        <!-- 数字显示 -->
-                                        <TextBlock x:Name="Digit1Display" Text="0" FontSize="64" FontWeight="Bold" 
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                                <!-- 数字显示 -->
+                                                <TextBlock x:Name="Digit1Display" Text="0" FontSize="64" FontWeight="Bold" 
                                                    HorizontalAlignment="Center" Foreground="#333333" Margin="0,0,0,8"/>
-                                        <!-- 下方-按钮 -->
-                                        <Button x:Name="Digit1MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                                <!-- 下方-按钮 -->
+                                                <Button x:Name="Digit1MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit1Minus_Click" Cursor="Hand">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
 
-                                <!-- 第2位数字（小时个位） -->
-                                <Grid>
-                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                        <!-- 上方+按钮 -->
-                                        <Button x:Name="Digit2PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                        <!-- 第2位数字（小时个位） -->
+                                        <Grid>
+                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                                <!-- 上方+按钮 -->
+                                                <Button x:Name="Digit2PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit2Plus_Click" Cursor="Hand" Margin="0,0,0,8">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
-                                        <!-- 数字显示 -->
-                                        <TextBlock x:Name="Digit2Display" Text="0" FontSize="64" FontWeight="Bold" 
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                                <!-- 数字显示 -->
+                                                <TextBlock x:Name="Digit2Display" Text="0" FontSize="64" FontWeight="Bold" 
                                                    HorizontalAlignment="Center" Foreground="#333333" Margin="0,0,0,8"/>
-                                        <!-- 下方-按钮 -->
-                                        <Button x:Name="Digit2MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                                <!-- 下方-按钮 -->
+                                                <Button x:Name="Digit2MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit2Minus_Click" Cursor="Hand">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
                                     </StackPanel>
-                                </Grid>
-                            </StackPanel>
-                            <!-- 时标签 -->
-                            <TextBlock Text="时" FontSize="16" HorizontalAlignment="Center" 
+                                    <!-- 时标签 -->
+                                    <TextBlock Text="时" FontSize="16" HorizontalAlignment="Center" 
                                        Foreground="#666666" Margin="0,112,0,-13"/>
-                        </Grid>
+                                </Grid>
 
-                        <!-- 分钟组（十位和个位） -->
-                        <Grid Margin="0,0,30,0" HorizontalAlignment="Center" Width="120">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <!-- 第3位数字（分钟十位） -->
-                                <Grid Margin="0,0,15,0">
-                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                        <!-- 上方+按钮 -->
-                                        <Button x:Name="Digit3PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                <!-- 分钟组（十位和个位） -->
+                                <Grid Margin="0,0,30,0" HorizontalAlignment="Center" Width="120">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <!-- 第3位数字（分钟十位） -->
+                                        <Grid Margin="0,0,15,0">
+                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                                <!-- 上方+按钮 -->
+                                                <Button x:Name="Digit3PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit3Plus_Click" Cursor="Hand" Margin="0,0,0,8">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
-                                        <!-- 数字显示 -->
-                                        <TextBlock x:Name="Digit3Display" Text="0" FontSize="64" FontWeight="Bold" 
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                                <!-- 数字显示 -->
+                                                <TextBlock x:Name="Digit3Display" Text="0" FontSize="64" FontWeight="Bold" 
                                                    HorizontalAlignment="Center" Foreground="#333333" Margin="0,0,0,8"/>
-                                        <!-- 下方-按钮 -->
-                                        <Button x:Name="Digit3MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                                <!-- 下方-按钮 -->
+                                                <Button x:Name="Digit3MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit3Minus_Click" Cursor="Hand">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
 
-                                <!-- 第4位数字（分钟个位） -->
-                                <Grid>
-                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                        <!-- 上方+按钮 -->
-                                        <Button x:Name="Digit4PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                        <!-- 第4位数字（分钟个位） -->
+                                        <Grid>
+                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                                <!-- 上方+按钮 -->
+                                                <Button x:Name="Digit4PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit4Plus_Click" Cursor="Hand" Margin="0,0,0,8">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
-                                        <!-- 数字显示 -->
-                                        <TextBlock x:Name="Digit4Display" Text="5" FontSize="64" FontWeight="Bold" 
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                                <!-- 数字显示 -->
+                                                <TextBlock x:Name="Digit4Display" Text="5" FontSize="64" FontWeight="Bold" 
                                                    HorizontalAlignment="Center" Foreground="#333333" Margin="0,0,0,8"/>
-                                        <!-- 下方-按钮 -->
-                                        <Button x:Name="Digit4MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                                <!-- 下方-按钮 -->
+                                                <Button x:Name="Digit4MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit4Minus_Click" Cursor="Hand">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
                                     </StackPanel>
-                                </Grid>
-                            </StackPanel>
-                            <!-- 分标签 -->
-                            <TextBlock Text="分" FontSize="16" HorizontalAlignment="Center" 
+                                    <!-- 分标签 -->
+                                    <TextBlock Text="分" FontSize="16" HorizontalAlignment="Center" 
                                        Foreground="#666666" Margin="0,112,0,-12"/>
-                        </Grid>
+                                </Grid>
 
-                        <!-- 秒组（十位和个位） -->
-                        <Grid Width="120">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <!-- 第5位数字（秒十位） -->
-                                <Grid Margin="0,0,15,0">
-                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                        <!-- 上方+按钮 -->
-                                        <Button x:Name="Digit5PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                <!-- 秒组（十位和个位） -->
+                                <Grid Width="120">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <!-- 第5位数字（秒十位） -->
+                                        <Grid Margin="0,0,15,0">
+                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                                <!-- 上方+按钮 -->
+                                                <Button x:Name="Digit5PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit5Plus_Click" Cursor="Hand" Margin="0,0,0,8">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
-                                        <!-- 数字显示 -->
-                                        <TextBlock x:Name="Digit5Display" Text="0" FontSize="64" FontWeight="Bold" 
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                                <!-- 数字显示 -->
+                                                <TextBlock x:Name="Digit5Display" Text="0" FontSize="64" FontWeight="Bold" 
                                                    HorizontalAlignment="Center" Foreground="#333333" Margin="0,0,0,8"/>
-                                        <!-- 下方-按钮 -->
-                                        <Button x:Name="Digit5MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                                <!-- 下方-按钮 -->
+                                                <Button x:Name="Digit5MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit5Minus_Click" Cursor="Hand">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
-                                    </StackPanel>
-                                </Grid>
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
 
-                                <!-- 第6位数字（秒个位） -->
-                                <Grid>
-                                    <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                        <!-- 上方+按钮 -->
-                                        <Button x:Name="Digit6PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                        <!-- 第6位数字（秒个位） -->
+                                        <Grid>
+                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                                                <!-- 上方+按钮 -->
+                                                <Button x:Name="Digit6PlusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit6Plus_Click" Cursor="Hand" Margin="0,0,0,8">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
-                                        <!-- 数字显示 -->
-                                        <TextBlock x:Name="Digit6Display" Text="0" FontSize="64" FontWeight="Bold" 
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                                <!-- 数字显示 -->
+                                                <TextBlock x:Name="Digit6Display" Text="0" FontSize="64" FontWeight="Bold" 
                                                    HorizontalAlignment="Center" Foreground="#333333" Margin="0,0,0,8"/>
-                                        <!-- 下方-按钮 -->
-                                        <Button x:Name="Digit6MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
+                                                <!-- 下方-按钮 -->
+                                                <Button x:Name="Digit6MinusBtn" Width="40" Height="40" Background="#F0F0F0" 
                                                 BorderThickness="0" Click="Digit6Minus_Click" Cursor="Hand">
-                                            <Button.Template>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Button.Template>
-                                            <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
-                                        </Button>
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="#666666"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
                                     </StackPanel>
+                                    <!-- 秒标签 -->
+                                    <TextBlock Text="秒" FontSize="16" HorizontalAlignment="Center" 
+                                       Foreground="#666666" Margin="0,112,0,-12"/>
                                 </Grid>
                             </StackPanel>
-                            <!-- 秒标签 -->
-                            <TextBlock Text="秒" FontSize="16" HorizontalAlignment="Center" 
-                                       Foreground="#666666" Margin="0,112,0,-12"/>
+
                         </Grid>
-                    </StackPanel>
 
-                </Grid>
-
-                <!-- 底部控制按钮区域 -->
-                <Grid HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                        <!-- 全屏按钮 -->
-                        <Button x:Name="FullscreenBtn" Width="80" Height="40" Background="#F5F5F5" 
+                        <!-- 底部控制按钮区域 -->
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <!-- 全屏按钮 -->
+                                <Button x:Name="FullscreenBtn" Width="80" Height="40" Background="#F5F5F5" 
                                 BorderThickness="0" Click="Fullscreen_Click" Cursor="Hand" Margin="0,0,30,0">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="⛶" FontSize="16" Foreground="#666666" Margin="0,0,5,0"/>
-                                <TextBlock Text="全屏" FontSize="12" Foreground="#666666"/>
-                            </StackPanel>
-                        </Button>
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="⛶" FontSize="16" Foreground="#666666" Margin="0,0,5,0"/>
+                                        <TextBlock Text="全屏" FontSize="12" Foreground="#666666"/>
+                                    </StackPanel>
+                                </Button>
 
-                        <!-- 开始/暂停按钮 -->
-                        <Button x:Name="StartPauseBtn" Width="80" Height="80" Background="#4CAF50" 
+                                <!-- 开始/暂停按钮 -->
+                                <Button x:Name="StartPauseBtn" Width="80" Height="80" Background="#4CAF50" 
                                 BorderThickness="0" Click="StartPause_Click" Cursor="Hand" Margin="0,0,30,0">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}" CornerRadius="40">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <TextBlock x:Name="StartPauseIcon" Text="▶" FontSize="32" Foreground="White" 
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="40">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <TextBlock x:Name="StartPauseIcon" Text="▶" FontSize="32" Foreground="White" 
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Button>
+                                </Button>
 
-                        <!-- 重置按钮 -->
-                        <Button x:Name="ResetBtn" Width="80" Height="40" Background="#F5F5F5" 
+                                <!-- 重置按钮 -->
+                                <Button x:Name="ResetBtn" Width="80" Height="40" Background="#F5F5F5" 
                                 BorderThickness="0" Click="Reset_Click" Cursor="Hand">
-                            <Button.Template>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Button.Template>
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <TextBlock Text="↻" FontSize="16" Foreground="#666666" Margin="0,0,5,0"/>
-                                <TextBlock Text="重置" FontSize="12" Foreground="#666666"/>
+                                    <Button.Template>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Button.Template>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Text="↻" FontSize="16" Foreground="#666666" Margin="0,0,5,0"/>
+                                        <TextBlock Text="重置" FontSize="12" Foreground="#666666"/>
+                                    </StackPanel>
+                                </Button>
                             </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Grid>
+                        </Grid>
+                    </Grid>
+                </Viewbox>
             </Grid>
         </Grid>
     </Border>
