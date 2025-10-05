@@ -135,7 +135,7 @@ namespace Ink_Canvas
             {
                 Name = "BackgroundPalette",
                 Visibility = Visibility.Collapsed,
-                Background = new SolidColorBrush(Colors.White),
+                Background = (SolidColorBrush)Application.Current.FindResource("SettingsPageBackground"),
                 Opacity = 1,
                 BorderBrush = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)),
                 BorderThickness = new Thickness(1),
@@ -166,7 +166,7 @@ namespace Ink_Canvas
             var titleText = new TextBlock
             {
                 Text = "背景设置",
-                Foreground = new SolidColorBrush(Colors.White),
+                Foreground = (SolidColorBrush)Application.Current.FindResource("FloatBarForeground"),
                 Padding = new Thickness(0, 5, 0, 0),
                 FontSize = 11,
                 FontWeight = FontWeights.Bold,
@@ -198,7 +198,7 @@ namespace Ink_Canvas
             var modeTitle = new TextBlock
             {
                 Text = "白板模式",
-                Foreground = new SolidColorBrush(Color.FromRgb(0x17, 0x25, 0x54)),
+                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground"),
                 FontSize = 10,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -319,7 +319,7 @@ namespace Ink_Canvas
             var separator = new Border
             {
                 Height = 1,
-                Background = new SolidColorBrush(Color.FromRgb(0xd4, 0xd4, 0xd8)),
+                Background = (SolidColorBrush)Application.Current.FindResource("SettingsPageBorderBrush"),
                 Margin = new Thickness(0, 12, 0, 12)
             };
             contentPanel.Children.Add(separator);
@@ -328,7 +328,7 @@ namespace Ink_Canvas
             var colorTitle = new TextBlock
             {
                 Text = "背景颜色",
-                Foreground = new SolidColorBrush(Color.FromRgb(0x17, 0x25, 0x54)),
+                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground"),
                 FontSize = 10,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
@@ -342,7 +342,7 @@ namespace Ink_Canvas
                 Width = 100,
                 Height = 40,
                 BorderThickness = new Thickness(1),
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0xd4, 0xd4, 0xd8)),
+                BorderBrush = (SolidColorBrush)Application.Current.FindResource("SettingsPageBorderBrush"),
                 Background = new SolidColorBrush(Colors.White),
                 CornerRadius = new CornerRadius(4),
                 Margin = new Thickness(0, 0, 0, 10),
@@ -378,7 +378,7 @@ namespace Ink_Canvas
             // 先创建所有滑块控件
             // R滑块和文本框
             var rPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 0, 10, 5) };
-            var rLabel = new TextBlock { Text = "R:", Width = 20, VerticalAlignment = VerticalAlignment.Center };
+            var rLabel = new TextBlock { Text = "R:", Width = 20, VerticalAlignment = VerticalAlignment.Center, Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground") };
             var rSlider = new Slider
             {
                 Minimum = 0,
@@ -393,12 +393,13 @@ namespace Ink_Canvas
                 Text = currentBackgroundColor.R.ToString(),
                 Width = 30,
                 VerticalAlignment = VerticalAlignment.Center,
-                TextAlignment = TextAlignment.Right
+                TextAlignment = TextAlignment.Right,
+                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground")
             };
 
             // G滑块和文本框
             var gPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 0, 10, 5) };
-            var gLabel = new TextBlock { Text = "G:", Width = 20, VerticalAlignment = VerticalAlignment.Center };
+            var gLabel = new TextBlock { Text = "G:", Width = 20, VerticalAlignment = VerticalAlignment.Center, Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground") };
             var gSlider = new Slider
             {
                 Minimum = 0,
@@ -413,12 +414,13 @@ namespace Ink_Canvas
                 Text = currentBackgroundColor.G.ToString(),
                 Width = 30,
                 VerticalAlignment = VerticalAlignment.Center,
-                TextAlignment = TextAlignment.Right
+                TextAlignment = TextAlignment.Right,
+                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground")
             };
 
             // B滑块和文本框
             var bPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 0, 10, 5) };
-            var bLabel = new TextBlock { Text = "B:", Width = 20, VerticalAlignment = VerticalAlignment.Center };
+            var bLabel = new TextBlock { Text = "B:", Width = 20, VerticalAlignment = VerticalAlignment.Center, Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground") };
             var bSlider = new Slider
             {
                 Minimum = 0,
@@ -433,7 +435,8 @@ namespace Ink_Canvas
                 Text = currentBackgroundColor.B.ToString(),
                 Width = 30,
                 VerticalAlignment = VerticalAlignment.Center,
-                TextAlignment = TextAlignment.Right
+                TextAlignment = TextAlignment.Right,
+                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground")
             };
 
             // 现在添加事件处理程序

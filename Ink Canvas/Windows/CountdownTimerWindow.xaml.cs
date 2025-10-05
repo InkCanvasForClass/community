@@ -1,5 +1,4 @@
 ﻿using Ink_Canvas.Helpers;
-using Ink_Canvas.Resources;
 using System;
 using System.Media;
 using System.Timers;
@@ -7,7 +6,6 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace Ink_Canvas
 {
@@ -24,6 +22,21 @@ namespace Ink_Canvas
             timer.Elapsed += Timer_Elapsed;
             timer.Interval = 50;
             InitializeUI();
+            
+            // 应用主题
+            ApplyTheme();
+        }
+
+        public static Window CreateTimerWindow()
+        {
+            if (MainWindow.Settings.RandSettings?.UseSeewoStyleUI == true)
+            {
+                return new SeewoStyleTimerWindow();
+            }
+            else
+            {
+                return new CountdownTimerWindow();
+            }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -56,7 +69,15 @@ namespace Ink_Canvas
                     isTimerRunning = false;
                     SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                     BtnStartCover.Visibility = Visibility.Visible;
-                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                    var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                    if (textForeground != null)
+                    {
+                        TextBlockHour.Foreground = textForeground;
+                    }
+                    else
+                    {
+                        TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                    }
                     BorderStopTime.Visibility = Visibility.Collapsed;
                 }
             });
@@ -90,17 +111,34 @@ namespace Ink_Canvas
         private void Grid_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (isTimerRunning) return;
+            
+            var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+            
             if (ProcessBarTime.Visibility == Visibility.Visible && isTimerRunning == false)
             {
                 ProcessBarTime.Visibility = Visibility.Collapsed;
                 GridAdjustHour.Visibility = Visibility.Visible;
-                TextBlockHour.Foreground = Brushes.Black;
+                if (textForeground != null)
+                {
+                    TextBlockHour.Foreground = textForeground;
+                }
+                else
+                {
+                    TextBlockHour.Foreground = Brushes.Black;
+                }
             }
             else
             {
                 ProcessBarTime.Visibility = Visibility.Visible;
                 GridAdjustHour.Visibility = Visibility.Collapsed;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                if (textForeground != null)
+                {
+                    TextBlockHour.Foreground = textForeground;
+                }
+                else
+                {
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                }
 
                 if (hour == 0 && minute == 0 && second == 0)
                 {
@@ -225,7 +263,11 @@ namespace Ink_Canvas
                 BtnResetCover.Visibility = Visibility.Visible;
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground3 != null)
+                    TextBlockHour.Foreground = textForeground3;
+                else
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
             }
             else if (isTimerRunning && isPaused)
             {
@@ -235,7 +277,11 @@ namespace Ink_Canvas
                 BtnResetCover.Visibility = Visibility.Visible;
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground3 != null)
+                    TextBlockHour.Foreground = textForeground3;
+                else
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 isTimerRunning = false;
                 timer.Stop();
@@ -285,7 +331,11 @@ namespace Ink_Canvas
                 //继续
                 startTime += DateTime.Now - pauseTime;
                 ProcessBarTime.IsPaused = false;
-                TextBlockHour.Foreground = Brushes.Black;
+                var textForeground1 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground1 != null)
+                    TextBlockHour.Foreground = textForeground1;
+                else
+                    TextBlockHour.Foreground = Brushes.Black;
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 isPaused = false;
                 timer.Start();
@@ -297,7 +347,11 @@ namespace Ink_Canvas
                 //暂停
                 pauseTime = DateTime.Now;
                 ProcessBarTime.IsPaused = true;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground3 != null)
+                    TextBlockHour.Foreground = textForeground3;
+                else
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 isPaused = true;
@@ -309,7 +363,11 @@ namespace Ink_Canvas
                 startTime = DateTime.Now;
                 totalSeconds = ((hour * 60) + minute) * 60 + second;
                 ProcessBarTime.IsPaused = false;
-                TextBlockHour.Foreground = Brushes.Black;
+                var textForeground2 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground2 != null)
+                    TextBlockHour.Foreground = textForeground2;
+                else
+                    TextBlockHour.Foreground = Brushes.Black;
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 BtnResetCover.Visibility = Visibility.Collapsed;
 
@@ -348,9 +406,47 @@ namespace Ink_Canvas
             }
         }
 
+        private void ApplyTheme()
+        {
+            try
+            {
+                // 根据主题设置文本颜色
+                var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground != null)
+                {
+                    TextBlockHour.Foreground = textForeground;
+                    TextBlockMinute.Foreground = textForeground;
+                    TextBlockSecond.Foreground = textForeground;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         public void RefreshUI()
         {
             InitializeUI();
+        }
+
+        /// <summary>
+        /// 刷新主题，当主窗口主题切换时调用
+        /// </summary>
+        public void RefreshTheme()
+        {
+            try
+            {
+                // 重新应用主题
+                ApplyTheme();
+                
+                // 强制刷新UI
+                InvalidateVisual();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新计时器窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void UpdateButtonTexts()
@@ -362,12 +458,12 @@ namespace Ink_Canvas
                 HourPlus1Text.Text = "+1";
                 HourMinus1Text.Text = "-1";
                 HourMinus5Text.Text = "-5";
-                
+
                 MinutePlus5Text.Text = "+5";
                 MinutePlus1Text.Text = "+1";
                 MinuteMinus1Text.Text = "-1";
                 MinuteMinus5Text.Text = "-5";
-                
+
                 SecondPlus5Text.Text = "+5";
                 SecondPlus1Text.Text = "+1";
                 SecondMinus1Text.Text = "-1";
@@ -380,12 +476,12 @@ namespace Ink_Canvas
                 HourPlus1Text.Text = "∧";
                 HourMinus1Text.Text = "∨";
                 HourMinus5Text.Text = "∨∨";
-                
+
                 MinutePlus5Text.Text = "∧∧";
                 MinutePlus1Text.Text = "∧";
                 MinuteMinus1Text.Text = "∨";
                 MinuteMinus5Text.Text = "∨∨";
-                
+
                 SecondPlus5Text.Text = "∧∧";
                 SecondPlus1Text.Text = "∧";
                 SecondMinus1Text.Text = "∨";
@@ -399,8 +495,8 @@ namespace Ink_Canvas
             {
                 double volume = MainWindow.Settings.RandSettings?.TimerVolume ?? 1.0;
                 mediaPlayer.Volume = volume;
-                
-                if (!string.IsNullOrEmpty(MainWindow.Settings.RandSettings?.CustomTimerSoundPath) && 
+
+                if (!string.IsNullOrEmpty(MainWindow.Settings.RandSettings?.CustomTimerSoundPath) &&
                     System.IO.File.Exists(MainWindow.Settings.RandSettings.CustomTimerSoundPath))
                 {
                     // 播放自定义铃声
@@ -419,7 +515,7 @@ namespace Ink_Canvas
                     }
                     mediaPlayer.Open(new Uri(tempPath));
                 }
-                
+
                 mediaPlayer.Play();
             }
             catch (Exception ex)

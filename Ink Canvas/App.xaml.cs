@@ -1,19 +1,15 @@
 using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
-using Ink_Canvas.Windows;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,7 +32,7 @@ namespace Ink_Canvas
 
         public static string[] StartArgs;
         public static string RootPath = Environment.GetEnvironmentVariable("APPDATA") + "\\Ink Canvas\\";
-        
+
         // 新增：标记是否通过--board参数启动
         public static bool StartWithBoardMode = false;
         // 新增：标记是否通过--show参数启动
@@ -302,7 +298,7 @@ namespace Ink_Canvas
         {
             string reason = e.Reason == SessionEndReasons.Logoff ? "用户注销" : "系统关机";
             WriteCrashLog($"系统会话即将结束: {reason}");
-            
+
             // 清理PowerPoint进程守护和悬浮窗拦截器
             try
             {
@@ -311,13 +307,13 @@ namespace Ink_Canvas
                 if (mainWindow != null)
                 {
                     // 清理PowerPoint进程守护
-                    var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring", 
+                    var method = mainWindow.GetType().GetMethod("StopPowerPointProcessMonitoring",
                         BindingFlags.NonPublic | BindingFlags.Instance);
                     method?.Invoke(mainWindow, null);
                     WriteCrashLog("PowerPoint进程守护已在系统关机时清理");
-                    
+
                     // 清理悬浮窗拦截器
-                    var interceptorField = mainWindow.GetType().GetField("_floatingWindowInterceptorManager", 
+                    var interceptorField = mainWindow.GetType().GetField("_floatingWindowInterceptorManager",
                         BindingFlags.NonPublic | BindingFlags.Instance);
                     var interceptorManager = interceptorField?.GetValue(mainWindow);
                     if (interceptorManager != null)
@@ -331,7 +327,7 @@ namespace Ink_Canvas
             {
                 WriteCrashLog($"清理资源失败: {ex.Message}");
             }
-            
+
             DeviceIdentifier.SaveUsageStatsOnShutdown();
         }
 
@@ -409,12 +405,12 @@ namespace Ink_Canvas
 
         public static void ShowSplashScreen()
         {
-            if (_isSplashScreenShown) 
+            if (_isSplashScreenShown)
             {
                 LogHelper.WriteLogToFile("启动画面已经显示，跳过重复显示");
                 return;
             }
-            
+
             try
             {
                 LogHelper.WriteLogToFile("开始创建启动画面...");
@@ -435,7 +431,7 @@ namespace Ink_Canvas
         public static void CloseSplashScreen()
         {
             if (!_isSplashScreenShown || _splashScreen == null) return;
-            
+
             try
             {
                 _splashScreen.CloseSplashScreen();
@@ -481,7 +477,7 @@ namespace Ink_Canvas
                         return (bool)obj["appearance"]["enableSplashScreen"];
                     }
                 }
-                
+
                 // 如果设置文件不存在或没有该设置，返回默认值false
                 return false;
             }
@@ -596,8 +592,8 @@ namespace Ink_Canvas
                 ShowSplashScreen();
                 SetSplashMessage("正在启动 Ink Canvas...");
                 SetSplashProgress(20);
-                await Task.Delay(500); 
-                
+                await Task.Delay(500);
+
                 // 强制刷新UI，确保启动画面显示
                 Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
             }
@@ -610,7 +606,7 @@ namespace Ink_Canvas
             // 检查是否为最终应用启动（更新后的应用）
             bool isFinalApp = e.Args.Contains("--final-app");
             bool skipMutexCheck = e.Args.Contains("--skip-mutex-check");
-            
+
             // 检查是否通过--board参数启动
             bool hasBoardArg = e.Args.Contains("--board");
             if (hasBoardArg)
@@ -638,8 +634,8 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在初始化组件...");
                 SetSplashProgress(40);
-                await Task.Delay(500); 
-            } 
+                await Task.Delay(500);
+            }
             try
             {
                 IACoreDllExtractor.ExtractIACoreDlls();
@@ -654,8 +650,8 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在加载配置...");
                 SetSplashProgress(60);
-                await Task.Delay(500); 
-            } 
+                await Task.Delay(500);
+            }
             DeviceIdentifier.RecordAppLaunch();
             LogHelper.WriteLogToFile($"App | 设备ID: {DeviceIdentifier.GetDeviceId()}");
             LogHelper.WriteLogToFile($"App | 使用频率: {DeviceIdentifier.GetUsageFrequency()}");
@@ -902,11 +898,11 @@ namespace Ink_Canvas
             {
                 SetSplashMessage("正在初始化主界面...");
                 SetSplashProgress(80);
-                await Task.Delay(500); 
-            } 
+                await Task.Delay(500);
+            }
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
-            
+
             // 主窗口加载完成后关闭启动画面
             mainWindow.Loaded += (s, args) =>
             {
@@ -929,7 +925,7 @@ namespace Ink_Canvas
                     });
                 }
             };
-            
+
             mainWindow.Show();
 
             // 注册.icstk文件关联

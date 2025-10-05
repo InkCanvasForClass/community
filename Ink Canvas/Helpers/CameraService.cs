@@ -31,22 +31,22 @@ namespace Ink_Canvas.Helpers
         public FilterInfo CurrentCamera { get; private set; }
 
         // 新增属性
-        public int RotationAngle 
-        { 
-            get => _rotationAngle; 
-            set => _rotationAngle = Math.Max(0, Math.Min(3, value)); 
+        public int RotationAngle
+        {
+            get => _rotationAngle;
+            set => _rotationAngle = Math.Max(0, Math.Min(3, value));
         }
-        
-        public int ResolutionWidth 
-        { 
-            get => _resolutionWidth; 
-            set => _resolutionWidth = Math.Max(320, Math.Min(1920, value)); 
+
+        public int ResolutionWidth
+        {
+            get => _resolutionWidth;
+            set => _resolutionWidth = Math.Max(320, Math.Min(1920, value));
         }
-        
-        public int ResolutionHeight 
-        { 
-            get => _resolutionHeight; 
-            set => _resolutionHeight = Math.Max(240, Math.Min(1080, value)); 
+
+        public int ResolutionHeight
+        {
+            get => _resolutionHeight;
+            set => _resolutionHeight = Math.Max(240, Math.Min(1080, value));
         }
 
         public CameraService()
@@ -75,7 +75,7 @@ namespace Ink_Canvas.Helpers
             {
                 AvailableCameras.Clear();
                 var videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
-                
+
                 foreach (FilterInfo device in videoDevices)
                 {
                     AvailableCameras.Add(device);
@@ -265,27 +265,27 @@ namespace Ink_Canvas.Helpers
                 {
                     // 释放之前的帧
                     _currentFrame?.Dispose();
-                    
+
                     // 创建新的位图，避免Clone的问题
                     var sourceFrame = eventArgs.Frame;
-                    
+
                     if (sourceFrame != null)
                     {
                         try
                         {
                             var width = sourceFrame.Width;
                             var height = sourceFrame.Height;
-                            
-                        if (width > 0 && height > 0)
-                        {
-                            // 应用旋转
-                            Bitmap rotatedFrame = ApplyRotation(sourceFrame);
-                            
-                            // 应用分辨率调整
-                            _currentFrame = ResizeImage(rotatedFrame, _resolutionWidth, _resolutionHeight);
-                            
-                            rotatedFrame?.Dispose();
-                        }
+
+                            if (width > 0 && height > 0)
+                            {
+                                // 应用旋转
+                                Bitmap rotatedFrame = ApplyRotation(sourceFrame);
+
+                                // 应用分辨率调整
+                                _currentFrame = ResizeImage(rotatedFrame, _resolutionWidth, _resolutionHeight);
+
+                                rotatedFrame?.Dispose();
+                            }
                             else
                             {
                                 _currentFrame = null;
@@ -379,7 +379,7 @@ namespace Ink_Canvas.Helpers
         public void Dispose()
         {
             StopPreview();
-            
+
             lock (_frameLock)
             {
                 _currentFrame?.Dispose();

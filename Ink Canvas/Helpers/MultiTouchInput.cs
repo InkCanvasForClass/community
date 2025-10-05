@@ -31,7 +31,7 @@ namespace Ink_Canvas.Helpers
     {
         private bool _needsRedraw = true;
         private int _lastPointCount = 0;
-        private const int REDRAW_THRESHOLD = 3; 
+        private const int REDRAW_THRESHOLD = 3;
 
         /// <summary>
         ///     创建显示笔迹的类
@@ -53,7 +53,7 @@ namespace Ink_Canvas.Helpers
         public StrokeVisual(DrawingAttributes drawingAttributes)
         {
             _drawingAttributes = drawingAttributes;
-            
+
             // 启用硬件加速
             RenderOptions.SetBitmapScalingMode(this, BitmapScalingMode.HighQuality);
             RenderOptions.SetEdgeMode(this, EdgeMode.Aliased);
@@ -82,7 +82,7 @@ namespace Ink_Canvas.Helpers
                 Stroke.StylusPoints.Add(point);
                 _lastPointCount++;
             }
-            
+
             // 标记需要重绘
             _needsRedraw = true;
         }
@@ -93,7 +93,7 @@ namespace Ink_Canvas.Helpers
         public void Redraw()
         {
             if (!_needsRedraw || Stroke == null) return;
-            
+
             if (_lastPointCount % REDRAW_THRESHOLD != 0 && _lastPointCount > REDRAW_THRESHOLD)
             {
                 return;

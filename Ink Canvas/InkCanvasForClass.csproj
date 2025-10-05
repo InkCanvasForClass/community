@@ -225,6 +225,8 @@
     <Resource Include="Resources\Icons-png\icc.png" />
     <Resource Include="Resources\Icons-png\icc-dark.png" />
     <Resource Include="Resources\Icons-png\icc-noshadow.png" />
+    <Resource Include="Resources\Icons-png\icc-sharpdark.png" />
+    <Resource Include="Resources\Icons-png\icc-transparent-light-small.png" />
     <Resource Include="Resources\Icons-png\InkCanvas.png" />
     <Resource Include="Resources\Icons-png\kuanciya.png" />
     <Resource Include="Resources\Icons-png\kuandogeyuanliangwo.png" />
@@ -290,7 +292,9 @@
     <Resource Include="Resources\Icons-Fluent\ic_fluent_arrow_circle_left_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_arrow_circle_right_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_weather_moon_24_regular.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_weather_moon_24_regular_white.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_weather_sunny_24_regular.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_weather_sunny_24_regular_white.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_signature_24_regular.png" />
@@ -325,6 +329,7 @@
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_arrow_rotate_clockwise_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_scale_fit_24_regular.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_scale_fit_24_regular_white.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_scales_24_regular.png" />
@@ -341,9 +346,6 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_clock_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_book_question_mark_24_regular.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_keyboard_24_regular.png" />
@@ -460,6 +462,37 @@
     <Resource Include="Resources\Icons-png\geo-icons\cube.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\arrow_white.png" />
+    <Resource Include="Resources\Icons-png\geo-icons\dashed-line_white.png" />
+    <Resource Include="Resources\Icons-png\geo-icons\dotted-line_white.png" />
+    <Resource Include="Resources\Icons-png\geo-icons\line_white.png" />
+    <Resource Include="Resources\Icons-png\geo-icons\paralle-lines_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\centered-square_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\centered-circle_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\centered-circle-dashed_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\centered-oval_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\square_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\cylinder_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\cone_white.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons-png\geo-icons\cube_white.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Resource Include="Resources\Icons-png\EasiNote.png" />
     <Resource Include="Resources\Icons-png\EasiNote3C.png" />
     <Resource Include="Resources\Icons-png\EasiNote5C.png" />
@@ -505,6 +538,10 @@
     <Resource Include="Resources\new-icons\chevron-left-light.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_keyboard_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_control_button_24_regular_white.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -532,6 +569,8 @@
     <None Remove="Resources\Icons-png\icc.png" />
     <None Remove="Resources\Icons-png\icc-dark.png" />
     <None Remove="Resources\Icons-png\icc-noshadow.png" />
+    <None Remove="Resources\Icons-png\icc-sharpdark.png" />
+    <None Remove="Resources\Icons-png\icc-transparent-light-small.png" />
     <None Remove="Resources\Icons-png\idt.png" />
     <None Remove="Resources\Icons-png\InkCanvas.png" />
     <None Remove="Resources\Icons-png\kuanciya.png" />
@@ -587,6 +626,12 @@
     <Resource Include="Resources\Startup-animation\ICC Autumn.png" />
     <Resource Include="Resources\Startup-animation\ICC Winter.png" />
     <Resource Include="Resources\Startup-animation\ICC Horse.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_copy_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_copy_add_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_flip_horizontal_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_flip_vertical_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_edit_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_delete_24_regular_white.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">

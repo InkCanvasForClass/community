@@ -1,5 +1,4 @@
-﻿using Ink_Canvas.Helpers;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -46,29 +45,35 @@ namespace Ink_Canvas
             }
 
             // 绑定事件处理
-            canvas.StylusDown += ((o, args) => {
+            canvas.StylusDown += ((o, args) =>
+            {
                 e.Handled = true;
                 if (args.StylusDevice.TabletDevice.Type == TabletDeviceType.Stylus) canvas.CaptureStylus();
                 EraserOverlay_PointerDown(sender);
             });
-            canvas.StylusUp += ((o, args) => {
+            canvas.StylusUp += ((o, args) =>
+            {
                 e.Handled = true;
                 if (args.StylusDevice.TabletDevice.Type == TabletDeviceType.Stylus) canvas.ReleaseStylusCapture();
                 EraserOverlay_PointerUp(sender);
             });
-            canvas.StylusMove += ((o, args) => {
+            canvas.StylusMove += ((o, args) =>
+            {
                 e.Handled = true;
                 EraserOverlay_PointerMove(sender, args.GetPosition(inkCanvas));
             });
-            canvas.MouseDown += ((o, args) => {
+            canvas.MouseDown += ((o, args) =>
+            {
                 canvas.CaptureMouse();
                 EraserOverlay_PointerDown(sender);
             });
-            canvas.MouseUp += ((o, args) => {
+            canvas.MouseUp += ((o, args) =>
+            {
                 canvas.ReleaseMouseCapture();
                 EraserOverlay_PointerUp(sender);
             });
-            canvas.MouseMove += ((o, args) => {
+            canvas.MouseMove += ((o, args) =>
+            {
                 EraserOverlay_PointerMove(sender, args.GetPosition(inkCanvas));
             });
 
@@ -86,7 +91,7 @@ namespace Ink_Canvas
             // 根据橡皮擦形状选择对应的图像资源
             string resourceKey = isEraserCircleShape ? "EllipseEraserImageSource" : "RectangleEraserImageSource";
             var imageSource = TryFindResource(resourceKey) as DrawingImage;
-            
+
             if (imageSource != null)
             {
                 eraserFeedback.Source = imageSource;
@@ -301,8 +306,8 @@ namespace Ink_Canvas
             if (isEraserCircleShape)
             {
                 eraserWidth = k * 90; // 圆形橡皮擦
-                }
-                else
+            }
+            else
             {
                 eraserWidth = k * 90 * 0.6; // 矩形橡皮擦宽度
             }

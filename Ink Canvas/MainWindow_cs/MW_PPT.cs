@@ -89,11 +89,11 @@ namespace Ink_Canvas
         // PowerPoint应用程序守护相关字段
         private DispatcherTimer _powerPointProcessMonitorTimer;
         private const int ProcessMonitorInterval = 1000; // 应用程序监控间隔（毫秒）
-        
+
         // 上次播放位置相关字段
         private int _lastPlaybackPage = 0;
         private bool _shouldNavigateToLastPage = false;
-        
+
         // 页面切换防抖机制
         private DateTime _lastSlideSwitchTime = DateTime.MinValue;
         private int _pendingSlideIndex = -1;
@@ -800,7 +800,7 @@ namespace Ink_Canvas
                 {
                     if (Settings.Automation.IsAutoFoldInPPTSlideShow)
                     {
-                        if (isFloatingBarFolded) 
+                        if (isFloatingBarFolded)
                         {
                             await UnFoldFloatingBar(new object());
                         }
@@ -808,7 +808,7 @@ namespace Ink_Canvas
                     else
                     {
                         // 如果两个功能都关闭，确保浮动栏展开
-                        if (isFloatingBarFolded) 
+                        if (isFloatingBarFolded)
                         {
                             await UnFoldFloatingBar(new object());
                         }
@@ -819,7 +819,7 @@ namespace Ink_Canvas
                 isEnteredSlideShowEndEvent = true;
 
                 // 保存所有墨迹
-                    _multiPPTInkManager?.SaveAllStrokesToFile(pres);
+                _multiPPTInkManager?.SaveAllStrokesToFile(pres);
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
@@ -1086,7 +1086,7 @@ namespace Ink_Canvas
                 {
                     // 切换到对应的墨迹管理器
                     _multiPPTInkManager?.SwitchToPresentation(activePresentation);
-                    
+
                     // 重置锁定状态
                     _multiPPTInkManager?.ResetCurrentPresentationLockState();
                 }
@@ -1106,21 +1106,21 @@ namespace Ink_Canvas
             {
                 // 重置进入PPT时的浮动栏收纳状态记录
                 wasFloatingBarFoldedWhenEnterSlideShow = false;
-                
+
                 // 重置PPT放映结束事件标志
                 isEnteredSlideShowEndEvent = false;
-                
+
                 // 重置演示文稿黑边状态
                 isPresentationHaveBlackSpace = false;
-                
+
                 // 重置上次播放位置相关字段
                 _lastPlaybackPage = 0;
                 _shouldNavigateToLastPage = false;
-                
+
                 // 重置页面切换防抖机制
                 _lastSlideSwitchTime = DateTime.MinValue;
                 _pendingSlideIndex = -1;
-                
+
                 LogHelper.WriteLogToFile("PPT状态变量已重置", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
@@ -1137,15 +1137,15 @@ namespace Ink_Canvas
             try
             {
                 var now = DateTime.Now;
-                
+
                 // 如果距离上次切换时间太短，使用防抖机制
                 if (now - _lastSlideSwitchTime < TimeSpan.FromMilliseconds(SlideSwitchDebounceMs))
                 {
                     _pendingSlideIndex = currentSlide;
-                    
+
                     // 停止之前的定时器
                     _slideSwitchDebounceTimer?.Stop();
-                    
+
                     // 创建新的定时器
                     _slideSwitchDebounceTimer = new System.Timers.Timer(SlideSwitchDebounceMs);
                     _slideSwitchDebounceTimer.Elapsed += (sender, e) =>
@@ -1169,7 +1169,7 @@ namespace Ink_Canvas
                     SwitchSlideInk(currentSlide);
                     _pptUIManager?.UpdateCurrentSlideNumber(currentSlide, totalSlides);
                 }
-                
+
                 _lastSlideSwitchTime = now;
             }
             catch (Exception ex)
@@ -1190,21 +1190,21 @@ namespace Ink_Canvas
 
                 // 获取当前页面索引
                 var currentSlideIndex = _pptManager?.GetCurrentSlideNumber() ?? 0;
-                
-                
+
+
                 // 验证页面索引的有效性
                 if (newSlideIndex <= 0)
                 {
                     LogHelper.WriteLogToFile($"无效的新页面索引: {newSlideIndex}，跳过页面切换", LogHelper.LogType.Warning);
                     return;
                 }
-                
+
                 // 如果有当前墨迹且不是第一次切换，先保存到当前页面
                 if (inkCanvas.Strokes.Count > 0 && currentSlideIndex > 0 && currentSlideIndex != newSlideIndex)
                 {
                     // 检查是否可以写入墨迹
                     bool canWrite = _multiPPTInkManager?.CanWriteInk(currentSlideIndex) == true;
-                    
+
                     if (canWrite)
                     {
                         // 正常保存
@@ -1219,7 +1219,7 @@ namespace Ink_Canvas
                 {
                     // 无法获取当前页面索引时，不保存墨迹，直接清空
                 }
-                
+
                 // 切换到新页面并加载墨迹
                 var newStrokes = _multiPPTInkManager?.SwitchToSlide(newSlideIndex, null);
                 if (newStrokes != null)
@@ -1590,7 +1590,7 @@ namespace Ink_Canvas
 
                 HideSubPanels("cursor");
                 SetCurrentToolMode(InkCanvasEditingMode.None);
-    
+
                 await Task.Delay(150);
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
                 {
@@ -1628,7 +1628,7 @@ namespace Ink_Canvas
 
                 // 异常情况下也手动处理收纳状态恢复
                 await HandleManualSlideShowEnd();
-                
+
                 // 异常情况下也要根据设置决定浮动栏边距
                 await Task.Delay(150);
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
@@ -1678,7 +1678,7 @@ namespace Ink_Canvas
                 {
                     if (Settings.Automation.IsAutoFoldInPPTSlideShow)
                     {
-                        if (isFloatingBarFolded) 
+                        if (isFloatingBarFolded)
                         {
                             await UnFoldFloatingBar(new object());
                         }
@@ -1686,7 +1686,7 @@ namespace Ink_Canvas
                     else
                     {
                         // 如果两个功能都关闭，确保浮动栏展开
-                        if (isFloatingBarFolded) 
+                        if (isFloatingBarFolded)
                         {
                             await UnFoldFloatingBar(new object());
                         }

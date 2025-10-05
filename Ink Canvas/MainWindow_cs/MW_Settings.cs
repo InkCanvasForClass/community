@@ -349,62 +349,74 @@ namespace Ink_Canvas
             else if (index == 1)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(
-                        new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-dark-small.png"));
-                FloatingbarHeadIconImg.Margin = new Thickness(1.2);
-            }
-            else if (index == 2)
-            {
-                FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-noshadow.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
-            else if (index == 3)
+            else if (index == 2)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-dark.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
+            else if (index == 3)
+            {
+                FloatingbarHeadIconImg.Source =
+                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-sharpdark.png"));
+                FloatingbarHeadIconImg.Margin = new Thickness(0.5);
+            }
             else if (index == 4)
+            {
+                FloatingbarHeadIconImg.Source =
+                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-light-small.png"));
+                FloatingbarHeadIconImg.Margin = new Thickness(0.5);
+            }
+            else if (index == 5)
+            {
+                FloatingbarHeadIconImg.Source =
+                    new BitmapImage(
+                        new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-dark-small.png"));
+                FloatingbarHeadIconImg.Margin = new Thickness(1.2);
+            }
+            else if (index == 6)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandoujiyanhuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
-            else if (index == 5)
+            else if (index == 7)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanshounvhuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
-            else if (index == 6)
+            else if (index == 8)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanciya.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
-            else if (index == 7)
+            else if (index == 9)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanneikuhuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
-            else if (index == 8)
+            else if (index == 10)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandogeyuanliangwo.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
-            else if (index == 9)
+            else if (index == 11)
             {
                 FloatingbarHeadIconImg.Source =
                     new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/tiebahuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1);
             }
-            else if (index >= 10 && index - 10 < Settings.Appearance.CustomFloatingBarImgs.Count)
+            else if (index >= 12 && index - 12 < Settings.Appearance.CustomFloatingBarImgs.Count)
             {
                 // 使用自定义图标
-                var customIcon = Settings.Appearance.CustomFloatingBarImgs[index - 10];
+                var customIcon = Settings.Appearance.CustomFloatingBarImgs[index - 12];
                 try
                 {
                     FloatingbarHeadIconImg.Source = new BitmapImage(new Uri(customIcon.FilePath));
@@ -421,8 +433,8 @@ namespace Ink_Canvas
 
         public void UpdateCustomIconsInComboBox()
         {
-            // 保留前10个内置图标选项
-            while (ComboBoxFloatingBarImg.Items.Count > 10)
+            // 保留前11个内置图标选项
+            while (ComboBoxFloatingBarImg.Items.Count > 11)
             {
                 ComboBoxFloatingBarImg.Items.RemoveAt(ComboBoxFloatingBarImg.Items.Count - 1);
             }
@@ -1029,41 +1041,41 @@ namespace Ink_Canvas
             // 获取当前屏幕的实际尺寸（考虑DPI缩放）
             var actualScreenWidth = SystemParameters.PrimaryScreenWidth;
             var actualScreenHeight = SystemParameters.PrimaryScreenHeight;
-            
+
             // 预览区域固定尺寸
             const double previewWidth = 324.0;
             const double previewHeight = 182.0;
-            
+
             // 计算缩放比例（预览区域与实际屏幕的比例）
             double scaleX = previewWidth / actualScreenWidth;
             double scaleY = previewHeight / actualScreenHeight;
-            
+
             // 获取按钮位置设置
             double rsPosition = Settings.PowerPointSettings.PPTRSButtonPosition;
             double lsPosition = Settings.PowerPointSettings.PPTLSButtonPosition;
             double lbPosition = Settings.PowerPointSettings.PPTLBButtonPosition;
             double rbPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
-            
+
             bool showSidePageButton = sopt.Length >= 1 && sopt[0] == '2';
             bool showBottomPageButton = bopt.Length >= 1 && bopt[0] == '2';
-            
+
             // 页码按钮的实际尺寸
-            const double pageButtonWidth = 50.0; 
-            const double pageButtonHeight = 50.0; 
-            
+            const double pageButtonWidth = 50.0;
+            const double pageButtonHeight = 50.0;
+
             // 计算侧边按钮位置（Y轴偏移）
             double sideOffsetY = showSidePageButton ? pageButtonHeight * scaleY : 0;
             PPTBtnPreviewRSTransform.Y = -(rsPosition * scaleY) - sideOffsetY;
             PPTBtnPreviewLSTransform.Y = -(lsPosition * scaleY) - sideOffsetY;
-            
+
             // 计算底部按钮位置（X轴偏移）
-            const double bottomMarginOffset = 6.0; 
+            const double bottomMarginOffset = 6.0;
             double scaledMarginOffset = bottomMarginOffset * scaleX;
-            
+
             double bottomOffsetX = showBottomPageButton ? pageButtonWidth * scaleX : 0;
             PPTBtnPreviewLBTransform.X = scaledMarginOffset + (lbPosition * scaleX) + bottomOffsetX;
             PPTBtnPreviewRBTransform.X = -(scaledMarginOffset + (rbPosition * scaleX) + bottomOffsetX);
-            
+
             // 计算工具栏尺寸
             var dpiScaleX = 1.0;
             var dpiScaleY = 1.0;
@@ -1082,17 +1094,17 @@ namespace Ink_Canvas
                 dpiScaleX = 1.0;
                 dpiScaleY = 1.0;
             }
-            
+
             // 计算工具栏的实际尺寸
-            const double baseToolbarHeight = 24.0; 
-            
+            const double baseToolbarHeight = 24.0;
+
             double actualToolbarHeight = baseToolbarHeight * dpiScaleY;
             double scaledToolbarHeight = actualToolbarHeight * scaleY;
             double scaledToolbarWidth = previewWidth;
-            
+
             // 设置工具栏尺寸
             PPTBtnPreviewToolbar.Height = scaledToolbarHeight;
-            PPTBtnPreviewToolbar.Width = scaledToolbarWidth; 
+            PPTBtnPreviewToolbar.Width = scaledToolbarWidth;
         }
 
         private void ToggleSwitchShowCursor_Toggled(object sender, RoutedEventArgs e)
@@ -1495,18 +1507,18 @@ namespace Ink_Canvas
         private void ToggleSwitchAutoFoldInPPTSlideShow_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            
+
             // 记录设置变更前的状态
             bool previousState = Settings.Automation.IsAutoFoldInPPTSlideShow;
             Settings.Automation.IsAutoFoldInPPTSlideShow = ToggleSwitchAutoFoldInPPTSlideShow.IsOn;
-            
+
             // 如果设置状态发生变化，重置PPT相关状态变量
             if (previousState != Settings.Automation.IsAutoFoldInPPTSlideShow)
             {
                 ResetPPTStateVariables();
                 LogHelper.WriteLogToFile($"PPT自动收纳设置已变更: {Settings.Automation.IsAutoFoldInPPTSlideShow}, 已重置相关状态变量", LogHelper.LogType.Trace);
             }
-            
+
             if (Settings.Automation.IsAutoFoldInPPTSlideShow)
             {
                 SettingsPPTInkingAndAutoFoldExplictBorder.Visibility = Visibility.Visible;
@@ -1887,7 +1899,7 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTwoFingerZoom_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            
+
             // 如果多指书写模式启用，强制禁用双指手势
             if (ToggleSwitchEnableMultiTouchMode.IsOn)
             {
@@ -1898,7 +1910,7 @@ namespace Ink_Canvas
                 SaveSettingsToFile();
                 return;
             }
-            
+
             if (sender == ToggleSwitchEnableTwoFingerZoom)
                 BoardToggleSwitchEnableTwoFingerZoom.IsOn = ToggleSwitchEnableTwoFingerZoom.IsOn;
             else
@@ -1978,7 +1990,7 @@ namespace Ink_Canvas
             }
 
             Settings.Gesture.IsEnableMultiTouchMode = ToggleSwitchEnableMultiTouchMode.IsOn;
-            
+
             // 如果启用多指书写模式，强制禁用所有双指手势
             if (ToggleSwitchEnableMultiTouchMode.IsOn)
             {
@@ -2003,7 +2015,7 @@ namespace Ink_Canvas
                 if (BoardToggleSwitchEnableTwoFingerRotation != null)
                     BoardToggleSwitchEnableTwoFingerRotation.IsOn = false;
             }
-            
+
             CheckEnableTwoFingerGestureBtnColorPrompt();
             SaveSettingsToFile();
         }
@@ -2011,7 +2023,7 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableTwoFingerTranslate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            
+
             // 如果多指书写模式启用，强制禁用双指手势
             if (ToggleSwitchEnableMultiTouchMode.IsOn)
             {
@@ -2022,7 +2034,7 @@ namespace Ink_Canvas
                 SaveSettingsToFile();
                 return;
             }
-            
+
             if (sender == ToggleSwitchEnableTwoFingerTranslate)
                 BoardToggleSwitchEnableTwoFingerTranslate.IsOn = ToggleSwitchEnableTwoFingerTranslate.IsOn;
             else
@@ -2597,6 +2609,23 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             Settings.RandSettings.UseLegacyTimerUI = ToggleSwitchUseLegacyTimerUI.IsOn;
+            if (ToggleSwitchUseLegacyTimerUI.IsOn)
+            {
+                ToggleSwitchUseSeewoStyleUI.IsOn = false;
+                Settings.RandSettings.UseSeewoStyleUI = false;
+            }
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchUseSeewoStyleUI_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.UseSeewoStyleUI = ToggleSwitchUseSeewoStyleUI.IsOn;
+            if (ToggleSwitchUseSeewoStyleUI.IsOn)
+            {
+                ToggleSwitchUseLegacyTimerUI.IsOn = false;
+                Settings.RandSettings.UseLegacyTimerUI = false;
+            }
             SaveSettingsToFile();
         }
 
@@ -3074,7 +3103,7 @@ namespace Ink_Canvas
                 {
                     Directory.CreateDirectory(configsDir);
                 }
-                
+
                 File.WriteAllText(App.RootPath + settingsFileName, text);
             }
             catch { }
@@ -3126,6 +3155,7 @@ namespace Ink_Canvas
                 if (Settings.Startup.IsAutoUpdate)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, performing immediate update check");
+                    ResetUpdateCheckRetry();
 
                     // 执行完整的更新检查
                     await Task.Run(async () =>

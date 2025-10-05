@@ -33,12 +33,12 @@ namespace Ink_Canvas
         {
             InitializeComponent();
             this.channel = channel;
-            
+
             // 应用当前主题
             ApplyCurrentTheme();
-            
+
             LoadVersions();
-            
+
             // 添加窗口拖动功能
             MouseDown += (sender, e) =>
             {
@@ -48,7 +48,7 @@ namespace Ink_Canvas
                 }
             };
         }
-        
+
         /// <summary>
         /// 应用当前主题设置
         /// </summary>
@@ -86,7 +86,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"应用主题时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
         /// <summary>
         /// 更新为浅色主题颜色
         /// </summary>
@@ -104,7 +104,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"更新浅色主题颜色时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
         /// <summary>
         /// 更新为深色主题颜色
         /// </summary>
@@ -122,7 +122,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"更新深色主题颜色时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
         /// <summary>
         /// 检查系统是否为浅色主题
         /// </summary>

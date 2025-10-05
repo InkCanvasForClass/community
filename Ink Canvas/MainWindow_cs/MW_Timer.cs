@@ -61,8 +61,10 @@ namespace Ink_Canvas
         private Timer timerCheckAutoFold = new Timer();
         private string AvailableLatestVersion;
         private Timer timerCheckAutoUpdateWithSilence = new Timer();
+        private Timer timerCheckAutoUpdateRetry = new Timer(); 
         private bool isHidingSubPanelsWhenInking; // 避免书写时触发二次关闭二级菜单导致动画不连续
-
+        private int updateCheckRetryCount = 0; 
+        private const int MAX_UPDATE_CHECK_RETRIES = 6; 
         private Timer timerDisplayTime = new Timer();
         private Timer timerDisplayDate = new Timer();
         private Timer timerNtpSync = new Timer();
@@ -70,8 +72,8 @@ namespace Ink_Canvas
         private TimeViewModel nowTimeVM = new TimeViewModel();
         private DateTime cachedNetworkTime = DateTime.Now;
         private DateTime lastNtpSyncTime = DateTime.MinValue;
-        private string lastDisplayedTime = ""; 
-        private bool useNetworkTime = false; 
+        private string lastDisplayedTime = "";
+        private bool useNetworkTime = false;
         private TimeSpan networkTimeOffset = TimeSpan.Zero;
         private DateTime lastLocalTime = DateTime.Now; // 记录上次的本地时间，用于检测时间跳跃
         private bool isNtpSyncing = false; // 防止重复NTP同步的标志 
@@ -87,7 +89,7 @@ namespace Ink_Canvas
                 var ipEndPoint = new IPEndPoint(addresses[0], 123);
                 using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp))
                 {
-                    socket.ReceiveTimeout = 5000; 
+                    socket.ReceiveTimeout = 5000;
                     socket.Connect(ipEndPoint);
                     await Task.Factory.FromAsync(socket.BeginSend(ntpData, 0, ntpData.Length, SocketFlags.None, null, socket), socket.EndSend);
                     await Task.Factory.FromAsync(socket.BeginReceive(ntpData, 0, ntpData.Length, SocketFlags.None, null, socket), socket.EndReceive);
@@ -117,6 +119,8 @@ namespace Ink_Canvas
             timerCheckAutoFold.Interval = 500;
             timerCheckAutoUpdateWithSilence.Elapsed += timerCheckAutoUpdateWithSilence_Elapsed;
             timerCheckAutoUpdateWithSilence.Interval = 1000 * 60 * 10;
+            timerCheckAutoUpdateRetry.Elapsed += timerCheckAutoUpdateRetry_Elapsed;
+            timerCheckAutoUpdateRetry.Interval = 1000 * 60 * 10; 
             WaterMarkTime.DataContext = nowTimeVM;
             WaterMarkDate.DataContext = nowTimeVM;
             timerDisplayTime.Elapsed += TimerDisplayTime_Elapsed;
@@ -131,7 +135,7 @@ namespace Ink_Canvas
             timerKillProcess.Start();
             nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
             nowTimeVM.nowTime = DateTime.Now.ToString("tt hh'时'mm'分'ss'秒'");
-            
+
             // 程序启动时立即进行一次NTP同步
             Task.Run(async () =>
             {
@@ -151,17 +155,17 @@ namespace Ink_Canvas
         {
             // 防止重复同步
             if (isNtpSyncing) return;
-            
+
             isNtpSyncing = true;
             try
             {
-                
+
                 // 添加超时机制，最多等待10秒
                 var timeoutTask = Task.Delay(10000);
                 var ntpTask = GetNetworkTimeAsync();
-                
+
                 var completedTask = await Task.WhenAny(ntpTask, timeoutTask);
-                
+
                 if (completedTask == timeoutTask)
                 {
                     cachedNetworkTime = DateTime.Now;
@@ -170,20 +174,20 @@ namespace Ink_Canvas
                     networkTimeOffset = TimeSpan.Zero;
                     return;
                 }
-                
+
                 DateTime networkTime = await ntpTask;
                 DateTime localTime = DateTime.Now;
-                
+
                 cachedNetworkTime = networkTime;
                 lastNtpSyncTime = localTime;
-                
+
                 // 计算网络时间与本地时间的偏移量
                 networkTimeOffset = networkTime - localTime;
-                
+
                 // 如果时间差超过3分钟，则使用网络时间
                 useNetworkTime = Math.Abs(networkTimeOffset.TotalMinutes) > 3.0;
-                
-           }
+
+            }
             catch (Exception ex)
             {
                 // NTP同步失败时，保持使用本地时间
@@ -191,7 +195,7 @@ namespace Ink_Canvas
                 lastNtpSyncTime = DateTime.Now;
                 useNetworkTime = false;
                 networkTimeOffset = TimeSpan.Zero;
-                
+
                 LogHelper.WriteLogToFile($"NTP同步失败: {ex.Message}", LogHelper.LogType.Warning);
             }
             finally
@@ -209,7 +213,7 @@ namespace Ink_Canvas
             // 检测系统时间是否发生重大跳跃（超过2分钟）
             TimeSpan timeJump = localTime - lastLocalTime;
             double timeJumpMinutes = Math.Abs(timeJump.TotalMinutes);
-            
+
             if (timeJumpMinutes > 3 && !isNtpSyncing)
             {
                 // 系统时间发生重大变化（超过3分钟），立即触发NTP同步
@@ -237,12 +241,12 @@ namespace Ink_Canvas
             // 格式化时间字符串
             string timeString = displayTime.ToString("tt hh'时'mm'分'ss'秒'");
 
-            
+
             // 只有当时间字符串发生变化时才更新UI，避免不必要的UI刷新
             if (timeString != lastDisplayedTime)
             {
                 lastDisplayedTime = timeString;
-                
+
                 // 使用BeginInvoke异步更新UI，避免阻塞
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
@@ -477,7 +481,7 @@ namespace Ink_Canvas
                         { // EasiNote5
                             // 检查是否是桌面批注窗口
                             bool isAnnotationWindow = windowTitle.Length == 0 && ForegroundWindowInfo.WindowRect().Height < 500;
-                            
+
                             // 如果启用了忽略桌面批注窗口功能，且当前是批注窗口
                             if (Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno && isAnnotationWindow)
                             {
@@ -828,6 +832,93 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"AutoUpdate | Error in silent update check: {ex.Message}", LogHelper.LogType.Error);
                 // 出错时重新启动计时器，稍后再检查
                 timerCheckAutoUpdateWithSilence.Start();
+            }
+        }
+
+        // 检查更新失败重试定时器事件处理
+        private async void timerCheckAutoUpdateRetry_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            // 停止定时器，避免重复触发
+            timerCheckAutoUpdateRetry.Stop();
+
+            try
+            {
+                // 检查是否启用了自动更新
+                if (!Settings.Startup.IsAutoUpdate)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Auto update is disabled, stopping retry timer");
+                    return;
+                }
+
+                // 增加重试计数
+                updateCheckRetryCount++;
+                LogHelper.WriteLogToFile($"AutoUpdate | Retry check attempt {updateCheckRetryCount}/{MAX_UPDATE_CHECK_RETRIES}");
+
+                // 检查是否超过最大重试次数
+                if (updateCheckRetryCount > MAX_UPDATE_CHECK_RETRIES)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Maximum retry attempts reached, stopping retry timer", LogHelper.LogType.Warning);
+                    return;
+                }
+
+                // 执行更新检查
+                LogHelper.WriteLogToFile("AutoUpdate | Retrying update check after failure");
+                
+                // 清除之前的更新状态
+                AvailableLatestVersion = null;
+                AvailableLatestLineGroup = null;
+
+                // 使用当前选择的更新通道检查更新
+                var (remoteVersion, lineGroup, apiReleaseNotes) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
+                AvailableLatestVersion = remoteVersion;
+                AvailableLatestLineGroup = lineGroup;
+
+                if (AvailableLatestVersion != null)
+                {
+                    // 检查更新成功，重置重试计数
+                    updateCheckRetryCount = 0;
+                    LogHelper.WriteLogToFile($"AutoUpdate | Retry successful, found new version: {AvailableLatestVersion}");
+                    
+                    // 停止重试定时器，因为已经找到了更新
+                    return;
+                }
+                else
+                {
+                    // 检查更新仍然失败，继续重试
+                    LogHelper.WriteLogToFile($"AutoUpdate | Retry {updateCheckRetryCount} failed, will retry in 10 minutes");
+                    
+                    // 重新启动定时器，10分钟后再次尝试
+                    timerCheckAutoUpdateRetry.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Error in retry check: {ex.Message}", LogHelper.LogType.Error);
+                
+                // 出错时也重新启动定时器，稍后再检查
+                if (updateCheckRetryCount <= MAX_UPDATE_CHECK_RETRIES)
+                {
+                    timerCheckAutoUpdateRetry.Start();
+                }
+            }
+        }
+
+        // 重置更新检查重试状态
+        public void ResetUpdateCheckRetry()
+        {
+            try
+            {
+                // 停止重试定时器
+                timerCheckAutoUpdateRetry.Stop();
+                
+                // 重置重试计数
+                updateCheckRetryCount = 0;
+                
+                LogHelper.WriteLogToFile("AutoUpdate | Update check retry state reset");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Error resetting retry state: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }

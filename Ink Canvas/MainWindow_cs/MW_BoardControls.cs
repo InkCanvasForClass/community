@@ -17,8 +17,8 @@ namespace Ink_Canvas
         private StrokeCollection lastTouchDownStrokeCollection = new StrokeCollection();
         private int CurrentWhiteboardIndex = 1;
         private int WhiteboardTotalCount = 1;
-        private TimeMachineHistory[][] TimeMachineHistories = new TimeMachineHistory[101][]; 
-        private bool[] savedMultiTouchModeStates = new bool[101]; 
+        private TimeMachineHistory[][] TimeMachineHistories = new TimeMachineHistory[101][];
+        private bool[] savedMultiTouchModeStates = new bool[101];
 
         // 保存每页白板图片信息
         private void SaveStrokes(bool isBackupMain = false)
@@ -197,20 +197,20 @@ namespace Ink_Canvas
                 {
                     // 恢复多指书写模式
                     EnterMultiTouchModeIfNeeded();
-                    
+
                     // 更新UI状态
                     if (ToggleSwitchEnableMultiTouchMode != null)
                     {
                         ToggleSwitchEnableMultiTouchMode.IsOn = true;
                     }
-                    
+
                     LogHelper.WriteLogToFile($"恢复多指书写模式状态 - 页面索引: {pageIndex}", LogHelper.LogType.Info);
                 }
                 else
                 {
                     // 确保多指书写模式关闭
                     ExitMultiTouchModeIfNeeded();
-                    
+
                     // 更新UI状态
                     if (ToggleSwitchEnableMultiTouchMode != null)
                     {
@@ -413,13 +413,19 @@ namespace Ink_Canvas
             BtnLeftWhiteBoardSwitchNextLabel.Text = isLastPage ? "新页面" : "下一页";
             BtnRightWhiteBoardSwitchNextLabel.Text = isLastPage ? "新页面" : "下一页";
 
-            // 始终允许点击“下一页/新页面”按钮（除非已达最大页数）
+            // 始终允许点击"下一页/新页面"按钮（除非已达最大页数）
             BtnWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
 
-            // 保持按钮常亮（高亮）
-            BtnLeftWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
+            // 获取主题颜色资源
+            var iconForegroundBrush = Application.Current.FindResource("IconForeground") as SolidColorBrush;
+            
+            // 设置下一页按钮颜色
+            if (iconForegroundBrush != null)
+            {
+                BtnLeftWhiteBoardSwitchNextGeometry.Brush = iconForegroundBrush;
+                BtnRightWhiteBoardSwitchNextGeometry.Brush = iconForegroundBrush;
+            }
             BtnLeftWhiteBoardSwitchNextLabel.Opacity = 1;
-            BtnRightWhiteBoardSwitchNextGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
             BtnRightWhiteBoardSwitchNextLabel.Opacity = 1;
 
             BtnWhiteBoardSwitchPrevious.IsEnabled = true;
@@ -427,16 +433,23 @@ namespace Ink_Canvas
             if (CurrentWhiteboardIndex == 1)
             {
                 BtnWhiteBoardSwitchPrevious.IsEnabled = false;
-                BtnLeftWhiteBoardSwitchPreviousGeometry.Brush = new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
+                if (iconForegroundBrush != null)
+                {
+                    var disabledBrush = new SolidColorBrush(Color.FromArgb(127, iconForegroundBrush.Color.R, iconForegroundBrush.Color.G, iconForegroundBrush.Color.B));
+                    BtnLeftWhiteBoardSwitchPreviousGeometry.Brush = disabledBrush;
+                    BtnRightWhiteBoardSwitchPreviousGeometry.Brush = disabledBrush;
+                }
                 BtnLeftWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
-                BtnRightWhiteBoardSwitchPreviousGeometry.Brush = new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
                 BtnRightWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
             }
             else
             {
-                BtnLeftWhiteBoardSwitchPreviousGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
+                if (iconForegroundBrush != null)
+                {
+                    BtnLeftWhiteBoardSwitchPreviousGeometry.Brush = iconForegroundBrush;
+                    BtnRightWhiteBoardSwitchPreviousGeometry.Brush = iconForegroundBrush;
+                }
                 BtnLeftWhiteBoardSwitchPreviousLabel.Opacity = 1;
-                BtnRightWhiteBoardSwitchPreviousGeometry.Brush = new SolidColorBrush(Color.FromArgb(255, 24, 24, 27));
                 BtnRightWhiteBoardSwitchPreviousLabel.Opacity = 1;
             }
 

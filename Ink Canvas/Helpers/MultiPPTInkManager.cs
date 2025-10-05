@@ -26,7 +26,7 @@ namespace Ink_Canvas.Helpers
         private readonly object _lockObject = new object();
         private bool _disposed;
         private string _currentActivePresentationId = "";
-        
+
         // 墨迹备份机制
         private readonly Dictionary<string, Dictionary<int, StrokeCollection>> _strokeBackups;
         private DateTime _lastBackupTime = DateTime.MinValue;
@@ -55,7 +55,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     var presentationId = GeneratePresentationId(presentation);
-                    
+
                     // 如果已存在该演示文稿的管理器，先清理
                     if (_presentationManagers.ContainsKey(presentationId))
                     {
@@ -104,11 +104,11 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     var presentationId = GeneratePresentationId(presentation);
-                    
+
                     if (_presentationManagers.ContainsKey(presentationId))
                     {
                         // 如果切换的是不同的演示文稿，先保存当前活跃演示文稿的墨迹
-                        if (!string.IsNullOrEmpty(_currentActivePresentationId) && 
+                        if (!string.IsNullOrEmpty(_currentActivePresentationId) &&
                             _currentActivePresentationId != presentationId)
                         {
                             var currentManager = GetCurrentManager();
@@ -132,7 +132,7 @@ namespace Ink_Canvas.Helpers
                         }
 
                         _currentActivePresentationId = presentationId;
-                        
+
                         // 更新最后访问时间
                         if (_presentationInfos.ContainsKey(presentationId))
                         {
@@ -176,13 +176,13 @@ namespace Ink_Canvas.Helpers
                     {
                         // 保存到管理器
                         manager.SaveCurrentSlideStrokes(slideIndex, strokes);
-                        
+
                         // 只有在保存成功后才创建备份
                         if (!string.IsNullOrEmpty(_currentActivePresentationId))
                         {
                             CreateStrokeBackup(_currentActivePresentationId, slideIndex, strokes);
                         }
-                        
+
                         // 检查是否需要执行定期备份
                         CheckAndPerformBackup();
                     }
@@ -233,7 +233,7 @@ namespace Ink_Canvas.Helpers
                     if (manager != null)
                     {
                         var strokes = manager.LoadSlideStrokes(slideIndex);
-                        
+
                         // 如果从管理器加载失败，尝试从备份恢复
                         if (strokes == null || strokes.Count == 0)
                         {
@@ -242,14 +242,14 @@ namespace Ink_Canvas.Helpers
                                 strokes = RestoreStrokeFromBackup(_currentActivePresentationId, slideIndex);
                             }
                         }
-                        
+
                         return strokes ?? new StrokeCollection();
                     }
                 }
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"加载页面墨迹失败: {ex}", LogHelper.LogType.Error);
-                    
+
                     // 尝试从备份恢复
                     if (!string.IsNullOrEmpty(_currentActivePresentationId))
                     {
@@ -464,12 +464,12 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     var presentationId = GeneratePresentationId(presentation);
-                    
+
                     if (_presentationManagers.ContainsKey(presentationId))
                     {
                         // 保存墨迹到文件
                         _presentationManagers[presentationId].SaveAllStrokesToFile(presentation);
-                        
+
                         // 释放资源
                         _presentationManagers[presentationId].Dispose();
                         _presentationManagers.Remove(presentationId);
@@ -550,13 +550,13 @@ namespace Ink_Canvas.Helpers
                             _presentationManagers.Remove(id);
                         }
                         _presentationInfos.Remove(id);
-                        
+
                         // 清理备份数据
                         if (_strokeBackups.ContainsKey(id))
                         {
                             _strokeBackups.Remove(id);
                         }
-                        
+
                         LogHelper.WriteLogToFile($"已清理非活跃演示文稿: {id}", LogHelper.LogType.Trace);
                     }
                 }
@@ -589,7 +589,7 @@ namespace Ink_Canvas.Helpers
 
                 // 创建新的备份
                 _strokeBackups[presentationId][slideIndex] = strokes.Clone();
-                
+
             }
             catch (Exception ex)
             {
@@ -604,7 +604,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                if (_strokeBackups.ContainsKey(presentationId) && 
+                if (_strokeBackups.ContainsKey(presentationId) &&
                     _strokeBackups[presentationId].ContainsKey(slideIndex))
                 {
                     var backup = _strokeBackups[presentationId][slideIndex];
@@ -631,7 +631,7 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var now = DateTime.Now;
-                
+
                 // 检查是否需要执行备份
                 if (now - _lastBackupTime < TimeSpan.FromMinutes(BackupIntervalMinutes))
                 {
@@ -639,7 +639,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 备份当前活跃演示文稿的所有墨迹
-                if (!string.IsNullOrEmpty(_currentActivePresentationId) && 
+                if (!string.IsNullOrEmpty(_currentActivePresentationId) &&
                     _presentationManagers.ContainsKey(_currentActivePresentationId))
                 {
                     var manager = _presentationManagers[_currentActivePresentationId];
@@ -661,7 +661,7 @@ namespace Ink_Canvas.Helpers
         #region Private Methods
         private PPTInkManager GetCurrentManager()
         {
-            if (string.IsNullOrEmpty(_currentActivePresentationId) || 
+            if (string.IsNullOrEmpty(_currentActivePresentationId) ||
                 !_presentationManagers.ContainsKey(_currentActivePresentationId))
             {
                 return null;
@@ -780,7 +780,7 @@ namespace Ink_Canvas.Helpers
                     }
                     _presentationManagers.Clear();
                     _presentationInfos.Clear();
-                    
+
                     // 清理备份数据
                     foreach (var backupDict in _strokeBackups.Values)
                     {
