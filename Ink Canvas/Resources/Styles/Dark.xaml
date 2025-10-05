@@ -122,4 +122,15 @@
     <SolidColorBrush x:Key="SeewoTimerWindowTitleForeground" Color="White"/>
     <SolidColorBrush x:Key="SeewoTimerWindowPrimaryButtonBackground" Color="#4CAF50"/>
     <SolidColorBrush x:Key="SeewoTimerWindowPrimaryButtonForeground" Color="White"/>
+    
+    <!-- 说明书窗口主题颜色 -->
+    <SolidColorBrush x:Key="OperatingGuideWindowBackground" Color="#1f1f1f"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowBorderBrush" Color="#0066BF"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowTextForeground" Color="White"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowButtonBackground" Color="#2a2a2a"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowFullscreenButtonBackground" Color="#2a2a2a"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowFullscreenButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowCloseButtonBackground" Color="#E32A34"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowCloseButtonForeground" Color="White"/>
 </ResourceDictionary>

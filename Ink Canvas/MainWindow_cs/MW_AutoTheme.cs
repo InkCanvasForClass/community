@@ -499,7 +499,7 @@ namespace Ink_Canvas
         {
             try
             {
-                // 刷新所有打开的计时器窗口
+                // 刷新所有打开的窗口
                 foreach (Window window in Application.Current.Windows)
                 {
                     if (window is CountdownTimerWindow timerWindow)
@@ -509,6 +509,10 @@ namespace Ink_Canvas
                     else if (window is RandWindow randWindow)
                     {
                         randWindow.RefreshTheme();
+                    }
+                    else if (window is OperatingGuideWindow operatingGuideWindow)
+                    {
+                        operatingGuideWindow.RefreshTheme();
                     }
                 }
             }
