@@ -347,9 +347,6 @@
     <Resource Include="Resources\Icons-Fluent\ic_fluent_clock_24_regular.png" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Icons-Fluent\ic_fluent_book_question_mark_24_regular.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_keyboard_24_regular.png" />
   </ItemGroup>
   <ItemGroup>
