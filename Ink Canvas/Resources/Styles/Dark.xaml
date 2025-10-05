@@ -57,6 +57,13 @@
     <BitmapImage x:Key="StrokeSelectionPenWidthIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_edit_24_regular_white.png"/>
     <BitmapImage x:Key="StrokeSelectionDeleteIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_delete_24_regular_white.png"/>
     
+    <!-- 图片选中栏图标资源 -->
+    <BitmapImage x:Key="ImageSelectionCloneIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_copy_24_regular_white.png"/>
+    <BitmapImage x:Key="ImageSelectionCloneToNewBoardIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_copy_add_24_regular_white.png"/>
+    <BitmapImage x:Key="ImageSelectionScaleIcon1" UriSource="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular_white.png"/>
+    <BitmapImage x:Key="ImageSelectionScaleIcon2" UriSource="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular_white.png"/>
+    <BitmapImage x:Key="ImageSelectionDeleteIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_delete_24_regular_white.png"/>
+    
     <BitmapImage x:Key="QuickPanelBlackboardIcon" UriSource="/Resources/new-icons/blackboard-light.png"/>
     <BitmapImage x:Key="QuickPanelEndSlideshowIcon" UriSource="/Resources/new-icons/end-slides-show-light.png"/>
     <BitmapImage x:Key="QuickPanelEyeIcon" UriSource="/Resources/new-icons/eye-light.png"/>

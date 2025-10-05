@@ -62,6 +62,9 @@ namespace Ink_Canvas
                 // 刷新墨迹选中栏图标
                 RefreshStrokeSelectionIcons();
 
+                // 刷新图片选中栏图标
+                RefreshImageSelectionIcons();
+
                 RefreshFloatingBarHighlightColors();
 
                 if (autoSwitchIcon)
@@ -99,6 +102,9 @@ namespace Ink_Canvas
 
                 // 刷新墨迹选中栏图标
                 RefreshStrokeSelectionIcons();
+
+                // 刷新图片选中栏图标
+                RefreshImageSelectionIcons();
 
                 RefreshFloatingBarHighlightColors();
 
@@ -402,6 +408,75 @@ namespace Ink_Canvas
                     {
                         // 处理Border内的面板
                         RefreshStrokeSelectionIconsRecursive(borderPanel);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // 忽略异常
+            }
+        }
+
+        /// <summary>
+        /// 刷新图片选中栏图标
+        /// </summary>
+        private void RefreshImageSelectionIcons()
+        {
+            try
+            {
+                if (BorderImageSelectionControl != null)
+                {
+                    // 强制刷新图片选中栏的视觉状态
+                    BorderImageSelectionControl.InvalidateVisual();
+                    
+                    // 刷新图片选中栏内的所有图标
+                    var viewbox = BorderImageSelectionControl.Child as Viewbox;
+                    if (viewbox?.Child is ui.SimpleStackPanel stackPanel)
+                    {
+                        RefreshImageSelectionIconsRecursive(stackPanel);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // 忽略异常，确保主题切换不会因为图标刷新失败而中断
+            }
+        }
+
+        /// <summary>
+        /// 递归刷新图片选中栏内的图标
+        /// </summary>
+        private void RefreshImageSelectionIconsRecursive(System.Windows.Controls.Panel panel)
+        {
+            try
+            {
+                foreach (var child in panel.Children)
+                {
+                    if (child is Image image)
+                    {
+                        // 强制刷新图像
+                        image.InvalidateVisual();
+                    }
+                    else if (child is System.Windows.Controls.Panel childPanel)
+                    {
+                        // 递归处理子面板
+                        RefreshImageSelectionIconsRecursive(childPanel);
+                    }
+                    else if (child is Border border && border.Child is System.Windows.Controls.Panel borderPanel)
+                    {
+                        // 处理Border内的面板
+                        RefreshImageSelectionIconsRecursive(borderPanel);
+                    }
+                    else if (child is Grid grid)
+                    {
+                        // 处理Grid内的子元素
+                        foreach (var gridChild in grid.Children)
+                        {
+                            if (gridChild is Image gridImage)
+                            {
+                                gridImage.InvalidateVisual();
+                            }
+                        }
                     }
                 }
             }

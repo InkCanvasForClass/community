@@ -329,6 +329,7 @@
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_arrow_rotate_clockwise_24_regular.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_scale_fit_24_regular.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_scale_fit_24_regular_white.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_scales_24_regular.png" />
@@ -621,7 +622,6 @@
     <Resource Include="Resources\Startup-animation\ICC Autumn.png" />
     <Resource Include="Resources\Startup-animation\ICC Winter.png" />
     <Resource Include="Resources\Startup-animation\ICC Horse.png" />
-    <!-- 墨迹选中栏图标资源 - 白色版本 -->
     <Resource Include="Resources\Icons-Fluent\ic_fluent_copy_24_regular_white.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_copy_add_24_regular_white.png" />
     <Resource Include="Resources\Icons-Fluent\ic_fluent_flip_horizontal_24_regular_white.png" />

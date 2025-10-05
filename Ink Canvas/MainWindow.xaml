@@ -3986,7 +3986,7 @@
                                 CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageClone_MouseUp">
                             <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_copy_24_regular.png"
+                                <Image Source="{DynamicResource ImageSelectionCloneIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                 <TextBlock Text="克隆" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
@@ -4002,7 +4002,7 @@
                                 Visibility="{Binding Visibility, ElementName=GridBackgroundCover}">
                             <ui:SimpleStackPanel VerticalAlignment="Center"
                                                  HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_copy_add_24_regular.png"
+                                <Image Source="{DynamicResource ImageSelectionCloneToNewBoardIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality"
                                        Height="25"
                                        Width="25" />
@@ -4045,14 +4045,14 @@
                             <ui:SimpleStackPanel VerticalAlignment="Center" Spacing="5" Margin="0,-10">
                                 <ui:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridImageScaleDecrease_MouseUp">
-                                        <Image Source="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular.png"
+                                        <Image Source="{DynamicResource ImageSelectionScaleIcon1}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                         <TextBlock Text="-" Foreground="{DynamicResource FloatBarForeground}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                                    Margin="0,0,-2,-7" FontSize="15" />
                                     </Grid>
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridImageScaleIncrease_MouseUp">
-                                        <Image Source="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular.png"
+                                        <Image Source="{DynamicResource ImageSelectionScaleIcon2}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                         <TextBlock Text="+" Foreground="{DynamicResource FloatBarForeground}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
@@ -4069,7 +4069,7 @@
                                 CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageDelete_MouseUp">
                             <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_delete_24_regular.png"
+                                <Image Source="{DynamicResource ImageSelectionDeleteIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                 <TextBlock Margin="0,5,0,0" Text="删除" FontSize="10"
                                            Foreground="{DynamicResource FloatBarForeground}"
