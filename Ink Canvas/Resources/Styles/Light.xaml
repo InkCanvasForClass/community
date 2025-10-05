@@ -133,4 +133,10 @@
     <SolidColorBrush x:Key="OperatingGuideWindowFullscreenButtonForeground" Color="Black"/>
     <SolidColorBrush x:Key="OperatingGuideWindowCloseButtonBackground" Color="#E32A34"/>
     <SolidColorBrush x:Key="OperatingGuideWindowCloseButtonForeground" Color="White"/>
+    
+    <!-- 说明书窗口图标资源 -->
+    <BitmapImage x:Key="OperatingGuideWindowKeyboardIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_keyboard_24_regular.png"/>
+    <BitmapImage x:Key="OperatingGuideWindowControlIcon1" UriSource="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"/>
+    <BitmapImage x:Key="OperatingGuideWindowControlIcon2" UriSource="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"/>
+    <BitmapImage x:Key="OperatingGuideWindowControlIcon3" UriSource="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"/>
 </ResourceDictionary>

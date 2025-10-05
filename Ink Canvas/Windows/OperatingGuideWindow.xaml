@@ -18,7 +18,7 @@
               ManipulationBoundaryFeedback="SCManipulationBoundaryFeedback">
                 <ui:SimpleStackPanel>
                     <ui:SimpleStackPanel Margin="20,20,20,0" Orientation="Horizontal" HorizontalAlignment="Left">
-                        <Image Margin="5, 0" Source="/Resources/Icons-Fluent/ic_fluent_keyboard_24_regular.png"
+                        <Image Margin="5, 0" Source="{DynamicResource OperatingGuideWindowKeyboardIcon}"
                            RenderOptions.BitmapScalingMode="HighQuality" Height="40" Width="40"/>
                         <TextBlock FontSize="22" Text="软件快捷键" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
                     </ui:SimpleStackPanel>
@@ -26,17 +26,17 @@
                     <Viewbox Height="320" HorizontalAlignment="Left">
                         <ui:SimpleStackPanel>
                             <ui:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"
+                                <Image Source="{DynamicResource OperatingGuideWindowControlIcon1}"
                                    RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"/>
                                 <TextBlock FontSize="10" Text=" + Z  ——  撤销" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
                             </ui:SimpleStackPanel>
                             <ui:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"
+                                <Image Source="{DynamicResource OperatingGuideWindowControlIcon2}"
                                    RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"/>
                                 <TextBlock FontSize="10" Text=" + Y  ——  重做" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
                             </ui:SimpleStackPanel>
                             <ui:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"
+                                <Image Source="{DynamicResource OperatingGuideWindowControlIcon3}"
                                    RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"/>
                                 <TextBlock FontSize="10" Text=" + E  ——  清屏" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
                             </ui:SimpleStackPanel>

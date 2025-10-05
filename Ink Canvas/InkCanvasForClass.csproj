@@ -538,6 +538,10 @@
     <Resource Include="Resources\new-icons\chevron-left-light.png" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_keyboard_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_control_button_24_regular_white.png" />
+  </ItemGroup>
+  <ItemGroup>
     <Compile Remove="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
