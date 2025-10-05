@@ -808,27 +808,19 @@ namespace Ink_Canvas.Helpers
                     return;
 
                 bool shouldEnableHotkeys = ShouldEnableHotkeysBasedOnContext();
+                bool currentlyHasHotkeys = _registeredHotkeys.Count > 0;
 
-                if (shouldEnableHotkeys)
+                if (shouldEnableHotkeys && !currentlyHasHotkeys)
                 {
-                    // 如果热键未注册，则注册
-                    if (_registeredHotkeys.Count == 0)
-                    {
-                        LoadHotkeysFromSettings();
-                    }
+                    // 需要注册快捷键
+                    LoadHotkeysFromSettings();
                 }
-                else
+                else if (!shouldEnableHotkeys && currentlyHasHotkeys)
                 {
-                    // 如果热键已注册，则注销（与鼠标模式禁用保持一致）
-                    if (_registeredHotkeys.Count > 0)
-                    {
-                        UnregisterAllHotkeys();
-
-                        // 注意：这里不设置 _hotkeysShouldBeRegistered = false
-                        // 因为我们需要保持热键系统的启用状态，只是暂时注销热键
-                        // 这样当上下文变化时，热键可以重新注册
-                    }
+                    // 需要注销快捷键
+                    UnregisterAllHotkeys();
                 }
+                // 如果状态没有变化，则不进行任何操作
             }
             catch (Exception ex)
             {
@@ -871,36 +863,50 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                // 策略1：鼠标在窗口上时启用热键（最高优先级）
-                if (_isMouseOverWindow)
+                // 检查当前是否处于鼠标模式
+                bool isMouseMode = IsInSelectMode();
+                
+                if (isMouseMode)
                 {
-                    return true;
+                    // 鼠标模式下，根据设置决定是否启用快捷键
+                    return MainWindow.Settings.Appearance.EnableHotkeysInMouseMode;
                 }
-
-                // 策略2：在多屏幕环境下，检查鼠标是否在当前窗口所在的屏幕上
-                if (_isMultiScreenMode)
+                else
                 {
-                    var mousePosition = Control.MousePosition;
-                    var mouseScreen = Screen.FromPoint(mousePosition);
-
-                    if (mouseScreen == _currentScreen)
+                    // 非鼠标模式下，需要检查焦点和屏幕位置
+                    
+                    // 策略1：鼠标在窗口上时启用热键（最高优先级）
+                    if (_isMouseOverWindow)
                     {
                         return true;
                     }
-                    else
-                    {
-                        return false;
-                    }
-                }
 
-                // 策略3：单屏幕环境下，窗口有焦点时启用热键
-                if (_isWindowFocused)
-                {
+                    // 策略2：在多屏幕环境下，检查鼠标是否在当前窗口所在的屏幕上
+                    if (_isMultiScreenMode && _enableScreenSpecificHotkeys)
+                    {
+                        var mousePosition = Control.MousePosition;
+                        var mouseScreen = Screen.FromPoint(mousePosition);
+
+                        if (mouseScreen == _currentScreen)
+                        {
+                            return true;
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    }
+
+                    // 策略3：单屏幕环境下，窗口有焦点时启用热键
+                    if (_isWindowFocused)
+                    {
+                        return true;
+                    }
+
+                    // 策略4：如果以上都不满足，但在非鼠标模式下，仍然启用快捷键
+                    // 这样可以确保在批注模式下快捷键始终可用
                     return true;
                 }
-
-                // 默认情况：禁用热键
-                return false;
             }
             catch (Exception ex)
             {
