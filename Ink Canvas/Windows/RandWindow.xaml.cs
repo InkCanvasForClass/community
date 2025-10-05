@@ -478,6 +478,25 @@ namespace Ink_Canvas
             // 这里可以添加必要的清理代码
         }
 
+        /// <summary>
+        /// 刷新主题，当主窗口主题切换时调用
+        /// </summary>
+        public void RefreshTheme()
+        {
+            try
+            {
+                // 重新应用主题
+                ApplyTheme(MainWindow.Settings);
+                
+                // 强制刷新UI
+                InvalidateVisual();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新点名窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         #region Win32 API 声明
         [DllImport("user32.dll")]
         private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);

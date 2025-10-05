@@ -430,6 +430,25 @@ namespace Ink_Canvas
             InitializeUI();
         }
 
+        /// <summary>
+        /// 刷新主题，当主窗口主题切换时调用
+        /// </summary>
+        public void RefreshTheme()
+        {
+            try
+            {
+                // 重新应用主题
+                ApplyTheme();
+                
+                // 强制刷新UI
+                InvalidateVisual();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新计时器窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         private void UpdateButtonTexts()
         {
             if (useLegacyUI)

@@ -74,6 +74,9 @@ namespace Ink_Canvas
 
                 // 强制刷新UI
                 window.InvalidateVisual();
+                
+                // 通知其他窗口刷新主题
+                RefreshOtherWindowsTheme();
             }
             else if (theme == "Dark")
             {
@@ -115,6 +118,9 @@ namespace Ink_Canvas
 
                 // 强制刷新UI
                 window.InvalidateVisual();
+                
+                // 通知其他窗口刷新主题
+                RefreshOtherWindowsTheme();
             }
         }
 
@@ -483,6 +489,31 @@ namespace Ink_Canvas
             catch (Exception)
             {
                 // 忽略异常
+            }
+        }
+
+        /// <summary>
+        /// 刷新其他窗口的主题
+        /// </summary>
+        private void RefreshOtherWindowsTheme()
+        {
+            try
+            {
+                // 刷新所有打开的计时器窗口
+                foreach (Window window in Application.Current.Windows)
+                {
+                    if (window is CountdownTimerWindow timerWindow)
+                    {
+                        timerWindow.RefreshTheme();
+                    }
+                    else if (window is RandWindow randWindow)
+                    {
+                        randWindow.RefreshTheme();
+                    }
+                }
+            }
+            catch (Exception)
+            {
             }
         }
     }
