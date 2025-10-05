@@ -433,8 +433,8 @@ namespace Ink_Canvas
 
         public void UpdateCustomIconsInComboBox()
         {
-            // 保留前11个内置图标选项
-            while (ComboBoxFloatingBarImg.Items.Count > 11)
+            // 保留前12个内置图标选项
+            while (ComboBoxFloatingBarImg.Items.Count > 12)
             {
                 ComboBoxFloatingBarImg.Items.RemoveAt(ComboBoxFloatingBarImg.Items.Count - 1);
             }
