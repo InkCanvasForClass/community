@@ -114,3 +114,4 @@ GPLv3
 
 ## 项目引用
 [Alan-CRL/DesktopDrawpadBlocker](https://github.com/Alan-CRL/DesktopDrawpadBlocker)  
+[Awesome-Iwb/Awesome-Iwb](https://github.com/awesome-iwb/awesome-iwb/wiki/iwbicons-gallery)「本项目部分图标来自 Awesome Iwb 的 IwbIcons 图标库，由 Douxiba 制作。」
