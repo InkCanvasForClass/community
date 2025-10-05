@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using Application = System.Windows.Application;
+using ui = iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas
 {
@@ -58,6 +59,9 @@ namespace Ink_Canvas
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
 
+                // 刷新墨迹选中栏图标
+                RefreshStrokeSelectionIcons();
+
                 RefreshFloatingBarHighlightColors();
 
                 if (autoSwitchIcon)
@@ -92,6 +96,9 @@ namespace Ink_Canvas
 
                 // 刷新快速面板图标
                 RefreshQuickPanelIcons();
+
+                // 刷新墨迹选中栏图标
+                RefreshStrokeSelectionIcons();
 
                 RefreshFloatingBarHighlightColors();
 
@@ -343,6 +350,64 @@ namespace Ink_Canvas
             }
             catch (Exception)
             {
+            }
+        }
+
+        /// <summary>
+        /// 刷新墨迹选中栏图标
+        /// </summary>
+        private void RefreshStrokeSelectionIcons()
+        {
+            try
+            {
+                if (BorderStrokeSelectionControl != null)
+                {
+                    // 强制刷新墨迹选中栏的视觉状态
+                    BorderStrokeSelectionControl.InvalidateVisual();
+                    
+                    // 刷新墨迹选中栏内的所有图标
+                    var viewbox = BorderStrokeSelectionControl.Child as Viewbox;
+                    if (viewbox?.Child is ui.SimpleStackPanel stackPanel)
+                    {
+                        RefreshStrokeSelectionIconsRecursive(stackPanel);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // 忽略异常，确保主题切换不会因为图标刷新失败而中断
+            }
+        }
+
+        /// <summary>
+        /// 递归刷新墨迹选中栏内的图标
+        /// </summary>
+        private void RefreshStrokeSelectionIconsRecursive(System.Windows.Controls.Panel panel)
+        {
+            try
+            {
+                foreach (var child in panel.Children)
+                {
+                    if (child is Image image)
+                    {
+                        // 强制刷新图像
+                        image.InvalidateVisual();
+                    }
+                    else if (child is System.Windows.Controls.Panel childPanel)
+                    {
+                        // 递归处理子面板
+                        RefreshStrokeSelectionIconsRecursive(childPanel);
+                    }
+                    else if (child is Border border && border.Child is System.Windows.Controls.Panel borderPanel)
+                    {
+                        // 处理Border内的面板
+                        RefreshStrokeSelectionIconsRecursive(borderPanel);
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                // 忽略异常
             }
         }
     }

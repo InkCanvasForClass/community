@@ -48,6 +48,15 @@
     <BitmapImage x:Key="QuickPanelPersonMoneyIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_person_money_24_regular.png"/>
     <BitmapImage x:Key="QuickPanelPeopleMoneyIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_people_money_24_regular.png"/>
     <BitmapImage x:Key="QuickPanelTimerIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_timer_24_regular.png"/>
+    
+    <!-- 墨迹选中栏图标资源 -->
+    <BitmapImage x:Key="StrokeSelectionCloneIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_copy_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionCloneToNewBoardIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_copy_add_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionFlipHorizontalIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_flip_horizontal_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionFlipVerticalIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_flip_vertical_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionPenWidthIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_edit_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionDeleteIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_delete_24_regular.png"/>
+    
     <BitmapImage x:Key="QuickPanelBlackboardIcon" UriSource="/Resources/new-icons/blackboard.png"/>
     <BitmapImage x:Key="QuickPanelEndSlideshowIcon" UriSource="/Resources/new-icons/end-slides-show.png"/>
     <BitmapImage x:Key="QuickPanelEyeIcon" UriSource="/Resources/new-icons/eye.png"/>

@@ -624,6 +624,13 @@
     <Resource Include="Resources\Startup-animation\ICC Autumn.png" />
     <Resource Include="Resources\Startup-animation\ICC Winter.png" />
     <Resource Include="Resources\Startup-animation\ICC Horse.png" />
+    <!-- 墨迹选中栏图标资源 - 白色版本 -->
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_copy_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_copy_add_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_flip_horizontal_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_flip_vertical_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_edit_24_regular_white.png" />
+    <Resource Include="Resources\Icons-Fluent\ic_fluent_delete_24_regular_white.png" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Settings.Designer.cs">
