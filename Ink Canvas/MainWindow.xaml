@@ -5607,8 +5607,7 @@
                                                                             x:Name="BoardCircleEraserTabButtonText"
                                                                             Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                             FontSize="9" TextAlignment="Center"
-                                                                            Text="圆形擦"
-                                                                            Margin="2,1,0,0" />
+                                                                            Text="圆形擦" />
                                                                     </ui:SimpleStackPanel>
                                                                 </ui:SimpleStackPanel>
                                                             </Canvas>
@@ -5634,8 +5633,7 @@
                                                                             x:Name="BoardRectangleEraserTabButtonText"
                                                                             Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                             FontSize="9" TextAlignment="Center"
-                                                                            Text="黑板擦"
-                                                                            Margin="2,1,0,0" />
+                                                                            Text="黑板擦" />
                                                                     </ui:SimpleStackPanel>
                                                                 </ui:SimpleStackPanel>
                                                             </Canvas>
