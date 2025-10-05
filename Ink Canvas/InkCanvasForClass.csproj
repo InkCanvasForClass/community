@@ -243,6 +243,10 @@
     <Resource Include="Resources\Icons-png\undo.png" />
     <Resource Include="Resources\Icons-png\minimize.png" />
     <Resource Include="Resources\Icons-png\penUpright.png" />
+    <Resource Include="Resources\new-icons\multi-touch_white.png" />
+    <Resource Include="Resources\new-icons\hand-move_white.png" />
+    <Resource Include="Resources\new-icons\zoom_white.png" />
+    <Resource Include="Resources\new-icons\rotate_white.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-png\twoFingelMove-Blue.png" />

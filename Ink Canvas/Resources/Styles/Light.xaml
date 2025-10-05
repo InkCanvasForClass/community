@@ -139,4 +139,10 @@
     <BitmapImage x:Key="OperatingGuideWindowControlIcon1" UriSource="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"/>
     <BitmapImage x:Key="OperatingGuideWindowControlIcon2" UriSource="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"/>
     <BitmapImage x:Key="OperatingGuideWindowControlIcon3" UriSource="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"/>
+    
+    <!-- 手势选项面板图标资源 - 浅色主题 -->
+    <BitmapImage x:Key="MultiTouchIcon" UriSource="/Resources/new-icons/multi-touch.png"/>
+    <BitmapImage x:Key="HandMoveIcon" UriSource="/Resources/new-icons/hand-move.png"/>
+    <BitmapImage x:Key="ZoomIcon" UriSource="/Resources/new-icons/zoom.png"/>
+    <BitmapImage x:Key="RotateIcon" UriSource="/Resources/new-icons/rotate.png"/>
 </ResourceDictionary>

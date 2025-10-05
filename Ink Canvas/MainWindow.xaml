@@ -4426,7 +4426,7 @@
                                                                              VerticalAlignment="Center"
                                                                              HorizontalAlignment="Center"
                                                                              Margin="0,3,0,0">
-                                                            <Image Source="/Resources/new-icons/multi-touch.png"
+                                                            <Image Source="{DynamicResource MultiTouchIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4457,7 +4457,7 @@
                                                             Orientation="Horizontal" Spacing="4"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center">
-                                                            <Image Source="/Resources/new-icons/hand-move.png"
+                                                            <Image Source="{DynamicResource HandMoveIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4488,7 +4488,7 @@
                                                             Orientation="Horizontal" Spacing="4"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center">
-                                                            <Image Source="/Resources/new-icons/zoom.png"
+                                                            <Image Source="{DynamicResource ZoomIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4517,7 +4517,7 @@
                                                             Orientation="Horizontal" Spacing="4"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center">
-                                                            <Image Source="/Resources/new-icons/rotate.png"
+                                                            <Image Source="{DynamicResource RotateIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -9343,7 +9343,7 @@
                                 </Border>
                                 <ui:SimpleStackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                                      HorizontalAlignment="Center" Margin="0,3,0,0">
-                                    <Image Source="/Resources/new-icons/multi-touch.png"
+                                    <Image Source="{DynamicResource MultiTouchIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="多指书写" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
@@ -9367,7 +9367,7 @@
                                 <ui:SimpleStackPanel Opacity="1" x:Name="TwoFingerGestureSimpleStackPanel"
                                                      Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                                      HorizontalAlignment="Center">
-                                    <Image Source="/Resources/new-icons/hand-move.png"
+                                    <Image Source="{DynamicResource HandMoveIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="双指移动" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
@@ -9392,7 +9392,7 @@
                                     Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
                                     Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
-                                    <Image Source="/Resources/new-icons/zoom.png"
+                                    <Image Source="{DynamicResource ZoomIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="双指缩放" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
@@ -9417,7 +9417,7 @@
                                     Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
                                     Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
-                                    <Image Source="/Resources/new-icons/rotate.png"
+                                    <Image Source="{DynamicResource RotateIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="双指旋转" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
