@@ -16,15 +16,17 @@ namespace Ink_Canvas
         private SeewoStyleTimerWindow parentWindow;
         private System.Timers.Timer updateTimer;
         private bool isMouseOver = false;
+        private bool isDragging = false;
+        private Point lastMousePosition;
 
         public MinimizedTimerWindow(SeewoStyleTimerWindow parent)
         {
             InitializeComponent();
             parentWindow = parent;
             
-            // 设置窗口位置（在父窗口右下角）
-            this.Left = parent.Left + parent.Width - this.Width - 20;
-            this.Top = parent.Top + parent.Height - this.Height - 20;
+            // 设置窗口位置（保持父窗口的位置）
+            this.Left = parent.Left;
+            this.Top = parent.Top;
             
             // 启动更新定时器
             updateTimer = new System.Timers.Timer(100); // 100ms更新一次
@@ -139,15 +141,51 @@ namespace Ink_Canvas
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            // 恢复主窗口
-            if (parentWindow != null)
+            // 记录点击时间
+            lastClickTime = DateTime.Now;
+            // 开始拖动
+            isDragging = true;
+            lastMousePosition = e.GetPosition(this);
+            this.CaptureMouse();
+        }
+
+        private void Window_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
             {
-                parentWindow.Show();
-                parentWindow.Activate();
-                parentWindow.WindowState = WindowState.Normal;
-                this.Close();
+                var currentPosition = e.GetPosition(this);
+                var deltaX = currentPosition.X - lastMousePosition.X;
+                var deltaY = currentPosition.Y - lastMousePosition.Y;
+                
+                this.Left += deltaX;
+                this.Top += deltaY;
             }
         }
+
+        private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (isDragging)
+            {
+                isDragging = false;
+                this.ReleaseMouseCapture();
+                
+                // 如果点击时间很短，认为是单击，恢复主窗口
+                var clickDuration = DateTime.Now - lastClickTime;
+                if (clickDuration.TotalMilliseconds < 200) // 200ms内认为是单击
+                {
+                    // 恢复主窗口
+                    if (parentWindow != null)
+                    {
+                        parentWindow.Show();
+                        parentWindow.Activate();
+                        parentWindow.WindowState = WindowState.Normal;
+                        this.Close();
+                    }
+                }
+            }
+        }
+
+        private DateTime lastClickTime = DateTime.Now;
 
         private void Window_MouseEnter(object sender, MouseEventArgs e)
         {

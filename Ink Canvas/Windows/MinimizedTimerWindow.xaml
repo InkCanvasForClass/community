@@ -7,9 +7,9 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         Topmost="True" Background="Transparent"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
-        WindowStartupLocation="Manual" Title="计时器" Height="120" Width="300"
-        MouseLeftButtonDown="Window_MouseLeftButtonDown" MouseEnter="Window_MouseEnter" MouseLeave="Window_MouseLeave"
-        ResizeMode="NoResize">
+        WindowStartupLocation="Manual" Title="计时器" Height="120" Width="350"
+        MouseLeftButtonDown="Window_MouseLeftButtonDown" MouseLeftButtonUp="Window_MouseLeftButtonUp"
+        MouseEnter="Window_MouseEnter" MouseLeave="Window_MouseLeave" MouseMove="Window_MouseMove">
 
     <Window.Resources>
         <ResourceDictionary>
@@ -33,18 +33,18 @@
                     <!-- 小时 -->
                     <Path x:Name="MinHour1Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="24" Height="24" 
+                          Width="32" Height="32" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,2,0"/>
+                          Margin="0,0,4,0"/>
                     <Path x:Name="MinHour2Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="24" Height="24" 
+                          Width="32" Height="32" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,2,0"/>
+                          Margin="0,0,4,0"/>
                     
                     <!-- 冒号 -->
                     <TextBlock Text=":" FontSize="20" FontWeight="Bold" 
@@ -55,18 +55,18 @@
                     <!-- 分钟 -->
                     <Path x:Name="MinMinute1Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="24" Height="24" 
+                          Width="32" Height="32" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,2,0"/>
+                          Margin="0,0,4,0"/>
                     <Path x:Name="MinMinute2Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="24" Height="24" 
+                          Width="32" Height="32" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,2,0"/>
+                          Margin="0,0,4,0"/>
                     
                     <!-- 冒号 -->
                     <TextBlock Text=":" FontSize="20" FontWeight="Bold" 
@@ -77,14 +77,14 @@
                     <!-- 秒 -->
                     <Path x:Name="MinSecond1Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="24" Height="24" 
+                          Width="32" Height="32" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,2,0"/>
+                          Margin="0,0,4,0"/>
                     <Path x:Name="MinSecond2Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="24" Height="24" 
+                          Width="32" Height="32" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
