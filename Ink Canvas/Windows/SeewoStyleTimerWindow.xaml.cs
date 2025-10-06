@@ -94,6 +94,7 @@ namespace Ink_Canvas
         private Timer hideTimer;
         private MinimizedTimerWindow minimizedWindow;
         private DateTime lastActivityTime;
+        private bool isFullscreenMode = false;
 
         // 最近计时记录
         private string recentTimer1 = "--:--";
@@ -206,11 +207,11 @@ namespace Ink_Canvas
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // 只有在计时器运行时才检查自动隐藏
-                if (isTimerRunning && !isPaused)
+                // 只有在计时器运行时且不在全屏模式下才检查自动隐藏
+                if (isTimerRunning && !isPaused && !isFullscreenMode)
                 {
                     var timeSinceLastActivity = DateTime.Now - lastActivityTime;
-                    if (timeSinceLastActivity.TotalSeconds >= 5) // 5秒无操作
+                    if (timeSinceLastActivity.TotalSeconds >= 5)
                     {
                         ShowMinimizedWindow();
                     }
@@ -233,6 +234,11 @@ namespace Ink_Canvas
         public void UpdateActivityTime()
         {
             lastActivityTime = DateTime.Now;
+        }
+
+        public void SetFullscreenMode(bool isFullscreen)
+        {
+            isFullscreenMode = isFullscreen;
         }
 
         public bool IsTimerRunning => isTimerRunning;
@@ -1009,6 +1015,9 @@ namespace Ink_Canvas
 
         private void ShowFullscreenTimer()
         {
+            // 设置全屏模式标志
+            isFullscreenMode = true;
+            
             // 创建全屏计时器窗口
             var fullscreenWindow = new FullscreenTimerWindow(this);
             fullscreenWindow.Show();

@@ -28,7 +28,7 @@ namespace Ink_Canvas
             this.Height = SystemParameters.PrimaryScreenHeight;
             
             // 启动更新定时器
-            updateTimer = new System.Timers.Timer(100); // 100ms更新一次
+            updateTimer = new System.Timers.Timer(100); 
             updateTimer.Elapsed += UpdateTimer_Elapsed;
             updateTimer.Start();
         }
@@ -105,6 +105,8 @@ namespace Ink_Canvas
             // 恢复主窗口
             if (parentWindow != null)
             {
+                // 清除全屏模式标志
+                parentWindow.SetFullscreenMode(false);
                 parentWindow.Show();
                 parentWindow.Activate();
                 parentWindow.WindowState = WindowState.Normal;
