@@ -53,7 +53,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                                 <!-- 数字显示 -->
                                                 <TextBlock x:Name="Digit1Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -68,7 +68,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -86,7 +86,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                                 <!-- 数字显示 -->
                                                 <TextBlock x:Name="Digit2Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -101,7 +101,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -127,7 +127,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                                 <!-- 数字显示 -->
                                                 <TextBlock x:Name="Digit3Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -142,7 +142,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -160,7 +160,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                                 <!-- 数字显示 -->
                                                 <TextBlock x:Name="Digit4Display" Text="5" FontSize="64" FontWeight="Bold" 
@@ -175,7 +175,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -201,7 +201,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                                 <!-- 数字显示 -->
                                                 <TextBlock x:Name="Digit5Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -216,7 +216,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
@@ -234,7 +234,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="+" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                                 <!-- 数字显示 -->
                                                 <TextBlock x:Name="Digit6Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -249,7 +249,7 @@
                                                             </Border>
                                                         </ControlTemplate>
                                                     </Button.Template>
-                                                    <TextBlock Text="-" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
                                             </StackPanel>
                                         </Grid>
