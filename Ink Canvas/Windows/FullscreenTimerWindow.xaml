@@ -85,7 +85,7 @@
         </Grid>
         
         <!-- 退出提示 -->
-        <TextBlock Text="点击屏幕或按ESC键退出全屏" 
+        <TextBlock Text="点击屏幕退出全屏" 
                    FontSize="16" 
                    Foreground="Gray" 
                    HorizontalAlignment="Center" 
