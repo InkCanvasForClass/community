@@ -98,6 +98,7 @@ namespace Ink_Canvas
         private void InitializeUI()
         {
             UpdateDigitDisplays();
+            LoadRecentTimers();
             UpdateRecentTimerDisplays();
         }
 
@@ -630,6 +631,9 @@ namespace Ink_Canvas
                 recentTimer2 = recentTimer1;
                 recentTimer1 = currentTime;
                 UpdateRecentTimerDisplays();
+                
+                // 保存到注册表
+                SaveRecentTimersToRegistry();
             }
         }
 
@@ -644,6 +648,48 @@ namespace Ink_Canvas
             catch
             {
                 // 如果UI元素还未初始化，忽略错误
+            }
+        }
+
+        // 从注册表加载最近计时记录
+        private void LoadRecentTimers()
+        {
+            try
+            {
+                using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\InkCanvas\SeewoTimer"))
+                {
+                    if (key != null)
+                    {
+                        recentTimer1 = key.GetValue(RecentTimer1Key, "--:--")?.ToString() ?? "--:--";
+                        recentTimer2 = key.GetValue(RecentTimer2Key, "--:--")?.ToString() ?? "--:--";
+                    }
+                }
+            }
+            catch
+            {
+                // 如果读取注册表失败，使用默认值
+                recentTimer1 = "--:--";
+                recentTimer2 = "--:--";
+            }
+        }
+
+        // 保存最近计时记录到注册表
+        private void SaveRecentTimersToRegistry()
+        {
+            try
+            {
+                using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\InkCanvas\SeewoTimer"))
+                {
+                    if (key != null)
+                    {
+                        key.SetValue(RecentTimer1Key, recentTimer1);
+                        key.SetValue(RecentTimer2Key, recentTimer2);
+                    }
+                }
+            }
+            catch
+            {
+                // 如果保存到注册表失败，静默处理
             }
         }
     }
