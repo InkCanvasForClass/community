@@ -93,22 +93,6 @@ namespace Ink_Canvas
         {
             try
             {
-                // 应用主题设置
-                var mainWindow = Application.Current.MainWindow as MainWindow;
-                if (mainWindow != null)
-                {
-                    bool isLightTheme = IsLightTheme();
-                    if (isLightTheme)
-                    {
-                        // 应用浅色主题
-                        this.Background = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                    }
-                    else
-                    {
-                        // 应用深色主题
-                        this.Background = new SolidColorBrush(Color.FromRgb(30, 30, 30));
-                    }
-                }
             }
             catch (Exception ex)
             {
