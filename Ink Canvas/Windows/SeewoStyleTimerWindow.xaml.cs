@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
 
 namespace Ink_Canvas
 {
@@ -48,21 +49,21 @@ namespace Ink_Canvas
 
                 if (displayHours > 99) displayHours = 99;
 
-                Digit1Display.Text = (displayHours / 10).ToString();
-                Digit2Display.Text = (displayHours % 10).ToString();
-                Digit3Display.Text = (leftTimeSpan.Minutes / 10).ToString();
-                Digit4Display.Text = (leftTimeSpan.Minutes % 10).ToString();
-                Digit5Display.Text = (leftTimeSpan.Seconds / 10).ToString();
-                Digit6Display.Text = (leftTimeSpan.Seconds % 10).ToString();
+                SetDigitDisplay("Digit1Display", displayHours / 10);
+                SetDigitDisplay("Digit2Display", displayHours % 10);
+                SetDigitDisplay("Digit3Display", leftTimeSpan.Minutes / 10);
+                SetDigitDisplay("Digit4Display", leftTimeSpan.Minutes % 10);
+                SetDigitDisplay("Digit5Display", leftTimeSpan.Seconds / 10);
+                SetDigitDisplay("Digit6Display", leftTimeSpan.Seconds % 10);
 
                 if (leftTimeSpan.TotalSeconds <= 0)
                 {
-                    Digit1Display.Text = "0";
-                    Digit2Display.Text = "0";
-                    Digit3Display.Text = "0";
-                    Digit4Display.Text = "0";
-                    Digit5Display.Text = "0";
-                    Digit6Display.Text = "0";
+                    SetDigitDisplay("Digit1Display", 0);
+                    SetDigitDisplay("Digit2Display", 0);
+                    SetDigitDisplay("Digit3Display", 0);
+                    SetDigitDisplay("Digit4Display", 0);
+                    SetDigitDisplay("Digit5Display", 0);
+                    SetDigitDisplay("Digit6Display", 0);
                     timer.Stop();
                     isTimerRunning = false;
                     StartPauseIcon.Data = Geometry.Parse(PlayIconData);
@@ -185,12 +186,31 @@ namespace Ink_Canvas
 
         private void UpdateDigitDisplays()
         {
-            Digit1Display.Text = (hour / 10).ToString();
-            Digit2Display.Text = (hour % 10).ToString();
-            Digit3Display.Text = (minute / 10).ToString();
-            Digit4Display.Text = (minute % 10).ToString();
-            Digit5Display.Text = (second / 10).ToString();
-            Digit6Display.Text = (second % 10).ToString();
+            SetDigitDisplay("Digit1Display", hour / 10);
+            SetDigitDisplay("Digit2Display", hour % 10);
+            SetDigitDisplay("Digit3Display", minute / 10);
+            SetDigitDisplay("Digit4Display", minute % 10);
+            SetDigitDisplay("Digit5Display", second / 10);
+            SetDigitDisplay("Digit6Display", second % 10);
+        }
+
+        /// <summary>
+        /// 根据数字值设置SVG数字显示
+        /// </summary>
+        /// <param name="pathName">Path控件的名称</param>
+        /// <param name="digit">要显示的数字(0-9)</param>
+        private void SetDigitDisplay(string pathName, int digit)
+        {
+            var path = this.FindName(pathName) as Path;
+            if (path != null)
+            {
+                string resourceKey = $"Digit{digit}";
+                var geometry = this.FindResource(resourceKey) as Geometry;
+                if (geometry != null)
+                {
+                    path.Data = geometry;
+                }
+            }
         }
 
         // 第1位数字（小时十位）
