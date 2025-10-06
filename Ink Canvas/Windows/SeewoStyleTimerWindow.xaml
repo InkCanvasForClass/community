@@ -395,7 +395,14 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="⛶" FontSize="16" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,0,5,0"/>
+                                        <Path Data="M4 8v-2a2 2 0 0 1 2 -2h2 M4 16v2a2 2 0 0 0 2 2h2 M16 4h2a2 2 0 0 1 2 2v2 M16 20h2a2 2 0 0 0 2 -2v-2" 
+                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                              StrokeThickness="2" 
+                                              StrokeLineJoin="Round" 
+                                              Fill="Transparent" 
+                                              Width="16" Height="16" 
+                                              Stretch="Uniform" 
+                                              Margin="0,0,5,0"/>
                                         <TextBlock Text="全屏" FontSize="16" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                     </StackPanel>
                                 </Button>
@@ -427,7 +434,14 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <TextBlock Text="↻" FontSize="16" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,0,5,0"/>
+                                        <Path Data="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4 M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" 
+                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                              StrokeThickness="2" 
+                                              StrokeLineJoin="Round" 
+                                              Fill="Transparent" 
+                                              Width="16" Height="16" 
+                                              Stretch="Uniform" 
+                                              Margin="0,0,5,0"/>
                                         <TextBlock Text="重置" FontSize="16" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                     </StackPanel>
                                 </Button>
