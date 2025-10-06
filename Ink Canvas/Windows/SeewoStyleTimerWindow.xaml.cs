@@ -68,9 +68,6 @@ namespace Ink_Canvas
                     isTimerRunning = false;
                     StartPauseIcon.Data = Geometry.Parse(PlayIconData);
                     PlayTimerSound();
-                    
-                    // 保存最近计时记录
-                    SaveRecentTimer();
                 }
             });
         }
@@ -93,6 +90,10 @@ namespace Ink_Canvas
         // 最近计时记录
         private string recentTimer1 = "--:--";
         private string recentTimer2 = "--:--";
+        
+        // 最近计时记录的注册表键名
+        private const string RecentTimer1Key = "SeewoTimer_RecentTimer1";
+        private const string RecentTimer2Key = "SeewoTimer_RecentTimer2";
 
         private void InitializeUI()
         {
@@ -422,6 +423,9 @@ namespace Ink_Canvas
                 isPaused = false;
                 isTimerRunning = true;
                 timer.Start();
+                
+                // 保存到最近计时记录
+                SaveRecentTimer();
             }
         }
 
@@ -549,37 +553,37 @@ namespace Ink_Canvas
         // 快捷选项事件处理
         private void Quick5Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (isTimerRunning && !isPaused) return;
             SetQuickTime(0, 5, 0);
         }
 
         private void Quick10Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (isTimerRunning && !isPaused) return;
             SetQuickTime(0, 10, 0);
         }
 
         private void Quick15Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (isTimerRunning && !isPaused) return;
             SetQuickTime(0, 15, 0);
         }
 
         private void Quick20Min_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
+            if (isTimerRunning && !isPaused) return;
             SetQuickTime(0, 20, 0);
         }
 
         private void RecentTimer1_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning || recentTimer1 == "--:--") return;
+            if ((isTimerRunning && !isPaused) || recentTimer1 == "--:--") return;
             ApplyRecentTimer(recentTimer1);
         }
 
         private void RecentTimer2_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning || recentTimer2 == "--:--") return;
+            if ((isTimerRunning && !isPaused) || recentTimer2 == "--:--") return;
             ApplyRecentTimer(recentTimer2);
         }
 
