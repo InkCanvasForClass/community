@@ -832,6 +832,8 @@ namespace Ink_Canvas
             // 声明下载状态变量，用于整个方法
             bool isDownloadSuccessful = false;
 
+            bool hasValidLineGroup = lineGroup != null;
+
             if (AvailableLatestVersion != null)
             {
                 // 检测到新版本，停止重试定时器
@@ -1000,6 +1002,14 @@ namespace Ink_Canvas
                                        MessageBoxImage.Information);
                         break;
                 }
+            }
+            else if (hasValidLineGroup)
+            {
+                LogHelper.WriteLogToFile("AutoUpdate | Current version is already the latest, no retry needed");
+                
+                // 停止重试定时器
+                timerCheckAutoUpdateRetry.Stop();
+                updateCheckRetryCount = 0;
             }
             else
             {
