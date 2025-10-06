@@ -178,8 +178,8 @@ namespace Ink_Canvas
                         if (position.HasValue)
                         {
                             // 在指定位置居中显示
-                            InkCanvas.SetLeft(image, position.Value.X - image.Width / 2);
-                            InkCanvas.SetTop(image, position.Value.Y - image.Height / 2);
+                            System.Windows.Controls.InkCanvas.SetLeft(image, position.Value.X - image.Width / 2);
+                            System.Windows.Controls.InkCanvas.SetTop(image, position.Value.Y - image.Height / 2);
                         }
 
                         // 绑定事件处理器

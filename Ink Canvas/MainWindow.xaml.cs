@@ -328,7 +328,7 @@ namespace Ink_Canvas
 
         private void inkCanvas_EditingModeChanged(object sender, RoutedEventArgs e)
         {
-            var inkCanvas1 = sender as InkCanvas;
+            var inkCanvas1 = sender as System.Windows.Controls.InkCanvas;
             if (inkCanvas1 == null) return;
 
             // 使用辅助方法设置光标
@@ -1036,7 +1036,7 @@ namespace Ink_Canvas
         }
 
         // 添加一个辅助方法，根据当前编辑模式设置光标
-        public void SetCursorBasedOnEditingMode(InkCanvas canvas)
+        public void SetCursorBasedOnEditingMode(System.Windows.Controls.InkCanvas canvas)
         {
             // 套索选择模式下光标始终显示，无论用户设置如何
             if (canvas.EditingMode == InkCanvasEditingMode.Select)
@@ -1095,7 +1095,7 @@ namespace Ink_Canvas
         private void inkCanvas_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(sender as InkCanvas);
+            SetCursorBasedOnEditingMode(sender as System.Windows.Controls.InkCanvas);
 
             // 检查是否点击了空白区域或其他非图片元素
             var hitTest = e.OriginalSource;
@@ -1122,7 +1122,7 @@ namespace Ink_Canvas
         private void inkCanvas_StylusDown(object sender, StylusDownEventArgs e)
         {
             // 使用辅助方法设置光标
-            SetCursorBasedOnEditingMode(sender as InkCanvas);
+            SetCursorBasedOnEditingMode(sender as System.Windows.Controls.InkCanvas);
         }
 
         // 触摸结束，恢复光标
@@ -1636,9 +1636,9 @@ namespace Ink_Canvas
         {
             try
             {
-                // 初始化插件管理器
-                PluginManager.Instance.Initialize();
-                LogHelper.WriteLogToFile("插件系统已初始化");
+                // TODO: Initialize new plugin system
+                // PluginManager.Instance.Initialize();
+                LogHelper.WriteLogToFile("插件系统初始化已跳过（新系统待实现）");
             }
             catch (Exception ex)
             {

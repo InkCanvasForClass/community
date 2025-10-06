@@ -47,11 +47,11 @@ namespace Ink_Canvas
 
         private TimeMachine timeMachine = new TimeMachine();
 
-        private void ApplyHistoryToCanvas(TimeMachineHistory item, InkCanvas applyCanvas = null)
+        private void ApplyHistoryToCanvas(TimeMachineHistory item, System.Windows.Controls.InkCanvas applyCanvas = null)
         {
             _currentCommitType = CommitReason.CodeInput;
             var canvas = inkCanvas;
-            if (applyCanvas != null && applyCanvas is InkCanvas)
+            if (applyCanvas != null && applyCanvas is System.Windows.Controls.InkCanvas)
             {
                 canvas = applyCanvas;
             }
@@ -191,8 +191,8 @@ namespace Ink_Canvas
                             if (item.InsertedElement is Image img)
                             {
                                 // 检查图片是否有位置信息，如果没有则应用居中
-                                double left = InkCanvas.GetLeft(img);
-                                double top = InkCanvas.GetTop(img);
+                                double left = System.Windows.Controls.InkCanvas.GetLeft(img);
+                                double top = System.Windows.Controls.InkCanvas.GetTop(img);
 
                                 if (double.IsNaN(left) || double.IsNaN(top))
                                 {
@@ -206,8 +206,8 @@ namespace Ink_Canvas
                             else if (item.InsertedElement is MediaElement media)
                             {
                                 // 检查媒体元素是否有位置信息，如果没有则应用居中
-                                double left = InkCanvas.GetLeft(media);
-                                double top = InkCanvas.GetTop(media);
+                                double left = System.Windows.Controls.InkCanvas.GetLeft(media);
+                                double top = System.Windows.Controls.InkCanvas.GetTop(media);
 
                                 if (double.IsNaN(left) || double.IsNaN(top))
                                 {
@@ -228,7 +228,7 @@ namespace Ink_Canvas
 
         private StrokeCollection ApplyHistoriesToNewStrokeCollection(TimeMachineHistory[] items)
         {
-            InkCanvas fakeInkCanv = new InkCanvas
+            System.Windows.Controls.InkCanvas fakeInkCanv = new System.Windows.Controls.InkCanvas
             {
                 Width = inkCanvas.ActualWidth,
                 Height = inkCanvas.ActualHeight,

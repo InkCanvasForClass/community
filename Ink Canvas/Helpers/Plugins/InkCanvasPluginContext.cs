@@ -32,11 +32,12 @@ namespace Ink_Canvas.Helpers.Plugins.New
 
         public System.Windows.Controls.InkCanvas CurrentCanvas => _mainWindow?.inkCanvas;
 
-        public IList<System.Windows.Controls.Canvas> AllCanvasPages => _mainWindow?.WhiteboardPages ?? new List<System.Windows.Controls.Canvas>();
+        // TODO: Implement these properties when the new plugin system is ready
+        public IList<System.Windows.Controls.Canvas> AllCanvasPages => new List<System.Windows.Controls.Canvas>();
 
-        public int CurrentPageIndex => _mainWindow?.CurrentPageIndex ?? 0;
+        public int CurrentPageIndex => 0;
 
-        public int TotalPageCount => _mainWindow?.WhiteboardPages?.Count ?? 0;
+        public int TotalPageCount => 0;
 
         public FrameworkElement FloatingToolBar => _mainWindow?.ViewboxFloatingBar;
 

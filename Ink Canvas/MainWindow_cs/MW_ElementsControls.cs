@@ -702,8 +702,8 @@ namespace Ink_Canvas
                 {
                     CenterAndScaleElement(mediaElement);
 
-                    InkCanvas.SetLeft(mediaElement, 0);
-                    InkCanvas.SetTop(mediaElement, 0);
+                    System.Windows.Controls.InkCanvas.SetLeft(mediaElement, 0);
+                    System.Windows.Controls.InkCanvas.SetTop(mediaElement, 0);
                     inkCanvas.Children.Add(mediaElement);
 
                     mediaElement.LoadedBehavior = MediaState.Manual;
@@ -826,8 +826,8 @@ namespace Ink_Canvas
                 };
 
                 // 设置位置，稍微偏移以避免重叠
-                InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
-                InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
+                System.Windows.Controls.InkCanvas.SetLeft(clonedImage, System.Windows.Controls.InkCanvas.GetLeft(image) + 20);
+                System.Windows.Controls.InkCanvas.SetTop(clonedImage, System.Windows.Controls.InkCanvas.GetTop(image) + 20);
 
                 // 设置图片属性，避免被InkCanvas选择系统处理
                 clonedImage.IsHitTestVisible = true;
@@ -876,8 +876,8 @@ namespace Ink_Canvas
                 };
 
                 // 设置位置，稍微偏移以避免重叠
-                InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(image) + 20);
-                InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(image) + 20);
+                System.Windows.Controls.InkCanvas.SetLeft(clonedImage, System.Windows.Controls.InkCanvas.GetLeft(image) + 20);
+                System.Windows.Controls.InkCanvas.SetTop(clonedImage, System.Windows.Controls.InkCanvas.GetTop(image) + 20);
 
                 // 创建新页面
                 BtnWhiteBoardAdd_Click(null, null);
@@ -1048,8 +1048,8 @@ namespace Ink_Canvas
                 centerY = Math.Max(0, centerY);
 
                 // 设置位置
-                InkCanvas.SetLeft(element, centerX);
-                InkCanvas.SetTop(element, centerY);
+                System.Windows.Controls.InkCanvas.SetLeft(element, centerX);
+                System.Windows.Controls.InkCanvas.SetTop(element, centerY);
 
                 // 保持TransformGroup，不清除RenderTransform
                 // 这样可以保持滚轮缩放和拖动功能
@@ -1114,8 +1114,8 @@ namespace Ink_Canvas
         {
             try
             {
-                var left = InkCanvas.GetLeft(element);
-                var top = InkCanvas.GetTop(element);
+                var left = System.Windows.Controls.InkCanvas.GetLeft(element);
+                var top = System.Windows.Controls.InkCanvas.GetTop(element);
 
                 if (double.IsNaN(left)) left = 0;
                 if (double.IsNaN(top)) top = 0;
@@ -1148,8 +1148,8 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"获取元素实际边界失败: {ex.Message}", LogHelper.LogType.Error);
                 // 回退到基本计算
-                var left = InkCanvas.GetLeft(element);
-                var top = InkCanvas.GetTop(element);
+                var left = System.Windows.Controls.InkCanvas.GetLeft(element);
+                var top = System.Windows.Controls.InkCanvas.GetTop(element);
                 if (double.IsNaN(left)) left = 0;
                 if (double.IsNaN(top)) top = 0;
                 return new Rect(left, top, element.ActualWidth, element.ActualHeight);
@@ -1380,10 +1380,10 @@ namespace Ink_Canvas
                 clonedImage.StretchDirection = originalImage.StretchDirection;
 
                 // 复制位置（在新页面中居中显示）
-                double left = InkCanvas.GetLeft(originalImage);
-                double top = InkCanvas.GetTop(originalImage);
-                InkCanvas.SetLeft(clonedImage, left + 20); // 稍微偏移位置
-                InkCanvas.SetTop(clonedImage, top + 20);
+                double left = System.Windows.Controls.InkCanvas.GetLeft(originalImage);
+                double top = System.Windows.Controls.InkCanvas.GetTop(originalImage);
+                System.Windows.Controls.InkCanvas.SetLeft(clonedImage, left + 20); // 稍微偏移位置
+                System.Windows.Controls.InkCanvas.SetTop(clonedImage, top + 20);
 
                 // 复制变换
                 if (originalImage.RenderTransform is TransformGroup originalTransformGroup)

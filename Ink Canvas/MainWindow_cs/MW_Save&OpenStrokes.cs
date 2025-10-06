@@ -142,8 +142,8 @@ namespace Ink_Canvas
                             {
                                 Type = "Image",
                                 SourcePath = bmp.UriSource?.LocalPath ?? "",
-                                Left = InkCanvas.GetLeft(img),
-                                Top = InkCanvas.GetTop(img),
+                                Left = System.Windows.Controls.InkCanvas.GetLeft(img),
+                                Top = System.Windows.Controls.InkCanvas.GetTop(img),
                                 Width = img.Width,
                                 Height = img.Height,
                                 Stretch = img.Stretch.ToString()
@@ -325,7 +325,7 @@ namespace Ink_Canvas
             try
             {
                 // 创建临时InkCanvas来渲染墨迹
-                var tempCanvas = new InkCanvas();
+                var tempCanvas = new System.Windows.Controls.InkCanvas();
                 tempCanvas.Strokes = strokes;
                 tempCanvas.Width = inkCanvas.ActualWidth;
                 tempCanvas.Height = inkCanvas.ActualHeight;
@@ -675,8 +675,8 @@ namespace Ink_Canvas
                             Height = info.Height,
                             Stretch = Enum.TryParse<Stretch>(info.Stretch, out var stretch) ? stretch : Stretch.Fill
                         };
-                        InkCanvas.SetLeft(img, info.Left);
-                        InkCanvas.SetTop(img, info.Top);
+                        System.Windows.Controls.InkCanvas.SetLeft(img, info.Left);
+                        System.Windows.Controls.InkCanvas.SetTop(img, info.Top);
                         inkCanvas.Children.Add(img);
                     }
                 }

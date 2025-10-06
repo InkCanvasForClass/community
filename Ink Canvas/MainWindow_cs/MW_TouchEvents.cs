@@ -83,8 +83,8 @@ namespace Ink_Canvas
                     clonedImage.IsManipulationEnabled = originalImage.IsManipulationEnabled;
 
                     // 复制位置
-                    InkCanvas.SetLeft(clonedImage, InkCanvas.GetLeft(originalImage));
-                    InkCanvas.SetTop(clonedImage, InkCanvas.GetTop(originalImage));
+                    System.Windows.Controls.InkCanvas.SetLeft(clonedImage, System.Windows.Controls.InkCanvas.GetLeft(originalImage));
+                    System.Windows.Controls.InkCanvas.SetTop(clonedImage, System.Windows.Controls.InkCanvas.GetTop(originalImage));
 
                     // 复制变换
                     if (originalImage.RenderTransform != null)
@@ -107,8 +107,8 @@ namespace Ink_Canvas
                     clonedMedia.Focusable = originalMedia.Focusable;
 
                     // 复制位置
-                    InkCanvas.SetLeft(clonedMedia, InkCanvas.GetLeft(originalMedia));
-                    InkCanvas.SetTop(clonedMedia, InkCanvas.GetTop(originalMedia));
+                    System.Windows.Controls.InkCanvas.SetLeft(clonedMedia, System.Windows.Controls.InkCanvas.GetLeft(originalMedia));
+                    System.Windows.Controls.InkCanvas.SetTop(clonedMedia, System.Windows.Controls.InkCanvas.GetTop(originalMedia));
 
                     // 复制变换
                     if (originalMedia.RenderTransform != null)
@@ -134,8 +134,8 @@ namespace Ink_Canvas
                     clonedBorder.CornerRadius = originalBorder.CornerRadius;
 
                     // 复制位置
-                    InkCanvas.SetLeft(clonedBorder, InkCanvas.GetLeft(originalBorder));
-                    InkCanvas.SetTop(clonedBorder, InkCanvas.GetTop(originalBorder));
+                    System.Windows.Controls.InkCanvas.SetLeft(clonedBorder, System.Windows.Controls.InkCanvas.GetLeft(originalBorder));
+                    System.Windows.Controls.InkCanvas.SetTop(clonedBorder, System.Windows.Controls.InkCanvas.GetTop(originalBorder));
 
                     // 复制变换
                     if (originalBorder.RenderTransform != null)

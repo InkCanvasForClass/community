@@ -736,8 +736,8 @@ namespace Ink_Canvas
         {
             if (element is FrameworkElement fe)
             {
-                var left = InkCanvas.GetLeft(element);
-                var top = InkCanvas.GetTop(element);
+                var left = System.Windows.Controls.InkCanvas.GetLeft(element);
+                var top = System.Windows.Controls.InkCanvas.GetTop(element);
 
                 if (double.IsNaN(left)) left = 0;
                 if (double.IsNaN(top)) top = 0;

@@ -483,8 +483,8 @@ namespace Ink_Canvas
                 centerY = Math.Max(0, centerY);
 
                 // 设置位置
-                InkCanvas.SetLeft(image, centerX);
-                InkCanvas.SetTop(image, centerY);
+                System.Windows.Controls.InkCanvas.SetLeft(image, centerX);
+                System.Windows.Controls.InkCanvas.SetTop(image, centerY);
 
                 // 这样可以保持滚轮缩放和拖动功能
                 if (image.RenderTransform == null || image.RenderTransform == Transform.Identity)
