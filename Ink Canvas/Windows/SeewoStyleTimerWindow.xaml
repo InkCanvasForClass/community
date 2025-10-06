@@ -9,6 +9,7 @@
         Topmost="True" Background="Transparent"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
         Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
+        MouseMove="Window_MouseMove" MouseEnter="Window_MouseEnter"
         Title="Ink Canvas 画板 - 计时器" Height="450" Width="900">
 
     <Window.Resources>

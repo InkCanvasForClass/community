@@ -26,6 +26,11 @@ namespace Ink_Canvas
 
             // 应用主题
             ApplyTheme();
+            
+            // 初始化隐藏定时器
+            hideTimer = new Timer(1000); // 每秒检查一次
+            hideTimer.Elapsed += HideTimer_Elapsed;
+            lastActivityTime = DateTime.Now;
         }
 
 
@@ -86,6 +91,9 @@ namespace Ink_Canvas
         bool isPaused = false;
 
         Timer timer = new Timer();
+        private Timer hideTimer;
+        private MinimizedTimerWindow minimizedWindow;
+        private DateTime lastActivityTime;
 
         // 最近计时记录
         private string recentTimer1 = "--:--";
@@ -192,6 +200,70 @@ namespace Ink_Canvas
             SetDigitDisplay("Digit4Display", minute % 10);
             SetDigitDisplay("Digit5Display", second / 10);
             SetDigitDisplay("Digit6Display", second % 10);
+        }
+
+        private void HideTimer_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // 只有在计时器运行时才检查自动隐藏
+                if (isTimerRunning && !isPaused)
+                {
+                    var timeSinceLastActivity = DateTime.Now - lastActivityTime;
+                    if (timeSinceLastActivity.TotalSeconds >= 5) // 5秒无操作
+                    {
+                        ShowMinimizedWindow();
+                    }
+                }
+            });
+        }
+
+        private void ShowMinimizedWindow()
+        {
+            if (minimizedWindow == null || !minimizedWindow.IsVisible)
+            {
+                minimizedWindow = new MinimizedTimerWindow(this);
+                minimizedWindow.Show();
+                
+                // 隐藏主窗口
+                this.Hide();
+            }
+        }
+
+        public void UpdateActivityTime()
+        {
+            lastActivityTime = DateTime.Now;
+        }
+
+        public bool IsTimerRunning => isTimerRunning;
+
+        public TimeSpan? GetRemainingTime()
+        {
+            if (!isTimerRunning || isPaused) return null;
+            
+            var elapsed = DateTime.Now - startTime;
+            var totalSeconds = hour * 3600 + minute * 60 + second;
+            var remaining = totalSeconds - elapsed.TotalSeconds;
+            
+            if (remaining <= 0) return TimeSpan.Zero;
+            return TimeSpan.FromSeconds(remaining);
+        }
+
+        public void StopTimer()
+        {
+            timer.Stop();
+            isTimerRunning = false;
+            StartPauseIcon.Data = Geometry.Parse(PlayIconData);
+        }
+
+        private void Window_MouseMove(object sender, MouseEventArgs e)
+        {
+            UpdateActivityTime();
+        }
+
+        private void Window_MouseEnter(object sender, MouseEventArgs e)
+        {
+            UpdateActivityTime();
         }
 
         /// <summary>
@@ -453,6 +525,9 @@ namespace Ink_Canvas
                 isPaused = false;
                 isTimerRunning = true;
                 timer.Start();
+                
+                // 启动隐藏定时器
+                hideTimer.Start();
 
                 // 保存到最近计时记录
                 SaveRecentTimer();
