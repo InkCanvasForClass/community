@@ -423,7 +423,7 @@
                                                             Cursor="Hand" 
                                                             HorizontalAlignment="Right">
                                                         <TextBlock x:Name="RecentTabText" Text="最近" FontSize="16" FontWeight="Normal" 
-                                                                   Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                                   Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Opacity="0.6"/>
                                                     </Button>
                                                 </Grid>
                                             </Grid>

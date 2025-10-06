@@ -566,11 +566,19 @@ namespace Ink_Canvas
             CommonTimersGrid.Visibility = Visibility.Visible;
             RecentTimersGrid.Visibility = Visibility.Collapsed;
             
-            // 更新字体粗细
+            // 更新字体粗细和透明度
             var commonText = this.FindName("CommonTabText") as TextBlock;
             var recentText = this.FindName("RecentTabText") as TextBlock;
-            if (commonText != null) commonText.FontWeight = FontWeights.Bold;
-            if (recentText != null) recentText.FontWeight = FontWeights.Normal;
+            if (commonText != null) 
+            {
+                commonText.FontWeight = FontWeights.Bold;
+                commonText.Opacity = 1.0;
+            }
+            if (recentText != null) 
+            {
+                recentText.FontWeight = FontWeights.Normal;
+                recentText.Opacity = 0.6;
+            }
             
             // 移动指示器到左侧
             var indicator = this.FindName("SegmentedIndicator") as Border;
@@ -588,11 +596,19 @@ namespace Ink_Canvas
             CommonTimersGrid.Visibility = Visibility.Collapsed;
             RecentTimersGrid.Visibility = Visibility.Visible;
             
-            // 更新字体粗细
+            // 更新字体粗细和透明度
             var commonText = this.FindName("CommonTabText") as TextBlock;
             var recentText = this.FindName("RecentTabText") as TextBlock;
-            if (commonText != null) commonText.FontWeight = FontWeights.Normal;
-            if (recentText != null) recentText.FontWeight = FontWeights.Bold;
+            if (commonText != null) 
+            {
+                commonText.FontWeight = FontWeights.Normal;
+                commonText.Opacity = 0.6;
+            }
+            if (recentText != null) 
+            {
+                recentText.FontWeight = FontWeights.Bold;
+                recentText.Opacity = 1.0;
+            }
             
             // 移动指示器到右侧
             var indicator = this.FindName("SegmentedIndicator") as Border;
