@@ -129,6 +129,7 @@ namespace Ink_Canvas
                 else if (settings.Appearance.Theme == 1) // 深色主题
                 {
                     iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
+                    SetDarkThemeBorder();
                 }
                 else // 跟随系统主题
                 {
@@ -140,6 +141,7 @@ namespace Ink_Canvas
                     else
                     {
                         iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
+                        SetDarkThemeBorder();
                     }
                 }
             }
@@ -690,6 +692,21 @@ namespace Ink_Canvas
             catch
             {
                 // 如果保存到注册表失败，静默处理
+            }
+        }
+
+        // 设置深色主题下的灰色边框
+        private void SetDarkThemeBorder()
+        {
+            try
+            {
+                if (MainBorder != null)
+                {
+                    MainBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64)); 
+                }
+            }
+            catch
+            {
             }
         }
     }

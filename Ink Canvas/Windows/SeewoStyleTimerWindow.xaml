@@ -10,7 +10,7 @@
         Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
         Title="Ink Canvas 画板 - 计时器" Height="450" Width="900">
 
-    <Border Background="{DynamicResource SeewoTimerWindowBackground}" CornerRadius="15" BorderThickness="1" BorderBrush="{DynamicResource SeewoTimerWindowBorderBrush}" Margin="10">
+    <Border Background="{DynamicResource SeewoTimerWindowBackground}" CornerRadius="15" BorderThickness="1" BorderBrush="{DynamicResource SeewoTimerWindowBorderBrush}" Margin="10" x:Name="MainBorder">
         <Grid>
             <!-- 主要内容区域 -->
             <Grid>
@@ -266,7 +266,7 @@
                             
                             <!-- 分割线 -->
                             <Border Width="2" Background="{DynamicResource SeewoTimerWindowButtonForeground}" 
-                                    Opacity="0.5" HorizontalAlignment="Left" VerticalAlignment="Stretch" 
+                                    Opacity="0.3" HorizontalAlignment="Left" VerticalAlignment="Stretch" 
                                     Margin="580,0,0,0"/>
                             
                             <!-- 右侧：快捷选项区域 -->
