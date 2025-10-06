@@ -561,17 +561,36 @@ namespace Ink_Canvas
                 DragMove();
         }
 
-        // Tab切换事件处理
         private void CommonTab_Click(object sender, RoutedEventArgs e)
         {
             CommonTimersGrid.Visibility = Visibility.Visible;
             RecentTimersGrid.Visibility = Visibility.Collapsed;
+            
+            // 移动指示器到左侧
+            var indicator = this.FindName("SegmentedIndicator") as Border;
+            if (indicator != null)
+            {
+                var animation = new System.Windows.Media.Animation.ThicknessAnimation(
+                    new Thickness(2, 0, 0, 0), 
+                    TimeSpan.FromMilliseconds(200));
+                indicator.BeginAnimation(Border.MarginProperty, animation);
+            }
         }
 
         private void RecentTab_Click(object sender, RoutedEventArgs e)
         {
             CommonTimersGrid.Visibility = Visibility.Collapsed;
             RecentTimersGrid.Visibility = Visibility.Visible;
+            
+            // 移动指示器到右侧
+            var indicator = this.FindName("SegmentedIndicator") as Border;
+            if (indicator != null)
+            {
+                var animation = new System.Windows.Media.Animation.ThicknessAnimation(
+                    new Thickness(120, 0, 0, 0), 
+                    TimeSpan.FromMilliseconds(200));
+                indicator.BeginAnimation(Border.MarginProperty, animation);
+            }
         }
 
         // 常用计时事件处理

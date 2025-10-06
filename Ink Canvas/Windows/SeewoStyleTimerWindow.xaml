@@ -388,34 +388,46 @@
                             <Grid HorizontalAlignment="Left" VerticalAlignment="Center" 
                                   x:Name="QuickOptionsGrid" Width="400" Margin="510,0,0,0" Height="200">
                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                    <!-- Tab切换区域 -->
+                                    <!-- Segmented Control -->
                                     <Grid Margin="0,0,0,20">
-                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Button x:Name="CommonTabBtn" Width="120" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                            BorderThickness="0" Click="CommonTab_Click" Cursor="Hand" Margin="0,0,15,0">
-                                                <Button.Template>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
-                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </Button.Template>
-                                                <TextBlock Text="常用" FontSize="16" FontWeight="Bold" 
-                                                           Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
-                                            </Button>
-                                            <Button x:Name="RecentTabBtn" Width="120" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                            BorderThickness="0" Click="RecentTab_Click" Cursor="Hand">
-                                                <Button.Template>
-                                                    <ControlTemplate TargetType="Button">
-                                                        <Border Background="{TemplateBinding Background}" CornerRadius="6">
-                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                        </Border>
-                                                    </ControlTemplate>
-                                                </Button.Template>
-                                                <TextBlock Text="最近" FontSize="16" FontWeight="Bold" 
-                                                           Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
-                                            </Button>
-                                        </StackPanel>
+                                        <Border Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                CornerRadius="8" 
+                                                Width="240" Height="40">
+                                            <Grid>
+                                                <!-- 背景指示器 -->
+                                                <Border x:Name="SegmentedIndicator" 
+                                                        Background="{DynamicResource SeewoTimerWindowPrimaryButtonBackground}" 
+                                                        CornerRadius="6" 
+                                                        Width="118" Height="32" 
+                                                        HorizontalAlignment="Left" 
+                                                        VerticalAlignment="Center" 
+                                                        Margin="2,0,0,0"/>
+                                                
+                                                <!-- 按钮容器 -->
+                                                <Grid>
+                                                    <Button x:Name="CommonTabBtn" 
+                                                            Width="120" Height="40" 
+                                                            Background="Transparent" 
+                                                            BorderThickness="0" 
+                                                            Click="CommonTab_Click" 
+                                                            Cursor="Hand" 
+                                                            HorizontalAlignment="Left">
+                                                        <TextBlock Text="常用" FontSize="16" FontWeight="Bold" 
+                                                                   Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    </Button>
+                                                    <Button x:Name="RecentTabBtn" 
+                                                            Width="120" Height="40" 
+                                                            Background="Transparent" 
+                                                            BorderThickness="0" 
+                                                            Click="RecentTab_Click" 
+                                                            Cursor="Hand" 
+                                                            HorizontalAlignment="Right">
+                                                        <TextBlock Text="最近" FontSize="16" FontWeight="Bold" 
+                                                                   Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                    </Button>
+                                                </Grid>
+                                            </Grid>
+                                        </Border>
                                     </Grid>
 
                                     <!-- 常用计时区域 -->
