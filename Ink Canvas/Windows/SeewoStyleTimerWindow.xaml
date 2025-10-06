@@ -399,7 +399,7 @@
                                                 <!-- 背景指示器 -->
                                                 <Border x:Name="SegmentedIndicator" 
                                                         Background="{DynamicResource SeewoTimerWindowPrimaryButtonBackground}" 
-                                                        CornerRadius="7,0,0,7" 
+                                                        CornerRadius="7.5,0,0,7.5" 
                                                         Width="120" Height="38" 
                                                         HorizontalAlignment="Left" 
                                                         VerticalAlignment="Center" 
