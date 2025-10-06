@@ -72,7 +72,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M12 5l0 14 M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                     <!-- 数字显示 -->
                                                     <TextBlock x:Name="Digit1Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -87,7 +95,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                 </StackPanel>
                                             </Grid>
@@ -105,7 +121,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M12 5l0 14 M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                     <!-- 数字显示 -->
                                                     <TextBlock x:Name="Digit2Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -120,7 +144,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                 </StackPanel>
                                             </Grid>
@@ -152,7 +184,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M12 5l0 14 M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                     <!-- 数字显示 -->
                                                     <TextBlock x:Name="Digit3Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -167,7 +207,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                 </StackPanel>
                                             </Grid>
@@ -185,7 +233,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M12 5l0 14 M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                     <!-- 数字显示 -->
                                                     <TextBlock x:Name="Digit4Display" Text="5" FontSize="64" FontWeight="Bold" 
@@ -200,7 +256,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                 </StackPanel>
                                             </Grid>
@@ -232,7 +296,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M12 5l0 14 M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                     <!-- 数字显示 -->
                                                     <TextBlock x:Name="Digit5Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -247,7 +319,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                 </StackPanel>
                                             </Grid>
@@ -265,7 +345,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="+" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M12 5l0 14 M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                     <!-- 数字显示 -->
                                                     <TextBlock x:Name="Digit6Display" Text="0" FontSize="64" FontWeight="Bold" 
@@ -280,7 +368,15 @@
                                                                 </Border>
                                                             </ControlTemplate>
                                                         </Button.Template>
-                                                        <TextBlock Text="-" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
+                                                        <Path Data="M5 12l14 0" 
+                                                              Stroke="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                                              StrokeThickness="2" 
+                                                              StrokeStartLineCap="Round" 
+                                                              StrokeEndLineCap="Round"
+                                                              StrokeLineJoin="Round" 
+                                                              Fill="Transparent" 
+                                                              Width="16" Height="16" 
+                                                              Stretch="Uniform"/>
                                                     </Button>
                                                 </StackPanel>
                                             </Grid>
