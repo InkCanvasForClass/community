@@ -52,7 +52,7 @@
                               x:Name="MainContentGrid" Margin="0,-25,0,25">
                             <!-- 左侧：6位数字显示区域 -->
                             <Grid HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                  x:Name="MainDisplayGrid" Width="500" Margin="50,0,0,0">
+                                  x:Name="MainDisplayGrid" Width="500" Margin="0,0,0,0">
                             <!-- 6位数字水平排列 -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" 
                                            x:Name="DigitsPanel">
@@ -382,11 +382,11 @@
                             <!-- 分割线 -->
                             <Border Width="2" Background="{DynamicResource SeewoTimerWindowButtonForeground}" 
                                     Opacity="0.3" HorizontalAlignment="Left" VerticalAlignment="Stretch" 
-                                    Margin="510,0,0,0"/>
+                                    Margin="465,0,0,0"/>
 
                             <!-- 右侧：快捷选项区域 -->
                             <Grid HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                  x:Name="QuickOptionsGrid" Width="400" Margin="510,0,0,0" Height="200">
+                                  x:Name="QuickOptionsGrid" Width="400" Margin="470,0,0,0" Height="200">
                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                     <!-- Segmented Control -->
                                     <Grid Margin="0,0,0,20">
