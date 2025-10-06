@@ -44,8 +44,13 @@ namespace Ink_Canvas
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Digit1Display.Text = (leftTimeSpan.Hours / 10).ToString();
-                Digit2Display.Text = (leftTimeSpan.Hours % 10).ToString();
+                int totalHours = (int)leftTimeSpan.TotalHours;
+                int displayHours = totalHours;
+                
+                if (displayHours > 99) displayHours = 99;
+                
+                Digit1Display.Text = (displayHours / 10).ToString();
+                Digit2Display.Text = (displayHours % 10).ToString();
                 Digit3Display.Text = (leftTimeSpan.Minutes / 10).ToString();
                 Digit4Display.Text = (leftTimeSpan.Minutes % 10).ToString();
                 Digit5Display.Text = (leftTimeSpan.Seconds / 10).ToString();
