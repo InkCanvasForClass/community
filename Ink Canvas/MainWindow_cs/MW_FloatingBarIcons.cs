@@ -476,9 +476,9 @@ namespace Ink_Canvas
 
                 // 根据主题选择高光颜色
                 Color highlightColor;
-                bool isDarkTheme = Settings.Appearance.Theme == 1 || 
+                bool isDarkTheme = Settings.Appearance.Theme == 1 ||
                                    (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
-                
+
                 if (isDarkTheme)
                 {
                     highlightColor = Color.FromRgb(102, 204, 255); // #66ccff for dark theme
@@ -3716,18 +3716,18 @@ namespace Ink_Canvas
                 // 根据主题设置高光颜色
                 Color highlightBackgroundColor;
                 Color highlightBarColor;
-                bool isDarkTheme = Settings.Appearance.Theme == 1 || 
+                bool isDarkTheme = Settings.Appearance.Theme == 1 ||
                                    (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
-                
+
                 if (isDarkTheme)
                 {
-                    highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255); 
-                    highlightBarColor = Color.FromRgb(102, 204, 255); 
+                    highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255);
+                    highlightBarColor = Color.FromRgb(102, 204, 255);
                 }
                 else
                 {
-                    highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246); 
-                    highlightBarColor = Color.FromRgb(37, 99, 235); 
+                    highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246);
+                    highlightBarColor = Color.FromRgb(37, 99, 235);
                 }
 
                 // 设置高光背景颜色

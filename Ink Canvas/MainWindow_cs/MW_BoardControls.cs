@@ -418,7 +418,7 @@ namespace Ink_Canvas
 
             // 获取主题颜色资源
             var iconForegroundBrush = Application.Current.FindResource("IconForeground") as SolidColorBrush;
-            
+
             // 设置下一页按钮颜色
             if (iconForegroundBrush != null)
             {

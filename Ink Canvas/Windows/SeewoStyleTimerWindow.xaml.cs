@@ -5,7 +5,6 @@ using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 
 namespace Ink_Canvas
@@ -23,7 +22,7 @@ namespace Ink_Canvas
             timer.Elapsed += Timer_Elapsed;
             timer.Interval = 50;
             InitializeUI();
-            
+
             // 应用主题
             ApplyTheme();
         }
@@ -46,9 +45,9 @@ namespace Ink_Canvas
             {
                 int totalHours = (int)leftTimeSpan.TotalHours;
                 int displayHours = totalHours;
-                
+
                 if (displayHours > 99) displayHours = 99;
-                
+
                 Digit1Display.Text = (displayHours / 10).ToString();
                 Digit2Display.Text = (displayHours % 10).ToString();
                 Digit3Display.Text = (leftTimeSpan.Minutes / 10).ToString();
@@ -86,7 +85,7 @@ namespace Ink_Canvas
         bool isPaused = false;
 
         Timer timer = new Timer();
-        
+
         // 最近计时记录
         private string recentTimer1 = "--:--";
         private string recentTimer2 = "--:--";
@@ -94,7 +93,7 @@ namespace Ink_Canvas
         private string recentTimer4 = "--:--";
         private string recentTimer5 = "--:--";
         private string recentTimer6 = "--:--";
-        
+
         // 最近计时记录的注册表键名
         private const string RecentTimer1Key = "SeewoTimer_RecentTimer1";
         private const string RecentTimer2Key = "SeewoTimer_RecentTimer2";
@@ -201,10 +200,10 @@ namespace Ink_Canvas
             int currentHour = hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
-            
+
             hourTens++;
             if (hourTens >= 10) hourTens = 0;
-            
+
             hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
@@ -215,10 +214,10 @@ namespace Ink_Canvas
             int currentHour = hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
-            
+
             hourTens--;
             if (hourTens < 0) hourTens = 9;
-            
+
             hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
@@ -230,15 +229,15 @@ namespace Ink_Canvas
             int currentHour = hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
-            
+
             hourOnes++;
-            if (hourOnes >= 10) 
+            if (hourOnes >= 10)
             {
                 hourOnes = 0;
                 hourTens++;
                 if (hourTens >= 10) hourTens = 0;
             }
-            
+
             hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
@@ -249,15 +248,15 @@ namespace Ink_Canvas
             int currentHour = hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
-            
+
             hourOnes--;
-            if (hourOnes < 0) 
+            if (hourOnes < 0)
             {
                 hourOnes = 9;
                 hourTens--;
                 if (hourTens < 0) hourTens = 9;
             }
-            
+
             hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
@@ -269,10 +268,10 @@ namespace Ink_Canvas
             int currentMinute = minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
-            
+
             minuteTens++;
             if (minuteTens >= 6) minuteTens = 0;
-            
+
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
@@ -283,10 +282,10 @@ namespace Ink_Canvas
             int currentMinute = minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
-            
+
             minuteTens--;
             if (minuteTens < 0) minuteTens = 5;
-            
+
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
@@ -298,15 +297,15 @@ namespace Ink_Canvas
             int currentMinute = minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
-            
+
             minuteOnes++;
-            if (minuteOnes >= 10) 
+            if (minuteOnes >= 10)
             {
                 minuteOnes = 0;
                 minuteTens++;
                 if (minuteTens >= 6) minuteTens = 0;
             }
-            
+
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
@@ -317,15 +316,15 @@ namespace Ink_Canvas
             int currentMinute = minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
-            
+
             minuteOnes--;
-            if (minuteOnes < 0) 
+            if (minuteOnes < 0)
             {
                 minuteOnes = 9;
                 minuteTens--;
                 if (minuteTens < 0) minuteTens = 5;
             }
-            
+
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
@@ -337,10 +336,10 @@ namespace Ink_Canvas
             int currentSecond = second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
-            
+
             secondTens++;
             if (secondTens >= 6) secondTens = 0;
-            
+
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
@@ -351,10 +350,10 @@ namespace Ink_Canvas
             int currentSecond = second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
-            
+
             secondTens--;
             if (secondTens < 0) secondTens = 5;
-            
+
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
@@ -366,15 +365,15 @@ namespace Ink_Canvas
             int currentSecond = second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
-            
+
             secondOnes++;
-            if (secondOnes >= 10) 
+            if (secondOnes >= 10)
             {
                 secondOnes = 0;
                 secondTens++;
                 if (secondTens >= 6) secondTens = 0;
             }
-            
+
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
@@ -385,15 +384,15 @@ namespace Ink_Canvas
             int currentSecond = second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
-            
+
             secondOnes--;
-            if (secondOnes < 0) 
+            if (secondOnes < 0)
             {
                 secondOnes = 9;
                 secondTens--;
                 if (secondTens < 0) secondTens = 5;
             }
-            
+
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
@@ -428,13 +427,13 @@ namespace Ink_Canvas
                     second = 1;
                     UpdateDigitDisplays();
                 }
-                
+
                 startTime = DateTime.Now;
                 StartPauseIcon.Data = Geometry.Parse(PauseIconData);
                 isPaused = false;
                 isTimerRunning = true;
                 timer.Start();
-                
+
                 // 保存到最近计时记录
                 SaveRecentTimer();
             }
@@ -518,7 +517,7 @@ namespace Ink_Canvas
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             isTimerRunning = false;
-            
+
             if (MainWindow.Settings != null)
             {
                 var mainWindow = Application.Current.MainWindow as MainWindow;
@@ -526,7 +525,7 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        var currentModeField = mainWindow.GetType().GetField("currentMode", 
+                        var currentModeField = mainWindow.GetType().GetField("currentMode",
                             System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                         if (currentModeField != null)
                         {
@@ -565,23 +564,23 @@ namespace Ink_Canvas
         {
             CommonTimersGrid.Visibility = Visibility.Visible;
             RecentTimersGrid.Visibility = Visibility.Collapsed;
-            
+
             // 更新字体粗细、透明度和颜色
             var commonText = this.FindName("CommonTabText") as TextBlock;
             var recentText = this.FindName("RecentTabText") as TextBlock;
-            if (commonText != null) 
+            if (commonText != null)
             {
                 commonText.FontWeight = FontWeights.Bold;
                 commonText.Opacity = 1.0;
                 commonText.Foreground = new SolidColorBrush(Colors.White);
             }
-            if (recentText != null) 
+            if (recentText != null)
             {
                 recentText.FontWeight = FontWeights.Normal;
                 recentText.Opacity = 0.8;
                 recentText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
             }
-            
+
             // 移动指示器到左侧
             var indicator = this.FindName("SegmentedIndicator") as Border;
             if (indicator != null)
@@ -589,7 +588,7 @@ namespace Ink_Canvas
                 // 设置左侧圆角
                 indicator.CornerRadius = new CornerRadius(7, 0, 0, 7);
                 var animation = new System.Windows.Media.Animation.ThicknessAnimation(
-                    new Thickness(0, 0, 0, 0), 
+                    new Thickness(0, 0, 0, 0),
                     TimeSpan.FromMilliseconds(200));
                 indicator.BeginAnimation(Border.MarginProperty, animation);
             }
@@ -599,23 +598,23 @@ namespace Ink_Canvas
         {
             CommonTimersGrid.Visibility = Visibility.Collapsed;
             RecentTimersGrid.Visibility = Visibility.Visible;
-            
+
             // 更新字体粗细、透明度和颜色
             var commonText = this.FindName("CommonTabText") as TextBlock;
             var recentText = this.FindName("RecentTabText") as TextBlock;
-            if (commonText != null) 
+            if (commonText != null)
             {
                 commonText.FontWeight = FontWeights.Normal;
                 commonText.Opacity = 0.8;
                 commonText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
             }
-            if (recentText != null) 
+            if (recentText != null)
             {
                 recentText.FontWeight = FontWeights.Bold;
                 recentText.Opacity = 1.0;
                 recentText.Foreground = new SolidColorBrush(Colors.White);
             }
-            
+
             // 移动指示器到右侧
             var indicator = this.FindName("SegmentedIndicator") as Border;
             if (indicator != null)
@@ -623,7 +622,7 @@ namespace Ink_Canvas
                 // 设置右侧圆角
                 indicator.CornerRadius = new CornerRadius(0, 7, 7, 0);
                 var animation = new System.Windows.Media.Animation.ThicknessAnimation(
-                    new Thickness(118, 0, 0, 0), 
+                    new Thickness(118, 0, 0, 0),
                     TimeSpan.FromMilliseconds(200));
                 indicator.BeginAnimation(Border.MarginProperty, animation);
             }
@@ -716,7 +715,7 @@ namespace Ink_Canvas
         private void ApplyRecentTimer(string timeString)
         {
             if (timeString == "--:--") return;
-            
+
             try
             {
                 var parts = timeString.Split(':');
@@ -737,9 +736,9 @@ namespace Ink_Canvas
         private void SaveRecentTimer()
         {
             if (hour == 0 && minute == 0 && second == 0) return;
-            
+
             string currentTime = $"{minute:D2}:{second:D2}";
-            
+
             // 如果当前时间与最近记录不同，则更新
             if (currentTime != recentTimer1)
             {
@@ -835,7 +834,7 @@ namespace Ink_Canvas
             {
                 if (MainBorder != null)
                 {
-                    MainBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64)); 
+                    MainBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64));
                 }
             }
             catch

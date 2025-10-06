@@ -22,7 +22,7 @@ namespace Ink_Canvas
             timer.Elapsed += Timer_Elapsed;
             timer.Interval = 50;
             InitializeUI();
-            
+
             // 应用主题
             ApplyTheme();
         }
@@ -111,9 +111,9 @@ namespace Ink_Canvas
         private void Grid_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (isTimerRunning) return;
-            
+
             var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
-            
+
             if (ProcessBarTime.Visibility == Visibility.Visible && isTimerRunning == false)
             {
                 ProcessBarTime.Visibility = Visibility.Collapsed;
@@ -439,7 +439,7 @@ namespace Ink_Canvas
             {
                 // 重新应用主题
                 ApplyTheme();
-                
+
                 // 强制刷新UI
                 InvalidateVisual();
             }

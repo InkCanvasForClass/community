@@ -839,7 +839,7 @@ namespace Ink_Canvas
                 // 检测到新版本，停止重试定时器
                 timerCheckAutoUpdateRetry.Stop();
                 updateCheckRetryCount = 0;
-                
+
                 // 检测到新版本
                 LogHelper.WriteLogToFile($"AutoUpdate | New version available: {AvailableLatestVersion}");
 
@@ -1006,7 +1006,7 @@ namespace Ink_Canvas
             else if (hasValidLineGroup)
             {
                 LogHelper.WriteLogToFile("AutoUpdate | Current version is already the latest, no retry needed");
-                
+
                 // 停止重试定时器
                 timerCheckAutoUpdateRetry.Stop();
                 updateCheckRetryCount = 0;
@@ -1015,13 +1015,13 @@ namespace Ink_Canvas
             {
                 // 检查更新失败，启动重试定时器
                 LogHelper.WriteLogToFile("AutoUpdate | Update check failed, starting retry timer");
-                
+
                 // 重置重试计数
                 updateCheckRetryCount = 0;
-                
+
                 // 启动重试定时器，10分钟后重新检查
                 timerCheckAutoUpdateRetry.Start();
-                
+
                 // 清理更新文件夹
                 AutoUpdateHelper.DeleteUpdatesFolder();
             }
