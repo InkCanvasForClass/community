@@ -412,7 +412,7 @@
                                                             Click="CommonTab_Click" 
                                                             Cursor="Hand" 
                                                             HorizontalAlignment="Left">
-                                                        <TextBlock Text="常用" FontSize="16" FontWeight="Bold" 
+                                                        <TextBlock x:Name="CommonTabText" Text="常用" FontSize="16" FontWeight="Bold" 
                                                                    Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                     </Button>
                                                     <Button x:Name="RecentTabBtn" 
@@ -422,7 +422,7 @@
                                                             Click="RecentTab_Click" 
                                                             Cursor="Hand" 
                                                             HorizontalAlignment="Right">
-                                                        <TextBlock Text="最近" FontSize="16" FontWeight="Bold" 
+                                                        <TextBlock x:Name="RecentTabText" Text="最近" FontSize="16" FontWeight="Normal" 
                                                                    Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                     </Button>
                                                 </Grid>

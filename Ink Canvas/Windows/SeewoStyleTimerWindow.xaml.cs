@@ -566,6 +566,12 @@ namespace Ink_Canvas
             CommonTimersGrid.Visibility = Visibility.Visible;
             RecentTimersGrid.Visibility = Visibility.Collapsed;
             
+            // 更新字体粗细
+            var commonText = this.FindName("CommonTabText") as TextBlock;
+            var recentText = this.FindName("RecentTabText") as TextBlock;
+            if (commonText != null) commonText.FontWeight = FontWeights.Bold;
+            if (recentText != null) recentText.FontWeight = FontWeights.Normal;
+            
             // 移动指示器到左侧
             var indicator = this.FindName("SegmentedIndicator") as Border;
             if (indicator != null)
@@ -581,6 +587,12 @@ namespace Ink_Canvas
         {
             CommonTimersGrid.Visibility = Visibility.Collapsed;
             RecentTimersGrid.Visibility = Visibility.Visible;
+            
+            // 更新字体粗细
+            var commonText = this.FindName("CommonTabText") as TextBlock;
+            var recentText = this.FindName("RecentTabText") as TextBlock;
+            if (commonText != null) commonText.FontWeight = FontWeights.Normal;
+            if (recentText != null) recentText.FontWeight = FontWeights.Bold;
             
             // 移动指示器到右侧
             var indicator = this.FindName("SegmentedIndicator") as Border;
