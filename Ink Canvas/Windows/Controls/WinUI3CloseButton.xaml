@@ -8,6 +8,7 @@
         <Setter Property="Width" Value="46" />
         <Setter Property="Height" Value="32" />
         <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource SeewoTimerWindowButtonForeground}" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
         <Setter Property="Template">
@@ -52,12 +53,10 @@
     <!-- 关闭按钮图标模板 -->
     <DataTemplate x:Key="CloseButtonIconTemplate" DataType="system:String">
         <TextBlock
-            FontFamily="Segoe MDL2 Assets"
-            FontSize="10"
-            Text="{Binding}"
+            FontSize="12"
+            Text="✕"
             HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Foreground="{Binding RelativeSource={RelativeSource AncestorType=Button}, Path=Foreground}" />
+            VerticalAlignment="Center" />
     </DataTemplate>
 
 </ResourceDictionary>

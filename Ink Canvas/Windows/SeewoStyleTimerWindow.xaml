@@ -24,7 +24,7 @@
             <controls:WinUI3CloseButton x:Name="CloseButton" 
                                         HorizontalAlignment="Right" VerticalAlignment="Top" 
                                         Margin="0,0,0,0" Cursor="Hand" Click="CloseButton_Click"
-                                        Content="&#xE8BB;" ContentTemplate="{StaticResource CloseButtonIconTemplate}"/>
+                                        Content="✕"/>
             <!-- 主要内容区域 -->
             <Grid>
                 <!-- 使用Viewbox自动缩放内容 -->
