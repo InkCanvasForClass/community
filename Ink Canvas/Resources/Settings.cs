@@ -632,7 +632,7 @@ namespace Ink_Canvas
         [JsonProperty("useLegacyTimerUI")]
         public bool UseLegacyTimerUI { get; set; } = false;
         [JsonProperty("useSeewoStyleUI")]
-        public bool UseSeewoStyleUI { get; set; } = false;
+        public bool UseSeewoStyleUI { get; set; } = true;
         [JsonProperty("timerVolume")]
         public double TimerVolume { get; set; } = 1.0;
         [JsonProperty("customTimerSoundPath")]
