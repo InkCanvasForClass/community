@@ -32,9 +32,20 @@
                     <Grid Height="400" Width="900">
                         <!-- 顶部标题栏 -->
                         <Grid Height="50" Background="{DynamicResource SeewoTimerWindowBackground}" x:Name="TitleBar" VerticalAlignment="Top" MouseLeftButtonDown="WindowDragMove" Margin="0,0,450,0">
-                            <TextBlock Text="计时" FontSize="20" FontWeight="Bold" 
-                                       HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                       Margin="22,0,0,0" Foreground="{DynamicResource SeewoTimerWindowTitleForeground}" x:Name="TitleText"/>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0">
+                                <!-- 计时器图标 -->
+                                <Path Data="M5 13a7 7 0 1 0 14 0a7 7 0 0 0 -14 0z M14.5 10.5l-2.5 2.5 M17 8l1 -1 M14 3h-4" 
+                                      Stroke="{DynamicResource SeewoTimerWindowTitleForeground}" 
+                                      StrokeThickness="2" 
+                                      StrokeLineJoin="Round" 
+                                      Fill="Transparent" 
+                                      Width="24" Height="24" 
+                                      Stretch="Uniform" 
+                                      Margin="0,0,8,0"/>
+                                <!-- 计时文字 -->
+                                <TextBlock Text="计时" FontSize="28" FontWeight="Bold" 
+                                           Foreground="{DynamicResource SeewoTimerWindowTitleForeground}" x:Name="TitleText"/>
+                            </StackPanel>
                         </Grid>
                         <!-- 主要内容区域 - 分为左右两部分 -->
                         <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" 
