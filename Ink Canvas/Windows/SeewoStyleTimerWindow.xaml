@@ -382,16 +382,16 @@
                             <!-- 分割线 -->
                             <Border Width="2" Background="{DynamicResource SeewoTimerWindowButtonForeground}" 
                                     Opacity="0.3" HorizontalAlignment="Left" VerticalAlignment="Stretch" 
-                                    Margin="580,0,0,0"/>
+                                    Margin="520,0,0,0"/>
 
                             <!-- 右侧：快捷选项区域 -->
                             <Grid HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                  x:Name="QuickOptionsGrid" Width="350" Margin="550,0,0,0" Height="177">
+                                  x:Name="QuickOptionsGrid" Width="400" Margin="480,0,0,0" Height="200">
                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                     <!-- Tab切换区域 -->
                                     <Grid Margin="0,0,0,20">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                            <Button x:Name="CommonTabBtn" Width="100" Height="35" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                            <Button x:Name="CommonTabBtn" Width="120" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                             BorderThickness="0" Click="CommonTab_Click" Cursor="Hand" Margin="0,0,10,0">
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
@@ -403,7 +403,7 @@
                                                 <TextBlock Text="常用" FontSize="14" FontWeight="Bold" 
                                                            Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                             </Button>
-                                            <Button x:Name="RecentTabBtn" Width="100" Height="35" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                            <Button x:Name="RecentTabBtn" Width="120" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                             BorderThickness="0" Click="RecentTab_Click" Cursor="Hand">
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
@@ -423,8 +423,8 @@
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                             <!-- 第一排：5分钟, 10分钟, 15分钟 -->
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                                <Button x:Name="Common5MinBtn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Common5Min_Click" Cursor="Hand" Margin="0,0,8,0">
+                                                <Button x:Name="Common5MinBtn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                BorderThickness="0" Click="Common5Min_Click" Cursor="Hand" Margin="0,0,10,0">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
@@ -447,8 +447,8 @@
                                                                    Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                     </StackPanel>
                                                 </Button>
-                                                <Button x:Name="Common10MinBtn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Common10Min_Click" Cursor="Hand" Margin="0,0,8,0">
+                                                <Button x:Name="Common10MinBtn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                BorderThickness="0" Click="Common10Min_Click" Cursor="Hand" Margin="0,0,10,0">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
@@ -471,7 +471,7 @@
                                                                    Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                     </StackPanel>
                                                 </Button>
-                                                <Button x:Name="Common15MinBtn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                <Button x:Name="Common15MinBtn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="Common15Min_Click" Cursor="Hand">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
@@ -499,8 +499,8 @@
 
                                             <!-- 第二排：30分钟, 45分钟, 60分钟 -->
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <Button x:Name="Common30MinBtn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Common30Min_Click" Cursor="Hand" Margin="0,0,8,0">
+                                                <Button x:Name="Common30MinBtn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                BorderThickness="0" Click="Common30Min_Click" Cursor="Hand" Margin="0,0,10,0">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
@@ -523,8 +523,8 @@
                                                                    Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                     </StackPanel>
                                                 </Button>
-                                                <Button x:Name="Common45MinBtn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Common45Min_Click" Cursor="Hand" Margin="0,0,8,0">
+                                                <Button x:Name="Common45MinBtn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                BorderThickness="0" Click="Common45Min_Click" Cursor="Hand" Margin="0,0,10,0">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
@@ -547,7 +547,7 @@
                                                                    Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                     </StackPanel>
                                                 </Button>
-                                                <Button x:Name="Common60MinBtn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                <Button x:Name="Common60MinBtn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="Common60Min_Click" Cursor="Hand">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
@@ -580,8 +580,8 @@
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                             <!-- 第一排：最近3个 -->
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
-                                                <Button x:Name="RecentTimer1Btn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="RecentTimer1_Click" Cursor="Hand" Margin="0,0,8,0">
+                                                <Button x:Name="RecentTimer1Btn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                BorderThickness="0" Click="RecentTimer1_Click" Cursor="Hand" Margin="0,0,10,0">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
@@ -592,8 +592,8 @@
                                                     <TextBlock x:Name="RecentTimer1Text" Text="--:--" FontSize="12" FontWeight="Bold" 
                                                                Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
-                                                <Button x:Name="RecentTimer2Btn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="RecentTimer2_Click" Cursor="Hand" Margin="0,0,8,0">
+                                                <Button x:Name="RecentTimer2Btn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                BorderThickness="0" Click="RecentTimer2_Click" Cursor="Hand" Margin="0,0,10,0">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
@@ -604,7 +604,7 @@
                                                     <TextBlock x:Name="RecentTimer2Text" Text="--:--" FontSize="12" FontWeight="Bold" 
                                                                Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
-                                                <Button x:Name="RecentTimer3Btn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                <Button x:Name="RecentTimer3Btn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="RecentTimer3_Click" Cursor="Hand">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
@@ -620,8 +620,8 @@
 
                                             <!-- 第二排：最近3个 -->
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <Button x:Name="RecentTimer4Btn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="RecentTimer4_Click" Cursor="Hand" Margin="0,0,8,0">
+                                                <Button x:Name="RecentTimer4Btn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                BorderThickness="0" Click="RecentTimer4_Click" Cursor="Hand" Margin="0,0,10,0">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
@@ -632,8 +632,8 @@
                                                     <TextBlock x:Name="RecentTimer4Text" Text="--:--" FontSize="12" FontWeight="Bold" 
                                                                Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
-                                                <Button x:Name="RecentTimer5Btn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="RecentTimer5_Click" Cursor="Hand" Margin="0,0,8,0">
+                                                <Button x:Name="RecentTimer5Btn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                BorderThickness="0" Click="RecentTimer5_Click" Cursor="Hand" Margin="0,0,10,0">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="6">
@@ -644,7 +644,7 @@
                                                     <TextBlock x:Name="RecentTimer5Text" Text="--:--" FontSize="12" FontWeight="Bold" 
                                                                Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
                                                 </Button>
-                                                <Button x:Name="RecentTimer6Btn" Width="70" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
+                                                <Button x:Name="RecentTimer6Btn" Width="80" Height="45" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="RecentTimer6_Click" Cursor="Hand">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
