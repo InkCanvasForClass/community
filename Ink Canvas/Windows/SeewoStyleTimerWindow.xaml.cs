@@ -566,26 +566,30 @@ namespace Ink_Canvas
             CommonTimersGrid.Visibility = Visibility.Visible;
             RecentTimersGrid.Visibility = Visibility.Collapsed;
             
-            // 更新字体粗细和透明度
+            // 更新字体粗细、透明度和颜色
             var commonText = this.FindName("CommonTabText") as TextBlock;
             var recentText = this.FindName("RecentTabText") as TextBlock;
             if (commonText != null) 
             {
                 commonText.FontWeight = FontWeights.Bold;
                 commonText.Opacity = 1.0;
+                commonText.Foreground = new SolidColorBrush(Colors.White);
             }
             if (recentText != null) 
             {
                 recentText.FontWeight = FontWeights.Normal;
-                recentText.Opacity = 0.6;
+                recentText.Opacity = 0.8;
+                recentText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
             }
             
             // 移动指示器到左侧
             var indicator = this.FindName("SegmentedIndicator") as Border;
             if (indicator != null)
             {
+                // 设置左侧圆角
+                indicator.CornerRadius = new CornerRadius(6, 0, 0, 6);
                 var animation = new System.Windows.Media.Animation.ThicknessAnimation(
-                    new Thickness(2, 0, 0, 0), 
+                    new Thickness(0, 0, 0, 0), 
                     TimeSpan.FromMilliseconds(200));
                 indicator.BeginAnimation(Border.MarginProperty, animation);
             }
@@ -596,26 +600,30 @@ namespace Ink_Canvas
             CommonTimersGrid.Visibility = Visibility.Collapsed;
             RecentTimersGrid.Visibility = Visibility.Visible;
             
-            // 更新字体粗细和透明度
+            // 更新字体粗细、透明度和颜色
             var commonText = this.FindName("CommonTabText") as TextBlock;
             var recentText = this.FindName("RecentTabText") as TextBlock;
             if (commonText != null) 
             {
                 commonText.FontWeight = FontWeights.Normal;
-                commonText.Opacity = 0.6;
+                commonText.Opacity = 0.8;
+                commonText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
             }
             if (recentText != null) 
             {
                 recentText.FontWeight = FontWeights.Bold;
                 recentText.Opacity = 1.0;
+                recentText.Foreground = new SolidColorBrush(Colors.White);
             }
             
             // 移动指示器到右侧
             var indicator = this.FindName("SegmentedIndicator") as Border;
             if (indicator != null)
             {
+                // 设置右侧圆角
+                indicator.CornerRadius = new CornerRadius(0, 6, 6, 0);
                 var animation = new System.Windows.Media.Animation.ThicknessAnimation(
-                    new Thickness(120, 0, 0, 0), 
+                    new Thickness(118, 0, 0, 0), 
                     TimeSpan.FromMilliseconds(200));
                 indicator.BeginAnimation(Border.MarginProperty, animation);
             }

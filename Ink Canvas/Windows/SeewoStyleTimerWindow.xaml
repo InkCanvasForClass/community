@@ -392,16 +392,18 @@
                                     <Grid Margin="0,0,0,20">
                                         <Border Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 CornerRadius="8" 
+                                                BorderThickness="1"
+                                                BorderBrush="#B0B0B0"
                                                 Width="240" Height="40">
                                             <Grid>
                                                 <!-- 背景指示器 -->
                                                 <Border x:Name="SegmentedIndicator" 
                                                         Background="{DynamicResource SeewoTimerWindowPrimaryButtonBackground}" 
-                                                        CornerRadius="6" 
-                                                        Width="118" Height="32" 
+                                                        CornerRadius="6,0,0,6" 
+                                                        Width="120" Height="38" 
                                                         HorizontalAlignment="Left" 
                                                         VerticalAlignment="Center" 
-                                                        Margin="2,0,0,0"/>
+                                                        Margin="0,0,0,0"/>
                                                 
                                                 <!-- 按钮容器 -->
                                                 <Grid>
