@@ -118,6 +118,38 @@ namespace Ink_Canvas
             UpdateDigitDisplays();
             LoadRecentTimers();
             UpdateRecentTimerDisplays();
+            InitializeTabState();
+        }
+
+        private void InitializeTabState()
+        {
+            // 设置默认选中CommonTab
+            CommonTimersGrid.Visibility = Visibility.Visible;
+            RecentTimersGrid.Visibility = Visibility.Collapsed;
+
+            // 设置tab文字颜色和样式
+            var commonText = this.FindName("CommonTabText") as TextBlock;
+            var recentText = this.FindName("RecentTabText") as TextBlock;
+            if (commonText != null)
+            {
+                commonText.FontWeight = FontWeights.Bold;
+                commonText.Opacity = 1.0;
+                commonText.Foreground = new SolidColorBrush(Colors.White);
+            }
+            if (recentText != null)
+            {
+                recentText.FontWeight = FontWeights.Normal;
+                recentText.Opacity = 0.8;
+                recentText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+            }
+
+            // 设置指示器位置
+            var indicator = this.FindName("SegmentedIndicator") as Border;
+            if (indicator != null)
+            {
+                indicator.CornerRadius = new CornerRadius(7.5, 0, 0, 7.5);
+                indicator.Margin = new Thickness(0, 0, 0, 0);
+            }
         }
 
         private void ApplyTheme()
