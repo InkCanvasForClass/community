@@ -383,7 +383,7 @@ namespace Ink_Canvas
                 var slideAnimation = new DoubleAnimation
                 {
                     From = 0, // 滑动距离
-                    To = BorderSettings.RenderTransform.Value.OffsetX - 440,
+                    To = BorderSettings.RenderTransform.Value.OffsetX - 490,
                     Duration = TimeSpan.FromSeconds(0.6)
                 };
                 slideAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut };
@@ -407,7 +407,6 @@ namespace Ink_Canvas
                     // 如果用户在设置中修改了无焦点模式，则保持用户的修改
                 };
 
-                BorderSettings.Visibility = Visibility.Visible;
                 BorderSettings.RenderTransform = new TranslateTransform();
 
                 isOpeningOrHidingSettingsPane = true;
@@ -2777,6 +2776,7 @@ namespace Ink_Canvas
             }
             else
             {
+                BorderSettings.Visibility = Visibility.Visible;
                 // 临时禁用无焦点模式以避免下拉选项被遮挡
                 wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
                 userChangedNoFocusModeInSettings = false; // 重置用户修改标志
@@ -2795,7 +2795,7 @@ namespace Ink_Canvas
                 // 滑动动画
                 var slideAnimation = new DoubleAnimation
                 {
-                    From = BorderSettings.RenderTransform.Value.OffsetX - 440, // 滑动距离
+                    From = BorderSettings.RenderTransform.Value.OffsetX - 490, // 滑动距离
                     To = 0,
                     Duration = TimeSpan.FromSeconds(0.6)
                 };
@@ -2807,7 +2807,6 @@ namespace Ink_Canvas
 
                 sb.Completed += (s, _) => { isOpeningOrHidingSettingsPane = false; };
 
-                BorderSettings.Visibility = Visibility.Visible;
                 BorderSettings.RenderTransform = new TranslateTransform();
 
                 isOpeningOrHidingSettingsPane = true;
