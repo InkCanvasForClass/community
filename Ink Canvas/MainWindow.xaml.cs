@@ -787,7 +787,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 辅助方法：使用多线路组下载更新
+        // 使用多线路组下载更新
         private async Task<bool> DownloadUpdateWithFallback(string version, AutoUpdateHelper.UpdateLineGroup primaryGroup, UpdateChannel channel)
         {
             try
@@ -1194,14 +1194,14 @@ namespace Ink_Canvas
             RefreshDeviceInfo();
         }
 
-        // 新增：个性化设置
+        // 个性化设置
         private void NavTheme_Click(object sender, RoutedEventArgs e)
         {
             // 切换到个性化设置页面
             ShowSettingsSection("theme");
         }
 
-        // 新增：快捷键设置
+        // 快捷键设置
         private void NavShortcuts_Click(object sender, RoutedEventArgs e)
         {
             OpenHotkeySettingsWindow();
@@ -1298,7 +1298,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：折叠侧边栏
+        // 折叠侧边栏
         private void CollapseNavSidebar_Click(object sender, RoutedEventArgs e)
         {
             // 折叠/展开侧边栏
@@ -1315,7 +1315,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：显示侧边栏
+        // 显示侧边栏
         private void ShowNavSidebar_Click(object sender, RoutedEventArgs e)
         {
             // 确保侧边栏展开
@@ -1323,7 +1323,7 @@ namespace Ink_Canvas
             columnDefinitions[0].Width = new GridLength(50);
         }
 
-        // 辅助方法：显示指定的设置部分
+        // 显示指定的设置部分
         private async void ShowSettingsSection(string sectionTag)
         {
             // 显示设置面板
