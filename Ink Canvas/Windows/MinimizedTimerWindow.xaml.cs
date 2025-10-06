@@ -93,6 +93,12 @@ namespace Ink_Canvas
         {
             try
             {
+
+                bool isLightTheme = IsLightTheme();
+                if (!isLightTheme)
+                {
+                    SetDarkThemeBorder();
+                }
             }
             catch (Exception ex)
             {
@@ -121,6 +127,23 @@ namespace Ink_Canvas
                 // 如果获取主题失败，默认使用浅色主题
             }
             return true;
+        }
+
+        // 设置深色主题下的灰色边框
+        private void SetDarkThemeBorder()
+        {
+            try
+            {
+                // 找到Border元素并设置灰色边框
+                var border = this.FindName("MainBorder") as Border;
+                if (border != null)
+                {
+                    border.BorderBrush = new SolidColorBrush(Color.FromRgb(64, 64, 64));
+                }
+            }
+            catch
+            {
+            }
         }
 
         private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

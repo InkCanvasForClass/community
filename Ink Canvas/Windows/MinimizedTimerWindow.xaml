@@ -19,7 +19,7 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border Background="{DynamicResource SeewoTimerWindowBackground}" 
+    <Border x:Name="MainBorder" Background="{DynamicResource SeewoTimerWindowBackground}" 
             CornerRadius="15" 
             BorderThickness="1" 
             BorderBrush="{DynamicResource SeewoTimerWindowBorderBrush}" 
