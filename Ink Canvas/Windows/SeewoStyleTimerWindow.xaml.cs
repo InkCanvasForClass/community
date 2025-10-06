@@ -587,7 +587,7 @@ namespace Ink_Canvas
             if (indicator != null)
             {
                 // 设置左侧圆角
-                indicator.CornerRadius = new CornerRadius(6, 0, 0, 6);
+                indicator.CornerRadius = new CornerRadius(7, 0, 0, 7);
                 var animation = new System.Windows.Media.Animation.ThicknessAnimation(
                     new Thickness(0, 0, 0, 0), 
                     TimeSpan.FromMilliseconds(200));
@@ -621,7 +621,7 @@ namespace Ink_Canvas
             if (indicator != null)
             {
                 // 设置右侧圆角
-                indicator.CornerRadius = new CornerRadius(0, 6, 6, 0);
+                indicator.CornerRadius = new CornerRadius(0, 7, 7, 0);
                 var animation = new System.Windows.Media.Animation.ThicknessAnimation(
                     new Thickness(118, 0, 0, 0), 
                     TimeSpan.FromMilliseconds(200));
