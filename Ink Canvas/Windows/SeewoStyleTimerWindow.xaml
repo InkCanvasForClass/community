@@ -5,49 +5,26 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ink_Canvas"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:controls="clr-namespace:Ink_Canvas.Windows.Controls"
         Topmost="True" Background="Transparent"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
         Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
         Title="Ink Canvas 画板 - 计时器" Height="450" Width="900">
 
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Controls/WinUI3CloseButton.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
+
     <Border Background="{DynamicResource SeewoTimerWindowBackground}" CornerRadius="15" BorderThickness="1" BorderBrush="{DynamicResource SeewoTimerWindowBorderBrush}" Margin="10" x:Name="MainBorder" MouseLeftButtonDown="WindowDragMove">
         <Grid>
-            <Button x:Name="CloseButton" 
-                    HorizontalAlignment="Right" VerticalAlignment="Top" 
-                    Width="46" Height="32" Margin="0,8,8,0"
-                    Background="Transparent" BorderThickness="0" 
-                    Cursor="Hand" Click="CloseButton_Click">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="Button">
-                                    <Border x:Name="ButtonBorder" 
-                                            Background="{TemplateBinding Background}" 
-                                            CornerRadius="4" 
-                                            BorderThickness="{TemplateBinding BorderThickness}"
-                                            BorderBrush="{TemplateBinding BorderBrush}">
-                                        <ContentPresenter x:Name="contentPresenter" 
-                                                        HorizontalAlignment="Center" 
-                                                        VerticalAlignment="Center"/>
-                                    </Border>
-                                    <ControlTemplate.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter TargetName="ButtonBorder" Property="Background" Value="#E81123"/>
-                                            <Setter TargetName="contentPresenter" Property="TextElement.Foreground" Value="White"/>
-                                        </Trigger>
-                                        <Trigger Property="IsPressed" Value="True">
-                                            <Setter TargetName="ButtonBorder" Property="Background" Value="#F1707A"/>
-                                            <Setter TargetName="contentPresenter" Property="TextElement.Foreground" Value="White"/>
-                                        </Trigger>
-                                    </ControlTemplate.Triggers>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                    </Style>
-                </Button.Style>
-                <TextBlock x:Name="CloseButtonText" Text="✕" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SeewoTimerWindowButtonForeground}"/>
-            </Button>
+            <controls:WinUI3CloseButton x:Name="CloseButton" 
+                                        HorizontalAlignment="Right" VerticalAlignment="Top" 
+                                        Margin="0,0,0,0" Cursor="Hand" Click="CloseButton_Click"
+                                        Content="&#xE8BB;" ContentTemplate="{StaticResource CloseButtonIconTemplate}"/>
             <!-- 主要内容区域 -->
             <Grid>
                 <!-- 使用Viewbox自动缩放内容 -->
