@@ -89,6 +89,7 @@ namespace Ink_Canvas
 
         bool isTimerRunning = false;
         bool isPaused = false;
+        TimeSpan remainingTime = TimeSpan.Zero;
 
         Timer timer = new Timer();
         private Timer hideTimer;
@@ -241,6 +242,74 @@ namespace Ink_Canvas
             isFullscreenMode = isFullscreen;
         }
 
+        // 更新剩余时间（时分秒独立工作）
+        private void UpdateRemainingTime()
+        {
+            if (isTimerRunning && !isPaused)
+            {
+                // 获取当前剩余时间
+                TimeSpan? currentRemaining = GetRemainingTime();
+                if (currentRemaining.HasValue)
+                {
+                    // 计算已经过去的时间
+                    TimeSpan elapsedTime = DateTime.Now - startTime;
+                    
+                    // 计算新的总时间
+                    TimeSpan newTotalTime = new TimeSpan(hour, minute, second);
+                    
+                    // 如果新设置的时间小于已经过去的时间，则设置为0
+                    if (newTotalTime <= elapsedTime)
+                    {
+                        remainingTime = TimeSpan.Zero;
+                    }
+                    else
+                    {
+                        // 否则，剩余时间 = 新总时间 - 已经过去的时间
+                        remainingTime = newTotalTime - elapsedTime;
+                    }
+                }
+                else
+                {
+                    // 如果没有剩余时间信息，直接设置新的剩余时间
+                    remainingTime = new TimeSpan(hour, minute, second);
+                }
+            }
+        }
+
+        // 更新特定时间单位的剩余时间（时分秒独立）
+        private void UpdateSpecificTimeUnit(int newHour, int newMinute, int newSecond)
+        {
+            if (isTimerRunning && !isPaused)
+            {
+                // 获取当前剩余时间
+                TimeSpan? currentRemaining = GetRemainingTime();
+                if (currentRemaining.HasValue)
+                {
+                    // 计算已经过去的时间
+                    TimeSpan elapsedTime = DateTime.Now - startTime;
+                    
+                    // 计算新的总时间
+                    TimeSpan newTotalTime = new TimeSpan(newHour, newMinute, newSecond);
+                    
+                    // 如果新设置的时间小于已经过去的时间，则设置为0
+                    if (newTotalTime <= elapsedTime)
+                    {
+                        remainingTime = TimeSpan.Zero;
+                    }
+                    else
+                    {
+                        // 否则，剩余时间 = 新总时间 - 已经过去的时间
+                        remainingTime = newTotalTime - elapsedTime;
+                    }
+                }
+                else
+                {
+                    // 如果没有剩余时间信息，直接设置新的剩余时间
+                    remainingTime = new TimeSpan(newHour, newMinute, newSecond);
+                }
+            }
+        }
+
         public bool IsTimerRunning => isTimerRunning;
 
         public TimeSpan? GetRemainingTime()
@@ -294,7 +363,6 @@ namespace Ink_Canvas
         // 第1位数字（小时十位）
         private void Digit1Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentHour = hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
@@ -304,11 +372,16 @@ namespace Ink_Canvas
 
             hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         private void Digit1Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentHour = hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
@@ -318,12 +391,17 @@ namespace Ink_Canvas
 
             hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         // 第2位数字（小时个位）
         private void Digit2Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentHour = hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
@@ -338,11 +416,16 @@ namespace Ink_Canvas
 
             hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         private void Digit2Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentHour = hour;
             int hourTens = currentHour / 10;
             int hourOnes = currentHour % 10;
@@ -357,12 +440,17 @@ namespace Ink_Canvas
 
             hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         // 第3位数字（分钟十位）
         private void Digit3Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentMinute = minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
@@ -372,11 +460,16 @@ namespace Ink_Canvas
 
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         private void Digit3Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentMinute = minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
@@ -386,12 +479,17 @@ namespace Ink_Canvas
 
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         // 第4位数字（分钟个位）
         private void Digit4Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentMinute = minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
@@ -406,11 +504,16 @@ namespace Ink_Canvas
 
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         private void Digit4Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentMinute = minute;
             int minuteTens = currentMinute / 10;
             int minuteOnes = currentMinute % 10;
@@ -425,12 +528,17 @@ namespace Ink_Canvas
 
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         // 第5位数字（秒十位）
         private void Digit5Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentSecond = second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
@@ -440,11 +548,16 @@ namespace Ink_Canvas
 
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         private void Digit5Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentSecond = second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
@@ -454,12 +567,17 @@ namespace Ink_Canvas
 
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         // 第6位数字（秒个位）
         private void Digit6Plus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentSecond = second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
@@ -474,11 +592,16 @@ namespace Ink_Canvas
 
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         private void Digit6Minus_Click(object sender, RoutedEventArgs e)
         {
-            if (isTimerRunning) return;
             int currentSecond = second;
             int secondTens = currentSecond / 10;
             int secondOnes = currentSecond % 10;
@@ -493,6 +616,12 @@ namespace Ink_Canvas
 
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
+            
+            // 如果计时器正在运行，重新计算剩余时间并继续计时
+            if (isTimerRunning && !isPaused)
+            {
+                UpdateSpecificTimeUnit(hour, minute, second);
+            }
         }
 
         // 图标数据常量
