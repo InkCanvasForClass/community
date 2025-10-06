@@ -264,6 +264,11 @@
                             </StackPanel>
                             </Grid>
                             
+                            <!-- 分割线 -->
+                            <Border Width="2" Background="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                                    Opacity="0.5" HorizontalAlignment="Left" VerticalAlignment="Stretch" 
+                                    Margin="580,0,0,0"/>
+                            
                             <!-- 右侧：快捷选项区域 -->
                             <Grid HorizontalAlignment="Right" VerticalAlignment="Center" 
                                   x:Name="QuickOptionsGrid" Width="350" Margin="30,0,0,0">
