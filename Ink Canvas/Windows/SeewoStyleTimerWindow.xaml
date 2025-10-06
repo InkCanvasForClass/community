@@ -53,7 +53,7 @@
                               x:Name="MainContentGrid" Margin="0,-25,0,25">
                             <!-- 左侧：6位数字显示区域 -->
                             <Grid HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                  x:Name="MainDisplayGrid" Width="500" Margin="0,0,0,0">
+                                  x:Name="MainDisplayGrid" Width="500" Margin="-10,0,0,0">
                             <!-- 6位数字水平排列 -->
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" 
                                            x:Name="DigitsPanel">
@@ -65,7 +65,7 @@
                                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                 <!-- 上方+按钮 -->
                                                 <Button x:Name="Digit1PlusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit1Plus_Click" Cursor="Hand" Margin="0,0,0,8" HorizontalAlignment="Center">
+                                                BorderThickness="0" Click="Digit1Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="15">
@@ -90,7 +90,7 @@
                                                      HorizontalAlignment="Center" 
                                                      VerticalAlignment="Center"
                                                      Stretch="Uniform" 
-                                                     Margin="0,0,0,8"/>
+                                                     Margin="0,0,0,15"/>
                                                 <!-- 下方-按钮 -->
                                                 <Button x:Name="Digit1MinusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="Digit1Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
@@ -119,7 +119,7 @@
                                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                 <!-- 上方+按钮 -->
                                                 <Button x:Name="Digit2PlusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit2Plus_Click" Cursor="Hand" Margin="0,0,0,8" HorizontalAlignment="Center">
+                                                BorderThickness="0" Click="Digit2Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="15">
@@ -144,7 +144,7 @@
                                                      HorizontalAlignment="Center" 
                                                      VerticalAlignment="Center"
                                                      Stretch="Uniform" 
-                                                     Margin="0,0,0,8"/>
+                                                     Margin="0,0,0,15"/>
                                                 <!-- 下方-按钮 -->
                                                 <Button x:Name="Digit2MinusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="Digit2Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
@@ -184,7 +184,7 @@
                                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                 <!-- 上方+按钮 -->
                                                 <Button x:Name="Digit3PlusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit3Plus_Click" Cursor="Hand" Margin="0,0,0,8" HorizontalAlignment="Center">
+                                                BorderThickness="0" Click="Digit3Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="15">
@@ -209,7 +209,7 @@
                                                      HorizontalAlignment="Center" 
                                                      VerticalAlignment="Center"
                                                      Stretch="Uniform" 
-                                                     Margin="0,0,0,8"/>
+                                                     Margin="0,0,0,15"/>
                                                 <!-- 下方-按钮 -->
                                                 <Button x:Name="Digit3MinusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="Digit3Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
@@ -238,7 +238,7 @@
                                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                 <!-- 上方+按钮 -->
                                                 <Button x:Name="Digit4PlusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit4Plus_Click" Cursor="Hand" Margin="0,0,0,8" HorizontalAlignment="Center">
+                                                BorderThickness="0" Click="Digit4Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="15">
@@ -263,7 +263,7 @@
                                                      HorizontalAlignment="Center" 
                                                      VerticalAlignment="Center"
                                                      Stretch="Uniform" 
-                                                     Margin="0,0,0,8"/>
+                                                     Margin="0,0,0,15"/>
                                                 <!-- 下方-按钮 -->
                                                 <Button x:Name="Digit4MinusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="Digit4Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
@@ -303,7 +303,7 @@
                                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                 <!-- 上方+按钮 -->
                                                 <Button x:Name="Digit5PlusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit5Plus_Click" Cursor="Hand" Margin="0,0,0,8" HorizontalAlignment="Center">
+                                                BorderThickness="0" Click="Digit5Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="15">
@@ -328,7 +328,7 @@
                                                      HorizontalAlignment="Center" 
                                                      VerticalAlignment="Center"
                                                      Stretch="Uniform" 
-                                                     Margin="0,0,0,8"/>
+                                                     Margin="0,0,0,15"/>
                                                 <!-- 下方-按钮 -->
                                                 <Button x:Name="Digit5MinusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="Digit5Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
@@ -357,7 +357,7 @@
                                             <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                 <!-- 上方+按钮 -->
                                                 <Button x:Name="Digit6PlusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit6Plus_Click" Cursor="Hand" Margin="0,0,0,8" HorizontalAlignment="Center">
+                                                BorderThickness="0" Click="Digit6Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="15">
@@ -382,7 +382,7 @@
                                                      HorizontalAlignment="Center" 
                                                      VerticalAlignment="Center"
                                                      Stretch="Uniform" 
-                                                     Margin="0,0,0,8"/>
+                                                     Margin="0,0,0,15"/>
                                                 <!-- 下方-按钮 -->
                                                 <Button x:Name="Digit6MinusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 BorderThickness="0" Click="Digit6Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
