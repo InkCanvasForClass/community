@@ -542,8 +542,9 @@ namespace Ink_Canvas
             }
         }
 
-        private void BtnClose_MouseUp(object sender, MouseButtonEventArgs e)
+        private void BtnClose_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            e.Handled = true;
             Close();
         }
 
