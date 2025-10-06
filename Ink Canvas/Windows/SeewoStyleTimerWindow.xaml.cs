@@ -178,16 +178,28 @@ namespace Ink_Canvas
         private void Digit1Plus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            hour += 10;
-            if (hour >= 100) hour = 0;
+            int currentHour = hour;
+            int hourTens = currentHour / 10;
+            int hourOnes = currentHour % 10;
+            
+            hourTens++;
+            if (hourTens >= 10) hourTens = 0;
+            
+            hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit1Minus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            hour -= 10;
-            if (hour < 0) hour = 90;
+            int currentHour = hour;
+            int hourTens = currentHour / 10;
+            int hourOnes = currentHour % 10;
+            
+            hourTens--;
+            if (hourTens < 0) hourTens = 9;
+            
+            hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
 
@@ -195,16 +207,38 @@ namespace Ink_Canvas
         private void Digit2Plus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            hour++;
-            if (hour >= 100) hour = 0;
+            int currentHour = hour;
+            int hourTens = currentHour / 10;
+            int hourOnes = currentHour % 10;
+            
+            hourOnes++;
+            if (hourOnes >= 10) 
+            {
+                hourOnes = 0;
+                hourTens++;
+                if (hourTens >= 10) hourTens = 0;
+            }
+            
+            hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit2Minus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            hour--;
-            if (hour < 0) hour = 99;
+            int currentHour = hour;
+            int hourTens = currentHour / 10;
+            int hourOnes = currentHour % 10;
+            
+            hourOnes--;
+            if (hourOnes < 0) 
+            {
+                hourOnes = 9;
+                hourTens--;
+                if (hourTens < 0) hourTens = 9;
+            }
+            
+            hour = hourTens * 10 + hourOnes;
             UpdateDigitDisplays();
         }
 
