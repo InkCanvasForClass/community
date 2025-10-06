@@ -207,16 +207,28 @@ namespace Ink_Canvas
         private void Digit3Plus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            minute += 10;
-            if (minute >= 60) minute = 0;
+            int currentMinute = minute;
+            int minuteTens = currentMinute / 10;
+            int minuteOnes = currentMinute % 10;
+            
+            minuteTens++;
+            if (minuteTens >= 6) minuteTens = 0;
+            
+            minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit3Minus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            minute -= 10;
-            if (minute < 0) minute = 50;
+            int currentMinute = minute;
+            int minuteTens = currentMinute / 10;
+            int minuteOnes = currentMinute % 10;
+            
+            minuteTens--;
+            if (minuteTens < 0) minuteTens = 5;
+            
+            minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
 
@@ -224,16 +236,28 @@ namespace Ink_Canvas
         private void Digit4Plus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            minute++;
-            if (minute >= 60) minute = 0;
+            int currentMinute = minute;
+            int minuteTens = currentMinute / 10;
+            int minuteOnes = currentMinute % 10;
+            
+            minuteOnes++;
+            if (minuteOnes >= 10) minuteOnes = 0;
+            
+            minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit4Minus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            minute--;
-            if (minute < 0) minute = 59;
+            int currentMinute = minute;
+            int minuteTens = currentMinute / 10;
+            int minuteOnes = currentMinute % 10;
+            
+            minuteOnes--;
+            if (minuteOnes < 0) minuteOnes = 9;
+            
+            minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
         }
 
@@ -241,16 +265,28 @@ namespace Ink_Canvas
         private void Digit5Plus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            second += 10;
-            if (second >= 60) second = 0;
+            int currentSecond = second;
+            int secondTens = currentSecond / 10;
+            int secondOnes = currentSecond % 10;
+            
+            secondTens++;
+            if (secondTens >= 6) secondTens = 0;
+            
+            second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit5Minus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            second -= 10;
-            if (second < 0) second = 50;
+            int currentSecond = second;
+            int secondTens = currentSecond / 10;
+            int secondOnes = currentSecond % 10;
+            
+            secondTens--;
+            if (secondTens < 0) secondTens = 5;
+            
+            second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
 
@@ -258,16 +294,28 @@ namespace Ink_Canvas
         private void Digit6Plus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            second++;
-            if (second >= 60) second = 0;
+            int currentSecond = second;
+            int secondTens = currentSecond / 10;
+            int secondOnes = currentSecond % 10;
+            
+            secondOnes++;
+            if (secondOnes >= 10) secondOnes = 0;
+            
+            second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
 
         private void Digit6Minus_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning) return;
-            second--;
-            if (second < 0) second = 59;
+            int currentSecond = second;
+            int secondTens = currentSecond / 10;
+            int secondOnes = currentSecond % 10;
+            
+            secondOnes--;
+            if (secondOnes < 0) secondOnes = 9;
+            
+            second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
         }
 
