@@ -246,7 +246,12 @@ namespace Ink_Canvas
             int minuteOnes = currentMinute % 10;
             
             minuteOnes++;
-            if (minuteOnes >= 10) minuteOnes = 0;
+            if (minuteOnes >= 10) 
+            {
+                minuteOnes = 0;
+                minuteTens++;
+                if (minuteTens >= 6) minuteTens = 0;
+            }
             
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
@@ -260,7 +265,12 @@ namespace Ink_Canvas
             int minuteOnes = currentMinute % 10;
             
             minuteOnes--;
-            if (minuteOnes < 0) minuteOnes = 9;
+            if (minuteOnes < 0) 
+            {
+                minuteOnes = 9;
+                minuteTens--;
+                if (minuteTens < 0) minuteTens = 5;
+            }
             
             minute = minuteTens * 10 + minuteOnes;
             UpdateDigitDisplays();
@@ -304,7 +314,12 @@ namespace Ink_Canvas
             int secondOnes = currentSecond % 10;
             
             secondOnes++;
-            if (secondOnes >= 10) secondOnes = 0;
+            if (secondOnes >= 10) 
+            {
+                secondOnes = 0;
+                secondTens++;
+                if (secondTens >= 6) secondTens = 0;
+            }
             
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
@@ -318,7 +333,12 @@ namespace Ink_Canvas
             int secondOnes = currentSecond % 10;
             
             secondOnes--;
-            if (secondOnes < 0) secondOnes = 9;
+            if (secondOnes < 0) 
+            {
+                secondOnes = 9;
+                secondTens--;
+                if (secondTens < 0) secondTens = 5;
+            }
             
             second = secondTens * 10 + secondOnes;
             UpdateDigitDisplays();
