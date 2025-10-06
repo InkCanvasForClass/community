@@ -393,7 +393,7 @@
                                         <Border Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
                                                 CornerRadius="8" 
                                                 BorderThickness="1"
-                                                BorderBrush="#B0B0B0"
+                                                BorderBrush="#616161"
                                                 Width="240" Height="40">
                                             <Grid>
                                                 <!-- 背景指示器 -->
