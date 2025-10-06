@@ -834,19 +834,97 @@ namespace Ink_Canvas
 
             string currentTime = $"{minute:D2}:{second:D2}";
 
-            // 如果当前时间与最近记录不同，则更新
-            if (currentTime != recentTimer1)
+            // 检查是否已存在相同的时间
+            var existingIndex = -1;
+            if (recentTimer1 == currentTime) existingIndex = 0;
+            else if (recentTimer2 == currentTime) existingIndex = 1;
+            else if (recentTimer3 == currentTime) existingIndex = 2;
+            else if (recentTimer4 == currentTime) existingIndex = 3;
+            else if (recentTimer5 == currentTime) existingIndex = 4;
+            else if (recentTimer6 == currentTime) existingIndex = 5;
+
+            if (existingIndex >= 0)
             {
-                // 向后移动所有记录
+                // 如果存在重复，将其移到最前面
+                string duplicateTimer = GetRecentTimerByIndex(existingIndex);
+                
+                // 移除重复项
+                RemoveRecentTimerByIndex(existingIndex);
+                
+                // 将重复项添加到最前面
+                recentTimer6 = recentTimer5;
+                recentTimer5 = recentTimer4;
+                recentTimer4 = recentTimer3;
+                recentTimer3 = recentTimer2;
+                recentTimer2 = recentTimer1;
+                recentTimer1 = duplicateTimer;
+            }
+            else
+            {
+                // 如果不存在重复，正常添加新记录
                 recentTimer6 = recentTimer5;
                 recentTimer5 = recentTimer4;
                 recentTimer4 = recentTimer3;
                 recentTimer3 = recentTimer2;
                 recentTimer2 = recentTimer1;
                 recentTimer1 = currentTime;
-                UpdateRecentTimerDisplays();
+            }
 
-                SaveRecentTimersToRegistry();
+            UpdateRecentTimerDisplays();
+            SaveRecentTimersToRegistry();
+        }
+
+        private string GetRecentTimerByIndex(int index)
+        {
+            switch (index)
+            {
+                case 0: return recentTimer1;
+                case 1: return recentTimer2;
+                case 2: return recentTimer3;
+                case 3: return recentTimer4;
+                case 4: return recentTimer5;
+                case 5: return recentTimer6;
+                default: return "";
+            }
+        }
+
+        private void RemoveRecentTimerByIndex(int index)
+        {
+            switch (index)
+            {
+                case 0:
+                    recentTimer1 = recentTimer2;
+                    recentTimer2 = recentTimer3;
+                    recentTimer3 = recentTimer4;
+                    recentTimer4 = recentTimer5;
+                    recentTimer5 = recentTimer6;
+                    recentTimer6 = "--:--";
+                    break;
+                case 1:
+                    recentTimer2 = recentTimer3;
+                    recentTimer3 = recentTimer4;
+                    recentTimer4 = recentTimer5;
+                    recentTimer5 = recentTimer6;
+                    recentTimer6 = "--:--";
+                    break;
+                case 2:
+                    recentTimer3 = recentTimer4;
+                    recentTimer4 = recentTimer5;
+                    recentTimer5 = recentTimer6;
+                    recentTimer6 = "--:--";
+                    break;
+                case 3:
+                    recentTimer4 = recentTimer5;
+                    recentTimer5 = recentTimer6;
+                    recentTimer6 = "--:--";
+                    break;
+                case 4:
+                    recentTimer5 = recentTimer6;
+                    recentTimer6 = "--:--";
+                    break;
+                case 5:
+                    recentTimer6 = "--:--";
+                    break;
             }
         }
 
