@@ -40,7 +40,6 @@
 
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
             <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-            <c:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <c:IntNumberToString x:Key="IntNumberToString" />
             <c:IntNumberToString2 x:Key="IntNumberToString2" />
 
@@ -632,13 +631,6 @@
                                         <TextBlock Text="# 稳定版提供可靠更新，测试版提供新功能抢先体验" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     </ui:SimpleStackPanel>
                                     
-                                    <!-- 手动更新按钮 -->
-                                    <Button x:Name="ManualUpdateButton" Content="手动更新" Margin="0,8,0,0"
-                                            Width="120" HorizontalAlignment="Left" Click="ManualUpdateButton_Click"
-                                            Visibility="{Binding ElementName=ToggleSwitchIsAutoUpdate, Path=IsOn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
-                                    <TextBlock Text="# 点击后立即检查并下载最新版本" 
-                                               TextWrapping="Wrap" Foreground="#a1a1aa" 
-                                               Visibility="{Binding ElementName=ToggleSwitchIsAutoUpdate, Path=IsOn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                     <!-- 版本修复按钮 -->
                                     <Button x:Name="FixVersionButton" Content="版本修复" Margin="0,8,0,0"
                                             Width="120" HorizontalAlignment="Left" Click="FixVersionButton_Click"/>
