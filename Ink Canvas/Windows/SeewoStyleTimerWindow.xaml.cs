@@ -274,7 +274,7 @@ namespace Ink_Canvas
             isFullscreenMode = isFullscreen;
         }
 
-        // 更新剩余时间（时分秒独立工作）
+        // 更新剩余时间
         private void UpdateRemainingTime()
         {
             if (isTimerRunning && !isPaused)
@@ -308,7 +308,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 更新特定时间单位的剩余时间（时分秒独立）
+        // 更新特定时间单位的剩余时间
         private void UpdateSpecificTimeUnit(int newHour, int newMinute, int newSecond)
         {
             if (isTimerRunning && !isPaused)
