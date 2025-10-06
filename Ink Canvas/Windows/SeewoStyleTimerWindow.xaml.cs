@@ -68,6 +68,9 @@ namespace Ink_Canvas
                     isTimerRunning = false;
                     StartPauseIcon.Data = Geometry.Parse(PlayIconData);
                     PlayTimerSound();
+                    
+                    // 保存最近计时记录
+                    SaveRecentTimer();
                 }
             });
         }
@@ -86,10 +89,15 @@ namespace Ink_Canvas
         bool isPaused = false;
 
         Timer timer = new Timer();
+        
+        // 最近计时记录
+        private string recentTimer1 = "--:--";
+        private string recentTimer2 = "--:--";
 
         private void InitializeUI()
         {
             UpdateDigitDisplays();
+            UpdateRecentTimerDisplays();
         }
 
         private void ApplyTheme()
@@ -536,6 +544,103 @@ namespace Ink_Canvas
         {
             if (e.LeftButton == MouseButtonState.Pressed)
                 DragMove();
+        }
+
+        // 快捷选项事件处理
+        private void Quick5Min_Click(object sender, RoutedEventArgs e)
+        {
+            if (isTimerRunning) return;
+            SetQuickTime(0, 5, 0);
+        }
+
+        private void Quick10Min_Click(object sender, RoutedEventArgs e)
+        {
+            if (isTimerRunning) return;
+            SetQuickTime(0, 10, 0);
+        }
+
+        private void Quick15Min_Click(object sender, RoutedEventArgs e)
+        {
+            if (isTimerRunning) return;
+            SetQuickTime(0, 15, 0);
+        }
+
+        private void Quick20Min_Click(object sender, RoutedEventArgs e)
+        {
+            if (isTimerRunning) return;
+            SetQuickTime(0, 20, 0);
+        }
+
+        private void RecentTimer1_Click(object sender, RoutedEventArgs e)
+        {
+            if (isTimerRunning || recentTimer1 == "--:--") return;
+            ApplyRecentTimer(recentTimer1);
+        }
+
+        private void RecentTimer2_Click(object sender, RoutedEventArgs e)
+        {
+            if (isTimerRunning || recentTimer2 == "--:--") return;
+            ApplyRecentTimer(recentTimer2);
+        }
+
+        // 设置快捷时间
+        private void SetQuickTime(int h, int m, int s)
+        {
+            hour = h;
+            minute = m;
+            second = s;
+            UpdateDigitDisplays();
+        }
+
+        // 应用最近计时
+        private void ApplyRecentTimer(string timeString)
+        {
+            if (timeString == "--:--") return;
+            
+            try
+            {
+                var parts = timeString.Split(':');
+                if (parts.Length == 2)
+                {
+                    int minutes = int.Parse(parts[0]);
+                    int seconds = int.Parse(parts[1]);
+                    SetQuickTime(0, minutes, seconds);
+                }
+            }
+            catch
+            {
+                // 如果解析失败，忽略
+            }
+        }
+
+        // 保存最近计时记录
+        private void SaveRecentTimer()
+        {
+            if (hour == 0 && minute == 0 && second == 0) return;
+            
+            string currentTime = $"{minute:D2}:{second:D2}";
+            
+            // 如果当前时间与最近记录不同，则更新
+            if (currentTime != recentTimer1)
+            {
+                recentTimer2 = recentTimer1;
+                recentTimer1 = currentTime;
+                UpdateRecentTimerDisplays();
+            }
+        }
+
+        // 更新最近计时显示
+        private void UpdateRecentTimerDisplays()
+        {
+            try
+            {
+                RecentTimer1Text.Text = recentTimer1;
+                RecentTimer2Text.Text = recentTimer2;
+            }
+            catch
+            {
+                // 如果UI元素还未初始化，忽略错误
+            }
         }
     }
 }
