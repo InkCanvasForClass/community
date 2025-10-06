@@ -57,10 +57,10 @@
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" 
                                            x:Name="DigitsPanel">
                                     <!-- 小时组（十位和个位） -->
-                                    <Grid Margin="0,0,40,0" HorizontalAlignment="Center" Width="140">
+                                    <Grid Margin="0,0,20,0" HorizontalAlignment="Center" Width="120">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                             <!-- 第1位数字（小时十位） -->
-                                            <Grid Margin="0,0,20,0">
+                                            <Grid Margin="0,0,15,0">
                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                     <!-- 上方+按钮 -->
                                                     <Button x:Name="Digit1PlusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
@@ -126,15 +126,21 @@
                                             </Grid>
                                         </StackPanel>
                                         <!-- 时标签 -->
-                                        <TextBlock Text="时" FontSize="16" HorizontalAlignment="Center" 
-                                       Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,112,0,-13"/>
+                                        <TextBlock Text="时" FontSize="12" HorizontalAlignment="Center" 
+                                       Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,130,0,-13" Opacity="0.6"/>
                                     </Grid>
 
+                                    <!-- 冒号分隔符 -->
+                                    <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                                               Margin="-20,0,0,0"/>
+
                                     <!-- 分钟组（十位和个位） -->
-                                    <Grid Margin="0,0,40,0" HorizontalAlignment="Center" Width="140">
+                                    <Grid Margin="0,0,20,0" HorizontalAlignment="Center" Width="120">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                             <!-- 第3位数字（分钟十位） -->
-                                            <Grid Margin="0,0,20,0">
+                                            <Grid Margin="0,0,15,0">
                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                     <!-- 上方+按钮 -->
                                                     <Button x:Name="Digit3PlusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
@@ -200,15 +206,21 @@
                                             </Grid>
                                         </StackPanel>
                                         <!-- 分标签 -->
-                                        <TextBlock Text="分" FontSize="16" HorizontalAlignment="Center" 
-                                       Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,112,0,-12"/>
+                                        <TextBlock Text="分" FontSize="12" HorizontalAlignment="Center" 
+                                       Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,130,0,-12" Opacity="0.6"/>
                                     </Grid>
 
+                                    <!-- 冒号分隔符 -->
+                                    <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Foreground="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                                               Margin="-20,0,0,0"/>
+
                                     <!-- 秒组（十位和个位） -->
-                                    <Grid Width="140">
+                                    <Grid Width="120">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                             <!-- 第5位数字（秒十位） -->
-                                            <Grid Margin="0,0,20,0">
+                                            <Grid Margin="0,0,15,0">
                                                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
                                                     <!-- 上方+按钮 -->
                                                     <Button x:Name="Digit5PlusBtn" Width="40" Height="40" Background="{DynamicResource SeewoTimerWindowButtonBackground}" 
@@ -274,8 +286,8 @@
                                             </Grid>
                                         </StackPanel>
                                         <!-- 秒标签 -->
-                                        <TextBlock Text="秒" FontSize="16" HorizontalAlignment="Center" 
-                                       Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,112,0,-12"/>
+                                        <TextBlock Text="秒" FontSize="12" HorizontalAlignment="Center" 
+                                       Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" Margin="0,130,0,-12" Opacity="0.6"/>
                                     </Grid>
                                 </StackPanel>
                             </Grid>
