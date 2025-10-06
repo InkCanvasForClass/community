@@ -90,10 +90,18 @@ namespace Ink_Canvas
         // 最近计时记录
         private string recentTimer1 = "--:--";
         private string recentTimer2 = "--:--";
+        private string recentTimer3 = "--:--";
+        private string recentTimer4 = "--:--";
+        private string recentTimer5 = "--:--";
+        private string recentTimer6 = "--:--";
         
         // 最近计时记录的注册表键名
         private const string RecentTimer1Key = "SeewoTimer_RecentTimer1";
         private const string RecentTimer2Key = "SeewoTimer_RecentTimer2";
+        private const string RecentTimer3Key = "SeewoTimer_RecentTimer3";
+        private const string RecentTimer4Key = "SeewoTimer_RecentTimer4";
+        private const string RecentTimer5Key = "SeewoTimer_RecentTimer5";
+        private const string RecentTimer6Key = "SeewoTimer_RecentTimer6";
 
         private void InitializeUI()
         {
@@ -553,31 +561,57 @@ namespace Ink_Canvas
                 DragMove();
         }
 
-        // 快捷选项事件处理
-        private void Quick5Min_Click(object sender, RoutedEventArgs e)
+        // Tab切换事件处理
+        private void CommonTab_Click(object sender, RoutedEventArgs e)
+        {
+            CommonTimersGrid.Visibility = Visibility.Visible;
+            RecentTimersGrid.Visibility = Visibility.Collapsed;
+        }
+
+        private void RecentTab_Click(object sender, RoutedEventArgs e)
+        {
+            CommonTimersGrid.Visibility = Visibility.Collapsed;
+            RecentTimersGrid.Visibility = Visibility.Visible;
+        }
+
+        // 常用计时事件处理
+        private void Common5Min_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning && !isPaused) return;
             SetQuickTime(0, 5, 0);
         }
 
-        private void Quick10Min_Click(object sender, RoutedEventArgs e)
+        private void Common10Min_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning && !isPaused) return;
             SetQuickTime(0, 10, 0);
         }
 
-        private void Quick15Min_Click(object sender, RoutedEventArgs e)
+        private void Common15Min_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning && !isPaused) return;
             SetQuickTime(0, 15, 0);
         }
 
-        private void Quick20Min_Click(object sender, RoutedEventArgs e)
+        private void Common30Min_Click(object sender, RoutedEventArgs e)
         {
             if (isTimerRunning && !isPaused) return;
-            SetQuickTime(0, 20, 0);
+            SetQuickTime(0, 30, 0);
         }
 
+        private void Common45Min_Click(object sender, RoutedEventArgs e)
+        {
+            if (isTimerRunning && !isPaused) return;
+            SetQuickTime(0, 45, 0);
+        }
+
+        private void Common60Min_Click(object sender, RoutedEventArgs e)
+        {
+            if (isTimerRunning && !isPaused) return;
+            SetQuickTime(1, 0, 0);
+        }
+
+        // 最近计时事件处理
         private void RecentTimer1_Click(object sender, RoutedEventArgs e)
         {
             if ((isTimerRunning && !isPaused) || recentTimer1 == "--:--") return;
@@ -588,6 +622,30 @@ namespace Ink_Canvas
         {
             if ((isTimerRunning && !isPaused) || recentTimer2 == "--:--") return;
             ApplyRecentTimer(recentTimer2);
+        }
+
+        private void RecentTimer3_Click(object sender, RoutedEventArgs e)
+        {
+            if ((isTimerRunning && !isPaused) || recentTimer3 == "--:--") return;
+            ApplyRecentTimer(recentTimer3);
+        }
+
+        private void RecentTimer4_Click(object sender, RoutedEventArgs e)
+        {
+            if ((isTimerRunning && !isPaused) || recentTimer4 == "--:--") return;
+            ApplyRecentTimer(recentTimer4);
+        }
+
+        private void RecentTimer5_Click(object sender, RoutedEventArgs e)
+        {
+            if ((isTimerRunning && !isPaused) || recentTimer5 == "--:--") return;
+            ApplyRecentTimer(recentTimer5);
+        }
+
+        private void RecentTimer6_Click(object sender, RoutedEventArgs e)
+        {
+            if ((isTimerRunning && !isPaused) || recentTimer6 == "--:--") return;
+            ApplyRecentTimer(recentTimer6);
         }
 
         // 设置快捷时间
@@ -630,11 +688,15 @@ namespace Ink_Canvas
             // 如果当前时间与最近记录不同，则更新
             if (currentTime != recentTimer1)
             {
+                // 向后移动所有记录
+                recentTimer6 = recentTimer5;
+                recentTimer5 = recentTimer4;
+                recentTimer4 = recentTimer3;
+                recentTimer3 = recentTimer2;
                 recentTimer2 = recentTimer1;
                 recentTimer1 = currentTime;
                 UpdateRecentTimerDisplays();
-                
-                // 保存到注册表
+
                 SaveRecentTimersToRegistry();
             }
         }
@@ -646,6 +708,10 @@ namespace Ink_Canvas
             {
                 RecentTimer1Text.Text = recentTimer1;
                 RecentTimer2Text.Text = recentTimer2;
+                RecentTimer3Text.Text = recentTimer3;
+                RecentTimer4Text.Text = recentTimer4;
+                RecentTimer5Text.Text = recentTimer5;
+                RecentTimer6Text.Text = recentTimer6;
             }
             catch
             {
@@ -664,6 +730,10 @@ namespace Ink_Canvas
                     {
                         recentTimer1 = key.GetValue(RecentTimer1Key, "--:--")?.ToString() ?? "--:--";
                         recentTimer2 = key.GetValue(RecentTimer2Key, "--:--")?.ToString() ?? "--:--";
+                        recentTimer3 = key.GetValue(RecentTimer3Key, "--:--")?.ToString() ?? "--:--";
+                        recentTimer4 = key.GetValue(RecentTimer4Key, "--:--")?.ToString() ?? "--:--";
+                        recentTimer5 = key.GetValue(RecentTimer5Key, "--:--")?.ToString() ?? "--:--";
+                        recentTimer6 = key.GetValue(RecentTimer6Key, "--:--")?.ToString() ?? "--:--";
                     }
                 }
             }
@@ -672,6 +742,10 @@ namespace Ink_Canvas
                 // 如果读取注册表失败，使用默认值
                 recentTimer1 = "--:--";
                 recentTimer2 = "--:--";
+                recentTimer3 = "--:--";
+                recentTimer4 = "--:--";
+                recentTimer5 = "--:--";
+                recentTimer6 = "--:--";
             }
         }
 
@@ -686,6 +760,10 @@ namespace Ink_Canvas
                     {
                         key.SetValue(RecentTimer1Key, recentTimer1);
                         key.SetValue(RecentTimer2Key, recentTimer2);
+                        key.SetValue(RecentTimer3Key, recentTimer3);
+                        key.SetValue(RecentTimer4Key, recentTimer4);
+                        key.SetValue(RecentTimer5Key, recentTimer5);
+                        key.SetValue(RecentTimer6Key, recentTimer6);
                     }
                 }
             }
