@@ -555,19 +555,6 @@ namespace Ink_Canvas
             }
         }
 
-        private void Fullscreen_Click(object sender, RoutedEventArgs e)
-        {
-            if (WindowState == WindowState.Normal)
-            {
-                WindowState = WindowState.Maximized;
-            }
-            else
-            {
-                WindowState = WindowState.Normal;
-            }
-        }
-
-
         private void PlayTimerSound()
         {
             try
@@ -1013,6 +1000,21 @@ namespace Ink_Canvas
             catch
             {
             }
+        }
+
+        private void Fullscreen_Click(object sender, RoutedEventArgs e)
+        {
+            ShowFullscreenTimer();
+        }
+
+        private void ShowFullscreenTimer()
+        {
+            // 创建全屏计时器窗口
+            var fullscreenWindow = new FullscreenTimerWindow(this);
+            fullscreenWindow.Show();
+            
+            // 隐藏主窗口
+            this.Hide();
         }
     }
 }
