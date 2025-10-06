@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ink_Canvas"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        Topmost="True" Background="Transparent"
+        Topmost="True" Background="{DynamicResource SeewoTimerWindowBackground}"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
-        WindowStartupLocation="Manual" Title="计时器" Height="120" Width="350"
+        WindowStartupLocation="Manual" Title="计时器" Height="200" Width="600"
         MouseLeftButtonDown="Window_MouseLeftButtonDown" MouseLeftButtonUp="Window_MouseLeftButtonUp"
         MouseEnter="Window_MouseEnter" MouseLeave="Window_MouseLeave" MouseMove="Window_MouseMove">
 
@@ -15,76 +15,76 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="DigitResources.xaml" />
-                <ResourceDictionary Source="../Resources/Styles/Light.xaml" />
-                <ResourceDictionary Source="../Resources/Styles/Dark.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Window.Resources>
 
     <Border Background="{DynamicResource SeewoTimerWindowBackground}" 
-            CornerRadius="8" 
+            CornerRadius="15" 
             BorderThickness="1" 
             BorderBrush="{DynamicResource SeewoTimerWindowBorderBrush}" 
-            Margin="5">
+            Margin="0"
+            UseLayoutRounding="True"
+            SnapsToDevicePixels="True">
         <Grid>
             <!-- 时间显示 -->
-            <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="20,20,20,20">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <!-- 小时 -->
                     <Path x:Name="MinHour1Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="32" Height="32" 
+                          Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,4,0"/>
+                          Margin="0,0,12,0"/>
                     <Path x:Name="MinHour2Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="32" Height="32" 
+                          Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,4,0"/>
+                          Margin="0,0,12,0"/>
                     
                     <!-- 冒号 -->
-                    <TextBlock Text=":" FontSize="20" FontWeight="Bold" 
+                    <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
                                Foreground="{DynamicResource SeewoTimerWindowDigitForeground}" 
                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Margin="0,0,2,0"/>
+                               Margin="0,0,12,0"/>
                     
                     <!-- 分钟 -->
                     <Path x:Name="MinMinute1Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="32" Height="32" 
+                          Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,4,0"/>
+                          Margin="0,0,12,0"/>
                     <Path x:Name="MinMinute2Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="32" Height="32" 
+                          Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,4,0"/>
+                          Margin="0,0,12,0"/>
                     
                     <!-- 冒号 -->
-                    <TextBlock Text=":" FontSize="20" FontWeight="Bold" 
+                    <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
                                Foreground="{DynamicResource SeewoTimerWindowDigitForeground}" 
                                HorizontalAlignment="Center" VerticalAlignment="Center"
-                               Margin="0,0,2,0"/>
+                               Margin="0,0,12,0"/>
                     
                     <!-- 秒 -->
                     <Path x:Name="MinSecond1Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="32" Height="32" 
+                          Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
-                          Margin="0,0,4,0"/>
+                          Margin="0,0,12,0"/>
                     <Path x:Name="MinSecond2Display" Data="{StaticResource Digit0}" 
                           Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
-                          Width="32" Height="32" 
+                          Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
@@ -94,10 +94,10 @@
             
             <!-- 关闭按钮 -->
             <Button x:Name="CloseButton" 
-                    Width="20" Height="20" 
+                    Width="24" Height="24" 
                     HorizontalAlignment="Right" 
                     VerticalAlignment="Top" 
-                    Margin="0,5,5,0"
+                    Margin="0,8,8,0"
                     Background="Transparent" 
                     BorderThickness="0" 
                     Click="CloseButton_Click" 
@@ -105,7 +105,7 @@
                     Opacity="0.7">
                 <Button.Template>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="10">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="12">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
