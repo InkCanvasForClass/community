@@ -24,7 +24,7 @@ namespace Ink_Canvas
             InitializeComponent();
             parentWindow = parent;
             
-            // 设置窗口位置（保持父窗口的位置）
+            // 设置窗口位置
             this.Left = parent.Left;
             this.Top = parent.Top;
             
@@ -32,6 +32,8 @@ namespace Ink_Canvas
             updateTimer = new System.Timers.Timer(100); // 100ms更新一次
             updateTimer.Elapsed += UpdateTimer_Elapsed;
             updateTimer.Start();
+            
+            parentWindow.TimerCompleted += ParentWindow_TimerCompleted;
             
             // 应用主题
             ApplyTheme();
@@ -73,6 +75,14 @@ namespace Ink_Canvas
                 SetDigitDisplay("MinSecond1Display", seconds / 10);
                 SetDigitDisplay("MinSecond2Display", seconds % 10);
             }
+        }
+        
+        private void ParentWindow_TimerCompleted(object sender, EventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                this.Close();
+            });
         }
 
         private void SetDigitDisplay(string pathName, int digit)
@@ -226,6 +236,11 @@ namespace Ink_Canvas
 
         protected override void OnClosed(EventArgs e)
         {
+            if (parentWindow != null)
+            {
+                parentWindow.TimerCompleted -= ParentWindow_TimerCompleted;
+            }
+            
             // 清理资源
             if (updateTimer != null)
             {

@@ -73,6 +73,9 @@ namespace Ink_Canvas
                     isTimerRunning = false;
                     StartPauseIcon.Data = Geometry.Parse(PlayIconData);
                     PlayTimerSound();
+                    
+                    TimerCompleted?.Invoke(this, EventArgs.Empty);
+                    HandleTimerCompletion();
                 }
             });
         }
@@ -96,6 +99,8 @@ namespace Ink_Canvas
         private MinimizedTimerWindow minimizedWindow;
         private DateTime lastActivityTime;
         private bool isFullscreenMode = false;
+        private FullscreenTimerWindow fullscreenWindow;
+        public event EventHandler TimerCompleted;
 
         // 最近计时记录
         private string recentTimer1 = "--:--";
@@ -1120,11 +1125,32 @@ namespace Ink_Canvas
             isFullscreenMode = true;
             
             // 创建全屏计时器窗口
-            var fullscreenWindow = new FullscreenTimerWindow(this);
+            fullscreenWindow = new FullscreenTimerWindow(this);
             fullscreenWindow.Show();
             
             // 隐藏主窗口
             this.Hide();
+        }
+        
+        private void HandleTimerCompletion()
+        {
+            if (minimizedWindow != null)
+            {
+                minimizedWindow.Close();
+                minimizedWindow = null;
+                this.Show();
+                this.Activate();
+                this.WindowState = WindowState.Normal;
+            }
+            else if (fullscreenWindow != null)
+            {
+                fullscreenWindow.Close();
+                fullscreenWindow = null;
+                isFullscreenMode = false;
+                this.Show();
+                this.Activate();
+                this.WindowState = WindowState.Normal;
+            }
         }
     }
 }
