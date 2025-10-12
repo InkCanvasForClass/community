@@ -895,6 +895,10 @@ namespace Ink_Canvas
                 
                 TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
 
+                // 渐进提醒设置
+                ToggleSwitchEnableProgressiveReminder.IsOn = Settings.RandSettings.EnableProgressiveReminder;
+                ProgressiveReminderVolumeSlider.Value = Settings.RandSettings.ProgressiveReminderVolume;
+
                 // 加载自定义点名背景
                 UpdatePickNameBackgroundsInComboBox();
 
@@ -925,6 +929,10 @@ namespace Ink_Canvas
                 }
                 
                 TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
+                
+                // 渐进提醒设置
+                ToggleSwitchEnableProgressiveReminder.IsOn = Settings.RandSettings.EnableProgressiveReminder;
+                ProgressiveReminderVolumeSlider.Value = Settings.RandSettings.ProgressiveReminderVolume;
             }
 
             // ModeSettings

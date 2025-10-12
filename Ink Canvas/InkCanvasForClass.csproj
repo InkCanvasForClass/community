@@ -192,6 +192,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\TimerDownNotice.wav" />
+    <None Include="Resources\ProgressiveAudio.wav" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\IACore\IACore.dll" />

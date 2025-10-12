@@ -65,6 +65,14 @@ namespace Ink_Canvas
                     SetDigitDisplay("Digit5Display", leftTimeSpan.Seconds / 10);
                     SetDigitDisplay("Digit6Display", leftTimeSpan.Seconds % 10);
 
+                    if (leftTimeSpan.TotalSeconds == 3 && 
+                        MainWindow.Settings.RandSettings?.EnableProgressiveReminder == true &&
+                        !hasPlayedProgressiveReminder)
+                    {
+                        PlayProgressiveReminderSound();
+                        hasPlayedProgressiveReminder = true;
+                    }
+
                     if (leftTimeSpan.TotalSeconds <= 0 && MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true)
                     {
                         isOvertimeMode = true;
@@ -121,6 +129,7 @@ namespace Ink_Canvas
         bool isPaused = false;
         bool isOvertimeMode = false; 
         TimeSpan remainingTime = TimeSpan.Zero;
+        bool hasPlayedProgressiveReminder = false; 
         
         Timer timer = new Timer();
         private Timer hideTimer;
@@ -692,7 +701,8 @@ namespace Ink_Canvas
                 StartPauseIcon.Data = Geometry.Parse(PauseIconData);
                 isPaused = false;
                 isTimerRunning = true;
-                isOvertimeMode = false; 
+                isOvertimeMode = false;
+                hasPlayedProgressiveReminder = false; 
                 timer.Start();
                 
                 // 启动隐藏定时器
@@ -736,12 +746,10 @@ namespace Ink_Canvas
                 if (!string.IsNullOrEmpty(MainWindow.Settings.RandSettings?.CustomTimerSoundPath) &&
                     System.IO.File.Exists(MainWindow.Settings.RandSettings.CustomTimerSoundPath))
                 {
-                    // 播放自定义铃声
                     mediaPlayer.Open(new Uri(MainWindow.Settings.RandSettings.CustomTimerSoundPath));
                 }
                 else
                 {
-                    // 播放默认铃声
                     string tempPath = System.IO.Path.GetTempFileName() + ".wav";
                     using (var stream = Properties.Resources.TimerDownNotice)
                     {
@@ -757,8 +765,40 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                // 如果播放失败，静默处理
                 System.Diagnostics.Debug.WriteLine($"播放计时器铃声失败: {ex.Message}");
+            }
+        }
+
+        private void PlayProgressiveReminderSound()
+        {
+            try
+            {
+                double volume = MainWindow.Settings.RandSettings?.ProgressiveReminderVolume ?? 1.0;
+                mediaPlayer.Volume = volume;
+
+                if (!string.IsNullOrEmpty(MainWindow.Settings.RandSettings?.ProgressiveReminderSoundPath) &&
+                    System.IO.File.Exists(MainWindow.Settings.RandSettings.ProgressiveReminderSoundPath))
+                {
+                    mediaPlayer.Open(new Uri(MainWindow.Settings.RandSettings.ProgressiveReminderSoundPath));
+                }
+                else
+                {
+                    string tempPath = System.IO.Path.GetTempFileName() + ".wav";
+                    using (var stream = Properties.Resources.ProgressiveAudio)
+                    {
+                        using (var fileStream = new System.IO.FileStream(tempPath, System.IO.FileMode.Create))
+                        {
+                            stream.CopyTo(fileStream);
+                        }
+                    }
+                    mediaPlayer.Open(new Uri(tempPath));
+                }
+
+                mediaPlayer.Play();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"播放渐进提醒音频失败: {ex.Message}");
             }
         }
 

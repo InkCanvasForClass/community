@@ -2460,6 +2460,7 @@ namespace Ink_Canvas
                     RandWindowOnceCloseLatencySlider,
                     RandWindowOnceMaxStudentsSlider,
                     TimerVolumeSlider,
+                    ProgressiveReminderVolumeSlider,
                     BoardInkWidthSlider,
                     BoardInkAlphaSlider,
                     BoardHighlighterWidthSlider,

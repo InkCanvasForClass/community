@@ -641,6 +641,12 @@ namespace Ink_Canvas
         public bool EnableOvertimeCountUp { get; set; } = false;
         [JsonProperty("enableOvertimeRedText")]
         public bool EnableOvertimeRedText { get; set; } = false;
+        [JsonProperty("enableProgressiveReminder")]
+        public bool EnableProgressiveReminder { get; set; } = false;
+        [JsonProperty("progressiveReminderVolume")]
+        public double ProgressiveReminderVolume { get; set; } = 1.0;
+        [JsonProperty("progressiveReminderSoundPath")]
+        public string ProgressiveReminderSoundPath { get; set; } = "";
     }
 
     public class CustomPickNameBackground

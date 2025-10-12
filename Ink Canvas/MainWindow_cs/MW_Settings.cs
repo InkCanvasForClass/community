@@ -2664,6 +2664,42 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnableProgressiveReminder_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.EnableProgressiveReminder = ToggleSwitchEnableProgressiveReminder.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ProgressiveReminderVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.ProgressiveReminderVolume = ProgressiveReminderVolumeSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void ButtonSelectCustomProgressiveReminderSound_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "选择渐进提醒音频文件",
+                Filter = "音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*",
+                DefaultExt = "wav"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Settings.RandSettings.ProgressiveReminderSoundPath = openFileDialog.FileName;
+                SaveSettingsToFile();
+            }
+        }
+
+        private void ButtonResetProgressiveReminderSound_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.RandSettings.ProgressiveReminderSoundPath = "";
+            SaveSettingsToFile();
+        }
+
         private void ButtonSelectCustomTimerSound_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
