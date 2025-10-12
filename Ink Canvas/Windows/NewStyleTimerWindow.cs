@@ -65,7 +65,7 @@ namespace Ink_Canvas
                     SetDigitDisplay("Digit5Display", leftTimeSpan.Seconds / 10);
                     SetDigitDisplay("Digit6Display", leftTimeSpan.Seconds % 10);
                     
-                    if (leftTimeSpan.TotalSeconds <= 7 && leftTimeSpan.TotalSeconds > 0 && 
+                    if (leftTimeSpan.TotalSeconds <= 6 && leftTimeSpan.TotalSeconds > 0 && 
                         MainWindow.Settings.RandSettings?.EnableProgressiveReminder == true &&
                         !hasPlayedProgressiveReminder)
                     {
