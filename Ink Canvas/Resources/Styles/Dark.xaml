@@ -113,15 +113,15 @@
     <BitmapImage x:Key="TimerWindowClockIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_timer_24_regular-light.png"/>
     
     <!-- 倒计时窗口主题颜色 -->
-    <SolidColorBrush x:Key="SeewoTimerWindowBackground" Color="#1f1f1f"/>
-    <SolidColorBrush x:Key="SeewoTimerWindowBorderBrush" Color="#E0E0E0"/>
-    <SolidColorBrush x:Key="SeewoTimerWindowTextForeground" Color="White"/>
-    <SolidColorBrush x:Key="SeewoTimerWindowButtonBackground" Color="#2a2a2a"/>
-    <SolidColorBrush x:Key="SeewoTimerWindowButtonForeground" Color="White"/>
-    <SolidColorBrush x:Key="SeewoTimerWindowDigitForeground" Color="White"/>
-    <SolidColorBrush x:Key="SeewoTimerWindowTitleForeground" Color="White"/>
-    <SolidColorBrush x:Key="SeewoTimerWindowPrimaryButtonBackground" Color="#4CAF50"/>
-    <SolidColorBrush x:Key="SeewoTimerWindowPrimaryButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="NewTimerWindowBackground" Color="#1f1f1f"/>
+    <SolidColorBrush x:Key="NewTimerWindowBorderBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="NewTimerWindowTextForeground" Color="White"/>
+    <SolidColorBrush x:Key="NewTimerWindowButtonBackground" Color="#2a2a2a"/>
+    <SolidColorBrush x:Key="NewTimerWindowButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="NewTimerWindowDigitForeground" Color="White"/>
+    <SolidColorBrush x:Key="NewTimerWindowTitleForeground" Color="White"/>
+    <SolidColorBrush x:Key="NewTimerWindowPrimaryButtonBackground" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="NewTimerWindowPrimaryButtonForeground" Color="White"/>
     
     <!-- 说明书窗口主题颜色 -->
     <SolidColorBrush x:Key="OperatingGuideWindowBackground" Color="#1f1f1f"/>

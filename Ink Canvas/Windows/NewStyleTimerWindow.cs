@@ -11,11 +11,11 @@ using System.Windows.Shapes;
 namespace Ink_Canvas
 {
     /// <summary>
-    /// 仿希沃风格的倒计时器窗口
+    /// 新计时器UI风格的倒计时器窗口
     /// </summary>
-    public partial class SeewoStyleTimerWindow : Window
+    public partial class NewStyleTimerWindow : Window
     {
-        public SeewoStyleTimerWindow()
+        public NewStyleTimerWindow()
         {
             InitializeComponent();
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
@@ -44,38 +44,65 @@ namespace Ink_Canvas
 
             TimeSpan timeSpan = DateTime.Now - startTime;
             TimeSpan totalTimeSpan = new TimeSpan(hour, minute, second);
-            TimeSpan leftTimeSpan = totalTimeSpan - timeSpan;
-            if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
+            double spentTimePercent = timeSpan.TotalMilliseconds / (totalTimeSpan.TotalMilliseconds);
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                int totalHours = (int)leftTimeSpan.TotalHours;
-                int displayHours = totalHours;
-
-                if (displayHours > 99) displayHours = 99;
-
-                SetDigitDisplay("Digit1Display", displayHours / 10);
-                SetDigitDisplay("Digit2Display", displayHours % 10);
-                SetDigitDisplay("Digit3Display", leftTimeSpan.Minutes / 10);
-                SetDigitDisplay("Digit4Display", leftTimeSpan.Minutes % 10);
-                SetDigitDisplay("Digit5Display", leftTimeSpan.Seconds / 10);
-                SetDigitDisplay("Digit6Display", leftTimeSpan.Seconds % 10);
-
-                if (leftTimeSpan.TotalSeconds <= 0)
+                if (!isOvertimeMode)
                 {
-                    SetDigitDisplay("Digit1Display", 0);
-                    SetDigitDisplay("Digit2Display", 0);
-                    SetDigitDisplay("Digit3Display", 0);
-                    SetDigitDisplay("Digit4Display", 0);
-                    SetDigitDisplay("Digit5Display", 0);
-                    SetDigitDisplay("Digit6Display", 0);
-                    timer.Stop();
-                    isTimerRunning = false;
-                    StartPauseIcon.Data = Geometry.Parse(PlayIconData);
-                    PlayTimerSound();
+                    TimeSpan leftTimeSpan = totalTimeSpan - timeSpan;
+                    if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
                     
-                    TimerCompleted?.Invoke(this, EventArgs.Empty);
-                    HandleTimerCompletion();
+                    int totalHours = (int)leftTimeSpan.TotalHours;
+                    int displayHours = totalHours;
+
+                    if (displayHours > 99) displayHours = 99;
+
+                    SetDigitDisplay("Digit1Display", displayHours / 10);
+                    SetDigitDisplay("Digit2Display", displayHours % 10);
+                    SetDigitDisplay("Digit3Display", leftTimeSpan.Minutes / 10);
+                    SetDigitDisplay("Digit4Display", leftTimeSpan.Minutes % 10);
+                    SetDigitDisplay("Digit5Display", leftTimeSpan.Seconds / 10);
+                    SetDigitDisplay("Digit6Display", leftTimeSpan.Seconds % 10);
+
+                    if (leftTimeSpan.TotalSeconds <= 0 && MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true)
+                    {
+                        isOvertimeMode = true;
+                        PlayTimerSound();
+                    }
+                    else if (leftTimeSpan.TotalSeconds <= 0)
+                    {
+                        SetDigitDisplay("Digit1Display", 0);
+                        SetDigitDisplay("Digit2Display", 0);
+                        SetDigitDisplay("Digit3Display", 0);
+                        SetDigitDisplay("Digit4Display", 0);
+                        SetDigitDisplay("Digit5Display", 0);
+                        SetDigitDisplay("Digit6Display", 0);
+                        timer.Stop();
+                        isTimerRunning = false;
+                        StartPauseIcon.Data = Geometry.Parse(PlayIconData);
+                        PlayTimerSound();
+                        
+                        TimerCompleted?.Invoke(this, EventArgs.Empty);
+                        HandleTimerCompletion();
+                    }
+                }
+                else
+                {
+                    TimeSpan overtimeSpan = timeSpan - totalTimeSpan;
+                    int totalHours = (int)overtimeSpan.TotalHours;
+                    int displayHours = totalHours;
+
+                    if (displayHours > 99) displayHours = 99;
+
+                    bool shouldShowRed = MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true;
+
+                    SetDigitDisplay("Digit1Display", displayHours / 10, shouldShowRed);
+                    SetDigitDisplay("Digit2Display", displayHours % 10, shouldShowRed);
+                    SetDigitDisplay("Digit3Display", overtimeSpan.Minutes / 10, shouldShowRed);
+                    SetDigitDisplay("Digit4Display", overtimeSpan.Minutes % 10, shouldShowRed);
+                    SetDigitDisplay("Digit5Display", overtimeSpan.Seconds / 10, shouldShowRed);
+                    SetDigitDisplay("Digit6Display", overtimeSpan.Seconds % 10, shouldShowRed);
                 }
             });
         }
@@ -92,6 +119,7 @@ namespace Ink_Canvas
 
         bool isTimerRunning = false;
         bool isPaused = false;
+        bool isOvertimeMode = false; 
         TimeSpan remainingTime = TimeSpan.Zero;
         
         Timer timer = new Timer();
@@ -100,7 +128,18 @@ namespace Ink_Canvas
         private DateTime lastActivityTime;
         private bool isFullscreenMode = false;
         private FullscreenTimerWindow fullscreenWindow;
-        public event EventHandler TimerCompleted;
+        public event EventHandler TimerCompleted;        
+        public TimeSpan? GetTotalTimeSpan()
+        {
+            return new TimeSpan(hour, minute, second);
+        }
+        
+        public TimeSpan? GetElapsedTime()
+        {
+            if (isPaused) return null;
+            
+            return DateTime.Now - startTime;
+        }
 
         // 最近计时记录
         private string recentTimer1 = "--:--";
@@ -111,12 +150,12 @@ namespace Ink_Canvas
         private string recentTimer6 = "--:--";
 
         // 最近计时记录的注册表键名
-        private const string RecentTimer1Key = "SeewoTimer_RecentTimer1";
-        private const string RecentTimer2Key = "SeewoTimer_RecentTimer2";
-        private const string RecentTimer3Key = "SeewoTimer_RecentTimer3";
-        private const string RecentTimer4Key = "SeewoTimer_RecentTimer4";
-        private const string RecentTimer5Key = "SeewoTimer_RecentTimer5";
-        private const string RecentTimer6Key = "SeewoTimer_RecentTimer6";
+        private const string RecentTimer1Key = "NewTimer_RecentTimer1";
+        private const string RecentTimer2Key = "NewTimer_RecentTimer2";
+        private const string RecentTimer3Key = "NewTimer_RecentTimer3";
+        private const string RecentTimer4Key = "NewTimer_RecentTimer4";
+        private const string RecentTimer5Key = "NewTimer_RecentTimer5";
+        private const string RecentTimer6Key = "NewTimer_RecentTimer6";
 
         private void InitializeUI()
         {
@@ -169,7 +208,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"应用仿希沃倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"应用新计时器UI倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -202,7 +241,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"应用仿希沃倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"应用新计时器UI倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -351,13 +390,12 @@ namespace Ink_Canvas
 
         public TimeSpan? GetRemainingTime()
         {
-            if (!isTimerRunning || isPaused) return null;
+            if (isPaused) return null;
             
             var elapsed = DateTime.Now - startTime;
             var totalSeconds = hour * 3600 + minute * 60 + second;
             var remaining = totalSeconds - elapsed.TotalSeconds;
             
-            if (remaining <= 0) return TimeSpan.Zero;
             return TimeSpan.FromSeconds(remaining);
         }
 
@@ -383,7 +421,8 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="pathName">Path控件的名称</param>
         /// <param name="digit">要显示的数字(0-9)</param>
-        private void SetDigitDisplay(string pathName, int digit)
+        /// <param name="isRed">是否显示为红色</param>
+        private void SetDigitDisplay(string pathName, int digit, bool isRed = false)
         {
             var path = this.FindName(pathName) as Path;
             if (path != null)
@@ -393,6 +432,23 @@ namespace Ink_Canvas
                 if (geometry != null)
                 {
                     path.Data = geometry;
+                }
+                
+                if (isRed)
+                {
+                    path.Fill = Brushes.Red;
+                }
+                else
+                {
+                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    if (defaultBrush != null)
+                    {
+                        path.Fill = defaultBrush;
+                    }
+                    else
+                    {
+                        path.Fill = Brushes.White;
+                    }
                 }
             }
         }
@@ -636,6 +692,7 @@ namespace Ink_Canvas
                 StartPauseIcon.Data = Geometry.Parse(PauseIconData);
                 isPaused = false;
                 isTimerRunning = true;
+                isOvertimeMode = false; 
                 timer.Start();
                 
                 // 启动隐藏定时器
@@ -651,6 +708,7 @@ namespace Ink_Canvas
             if (!isTimerRunning)
             {
                 UpdateDigitDisplays();
+                isOvertimeMode = false;
             }
             else if (isTimerRunning && isPaused)
             {
@@ -659,6 +717,7 @@ namespace Ink_Canvas
                 isTimerRunning = false;
                 timer.Stop();
                 isPaused = false;
+                isOvertimeMode = false;
             }
             else
             {
@@ -1050,7 +1109,7 @@ namespace Ink_Canvas
         {
             try
             {
-                using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\InkCanvas\SeewoTimer"))
+                using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\InkCanvas\NewTimer"))
                 {
                     if (key != null)
                     {
@@ -1080,7 +1139,7 @@ namespace Ink_Canvas
         {
             try
             {
-                using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\InkCanvas\SeewoTimer"))
+                using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\InkCanvas\NewTimer"))
                 {
                     if (key != null)
                     {

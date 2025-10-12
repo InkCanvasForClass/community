@@ -13,10 +13,10 @@ namespace Ink_Canvas
     /// </summary>
     public partial class FullscreenTimerWindow : Window
     {
-        private SeewoStyleTimerWindow parentWindow;
+        private NewStyleTimerWindow parentWindow;
         private System.Timers.Timer updateTimer;
 
-        public FullscreenTimerWindow(SeewoStyleTimerWindow parent)
+        public FullscreenTimerWindow(NewStyleTimerWindow parent)
         {
             InitializeComponent();
             parentWindow = parent;
@@ -37,12 +37,43 @@ namespace Ink_Canvas
 
         private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (parentWindow != null && parentWindow.IsTimerRunning)
+            if (parentWindow != null)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
+                    if (ShouldCloseWindow())
+                    {
+                        this.Close();
+                        return;
+                    }
+                    
                     UpdateTimeDisplay();
                 });
+            }
+        }
+        
+        private bool ShouldCloseWindow()
+        {
+            if (parentWindow == null) return true;
+            
+            if (MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true)
+            {
+                if (parentWindow.IsTimerRunning)
+                {
+                    return false;
+                }
+                
+                var remainingTime = parentWindow.GetRemainingTime();
+                if (remainingTime.HasValue && remainingTime.Value.TotalSeconds < 0)
+                {
+                    return false;
+                }
+                
+                return true;
+            }
+            else
+            {
+                return !parentWindow.IsTimerRunning;
             }
         }
 
@@ -55,21 +86,56 @@ namespace Ink_Canvas
             if (remainingTime.HasValue)
             {
                 var timeSpan = remainingTime.Value;
-                int hours = (int)timeSpan.TotalHours;
-                int minutes = timeSpan.Minutes;
-                int seconds = timeSpan.Seconds;
+                bool isOvertimeMode = timeSpan.TotalSeconds < 0;
+                bool shouldShowRed = isOvertimeMode && MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true;
+
+                int hours, minutes, seconds;
+
+                if (isOvertimeMode)
+                {
+                    var totalTimeSpan = parentWindow.GetTotalTimeSpan();
+                    if (totalTimeSpan.HasValue)
+                    {
+                        var elapsedTime = parentWindow.GetElapsedTime();
+                        if (elapsedTime.HasValue)
+                        {
+                            var overtimeSpan = elapsedTime.Value - totalTimeSpan.Value;
+                            hours = (int)overtimeSpan.TotalHours;
+                            minutes = overtimeSpan.Minutes;
+                            seconds = overtimeSpan.Seconds;
+                        }
+                        else
+                        {
+                            hours = 0;
+                            minutes = 0;
+                            seconds = 0;
+                        }
+                    }
+                    else
+                    {
+                        hours = 0;
+                        minutes = 0;
+                        seconds = 0;
+                    }
+                }
+                else
+                {
+                    hours = (int)timeSpan.TotalHours;
+                    minutes = timeSpan.Minutes;
+                    seconds = timeSpan.Seconds;
+                }
 
                 // 更新小时显示
-                SetDigitDisplay("FullHour1Display", hours / 10);
-                SetDigitDisplay("FullHour2Display", hours % 10);
+                SetDigitDisplay("FullHour1Display", hours / 10, shouldShowRed);
+                SetDigitDisplay("FullHour2Display", hours % 10, shouldShowRed);
                 
                 // 更新分钟显示
-                SetDigitDisplay("FullMinute1Display", minutes / 10);
-                SetDigitDisplay("FullMinute2Display", minutes % 10);
+                SetDigitDisplay("FullMinute1Display", minutes / 10, shouldShowRed);
+                SetDigitDisplay("FullMinute2Display", minutes % 10, shouldShowRed);
                 
                 // 更新秒显示
-                SetDigitDisplay("FullSecond1Display", seconds / 10);
-                SetDigitDisplay("FullSecond2Display", seconds % 10);
+                SetDigitDisplay("FullSecond1Display", seconds / 10, shouldShowRed);
+                SetDigitDisplay("FullSecond2Display", seconds % 10, shouldShowRed);
             }
         }
         
@@ -81,7 +147,7 @@ namespace Ink_Canvas
             });
         }
 
-        private void SetDigitDisplay(string pathName, int digit)
+        private void SetDigitDisplay(string pathName, int digit, bool isRed = false)
         {
             var path = this.FindName(pathName) as Path;
             if (path != null)
@@ -91,6 +157,16 @@ namespace Ink_Canvas
                 if (geometry != null)
                 {
                     path.Data = geometry;
+                }
+                
+                // 设置颜色
+                if (isRed)
+                {
+                    path.Fill = Brushes.Red;
+                }
+                else
+                {
+                    path.Fill = Brushes.White;
                 }
             }
         }

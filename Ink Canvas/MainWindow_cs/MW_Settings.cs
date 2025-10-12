@@ -2611,21 +2611,49 @@ namespace Ink_Canvas
             Settings.RandSettings.UseLegacyTimerUI = ToggleSwitchUseLegacyTimerUI.IsOn;
             if (ToggleSwitchUseLegacyTimerUI.IsOn)
             {
-                ToggleSwitchUseSeewoStyleUI.IsOn = false;
-                Settings.RandSettings.UseSeewoStyleUI = false;
+                ToggleSwitchUseNewStyleUI.IsOn = false;
+                Settings.RandSettings.UseNewStyleUI = false;
             }
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchUseSeewoStyleUI_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchUseNewStyleUI_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.RandSettings.UseSeewoStyleUI = ToggleSwitchUseSeewoStyleUI.IsOn;
-            if (ToggleSwitchUseSeewoStyleUI.IsOn)
+            Settings.RandSettings.UseNewStyleUI = ToggleSwitchUseNewStyleUI.IsOn;
+            if (ToggleSwitchUseNewStyleUI.IsOn)
             {
                 ToggleSwitchUseLegacyTimerUI.IsOn = false;
                 Settings.RandSettings.UseLegacyTimerUI = false;
             }
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableOvertimeCountUp_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.EnableOvertimeCountUp = ToggleSwitchEnableOvertimeCountUp.IsOn;
+            
+            if (!ToggleSwitchEnableOvertimeCountUp.IsOn)
+            {
+                ToggleSwitchEnableOvertimeRedText.IsOn = false;
+                Settings.RandSettings.EnableOvertimeRedText = false;
+            }
+            
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableOvertimeRedText_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            if (ToggleSwitchEnableOvertimeRedText.IsOn && !ToggleSwitchEnableOvertimeCountUp.IsOn)
+            {
+                ToggleSwitchEnableOvertimeRedText.IsOn = false;
+                return;
+            }
+            
+            Settings.RandSettings.EnableOvertimeRedText = ToggleSwitchEnableOvertimeRedText.IsOn;
             SaveSettingsToFile();
         }
 

@@ -631,12 +631,16 @@ namespace Ink_Canvas
         public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
         [JsonProperty("useLegacyTimerUI")]
         public bool UseLegacyTimerUI { get; set; } = false;
-        [JsonProperty("useSeewoStyleUI")]
-        public bool UseSeewoStyleUI { get; set; } = true;
+        [JsonProperty("useNewStyleUI")]
+        public bool UseNewStyleUI { get; set; } = true;
         [JsonProperty("timerVolume")]
         public double TimerVolume { get; set; } = 1.0;
         [JsonProperty("customTimerSoundPath")]
         public string CustomTimerSoundPath { get; set; } = "";
+        [JsonProperty("enableOvertimeCountUp")]
+        public bool EnableOvertimeCountUp { get; set; } = false;
+        [JsonProperty("enableOvertimeRedText")]
+        public bool EnableOvertimeRedText { get; set; } = false;
     }
 
     public class CustomPickNameBackground

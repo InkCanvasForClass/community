@@ -19,10 +19,10 @@
         </ResourceDictionary>
     </Window.Resources>
 
-    <Border x:Name="MainBorder" Background="{DynamicResource SeewoTimerWindowBackground}" 
+    <Border x:Name="MainBorder" Background="{DynamicResource NewTimerWindowBackground}" 
             CornerRadius="15" 
             BorderThickness="1" 
-            BorderBrush="{DynamicResource SeewoTimerWindowBorderBrush}" 
+            BorderBrush="{DynamicResource NewTimerWindowBorderBrush}" 
             Margin="0"
             UseLayoutRounding="True"
             SnapsToDevicePixels="True">
@@ -32,14 +32,14 @@
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <!-- 小时 -->
                     <Path x:Name="MinHour1Display" Data="{StaticResource Digit0}" 
-                          Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
                           Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
                           Margin="0,0,12,0"/>
                     <Path x:Name="MinHour2Display" Data="{StaticResource Digit0}" 
-                          Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
                           Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
@@ -48,20 +48,20 @@
                     
                     <!-- 冒号 -->
                     <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
-                               Foreground="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                               Foreground="{DynamicResource NewTimerWindowDigitForeground}" 
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Margin="0,0,12,0"/>
                     
                     <!-- 分钟 -->
                     <Path x:Name="MinMinute1Display" Data="{StaticResource Digit0}" 
-                          Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
                           Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
                           Margin="0,0,12,0"/>
                     <Path x:Name="MinMinute2Display" Data="{StaticResource Digit0}" 
-                          Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
                           Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
@@ -70,20 +70,20 @@
                     
                     <!-- 冒号 -->
                     <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
-                               Foreground="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                               Foreground="{DynamicResource NewTimerWindowDigitForeground}" 
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Margin="0,0,12,0"/>
                     
                     <!-- 秒 -->
                     <Path x:Name="MinSecond1Display" Data="{StaticResource Digit0}" 
-                          Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
                           Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
                           Stretch="Uniform" 
                           Margin="0,0,12,0"/>
                     <Path x:Name="MinSecond2Display" Data="{StaticResource Digit0}" 
-                          Fill="{DynamicResource SeewoTimerWindowDigitForeground}" 
+                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
                           Width="72" Height="72" 
                           HorizontalAlignment="Center" 
                           VerticalAlignment="Center"
@@ -117,7 +117,7 @@
                     </ControlTemplate>
                 </Button.Template>
                 <TextBlock Text="✕" FontSize="12" FontWeight="Bold" 
-                           Foreground="{DynamicResource SeewoTimerWindowButtonForeground}" 
+                           Foreground="{DynamicResource NewTimerWindowButtonForeground}" 
                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
         </Grid>

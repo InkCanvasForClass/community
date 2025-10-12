@@ -883,7 +883,16 @@ namespace Ink_Canvas
 
                 // 计时器设置
                 ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
-                ToggleSwitchUseSeewoStyleUI.IsOn = Settings.RandSettings.UseSeewoStyleUI;
+                ToggleSwitchUseNewStyleUI.IsOn = Settings.RandSettings.UseNewStyleUI;
+                ToggleSwitchEnableOvertimeCountUp.IsOn = Settings.RandSettings.EnableOvertimeCountUp;
+                
+                bool canEnableRedText = Settings.RandSettings.EnableOvertimeCountUp && Settings.RandSettings.EnableOvertimeRedText;
+                ToggleSwitchEnableOvertimeRedText.IsOn = canEnableRedText;
+                if (!canEnableRedText)
+                {
+                    Settings.RandSettings.EnableOvertimeRedText = false;
+                }
+                
                 TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
 
                 // 加载自定义点名背景
@@ -905,7 +914,16 @@ namespace Ink_Canvas
                 ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
                 ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
                 ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
-                ToggleSwitchUseSeewoStyleUI.IsOn = Settings.RandSettings.UseSeewoStyleUI;
+                ToggleSwitchUseNewStyleUI.IsOn = Settings.RandSettings.UseNewStyleUI;
+                ToggleSwitchEnableOvertimeCountUp.IsOn = Settings.RandSettings.EnableOvertimeCountUp;
+                
+                bool canEnableRedText = Settings.RandSettings.EnableOvertimeCountUp && Settings.RandSettings.EnableOvertimeRedText;
+                ToggleSwitchEnableOvertimeRedText.IsOn = canEnableRedText;
+                if (!canEnableRedText)
+                {
+                    Settings.RandSettings.EnableOvertimeRedText = false;
+                }
+                
                 TimerVolumeSlider.Value = Settings.RandSettings.TimerVolume;
             }
 
