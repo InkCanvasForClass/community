@@ -610,6 +610,14 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Name="UIAccessTopMostPanel" Visibility="Collapsed">
+                                        <TextBlock Foreground="#fafafa" Text="UIA置顶" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchUIAccessTopMost"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Name="UIAccessTopMostDescription" Text="# 开启UIA置顶后，软件自动重启置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能" TextWrapping="Wrap" Foreground="#a1a1aa" Visibility="Collapsed" />
                                     <ui:ToggleSwitch OnContent="" OffContent=""
                                                      Name="ToggleSwitchIsAutoUpdate" Header="自动检查更新"
                                                      FontFamily="Microsoft YaHei UI"

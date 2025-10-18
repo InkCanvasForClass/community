@@ -41,6 +41,8 @@ namespace Ink_Canvas
         private static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
         public static bool IsAppExitByUser;
+        // 新增：标记是否启用了UIA置顶功能
+        public static bool IsUIAccessTopMostEnabled;
         // 新增：退出信号文件路径
         private static string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + Process.GetCurrentProcess().Id + ".flag");
         // 新增：崩溃日志文件路径
@@ -629,7 +631,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("App | 检测到最终应用启动（更新后的应用）");
             }
 
-            // 在应用启动时自动释放IACore相关DLL
+            // 释放IACore相关DLL
             if (_isSplashScreenShown)
             {
                 SetSplashMessage("正在初始化组件...");
@@ -643,6 +645,22 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"释放IACore DLL时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 释放UIAccess DLL
+            if (_isSplashScreenShown)
+            {
+                SetSplashMessage("正在初始化组件...");
+                SetSplashProgress(50);
+                await Task.Delay(300);
+            }
+            try
+            {
+                UIAccessDllExtractor.ExtractUIAccessDlls();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"释放UIAccess DLL时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
             // 记录应用启动（设备标识符）
@@ -1055,7 +1073,15 @@ namespace Ink_Canvas
                         Thread.Sleep(2000);
                     }
                     // 主进程异常退出，自动重启前判断崩溃后操作
-                    SyncCrashActionFromSettings(); // 新增：同步设置
+                    SyncCrashActionFromSettings(); // 同步设置
+                    
+                    if (IsUIAccessTopMostEnabled)
+                    {
+                        string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                        Process.Start(exePath);
+                        Environment.Exit(0);
+                    }
+                    
                     if (CrashAction == CrashActionType.SilentRestart)
                     {
                         StartupCount.Increment();
@@ -1068,7 +1094,6 @@ namespace Ink_Canvas
                         string exePath = Process.GetCurrentProcess().MainModule.FileName;
                         Process.Start(exePath);
                     }
-                    // CrashActionType.NoAction 时不重启，直接退出
                 }
                 catch { }
                 Environment.Exit(0);

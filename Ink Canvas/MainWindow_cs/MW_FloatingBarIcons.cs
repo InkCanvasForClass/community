@@ -928,7 +928,7 @@ namespace Ink_Canvas
         #region 主要的工具按鈕事件
 
         /// <summary>
-        ///     浮動工具欄的"套索選"按鈕事件，重定向到舊UI的<c>BtnSelect_Click</c>方法
+        /// 浮動工具欄的"套索選"按鈕事件，重定向到舊UI的<c>BtnSelect_Click</c>方法
         /// </summary>
         /// <param name="sender">sender</param>
         /// <param name="e">MouseButtonEventArgs</param>

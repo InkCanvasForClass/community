@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -38,6 +39,12 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        [DllImport("UIAccessDLL_x86.dll", EntryPoint = "PrepareUIAccess", CallingConvention = CallingConvention.Cdecl)]
+        public static extern Int32 PrepareUIAccessX86();
+
+        [DllImport("UIAccessDLL_x64.dll", EntryPoint = "PrepareUIAccess", CallingConvention = CallingConvention.Cdecl)]
+        public static extern Int32 PrepareUIAccessX64();
+
         // 每一页一个Canvas对象
         private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();
         private int currentPageIndex;
@@ -549,6 +556,12 @@ namespace Ink_Canvas
             ApplyNoFocusMode();
             ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
             ApplyAlwaysOnTop();
+
+            // 初始化UIA置顶开关
+            ToggleSwitchUIAccessTopMost.IsOn = Settings.Advanced.EnableUIAccessTopMost;
+            UpdateUIAccessTopMostVisibility();
+            
+            App.IsUIAccessTopMostEnabled = Settings.Advanced.EnableUIAccessTopMost;
 
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
@@ -2030,6 +2043,21 @@ namespace Ink_Canvas
             Settings.Advanced.IsAlwaysOnTop = toggle != null && toggle.IsOn;
             SaveSettingsToFile();
             ApplyAlwaysOnTop();
+            UpdateUIAccessTopMostVisibility();
+        }
+
+        private void ToggleSwitchUIAccessTopMost_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            var toggle = sender as ToggleSwitch;
+            bool newValue = toggle != null && toggle.IsOn;
+            
+            Settings.Advanced.EnableUIAccessTopMost = newValue;
+            SaveSettingsToFile();
+            ApplyUIAccessTopMost();
+            
+            App.IsUIAccessTopMostEnabled = newValue;
+        
         }
 
         private void Window_Activated(object sender, EventArgs e)
@@ -2919,6 +2947,83 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"刷新通知框颜色时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #endregion
+
+        #region UIA置顶功能
+
+        /// <summary>
+        /// 更新UIA置顶开关的可见性
+        /// </summary>
+        private void UpdateUIAccessTopMostVisibility()
+        {
+            try
+            {
+                var visibility = Settings.Advanced.IsAlwaysOnTop ? Visibility.Visible : Visibility.Collapsed;
+                
+                if (UIAccessTopMostPanel != null)
+                {
+                    UIAccessTopMostPanel.Visibility = visibility;
+                }
+                
+                if (UIAccessTopMostDescription != null)
+                {
+                    UIAccessTopMostDescription.Visibility = visibility;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新UIA置顶开关可见性时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 应用UIA置顶功能
+        /// </summary>
+        private void ApplyUIAccessTopMost()
+        {
+            try
+            {
+                if (Settings.Advanced.EnableUIAccessTopMost && Settings.Advanced.IsAlwaysOnTop)
+                {
+                    // 检查是否以管理员权限运行
+                    var identity = WindowsIdentity.GetCurrent();
+                    var principal = new WindowsPrincipal(identity);
+                    
+                    if (principal.IsInRole(WindowsBuiltInRole.Administrator))
+                    {
+                        try
+                        {
+                            // 调用UIAccess DLL
+                            if (Environment.Is64BitProcess)
+                            {
+                                PrepareUIAccessX64();
+                            }
+                            else
+                            {
+                                PrepareUIAccessX86();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"启用UIA置顶功能时出错: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("UIA置顶功能需要管理员权限", LogHelper.LogType.Warning);
+                    }
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("UIA置顶功能已禁用", LogHelper.LogType.Trace);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用UIA置顶功能时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

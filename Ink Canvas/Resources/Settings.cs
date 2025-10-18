@@ -591,6 +591,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isAlwaysOnTop")]
         public bool IsAlwaysOnTop { get; set; } = true;
+
+        [JsonProperty("enableUIAccessTopMost")]
+        public bool EnableUIAccessTopMost { get; set; } = false;
     }
 
     public class InkToShape
