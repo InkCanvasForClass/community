@@ -62,6 +62,7 @@ namespace Ink_Canvas
 
         // 设置面板相关状态
         private bool userChangedNoFocusModeInSettings;
+        private bool isTemporarilyDisablingNoFocusMode = false;
 
 
 
@@ -1839,7 +1840,11 @@ namespace Ink_Canvas
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            if (Settings.Advanced.IsNoFocusMode)
+            
+            bool shouldBeNoFocus = isTemporarilyDisablingNoFocusMode ? 
+                false : Settings.Advanced.IsNoFocusMode;
+            
+            if (shouldBeNoFocus)
             {
                 SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
             }
@@ -2021,6 +2026,12 @@ namespace Ink_Canvas
             var toggle = sender as ToggleSwitch;
             Settings.Advanced.IsNoFocusMode = toggle != null && toggle.IsOn;
             SaveSettingsToFile();
+                
+            if (isTemporarilyDisablingNoFocusMode)
+            {
+                isTemporarilyDisablingNoFocusMode = false;
+            }
+            
             ApplyNoFocusMode();
 
             // 如果启用了窗口置顶，需要重新应用置顶设置以处理无焦点模式的变化

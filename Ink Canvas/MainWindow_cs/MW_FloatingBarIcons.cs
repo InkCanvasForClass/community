@@ -396,15 +396,11 @@ namespace Ink_Canvas
                 {
                     BorderSettings.Visibility = Visibility.Collapsed;
                     isOpeningOrHidingSettingsPane = false;
-                    // 在设置面板完全关闭后，根据情况恢复无焦点模式状态
-                    if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
+                    if (isTemporarilyDisablingNoFocusMode)
                     {
-                        // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
-                        Settings.Advanced.IsNoFocusMode = true;
-                        ToggleSwitchNoFocusMode.IsOn = true; // 同步更新设置面板中的开关状态
+                        isTemporarilyDisablingNoFocusMode = false;
                         ApplyNoFocusMode();
                     }
-                    // 如果用户在设置中修改了无焦点模式，则保持用户的修改
                 };
 
                 BorderSettings.RenderTransform = new TranslateTransform();
@@ -2707,11 +2703,9 @@ namespace Ink_Canvas
             // 如果当前在设置面板中，需要先恢复无焦点模式状态
             if (BorderSettings.Visibility == Visibility.Visible)
             {
-                // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
-                if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
+                if (isTemporarilyDisablingNoFocusMode)
                 {
-                    Settings.Advanced.IsNoFocusMode = true;
-                    ToggleSwitchNoFocusMode.IsOn = true;
+                    isTemporarilyDisablingNoFocusMode = false;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
@@ -2726,11 +2720,9 @@ namespace Ink_Canvas
         {
             if (BorderSettings.Visibility == Visibility.Visible)
             {
-                // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
-                if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
+                if (isTemporarilyDisablingNoFocusMode)
                 {
-                    Settings.Advanced.IsNoFocusMode = true;
-                    ToggleSwitchNoFocusMode.IsOn = true;
+                    isTemporarilyDisablingNoFocusMode = false;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
@@ -2777,12 +2769,11 @@ namespace Ink_Canvas
             else
             {
                 BorderSettings.Visibility = Visibility.Visible;
-                // 临时禁用无焦点模式以避免下拉选项被遮挡
                 wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
                 userChangedNoFocusModeInSettings = false; // 重置用户修改标志
                 if (wasNoFocusModeBeforeSettings)
                 {
-                    Settings.Advanced.IsNoFocusMode = false;
+                    isTemporarilyDisablingNoFocusMode = true;
                     ApplyNoFocusMode();
                 }
 
