@@ -74,7 +74,7 @@ namespace Ink_Canvas
 
                 // 强制刷新UI
                 window.InvalidateVisual();
-                
+
                 // 通知其他窗口刷新主题
                 RefreshOtherWindowsTheme();
             }
@@ -118,7 +118,7 @@ namespace Ink_Canvas
 
                 // 强制刷新UI
                 window.InvalidateVisual();
-                
+
                 // 通知其他窗口刷新主题
                 RefreshOtherWindowsTheme();
             }
@@ -184,18 +184,18 @@ namespace Ink_Canvas
                     // 根据主题设置高光颜色
                     Color highlightBackgroundColor;
                     Color highlightBarColor;
-                    bool isDarkTheme = Settings.Appearance.Theme == 1 || 
+                    bool isDarkTheme = Settings.Appearance.Theme == 1 ||
                                        (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
-                    
+
                     if (isDarkTheme)
                     {
-                        highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255); 
-                        highlightBarColor = Color.FromRgb(102, 204, 255); 
+                        highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255);
+                        highlightBarColor = Color.FromRgb(102, 204, 255);
                     }
                     else
                     {
-                        highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246); 
-                        highlightBarColor = Color.FromRgb(37, 99, 235); 
+                        highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246);
+                        highlightBarColor = Color.FromRgb(37, 99, 235);
                     }
 
                     // 设置高光背景颜色
@@ -224,16 +224,16 @@ namespace Ink_Canvas
             {
                 // 根据主题选择高光颜色
                 Color selectedColor;
-                bool isDarkTheme = Settings.Appearance.Theme == 1 || 
+                bool isDarkTheme = Settings.Appearance.Theme == 1 ||
                                    (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
-                
+
                 if (isDarkTheme)
                 {
-                    selectedColor = Color.FromRgb(102, 204, 255); 
+                    selectedColor = Color.FromRgb(102, 204, 255);
                 }
                 else
                 {
-                    selectedColor = Color.FromRgb(30, 58, 138); 
+                    selectedColor = Color.FromRgb(30, 58, 138);
                 }
 
                 // 根据当前模式设置按钮颜色
@@ -376,7 +376,7 @@ namespace Ink_Canvas
                 {
                     // 强制刷新墨迹选中栏的视觉状态
                     BorderStrokeSelectionControl.InvalidateVisual();
-                    
+
                     // 刷新墨迹选中栏内的所有图标
                     var viewbox = BorderStrokeSelectionControl.Child as Viewbox;
                     if (viewbox?.Child is ui.SimpleStackPanel stackPanel)
@@ -434,7 +434,7 @@ namespace Ink_Canvas
                 {
                     // 强制刷新图片选中栏的视觉状态
                     BorderImageSelectionControl.InvalidateVisual();
-                    
+
                     // 刷新图片选中栏内的所有图标
                     var viewbox = BorderImageSelectionControl.Child as Viewbox;
                     if (viewbox?.Child is ui.SimpleStackPanel stackPanel)

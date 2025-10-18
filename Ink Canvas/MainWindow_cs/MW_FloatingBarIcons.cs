@@ -383,7 +383,7 @@ namespace Ink_Canvas
                 var slideAnimation = new DoubleAnimation
                 {
                     From = 0, // 滑动距离
-                    To = BorderSettings.RenderTransform.Value.OffsetX - 440,
+                    To = BorderSettings.RenderTransform.Value.OffsetX - 490,
                     Duration = TimeSpan.FromSeconds(0.6)
                 };
                 slideAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut };
@@ -396,18 +396,13 @@ namespace Ink_Canvas
                 {
                     BorderSettings.Visibility = Visibility.Collapsed;
                     isOpeningOrHidingSettingsPane = false;
-                    // 在设置面板完全关闭后，根据情况恢复无焦点模式状态
-                    if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
+                    if (isTemporarilyDisablingNoFocusMode)
                     {
-                        // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
-                        Settings.Advanced.IsNoFocusMode = true;
-                        ToggleSwitchNoFocusMode.IsOn = true; // 同步更新设置面板中的开关状态
+                        isTemporarilyDisablingNoFocusMode = false;
                         ApplyNoFocusMode();
                     }
-                    // 如果用户在设置中修改了无焦点模式，则保持用户的修改
                 };
 
-                BorderSettings.Visibility = Visibility.Visible;
                 BorderSettings.RenderTransform = new TranslateTransform();
 
                 isOpeningOrHidingSettingsPane = true;
@@ -477,9 +472,9 @@ namespace Ink_Canvas
 
                 // 根据主题选择高光颜色
                 Color highlightColor;
-                bool isDarkTheme = Settings.Appearance.Theme == 1 || 
+                bool isDarkTheme = Settings.Appearance.Theme == 1 ||
                                    (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
-                
+
                 if (isDarkTheme)
                 {
                     highlightColor = Color.FromRgb(102, 204, 255); // #66ccff for dark theme
@@ -929,7 +924,7 @@ namespace Ink_Canvas
         #region 主要的工具按鈕事件
 
         /// <summary>
-        ///     浮動工具欄的"套索選"按鈕事件，重定向到舊UI的<c>BtnSelect_Click</c>方法
+        /// 浮動工具欄的"套索選"按鈕事件，重定向到舊UI的<c>BtnSelect_Click</c>方法
         /// </summary>
         /// <param name="sender">sender</param>
         /// <param name="e">MouseButtonEventArgs</param>
@@ -2708,11 +2703,9 @@ namespace Ink_Canvas
             // 如果当前在设置面板中，需要先恢复无焦点模式状态
             if (BorderSettings.Visibility == Visibility.Visible)
             {
-                // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
-                if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
+                if (isTemporarilyDisablingNoFocusMode)
                 {
-                    Settings.Advanced.IsNoFocusMode = true;
-                    ToggleSwitchNoFocusMode.IsOn = true;
+                    isTemporarilyDisablingNoFocusMode = false;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
@@ -2727,11 +2720,9 @@ namespace Ink_Canvas
         {
             if (BorderSettings.Visibility == Visibility.Visible)
             {
-                // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
-                if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
+                if (isTemporarilyDisablingNoFocusMode)
                 {
-                    Settings.Advanced.IsNoFocusMode = true;
-                    ToggleSwitchNoFocusMode.IsOn = true;
+                    isTemporarilyDisablingNoFocusMode = false;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
@@ -2777,12 +2768,12 @@ namespace Ink_Canvas
             }
             else
             {
-                // 临时禁用无焦点模式以避免下拉选项被遮挡
+                BorderSettings.Visibility = Visibility.Visible;
                 wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
                 userChangedNoFocusModeInSettings = false; // 重置用户修改标志
                 if (wasNoFocusModeBeforeSettings)
                 {
-                    Settings.Advanced.IsNoFocusMode = false;
+                    isTemporarilyDisablingNoFocusMode = true;
                     ApplyNoFocusMode();
                 }
 
@@ -2795,7 +2786,7 @@ namespace Ink_Canvas
                 // 滑动动画
                 var slideAnimation = new DoubleAnimation
                 {
-                    From = BorderSettings.RenderTransform.Value.OffsetX - 440, // 滑动距离
+                    From = BorderSettings.RenderTransform.Value.OffsetX - 490, // 滑动距离
                     To = 0,
                     Duration = TimeSpan.FromSeconds(0.6)
                 };
@@ -2807,7 +2798,6 @@ namespace Ink_Canvas
 
                 sb.Completed += (s, _) => { isOpeningOrHidingSettingsPane = false; };
 
-                BorderSettings.Visibility = Visibility.Visible;
                 BorderSettings.RenderTransform = new TranslateTransform();
 
                 isOpeningOrHidingSettingsPane = true;
@@ -3717,18 +3707,18 @@ namespace Ink_Canvas
                 // 根据主题设置高光颜色
                 Color highlightBackgroundColor;
                 Color highlightBarColor;
-                bool isDarkTheme = Settings.Appearance.Theme == 1 || 
+                bool isDarkTheme = Settings.Appearance.Theme == 1 ||
                                    (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
-                
+
                 if (isDarkTheme)
                 {
-                    highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255); 
-                    highlightBarColor = Color.FromRgb(102, 204, 255); 
+                    highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255);
+                    highlightBarColor = Color.FromRgb(102, 204, 255);
                 }
                 else
                 {
-                    highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246); 
-                    highlightBarColor = Color.FromRgb(37, 99, 235); 
+                    highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246);
+                    highlightBarColor = Color.FromRgb(37, 99, 235);
                 }
 
                 // 设置高光背景颜色

@@ -74,5 +74,14 @@ namespace Ink_Canvas.Properties {
                 return ResourceManager.GetStream("TimerDownNotice", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static UnmanagedMemoryStream ProgressiveAudio {
+            get {
+                return ResourceManager.GetStream("ProgressiveAudio", resourceCulture);
+            }
+        }
     }
 }

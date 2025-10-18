@@ -193,11 +193,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\TimerDownNotice.wav" />
+    <None Include="Resources\ProgressiveAudio.wav" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\IACore\IACore.dll" />
     <EmbeddedResource Include="Resources\IACore\IALoader.dll" />
     <EmbeddedResource Include="Resources\IACore\IAWinFX.dll" />
+    <EmbeddedResource Include="UIAccessDLL_x64.dll" />
+    <EmbeddedResource Include="UIAccessDLL_x86.dll" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Cursors\Cursor.cur" />

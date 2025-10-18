@@ -2611,17 +2611,17 @@ namespace Ink_Canvas
             Settings.RandSettings.UseLegacyTimerUI = ToggleSwitchUseLegacyTimerUI.IsOn;
             if (ToggleSwitchUseLegacyTimerUI.IsOn)
             {
-                ToggleSwitchUseSeewoStyleUI.IsOn = false;
-                Settings.RandSettings.UseSeewoStyleUI = false;
+                ToggleSwitchUseNewStyleUI.IsOn = false;
+                Settings.RandSettings.UseNewStyleUI = false;
             }
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchUseSeewoStyleUI_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchUseNewStyleUI_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.RandSettings.UseSeewoStyleUI = ToggleSwitchUseSeewoStyleUI.IsOn;
-            if (ToggleSwitchUseSeewoStyleUI.IsOn)
+            Settings.RandSettings.UseNewStyleUI = ToggleSwitchUseNewStyleUI.IsOn;
+            if (ToggleSwitchUseNewStyleUI.IsOn)
             {
                 ToggleSwitchUseLegacyTimerUI.IsOn = false;
                 Settings.RandSettings.UseLegacyTimerUI = false;
@@ -2629,10 +2629,74 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnableOvertimeCountUp_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.EnableOvertimeCountUp = ToggleSwitchEnableOvertimeCountUp.IsOn;
+            
+            if (!ToggleSwitchEnableOvertimeCountUp.IsOn)
+            {
+                ToggleSwitchEnableOvertimeRedText.IsOn = false;
+                Settings.RandSettings.EnableOvertimeRedText = false;
+            }
+            
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableOvertimeRedText_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            if (ToggleSwitchEnableOvertimeRedText.IsOn && !ToggleSwitchEnableOvertimeCountUp.IsOn)
+            {
+                ToggleSwitchEnableOvertimeRedText.IsOn = false;
+                return;
+            }
+            
+            Settings.RandSettings.EnableOvertimeRedText = ToggleSwitchEnableOvertimeRedText.IsOn;
+            SaveSettingsToFile();
+        }
+
         private void TimerVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
             Settings.RandSettings.TimerVolume = TimerVolumeSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableProgressiveReminder_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.EnableProgressiveReminder = ToggleSwitchEnableProgressiveReminder.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ProgressiveReminderVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.ProgressiveReminderVolume = ProgressiveReminderVolumeSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void ButtonSelectCustomProgressiveReminderSound_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "选择渐进提醒音频文件",
+                Filter = "音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*",
+                DefaultExt = "wav"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Settings.RandSettings.ProgressiveReminderSoundPath = openFileDialog.FileName;
+                SaveSettingsToFile();
+            }
+        }
+
+        private void ButtonResetProgressiveReminderSound_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.RandSettings.ProgressiveReminderSoundPath = "";
             SaveSettingsToFile();
         }
 

@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -38,6 +39,12 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        [DllImport("UIAccessDLL_x86.dll", EntryPoint = "PrepareUIAccess", CallingConvention = CallingConvention.Cdecl)]
+        public static extern Int32 PrepareUIAccessX86();
+
+        [DllImport("UIAccessDLL_x64.dll", EntryPoint = "PrepareUIAccess", CallingConvention = CallingConvention.Cdecl)]
+        public static extern Int32 PrepareUIAccessX64();
+
         // 每一页一个Canvas对象
         private List<System.Windows.Controls.Canvas> whiteboardPages = new List<System.Windows.Controls.Canvas>();
         private int currentPageIndex;
@@ -55,6 +62,7 @@ namespace Ink_Canvas
 
         // 设置面板相关状态
         private bool userChangedNoFocusModeInSettings;
+        private bool isTemporarilyDisablingNoFocusMode = false;
 
 
 
@@ -550,6 +558,12 @@ namespace Ink_Canvas
             ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
             ApplyAlwaysOnTop();
 
+            // 初始化UIA置顶开关
+            ToggleSwitchUIAccessTopMost.IsOn = Settings.Advanced.EnableUIAccessTopMost;
+            UpdateUIAccessTopMostVisibility();
+            
+            App.IsUIAccessTopMostEnabled = Settings.Advanced.EnableUIAccessTopMost;
+
             // 初始化剪贴板监控
             InitializeClipboardMonitoring();
 
@@ -787,7 +801,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 辅助方法：使用多线路组下载更新
+        // 使用多线路组下载更新
         private async Task<bool> DownloadUpdateWithFallback(string version, AutoUpdateHelper.UpdateLineGroup primaryGroup, UpdateChannel channel)
         {
             try
@@ -832,12 +846,14 @@ namespace Ink_Canvas
             // 声明下载状态变量，用于整个方法
             bool isDownloadSuccessful = false;
 
+            bool hasValidLineGroup = lineGroup != null;
+
             if (AvailableLatestVersion != null)
             {
                 // 检测到新版本，停止重试定时器
                 timerCheckAutoUpdateRetry.Stop();
                 updateCheckRetryCount = 0;
-                
+
                 // 检测到新版本
                 LogHelper.WriteLogToFile($"AutoUpdate | New version available: {AvailableLatestVersion}");
 
@@ -1001,17 +1017,25 @@ namespace Ink_Canvas
                         break;
                 }
             }
+            else if (hasValidLineGroup)
+            {
+                LogHelper.WriteLogToFile("AutoUpdate | Current version is already the latest, no retry needed");
+
+                // 停止重试定时器
+                timerCheckAutoUpdateRetry.Stop();
+                updateCheckRetryCount = 0;
+            }
             else
             {
                 // 检查更新失败，启动重试定时器
                 LogHelper.WriteLogToFile("AutoUpdate | Update check failed, starting retry timer");
-                
+
                 // 重置重试计数
                 updateCheckRetryCount = 0;
-                
+
                 // 启动重试定时器，10分钟后重新检查
                 timerCheckAutoUpdateRetry.Start();
-                
+
                 // 清理更新文件夹
                 AutoUpdateHelper.DeleteUpdatesFolder();
             }
@@ -1194,14 +1218,14 @@ namespace Ink_Canvas
             RefreshDeviceInfo();
         }
 
-        // 新增：个性化设置
+        // 个性化设置
         private void NavTheme_Click(object sender, RoutedEventArgs e)
         {
             // 切换到个性化设置页面
             ShowSettingsSection("theme");
         }
 
-        // 新增：快捷键设置
+        // 快捷键设置
         private void NavShortcuts_Click(object sender, RoutedEventArgs e)
         {
             OpenHotkeySettingsWindow();
@@ -1298,7 +1322,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：折叠侧边栏
+        // 折叠侧边栏
         private void CollapseNavSidebar_Click(object sender, RoutedEventArgs e)
         {
             // 折叠/展开侧边栏
@@ -1315,7 +1339,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：显示侧边栏
+        // 显示侧边栏
         private void ShowNavSidebar_Click(object sender, RoutedEventArgs e)
         {
             // 确保侧边栏展开
@@ -1323,7 +1347,7 @@ namespace Ink_Canvas
             columnDefinitions[0].Width = new GridLength(50);
         }
 
-        // 辅助方法：显示指定的设置部分
+        // 显示指定的设置部分
         private async void ShowSettingsSection(string sectionTag)
         {
             // 显示设置面板
@@ -1816,7 +1840,11 @@ namespace Ink_Canvas
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-            if (Settings.Advanced.IsNoFocusMode)
+            
+            bool shouldBeNoFocus = isTemporarilyDisablingNoFocusMode ? 
+                false : Settings.Advanced.IsNoFocusMode;
+            
+            if (shouldBeNoFocus)
             {
                 SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
             }
@@ -1998,6 +2026,12 @@ namespace Ink_Canvas
             var toggle = sender as ToggleSwitch;
             Settings.Advanced.IsNoFocusMode = toggle != null && toggle.IsOn;
             SaveSettingsToFile();
+                
+            if (isTemporarilyDisablingNoFocusMode)
+            {
+                isTemporarilyDisablingNoFocusMode = false;
+            }
+            
             ApplyNoFocusMode();
 
             // 如果启用了窗口置顶，需要重新应用置顶设置以处理无焦点模式的变化
@@ -2020,6 +2054,21 @@ namespace Ink_Canvas
             Settings.Advanced.IsAlwaysOnTop = toggle != null && toggle.IsOn;
             SaveSettingsToFile();
             ApplyAlwaysOnTop();
+            UpdateUIAccessTopMostVisibility();
+        }
+
+        private void ToggleSwitchUIAccessTopMost_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            var toggle = sender as ToggleSwitch;
+            bool newValue = toggle != null && toggle.IsOn;
+            
+            Settings.Advanced.EnableUIAccessTopMost = newValue;
+            SaveSettingsToFile();
+            ApplyUIAccessTopMost();
+            
+            App.IsUIAccessTopMostEnabled = newValue;
+        
         }
 
         private void Window_Activated(object sender, EventArgs e)
@@ -2449,6 +2498,8 @@ namespace Ink_Canvas
                     SideControlMinimumAutomationSlider,
                     RandWindowOnceCloseLatencySlider,
                     RandWindowOnceMaxStudentsSlider,
+                    TimerVolumeSlider,
+                    ProgressiveReminderVolumeSlider,
                     BoardInkWidthSlider,
                     BoardInkAlphaSlider,
                     BoardHighlighterWidthSlider,
@@ -2907,6 +2958,83 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"刷新通知框颜色时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        #endregion
+
+        #region UIA置顶功能
+
+        /// <summary>
+        /// 更新UIA置顶开关的可见性
+        /// </summary>
+        private void UpdateUIAccessTopMostVisibility()
+        {
+            try
+            {
+                var visibility = Settings.Advanced.IsAlwaysOnTop ? Visibility.Visible : Visibility.Collapsed;
+                
+                if (UIAccessTopMostPanel != null)
+                {
+                    UIAccessTopMostPanel.Visibility = visibility;
+                }
+                
+                if (UIAccessTopMostDescription != null)
+                {
+                    UIAccessTopMostDescription.Visibility = visibility;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新UIA置顶开关可见性时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 应用UIA置顶功能
+        /// </summary>
+        private void ApplyUIAccessTopMost()
+        {
+            try
+            {
+                if (Settings.Advanced.EnableUIAccessTopMost && Settings.Advanced.IsAlwaysOnTop)
+                {
+                    // 检查是否以管理员权限运行
+                    var identity = WindowsIdentity.GetCurrent();
+                    var principal = new WindowsPrincipal(identity);
+                    
+                    if (principal.IsInRole(WindowsBuiltInRole.Administrator))
+                    {
+                        try
+                        {
+                            // 调用UIAccess DLL
+                            if (Environment.Is64BitProcess)
+                            {
+                                PrepareUIAccessX64();
+                            }
+                            else
+                            {
+                                PrepareUIAccessX86();
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"启用UIA置顶功能时出错: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("UIA置顶功能需要管理员权限", LogHelper.LogType.Warning);
+                    }
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile("UIA置顶功能已禁用", LogHelper.LogType.Trace);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用UIA置顶功能时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

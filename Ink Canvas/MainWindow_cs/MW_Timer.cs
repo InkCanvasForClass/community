@@ -61,10 +61,10 @@ namespace Ink_Canvas
         private Timer timerCheckAutoFold = new Timer();
         private string AvailableLatestVersion;
         private Timer timerCheckAutoUpdateWithSilence = new Timer();
-        private Timer timerCheckAutoUpdateRetry = new Timer(); 
+        private Timer timerCheckAutoUpdateRetry = new Timer();
         private bool isHidingSubPanelsWhenInking; // 避免书写时触发二次关闭二级菜单导致动画不连续
-        private int updateCheckRetryCount = 0; 
-        private const int MAX_UPDATE_CHECK_RETRIES = 6; 
+        private int updateCheckRetryCount = 0;
+        private const int MAX_UPDATE_CHECK_RETRIES = 6;
         private Timer timerDisplayTime = new Timer();
         private Timer timerDisplayDate = new Timer();
         private Timer timerNtpSync = new Timer();
@@ -120,7 +120,7 @@ namespace Ink_Canvas
             timerCheckAutoUpdateWithSilence.Elapsed += timerCheckAutoUpdateWithSilence_Elapsed;
             timerCheckAutoUpdateWithSilence.Interval = 1000 * 60 * 10;
             timerCheckAutoUpdateRetry.Elapsed += timerCheckAutoUpdateRetry_Elapsed;
-            timerCheckAutoUpdateRetry.Interval = 1000 * 60 * 10; 
+            timerCheckAutoUpdateRetry.Interval = 1000 * 60 * 10;
             WaterMarkTime.DataContext = nowTimeVM;
             WaterMarkDate.DataContext = nowTimeVM;
             timerDisplayTime.Elapsed += TimerDisplayTime_Elapsed;
@@ -863,7 +863,7 @@ namespace Ink_Canvas
 
                 // 执行更新检查
                 LogHelper.WriteLogToFile("AutoUpdate | Retrying update check after failure");
-                
+
                 // 清除之前的更新状态
                 AvailableLatestVersion = null;
                 AvailableLatestLineGroup = null;
@@ -878,7 +878,7 @@ namespace Ink_Canvas
                     // 检查更新成功，重置重试计数
                     updateCheckRetryCount = 0;
                     LogHelper.WriteLogToFile($"AutoUpdate | Retry successful, found new version: {AvailableLatestVersion}");
-                    
+
                     // 停止重试定时器，因为已经找到了更新
                     return;
                 }
@@ -886,7 +886,7 @@ namespace Ink_Canvas
                 {
                     // 检查更新仍然失败，继续重试
                     LogHelper.WriteLogToFile($"AutoUpdate | Retry {updateCheckRetryCount} failed, will retry in 10 minutes");
-                    
+
                     // 重新启动定时器，10分钟后再次尝试
                     timerCheckAutoUpdateRetry.Start();
                 }
@@ -894,7 +894,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | Error in retry check: {ex.Message}", LogHelper.LogType.Error);
-                
+
                 // 出错时也重新启动定时器，稍后再检查
                 if (updateCheckRetryCount <= MAX_UPDATE_CHECK_RETRIES)
                 {
@@ -910,10 +910,10 @@ namespace Ink_Canvas
             {
                 // 停止重试定时器
                 timerCheckAutoUpdateRetry.Stop();
-                
+
                 // 重置重试计数
                 updateCheckRetryCount = 0;
-                
+
                 LogHelper.WriteLogToFile("AutoUpdate | Update check retry state reset");
             }
             catch (Exception ex)
