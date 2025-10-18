@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -120,13 +121,27 @@ namespace Ink_Canvas
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
-
-
-            // 只清除笔画，不清除图片元素
-            // 图片元素的清除由调用方决定
             inkCanvas.Strokes.Clear();
 
+            // 执行内存清理
+            PerformLightweightMemoryCleanup();
+
             _currentCommitType = CommitReason.UserInput;
+        }
+
+        /// <summary>
+        /// 执行内存清理
+        /// </summary>
+        private void PerformLightweightMemoryCleanup()
+        {
+
+            // 异步执行垃圾回收，避免阻塞UI
+            Task.Run(() =>
+            {
+                // 延迟执行垃圾回收，避免立即阻塞
+                Thread.Sleep(100);
+                GC.Collect();
+            });
         }
 
         // 恢复每页白板图片信息
