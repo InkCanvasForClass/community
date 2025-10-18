@@ -2029,7 +2029,7 @@
                                                          FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchNotifyPreviousPage_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="#开启后会记录上次播放的页数，点击“是”后会在进入放映状态时自动跳转"
+                                    <TextBlock Text="#开启后会记录上次播放的页数，点击“是”后会自动跳转"
                                                TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="进入放映时回到首页" VerticalAlignment="Center"
