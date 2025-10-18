@@ -77,7 +77,7 @@ namespace Ink_Canvas
 
         #region PPT State Management
         private bool wasFloatingBarFoldedWhenEnterSlideShow;
-        private bool isEnteredSlideShowEndEvent; //防止重复调用本函数导致墨迹保存失效
+        private bool isEnteredSlideShowEndEvent; 
         private bool isPresentationHaveBlackSpace;
 
         // 长按翻页相关字段
@@ -107,7 +107,7 @@ namespace Ink_Canvas
         private PPTUIManager _pptUIManager;
 
         /// <summary>
-        /// 获取PPT管理器实例（供UI管理器使用）
+        /// 获取PPT管理器实例
         /// </summary>
         public PPTManager PPTManager => _pptManager;
         #endregion
@@ -615,7 +615,7 @@ namespace Ink_Canvas
             }
         }
 
-        private async void OnPPTSlideShowBegin(SlideShowWindow wn)
+        private void OnPPTSlideShowBegin(SlideShowWindow wn)
         {
             try
             {
@@ -629,16 +629,15 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    // 如果关闭了PPT自动收纳功能，但用户当前在收纳模式下，进入PPT时取消收纳以提供更好的使用体验
                     if (isFloatingBarFolded)
                     {
-                        await UnFoldFloatingBar(new object());
+                        UnFoldFloatingBar(new object());
                     }
                 }
 
                 isStopInkReplay = true;
 
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                Application.Current.Dispatcher.Invoke(() =>
                 {
                     // 获取当前活跃的演示文稿并切换到对应的墨迹管理器
                     var activePresentation = _pptManager?.GetCurrentActivePresentation();
@@ -753,14 +752,7 @@ namespace Ink_Canvas
 
                 if (!isFloatingBarFolded)
                 {
-                    new Thread(() =>
-                    {
-                        Thread.Sleep(100);
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            ViewboxFloatingBarMarginAnimation(60);
-                        });
-                    }).Start();
+                    ViewboxFloatingBarMarginAnimation(60);
                 }
             }
             catch (Exception ex)
@@ -800,7 +792,6 @@ namespace Ink_Canvas
         {
             try
             {
-                // 处理浮动栏状态：根据"退出PPT放映后自动恢复浮动栏状态"设置决定是否恢复
                 if (Settings.Automation.IsAutoFoldAfterPPTSlideShow)
                 {
                     if (wasFloatingBarFoldedWhenEnterSlideShow)
@@ -823,7 +814,6 @@ namespace Ink_Canvas
                     }
                     else
                     {
-                        // 如果两个功能都关闭，确保浮动栏展开
                         if (isFloatingBarFolded)
                         {
                             await UnFoldFloatingBar(new object());
@@ -908,8 +898,6 @@ namespace Ink_Canvas
                 await Task.Delay(100);
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    // 强制重新计算浮动栏位置，确保在退出PPT模式后正确复位
-                    // 先调用桌面模式的复位方法，然后调用通用的位置计算方法
                     PureViewboxFloatingBarMarginAnimationInDesktopMode();
                     ViewboxFloatingBarMarginAnimation(100, true);
                 });
@@ -1468,7 +1456,7 @@ namespace Ink_Canvas
             });
         }
 
-        private async void PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
+        private void PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
         {
             lastBorderMouseDownObject = sender;
             if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
@@ -1490,7 +1478,7 @@ namespace Ink_Canvas
             }
         }
 
-        private async void PPTNavigationBtn_MouseLeave(object sender, MouseEventArgs e)
+        private void PPTNavigationBtn_MouseLeave(object sender, MouseEventArgs e)
         {
             lastBorderMouseDownObject = null;
             if (sender == PPTLSPageButton)
@@ -1511,7 +1499,7 @@ namespace Ink_Canvas
             }
         }
 
-        private async void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
+        private void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
 
@@ -1560,7 +1548,6 @@ namespace Ink_Canvas
                 // 控制居中
                 if (!isFloatingBarFolded)
                 {
-                    await Task.Delay(100);
                     ViewboxFloatingBarMarginAnimation(60);
                 }
             }

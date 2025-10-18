@@ -162,7 +162,7 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 强制保存指定页面的墨迹（忽略锁定状态）
+        /// 强制保存指定页面的墨迹
         /// </summary>
         public void ForceSaveSlideStrokes(int slideIndex, StrokeCollection strokes)
         {
