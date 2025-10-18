@@ -259,7 +259,6 @@ namespace Ink_Canvas
 
             // 只保留普通橡皮逻辑
             TouchDownPointsList[e.TouchDevice.Id] = InkCanvasEditingMode.None;
-            inkCanvas.EraserShape = new EllipseStylusShape(50, 50);
             if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                 && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
             {
@@ -682,8 +681,6 @@ namespace Ink_Canvas
 
                         if (Settings.Advanced.IsSpecialScreen)
                             boundWidth *= Settings.Advanced.TouchMultiplier;
-
-                        inkCanvas.EraserShape = new EllipseStylusShape(boundWidth, boundWidth);
                         inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
                         isPalmEraserActive = true;
 
