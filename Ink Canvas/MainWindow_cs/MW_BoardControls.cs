@@ -134,12 +134,8 @@ namespace Ink_Canvas
         /// </summary>
         private void PerformLightweightMemoryCleanup()
         {
-
-            // 异步执行垃圾回收，避免阻塞UI
             Task.Run(() =>
             {
-                // 延迟执行垃圾回收，避免立即阻塞
-                Thread.Sleep(100);
                 GC.Collect();
             });
         }
