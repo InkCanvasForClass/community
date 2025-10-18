@@ -172,7 +172,7 @@
                                 </Grid>
 
                                     <!-- 冒号分隔符 -->
-                                    <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
+                                    <TextBlock x:Name="Colon1Display" Text=":" FontSize="48" FontWeight="Bold" 
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="{DynamicResource NewTimerWindowDigitForeground}" 
                                                Margin="-20,0,0,0"/>
@@ -291,7 +291,7 @@
                                 </Grid>
 
                                     <!-- 冒号分隔符 -->
-                                    <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
+                                    <TextBlock x:Name="Colon2Display" Text=":" FontSize="48" FontWeight="Bold" 
                                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                                Foreground="{DynamicResource NewTimerWindowDigitForeground}" 
                                                Margin="-20,0,0,0"/>

@@ -136,6 +136,8 @@ namespace Ink_Canvas
                 // 更新秒显示
                 SetDigitDisplay("FullSecond1Display", seconds / 10, shouldShowRed);
                 SetDigitDisplay("FullSecond2Display", seconds % 10, shouldShowRed);
+                
+                SetColonDisplay(shouldShowRed);
             }
         }
         
@@ -167,6 +169,40 @@ namespace Ink_Canvas
                 else
                 {
                     path.Fill = Brushes.White;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 设置全屏窗口冒号显示颜色
+        /// </summary>
+        /// <param name="isRed">是否显示为红色</param>
+        private void SetColonDisplay(bool isRed = false)
+        {
+            var colon1 = this.FindName("FullColon1Display") as TextBlock;
+            var colon2 = this.FindName("FullColon2Display") as TextBlock;
+            
+            if (colon1 != null)
+            {
+                if (isRed)
+                {
+                    colon1.Foreground = Brushes.Red;
+                }
+                else
+                {
+                    colon1.Foreground = Brushes.White;
+                }
+            }
+            
+            if (colon2 != null)
+            {
+                if (isRed)
+                {
+                    colon2.Foreground = Brushes.Red;
+                }
+                else
+                {
+                    colon2.Foreground = Brushes.White;
                 }
             }
         }

@@ -47,7 +47,7 @@
                           Margin="0,0,12,0"/>
                     
                     <!-- 冒号 -->
-                    <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
+                    <TextBlock x:Name="MinColon1Display" Text=":" FontSize="48" FontWeight="Bold" 
                                Foreground="{DynamicResource NewTimerWindowDigitForeground}" 
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Margin="0,0,12,0"/>
@@ -69,7 +69,7 @@
                           Margin="0,0,12,0"/>
                     
                     <!-- 冒号 -->
-                    <TextBlock Text=":" FontSize="48" FontWeight="Bold" 
+                    <TextBlock x:Name="MinColon2Display" Text=":" FontSize="48" FontWeight="Bold" 
                                Foreground="{DynamicResource NewTimerWindowDigitForeground}" 
                                HorizontalAlignment="Center" VerticalAlignment="Center"
                                Margin="0,0,12,0"/>

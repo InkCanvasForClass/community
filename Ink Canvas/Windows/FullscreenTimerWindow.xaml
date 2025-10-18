@@ -39,7 +39,7 @@
                       Margin="0,0,20,0"/>
                 
                 <!-- 冒号 -->
-                <TextBlock Text=":" FontSize="120" FontWeight="Bold" 
+                <TextBlock x:Name="FullColon1Display" Text=":" FontSize="120" FontWeight="Bold" 
                            Foreground="White" 
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            Margin="0,0,20,0"/>
@@ -61,7 +61,7 @@
                       Margin="0,0,20,0"/>
                 
                 <!-- 冒号 -->
-                <TextBlock Text=":" FontSize="120" FontWeight="Bold" 
+                <TextBlock x:Name="FullColon2Display" Text=":" FontSize="120" FontWeight="Bold" 
                            Foreground="White" 
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            Margin="0,0,20,0"/>

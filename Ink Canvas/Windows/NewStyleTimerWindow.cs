@@ -1,5 +1,6 @@
 using Ink_Canvas.Helpers;
 using System;
+using System.IO;
 using System.Media;
 using System.Timers;
 using System.Windows;
@@ -7,9 +8,23 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Newtonsoft.Json;
 
 namespace Ink_Canvas
 {
+    /// <summary>
+    /// 最近计时记录数据模型
+    /// </summary>
+    public class RecentTimersData
+    {
+        public string RecentTimer1 { get; set; } = "--:--";
+        public string RecentTimer2 { get; set; } = "--:--";
+        public string RecentTimer3 { get; set; } = "--:--";
+        public string RecentTimer4 { get; set; } = "--:--";
+        public string RecentTimer5 { get; set; } = "--:--";
+        public string RecentTimer6 { get; set; } = "--:--";
+    }
+
     /// <summary>
     /// 新计时器UI风格的倒计时器窗口
     /// </summary>
@@ -65,6 +80,8 @@ namespace Ink_Canvas
                     SetDigitDisplay("Digit5Display", leftTimeSpan.Seconds / 10);
                     SetDigitDisplay("Digit6Display", leftTimeSpan.Seconds % 10);
                     
+                    SetColonDisplay(false);
+                    
                     if (leftTimeSpan.TotalSeconds <= 6 && leftTimeSpan.TotalSeconds > 0 && 
                         MainWindow.Settings.RandSettings?.EnableProgressiveReminder == true &&
                         !hasPlayedProgressiveReminder)
@@ -86,6 +103,8 @@ namespace Ink_Canvas
                         SetDigitDisplay("Digit4Display", 0);
                         SetDigitDisplay("Digit5Display", 0);
                         SetDigitDisplay("Digit6Display", 0);
+                        
+                        SetColonDisplay(false);
                         timer.Stop();
                         isTimerRunning = false;
                         StartPauseIcon.Data = Geometry.Parse(PlayIconData);
@@ -111,6 +130,8 @@ namespace Ink_Canvas
                     SetDigitDisplay("Digit4Display", overtimeSpan.Minutes % 10, shouldShowRed);
                     SetDigitDisplay("Digit5Display", overtimeSpan.Seconds / 10, shouldShowRed);
                     SetDigitDisplay("Digit6Display", overtimeSpan.Seconds % 10, shouldShowRed);
+                    
+                    SetColonDisplay(shouldShowRed);
                 }
             });
         }
@@ -158,13 +179,9 @@ namespace Ink_Canvas
         private string recentTimer5 = "--:--";
         private string recentTimer6 = "--:--";
 
-        // 最近计时记录的注册表键名
-        private const string RecentTimer1Key = "NewTimer_RecentTimer1";
-        private const string RecentTimer2Key = "NewTimer_RecentTimer2";
-        private const string RecentTimer3Key = "NewTimer_RecentTimer3";
-        private const string RecentTimer4Key = "NewTimer_RecentTimer4";
-        private const string RecentTimer5Key = "NewTimer_RecentTimer5";
-        private const string RecentTimer6Key = "NewTimer_RecentTimer6";
+        // JSON文件路径
+        private static readonly string ConfigsFolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs");
+        private static readonly string RecentTimersJsonPath = System.IO.Path.Combine(ConfigsFolder, "RecentTimers.json");
 
         private void InitializeUI()
         {
@@ -287,6 +304,8 @@ namespace Ink_Canvas
             SetDigitDisplay("Digit4Display", minute % 10);
             SetDigitDisplay("Digit5Display", second / 10);
             SetDigitDisplay("Digit6Display", second % 10);
+            
+            SetColonDisplay(false);
         }
 
         private void HideTimer_Elapsed(object sender, ElapsedEventArgs e)
@@ -433,7 +452,7 @@ namespace Ink_Canvas
         /// <param name="isRed">是否显示为红色</param>
         private void SetDigitDisplay(string pathName, int digit, bool isRed = false)
         {
-            var path = this.FindName(pathName) as Path;
+            var path = this.FindName(pathName) as System.Windows.Shapes.Path;
             if (path != null)
             {
                 string resourceKey = $"Digit{digit}";
@@ -457,6 +476,56 @@ namespace Ink_Canvas
                     else
                     {
                         path.Fill = Brushes.White;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 设置冒号显示颜色
+        /// </summary>
+        /// <param name="isRed">是否显示为红色</param>
+        private void SetColonDisplay(bool isRed = false)
+        {
+            var colon1 = this.FindName("Colon1Display") as TextBlock;
+            var colon2 = this.FindName("Colon2Display") as TextBlock;
+            
+            if (colon1 != null)
+            {
+                if (isRed)
+                {
+                    colon1.Foreground = Brushes.Red;
+                }
+                else
+                {
+                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    if (defaultBrush != null)
+                    {
+                        colon1.Foreground = defaultBrush;
+                    }
+                    else
+                    {
+                        colon1.Foreground = Brushes.White;
+                    }
+                }
+            }
+            
+            if (colon2 != null)
+            {
+                if (isRed)
+                {
+                    colon2.Foreground = Brushes.Red;
+                }
+                else
+                {
+                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    if (defaultBrush != null)
+                    {
+                        colon2.Foreground = defaultBrush;
+                    }
+                    else
+                    {
+                        colon2.Foreground = Brushes.White;
                     }
                 }
             }
@@ -1144,27 +1213,53 @@ namespace Ink_Canvas
             }
         }
 
-        // 从注册表加载最近计时记录
+        // 从JSON文件加载最近计时记录
         private void LoadRecentTimers()
         {
             try
             {
-                using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\InkCanvas\NewTimer"))
+                // 确保Configs文件夹存在
+                if (!Directory.Exists(ConfigsFolder))
                 {
-                    if (key != null)
-                    {
-                        recentTimer1 = key.GetValue(RecentTimer1Key, "--:--")?.ToString() ?? "--:--";
-                        recentTimer2 = key.GetValue(RecentTimer2Key, "--:--")?.ToString() ?? "--:--";
-                        recentTimer3 = key.GetValue(RecentTimer3Key, "--:--")?.ToString() ?? "--:--";
-                        recentTimer4 = key.GetValue(RecentTimer4Key, "--:--")?.ToString() ?? "--:--";
-                        recentTimer5 = key.GetValue(RecentTimer5Key, "--:--")?.ToString() ?? "--:--";
-                        recentTimer6 = key.GetValue(RecentTimer6Key, "--:--")?.ToString() ?? "--:--";
-                    }
+                    Directory.CreateDirectory(ConfigsFolder);
+                }
+
+                if (!File.Exists(RecentTimersJsonPath))
+                {
+                    recentTimer1 = "--:--";
+                    recentTimer2 = "--:--";
+                    recentTimer3 = "--:--";
+                    recentTimer4 = "--:--";
+                    recentTimer5 = "--:--";
+                    recentTimer6 = "--:--";
+                    return;
+                }
+
+                // 读取JSON文件
+                string jsonContent = File.ReadAllText(RecentTimersJsonPath);
+                var data = JsonConvert.DeserializeObject<RecentTimersData>(jsonContent);
+
+                if (data != null)
+                {
+                    recentTimer1 = data.RecentTimer1 ?? "--:--";
+                    recentTimer2 = data.RecentTimer2 ?? "--:--";
+                    recentTimer3 = data.RecentTimer3 ?? "--:--";
+                    recentTimer4 = data.RecentTimer4 ?? "--:--";
+                    recentTimer5 = data.RecentTimer5 ?? "--:--";
+                    recentTimer6 = data.RecentTimer6 ?? "--:--";
+                }
+                else
+                {
+                    recentTimer1 = "--:--";
+                    recentTimer2 = "--:--";
+                    recentTimer3 = "--:--";
+                    recentTimer4 = "--:--";
+                    recentTimer5 = "--:--";
+                    recentTimer6 = "--:--";
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // 如果读取注册表失败，使用默认值
                 recentTimer1 = "--:--";
                 recentTimer2 = "--:--";
                 recentTimer3 = "--:--";
@@ -1174,27 +1269,34 @@ namespace Ink_Canvas
             }
         }
 
-        // 保存最近计时记录到注册表
+        // 保存最近计时记录到JSON文件
         private void SaveRecentTimersToRegistry()
         {
             try
             {
-                using (var key = Microsoft.Win32.Registry.CurrentUser.CreateSubKey(@"Software\InkCanvas\NewTimer"))
+                // 确保Configs文件夹存在
+                if (!Directory.Exists(ConfigsFolder))
                 {
-                    if (key != null)
-                    {
-                        key.SetValue(RecentTimer1Key, recentTimer1);
-                        key.SetValue(RecentTimer2Key, recentTimer2);
-                        key.SetValue(RecentTimer3Key, recentTimer3);
-                        key.SetValue(RecentTimer4Key, recentTimer4);
-                        key.SetValue(RecentTimer5Key, recentTimer5);
-                        key.SetValue(RecentTimer6Key, recentTimer6);
-                    }
+                    Directory.CreateDirectory(ConfigsFolder);
                 }
+
+                // 创建数据对象
+                var data = new RecentTimersData
+                {
+                    RecentTimer1 = recentTimer1,
+                    RecentTimer2 = recentTimer2,
+                    RecentTimer3 = recentTimer3,
+                    RecentTimer4 = recentTimer4,
+                    RecentTimer5 = recentTimer5,
+                    RecentTimer6 = recentTimer6
+                };
+
+                // 序列化为JSON并保存到文件
+                string jsonContent = JsonConvert.SerializeObject(data, Formatting.Indented);
+                File.WriteAllText(RecentTimersJsonPath, jsonContent);
             }
-            catch
+            catch (Exception)
             {
-                // 如果保存到注册表失败，静默处理
             }
         }
 

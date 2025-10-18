@@ -140,6 +140,8 @@ namespace Ink_Canvas
                 // 更新秒显示
                 SetDigitDisplay("MinSecond1Display", seconds / 10, shouldShowRed);
                 SetDigitDisplay("MinSecond2Display", seconds % 10, shouldShowRed);
+                
+                SetColonDisplay(shouldShowRed);
             }
         }
         
@@ -179,6 +181,58 @@ namespace Ink_Canvas
                     {
                         bool isLightTheme = IsLightTheme();
                         path.Fill = isLightTheme ? Brushes.Black : Brushes.White;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 设置最小化窗口冒号显示颜色
+        /// </summary>
+        /// <param name="isRed">是否显示为红色</param>
+        private void SetColonDisplay(bool isRed = false)
+        {
+            var colon1 = this.FindName("MinColon1Display") as TextBlock;
+            var colon2 = this.FindName("MinColon2Display") as TextBlock;
+            
+            if (colon1 != null)
+            {
+                if (isRed)
+                {
+                    colon1.Foreground = Brushes.Red;
+                }
+                else
+                {
+                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    if (defaultBrush != null)
+                    {
+                        colon1.Foreground = defaultBrush;
+                    }
+                    else
+                    {
+                        bool isLightTheme = IsLightTheme();
+                        colon1.Foreground = isLightTheme ? Brushes.Black : Brushes.White;
+                    }
+                }
+            }
+            
+            if (colon2 != null)
+            {
+                if (isRed)
+                {
+                    colon2.Foreground = Brushes.Red;
+                }
+                else
+                {
+                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    if (defaultBrush != null)
+                    {
+                        colon2.Foreground = defaultBrush;
+                    }
+                    else
+                    {
+                        bool isLightTheme = IsLightTheme();
+                        colon2.Foreground = isLightTheme ? Brushes.Black : Brushes.White;
                     }
                 }
             }
