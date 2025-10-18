@@ -1861,8 +1861,10 @@ namespace Ink_Canvas
                 var hwnd = new WindowInteropHelper(this).Handle;
                 if (Settings.Advanced.IsAlwaysOnTop)
                 {
+                    // 先设置WPF的Topmost属性
                     Topmost = true;
 
+                    // 使用更强的Win32 API调用来确保置顶
                     // 1. 设置窗口样式为置顶
                     int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
                     SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
@@ -1871,8 +1873,8 @@ namespace Ink_Canvas
                     SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                         SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
 
-                    // 3. 如果启用了无焦点模式且未启用UIA置顶，需要特殊处理
-                    if (Settings.Advanced.IsNoFocusMode && !Settings.Advanced.EnableUIAccessTopMost)
+                    // 3. 如果启用了无焦点模式，需要特殊处理
+                    if (Settings.Advanced.IsNoFocusMode)
                     {
                         // 启动置顶维护定时器
                         StartTopmostMaintenance();
@@ -1896,6 +1898,11 @@ namespace Ink_Canvas
 
                     // 3. 停止置顶维护定时器
                     StopTopmostMaintenance();
+
+                    // 注意：这里不直接设置Topmost，让其他代码根据模式决定
+
+                    // 添加调试日志
+                    LogHelper.WriteLogToFile("应用窗口置顶: 取消置顶", LogHelper.LogType.Trace);
                 }
             }
             catch (Exception ex)
@@ -1909,11 +1916,6 @@ namespace Ink_Canvas
         /// </summary>
         private void StartTopmostMaintenance()
         {
-            if (Settings.Advanced.EnableUIAccessTopMost)
-            {
-                return;
-            }
-
             if (isTopmostMaintenanceEnabled) return;
 
             if (topmostMaintenanceTimer == null)
@@ -1948,12 +1950,6 @@ namespace Ink_Canvas
         {
             try
             {
-                if (Settings.Advanced.EnableUIAccessTopMost)
-                {
-                    StopTopmostMaintenance();
-                    return;
-                }
-
                 if (!Settings.Advanced.IsAlwaysOnTop || !Settings.Advanced.IsNoFocusMode)
                 {
                     StopTopmostMaintenance();
