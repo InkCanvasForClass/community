@@ -3104,7 +3104,15 @@ namespace Ink_Canvas
                         }
 
                         StackPanelPPTButtons.Visibility = Visibility.Collapsed;
-                        Topmost = false;
+                        
+                        if (Settings.Advanced.EnableUIAccessTopMost)
+                        {
+                            Topmost = true;
+                        }
+                        else
+                        {
+                            Topmost = false;
+                        }
                         break;
                 }
             }
