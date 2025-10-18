@@ -678,14 +678,25 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                if (!IsConnected || !IsInSlideShow || PPTApplication == null) return false;
+                if (!IsConnected || PPTApplication == null) return false;
                 if (!Marshal.IsComObject(PPTApplication)) return false;
 
-                var slideShowWindow = PPTApplication.SlideShowWindows[1];
-                if (slideShowWindow?.View != null)
+                if (IsInSlideShow && PPTApplication.SlideShowWindows.Count >= 1)
                 {
-                    slideShowWindow.View.GotoSlide(slideNumber);
-                    return true;
+                    var slideShowWindow = PPTApplication.SlideShowWindows[1];
+                    if (slideShowWindow?.View != null)
+                    {
+                        slideShowWindow.View.GotoSlide(slideNumber);
+                        return true;
+                    }
+                }
+                else if (CurrentPresentation != null)
+                {
+                    if (CurrentPresentation.Windows?.Count >= 1)
+                    {
+                        CurrentPresentation.Windows[1].View.GotoSlide(slideNumber);
+                        return true;
+                    }
                 }
                 return false;
             }

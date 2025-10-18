@@ -960,7 +960,24 @@ namespace Ink_Canvas
                     _lastPlaybackPage = page;
                     new YesOrNoNotificationWindow($"上次播放到了第 {page} 页, 是否立即跳转", () =>
                     {
-                        _shouldNavigateToLastPage = true;
+                        try
+                        {
+                            if (_pptManager?.PPTApplication != null)
+                            {
+                                if (_pptManager.PPTApplication.SlideShowWindows.Count >= 1)
+                                {
+                                    pres.SlideShowWindow.View.GotoSlide(page);
+                                }
+                                else
+                                {
+                                    pres.Windows[1].View.GotoSlide(page);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"跳转到第{page}页失败: {ex}", LogHelper.LogType.Error);
+                        }
                     }).ShowDialog();
                 }
             }
