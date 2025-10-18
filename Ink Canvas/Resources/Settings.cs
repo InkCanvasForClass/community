@@ -591,6 +591,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isAlwaysOnTop")]
         public bool IsAlwaysOnTop { get; set; } = true;
+
+        [JsonProperty("enableUIAccessTopMost")]
+        public bool EnableUIAccessTopMost { get; set; } = false;
     }
 
     public class InkToShape
@@ -631,12 +634,22 @@ namespace Ink_Canvas
         public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
         [JsonProperty("useLegacyTimerUI")]
         public bool UseLegacyTimerUI { get; set; } = false;
-        [JsonProperty("useSeewoStyleUI")]
-        public bool UseSeewoStyleUI { get; set; } = false;
+        [JsonProperty("useNewStyleUI")]
+        public bool UseNewStyleUI { get; set; } = true;
         [JsonProperty("timerVolume")]
         public double TimerVolume { get; set; } = 1.0;
         [JsonProperty("customTimerSoundPath")]
         public string CustomTimerSoundPath { get; set; } = "";
+        [JsonProperty("enableOvertimeCountUp")]
+        public bool EnableOvertimeCountUp { get; set; } = false;
+        [JsonProperty("enableOvertimeRedText")]
+        public bool EnableOvertimeRedText { get; set; } = false;
+        [JsonProperty("enableProgressiveReminder")]
+        public bool EnableProgressiveReminder { get; set; } = false;
+        [JsonProperty("progressiveReminderVolume")]
+        public double ProgressiveReminderVolume { get; set; } = 1.0;
+        [JsonProperty("progressiveReminderSoundPath")]
+        public string ProgressiveReminderSoundPath { get; set; } = "";
     }
 
     public class CustomPickNameBackground

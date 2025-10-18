@@ -40,6 +40,7 @@
 
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
             <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <c:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <c:IntNumberToString x:Key="IntNumberToString" />
             <c:IntNumberToString2 x:Key="IntNumberToString2" />
 
@@ -609,6 +610,14 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Name="UIAccessTopMostPanel" Visibility="Collapsed">
+                                        <TextBlock Foreground="#fafafa" Text="UIA置顶" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchUIAccessTopMost"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Name="UIAccessTopMostDescription" Text="# 开启UIA置顶后，软件自动重启置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能" TextWrapping="Wrap" Foreground="#a1a1aa" Visibility="Collapsed" />
                                     <ui:ToggleSwitch OnContent="" OffContent=""
                                                      Name="ToggleSwitchIsAutoUpdate" Header="自动检查更新"
                                                      FontFamily="Microsoft YaHei UI"
@@ -631,6 +640,13 @@
                                         <TextBlock Text="# 稳定版提供可靠更新，测试版提供新功能抢先体验" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     </ui:SimpleStackPanel>
                                     
+                                    <!-- 手动更新按钮 -->
+                                    <Button x:Name="ManualUpdateButton" Content="手动更新" Margin="0,8,0,0"
+                                            Width="120" HorizontalAlignment="Left" Click="ManualUpdateButton_Click"
+                                            Visibility="{Binding ElementName=ToggleSwitchIsAutoUpdate, Path=IsOn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                    <TextBlock Text="# 点击后立即检查并下载最新版本" 
+                                               TextWrapping="Wrap" Foreground="#a1a1aa" 
+                                               Visibility="{Binding ElementName=ToggleSwitchIsAutoUpdate, Path=IsOn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                     <!-- 版本修复按钮 -->
                                     <Button x:Name="FixVersionButton" Content="版本修复" Margin="0,8,0,0"
                                             Width="120" HorizontalAlignment="Left" Click="FixVersionButton_Click"/>
@@ -2013,7 +2029,7 @@
                                                          FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchNotifyPreviousPage_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="#开启后会记录上次播放的页数，点击“是”后会在进入放映状态时自动跳转"
+                                    <TextBlock Text="#开启后会记录上次播放的页数，点击“是”后会自动跳转"
                                                TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="进入放映时回到首页" VerticalAlignment="Center"
@@ -3297,13 +3313,31 @@
                                                          Toggled="ToggleSwitchUseLegacyTimerUI_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="启用仿希沃UI"
+                                        <TextBlock Foreground="#fafafa" Text="新计时器UI"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent=""
-                                                         Name="ToggleSwitchUseSeewoStyleUI"
+                                                         Name="ToggleSwitchUseNewStyleUI"
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" 
                                                          FontWeight="Bold" 
-                                                         Toggled="ToggleSwitchUseSeewoStyleUI_Toggled" />
+                                                         Toggled="ToggleSwitchUseNewStyleUI_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用正计时"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableOvertimeCountUp"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableOvertimeCountUp_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="超时醒目数字"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableOvertimeRedText"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableOvertimeRedText_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="计时器提醒音量" VerticalAlignment="Center"
@@ -3324,6 +3358,35 @@
                                                 Click="ButtonSelectCustomTimerSound_Click" Padding="10,3"/>
                                         <Button Name="ButtonResetTimerSound" Content="重置" FontFamily="Microsoft YaHei UI" 
                                                 Click="ButtonResetTimerSound_Click" Padding="10,3" Margin="5,0,0,0"/>
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="渐进提醒" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableProgressiveReminder"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableProgressiveReminder_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="渐进提醒音量" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider x:Name="ProgressiveReminderVolumeSlider" Minimum="0"
+                                                Maximum="1" Width="168" FontFamily="Microsoft YaHei UI"
+                                                ValueChanged="ProgressiveReminderVolumeSlider_ValueChanged"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"
+                                                TickPlacement="None" AutoToolTipPlacement="None" />
+                                        <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
+                                                   FontFamily="Consolas"
+                                                   Text="{Binding ElementName=ProgressiveReminderVolumeSlider, Path=Value, StringFormat={}{0:P0}}" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="自定义渐进提醒音频：" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Button Name="ButtonSelectCustomProgressiveReminderSound" Content="选择文件" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonSelectCustomProgressiveReminderSound_Click" Padding="10,3"/>
+                                        <Button Name="ButtonResetProgressiveReminderSound" Content="重置" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonResetProgressiveReminderSound_Click" Padding="10,3" Margin="5,0,0,0"/>
                                     </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                             </GroupBox>
@@ -4418,7 +4481,7 @@
                                                                              VerticalAlignment="Center"
                                                                              HorizontalAlignment="Center"
                                                                              Margin="0,3,0,0">
-                                                            <Image Source="/Resources/new-icons/multi-touch.png"
+                                                            <Image Source="{DynamicResource MultiTouchIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4449,7 +4512,7 @@
                                                             Orientation="Horizontal" Spacing="4"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center">
-                                                            <Image Source="/Resources/new-icons/hand-move.png"
+                                                            <Image Source="{DynamicResource HandMoveIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4480,7 +4543,7 @@
                                                             Orientation="Horizontal" Spacing="4"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center">
-                                                            <Image Source="/Resources/new-icons/zoom.png"
+                                                            <Image Source="{DynamicResource ZoomIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4509,7 +4572,7 @@
                                                             Orientation="Horizontal" Spacing="4"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center">
-                                                            <Image Source="/Resources/new-icons/rotate.png"
+                                                            <Image Source="{DynamicResource RotateIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -9335,7 +9398,7 @@
                                 </Border>
                                 <ui:SimpleStackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                                      HorizontalAlignment="Center" Margin="0,3,0,0">
-                                    <Image Source="/Resources/new-icons/multi-touch.png"
+                                    <Image Source="{DynamicResource MultiTouchIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="多指书写" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
@@ -9359,7 +9422,7 @@
                                 <ui:SimpleStackPanel Opacity="1" x:Name="TwoFingerGestureSimpleStackPanel"
                                                      Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                                      HorizontalAlignment="Center">
-                                    <Image Source="/Resources/new-icons/hand-move.png"
+                                    <Image Source="{DynamicResource HandMoveIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="双指移动" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
@@ -9384,7 +9447,7 @@
                                     Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
                                     Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
-                                    <Image Source="/Resources/new-icons/zoom.png"
+                                    <Image Source="{DynamicResource ZoomIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="双指缩放" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
@@ -9409,7 +9472,7 @@
                                     Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
                                     Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
-                                    <Image Source="/Resources/new-icons/rotate.png"
+                                    <Image Source="{DynamicResource RotateIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="双指旋转" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">

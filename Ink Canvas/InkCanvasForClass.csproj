@@ -192,11 +192,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\TimerDownNotice.wav" />
+    <None Include="Resources\ProgressiveAudio.wav" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\IACore\IACore.dll" />
     <EmbeddedResource Include="Resources\IACore\IALoader.dll" />
     <EmbeddedResource Include="Resources\IACore\IAWinFX.dll" />
+    <EmbeddedResource Include="UIAccessDLL_x64.dll" />
+    <EmbeddedResource Include="UIAccessDLL_x86.dll" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Cursors\Cursor.cur" />
@@ -243,6 +246,10 @@
     <Resource Include="Resources\Icons-png\undo.png" />
     <Resource Include="Resources\Icons-png\minimize.png" />
     <Resource Include="Resources\Icons-png\penUpright.png" />
+    <Resource Include="Resources\new-icons\multi-touch_white.png" />
+    <Resource Include="Resources\new-icons\hand-move_white.png" />
+    <Resource Include="Resources\new-icons\zoom_white.png" />
+    <Resource Include="Resources\new-icons\rotate_white.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-png\twoFingelMove-Blue.png" />

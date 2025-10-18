@@ -487,7 +487,7 @@ namespace Ink_Canvas
             {
                 // 重新应用主题
                 ApplyTheme(MainWindow.Settings);
-                
+
                 // 强制刷新UI
                 InvalidateVisual();
             }

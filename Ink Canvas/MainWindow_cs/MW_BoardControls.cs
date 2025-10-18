@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -120,13 +121,23 @@ namespace Ink_Canvas
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
-
-
-            // 只清除笔画，不清除图片元素
-            // 图片元素的清除由调用方决定
             inkCanvas.Strokes.Clear();
 
+            // 执行内存清理
+            PerformLightweightMemoryCleanup();
+
             _currentCommitType = CommitReason.UserInput;
+        }
+
+        /// <summary>
+        /// 执行内存清理
+        /// </summary>
+        private void PerformLightweightMemoryCleanup()
+        {
+            Task.Run(() =>
+            {
+                GC.Collect();
+            });
         }
 
         // 恢复每页白板图片信息
@@ -418,7 +429,7 @@ namespace Ink_Canvas
 
             // 获取主题颜色资源
             var iconForegroundBrush = Application.Current.FindResource("IconForeground") as SolidColorBrush;
-            
+
             // 设置下一页按钮颜色
             if (iconForegroundBrush != null)
             {

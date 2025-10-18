@@ -865,7 +865,7 @@ namespace Ink_Canvas.Helpers
             {
                 // 检查当前是否处于鼠标模式
                 bool isMouseMode = IsInSelectMode();
-                
+
                 if (isMouseMode)
                 {
                     // 鼠标模式下，根据设置决定是否启用快捷键
@@ -874,7 +874,7 @@ namespace Ink_Canvas.Helpers
                 else
                 {
                     // 非鼠标模式下，需要检查焦点和屏幕位置
-                    
+
                     // 策略1：鼠标在窗口上时启用热键（最高优先级）
                     if (_isMouseOverWindow)
                     {

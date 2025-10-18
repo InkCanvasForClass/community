@@ -1,8 +1,8 @@
 ﻿using Ink_Canvas.Helpers;
-using System.Windows;
-using System.Windows.Input;
 using iNKORE.UI.WPF.Modern;
 using System;
+using System.Windows;
+using System.Windows.Input;
 
 namespace Ink_Canvas
 {
@@ -54,9 +54,9 @@ namespace Ink_Canvas
             try
             {
                 // 根据当前主题设置窗口主题
-                bool isDarkTheme = MainWindow.Settings.Appearance.Theme == 1 || 
+                bool isDarkTheme = MainWindow.Settings.Appearance.Theme == 1 ||
                                    (MainWindow.Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
-                
+
                 if (isDarkTheme)
                 {
                     ThemeManager.SetRequestedTheme(this, ElementTheme.Dark);

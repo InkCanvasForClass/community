@@ -37,8 +37,8 @@ namespace Ink_Canvas
                 }
 
                 // 如果当前选中的是被删除的图标，重置为默认图标
-                if (MainWindow.Settings.Appearance.FloatingBarImg >= 8 &&
-                    MainWindow.Settings.Appearance.FloatingBarImg - 8 >= MainWindow.Settings.Appearance.CustomFloatingBarImgs.Count)
+                if (MainWindow.Settings.Appearance.FloatingBarImg >= 12 &&
+                    MainWindow.Settings.Appearance.FloatingBarImg - 12 >= MainWindow.Settings.Appearance.CustomFloatingBarImgs.Count)
                 {
                     MainWindow.Settings.Appearance.FloatingBarImg = 0;
                     mainWindow.ComboBoxFloatingBarImg.SelectedIndex = 0;

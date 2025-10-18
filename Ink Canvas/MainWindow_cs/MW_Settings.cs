@@ -433,8 +433,8 @@ namespace Ink_Canvas
 
         public void UpdateCustomIconsInComboBox()
         {
-            // 保留前11个内置图标选项
-            while (ComboBoxFloatingBarImg.Items.Count > 11)
+            // 保留前12个内置图标选项
+            while (ComboBoxFloatingBarImg.Items.Count > 12)
             {
                 ComboBoxFloatingBarImg.Items.RemoveAt(ComboBoxFloatingBarImg.Items.Count - 1);
             }
@@ -2611,17 +2611,17 @@ namespace Ink_Canvas
             Settings.RandSettings.UseLegacyTimerUI = ToggleSwitchUseLegacyTimerUI.IsOn;
             if (ToggleSwitchUseLegacyTimerUI.IsOn)
             {
-                ToggleSwitchUseSeewoStyleUI.IsOn = false;
-                Settings.RandSettings.UseSeewoStyleUI = false;
+                ToggleSwitchUseNewStyleUI.IsOn = false;
+                Settings.RandSettings.UseNewStyleUI = false;
             }
             SaveSettingsToFile();
         }
 
-        private void ToggleSwitchUseSeewoStyleUI_Toggled(object sender, RoutedEventArgs e)
+        private void ToggleSwitchUseNewStyleUI_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.RandSettings.UseSeewoStyleUI = ToggleSwitchUseSeewoStyleUI.IsOn;
-            if (ToggleSwitchUseSeewoStyleUI.IsOn)
+            Settings.RandSettings.UseNewStyleUI = ToggleSwitchUseNewStyleUI.IsOn;
+            if (ToggleSwitchUseNewStyleUI.IsOn)
             {
                 ToggleSwitchUseLegacyTimerUI.IsOn = false;
                 Settings.RandSettings.UseLegacyTimerUI = false;
@@ -2629,10 +2629,74 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnableOvertimeCountUp_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.EnableOvertimeCountUp = ToggleSwitchEnableOvertimeCountUp.IsOn;
+            
+            if (!ToggleSwitchEnableOvertimeCountUp.IsOn)
+            {
+                ToggleSwitchEnableOvertimeRedText.IsOn = false;
+                Settings.RandSettings.EnableOvertimeRedText = false;
+            }
+            
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableOvertimeRedText_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            if (ToggleSwitchEnableOvertimeRedText.IsOn && !ToggleSwitchEnableOvertimeCountUp.IsOn)
+            {
+                ToggleSwitchEnableOvertimeRedText.IsOn = false;
+                return;
+            }
+            
+            Settings.RandSettings.EnableOvertimeRedText = ToggleSwitchEnableOvertimeRedText.IsOn;
+            SaveSettingsToFile();
+        }
+
         private void TimerVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
             Settings.RandSettings.TimerVolume = TimerVolumeSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableProgressiveReminder_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.EnableProgressiveReminder = ToggleSwitchEnableProgressiveReminder.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ProgressiveReminderVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.ProgressiveReminderVolume = ProgressiveReminderVolumeSlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void ButtonSelectCustomProgressiveReminderSound_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.OpenFileDialog openFileDialog = new Microsoft.Win32.OpenFileDialog
+            {
+                Title = "选择渐进提醒音频文件",
+                Filter = "音频文件 (*.wav)|*.wav|所有文件 (*.*)|*.*",
+                DefaultExt = "wav"
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                Settings.RandSettings.ProgressiveReminderSoundPath = openFileDialog.FileName;
+                SaveSettingsToFile();
+            }
+        }
+
+        private void ButtonResetProgressiveReminderSound_Click(object sender, RoutedEventArgs e)
+        {
+            Settings.RandSettings.ProgressiveReminderSoundPath = "";
             SaveSettingsToFile();
         }
 
@@ -3178,6 +3242,149 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | Channel changed to {newChannel}, but auto-update is disabled");
                 }
+            }
+        }
+
+        private async void ManualUpdateButton_Click(object sender, RoutedEventArgs e)
+        {
+            ManualUpdateButton.IsEnabled = false;
+            ManualUpdateButton.Content = "正在检查更新...";
+
+            try
+            {
+                LogHelper.WriteLogToFile("ManualUpdate | Manual update button clicked");
+
+                // 使用当前选择的更新通道检查更新
+                var (remoteVersion, lineGroup, apiReleaseNotes) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel, true, false);
+
+                if (remoteVersion != null)
+                {
+                    LogHelper.WriteLogToFile($"ManualUpdate | Found new version: {remoteVersion}");
+
+                    // 获取当前版本
+                    string currentVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+
+                    // 创建并显示更新窗口
+                    HasNewUpdateWindow updateWindow = new HasNewUpdateWindow(currentVersion, remoteVersion, "", apiReleaseNotes);
+                    updateWindow.Owner = Application.Current.MainWindow;
+                    bool? dialogResult = updateWindow.ShowDialog();
+
+                    // 如果窗口被关闭但没有点击按钮，则不执行任何操作
+                    if (dialogResult != true)
+                    {
+                        LogHelper.WriteLogToFile("ManualUpdate | Update dialog closed without selection");
+                        return;
+                    }
+
+                    // 根据用户选择处理更新
+                    switch (updateWindow.Result)
+                    {
+                        case HasNewUpdateWindow.UpdateResult.UpdateNow:
+                            // 立即更新：显示下载进度，下载完成后立即安装
+                            LogHelper.WriteLogToFile("ManualUpdate | User chose to update now");
+
+                            // 显示下载进度提示
+                            MessageBox.Show("开始下载更新，请稍候...", "正在更新", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                            // 下载更新文件，使用多线路组下载功能
+                            bool isDownloadSuccessful = await DownloadUpdateWithFallback(remoteVersion, lineGroup, Settings.Startup.UpdateChannel);
+
+                            if (isDownloadSuccessful)
+                            {
+                                // 下载成功，提示用户准备安装
+                                MessageBoxResult result = MessageBox.Show("更新已下载完成，点击确定后将关闭软件并安装新版本！", "安装更新", MessageBoxButton.OKCancel, MessageBoxImage.Information);
+
+                                // 只有当用户点击确定按钮后才关闭软件
+                                if (result == MessageBoxResult.OK)
+                                {
+                                    // 设置为用户主动退出，避免被看门狗判定为崩溃
+                                    App.IsAppExitByUser = true;
+
+                                    // 准备批处理脚本
+                                    AutoUpdateHelper.InstallNewVersionApp(remoteVersion, true);
+
+                                    // 关闭软件，让安装程序接管
+                                    Application.Current.Shutdown();
+                                }
+                                else
+                                {
+                                    LogHelper.WriteLogToFile("ManualUpdate | User cancelled update installation");
+                                }
+                            }
+                            else
+                            {
+                                // 下载失败
+                                MessageBox.Show("更新下载失败，请检查网络连接后重试。", "下载失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                            break;
+
+                        case HasNewUpdateWindow.UpdateResult.UpdateLater:
+                            // 稍后更新：静默下载，在软件关闭时自动安装
+                            LogHelper.WriteLogToFile("ManualUpdate | User chose to update later");
+
+                            // 不管设置如何，都进行下载，使用多线路组下载功能
+                            isDownloadSuccessful = await DownloadUpdateWithFallback(remoteVersion, lineGroup, Settings.Startup.UpdateChannel);
+
+                            if (isDownloadSuccessful)
+                            {
+                                LogHelper.WriteLogToFile("ManualUpdate | Update downloaded successfully, will install when application closes");
+
+                                // 设置标志，在应用程序关闭时安装
+                                Settings.Startup.IsAutoUpdate = true;
+                                Settings.Startup.IsAutoUpdateWithSilence = true;
+
+                                // 启动检查定时器
+                                timerCheckAutoUpdateWithSilence.Start();
+
+                                // 通知用户
+                                MessageBox.Show("更新已下载完成，将在软件关闭时自动安装。", "更新已准备就绪", MessageBoxButton.OK, MessageBoxImage.Information);
+                            }
+                            else
+                            {
+                                LogHelper.WriteLogToFile("ManualUpdate | Update download failed", LogHelper.LogType.Error);
+                                MessageBox.Show("更新下载失败，请检查网络连接后重试。", "下载失败", MessageBoxButton.OK, MessageBoxImage.Error);
+                            }
+                            break;
+
+                        case HasNewUpdateWindow.UpdateResult.SkipVersion:
+                            // 跳过该版本：记录到设置中
+                            LogHelper.WriteLogToFile($"ManualUpdate | User chose to skip version {remoteVersion}");
+
+                            // 记录要跳过的版本号
+                            Settings.Startup.SkippedVersion = remoteVersion;
+
+                            // 保存设置到文件
+                            SaveSettingsToFile();
+
+                            // 通知用户
+                            MessageBox.Show($"已设置跳过版本 {remoteVersion}，在下次发布新版本之前不会再提示更新。",
+                                           "已跳过此版本",
+                                           MessageBoxButton.OK,
+                                           MessageBoxImage.Information);
+                            break;
+                    }
+                }
+                else
+                {
+                    // 没有更新
+                    LogHelper.WriteLogToFile("ManualUpdate | No updates available");
+                    MessageBox.Show("当前已是最新版本！", "无可用更新", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Error in ManualUpdateButton_Click: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show(
+                    $"手动更新过程中发生错误: {ex.Message}",
+                    "更新错误",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+            }
+            finally
+            {
+                // 恢复按钮状态
+                ManualUpdateButton.IsEnabled = true;
+                ManualUpdateButton.Content = "手动更新";
             }
         }
 
