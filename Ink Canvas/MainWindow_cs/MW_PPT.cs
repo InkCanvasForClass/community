@@ -752,22 +752,6 @@ namespace Ink_Canvas
                                 {
                                     UpdateCurrentToolMode("pen");
                                     SetFloatingBarHighlightPosition("pen");
-                                    if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
-                                    {
-                                        // 根据显示模式选择显示哪个面板
-                                        if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
-                                        {
-                                            // 单行显示模式
-                                            QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
-                                        }
-                                        else
-                                        {
-                                            // 双行显示模式
-                                            QuickColorPalettePanel.Visibility = Visibility.Visible;
-                                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
-                                        }
-                                    }
                                 }
                             }
                             catch (Exception ex)
@@ -929,9 +913,6 @@ namespace Ink_Canvas
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
                             BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
                         SetCurrentToolMode(InkCanvasEditingMode.None);
-                        
-                        UpdateCurrentToolMode("cursor");
-                        SetFloatingBarHighlightPosition("cursor");
                     }
                     catch (Exception ex)
                     {
