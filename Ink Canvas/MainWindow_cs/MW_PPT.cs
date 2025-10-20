@@ -643,7 +643,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void OnPPTSlideShowBegin(SlideShowWindow wn)
+        private async void OnPPTSlideShowBegin(SlideShowWindow wn)
         {
             try
             {
@@ -659,13 +659,13 @@ namespace Ink_Canvas
                 {
                     if (isFloatingBarFolded)
                     {
-                        UnFoldFloatingBar(new object());
+                        await UnFoldFloatingBar(new object());
                     }
                 }
 
                 isStopInkReplay = true;
 
-                Application.Current.Dispatcher.Invoke(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     var activePresentation = _pptManager?.GetCurrentActivePresentation();
                     if (activePresentation != null)
@@ -785,7 +785,14 @@ namespace Ink_Canvas
 
                 if (!isFloatingBarFolded)
                 {
-                    ViewboxFloatingBarMarginAnimation(60);
+                    new Thread(() =>
+                    {
+                        Thread.Sleep(100);
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            ViewboxFloatingBarMarginAnimation(60);
+                        });
+                    }).Start();
                 }
             }
             catch (Exception ex)
@@ -929,6 +936,9 @@ namespace Ink_Canvas
                         if (GridTransparencyFakeBackground.Background != Brushes.Transparent)
                             BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
                         SetCurrentToolMode(InkCanvasEditingMode.None);
+                        
+                        UpdateCurrentToolMode("cursor");
+                        SetFloatingBarHighlightPosition("cursor");
                     }
                     catch (Exception ex)
                     {
