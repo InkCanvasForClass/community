@@ -1640,7 +1640,7 @@ namespace Ink_Canvas
                 // 控制居中
                 if (!isFloatingBarFolded)
                 {
-                    await Task.Delay(100); 
+                    await Task.Delay(100);
                     ViewboxFloatingBarMarginAnimation(60);
                 }
             }
