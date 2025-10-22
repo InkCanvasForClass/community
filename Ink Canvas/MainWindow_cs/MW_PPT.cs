@@ -1591,7 +1591,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void async PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
 
