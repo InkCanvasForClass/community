@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("CJK_mkp")]
 [assembly: AssemblyProduct("InkCanvasForClass")]
-[assembly: AssemblyCopyright("Copyright ©  CJK_mkp 2025")]
+[assembly: AssemblyCopyright("Copyright © CJK_mkp 2025")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
