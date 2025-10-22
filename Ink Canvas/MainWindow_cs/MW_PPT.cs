@@ -1548,7 +1548,7 @@ namespace Ink_Canvas
             });
         }
 
-        private void PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
+        private void async PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
         {
             lastBorderMouseDownObject = sender;
             if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
@@ -1640,6 +1640,7 @@ namespace Ink_Canvas
                 // 控制居中
                 if (!isFloatingBarFolded)
                 {
+                    await Task.Delay(100); 
                     ViewboxFloatingBarMarginAnimation(60);
                 }
             }
