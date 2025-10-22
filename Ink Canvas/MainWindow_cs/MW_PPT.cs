@@ -1548,7 +1548,7 @@ namespace Ink_Canvas
             });
         }
 
-        private void async PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
+        private void PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
         {
             lastBorderMouseDownObject = sender;
             if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
@@ -1591,7 +1591,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
+        private void async PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
 
