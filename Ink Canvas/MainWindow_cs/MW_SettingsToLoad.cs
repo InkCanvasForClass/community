@@ -876,6 +876,7 @@ namespace Ink_Canvas
                 RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
                 ToggleSwitchShowRandomAndSingleDraw.IsOn = Settings.RandSettings.ShowRandomAndSingleDraw;
+                ToggleSwitchEnableQuickDraw.IsOn = Settings.RandSettings.EnableQuickDraw;
                 ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
                 ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
                 RandomDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
@@ -921,6 +922,7 @@ namespace Ink_Canvas
                 ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn = Settings.RandSettings.DisplayRandWindowNamesInputBtn;
                 RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
+                ToggleSwitchEnableQuickDraw.IsOn = Settings.RandSettings.EnableQuickDraw;
                 ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
                 ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
                 ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;

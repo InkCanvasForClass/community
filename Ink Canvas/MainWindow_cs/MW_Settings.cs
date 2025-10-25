@@ -2769,6 +2769,20 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnableQuickDraw_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            // 获取开关状态并保存到设置中
+            Settings.RandSettings.EnableQuickDraw = ToggleSwitchEnableQuickDraw.IsOn;
+
+            // 保存设置到文件
+            SaveSettingsToFile();
+            
+            // 根据设置状态显示或隐藏快抽悬浮按钮
+            ShowQuickDrawFloatingButton();
+        }
+
         private void ToggleSwitchExternalCaller_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;

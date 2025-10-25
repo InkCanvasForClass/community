@@ -60,6 +60,9 @@ namespace Ink_Canvas
         // 悬浮窗拦截管理器
         private FloatingWindowInterceptorManager _floatingWindowInterceptorManager;
 
+        // 快抽悬浮按钮
+        private QuickDrawFloatingButton _quickDrawFloatingButton;
+
         // 设置面板相关状态
         private bool userChangedNoFocusModeInSettings;
         private bool isTemporarilyDisablingNoFocusMode = false;
@@ -530,6 +533,9 @@ namespace Ink_Canvas
             else
                 RadioCrashNoAction.IsChecked = true;
 
+            // 显示快抽悬浮按钮
+            ShowQuickDrawFloatingButton();
+
             // 如果当前不是黑板模式，则切换到黑板模式
             if (currentMode == 0)
             {
@@ -668,6 +674,19 @@ namespace Ink_Canvas
         private void Window_Closing(object sender, CancelEventArgs e)
         {
             LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
+            try
+            {
+                if (_quickDrawFloatingButton != null)
+                {
+                    _quickDrawFloatingButton.Close();
+                    _quickDrawFloatingButton = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"关闭快抽悬浮按钮时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+            
             if (!CloseIsFromButton && Settings.Advanced.IsSecondConfirmWhenShutdownApp)
             {
                 // 第一个确认对话框
@@ -2509,7 +2528,9 @@ namespace Ink_Canvas
                     BoardHighlighterWidthSlider,
                     InkWidthSlider,
                     InkAlphaSlider,
-                    HighlighterWidthSlider
+                    HighlighterWidthSlider,
+                    MLAvoidanceHistorySlider,
+                    MLAvoidanceWeightSlider
                 };
 
                 foreach (var slider in sliders)
@@ -3052,6 +3073,45 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"应用UIA置顶功能时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
+
+        /// <summary>
+        /// 显示快抽悬浮按钮
+        /// </summary>
+        private void ShowQuickDrawFloatingButton()
+        {
+            try
+            {
+                // 检查设置是否启用快抽功能
+                if (Settings?.RandSettings?.EnableQuickDraw != true)
+                {
+                    // 如果设置未启用，确保悬浮按钮被关闭
+                    if (_quickDrawFloatingButton != null)
+                    {
+                        _quickDrawFloatingButton.Close();
+                        _quickDrawFloatingButton = null;
+                    }
+                    return;
+                }
+
+                // 如果已经存在悬浮按钮，先关闭它
+                if (_quickDrawFloatingButton != null)
+                {
+                    _quickDrawFloatingButton.Close();
+                    _quickDrawFloatingButton = null;
+                }
+
+                // 创建并显示悬浮按钮
+                _quickDrawFloatingButton = new QuickDrawFloatingButton();
+                _quickDrawFloatingButton.Show();
+                
+                LogHelper.WriteLogToFile("快抽悬浮按钮已显示", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"显示快抽悬浮按钮失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
 
         #endregion
     }
