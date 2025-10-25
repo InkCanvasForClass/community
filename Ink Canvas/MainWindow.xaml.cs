@@ -3011,6 +3011,14 @@ namespace Ink_Canvas
                     {
                         try
                         {
+                            timerKillProcess.Stop();
+                            if (App.watchdogProcess != null && !App.watchdogProcess.HasExited)
+                            {
+                                App.watchdogProcess.Kill();
+                                App.watchdogProcess = null;
+                            }
+        
+                            
                             // 调用UIAccess DLL
                             if (Environment.Is64BitProcess)
                             {
@@ -3020,6 +3028,9 @@ namespace Ink_Canvas
                             {
                                 PrepareUIAccessX86();
                             }
+                            
+                            App.StartWatchdogIfNeeded();
+                            timerKillProcess.Start();
                         }
                         catch (Exception ex)
                         {
