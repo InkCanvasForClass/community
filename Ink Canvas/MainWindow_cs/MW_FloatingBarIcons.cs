@@ -2843,9 +2843,35 @@ namespace Ink_Canvas
             CancelSingleFingerDragMode();
 
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
+
+            if (Settings.Gesture.IsEnableMultiTouchMode && ToggleSwitchEnableMultiTouchMode != null && ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                ReinitializeMultiTouchMode();
+            }
         }
 
         private bool lastIsInMultiTouchMode;
+
+        private void ReinitializeMultiTouchMode()
+        {
+            try
+            {
+                if (!isInMultiTouchMode)
+                {
+                    isInMultiTouchMode = true;
+                }
+
+                inkCanvas.TouchDown -= Main_Grid_TouchDown;
+                inkCanvas.TouchDown += MainWindow_TouchDown;
+                inkCanvas.StylusDown += MainWindow_StylusDown;
+                inkCanvas.StylusMove += MainWindow_StylusMove;
+                inkCanvas.StylusUp += MainWindow_StylusUp;
+
+            }
+            catch (Exception)
+            {
+            }
+        }
 
         private void CancelSingleFingerDragMode()
         {
