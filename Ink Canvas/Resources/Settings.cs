@@ -650,6 +650,14 @@ namespace Ink_Canvas
         public double ProgressiveReminderVolume { get; set; } = 1.0;
         [JsonProperty("progressiveReminderSoundPath")]
         public string ProgressiveReminderSoundPath { get; set; } = "";
+        [JsonProperty("useNewRollCallUI")]
+        public bool UseNewRollCallUI { get; set; } = true;
+        [JsonProperty("enableMLAvoidance")]
+        public bool EnableMLAvoidance { get; set; } = true;
+        [JsonProperty("mlAvoidanceHistoryCount")]
+        public int MLAvoidanceHistoryCount { get; set; } = 20;
+        [JsonProperty("mlAvoidanceWeight")]
+        public double MLAvoidanceWeight { get; set; } = 0.8;
     }
 
     public class CustomPickNameBackground

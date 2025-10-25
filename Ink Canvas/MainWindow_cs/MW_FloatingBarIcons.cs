@@ -1085,11 +1085,20 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            var randWindow = new RandWindow(Settings);
-            randWindow.Show();
+            // 根据设置决定使用哪个点名窗口
+            if (Settings.RandSettings.UseNewRollCallUI)
+            {
+                // 使用新点名UI - 随机抽模式
+                new NewStyleRollCallWindow(Settings, false).ShowDialog();
+            }
+            else
+            {
+                // 使用默认的随机点名窗口
+                var randWindow = new RandWindow(Settings);
+                randWindow.Show();
 
-            // 使用延迟确保窗口完全显示后再强制置顶
-            randWindow.Dispatcher.BeginInvoke(new Action(() =>
+                // 使用延迟确保窗口完全显示后再强制置顶
+                randWindow.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
@@ -1126,6 +1135,7 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"强制置顶RandWindow失败: {ex.Message}", LogHelper.LogType.Error);
                 }
             }), DispatcherPriority.Loaded);
+            }
         }
 
         public void CheckEraserTypeTab()
@@ -1232,14 +1242,30 @@ namespace Ink_Canvas
                 {
                     MessageBox.Show("无法调用外部点名：" + ex.Message);
 
-                    // 调用失败时回退到默认的随机点名窗口
-                    new RandWindow(Settings, true).ShowDialog();
+                    // 调用失败时回退到相应的点名窗口
+                    if (Settings.RandSettings.UseNewRollCallUI)
+                    {
+                        new NewStyleRollCallWindow(Settings, true).ShowDialog(); // 单次抽模式
+                    }
+                    else
+                    {
+                        new RandWindow(Settings, true).ShowDialog();
+                    }
                 }
             }
             else
             {
-                // 使用默认的随机点名窗口
-                new RandWindow(Settings, true).ShowDialog();
+                // 根据设置决定使用哪个点名窗口
+                if (Settings.RandSettings.UseNewRollCallUI)
+                {
+                    // 使用新点名UI - 单次抽模式
+                    new NewStyleRollCallWindow(Settings, true).ShowDialog();
+                }
+                else
+                {
+                    // 使用默认的随机点名窗口
+                    new RandWindow(Settings, true).ShowDialog();
+                }
             }
         }
 

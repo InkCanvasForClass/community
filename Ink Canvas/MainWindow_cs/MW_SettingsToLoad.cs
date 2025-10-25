@@ -886,6 +886,12 @@ namespace Ink_Canvas
                 ToggleSwitchUseNewStyleUI.IsOn = Settings.RandSettings.UseNewStyleUI;
                 ToggleSwitchEnableOvertimeCountUp.IsOn = Settings.RandSettings.EnableOvertimeCountUp;
                 
+                // 新点名UI设置
+                ToggleSwitchUseNewRollCallUI.IsOn = Settings.RandSettings.UseNewRollCallUI;
+                ToggleSwitchEnableMLAvoidance.IsOn = Settings.RandSettings.EnableMLAvoidance;
+                MLAvoidanceHistorySlider.Value = Settings.RandSettings.MLAvoidanceHistoryCount;
+                MLAvoidanceWeightSlider.Value = Settings.RandSettings.MLAvoidanceWeight;
+                
                 bool canEnableRedText = Settings.RandSettings.EnableOvertimeCountUp && Settings.RandSettings.EnableOvertimeRedText;
                 ToggleSwitchEnableOvertimeRedText.IsOn = canEnableRedText;
                 if (!canEnableRedText)
