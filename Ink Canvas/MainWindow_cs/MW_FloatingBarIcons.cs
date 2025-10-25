@@ -2844,36 +2844,32 @@ namespace Ink_Canvas
 
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
-            // 清空墨迹后模拟用户重新手动开关多指书写功能
-            SimulateMultiTouchToggle();
+            if (Settings.Gesture.IsEnableMultiTouchMode && ToggleSwitchEnableMultiTouchMode != null && ToggleSwitchEnableMultiTouchMode.IsOn)
+            {
+                ReinitializeMultiTouchMode();
+            }
         }
 
         private bool lastIsInMultiTouchMode;
 
-        /// <summary>
-        /// 模拟用户重新手动开关多指书写功能
-        /// </summary>
-        private void SimulateMultiTouchToggle()
+        private void ReinitializeMultiTouchMode()
         {
             try
             {
-                // 检查多指书写模式是否启用
-                if (ToggleSwitchEnableMultiTouchMode != null && ToggleSwitchEnableMultiTouchMode.IsOn)
+                if (!isInMultiTouchMode)
                 {
-                    // 先关闭多指书写模式
-                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
-
-                    // 使用Dispatcher.BeginInvoke确保UI更新完成后再重新开启
-                    Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        // 重新开启多指书写模式
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
-                    }), DispatcherPriority.Background);
+                    isInMultiTouchMode = true;
                 }
+
+                inkCanvas.TouchDown -= Main_Grid_TouchDown;
+                inkCanvas.TouchDown += MainWindow_TouchDown;
+                inkCanvas.StylusDown += MainWindow_StylusDown;
+                inkCanvas.StylusMove += MainWindow_StylusMove;
+                inkCanvas.StylusUp += MainWindow_StylusUp;
+
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"模拟多指书写开关时发生错误: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -3104,7 +3100,15 @@ namespace Ink_Canvas
                         }
 
                         StackPanelPPTButtons.Visibility = Visibility.Collapsed;
-                        Topmost = false;
+                        
+                        if (Settings.Advanced.EnableUIAccessTopMost)
+                        {
+                            Topmost = true;
+                        }
+                        else
+                        {
+                            Topmost = false;
+                        }
                         break;
                 }
             }

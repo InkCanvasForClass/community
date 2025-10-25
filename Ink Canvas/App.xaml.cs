@@ -38,7 +38,7 @@ namespace Ink_Canvas
         // 新增：标记是否通过--show参数启动
         public static bool StartWithShowMode = false;
         // 新增：保存看门狗进程对象
-        private static Process watchdogProcess;
+        public static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
         public static bool IsAppExitByUser;
         // 新增：标记是否启用了UIA置顶功能
@@ -438,7 +438,6 @@ namespace Ink_Canvas
             {
                 _splashScreen.CloseSplashScreen();
                 _isSplashScreenShown = false;
-                LogHelper.WriteLogToFile("启动画面已关闭");
             }
             catch (Exception ex)
             {
@@ -1034,7 +1033,7 @@ namespace Ink_Canvas
         }
 
         // 看门狗进程
-        private void StartWatchdogIfNeeded()
+        public static void StartWatchdogIfNeeded()
         {
             // 避免递归启动
             if (Environment.GetCommandLineArgs().Contains("--watchdog")) return;
@@ -1077,8 +1076,6 @@ namespace Ink_Canvas
                     
                     if (IsUIAccessTopMostEnabled)
                     {
-                        string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                        Process.Start(exePath);
                         Environment.Exit(0);
                     }
                     

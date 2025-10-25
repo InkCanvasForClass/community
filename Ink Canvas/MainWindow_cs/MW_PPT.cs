@@ -643,7 +643,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void OnPPTSlideShowBegin(SlideShowWindow wn)
+        private async void OnPPTSlideShowBegin(SlideShowWindow wn)
         {
             try
             {
@@ -659,13 +659,13 @@ namespace Ink_Canvas
                 {
                     if (isFloatingBarFolded)
                     {
-                        UnFoldFloatingBar(new object());
+                        await UnFoldFloatingBar(new object());
                     }
                 }
 
                 isStopInkReplay = true;
 
-                Application.Current.Dispatcher.Invoke(() =>
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     var activePresentation = _pptManager?.GetCurrentActivePresentation();
                     if (activePresentation != null)
@@ -785,7 +785,14 @@ namespace Ink_Canvas
 
                 if (!isFloatingBarFolded)
                 {
-                    ViewboxFloatingBarMarginAnimation(60);
+                    new Thread(() =>
+                    {
+                        Thread.Sleep(100);
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            ViewboxFloatingBarMarginAnimation(60);
+                        });
+                    }).Start();
                 }
             }
             catch (Exception ex)
@@ -1584,7 +1591,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
 
@@ -1633,6 +1640,7 @@ namespace Ink_Canvas
                 // 控制居中
                 if (!isFloatingBarFolded)
                 {
+                    await Task.Delay(100);
                     ViewboxFloatingBarMarginAnimation(60);
                 }
             }
