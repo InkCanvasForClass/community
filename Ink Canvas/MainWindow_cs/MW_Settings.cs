@@ -2671,6 +2671,35 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        // 新点名UI设置事件处理
+        private void ToggleSwitchUseNewRollCallUI_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.UseNewRollCallUI = ToggleSwitchUseNewRollCallUI.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableMLAvoidance_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.EnableMLAvoidance = ToggleSwitchEnableMLAvoidance.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void MLAvoidanceHistorySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.MLAvoidanceHistoryCount = (int)MLAvoidanceHistorySlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void MLAvoidanceWeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.MLAvoidanceWeight = MLAvoidanceWeightSlider.Value;
+            SaveSettingsToFile();
+        }
+
         private void ProgressiveReminderVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2738,6 +2767,20 @@ namespace Ink_Canvas
 
             // 保存设置到文件
             SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableQuickDraw_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            // 获取开关状态并保存到设置中
+            Settings.RandSettings.EnableQuickDraw = ToggleSwitchEnableQuickDraw.IsOn;
+
+            // 保存设置到文件
+            SaveSettingsToFile();
+            
+            // 根据设置状态显示或隐藏快抽悬浮按钮
+            ShowQuickDrawFloatingButton();
         }
 
         private void ToggleSwitchExternalCaller_Toggled(object sender, RoutedEventArgs e)

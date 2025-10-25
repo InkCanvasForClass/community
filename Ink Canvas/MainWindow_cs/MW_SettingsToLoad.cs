@@ -876,6 +876,7 @@ namespace Ink_Canvas
                 RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
                 ToggleSwitchShowRandomAndSingleDraw.IsOn = Settings.RandSettings.ShowRandomAndSingleDraw;
+                ToggleSwitchEnableQuickDraw.IsOn = Settings.RandSettings.EnableQuickDraw;
                 ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
                 ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
                 RandomDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
@@ -885,6 +886,12 @@ namespace Ink_Canvas
                 ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
                 ToggleSwitchUseNewStyleUI.IsOn = Settings.RandSettings.UseNewStyleUI;
                 ToggleSwitchEnableOvertimeCountUp.IsOn = Settings.RandSettings.EnableOvertimeCountUp;
+                
+                // 新点名UI设置
+                ToggleSwitchUseNewRollCallUI.IsOn = Settings.RandSettings.UseNewRollCallUI;
+                ToggleSwitchEnableMLAvoidance.IsOn = Settings.RandSettings.EnableMLAvoidance;
+                MLAvoidanceHistorySlider.Value = Settings.RandSettings.MLAvoidanceHistoryCount;
+                MLAvoidanceWeightSlider.Value = Settings.RandSettings.MLAvoidanceWeight;
                 
                 bool canEnableRedText = Settings.RandSettings.EnableOvertimeCountUp && Settings.RandSettings.EnableOvertimeRedText;
                 ToggleSwitchEnableOvertimeRedText.IsOn = canEnableRedText;
@@ -915,6 +922,7 @@ namespace Ink_Canvas
                 ToggleSwitchDisplayRandWindowNamesInputBtn.IsOn = Settings.RandSettings.DisplayRandWindowNamesInputBtn;
                 RandWindowOnceCloseLatencySlider.Value = Settings.RandSettings.RandWindowOnceCloseLatency;
                 RandWindowOnceMaxStudentsSlider.Value = Settings.RandSettings.RandWindowOnceMaxStudents;
+                ToggleSwitchEnableQuickDraw.IsOn = Settings.RandSettings.EnableQuickDraw;
                 ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
                 ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
                 ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;
