@@ -88,8 +88,8 @@
     <SolidColorBrush x:Key="RandWindowBackground" Color="#1f1f1f"/>
     <SolidColorBrush x:Key="RandWindowBorderBrush" Color="#0066BF"/>
     <SolidColorBrush x:Key="RandWindowTextForeground" Color="White"/>
-    <SolidColorBrush x:Key="RandWindowButtonBackground" Color="#FBFBFD"/>
-    <SolidColorBrush x:Key="RandWindowButtonForeground" Color="Black"/>
+    <SolidColorBrush x:Key="RandWindowButtonBackground" Color="#3F3F46"/>
+    <SolidColorBrush x:Key="RandWindowButtonForeground" Color="White"/>
     <SolidColorBrush x:Key="RandWindowPrimaryButtonBackground" Color="#0066BF"/>
     <SolidColorBrush x:Key="RandWindowPrimaryButtonForeground" Color="White"/>
     <SolidColorBrush x:Key="RandWindowSecondaryButtonBackground" Color="#00B894"/>
