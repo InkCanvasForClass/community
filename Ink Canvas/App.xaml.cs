@@ -1077,8 +1077,6 @@ namespace Ink_Canvas
                     
                     if (IsUIAccessTopMostEnabled)
                     {
-                        string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                        Process.Start(exePath);
                         Environment.Exit(0);
                     }
                     
