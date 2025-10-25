@@ -617,7 +617,7 @@
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Name="UIAccessTopMostDescription" Text="# 开启UIA置顶后，软件自动重启置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能" TextWrapping="Wrap" Foreground="#a1a1aa" Visibility="Collapsed" />
+                                    <TextBlock Name="UIAccessTopMostDescription" Text="# 开启UIA置顶后，软件需要管理员启动才能置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能" TextWrapping="Wrap" Foreground="#a1a1aa" Visibility="Collapsed" />
                                     <ui:ToggleSwitch OnContent="" OffContent=""
                                                      Name="ToggleSwitchIsAutoUpdate" Header="自动检查更新"
                                                      FontFamily="Microsoft YaHei UI"
