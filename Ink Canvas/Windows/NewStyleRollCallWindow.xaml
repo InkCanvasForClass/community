@@ -70,95 +70,135 @@
                                         <StackPanel x:Name="MultiResultPanel" Orientation="Vertical" HorizontalAlignment="Center">
                                             <!-- 第1行：结果1-5 -->
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                                                <TextBlock x:Name="Result1Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result2Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result3Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result4Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result5Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Width="60"/>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result1Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result2Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result3Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result4Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result5Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
                                             </StackPanel>
                                             <!-- 第2行：结果6-10 -->
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                                                <TextBlock x:Name="Result6Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result7Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result8Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result9Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result10Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Width="60"/>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result6Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result7Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result8Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result9Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result10Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
                                             </StackPanel>
                                             <!-- 第3行：结果11-15 -->
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,8">
-                                                <TextBlock x:Name="Result11Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result12Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result13Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result14Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result15Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Width="60"/>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result11Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result12Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result13Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result14Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result15Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
                                             </StackPanel>
                                             <!-- 第4行：结果16-20 -->
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                                <TextBlock x:Name="Result16Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result17Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result18Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result19Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Margin="0,0,12,0" Width="60"/>
-                                                <TextBlock x:Name="Result20Display" Text="" FontSize="24" FontWeight="Bold" 
-                                                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                                                           Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
-                                                           TextAlignment="Center" Width="60"/>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result16Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result17Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result18Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" Margin="0,0,12,0" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result19Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
+                                                <Viewbox Width="60" Height="36" Stretch="Uniform" ClipToBounds="True">
+                                                    <TextBlock x:Name="Result20Display" Text="" FontSize="24" FontWeight="Bold" 
+                                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
+                                                               TextAlignment="Center" />
+                                                </Viewbox>
                                             </StackPanel>
                                         </StackPanel>
                                     </ScrollViewer>
@@ -212,6 +252,7 @@
                                                            Foreground="{DynamicResource NewRollCallWindowDigitForeground}" 
                                                            Width="60" TextAlignment="Center"/>
                                                 
+
                                                 <Button x:Name="CountPlusBtn" Width="40" Height="40" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
                                                         BorderThickness="0" Click="CountPlus_Click" Cursor="Hand" Margin="15,0,0,0">
                                                     <Button.Template>
