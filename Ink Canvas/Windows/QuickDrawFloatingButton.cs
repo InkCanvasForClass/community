@@ -14,6 +14,9 @@ namespace Ink_Canvas
     /// </summary>
     public partial class QuickDrawFloatingButton : Window
     {
+        // 定期维护置顶的定时器
+        private DispatcherTimer _topmostTimer;
+
         public QuickDrawFloatingButton()
         {
             InitializeComponent();
@@ -21,6 +24,10 @@ namespace Ink_Canvas
             // 设置无焦点状态
             this.Focusable = false;
             this.ShowInTaskbar = false;
+
+            // 停止定时器并清理
+            this.Closed += QuickDrawFloatingButton_Closed;
+            this.Unloaded += QuickDrawFloatingButton_Unloaded;
         }
 
 
@@ -29,7 +36,10 @@ namespace Ink_Canvas
             // 设置位置到屏幕右下角稍微靠近中部
             SetPositionToBottomRight();
             
-            // 应用置顶
+            // 启动定时维护置顶
+            StartTopmostTimer();
+
+            // 保留立即应用置顶以避免短时间内失效
             ApplyFloatingButtonTopmost();
         }
 
@@ -65,7 +75,76 @@ namespace Ink_Canvas
             }
         }
 
+        private void QuickDrawFloatingButton_Unloaded(object sender, RoutedEventArgs e)
+        {
+            StopTopmostTimer();
+        }
 
+        private void QuickDrawFloatingButton_Closed(object sender, EventArgs e)
+        {
+            StopTopmostTimer();
+        }
+
+        private void StartTopmostTimer()
+        {
+            try
+            {
+                if (_topmostTimer != null) return;
+
+                _topmostTimer = new DispatcherTimer(DispatcherPriority.Normal)
+                {
+                    Interval = TimeSpan.FromSeconds(1.5)
+                };
+                _topmostTimer.Tick += TopmostTimer_Tick;
+                _topmostTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动置顶维护定时器失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void StopTopmostTimer()
+        {
+            try
+            {
+                if (_topmostTimer == null) return;
+                _topmostTimer.Stop();
+                _topmostTimer.Tick -= TopmostTimer_Tick;
+                _topmostTimer = null;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"停止置顶维护定时器失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void TopmostTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                var main = Application.Current?.MainWindow as Window;
+                if (main == null) return;
+
+                // 保持与主窗口一致的 Topmost 状态
+                if (this.Topmost != main.Topmost)
+                {
+                    this.Topmost = main.Topmost;
+
+                    // 若需要强制置顶，尝试使用 Win32
+                    var hwnd = new WindowInteropHelper(this).Handle;
+                    if (hwnd != IntPtr.Zero && this.Topmost)
+                    {
+                        SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                            SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"置顶维护Tick失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
 
 
         #region Win32 API 声明和置顶管理
@@ -112,8 +191,6 @@ namespace Ink_Canvas
                 // 2. 使用SetWindowPos确保窗口在最顶层
                 SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
                     SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
-
-                LogHelper.WriteLogToFile("快抽悬浮按钮已应用置顶", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {
