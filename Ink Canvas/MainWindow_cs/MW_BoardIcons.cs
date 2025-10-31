@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -734,6 +734,7 @@ namespace Ink_Canvas
             drawingAttributes.StylusTip = StylusTip.Ellipse;
 
             inkCanvas_EditingModeChanged(inkCanvas, null);
+            CancelSingleFingerDragMode();
 
             HideSubPanels("eraserByStrokes");
             //}
