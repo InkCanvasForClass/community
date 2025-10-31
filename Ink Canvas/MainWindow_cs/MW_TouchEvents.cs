@@ -798,45 +798,7 @@ namespace Ink_Canvas
             {
                 isMultiTouchTimerActive = false;
             }
-
-
-            // 当手掌擦激活且所有触摸点都抬起时，恢复原编辑模式
-            if (isPalmEraserActive && dec.Count == 0)
-            {
-                LogHelper.WriteLogToFile($"Palm eraser recovery triggered - Touch points remaining: {dec.Count}");
-
-                // 恢复高光状态
-                drawingAttributes.IsHighlighter = palmEraserLastIsHighlighter;
-
-                // 恢复编辑模式
-                try
-                {
-                    if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
-                    {
-                        // 根据之前的状态恢复
-                        switch (palmEraserLastEditingMode)
-                        {
-                            case InkCanvasEditingMode.Ink:
-                                PenIcon_Click(null, null);
-                                break;
-                            case InkCanvasEditingMode.Select:
-                                SymbolIconSelect_MouseUp(null, null);
-                                break;
-                            default:
-                                inkCanvas.EditingMode = palmEraserLastEditingMode;
-                                break;
-                        }
-
-                        LogHelper.WriteLogToFile($"Palm eraser recovered to mode: {palmEraserLastEditingMode}");
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // 如果恢复失败，强制切换到批注模式
-                    LogHelper.WriteLogToFile($"Palm eraser recovery failed: {ex.Message}, forcing to Ink mode", LogHelper.LogType.Error);
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                }
-
+            
                 // 重置手掌擦状态
                 isPalmEraserActive = false;
 
