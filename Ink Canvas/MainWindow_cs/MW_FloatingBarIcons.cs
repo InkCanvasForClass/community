@@ -1085,11 +1085,20 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            var randWindow = new RandWindow(Settings);
-            randWindow.Show();
+            // 根据设置决定使用哪个点名窗口
+            if (Settings.RandSettings.UseNewRollCallUI)
+            {
+                // 使用新点名UI - 随机抽模式
+                new NewStyleRollCallWindow(Settings, false).ShowDialog();
+            }
+            else
+            {
+                // 使用默认的随机点名窗口
+                var randWindow = new RandWindow(Settings);
+                randWindow.Show();
 
-            // 使用延迟确保窗口完全显示后再强制置顶
-            randWindow.Dispatcher.BeginInvoke(new Action(() =>
+                // 使用延迟确保窗口完全显示后再强制置顶
+                randWindow.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
@@ -1126,6 +1135,7 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"强制置顶RandWindow失败: {ex.Message}", LogHelper.LogType.Error);
                 }
             }), DispatcherPriority.Loaded);
+            }
         }
 
         public void CheckEraserTypeTab()
@@ -1232,14 +1242,30 @@ namespace Ink_Canvas
                 {
                     MessageBox.Show("无法调用外部点名：" + ex.Message);
 
-                    // 调用失败时回退到默认的随机点名窗口
-                    new RandWindow(Settings, true).ShowDialog();
+                    // 调用失败时回退到相应的点名窗口
+                    if (Settings.RandSettings.UseNewRollCallUI)
+                    {
+                        new NewStyleRollCallWindow(Settings, true).ShowDialog(); // 单次抽模式
+                    }
+                    else
+                    {
+                        new RandWindow(Settings, true).ShowDialog();
+                    }
                 }
             }
             else
             {
-                // 使用默认的随机点名窗口
-                new RandWindow(Settings, true).ShowDialog();
+                // 根据设置决定使用哪个点名窗口
+                if (Settings.RandSettings.UseNewRollCallUI)
+                {
+                    // 使用新点名UI - 单次抽模式
+                    new NewStyleRollCallWindow(Settings, true).ShowDialog();
+                }
+                else
+                {
+                    // 使用默认的随机点名窗口
+                    new RandWindow(Settings, true).ShowDialog();
+                }
             }
         }
 
@@ -2840,70 +2866,10 @@ namespace Ink_Canvas
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
 
-            CancelSingleFingerDragMode();
-
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
         }
 
         private bool lastIsInMultiTouchMode;
-
-        private void CancelSingleFingerDragMode()
-        {
-            if (ToggleSwitchDrawShapeBorderAutoHide.IsOn) CollapseBorderDrawShape();
-
-            GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-
-            if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
-            isLongPressSelected = false;
-
-            ResetTouchStates();
-        }
-
-        /// <summary>
-        /// 重置所有触摸相关状态，
-        /// </summary>
-        private void ResetTouchStates()
-        {
-            try
-            {
-                // 清空触摸点计数器
-                dec.Clear();
-
-
-                // 重置单指拖动模式状态
-                if (isSingleFingerDragMode)
-                {
-                    isSingleFingerDragMode = false;
-                    if (BtnFingerDragMode != null)
-                    {
-                        BtnFingerDragMode.Content = "单指\n拖动";
-                    }
-                }
-
-                // 重置手掌擦状态
-                if (isPalmEraserActive)
-                {
-                    isPalmEraserActive = false;
-                }
-
-                // 确保触摸事件能正常响应
-                inkCanvas.IsHitTestVisible = true;
-                inkCanvas.IsManipulationEnabled = true;
-
-                // 释放所有触摸捕获
-                inkCanvas.ReleaseAllTouchCaptures();
-
-                // 恢复UI元素的触摸响应
-                ViewboxFloatingBar.IsHitTestVisible = true;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
-
-
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"重置触摸状态失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
         private void BtnHideControl_Click(object sender, RoutedEventArgs e)
         {
