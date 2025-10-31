@@ -189,10 +189,7 @@ namespace Ink_Canvas
             EnterShapeDrawingMode(1);
             lastMouseDownSender = null;
 
-            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
             bool wasLongPressed = isLongPressSelected;
-
-            CancelSingleFingerDragMode();
 
             if (wasLongPressed)
             {
@@ -211,10 +208,7 @@ namespace Ink_Canvas
             EnterShapeDrawingMode(8);
             lastMouseDownSender = null;
 
-            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
             bool wasLongPressed = isLongPressSelected;
-
-            CancelSingleFingerDragMode();
 
             if (wasLongPressed)
             {
@@ -233,10 +227,10 @@ namespace Ink_Canvas
             EnterShapeDrawingMode(18);
             lastMouseDownSender = null;
 
-            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
+            
             bool wasLongPressed = isLongPressSelected;
 
-            CancelSingleFingerDragMode();
+            
 
             if (wasLongPressed)
             {
@@ -255,10 +249,10 @@ namespace Ink_Canvas
             EnterShapeDrawingMode(2);
             lastMouseDownSender = null;
 
-            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
+            
             bool wasLongPressed = isLongPressSelected;
 
-            CancelSingleFingerDragMode();
+            
 
             if (wasLongPressed)
             {
@@ -277,10 +271,10 @@ namespace Ink_Canvas
             EnterShapeDrawingMode(15);
             lastMouseDownSender = null;
 
-            // 先保存长按状态，避免被CancelSingleFingerDragMode重置
+            
             bool wasLongPressed = isLongPressSelected;
 
-            CancelSingleFingerDragMode();
+            
 
             if (wasLongPressed)
             {
@@ -297,7 +291,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(11);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -306,7 +300,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(12);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -315,7 +309,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(13);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -324,7 +318,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(14);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -333,7 +327,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(17);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -342,7 +336,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(3);
-            CancelSingleFingerDragMode();
+            
             isLongPressSelected = false;
             lastMouseDownSender = null;
             DrawShapePromptToPen();
@@ -352,7 +346,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(19);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -361,7 +355,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(4);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -370,7 +364,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(5);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -379,7 +373,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(16);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -388,7 +382,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(23);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -397,7 +391,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(10);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -407,7 +401,7 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(24);
             drawMultiStepShapeCurrentStep = 0;
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -417,7 +411,7 @@ namespace Ink_Canvas
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(25);
             drawMultiStepShapeCurrentStep = 0;
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -426,7 +420,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(20);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -435,7 +429,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(22);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -444,7 +438,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(21);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -453,7 +447,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(6);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -462,7 +456,7 @@ namespace Ink_Canvas
         {
             await CheckIsDrawingShapesInMultiTouchMode();
             EnterShapeDrawingMode(7);
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
@@ -474,7 +468,7 @@ namespace Ink_Canvas
             isFirstTouchCuboid = true;
             CuboidFrontRectIniP = new Point();
             CuboidFrontRectEndP = new Point();
-            CancelSingleFingerDragMode();
+            
             lastMouseDownSender = null;
             DrawShapePromptToPen();
         }
