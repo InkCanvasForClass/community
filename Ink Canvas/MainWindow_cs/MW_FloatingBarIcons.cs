@@ -1408,8 +1408,6 @@ namespace Ink_Canvas
                     {
                         inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                     }
-
-                    ResetTouchStates();
                 });
             }).Start();
         }
