@@ -734,7 +734,6 @@ namespace Ink_Canvas
             drawingAttributes.StylusTip = StylusTip.Ellipse;
 
             inkCanvas_EditingModeChanged(inkCanvas, null);
-            CancelSingleFingerDragMode();
 
             HideSubPanels("eraserByStrokes");
             //}
