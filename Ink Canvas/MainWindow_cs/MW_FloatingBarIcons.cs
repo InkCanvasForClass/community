@@ -2362,11 +2362,7 @@ namespace Ink_Canvas
 
             drawingShapeMode = 0;
 
-            // 这样从线擦切换回批注时，可以恢复之前的荧光笔状态
-            // penType 和 drawingAttributes 的状态将在 PenIcon_Click 中根据 wasHighlighter 来恢复
-
             inkCanvas_EditingModeChanged(inkCanvas, null);
-            CancelSingleFingerDragMode();
 
             HideSubPanels("eraserByStrokes");
 
