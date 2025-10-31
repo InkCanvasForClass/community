@@ -2870,34 +2870,9 @@ namespace Ink_Canvas
 
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
-            if (Settings.Gesture.IsEnableMultiTouchMode && ToggleSwitchEnableMultiTouchMode != null && ToggleSwitchEnableMultiTouchMode.IsOn)
-            {
-                ReinitializeMultiTouchMode();
-            }
         }
 
         private bool lastIsInMultiTouchMode;
-
-        private void ReinitializeMultiTouchMode()
-        {
-            try
-            {
-                if (!isInMultiTouchMode)
-                {
-                    isInMultiTouchMode = true;
-                }
-
-                inkCanvas.TouchDown -= Main_Grid_TouchDown;
-                inkCanvas.TouchDown += MainWindow_TouchDown;
-                inkCanvas.StylusDown += MainWindow_StylusDown;
-                inkCanvas.StylusMove += MainWindow_StylusMove;
-                inkCanvas.StylusUp += MainWindow_StylusUp;
-
-            }
-            catch (Exception)
-            {
-            }
-        }
 
         private void CancelSingleFingerDragMode()
         {
@@ -2920,7 +2895,6 @@ namespace Ink_Canvas
             {
                 // 清空触摸点计数器
                 dec.Clear();
-
 
                 // 重置单指拖动模式状态
                 if (isSingleFingerDragMode)
