@@ -972,7 +972,6 @@ namespace Ink_Canvas
 
             if (dec.Count == 0 && (isSingleFingerDragMode || isInMultiTouchMode))
             {
-                ResetTouchStates();
                 return;
             }
 
