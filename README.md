@@ -29,7 +29,8 @@
 **智教联盟 InkCanvasForClass Community Edition 板块：** [forum.smart-teach.cn/t/icc-ce](https://forum.smart-teach.cn/t/icc-ce) ，我们会在此处发布版本更新日志，同时，您也可以在遵守论坛对应管理规则与InkCanvasForClass Community Edition 板块管理条约的情况下，在该板块内提问或发表自己的使用体验。
 
 ## ⚠️ 使用须知
-在使用和分发本软件前，请务必了解相关开源协议。本软件基于 https://github.com/Awesome-Iwb/icc-0610fix 修改而来，而 icc-0610fix 基于 https://github.com/ChangSakura/Ink-Canvas 修改，ica 则基于 https://github.com/WXRIW/Ink-Canvas 修改，增加了包括但不限于隐藏到侧边栏等功能，更改了相关UI和软件操作逻辑。对于墨迹书写功能以及 ica 独有功能的相关问题反馈，建议优先查阅 https://github.com/WXRIW/Ink-Canvas/issues 。**使用前建议戴上大脑使用。**
+
+在使用和分发本软件前，请务必了解相关开源协议。本软件基于 <https://github.com/InkCanvasForClass/icc-20240610-stable> 修改而来，而 icc-20240610-stable 基于 <https://github.com/ChangSakura/Ink-Canvas> 修改，ica 则基于 <https://github.com/WXRIW/Ink-Canvas> 修改，增加了包括但不限于隐藏到侧边栏等功能，更改了相关UI和软件操作逻辑。对于墨迹书写功能以及 ica 独有功能的相关问题反馈，建议优先查阅 <https://github.com/WXRIW/Ink-Canvas/issues> 。**使用前建议戴上大脑使用。**
 
 # 💬 提示
 - 对于新功能的有效意见和合理建议，开发者会适时回复并进行开发。本软件并非商业性质软件或由营利性机构驱动，请不要催促开发者，耐心等待能让功能少些Bug，更加稳定。
@@ -57,12 +58,7 @@
 
 如果仍无法运行，请[安装 `Microsoft Office`](https://www.coolhub.top/archives/11)。
 
-### 程序能在 Wine 环境中运行吗？
-不能，但是你可以期待 icc-gtk4，是正在开发的仅支持 Linux 平台的 icc 移植版本。
-
 ## ✏️ 贡献指南
-
-请前往 InkCanvasForClass/dubious-notes
 
 **请注意，在贡献代码时，_务必_ 将所有代码提交到 _beta_ 分支，以保证beta版本总是新于main版本。**
 
@@ -100,13 +96,12 @@
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## 🤝 感谢
-感谢 [DotteringDoge471](https://github.com/DotteringDoge471) 创造了 `InkCanvasForClass`！   
+ 
 感谢 [yuwenhui2020](https://github.com/yuwenhui2020) 为 `Ink Canvas 使用说明` 做出的贡献！  
-感谢 [CN-Ironegg](https://github.com/CN-Ironegg)、[jiajiaxd](https://github.com/jiajiaxd)、[Kengwang](https://github.com/kengwang)、[Raspberry Kan](https://github.com/Raspberry-Monster)、[clover-yan](https://github.com/clover-yan)、[STBBRD](https://github.com/STBBRD)、[ChangSakura](https://github.com/WuChanging)、[DotteringDoge471](https://github.com/DotteringDoge471) 为本项目贡献代码！  
+感谢 [CN-Ironegg](https://github.com/CN-Ironegg)、[jiajiaxd](https://github.com/jiajiaxd)、[Kengwang](https://github.com/kengwang)、[Raspberry Kan](https://github.com/Raspberry-Monster)、[clover-yan](https://github.com/clover-yan)、[STBBRD](https://github.com/STBBRD)、[ChangSakura](https://github.com/WuChanging) 为本项目贡献代码！  
 
 ## License
 GPLv3
 
 ## 项目引用
 [Alan-CRL/DesktopDrawpadBlocker](https://github.com/Alan-CRL/DesktopDrawpadBlocker)  
-[Awesome-Iwb/iwbicons-gallery](https://github.com/awesome-iwb/awesome-iwb/wiki/iwbicons-gallery)「本项目部分图标来自 Awesome Iwb 的 IwbIcons 图标库，由 Douxiba 制作。」
