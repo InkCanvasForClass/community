@@ -2866,8 +2866,6 @@ namespace Ink_Canvas
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
 
-            CancelSingleFingerDragMode();
-
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
         }
