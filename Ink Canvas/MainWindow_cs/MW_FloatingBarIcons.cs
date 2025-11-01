@@ -2025,8 +2025,6 @@ namespace Ink_Canvas
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
 
-            ExitMultiTouchModeIfNeeded();
-
             SetFloatingBarHighlightPosition("pen");
 
             // 记录当前是否已经是批注模式且是否为高光显示模式
