@@ -1877,6 +1877,29 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnableAutoSaveStrokes_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Automation.IsEnableAutoSaveStrokes = ToggleSwitchEnableAutoSaveStrokes.IsOn;
+            SaveSettingsToFile();
+            // 更新定时器状态
+            UpdateAutoSaveStrokesTimer();
+        }
+
+        private void ComboBoxAutoSaveStrokesInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded || ComboBoxAutoSaveStrokesInterval.SelectedItem == null) return;
+            
+            var selectedItem = ComboBoxAutoSaveStrokesInterval.SelectedItem as System.Windows.Controls.ComboBoxItem;
+            if (selectedItem?.Tag != null && int.TryParse(selectedItem.Tag.ToString(), out int intervalMinutes))
+            {
+                Settings.Automation.AutoSaveStrokesIntervalMinutes = intervalMinutes;
+                SaveSettingsToFile();
+                // 更新定时器间隔
+                UpdateAutoSaveStrokesTimer();
+            }
+        }
+
         #endregion
 
         #region Gesture

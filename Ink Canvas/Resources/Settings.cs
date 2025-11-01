@@ -462,6 +462,12 @@ namespace Ink_Canvas
         [JsonProperty("isAutoEnterAnnotationAfterKillHite")]
         public bool IsAutoEnterAnnotationAfterKillHite { get; set; }
 
+        [JsonProperty("isEnableAutoSaveStrokes")]
+        public bool IsEnableAutoSaveStrokes { get; set; } = true;
+
+        [JsonProperty("autoSaveStrokesIntervalMinutes")]
+        public int AutoSaveStrokesIntervalMinutes { get; set; } = 5;
+
         [JsonProperty("floatingWindowInterceptor")]
         public FloatingWindowInterceptorSettings FloatingWindowInterceptor { get; set; } = new FloatingWindowInterceptorSettings();
     }

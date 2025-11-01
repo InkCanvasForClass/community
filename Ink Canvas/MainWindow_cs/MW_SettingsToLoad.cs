@@ -1053,6 +1053,23 @@ namespace Ink_Canvas
 
                 ToggleSwitchSaveFullPageStrokes.IsOn = Settings.Automation.IsSaveFullPageStrokes;
 
+                // 加载定时保存墨迹设置
+                ToggleSwitchEnableAutoSaveStrokes.IsOn = Settings.Automation.IsEnableAutoSaveStrokes;
+                // 初始化保存间隔下拉框
+                if (ComboBoxAutoSaveStrokesInterval != null)
+                {
+                    int intervalMinutes = Settings.Automation.AutoSaveStrokesIntervalMinutes;
+                    if (intervalMinutes < 1) intervalMinutes = 5; // 默认5分钟
+                    foreach (System.Windows.Controls.ComboBoxItem item in ComboBoxAutoSaveStrokesInterval.Items)
+                    {
+                        if (item.Tag != null && int.TryParse(item.Tag.ToString(), out int tagValue) && tagValue == intervalMinutes)
+                        {
+                            ComboBoxAutoSaveStrokesInterval.SelectedItem = item;
+                            break;
+                        }
+                    }
+                }
+
                 SideControlMinimumAutomationSlider.Value = Settings.Automation.MinimumAutomationStrokeNumber;
 
                 AutoSavedStrokesLocation.Text = Settings.Automation.AutoSavedStrokesLocation;
