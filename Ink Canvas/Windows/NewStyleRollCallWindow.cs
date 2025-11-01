@@ -1197,6 +1197,13 @@ namespace Ink_Canvas
             {
                 List<string> usedNames = new List<string>();
                 
+                // 确保动画期间主显示区域可见
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MainResultDisplay.Visibility = Visibility.Visible;
+                    MultiResultScrollViewer.Visibility = Visibility.Collapsed;
+                });
+                
                 for (int i = 0; i < animationTimes; i++)
                 {
                     // 随机选择一个名字进行动画显示
@@ -1207,6 +1214,8 @@ namespace Ink_Canvas
                         
                         Application.Current.Dispatcher.Invoke(() =>
                         {
+                            // 确保主显示区域在动画期间保持可见
+                            MainResultDisplay.Visibility = Visibility.Visible;
                             MainResultDisplay.Text = displayName;
                         });
                     }
@@ -1258,6 +1267,13 @@ namespace Ink_Canvas
             {
                 List<int> usedNumbers = new List<int>();
                 
+                // 确保动画期间主显示区域可见
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    MainResultDisplay.Visibility = Visibility.Visible;
+                    MultiResultScrollViewer.Visibility = Visibility.Collapsed;
+                });
+                
                 for (int i = 0; i < animationTimes; i++)
                 {
                     // 随机选择一个数字进行动画显示
@@ -1265,6 +1281,8 @@ namespace Ink_Canvas
                     
                     Application.Current.Dispatcher.Invoke(() =>
                     {
+                        // 确保主显示区域在动画期间保持可见
+                        MainResultDisplay.Visibility = Visibility.Visible;
                         MainResultDisplay.Text = randomNumber.ToString();
                     });
                     
@@ -1280,7 +1298,7 @@ namespace Ink_Canvas
                     // 更新历史记录
                     UpdateRollCallHistory(selectedNumbers);
 
-                    // 显示结果
+                    // 显示结果（这里会根据结果数量决定显示主显示区域还是多结果区域）
                     ShowResults(selectedNumbers);
                     UpdateStatusDisplay($"抽选完成，共选择 {selectedNumbers.Count} 个数字");
 
