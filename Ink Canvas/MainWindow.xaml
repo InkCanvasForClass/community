@@ -9434,7 +9434,7 @@
 
                             MouseUp="TwoFingerGestureBorder_MouseUp" Background="Transparent"
                             Orientation="Vertical" HorizontalAlignment="Center" Width="36" Margin="0">
-                            <Image x:Name="EnableTwoFingerGestureBtn" Source="/Resources/new-icons/gesture.png"
+                            <Image x:Name="EnableTwoFingerGestureBtn" Source="{DynamicResource GestureIcon}"
                                    RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="18"
                                    Margin="0,3,0,0" />
                             <TextBlock x:Name="gestureiconText" Text="手势" Foreground="{DynamicResource FloatBarForeground}" FontSize="8"

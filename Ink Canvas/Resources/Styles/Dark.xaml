@@ -145,4 +145,8 @@
     <BitmapImage x:Key="HandMoveIcon" UriSource="/Resources/new-icons/hand-move_white.png"/>
     <BitmapImage x:Key="ZoomIcon" UriSource="/Resources/new-icons/zoom_white.png"/>
     <BitmapImage x:Key="RotateIcon" UriSource="/Resources/new-icons/rotate_white.png"/>
+    
+    <!-- 浮动栏手势按钮图标资源 - 深色主题 -->
+    <BitmapImage x:Key="GestureIcon" UriSource="/Resources/new-icons/gesture_white.png"/>
+    <BitmapImage x:Key="GestureIconEnabled" UriSource="/Resources/new-icons/gesture-enabled.png"/>
 </ResourceDictionary>

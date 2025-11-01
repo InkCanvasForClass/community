@@ -421,6 +421,7 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\new-icons\gesture.png" />
+    <Resource Include="Resources\new-icons\gesture_white.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\new-icons\gesture-enabled.png" />

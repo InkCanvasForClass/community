@@ -65,6 +65,9 @@ namespace Ink_Canvas
                 // 刷新图片选中栏图标
                 RefreshImageSelectionIcons();
 
+                // 刷新手势按钮图标
+                RefreshGestureButtonIcon();
+
                 RefreshFloatingBarHighlightColors();
 
                 if (autoSwitchIcon)
@@ -108,6 +111,9 @@ namespace Ink_Canvas
 
                 // 刷新图片选中栏图标
                 RefreshImageSelectionIcons();
+
+                // 刷新手势按钮图标
+                RefreshGestureButtonIcon();
 
                 RefreshFloatingBarHighlightColors();
 
@@ -489,6 +495,21 @@ namespace Ink_Canvas
             catch (Exception)
             {
                 // 忽略异常
+            }
+        }
+
+        /// <summary>
+        /// 刷新手势按钮图标
+        /// </summary>
+        private void RefreshGestureButtonIcon()
+        {
+            try
+            {
+                // 调用手势按钮颜色和图标更新方法，该方法会根据当前主题和手势状态设置正确的图标
+                CheckEnableTwoFingerGestureBtnColorPrompt();
+            }
+            catch (Exception)
+            {
             }
         }
 

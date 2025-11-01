@@ -80,8 +80,7 @@ namespace Ink_Canvas
                 // 多指书写模式启用时，手势功能被禁用
                 TwoFingerGestureSimpleStackPanel.Opacity = 0.5;
                 TwoFingerGestureSimpleStackPanel.IsHitTestVisible = false;
-                EnableTwoFingerGestureBtn.Source =
-                    new BitmapImage(new Uri("/Resources/new-icons/gesture.png", UriKind.Relative));
+                EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIcon");
 
                 // 根据主题设置颜色
                 if (Settings.Appearance.Theme == 1) // 深色主题
@@ -117,8 +116,7 @@ namespace Ink_Canvas
 
                 if (hasGestureEnabled)
                 {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri("/Resources/new-icons/gesture-enabled.png", UriKind.Relative));
+                    EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIconEnabled");
 
                     BoardGesture.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                     BoardGestureGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -130,8 +128,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri("/Resources/new-icons/gesture.png", UriKind.Relative));
+                    EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIcon");
 
                     // 根据主题设置颜色
                     if (Settings.Appearance.Theme == 1) // 深色主题
