@@ -176,11 +176,16 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 在屏幕模式（非放映模式）下，不显示手势按钮
             if (currentMode == 0)
             {
-                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                return;
+                if (GridTransparencyFakeBackground.Background != Brushes.Transparent && isVisible)
+                {
+                }
+                else
+                {
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    return;
+                }
             }
 
             if (StackPanelCanvasControls.Visibility != Visibility.Visible
