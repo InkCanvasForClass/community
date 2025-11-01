@@ -5,15 +5,40 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ink_Canvas"
         mc:Ignorable="d" FontFamily="Microsoft YaHei UI" ui:WindowHelper.UseModernWindowStyle="True"
-        ui:ThemeManager.RequestedTheme="Light" WindowStartupLocation="CenterScreen"
+        WindowStartupLocation="CenterScreen"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern" Topmost="True"
         Title="Ink Canvas 抽奖 - 名单导入" Height="500" Width="400"
         Loaded="Window_Loaded" Closing="Window_Closing">
-    <Grid>
-        <Label Content="请在下方输入名单，每行一人（建议直接粘贴表格姓名列）" Margin="10"/>
-        <TextBox Name="TextBoxNames" FontFamily="Microsoft YaHei UI" VerticalScrollBarVisibility="Auto" AcceptsReturn="True" Margin="10,40,10,50" />
-        <Button Margin="10" VerticalAlignment="Bottom" HorizontalAlignment="Right"
-                Content="关闭" FontFamily="Microsoft YaHei UI"
-                Width="100" Click="Button_Click"/>
+    <Window.Resources>
+        <!-- 主题资源 -->
+        <SolidColorBrush x:Key="NamesInputWindowBackground" Color="White"/>
+        <SolidColorBrush x:Key="NamesInputWindowForeground" Color="Black"/>
+        <SolidColorBrush x:Key="NamesInputWindowButtonBackground" Color="#F4F4F5"/>
+        <SolidColorBrush x:Key="NamesInputWindowButtonForeground" Color="Black"/>
+        <SolidColorBrush x:Key="NamesInputWindowBorderBrush" Color="#E4E4E7"/>
+    </Window.Resources>
+    <Grid Background="{DynamicResource NamesInputWindowBackground}">
+        <Label Content="请在下方输入名单，每行一人（建议直接粘贴表格姓名列）" 
+               Margin="10" 
+               Foreground="{DynamicResource NamesInputWindowForeground}"
+               FontFamily="Microsoft YaHei UI"/>
+        <TextBox Name="TextBoxNames" 
+                 FontFamily="Microsoft YaHei UI" 
+                 VerticalScrollBarVisibility="Auto" 
+                 AcceptsReturn="True" 
+                 Margin="10,40,10,50"
+                 Background="{DynamicResource NamesInputWindowBackground}"
+                 Foreground="{DynamicResource NamesInputWindowForeground}"
+                 BorderBrush="{DynamicResource NamesInputWindowBorderBrush}"/>
+        <Button Margin="10" 
+                VerticalAlignment="Bottom" 
+                HorizontalAlignment="Right"
+                Content="关闭" 
+                FontFamily="Microsoft YaHei UI"
+                Width="100" 
+                Click="Button_Click"
+                Background="{DynamicResource NamesInputWindowButtonBackground}"
+                Foreground="{DynamicResource NamesInputWindowButtonForeground}"
+                BorderBrush="{DynamicResource NamesInputWindowBorderBrush}"/>
     </Grid>
 </Window>

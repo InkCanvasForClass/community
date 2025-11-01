@@ -88,8 +88,8 @@
     <SolidColorBrush x:Key="RandWindowBackground" Color="#1f1f1f"/>
     <SolidColorBrush x:Key="RandWindowBorderBrush" Color="#0066BF"/>
     <SolidColorBrush x:Key="RandWindowTextForeground" Color="White"/>
-    <SolidColorBrush x:Key="RandWindowButtonBackground" Color="#FBFBFD"/>
-    <SolidColorBrush x:Key="RandWindowButtonForeground" Color="Black"/>
+    <SolidColorBrush x:Key="RandWindowButtonBackground" Color="#3F3F46"/>
+    <SolidColorBrush x:Key="RandWindowButtonForeground" Color="White"/>
     <SolidColorBrush x:Key="RandWindowPrimaryButtonBackground" Color="#0066BF"/>
     <SolidColorBrush x:Key="RandWindowPrimaryButtonForeground" Color="White"/>
     <SolidColorBrush x:Key="RandWindowSecondaryButtonBackground" Color="#00B894"/>
@@ -145,4 +145,8 @@
     <BitmapImage x:Key="HandMoveIcon" UriSource="/Resources/new-icons/hand-move_white.png"/>
     <BitmapImage x:Key="ZoomIcon" UriSource="/Resources/new-icons/zoom_white.png"/>
     <BitmapImage x:Key="RotateIcon" UriSource="/Resources/new-icons/rotate_white.png"/>
+    
+    <!-- 浮动栏手势按钮图标资源 - 深色主题 -->
+    <BitmapImage x:Key="GestureIcon" UriSource="/Resources/new-icons/gesture_white.png"/>
+    <BitmapImage x:Key="GestureIconEnabled" UriSource="/Resources/new-icons/gesture-enabled.png"/>
 </ResourceDictionary>

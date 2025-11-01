@@ -80,8 +80,7 @@ namespace Ink_Canvas
                 // 多指书写模式启用时，手势功能被禁用
                 TwoFingerGestureSimpleStackPanel.Opacity = 0.5;
                 TwoFingerGestureSimpleStackPanel.IsHitTestVisible = false;
-                EnableTwoFingerGestureBtn.Source =
-                    new BitmapImage(new Uri("/Resources/new-icons/gesture.png", UriKind.Relative));
+                EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIcon");
 
                 // 根据主题设置颜色
                 if (Settings.Appearance.Theme == 1) // 深色主题
@@ -117,8 +116,7 @@ namespace Ink_Canvas
 
                 if (hasGestureEnabled)
                 {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri("/Resources/new-icons/gesture-enabled.png", UriKind.Relative));
+                    EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIconEnabled");
 
                     BoardGesture.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                     BoardGestureGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -130,8 +128,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri("/Resources/new-icons/gesture.png", UriKind.Relative));
+                    EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIcon");
 
                     // 根据主题设置颜色
                     if (Settings.Appearance.Theme == 1) // 深色主题
@@ -176,11 +173,16 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 在屏幕模式（非放映模式）下，不显示手势按钮
             if (currentMode == 0)
             {
-                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                return;
+                if (GridTransparencyFakeBackground.Background != Brushes.Transparent && isVisible)
+                {
+                }
+                else
+                {
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    return;
+                }
             }
 
             if (StackPanelCanvasControls.Visibility != Visibility.Visible
@@ -1085,11 +1087,20 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            var randWindow = new RandWindow(Settings);
-            randWindow.Show();
+            // 根据设置决定使用哪个点名窗口
+            if (Settings.RandSettings.UseNewRollCallUI)
+            {
+                // 使用新点名UI - 随机抽模式
+                new NewStyleRollCallWindow(Settings, false).ShowDialog();
+            }
+            else
+            {
+                // 使用默认的随机点名窗口
+                var randWindow = new RandWindow(Settings);
+                randWindow.Show();
 
-            // 使用延迟确保窗口完全显示后再强制置顶
-            randWindow.Dispatcher.BeginInvoke(new Action(() =>
+                // 使用延迟确保窗口完全显示后再强制置顶
+                randWindow.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
@@ -1126,6 +1137,7 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"强制置顶RandWindow失败: {ex.Message}", LogHelper.LogType.Error);
                 }
             }), DispatcherPriority.Loaded);
+            }
         }
 
         public void CheckEraserTypeTab()
@@ -1232,14 +1244,30 @@ namespace Ink_Canvas
                 {
                     MessageBox.Show("无法调用外部点名：" + ex.Message);
 
-                    // 调用失败时回退到默认的随机点名窗口
-                    new RandWindow(Settings, true).ShowDialog();
+                    // 调用失败时回退到相应的点名窗口
+                    if (Settings.RandSettings.UseNewRollCallUI)
+                    {
+                        new NewStyleRollCallWindow(Settings, true).ShowDialog(); // 单次抽模式
+                    }
+                    else
+                    {
+                        new RandWindow(Settings, true).ShowDialog();
+                    }
                 }
             }
             else
             {
-                // 使用默认的随机点名窗口
-                new RandWindow(Settings, true).ShowDialog();
+                // 根据设置决定使用哪个点名窗口
+                if (Settings.RandSettings.UseNewRollCallUI)
+                {
+                    // 使用新点名UI - 单次抽模式
+                    new NewStyleRollCallWindow(Settings, true).ShowDialog();
+                }
+                else
+                {
+                    // 使用默认的随机点名窗口
+                    new RandWindow(Settings, true).ShowDialog();
+                }
             }
         }
 
@@ -1996,8 +2024,6 @@ namespace Ink_Canvas
 
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
-
-            ExitMultiTouchModeIfNeeded();
 
             SetFloatingBarHighlightPosition("pen");
 
@@ -2840,42 +2866,13 @@ namespace Ink_Canvas
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
 
-            CancelSingleFingerDragMode();
-
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
-            // 清空墨迹后模拟用户重新手动开关多指书写功能
-            SimulateMultiTouchToggle();
+            CancelSingleFingerDragMode();
+
         }
 
         private bool lastIsInMultiTouchMode;
-
-        /// <summary>
-        /// 模拟用户重新手动开关多指书写功能
-        /// </summary>
-        private void SimulateMultiTouchToggle()
-        {
-            try
-            {
-                // 检查多指书写模式是否启用
-                if (ToggleSwitchEnableMultiTouchMode != null && ToggleSwitchEnableMultiTouchMode.IsOn)
-                {
-                    // 先关闭多指书写模式
-                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
-
-                    // 使用Dispatcher.BeginInvoke确保UI更新完成后再重新开启
-                    Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        // 重新开启多指书写模式
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
-                    }), DispatcherPriority.Background);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"模拟多指书写开关时发生错误: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
         private void CancelSingleFingerDragMode()
         {
@@ -2885,8 +2882,6 @@ namespace Ink_Canvas
 
             if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
             isLongPressSelected = false;
-
-            ResetTouchStates();
         }
 
         /// <summary>
@@ -2898,17 +2893,6 @@ namespace Ink_Canvas
             {
                 // 清空触摸点计数器
                 dec.Clear();
-
-
-                // 重置单指拖动模式状态
-                if (isSingleFingerDragMode)
-                {
-                    isSingleFingerDragMode = false;
-                    if (BtnFingerDragMode != null)
-                    {
-                        BtnFingerDragMode.Content = "单指\n拖动";
-                    }
-                }
 
                 // 重置手掌擦状态
                 if (isPalmEraserActive)
@@ -3104,7 +3088,15 @@ namespace Ink_Canvas
                         }
 
                         StackPanelPPTButtons.Visibility = Visibility.Collapsed;
-                        Topmost = false;
+                        
+                        if (Settings.Advanced.EnableUIAccessTopMost)
+                        {
+                            Topmost = true;
+                        }
+                        else
+                        {
+                            Topmost = false;
+                        }
                         break;
                 }
             }

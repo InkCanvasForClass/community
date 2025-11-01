@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace Ink_Canvas
 {
@@ -148,6 +149,55 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"程序启动时NTP同步失败: {ex.Message}", LogHelper.LogType.Error);
                 }
             });
+
+            // 初始化定时保存墨迹定时器
+            InitAutoSaveStrokesTimer();
+        }
+
+        // 初始化定时保存墨迹定时器
+        private void InitAutoSaveStrokesTimer()
+        {
+            if (autoSaveStrokesTimer == null)
+            {
+                autoSaveStrokesTimer = new DispatcherTimer();
+                autoSaveStrokesTimer.Tick += AutoSaveStrokesTimer_Tick;
+            }
+
+            // 根据设置更新定时器间隔和启动状态
+            UpdateAutoSaveStrokesTimer();
+        }
+
+        // 更新定时保存墨迹定时器状态
+        private void UpdateAutoSaveStrokesTimer()
+        {
+            if (autoSaveStrokesTimer == null) return;
+
+            autoSaveStrokesTimer.Stop();
+
+            if (Settings.Automation.IsEnableAutoSaveStrokes)
+            {
+                int intervalMinutes = Settings.Automation.AutoSaveStrokesIntervalMinutes;
+                if (intervalMinutes < 1) intervalMinutes = 1; // 最小间隔1分钟
+                autoSaveStrokesTimer.Interval = TimeSpan.FromMinutes(intervalMinutes);
+                autoSaveStrokesTimer.Start();
+            }
+        }
+
+        // 定时保存墨迹定时器事件处理
+        private void AutoSaveStrokesTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                // 只有在画布可见且有墨迹时才保存
+                if (inkCanvas.Visibility == Visibility.Visible && inkCanvas.Strokes.Count > 0)
+                {
+                    // 静默保存
+                    SaveInkCanvasStrokes(false, false);
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
 
         // NTP同步定时器事件处理

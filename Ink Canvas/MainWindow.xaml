@@ -617,7 +617,7 @@
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Name="UIAccessTopMostDescription" Text="# 开启UIA置顶后，软件自动重启置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能" TextWrapping="Wrap" Foreground="#a1a1aa" Visibility="Collapsed" />
+                                    <TextBlock Name="UIAccessTopMostDescription" Text="# 开启UIA置顶后，软件需要管理员启动才能置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能" TextWrapping="Wrap" Foreground="#a1a1aa" Visibility="Collapsed" />
                                     <ui:ToggleSwitch OnContent="" OffContent=""
                                                      Name="ToggleSwitchIsAutoUpdate" Header="自动检查更新"
                                                      FontFamily="Microsoft YaHei UI"
@@ -2824,17 +2824,11 @@
                                                TextWrapping="Wrap" Foreground="#a1a1aa" Margin="0,0,0,8" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
                                         <Button Name="BtnUnregisterFileAssociation" Content="取消文件关联" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnUnregisterFileAssociation_Click"
-                                                Background="#FFDC3545" Foreground="White" BorderBrush="#FFBD2130" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                                Padding="15,5" Margin="0,0,8,0" Click="BtnUnregisterFileAssociation_Click" />
                                         <Button Name="BtnCheckFileAssociation" Content="检查关联状态" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnCheckFileAssociation_Click"
-                                                Background="#FF17A2B8" Foreground="White" BorderBrush="#FF138496" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                                Padding="15,5" Margin="0,0,8,0" Click="BtnCheckFileAssociation_Click" />
                                         <Button Name="BtnRegisterFileAssociation" Content="重新注册关联" 
-                                                Padding="12,6" Click="BtnRegisterFileAssociation_Click"
-                                                Background="#FF28A745" Foreground="White" BorderBrush="#FF1E7E34" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                                Padding="15,5" Click="BtnRegisterFileAssociation_Click" />
                                     </ui:SimpleStackPanel>
                                     <TextBlock Name="TextBlockFileAssociationStatus" Text="" 
                                                Foreground="#a1a1aa" FontSize="12" Margin="0,4,0,0" />
@@ -3084,6 +3078,30 @@
                                     </ui:SimpleStackPanel>
                                     
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="定时自动保存墨迹" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableAutoSaveStrokes" IsOn="False"
+                                                         FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchEnableAutoSaveStrokes_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#a1a1aa" Text="保存间隔" VerticalAlignment="Center"
+                                                   FontSize="12" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxAutoSaveStrokesInterval" Width="120" 
+                                                  SelectionChanged="ComboBoxAutoSaveStrokesInterval_SelectionChanged">
+                                            <ComboBoxItem Content="1分钟" Tag="1" />
+                                            <ComboBoxItem Content="3分钟" Tag="3" />
+                                            <ComboBoxItem Content="5分钟" Tag="5" />
+                                            <ComboBoxItem Content="10分钟" Tag="10" />
+                                            <ComboBoxItem Content="15分钟" Tag="15" />
+                                            <ComboBoxItem Content="30分钟" Tag="30" />
+                                            <ComboBoxItem Content="60分钟" Tag="60" />
+                                        </ComboBox>
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后将在设定时间间隔自动保存墨迹，仅在画布可见且有墨迹时才会保存" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="墨迹全页面保存" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent=""
@@ -3250,6 +3268,15 @@
                                                          Toggled="ToggleSwitchShowRandomAndSingleDraw_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用快抽悬浮按钮"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableQuickDraw"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableQuickDraw_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="直接调用外部点名"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent=""
@@ -3299,6 +3326,62 @@
                                                    FontFamily="Consolas"
                                                    Text="{Binding ElementName=RandWindowOnceMaxStudentsSlider, Path=Value, Converter={StaticResource IntNumberToString}}" />
                                     </ui:SimpleStackPanel>
+                                    
+                                    <!-- 新点名UI设置 -->
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
+                                          Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
+                                    <TextBlock Foreground="#fafafa" Text="新点名UI设置" 
+                                               FontSize="16" FontWeight="Bold" Margin="0,10,0,5" />
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用新点名UI"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchUseNewRollCallUI"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchUseNewRollCallUI_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用机器学习避免重复"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableMLAvoidance"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableMLAvoidance_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="避免重复历史记录数量" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider x:Name="MLAvoidanceHistorySlider" Minimum="5"
+                                                Maximum="50" Width="168" FontFamily="Microsoft YaHei UI"
+                                                ValueChanged="MLAvoidanceHistorySlider_ValueChanged"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="20" TickFrequency="5"
+                                                TickPlacement="None" AutoToolTipPlacement="None" />
+                                        <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
+                                                   FontFamily="Consolas"
+                                                   Text="{Binding ElementName=MLAvoidanceHistorySlider, Path=Value, Converter={StaticResource IntNumberToString}}" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="避免重复权重" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider x:Name="MLAvoidanceWeightSlider" Minimum="0.1"
+                                                Maximum="1.0" Width="168" FontFamily="Microsoft YaHei UI"
+                                                ValueChanged="MLAvoidanceWeightSlider_ValueChanged"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="0.8" TickFrequency="0.1"
+                                                TickPlacement="None" AutoToolTipPlacement="None" />
+                                        <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
+                                                   FontFamily="Consolas"
+                                                   Text="{Binding ElementName=MLAvoidanceWeightSlider, Path=Value, StringFormat={}{0:P0}}" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <TextBlock Text="# 机器学习算法会分析最近的点名历史，智能避免重复选择相同人员" 
+                                               TextWrapping="Wrap" Foreground="#a1a1aa" Margin="0,5,0,0" />
+                                    
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                     <TextBlock Foreground="#fafafa" Text="计时器设置" 
@@ -9369,7 +9452,7 @@
 
                             MouseUp="TwoFingerGestureBorder_MouseUp" Background="Transparent"
                             Orientation="Vertical" HorizontalAlignment="Center" Width="36" Margin="0">
-                            <Image x:Name="EnableTwoFingerGestureBtn" Source="/Resources/new-icons/gesture.png"
+                            <Image x:Name="EnableTwoFingerGestureBtn" Source="{DynamicResource GestureIcon}"
                                    RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="18"
                                    Margin="0,3,0,0" />
                             <TextBlock x:Name="gestureiconText" Text="手势" Foreground="{DynamicResource FloatBarForeground}" FontSize="8"

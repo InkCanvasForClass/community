@@ -1877,6 +1877,29 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchEnableAutoSaveStrokes_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Automation.IsEnableAutoSaveStrokes = ToggleSwitchEnableAutoSaveStrokes.IsOn;
+            SaveSettingsToFile();
+            // 更新定时器状态
+            UpdateAutoSaveStrokesTimer();
+        }
+
+        private void ComboBoxAutoSaveStrokesInterval_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isLoaded || ComboBoxAutoSaveStrokesInterval.SelectedItem == null) return;
+            
+            var selectedItem = ComboBoxAutoSaveStrokesInterval.SelectedItem as System.Windows.Controls.ComboBoxItem;
+            if (selectedItem?.Tag != null && int.TryParse(selectedItem.Tag.ToString(), out int intervalMinutes))
+            {
+                Settings.Automation.AutoSaveStrokesIntervalMinutes = intervalMinutes;
+                SaveSettingsToFile();
+                // 更新定时器间隔
+                UpdateAutoSaveStrokesTimer();
+            }
+        }
+
         #endregion
 
         #region Gesture
@@ -2671,6 +2694,35 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        // 新点名UI设置事件处理
+        private void ToggleSwitchUseNewRollCallUI_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.UseNewRollCallUI = ToggleSwitchUseNewRollCallUI.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableMLAvoidance_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.EnableMLAvoidance = ToggleSwitchEnableMLAvoidance.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void MLAvoidanceHistorySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.MLAvoidanceHistoryCount = (int)MLAvoidanceHistorySlider.Value;
+            SaveSettingsToFile();
+        }
+
+        private void MLAvoidanceWeightSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!isLoaded) return;
+            Settings.RandSettings.MLAvoidanceWeight = MLAvoidanceWeightSlider.Value;
+            SaveSettingsToFile();
+        }
+
         private void ProgressiveReminderVolumeSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2738,6 +2790,20 @@ namespace Ink_Canvas
 
             // 保存设置到文件
             SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchEnableQuickDraw_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            // 获取开关状态并保存到设置中
+            Settings.RandSettings.EnableQuickDraw = ToggleSwitchEnableQuickDraw.IsOn;
+
+            // 保存设置到文件
+            SaveSettingsToFile();
+            
+            // 根据设置状态显示或隐藏快抽悬浮按钮
+            ShowQuickDrawFloatingButton();
         }
 
         private void ToggleSwitchExternalCaller_Toggled(object sender, RoutedEventArgs e)
