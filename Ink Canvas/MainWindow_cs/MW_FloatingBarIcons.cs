@@ -2894,16 +2894,6 @@ namespace Ink_Canvas
                 // 清空触摸点计数器
                 dec.Clear();
 
-                // 重置单指拖动模式状态
-                if (isSingleFingerDragMode)
-                {
-                    isSingleFingerDragMode = false;
-                    if (BtnFingerDragMode != null)
-                    {
-                        BtnFingerDragMode.Content = "单指\n拖动";
-                    }
-                }
-
                 // 重置手掌擦状态
                 if (isPalmEraserActive)
                 {
