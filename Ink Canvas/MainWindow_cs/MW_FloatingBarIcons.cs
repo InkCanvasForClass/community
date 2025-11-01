@@ -80,8 +80,7 @@ namespace Ink_Canvas
                 // 多指书写模式启用时，手势功能被禁用
                 TwoFingerGestureSimpleStackPanel.Opacity = 0.5;
                 TwoFingerGestureSimpleStackPanel.IsHitTestVisible = false;
-                EnableTwoFingerGestureBtn.Source =
-                    new BitmapImage(new Uri("/Resources/new-icons/gesture.png", UriKind.Relative));
+                EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIcon");
 
                 // 根据主题设置颜色
                 if (Settings.Appearance.Theme == 1) // 深色主题
@@ -117,8 +116,7 @@ namespace Ink_Canvas
 
                 if (hasGestureEnabled)
                 {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri("/Resources/new-icons/gesture-enabled.png", UriKind.Relative));
+                    EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIconEnabled");
 
                     BoardGesture.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                     BoardGestureGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -130,8 +128,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri("/Resources/new-icons/gesture.png", UriKind.Relative));
+                    EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIcon");
 
                     // 根据主题设置颜色
                     if (Settings.Appearance.Theme == 1) // 深色主题
@@ -176,11 +173,16 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 在屏幕模式（非放映模式）下，不显示手势按钮
             if (currentMode == 0)
             {
-                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                return;
+                if (GridTransparencyFakeBackground.Background != Brushes.Transparent && isVisible)
+                {
+                }
+                else
+                {
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    return;
+                }
             }
 
             if (StackPanelCanvasControls.Visibility != Visibility.Visible
@@ -2023,8 +2025,6 @@ namespace Ink_Canvas
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
 
-            ExitMultiTouchModeIfNeeded();
-
             SetFloatingBarHighlightPosition("pen");
 
             // 记录当前是否已经是批注模式且是否为高光显示模式
@@ -2866,38 +2866,13 @@ namespace Ink_Canvas
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
 
-            CancelSingleFingerDragMode();
-
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
-            if (Settings.Gesture.IsEnableMultiTouchMode && ToggleSwitchEnableMultiTouchMode != null && ToggleSwitchEnableMultiTouchMode.IsOn)
-            {
-                ReinitializeMultiTouchMode();
-            }
+            CancelSingleFingerDragMode();
+
         }
 
         private bool lastIsInMultiTouchMode;
-
-        private void ReinitializeMultiTouchMode()
-        {
-            try
-            {
-                if (!isInMultiTouchMode)
-                {
-                    isInMultiTouchMode = true;
-                }
-
-                inkCanvas.TouchDown -= Main_Grid_TouchDown;
-                inkCanvas.TouchDown += MainWindow_TouchDown;
-                inkCanvas.StylusDown += MainWindow_StylusDown;
-                inkCanvas.StylusMove += MainWindow_StylusMove;
-                inkCanvas.StylusUp += MainWindow_StylusUp;
-
-            }
-            catch (Exception)
-            {
-            }
-        }
 
         private void CancelSingleFingerDragMode()
         {
@@ -2907,8 +2882,6 @@ namespace Ink_Canvas
 
             if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
             isLongPressSelected = false;
-
-            ResetTouchStates();
         }
 
         /// <summary>
@@ -2920,17 +2893,6 @@ namespace Ink_Canvas
             {
                 // 清空触摸点计数器
                 dec.Clear();
-
-
-                // 重置单指拖动模式状态
-                if (isSingleFingerDragMode)
-                {
-                    isSingleFingerDragMode = false;
-                    if (BtnFingerDragMode != null)
-                    {
-                        BtnFingerDragMode.Content = "单指\n拖动";
-                    }
-                }
 
                 // 重置手掌擦状态
                 if (isPalmEraserActive)

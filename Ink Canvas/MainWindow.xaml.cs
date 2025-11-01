@@ -1853,6 +1853,7 @@ namespace Ink_Canvas
 
         // 添加定时器来维护置顶状态
         private DispatcherTimer topmostMaintenanceTimer;
+        private DispatcherTimer autoSaveStrokesTimer;
         private bool isTopmostMaintenanceEnabled;
 
         private void ApplyNoFocusMode()

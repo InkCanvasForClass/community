@@ -20,21 +20,17 @@
 
 </div>
 
-## 🤔 发生了什么？
+## 💫 软件说明
 
-
-由于众所周知的原因，[DotteringDoge471](https://github.com/DotteringDoge471) 不再积极负责 InkCanvasForClass 旧时代版本的开发与维护工作，而刚好 [CJKmkp](https://github.com/CJKmkp) 又维护了这个社区版本的 icc，经过沟通后就顺理成章地成为了 icc 的官方版本。该分支版本 **目前还在开发之中** ，可能会有潜在的问题/ Bug 出现，请在出现 Bug 后与开发者或与 [DotteringDoge471](https://github.com/DotteringDoge471) 上报，方便我们迅速诊断并解决问题。
-
-> ⚠️ 请注意：[DotteringDoge471](https://github.com/DotteringDoge471) 不积极负责 **本社区版本** 的开发与维护工作，仅会在有空的时候对本项目开发新功能或修复 Bug。因此，任何问题反馈/Bug反馈/建议等，请优先找本项目主要维护者 [CJKmkp](https://github.com/CJKmkp) 反馈或在 GitHub 仓库内提出 Issue！
-
-使用该版本 InkCanvasForClass，意味着您同意自行承担任何可能存在的问题与风险。建议不要在公众场合（例如公开课，录播课，线上直播课，大型会议）使用未经广泛测试和优化的 Beta 版本，对使用 Beta 版本而带来的任何问题和风险（例如：被班主任批斗，被校长处罚，崩溃而导致的场面混乱，全球海平面上升等），**将由使用者自行承担**，[CJKmkp](https://github.com/CJKmkp) 和 [DotteringDoge471](https://github.com/DotteringDoge471) 及其项目的所有维护者不提供任何担保。
+使用该版本 InkCanvasForClass，意味着您同意自行承担任何可能存在的问题与风险。建议不要在公众场合（例如公开课，录播课，线上直播课，大型会议）使用未经广泛测试和优化的 Beta 版本，对使用 Beta 版本而带来的任何问题和风险（例如：被班主任批斗，被校长处罚，崩溃而导致的场面混乱，全球海平面上升等），**将由使用者自行承担**，[CJKmkp](https://github.com/CJKmkp) 及其项目的所有维护者不提供任何担保。
 
 ♥️ **本项目版权归 [CJKmkp](https://github.com/CJKmkp) 所有。[CJKmkp](https://github.com/CJKmkp) 拥有最终解释权。**
 
 **智教联盟 InkCanvasForClass Community Edition 板块：** [forum.smart-teach.cn/t/icc-ce](https://forum.smart-teach.cn/t/icc-ce) ，我们会在此处发布版本更新日志，同时，您也可以在遵守论坛对应管理规则与InkCanvasForClass Community Edition 板块管理条约的情况下，在该板块内提问或发表自己的使用体验。
 
 ## ⚠️ 使用须知
-在使用和分发本软件前，请务必了解相关开源协议。本软件基于 https://github.com/Awesome-Iwb/icc-0610fix 修改而来，而 icc-0610fix 基于 https://github.com/ChangSakura/Ink-Canvas 修改，ica 则基于 https://github.com/WXRIW/Ink-Canvas 修改，增加了包括但不限于隐藏到侧边栏等功能，更改了相关UI和软件操作逻辑。对于墨迹书写功能以及 ica 独有功能的相关问题反馈，建议优先查阅 https://github.com/WXRIW/Ink-Canvas/issues 。**使用前建议戴上大脑使用。**
+
+在使用和分发本软件前，请务必了解相关开源协议。本软件基于 <https://github.com/InkCanvasForClass/icc-20240610-stable> 修改而来，而 icc-20240610-stable 基于 <https://github.com/ChangSakura/Ink-Canvas> 修改，ica 则基于 <https://github.com/WXRIW/Ink-Canvas> 修改，增加了包括但不限于隐藏到侧边栏等功能，更改了相关UI和软件操作逻辑。对于墨迹书写功能以及 ica 独有功能的相关问题反馈，建议优先查阅 <https://github.com/WXRIW/Ink-Canvas/issues> 。**使用前建议戴上大脑使用。**
 
 # 💬 提示
 - 对于新功能的有效意见和合理建议，开发者会适时回复并进行开发。本软件并非商业性质软件或由营利性机构驱动，请不要催促开发者，耐心等待能让功能少些Bug，更加稳定。
@@ -62,12 +58,7 @@
 
 如果仍无法运行，请[安装 `Microsoft Office`](https://www.coolhub.top/archives/11)。
 
-### 程序能在 Wine 环境中运行吗？
-不能，但是你可以期待 icc-gtk4，是正在开发的仅支持 Linux 平台的 icc 移植版本。
-
 ## ✏️ 贡献指南
-
-请前往 InkCanvasForClass/dubious-notes
 
 **请注意，在贡献代码时，_务必_ 将所有代码提交到 _beta_ 分支，以保证beta版本总是新于main版本。**
 
@@ -105,13 +96,12 @@
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## 🤝 感谢
-感谢 [DotteringDoge471](https://github.com/DotteringDoge471) 创造了 `InkCanvasForClass`！   
+ 
 感谢 [yuwenhui2020](https://github.com/yuwenhui2020) 为 `Ink Canvas 使用说明` 做出的贡献！  
-感谢 [CN-Ironegg](https://github.com/CN-Ironegg)、[jiajiaxd](https://github.com/jiajiaxd)、[Kengwang](https://github.com/kengwang)、[Raspberry Kan](https://github.com/Raspberry-Monster)、[clover-yan](https://github.com/clover-yan)、[STBBRD](https://github.com/STBBRD)、[ChangSakura](https://github.com/WuChanging)、[DotteringDoge471](https://github.com/DotteringDoge471) 为本项目贡献代码！  
+感谢 [CN-Ironegg](https://github.com/CN-Ironegg)、[jiajiaxd](https://github.com/jiajiaxd)、[Kengwang](https://github.com/kengwang)、[Raspberry Kan](https://github.com/Raspberry-Monster)、[clover-yan](https://github.com/clover-yan)、[STBBRD](https://github.com/STBBRD)、[ChangSakura](https://github.com/WuChanging) 为本项目贡献代码！  
 
 ## License
 GPLv3
 
 ## 项目引用
 [Alan-CRL/DesktopDrawpadBlocker](https://github.com/Alan-CRL/DesktopDrawpadBlocker)  
-[Awesome-Iwb/iwbicons-gallery](https://github.com/awesome-iwb/awesome-iwb/wiki/iwbicons-gallery)「本项目部分图标来自 Awesome Iwb 的 IwbIcons 图标库，由 Douxiba 制作。」
