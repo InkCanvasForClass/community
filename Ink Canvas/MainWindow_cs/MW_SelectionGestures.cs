@@ -354,6 +354,7 @@ namespace Ink_Canvas
 
         private void BtnSelect_Click(object sender, RoutedEventArgs e)
         {
+            ExitMultiTouchModeIfNeeded();
             forceEraser = true;
             drawingShapeMode = 0;
             inkCanvas.IsManipulationEnabled = false;
