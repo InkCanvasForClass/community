@@ -396,7 +396,7 @@ namespace Ink_Canvas.Windows
                     if (month >= 2 && month <= 4) return GetImageNameByStyle(2); // 春季
                     if (month >= 5 && month <= 7) return GetImageNameByStyle(3); // 夏季
                     if (month >= 8 && month <= 10) return GetImageNameByStyle(4); // 秋季
-                    if (month >= 11 || month <= 1) return GetImageNameByStyle(5); // 冬季
+                    return GetImageNameByStyle(5); // 冬季
 
                 case 2: // 春季
                     return "ICC Spring.png";
