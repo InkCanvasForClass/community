@@ -2824,17 +2824,11 @@
                                                TextWrapping="Wrap" Foreground="#a1a1aa" Margin="0,0,0,8" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
                                         <Button Name="BtnUnregisterFileAssociation" Content="取消文件关联" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnUnregisterFileAssociation_Click"
-                                                Background="#FFDC3545" Foreground="White" BorderBrush="#FFBD2130" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                                Padding="15,5" Margin="0,0,8,0" Click="BtnUnregisterFileAssociation_Click" />
                                         <Button Name="BtnCheckFileAssociation" Content="检查关联状态" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnCheckFileAssociation_Click"
-                                                Background="#FF17A2B8" Foreground="White" BorderBrush="#FF138496" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                                Padding="15,5" Margin="0,0,8,0" Click="BtnCheckFileAssociation_Click" />
                                         <Button Name="BtnRegisterFileAssociation" Content="重新注册关联" 
-                                                Padding="12,6" Click="BtnRegisterFileAssociation_Click"
-                                                Background="#FF28A745" Foreground="White" BorderBrush="#FF1E7E34" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                                Padding="15,5" Click="BtnRegisterFileAssociation_Click" />
                                     </ui:SimpleStackPanel>
                                     <TextBlock Name="TextBlockFileAssociationStatus" Text="" 
                                                Foreground="#a1a1aa" FontSize="12" Margin="0,4,0,0" />
