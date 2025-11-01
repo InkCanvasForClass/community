@@ -708,6 +708,7 @@ namespace Ink_Canvas
 
         private void LassoSelect_Click(object sender, RoutedEventArgs e)
         {
+            ExitMultiTouchModeIfNeeded();
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;
@@ -718,6 +719,7 @@ namespace Ink_Canvas
 
         private void BtnLassoSelect_Click(object sender, RoutedEventArgs e)
         {
+            ExitMultiTouchModeIfNeeded();
             forceEraser = false;
             forcePointEraser = false;
             drawingShapeMode = 0;
