@@ -342,57 +342,59 @@
                                                        Foreground="{DynamicResource NewRollCallWindowButtonForeground}" 
                                                        HorizontalAlignment="Center" Margin="0,0,0,10"/>
                                             
-                                            <!-- 外部点名类型切换 -->
-                                            <Border Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                                    CornerRadius="8" 
-                                                    BorderThickness="1"
-                                                    BorderBrush="#616161"
-                                                    Width="360" Height="40">
-                                                <Grid>
-                                                    <!-- 背景指示器 -->
-                                                    <Border x:Name="ExternalCallerIndicator" 
-                                                            Background="{DynamicResource NewRollCallWindowPrimaryButtonBackground}" 
-                                                            CornerRadius="7.5,0,0,7.5" 
-                                                            Width="120" Height="38" 
-                                                            HorizontalAlignment="Left" 
-                                                            VerticalAlignment="Center" 
-                                                            Margin="0,0,0,0"/>
-                                                    
-                                                    <!-- 按钮容器 -->
+                                            <!-- 外部点名模式选择 -->
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="10"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                
+                                                <!-- 外部点名模式Tab -->
+                                                <Border Grid.Column="0"
+                                                        Background="{DynamicResource NewRollCallWindowButtonBackground}" 
+                                                        CornerRadius="8" 
+                                                        BorderThickness="1"
+                                                        BorderBrush="#616161"
+                                                        Width="100" Height="40">
                                                     <Grid>
-                                                        <Button x:Name="ClassIslandBtn" 
-                                                                Width="120" Height="40" 
+                                                        <!-- 背景指示器 -->
+                                                        <Border x:Name="ExternalCallerModeIndicator" 
+                                                                Background="{DynamicResource NewRollCallWindowPrimaryButtonBackground}" 
+                                                                CornerRadius="7.5" 
+                                                                Width="100" Height="38" 
+                                                                HorizontalAlignment="Left" 
+                                                                VerticalAlignment="Center" 
+                                                                Margin="0,0,0,0"
+                                                                Visibility="Collapsed"/>
+                                                        
+                                                        <!-- 按钮容器 -->
+                                                        <Button x:Name="ExternalCallerModeBtn" 
+                                                                Width="100" Height="40" 
                                                                 Background="Transparent" 
                                                                 BorderThickness="0" 
-                                                                Click="ClassIsland_Click" 
-                                                                Cursor="Hand" 
-                                                                HorizontalAlignment="Left">
-                                                            <TextBlock x:Name="ClassIslandText" Text="ClassIsland" FontSize="16" FontWeight="Bold" 
-                                                                       Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
-                                                        </Button>
-                                                        <Button x:Name="SecRandomBtn" 
-                                                                Width="120" Height="40" 
-                                                                Background="Transparent" 
-                                                                BorderThickness="0" 
-                                                                Click="SecRandom_Click" 
-                                                                Cursor="Hand" 
-                                                                HorizontalAlignment="Center">
-                                                            <TextBlock x:Name="SecRandomText" Text="SecRandom" FontSize="16" FontWeight="Normal" 
-                                                                       Foreground="{DynamicResource NewRollCallWindowButtonForeground}" Opacity="0.6"/>
-                                                        </Button>
-                                                        <Button x:Name="NamePickerBtn" 
-                                                                Width="120" Height="40" 
-                                                                Background="Transparent" 
-                                                                BorderThickness="0" 
-                                                                Click="NamePicker_Click" 
-                                                                Cursor="Hand" 
-                                                                HorizontalAlignment="Right">
-                                                            <TextBlock x:Name="NamePickerText" Text="NamePicker" FontSize="16" FontWeight="Normal" 
+                                                                Click="ExternalCallerMode_Click" 
+                                                                Cursor="Hand">
+                                                            <TextBlock x:Name="ExternalCallerModeText" Text="外部点名" FontSize="16" FontWeight="Normal" 
                                                                        Foreground="{DynamicResource NewRollCallWindowButtonForeground}" Opacity="0.6"/>
                                                         </Button>
                                                     </Grid>
-                                                </Grid>
-                                            </Border>
+                                                </Border>
+                                                
+                                                <!-- 外部点名类型下拉框 -->
+                                                <ComboBox x:Name="ExternalCallerTypeComboBox"
+                                                          Grid.Column="2"
+                                                          Width="160" Height="40"
+                                                          IsEditable="False"
+                                                          IsReadOnly="True"
+                                                          SelectedIndex="0"
+                                                          Foreground="{DynamicResource NewRollCallWindowButtonForeground}"
+                                                          SelectionChanged="ExternalCallerTypeComboBox_SelectionChanged">
+                                                    <ComboBoxItem Content="ClassIsland" IsSelected="True"/>
+                                                    <ComboBoxItem Content="SecRandom"/>
+                                                    <ComboBoxItem Content="NamePicker"/>
+                                                </ComboBox>
+                                            </Grid>
                                         </StackPanel>
                                     </Grid>
 
@@ -447,29 +449,6 @@
                         <!-- 底部控制按钮区域 -->
                         <Grid HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20">
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <!-- 外部点名按钮 -->
-                                <Button x:Name="ExternalCallerBtn" Width="140" Height="60" 
-                                        Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                        BorderThickness="0" Click="ExternalCaller_Click" Cursor="Hand" Margin="0,0,20,0">
-                                    <Button.Template>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="30">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Button.Template>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Path Data="M9 15L15 9 M11 6L11.463 5.464C12.4008 4.52633 13.6727 3.9996 14.9989 3.99969C16.325 3.99979 17.5968 4.52669 18.5345 5.4645C19.4722 6.40231 19.9989 7.67419 19.9988 9.00035C19.9987 10.3265 19.4718 11.5983 18.534 12.536L18 13 M13.0001 18L12.6031 18.534C11.6544 19.4722 10.3739 19.9984 9.03964 19.9984C7.70535 19.9984 6.42489 19.4722 5.47614 18.534C5.0085 18.0716 4.63724 17.521 4.38385 16.9141C4.13047 16.3073 4 15.6561 4 14.9985C4 14.3408 4.13047 13.6897 4.38385 13.0829C4.63724 12.476 5.0085 11.9254 5.47614 11.463L6.00014 11" 
-                                              Stroke="{DynamicResource NewRollCallWindowButtonForeground}" 
-                                              StrokeThickness="2" 
-                                              Fill="Transparent" 
-                                              Width="20" Height="20" 
-                                              Stretch="Uniform" 
-                                              Margin="0,0,8,0"/>
-                                        <TextBlock Text="外部点名" FontSize="18" FontWeight="Bold" 
-                                                   Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
-                                    </StackPanel>
-                                </Button>
                                 <!-- 开始点名按钮 -->
                                 <Button x:Name="StartRollCallBtn" Width="140" Height="60" Background="{DynamicResource NewRollCallWindowPrimaryButtonBackground}" 
                                         BorderThickness="0" Click="StartRollCall_Click" Cursor="Hand" Margin="0,0,20,0">
@@ -481,14 +460,14 @@
                                         </ControlTemplate>
                                     </Button.Template>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <Path Data="M5 7C5 8.06087 5.42143 9.07828 6.17157 9.82843C6.92172 10.5786 7.93913 11 9 11C10.0609 11 11.0783 10.5786 11.8284 9.82843C12.5786 9.07828 13 8.06087 13 7C13 5.93913 12.5786 4.92172 11.8284 4.17157C11.0783 3.42143 10.0609 3 9 3C7.93913 3 6.92172 3.42143 6.17157 4.17157C5.42143 4.92172 5 5.93913 5 7Z M3 21V19C3 17.9391 3.42143 16.9217 4.17157 16.1716C4.92172 15.4214 5.93913 15 7 15H11C12.0609 15 13.0783 15.4214 13.8284 16.1716C14.5786 16.9217 15 17.9391 15 19V21 M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88 M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15" 
+                                        <Path x:Name="StartRollCallBtnIcon" Data="M5 7C5 8.06087 5.42143 9.07828 6.17157 9.82843C6.92172 10.5786 7.93913 11 9 11C10.0609 11 11.0783 10.5786 11.8284 9.82843C12.5786 9.07828 13 8.06087 13 7C13 5.93913 12.5786 4.92172 11.8284 4.17157C11.0783 3.42143 10.0609 3 9 3C7.93913 3 6.92172 3.42143 6.17157 4.17157C5.42143 4.92172 5 5.93913 5 7Z M3 21V19C3 17.9391 3.42143 16.9217 4.17157 16.1716C4.92172 15.4214 5.93913 15 7 15H11C12.0609 15 13.0783 15.4214 13.8284 16.1716C14.5786 16.9217 15 17.9391 15 19V21 M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88 M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15" 
                                               Stroke="{DynamicResource NewRollCallWindowPrimaryButtonForeground}" 
                                               StrokeThickness="2" 
                                               Fill="Transparent" 
                                               Width="20" Height="20" 
                                               Stretch="Uniform" 
                                               Margin="0,0,8,0"/>
-                                        <TextBlock Text="开始点名" FontSize="18" FontWeight="Bold" 
+                                        <TextBlock x:Name="StartRollCallBtnText" Text="开始点名" FontSize="18" FontWeight="Bold" 
                                                    Foreground="{DynamicResource NewRollCallWindowPrimaryButtonForeground}"/>
                                     </StackPanel>
                                 </Button>

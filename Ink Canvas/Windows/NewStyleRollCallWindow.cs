@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Media;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -143,6 +142,17 @@ namespace Ink_Canvas
         // 点名模式
         private string selectedRollCallMode = "Random"; // 默认随机点名
         
+        // 外部点名相关
+        private string selectedExternalCaller = "ClassIsland";
+        
+        // 开始点名按钮的数据
+        private string originalStartBtnIconData = "M5 7C5 8.06087 5.42143 9.07828 6.17157 9.82843C6.92172 10.5786 7.93913 11 9 11C10.0609 11 11.0783 10.5786 11.8284 9.82843C12.5786 9.07828 13 8.06087 13 7C13 5.93913 12.5786 4.92172 11.8284 4.17157C11.0783 3.42143 10.0609 3 9 3C7.93913 3 6.92172 3.42143 6.17157 4.17157C5.42143 4.92172 5 5.93913 5 7Z M3 21V19C3 17.9391 3.42143 16.9217 4.17157 16.1716C4.92172 15.4214 5.93913 15 7 15H11C12.0609 15 13.0783 15.4214 13.8284 16.1716C14.5786 16.9217 15 17.9391 15 19V21 M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88 M21 21V19C20.9949 18.1172 20.6979 17.2608 20.1553 16.5644C19.6126 15.868 18.8548 15.3707 18 15.15";
+        private string originalStartBtnText = "开始点名";
+        
+        // 外部点名按钮的数据
+        private string externalCallerBtnIconData = "M9 15L15 9 M11 6L11.463 5.464C12.4008 4.52633 13.6727 3.9996 14.9989 3.99969C16.325 3.99979 17.5968 4.52669 18.5345 5.4645C19.4722 6.40231 19.9989 7.67419 19.9988 9.00035C19.9987 10.3265 19.4718 11.5983 18.534 12.536L18 13 M13.0001 18L12.6031 18.534C11.6544 19.4722 10.3739 19.9984 9.03964 19.9984C7.70535 19.9984 6.42489 19.4722 5.47614 18.534C5.0085 18.0716 4.63724 17.521 4.38385 16.9141C4.13047 16.3073 4 15.6561 4 14.9985C4 14.3408 4.13047 13.6897 4.38385 13.0829C4.63724 12.476 5.0085 11.9254 5.47614 11.463L6.00014 11";
+        private string externalCallerBtnText = "外部点名";
+        
         // JSON文件路径
         private static readonly string ConfigsFolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs");
         private static readonly string RollCallHistoryJsonPath = System.IO.Path.Combine(ConfigsFolder, "RollCallHistory.json");
@@ -199,7 +209,12 @@ namespace Ink_Canvas
         {
             try
             {
-                SetExternalCallerSelection("ClassIsland");
+                // 初始化下拉框选择
+                if (ExternalCallerTypeComboBox != null)
+                {
+                    ExternalCallerTypeComboBox.SelectedIndex = 0; // 默认选择ClassIsland
+                    selectedExternalCaller = "ClassIsland";
+                }
             }
             catch (Exception ex)
             {
@@ -872,6 +887,13 @@ namespace Ink_Canvas
                 GroupModeText.FontWeight = FontWeights.Normal;
                 GroupModeText.Opacity = 0.6;
                 GroupModeText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+                
+                // 重置外部点名模式按钮状态
+                ExternalCallerModeText.FontWeight = FontWeights.Normal;
+                ExternalCallerModeText.Opacity = 0.6;
+                ExternalCallerModeText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
+                ExternalCallerModeIndicator.Visibility = Visibility.Collapsed;
+                SegmentedIndicator.Visibility = Visibility.Visible;
 
                 // 设置选中状态和动画
                 switch (mode)
@@ -889,6 +911,8 @@ namespace Ink_Canvas
                             TimeSpan.FromMilliseconds(200));
                         SegmentedIndicator.BeginAnimation(Border.MarginProperty, randomAnimation);
                         
+                        // 恢复开始点名按钮的原始图标和文字
+                        RestoreStartRollCallButton();
                         UpdateStatusDisplay("已选择点名模式: 随机点名");
                         break;
                     case "Sequential":
@@ -904,6 +928,8 @@ namespace Ink_Canvas
                             TimeSpan.FromMilliseconds(200));
                         SegmentedIndicator.BeginAnimation(Border.MarginProperty, sequentialAnimation);
                         
+                        // 恢复开始点名按钮的原始图标和文字
+                        RestoreStartRollCallButton();
                         UpdateStatusDisplay("已选择点名模式: 顺序点名");
                         break;
                     case "Group":
@@ -919,13 +945,90 @@ namespace Ink_Canvas
                             TimeSpan.FromMilliseconds(200));
                         SegmentedIndicator.BeginAnimation(Border.MarginProperty, groupAnimation);
                         
+                        // 恢复开始点名按钮的原始图标和文字
+                        RestoreStartRollCallButton();
                         UpdateStatusDisplay("已选择点名模式: 分组点名");
+                        break;
+                    case "External":
+                        // 外部点名模式
+                        ExternalCallerModeText.FontWeight = FontWeights.Bold;
+                        ExternalCallerModeText.Opacity = 1.0;
+                        ExternalCallerModeText.Foreground = new SolidColorBrush(Colors.White);
+                        ExternalCallerModeIndicator.Visibility = Visibility.Visible;
+                        
+                        // 隐藏其他模式的指示器
+                        SegmentedIndicator.Visibility = Visibility.Collapsed;
+                        
+                        // 切换到外部点名按钮的图标和文字
+                        UpdateStartRollCallButtonForExternal();
+                        UpdateStatusDisplay($"已选择点名模式: 外部点名 ({selectedExternalCaller})");
                         break;
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"设置点名模式选择时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 更新开始点名按钮为外部点名样式
+        /// </summary>
+        private void UpdateStartRollCallButtonForExternal()
+        {
+            try
+            {
+                // 更新图标
+                if (StartRollCallBtnIcon != null)
+                {
+                    StartRollCallBtnIcon.Data = Geometry.Parse(externalCallerBtnIconData);
+                    // 外部点名使用按钮前景色而不是主按钮前景色
+                    StartRollCallBtnIcon.Stroke = (Brush)FindResource("NewRollCallWindowButtonForeground");
+                }
+                
+                // 更新文字
+                if (StartRollCallBtnText != null)
+                {
+                    StartRollCallBtnText.Text = externalCallerBtnText;
+                    StartRollCallBtnText.Foreground = (Brush)FindResource("NewRollCallWindowButtonForeground");
+                }
+                
+                // 更新按钮背景色为普通按钮背景
+                StartRollCallBtn.Background = (Brush)FindResource("NewRollCallWindowButtonBackground");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新开始点名按钮为外部点名样式时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+        
+        /// <summary>
+        /// 恢复开始点名按钮的原始样式
+        /// </summary>
+        private void RestoreStartRollCallButton()
+        {
+            try
+            {
+                // 恢复图标
+                if (StartRollCallBtnIcon != null)
+                {
+                    StartRollCallBtnIcon.Data = Geometry.Parse(originalStartBtnIconData);
+                    StartRollCallBtnIcon.Stroke = (Brush)FindResource("NewRollCallWindowPrimaryButtonForeground");
+                }
+                
+                // 恢复文字
+                if (StartRollCallBtnText != null)
+                {
+                    StartRollCallBtnText.Text = originalStartBtnText;
+                    StartRollCallBtnText.Foreground = (Brush)FindResource("NewRollCallWindowPrimaryButtonForeground");
+                }
+                
+                // 恢复按钮背景色为主按钮背景
+                StartRollCallBtn.Background = (Brush)FindResource("NewRollCallWindowPrimaryButtonBackground");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"恢复开始点名按钮原始样式时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -944,8 +1047,32 @@ namespace Ink_Canvas
             SetModeSelection("Group");
         }
 
-        private static bool isExternalCallerFirstClick = true;
-        private string selectedExternalCaller = "ClassIsland"; 
+        private void ExternalCallerMode_Click(object sender, RoutedEventArgs e)
+        {
+            SetModeSelection("External");
+        }
+
+        private void ExternalCallerTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (ExternalCallerTypeComboBox.SelectedItem is ComboBoxItem selectedItem)
+                {
+                    selectedExternalCaller = selectedItem.Content.ToString();
+                    
+                    if (selectedRollCallMode == "External")
+                    {
+                        UpdateStatusDisplay($"已选择外部点名: {selectedExternalCaller}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"外部点名类型选择更改时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private static bool isExternalCallerFirstClick = true; 
 
         private void ExternalCaller_Click(object sender, RoutedEventArgs e)
         {
@@ -993,97 +1120,16 @@ namespace Ink_Canvas
             }
         }
 
-        private void ClassIsland_Click(object sender, RoutedEventArgs e)
-        {
-            SetExternalCallerSelection("ClassIsland");
-        }
-
-        private void SecRandom_Click(object sender, RoutedEventArgs e)
-        {
-            SetExternalCallerSelection("SecRandom");
-        }
-
-        private void NamePicker_Click(object sender, RoutedEventArgs e)
-        {
-            SetExternalCallerSelection("NamePicker");
-        }
-
-        private void SetExternalCallerSelection(string caller)
-        {
-            try
-            {
-                // 重置所有按钮状态
-                ClassIslandText.FontWeight = FontWeights.Normal;
-                ClassIslandText.Opacity = 0.6;
-                ClassIslandText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-                SecRandomText.FontWeight = FontWeights.Normal;
-                SecRandomText.Opacity = 0.6;
-                SecRandomText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-                NamePickerText.FontWeight = FontWeights.Normal;
-                NamePickerText.Opacity = 0.6;
-                NamePickerText.Foreground = new SolidColorBrush(Color.FromRgb(102, 102, 102));
-
-                // 设置选中状态和动画
-                switch (caller)
-                {
-                    case "ClassIsland":
-                        ClassIslandText.FontWeight = FontWeights.Bold;
-                        ClassIslandText.Opacity = 1.0;
-                        ClassIslandText.Foreground = new SolidColorBrush(Colors.White);
-                        ExternalCallerIndicator.HorizontalAlignment = HorizontalAlignment.Left;
-                        ExternalCallerIndicator.CornerRadius = new CornerRadius(7.5, 0, 0, 7.5);
-                        
-                        // 添加动画效果
-                        var classIslandAnimation = new System.Windows.Media.Animation.ThicknessAnimation(
-                            new Thickness(0, 0, 0, 0),
-                            TimeSpan.FromMilliseconds(200));
-                        ExternalCallerIndicator.BeginAnimation(Border.MarginProperty, classIslandAnimation);
-                        
-                        selectedExternalCaller = "ClassIsland";
-                        UpdateStatusDisplay("已选择外部点名: ClassIsland");
-                        break;
-                    case "SecRandom":
-                        SecRandomText.FontWeight = FontWeights.Bold;
-                        SecRandomText.Opacity = 1.0;
-                        SecRandomText.Foreground = new SolidColorBrush(Colors.White);
-                        ExternalCallerIndicator.HorizontalAlignment = HorizontalAlignment.Left;
-                        ExternalCallerIndicator.CornerRadius = new CornerRadius(0, 0, 0, 0);
-                        
-                        // 添加动画效果
-                        var secRandomAnimation = new System.Windows.Media.Animation.ThicknessAnimation(
-                            new Thickness(120, 0, 0, 0),
-                            TimeSpan.FromMilliseconds(200));
-                        ExternalCallerIndicator.BeginAnimation(Border.MarginProperty, secRandomAnimation);
-                        
-                        selectedExternalCaller = "SecRandom";
-                        UpdateStatusDisplay("已选择外部点名: SecRandom");
-                        break;
-                    case "NamePicker":
-                        NamePickerText.FontWeight = FontWeights.Bold;
-                        NamePickerText.Opacity = 1.0;
-                        NamePickerText.Foreground = new SolidColorBrush(Colors.White);
-                        ExternalCallerIndicator.HorizontalAlignment = HorizontalAlignment.Left;
-                        ExternalCallerIndicator.CornerRadius = new CornerRadius(0, 7.5, 7.5, 0);
-                        
-                        // 添加动画效果
-                        var namePickerAnimation = new System.Windows.Media.Animation.ThicknessAnimation(
-                            new Thickness(240, 0, 0, 0),
-                            TimeSpan.FromMilliseconds(200));
-                        ExternalCallerIndicator.BeginAnimation(Border.MarginProperty, namePickerAnimation);
-                        
-                        selectedExternalCaller = "NamePicker";
-                        UpdateStatusDisplay("已选择外部点名: NamePicker");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"设置外部点名选择时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
         private void StartRollCall_Click(object sender, RoutedEventArgs e)
         {
+            // 如果是外部点名模式，调用外部点名
+            if (selectedRollCallMode == "External")
+            {
+                ExternalCaller_Click(sender, e);
+                return;
+            }
+            
             if (isSingleDrawMode)
             {
                 // 单次抽模式：直接开始抽选
