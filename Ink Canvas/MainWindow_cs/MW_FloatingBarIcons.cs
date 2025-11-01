@@ -2873,6 +2873,8 @@ namespace Ink_Canvas
 
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
+            CancelSingleFingerDragMode();
+
         }
 
         private bool lastIsInMultiTouchMode;
@@ -2885,8 +2887,6 @@ namespace Ink_Canvas
 
             if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
             isLongPressSelected = false;
-
-            ResetTouchStates();
         }
 
         /// <summary>
