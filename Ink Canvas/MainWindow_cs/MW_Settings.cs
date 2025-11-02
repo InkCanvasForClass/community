@@ -2728,8 +2728,8 @@ namespace Ink_Canvas
 
             if (ToggleSwitchEnableOvertimeRedText.IsOn && !ToggleSwitchEnableOvertimeCountUp.IsOn)
             {
-                ToggleSwitchEnableOvertimeRedText.IsOn = false;
-                return;
+                ToggleSwitchEnableOvertimeCountUp.IsOn = true;
+                Settings.RandSettings.EnableOvertimeCountUp = true;
             }
             
             Settings.RandSettings.EnableOvertimeRedText = ToggleSwitchEnableOvertimeRedText.IsOn;
