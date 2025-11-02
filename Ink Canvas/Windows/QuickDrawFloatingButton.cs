@@ -14,6 +14,10 @@ namespace Ink_Canvas
     /// </summary>
     public partial class QuickDrawFloatingButton : Window
     {
+        private bool isDragging = false;
+        private Point dragStartPoint;
+        private Point windowStartPoint;
+
         public QuickDrawFloatingButton()
         {
             InitializeComponent();
@@ -62,6 +66,9 @@ namespace Ink_Canvas
         {
             try
             {
+                // 如果正在拖动，不触发点击事件
+                if (isDragging) return;
+                
                 // 打开快抽窗口
                 var quickDrawWindow = new QuickDrawWindow();
                 quickDrawWindow.ShowDialog();
@@ -70,6 +77,68 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"打开快抽窗口失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        private void DragArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            isDragging = false;
+            // 记录鼠标在屏幕上的初始位置
+            dragStartPoint = this.PointToScreen(e.GetPosition(this));
+            // 记录窗口的初始位置
+            windowStartPoint = new Point(this.Left, this.Top);
+            ((UIElement)sender).CaptureMouse();
+            e.Handled = true;
+        }
+
+        private void DragArea_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && ((UIElement)sender).IsMouseCaptured)
+            {
+                // 获取鼠标在屏幕上的当前位置
+                Point currentScreenPoint = this.PointToScreen(e.GetPosition(this));
+                Vector diff = currentScreenPoint - dragStartPoint;
+                
+                if (!isDragging && (Math.Abs(diff.X) > 3 || Math.Abs(diff.Y) > 3))
+                {
+                    isDragging = true;
+                }
+                
+                if (isDragging)
+                {
+                    // 使用窗口初始位置加上鼠标移动的距离
+                    double newLeft = windowStartPoint.X + diff.X;
+                    double newTop = windowStartPoint.Y + diff.Y;
+                    
+                    // 限制在屏幕范围内
+                    var workingArea = SystemParameters.WorkArea;
+                    newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width));
+                    newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height));
+                    
+                    this.Left = newLeft;
+                    this.Top = newTop;
+                }
+            }
+        }
+
+        private void DragArea_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (((UIElement)sender).IsMouseCaptured)
+            {
+                ((UIElement)sender).ReleaseMouseCapture();
+            }
+            
+            // 延迟重置拖动状态，避免触发点击事件
+            if (isDragging)
+            {
+                Dispatcher.BeginInvoke(new Action(() => { isDragging = false; }), 
+                    DispatcherPriority.Background);
+            }
+            else
+            {
+                isDragging = false;
+            }
+            
+            e.Handled = true;
         }
 
 
