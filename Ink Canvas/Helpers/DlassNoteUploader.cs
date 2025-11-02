@@ -1,9 +1,11 @@
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ink_Canvas.Helpers
@@ -15,6 +17,17 @@ namespace Ink_Canvas.Helpers
     {
         private const string APP_ID = "app_WkjocWqsrVY7T6zQV2CfiA";
         private const string APP_SECRET = "o7dx5b5ASGUMcM72PCpmRQYAhSijqaOVHoGyBK0IxbA";
+        private const int BATCH_SIZE = 10; // 批量上传大小
+
+        /// <summary>
+        /// 上传队列（线程安全）
+        /// </summary>
+        private static readonly ConcurrentQueue<string> _uploadQueue = new ConcurrentQueue<string>();
+
+        /// <summary>
+        /// 队列处理锁，防止并发处理
+        /// </summary>
+        private static readonly SemaphoreSlim _queueProcessingLock = new SemaphoreSlim(1, 1);
 
         /// <summary>
         /// 上传笔记响应模型
@@ -80,18 +93,8 @@ namespace Ink_Canvas.Helpers
         /// 异步上传笔记文件到Dlass（支持PNG和ICSTK格式）
         /// </summary>
         /// <param name="filePath">文件路径（支持PNG和ICSTK）</param>
-        /// <returns>是否上传成功</returns>
+        /// <returns>是否成功加入队列（不等待实际上传完成）</returns>
         public static async Task<bool> UploadNoteFileAsync(string filePath)
-        {
-            return await UploadPngNoteAsync(filePath);
-        }
-
-        /// <summary>
-        /// 异步上传PNG文件到Dlass
-        /// </summary>
-        /// <param name="pngFilePath">PNG文件路径</param>
-        /// <returns>是否上传成功</returns>
-        public static async Task<bool> UploadPngNoteAsync(string pngFilePath)
         {
             try
             {
@@ -101,91 +104,267 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
 
-                // 检查文件是否存在
-                if (!File.Exists(pngFilePath))
+                // 基本验证
+                if (!File.Exists(filePath))
                 {
-                    LogHelper.WriteLogToFile($"上传失败：文件不存在 - {pngFilePath}", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"上传失败：文件不存在 - {filePath}", LogHelper.LogType.Error);
                     return false;
                 }
 
-                // 检查文件扩展名
-                var fileExtension = Path.GetExtension(pngFilePath).ToLower();
+                var fileExtension = Path.GetExtension(filePath).ToLower();
                 if (fileExtension != ".png" && fileExtension != ".icstk")
                 {
-                    LogHelper.WriteLogToFile($"上传失败：不支持的文件格式 - {fileExtension}，仅支持PNG和ICSTK", LogHelper.LogType.Error);
                     return false;
                 }
 
-                // 检查文件大小（最大10MB）
-                var fileInfo = new FileInfo(pngFilePath);
+                var fileInfo = new FileInfo(filePath);
                 if (fileInfo.Length > 10 * 1024 * 1024)
                 {
                     LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过10MB限制", LogHelper.LogType.Error);
                     return false;
                 }
 
-                // 获取设置的班级名称
-                var selectedClassName = MainWindow.Settings?.Dlass?.SelectedClassName;
-                if (string.IsNullOrEmpty(selectedClassName))
+                // 获取上传延迟时间（分钟）
+                var delayMinutes = MainWindow.Settings?.Dlass?.AutoUploadDelayMinutes ?? 0;
+
+                // 如果设置了延迟时间，在后台任务中等待后再加入队列
+                if (delayMinutes > 0)
                 {
-                    LogHelper.WriteLogToFile("上传失败：未选择班级", LogHelper.LogType.Error);
-                    return false;
+                    _ = Task.Run(async () =>
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(delayMinutes));
+                        EnqueueFile(filePath);
+                    });
+                }
+                else
+                {
+                    EnqueueFile(filePath);
                 }
 
-                // 获取用户Token
-                var userToken = MainWindow.Settings?.Dlass?.UserToken;
-                if (string.IsNullOrEmpty(userToken))
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"加入上传队列时出错: {ex.Message}", LogHelper.LogType.Error);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 将文件加入上传队列
+        /// </summary>
+        private static void EnqueueFile(string filePath)
+        {
+            _uploadQueue.Enqueue(filePath);
+
+            // 如果队列达到批量大小，触发批量上传
+            if (_uploadQueue.Count >= BATCH_SIZE)
+            {
+                _ = ProcessUploadQueueAsync();
+            }
+        }
+
+        /// <summary>
+        /// 处理上传队列，批量上传文件
+        /// </summary>
+        private static async Task ProcessUploadQueueAsync()
+        {
+            // 使用信号量防止并发处理
+            if (!await _queueProcessingLock.WaitAsync(0))
+            {
+                return; // 已有处理任务在运行
+            }
+
+            try
+            {
+                var filesToUpload = new List<string>();
+
+                // 从队列中取出最多BATCH_SIZE个文件
+                while (filesToUpload.Count < BATCH_SIZE && _uploadQueue.TryDequeue(out string filePath))
                 {
-                    LogHelper.WriteLogToFile("上传失败：未设置用户Token", LogHelper.LogType.Error);
-                    return false;
+                    // 再次检查文件是否存在（可能在队列中时被删除）
+                    if (File.Exists(filePath))
+                    {
+                        filesToUpload.Add(filePath);
+                    }
                 }
 
-                // 获取API基础URL
-                var apiBaseUrl = MainWindow.Settings?.Dlass?.ApiBaseUrl ?? "https://dlass.tech";
+                if (filesToUpload.Count == 0)
+                {
+                    return;
+                }
 
-                // 创建API客户端并获取白板信息
-                DlassApiClient apiClient = null;
+                // 获取共享的白板信息（同一批次的所有文件共享认证信息）
+                WhiteboardInfo sharedWhiteboard = null;
+                string apiBaseUrl = null;
+                string userToken = null;
+                
                 try
                 {
-                    apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken);
-
-                    // 调用认证接口获取白板列表
-                    var authData = new
+                    var selectedClassName = MainWindow.Settings?.Dlass?.SelectedClassName;
+                    if (string.IsNullOrEmpty(selectedClassName))
                     {
-                        app_id = APP_ID,
-                        app_secret = APP_SECRET,
-                        user_token = userToken
-                    };
+                        LogHelper.WriteLogToFile("上传失败：未选择班级", LogHelper.LogType.Error);
+                        return;
+                    }
 
-                    var authResult = await apiClient.PostAsync<AuthWithTokenResponse>("/api/whiteboard/framework/auth-with-token", authData, requireAuth: false);
-
-                    if (authResult == null || !authResult.Success || authResult.Whiteboards == null)
+                    userToken = MainWindow.Settings?.Dlass?.UserToken;
+                    if (string.IsNullOrEmpty(userToken))
                     {
-                        LogHelper.WriteLogToFile("上传失败：无法获取白板信息", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile("上传失败：未设置用户Token", LogHelper.LogType.Error);
+                        return;
+                    }
+
+                    apiBaseUrl = MainWindow.Settings?.Dlass?.ApiBaseUrl ?? "https://dlass.tech";
+
+                    // 获取白板信息（只获取一次，所有文件共享）
+                    using (var apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken))
+                    {
+                        var authData = new
+                        {
+                            app_id = APP_ID,
+                            app_secret = APP_SECRET,
+                            user_token = userToken
+                        };
+
+                        var authResult = await apiClient.PostAsync<AuthWithTokenResponse>("/api/whiteboard/framework/auth-with-token", authData, requireAuth: false);
+
+                        if (authResult == null || !authResult.Success || authResult.Whiteboards == null)
+                        {
+                            LogHelper.WriteLogToFile("上传失败：无法获取白板信息", LogHelper.LogType.Error);
+                            return;
+                        }
+
+                        sharedWhiteboard = authResult.Whiteboards
+                            .FirstOrDefault(w => !string.IsNullOrEmpty(w.ClassName) && w.ClassName == selectedClassName);
+
+                        if (sharedWhiteboard == null || string.IsNullOrEmpty(sharedWhiteboard.BoardId) || string.IsNullOrEmpty(sharedWhiteboard.SecretKey))
+                        {
+                            LogHelper.WriteLogToFile($"上传失败：未找到班级'{selectedClassName}'对应的白板", LogHelper.LogType.Error);
+                            return;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"批量上传获取白板信息时出错: {ex.Message}", LogHelper.LogType.Error);
+                    return;
+                }
+
+                // 并发上传所有文件（共享白板信息）
+                var uploadTasks = filesToUpload.Select(filePath => UploadFileInternalAsync(filePath, sharedWhiteboard, apiBaseUrl, userToken));
+                await Task.WhenAll(uploadTasks);
+
+                // 如果队列中还有文件，继续处理
+                if (_uploadQueue.Count >= BATCH_SIZE)
+                {
+                    _ = ProcessUploadQueueAsync();
+                }
+            }
+            finally
+            {
+                _queueProcessingLock.Release();
+            }
+        }
+
+        /// <summary>
+        /// 内部上传方法，执行实际上传操作
+        /// </summary>
+        /// <param name="filePath">文件路径</param>
+        /// <param name="whiteboard">白板信息（如果为null则重新获取）</param>
+        /// <param name="apiBaseUrl">API基础URL（如果为null则从设置获取）</param>
+        /// <param name="userToken">用户Token（如果为null则从设置获取）</param>
+        private static async Task<bool> UploadFileInternalAsync(string filePath, WhiteboardInfo whiteboard = null, string apiBaseUrl = null, string userToken = null)
+        {
+            try
+            {
+                // 再次检查文件是否存在（可能在队列等待时被删除）
+                if (!File.Exists(filePath))
+                {
+                    return false;
+                }
+
+                // 检查文件扩展名
+                var fileExtension = Path.GetExtension(filePath).ToLower();
+                if (fileExtension != ".png" && fileExtension != ".icstk")
+                {
+                    return false;
+                }
+
+                // 检查文件大小（最大10MB）
+                var fileInfo = new FileInfo(filePath);
+                if (fileInfo.Length > 10 * 1024 * 1024)
+                {
+                    LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过10MB限制", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                // 如果白板信息未提供，则重新获取
+                if (whiteboard == null)
+                {
+                    var selectedClassName = MainWindow.Settings?.Dlass?.SelectedClassName;
+                    if (string.IsNullOrEmpty(selectedClassName))
+                    {
+                        LogHelper.WriteLogToFile("上传失败：未选择班级", LogHelper.LogType.Error);
                         return false;
                     }
 
-                    // 查找匹配班级的白板
-                    var whiteboard = authResult.Whiteboards
-                        .FirstOrDefault(w => !string.IsNullOrEmpty(w.ClassName) && w.ClassName == selectedClassName);
-
-                    if (whiteboard == null || string.IsNullOrEmpty(whiteboard.BoardId) || string.IsNullOrEmpty(whiteboard.SecretKey))
+                    userToken = userToken ?? MainWindow.Settings?.Dlass?.UserToken;
+                    if (string.IsNullOrEmpty(userToken))
                     {
-                        LogHelper.WriteLogToFile($"上传失败：未找到班级'{selectedClassName}'对应的白板", LogHelper.LogType.Error);
+                        LogHelper.WriteLogToFile("上传失败：未设置用户Token", LogHelper.LogType.Error);
                         return false;
                     }
 
-                    // 准备上传参数
-                    var fileName = Path.GetFileNameWithoutExtension(pngFilePath);
-                    var title = fileName;
-                    var fileType = fileExtension == ".icstk" ? "墨迹文件" : "笔记";
-                    var description = $"自动上传的{fileType} - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-                    var tags = fileExtension == ".icstk" ? "自动上传,墨迹,icstk" : "自动上传,笔记,png";
+                    apiBaseUrl = apiBaseUrl ?? MainWindow.Settings?.Dlass?.ApiBaseUrl ?? "https://dlass.tech";
 
-                    // 上传文件
+                    // 创建API客户端并获取白板信息
+                    using (var apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken))
+                    {
+                        var authData = new
+                        {
+                            app_id = APP_ID,
+                            app_secret = APP_SECRET,
+                            user_token = userToken
+                        };
+
+                        var authResult = await apiClient.PostAsync<AuthWithTokenResponse>("/api/whiteboard/framework/auth-with-token", authData, requireAuth: false);
+
+                        if (authResult == null || !authResult.Success || authResult.Whiteboards == null)
+                        {
+                            LogHelper.WriteLogToFile("上传失败：无法获取白板信息", LogHelper.LogType.Error);
+                            return false;
+                        }
+
+                        // 查找匹配班级的白板
+                        whiteboard = authResult.Whiteboards
+                            .FirstOrDefault(w => !string.IsNullOrEmpty(w.ClassName) && w.ClassName == selectedClassName);
+
+                        if (whiteboard == null || string.IsNullOrEmpty(whiteboard.BoardId) || string.IsNullOrEmpty(whiteboard.SecretKey))
+                        {
+                            LogHelper.WriteLogToFile($"上传失败：未找到班级'{selectedClassName}'对应的白板", LogHelper.LogType.Error);
+                            return false;
+                        }
+                    }
+                }
+
+                // 获取API基础URL和用户Token（如果未提供）
+                apiBaseUrl = apiBaseUrl ?? MainWindow.Settings?.Dlass?.ApiBaseUrl ?? "https://dlass.tech";
+                userToken = userToken ?? MainWindow.Settings?.Dlass?.UserToken;
+
+                // 准备上传参数
+                var fileName = Path.GetFileNameWithoutExtension(filePath);
+                var title = fileName;
+                var fileType = fileExtension == ".icstk" ? "墨迹文件" : "笔记";
+                var description = $"自动上传的{fileType} - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+                var tags = fileExtension == ".icstk" ? "自动上传,墨迹,icstk" : "自动上传,笔记,png";
+
+                // 创建API客户端并上传文件
+                using (var apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken))
+                {
                     var uploadResult = await apiClient.UploadNoteAsync<UploadNoteResponse>(
                         "/api/whiteboard/upload_note",
-                        pngFilePath,
+                        filePath,
                         whiteboard.BoardId,
                         whiteboard.SecretKey,
                         title,
@@ -202,10 +381,6 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"上传失败：服务器响应失败 - {uploadResult?.Message ?? "未知错误"}", LogHelper.LogType.Error);
                         return false;
                     }
-                }
-                finally
-                {
-                    apiClient?.Dispose();
                 }
             }
             catch (Exception ex)

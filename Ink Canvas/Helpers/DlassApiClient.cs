@@ -12,7 +12,7 @@ namespace Ink_Canvas.Helpers
     /// <summary>
     /// Dlass API 客户端，用于与服务端通信
     /// </summary>
-    public class DlassApiClient
+    public class DlassApiClient : IDisposable
     {
         private const string DEFAULT_BASE_URL = "https://dlass.tech"; 
         private readonly string _appId;
