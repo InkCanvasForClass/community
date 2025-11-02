@@ -28,6 +28,9 @@ namespace Ink_Canvas
             this.Left = parent.Left;
             this.Top = parent.Top;
             
+            // 根据分辨率和DPI缩放窗口
+            ScaleWindowForResolution();
+            
             // 启动更新定时器
             updateTimer = new System.Timers.Timer(100); // 100ms更新一次
             updateTimer.Elapsed += UpdateTimer_Elapsed;
@@ -37,6 +40,43 @@ namespace Ink_Canvas
             
             // 应用主题
             ApplyTheme();
+        }
+
+        /// <summary>
+        /// 根据屏幕分辨率和 DPI 缩放窗口大小（保持原始尺寸，使用Transform缩放）
+        /// </summary>
+        private void ScaleWindowForResolution()
+        {
+            try
+            {
+                // 获取屏幕尺寸（考虑 DPI 缩放）
+                double screenWidth = SystemParameters.PrimaryScreenWidth;
+                double screenHeight = SystemParameters.PrimaryScreenHeight;
+                
+                // 基准分辨率（1920x1080）
+                const double baseWidth = 1920.0;
+                const double baseHeight = 1080.0;
+                
+                // 计算缩放比例（使用较小的比例以保持比例）
+                double scaleX = screenWidth / baseWidth;
+                double scaleY = screenHeight / baseHeight;
+                double scale = Math.Min(scaleX, scaleY);
+                
+                // 限制最小和最大缩放，避免过小或过大
+                scale = Math.Max(0.5, Math.Min(2.0, scale));
+                
+                // 应用缩放变换到整个窗口内容
+                var scaleTransform = this.FindName("WindowScaleTransform") as ScaleTransform;
+                if (scaleTransform != null)
+                {
+                    scaleTransform.ScaleX = scale;
+                    scaleTransform.ScaleY = scale;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"缩放窗口大小时出错: {ex.Message}");
+            }
         }
 
         private void UpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
