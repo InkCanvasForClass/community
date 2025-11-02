@@ -77,6 +77,16 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
+        /// 异步上传笔记文件到Dlass（支持PNG和ICSTK格式）
+        /// </summary>
+        /// <param name="filePath">文件路径（支持PNG和ICSTK）</param>
+        /// <returns>是否上传成功</returns>
+        public static async Task<bool> UploadNoteFileAsync(string filePath)
+        {
+            return await UploadPngNoteAsync(filePath);
+        }
+
+        /// <summary>
         /// 异步上传PNG文件到Dlass
         /// </summary>
         /// <param name="pngFilePath">PNG文件路径</param>
@@ -95,6 +105,14 @@ namespace Ink_Canvas.Helpers
                 if (!File.Exists(pngFilePath))
                 {
                     LogHelper.WriteLogToFile($"上传失败：文件不存在 - {pngFilePath}", LogHelper.LogType.Error);
+                    return false;
+                }
+
+                // 检查文件扩展名
+                var fileExtension = Path.GetExtension(pngFilePath).ToLower();
+                if (fileExtension != ".png" && fileExtension != ".icstk")
+                {
+                    LogHelper.WriteLogToFile($"上传失败：不支持的文件格式 - {fileExtension}，仅支持PNG和ICSTK", LogHelper.LogType.Error);
                     return false;
                 }
 
@@ -160,8 +178,9 @@ namespace Ink_Canvas.Helpers
                     // 准备上传参数
                     var fileName = Path.GetFileNameWithoutExtension(pngFilePath);
                     var title = fileName;
-                    var description = $"自动上传的笔记 - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-                    var tags = "自动上传,笔记";
+                    var fileType = fileExtension == ".icstk" ? "墨迹文件" : "笔记";
+                    var description = $"自动上传的{fileType} - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
+                    var tags = fileExtension == ".icstk" ? "自动上传,墨迹,icstk" : "自动上传,笔记,png";
 
                     // 上传文件
                     var uploadResult = await apiClient.UploadNoteAsync<UploadNoteResponse>(

@@ -76,14 +76,7 @@ namespace Ink_Canvas
                         await Task.Delay(TimeSpan.FromMinutes(delayMinutes));
                     }
 
-                    var uploaded = await Helpers.DlassNoteUploader.UploadPngNoteAsync(savePath);
-                    if (uploaded && !isHideNotification)
-                    {
-                        Dispatcher.Invoke(() =>
-                        {
-                            ShowNotification($"笔记已自动上传到Dlass");
-                        });
-                    }
+                    await Helpers.DlassNoteUploader.UploadNoteFileAsync(savePath);
                 }
                 catch (Exception)
                 {

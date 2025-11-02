@@ -341,13 +341,13 @@
                                     
                                     <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
                                         <ui:ToggleSwitch x:Name="ToggleSwitchAutoUploadNotes"
-                                                         Header="自动上传PNG笔记"
+                                                         Header="自动上传笔记"
                                                          FontSize="14"
                                                          Foreground="{StaticResource TextForeground}"
                                                          Toggled="ToggleSwitchAutoUploadNotes_Toggled">
                                         </ui:ToggleSwitch>
                                         
-                                        <TextBlock Text="启用后，保存的PNG截图将自动上传到所选班级的白板。" 
+                                        <TextBlock Text="启用后，保存的PNG截图和ICSTK墨迹文件将自动上传到所选班级的白板。" 
                                                    FontSize="12" 
                                                    Foreground="{StaticResource TextSecondary}"
                                                    TextWrapping="Wrap"
