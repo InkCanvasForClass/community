@@ -106,22 +106,22 @@
                                           X1="0" Y1="0" X2="1" Y2="0" 
                                           Stroke="{StaticResource BorderBrush}" 
                                           StrokeThickness="1" 
-                                          Margin="0,8,0,12"/>
+                                          Margin="0,2,0,2"/>
                                     
                                     <!-- 用户Token设置 -->
                                     <TextBlock Text="用户Token" 
                                                FontSize="16" 
                                                FontWeight="SemiBold" 
                                                Foreground="{StaticResource TextForeground}"
-                                               Margin="0,0,0,8"/>
+                                               Margin="0,0,0,1"/>
                                     
                                     <TextBlock Text="设置您的用户Token以访问Dlass服务端功能。您可以从Dlass平台获取您的用户Token。" 
                                                FontSize="12" 
                                                Foreground="{StaticResource TextSecondary}"
                                                TextWrapping="Wrap"
-                                               Margin="0,0,0,12"/>
+                                               Margin="0,0,0,2"/>
                                     
-                                    <ui:SimpleStackPanel Orientation="Vertical" Spacing="8">
+                                    <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
                                         <ComboBox x:Name="CmbSavedTokens"
                                                   FontSize="14"
                                                   Padding="12,8"
@@ -137,7 +137,7 @@
                                         
                                         <TextBox x:Name="TxtNewToken" 
                                                  FontSize="14"
-                                                 Padding="12,8"
+                                                 Padding="12,4"
                                                  Background="#18181b"
                                                  Foreground="{StaticResource TextForeground}"
                                                  BorderBrush="{StaticResource BorderBrush}"
@@ -280,24 +280,38 @@
                                                    Margin="0,4,0,0"/>
                                     </ui:SimpleStackPanel>
                                     
+                                    <!-- 连接状态 -->
+                                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                                        <TextBlock Text="连接状态：" 
+                                                   FontSize="14" 
+                                                   Foreground="{StaticResource TextForeground}" 
+                                                   VerticalAlignment="Center"
+                                                   Width="100"/>
+                                        <TextBlock x:Name="TxtConnectionStatus" 
+                                                   Text="未连接" 
+                                                   FontSize="14" 
+                                                   Foreground="{StaticResource TextSecondary}"
+                                                   VerticalAlignment="Center"/>
+                                    </ui:SimpleStackPanel>
+                                    
                                     <Line HorizontalAlignment="Stretch" 
                                           X1="0" Y1="0" X2="1" Y2="0" 
                                           Stroke="{StaticResource BorderBrush}" 
                                           StrokeThickness="1" 
-                                          Margin="0,12,0,8"/>
+                                          Margin="0,2,0,1"/>
                                     
                                     <!-- 班级选择 -->
                                     <TextBlock Text="班级选择" 
                                                FontSize="16" 
                                                FontWeight="SemiBold" 
                                                Foreground="{StaticResource TextForeground}"
-                                               Margin="0,0,0,8"/>
+                                               Margin="0,0,0,1"/>
                                     
                                     <TextBlock Text="连接成功后，将自动加载可用班级列表。" 
                                                FontSize="12" 
                                                Foreground="{StaticResource TextSecondary}"
                                                TextWrapping="Wrap"
-                                               Margin="0,0,0,8"/>
+                                               Margin="0,0,0,2"/>
                                     
                                     <ComboBox x:Name="CmbClassSelection"
                                               FontSize="14"
@@ -316,27 +330,87 @@
                                           X1="0" Y1="0" X2="1" Y2="0" 
                                           Stroke="{StaticResource BorderBrush}" 
                                           StrokeThickness="1" 
-                                          Margin="0,12,0,8"/>
+                                          Margin="0,2,0,1"/>
                                     
-                                    <!-- 连接状态 -->
-                                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12">
-                                        <TextBlock Text="连接状态：" 
-                                                   FontSize="14" 
-                                                   Foreground="{StaticResource TextForeground}" 
-                                                   VerticalAlignment="Center"
-                                                   Width="100"/>
-                                        <TextBlock x:Name="TxtConnectionStatus" 
-                                                   Text="未连接" 
-                                                   FontSize="14" 
+                                    <!-- 自动上传设置 -->
+                                    <TextBlock Text="自动上传设置" 
+                                               FontSize="16" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="{StaticResource TextForeground}"
+                                               Margin="0,0,0,1"/>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
+                                        <ui:ToggleSwitch x:Name="ToggleSwitchAutoUploadNotes"
+                                                         Header="自动上传PNG笔记"
+                                                         FontSize="14"
+                                                         Foreground="{StaticResource TextForeground}"
+                                                         Toggled="ToggleSwitchAutoUploadNotes_Toggled">
+                                        </ui:ToggleSwitch>
+                                        
+                                        <TextBlock Text="启用后，保存的PNG截图将自动上传到所选班级的白板。" 
+                                                   FontSize="12" 
                                                    Foreground="{StaticResource TextSecondary}"
-                                                   VerticalAlignment="Center"/>
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,0,0,2"/>
+                                        
+                                        <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" 
+                                                            IsEnabled="{Binding ElementName=ToggleSwitchAutoUploadNotes, Path=IsOn}">
+                                            <TextBlock Text="上传延迟时间：" 
+                                                       FontSize="14" 
+                                                       Foreground="{StaticResource TextForeground}" 
+                                                       VerticalAlignment="Center"
+                                                       Width="120"/>
+                                            <TextBox x:Name="TxtUploadDelayMinutes"
+                                                     FontSize="14"
+                                                     Background="#18181b"
+                                                     Foreground="{StaticResource TextForeground}"
+                                                     BorderBrush="{StaticResource BorderBrush}"
+                                                     BorderThickness="1"
+                                                     MinWidth="100"
+                                                     Height="32"
+                                                     VerticalAlignment="Center"
+                                                     VerticalContentAlignment="Center"
+                                                     HorizontalContentAlignment="Left"
+                                                     TextChanged="TxtUploadDelayMinutes_TextChanged"
+                                                     PreviewTextInput="TxtUploadDelayMinutes_PreviewTextInput">
+                                                <TextBox.Style>
+                                                    <Style TargetType="TextBox">
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="TextBox">
+                                                                    <Border Background="{TemplateBinding Background}" 
+                                                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                                                            CornerRadius="6">
+                                                                        <ScrollViewer x:Name="PART_ContentHost" 
+                                                                                      Margin="12,0"
+                                                                                      VerticalAlignment="Center"/>
+                                                                    </Border>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </TextBox.Style>
+                                            </TextBox>
+                                            <TextBlock Text="分钟" 
+                                                       FontSize="14" 
+                                                       Foreground="{StaticResource TextSecondary}" 
+                                                       VerticalAlignment="Center"
+                                                       Margin="0,0,0,0"/>
+                                        </ui:SimpleStackPanel>
+                                        
+                                        <TextBlock Text="设置上传延迟时间（0-60分钟），可以在保存后等待一段时间再上传。" 
+                                                   FontSize="12" 
+                                                   Foreground="{StaticResource TextSecondary}"
+                                                   TextWrapping="Wrap"
+                                                   Margin="0,2,0,0"/>
                                     </ui:SimpleStackPanel>
                                     
                                     <Line HorizontalAlignment="Stretch" 
                                           X1="0" Y1="0" X2="1" Y2="0" 
                                           Stroke="{StaticResource BorderBrush}" 
                                           StrokeThickness="1" 
-                                          Margin="0,8,0,12"/>
+                                          Margin="0,2,0,1"/>
                                     
                                     <!-- 操作按钮 -->
                                     <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">

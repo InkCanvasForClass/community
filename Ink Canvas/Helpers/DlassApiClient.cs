@@ -1,7 +1,9 @@
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using System;
+using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -340,6 +342,86 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// 上传笔记文件
+        /// </summary>
+        /// <param name="endpoint">上传端点</param>
+        /// <param name="filePath">文件路径</param>
+        /// <param name="boardId">白板ID</param>
+        /// <param name="secretKey">白板密钥</param>
+        /// <param name="title">笔记标题（可选）</param>
+        /// <param name="description">笔记描述（可选）</param>
+        /// <param name="tags">笔记标签（可选）</param>
+        public async Task<T> UploadNoteAsync<T>(string endpoint, string filePath, string boardId, string secretKey, string title = null, string description = null, string tags = null)
+        {
+            try
+            {
+                if (!File.Exists(filePath))
+                {
+                    throw new FileNotFoundException($"文件不存在: {filePath}");
+                }
+
+                var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+                
+                // 设置白板认证头
+                request.Headers.Add("X-Board-ID", boardId);
+                request.Headers.Add("X-Secret-Key", secretKey);
+
+                // 创建multipart/form-data内容
+                var content = new MultipartFormDataContent();
+                
+                // 添加文件
+                var fileContent = new ByteArrayContent(File.ReadAllBytes(filePath));
+                var fileName = Path.GetFileName(filePath);
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                content.Add(fileContent, "file", fileName);
+
+                // 添加可选参数
+                if (!string.IsNullOrEmpty(title))
+                {
+                    content.Add(new StringContent(title), "title");
+                }
+                if (!string.IsNullOrEmpty(description))
+                {
+                    content.Add(new StringContent(description), "description");
+                }
+                if (!string.IsNullOrEmpty(tags))
+                {
+                    content.Add(new StringContent(tags), "tags");
+                }
+
+                request.Content = content;
+
+                var response = await _httpClient.SendAsync(request);
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                if (response.IsSuccessStatusCode)
+                {
+                    if (string.IsNullOrEmpty(responseContent))
+                    {
+                        return default(T);
+                    }
+                    return JsonConvert.DeserializeObject<T>(responseContent);
+                }
+                else
+                {
+                    throw new Exception($"上传文件失败: {response.StatusCode} - {responseContent}");
+                }
+            }
+            catch (HttpRequestException httpEx)
+            {
+                throw new Exception($"上传文件时网络错误: {httpEx.Message}", httpEx);
+            }
+            catch (TaskCanceledException timeoutEx)
+            {
+                throw new Exception($"上传文件超时: {endpoint}", timeoutEx);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"上传文件时出错: {ex.Message}", ex);
             }
         }
 

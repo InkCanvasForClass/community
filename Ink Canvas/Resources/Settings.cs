@@ -740,5 +740,11 @@ namespace Ink_Canvas
 
         [JsonProperty("apiBaseUrl")]
         public string ApiBaseUrl { get; set; } = "https://dlass.tech";
+
+        [JsonProperty("isAutoUploadNotes")]
+        public bool IsAutoUploadNotes { get; set; } = false;
+
+        [JsonProperty("autoUploadDelayMinutes")]
+        public int AutoUploadDelayMinutes { get; set; } = 0;
     }
 }

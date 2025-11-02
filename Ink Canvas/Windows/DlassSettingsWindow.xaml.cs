@@ -2,6 +2,7 @@ using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -33,6 +34,9 @@ namespace Ink_Canvas.Windows
             
             // 加载保存的token
             LoadUserToken();
+            
+            // 加载自动上传设置
+            LoadAutoUploadSettings();
             
             // 初始化API客户端（优先使用用户token）
             InitializeApiClient();
@@ -270,6 +274,98 @@ namespace Ink_Canvas.Windows
             {
                 LogHelper.WriteLogToFile($"选择班级时出错: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        /// <summary>
+        /// 加载自动上传设置
+        /// </summary>
+        private void LoadAutoUploadSettings()
+        {
+            try
+            {
+                if (MainWindow.Settings?.Dlass != null)
+                {
+                    ToggleSwitchAutoUploadNotes.IsOn = MainWindow.Settings.Dlass.IsAutoUploadNotes;
+                    var delayMinutes = MainWindow.Settings.Dlass.AutoUploadDelayMinutes;
+                    if (delayMinutes < 0 || delayMinutes > 60)
+                    {
+                        delayMinutes = 0;
+                    }
+                    TxtUploadDelayMinutes.Text = delayMinutes.ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"加载自动上传设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 自动上传开关切换事件
+        /// </summary>
+        private void ToggleSwitchAutoUploadNotes_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (MainWindow.Settings?.Dlass != null)
+                {
+                    MainWindow.Settings.Dlass.IsAutoUploadNotes = ToggleSwitchAutoUploadNotes.IsOn;
+                    MainWindow.SaveSettingsToFile();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存自动上传设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 上传延迟时间输入框文本改变事件
+        /// </summary>
+        private void TxtUploadDelayMinutes_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            try
+            {
+                if (MainWindow.Settings?.Dlass != null && int.TryParse(TxtUploadDelayMinutes.Text, out int delayMinutes))
+                {
+                    // 限制范围在0-60分钟
+                    if (delayMinutes < 0)
+                    {
+                        delayMinutes = 0;
+                        TxtUploadDelayMinutes.Text = "0";
+                    }
+                    else if (delayMinutes > 60)
+                    {
+                        delayMinutes = 60;
+                        TxtUploadDelayMinutes.Text = "60";
+                    }
+                    
+                    MainWindow.Settings.Dlass.AutoUploadDelayMinutes = delayMinutes;
+                    MainWindow.SaveSettingsToFile();
+                }
+                else if (string.IsNullOrWhiteSpace(TxtUploadDelayMinutes.Text))
+                {
+                    // 空文本时设置为0
+                    if (MainWindow.Settings?.Dlass != null)
+                    {
+                        MainWindow.Settings.Dlass.AutoUploadDelayMinutes = 0;
+                        MainWindow.SaveSettingsToFile();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存上传延迟时间时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 上传延迟时间输入框预览文本输入事件（只允许数字）
+        /// </summary>
+        private void TxtUploadDelayMinutes_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]+");
+            e.Handled = regex.IsMatch(e.Text);
         }
 
         /// <summary>
