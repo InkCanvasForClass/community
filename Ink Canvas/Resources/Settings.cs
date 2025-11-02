@@ -29,6 +29,8 @@ namespace Ink_Canvas
         public ModeSettings ModeSettings { get; set; } = new ModeSettings();
         [JsonProperty("camera")]
         public CameraSettings Camera { get; set; } = new CameraSettings();
+        [JsonProperty("dlass")]
+        public DlassSettings Dlass { get; set; } = new DlassSettings();
     }
 
     public class Canvas
@@ -723,5 +725,17 @@ namespace Ink_Canvas
 
         [JsonProperty("selectedCameraIndex")]
         public int SelectedCameraIndex { get; set; } = 0;
+    }
+
+    public class DlassSettings
+    {
+        [JsonProperty("userToken")]
+        public string UserToken { get; set; } = string.Empty;
+
+        [JsonProperty("savedTokens")]
+        public List<string> SavedTokens { get; set; } = new List<string>();
+
+        [JsonProperty("apiBaseUrl")]
+        public string ApiBaseUrl { get; set; } = "https://dlass.tech";
     }
 }
