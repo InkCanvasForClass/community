@@ -286,6 +286,38 @@
                                           StrokeThickness="1" 
                                           Margin="0,12,0,8"/>
                                     
+                                    <!-- 班级选择 -->
+                                    <TextBlock Text="班级选择" 
+                                               FontSize="16" 
+                                               FontWeight="SemiBold" 
+                                               Foreground="{StaticResource TextForeground}"
+                                               Margin="0,0,0,8"/>
+                                    
+                                    <TextBlock Text="连接成功后，将自动加载可用班级列表。" 
+                                               FontSize="12" 
+                                               Foreground="{StaticResource TextSecondary}"
+                                               TextWrapping="Wrap"
+                                               Margin="0,0,0,8"/>
+                                    
+                                    <ComboBox x:Name="CmbClassSelection"
+                                              FontSize="14"
+                                              Padding="12,8"
+                                              Background="#18181b"
+                                              Foreground="{StaticResource TextForeground}"
+                                              BorderBrush="{StaticResource BorderBrush}"
+                                              BorderThickness="1"
+                                              MinHeight="36"
+                                              IsEditable="False"
+                                              IsReadOnly="True"
+                                              SelectionChanged="CmbClassSelection_SelectionChanged">
+                                    </ComboBox>
+                                    
+                                    <Line HorizontalAlignment="Stretch" 
+                                          X1="0" Y1="0" X2="1" Y2="0" 
+                                          Stroke="{StaticResource BorderBrush}" 
+                                          StrokeThickness="1" 
+                                          Margin="0,12,0,8"/>
+                                    
                                     <!-- 连接状态 -->
                                     <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                                         <TextBlock Text="连接状态：" 

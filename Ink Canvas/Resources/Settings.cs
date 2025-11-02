@@ -735,6 +735,9 @@ namespace Ink_Canvas
         [JsonProperty("savedTokens")]
         public List<string> SavedTokens { get; set; } = new List<string>();
 
+        [JsonProperty("selectedClassName")]
+        public string SelectedClassName { get; set; } = string.Empty;
+
         [JsonProperty("apiBaseUrl")]
         public string ApiBaseUrl { get; set; } = "https://dlass.tech";
     }

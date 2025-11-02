@@ -1,6 +1,7 @@
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -17,10 +18,18 @@ namespace Ink_Canvas.Windows
         private const string APP_SECRET = "o7dx5b5ASGUMcM72PCpmRQYAhSijqaOVHoGyBK0IxbA";
 
         private DlassApiClient _apiClient;
+        private List<WhiteboardInfo> _currentWhiteboards = new List<WhiteboardInfo>();
+        private UserInfo _currentUser;
 
         public DlassSettingsWindow(MainWindow mainWindow = null)
         {
             InitializeComponent();
+            
+            // 初始化班级下拉框
+            CmbClassSelection.Items.Clear();
+            CmbClassSelection.Items.Add("（等待连接）");
+            CmbClassSelection.SelectedIndex = 0;
+            CmbClassSelection.IsEnabled = false;
             
             // 加载保存的token
             LoadUserToken();
@@ -185,6 +194,85 @@ namespace Ink_Canvas.Windows
         }
 
         /// <summary>
+        /// 加载班级列表到下拉框
+        /// </summary>
+        private void LoadClasses(List<WhiteboardInfo> whiteboards, UserInfo user = null)
+        {
+            CmbClassSelection.Items.Clear();
+            
+            if (whiteboards != null && whiteboards.Count > 0)
+            {
+                var teacherName = user?.Username ?? "未知教师";
+                var classGroups = whiteboards
+                    .Where(w => !string.IsNullOrEmpty(w.ClassName))
+                    .GroupBy(w => w.ClassName)
+                    .OrderBy(g => g.Key)
+                    .ToList();
+                
+                foreach (var group in classGroups)
+                {
+                    var className = group.Key;
+                    var displayText = $"{teacherName} - {className}";
+                    CmbClassSelection.Items.Add(new ClassSelectionItem
+                    {
+                        DisplayText = displayText,
+                        ClassName = className,
+                        TeacherName = teacherName
+                    });
+                }
+                
+                var savedClassName = MainWindow.Settings?.Dlass?.SelectedClassName ?? string.Empty;
+                if (!string.IsNullOrEmpty(savedClassName))
+                {
+                    var savedItem = CmbClassSelection.Items.Cast<ClassSelectionItem>()
+                        .FirstOrDefault(item => item.ClassName == savedClassName);
+                    if (savedItem != null)
+                    {
+                        CmbClassSelection.SelectedItem = savedItem;
+                    }
+                    else if (CmbClassSelection.Items.Count > 0)
+                    {
+                        CmbClassSelection.SelectedIndex = 0;
+                    }
+                }
+                else if (CmbClassSelection.Items.Count > 0)
+                {
+                    CmbClassSelection.SelectedIndex = 0;
+                }
+                
+                CmbClassSelection.IsEnabled = true;
+            }
+            else
+            {
+                CmbClassSelection.Items.Add("（无可用班级）");
+                CmbClassSelection.SelectedIndex = 0;
+                CmbClassSelection.IsEnabled = false;
+            }
+        }
+
+        /// <summary>
+        /// 班级选择改变事件
+        /// </summary>
+        private void CmbClassSelection_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (CmbClassSelection.SelectedItem is ClassSelectionItem selectedItem)
+                {
+                    if (MainWindow.Settings?.Dlass != null)
+                    {
+                        MainWindow.Settings.Dlass.SelectedClassName = selectedItem.ClassName;
+                        MainWindow.SaveSettingsToFile();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"选择班级时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
         /// 标题栏拖动事件
         /// </summary>
         private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -292,6 +380,13 @@ namespace Ink_Canvas.Windows
                     
                     LoadUserToken();
                     
+                    CmbClassSelection.Items.Clear();
+                    CmbClassSelection.Items.Add("（等待连接）");
+                    CmbClassSelection.SelectedIndex = 0;
+                    CmbClassSelection.IsEnabled = false;
+                    _currentWhiteboards.Clear();
+                    _currentUser = null;
+                    
                     TxtConnectionStatus.Text = "未连接";
                     TxtConnectionStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(161, 161, 170));
                 }
@@ -380,12 +475,18 @@ namespace Ink_Canvas.Windows
                     
                     if (result != null && result.Success)
                     {
-                        var whiteboardCount = result.Whiteboards?.Count ?? 0;
+                        var whiteboards = result.Whiteboards ?? new List<WhiteboardInfo>();
+                        _currentWhiteboards = whiteboards;
+                        _currentUser = result.User;
+                        var whiteboardCount = whiteboards.Count;
                         
                         Dispatcher.Invoke(() =>
                         {
                             TxtConnectionStatus.Text = $"已连接 (找到 {whiteboardCount} 个白板)";
                             TxtConnectionStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(34, 197, 94));
+                            
+                            // 加载班级列表
+                            LoadClasses(whiteboards, result.User);
                         });
                     }
                     else
@@ -411,7 +512,14 @@ namespace Ink_Canvas.Windows
                 Dispatcher.Invoke(() =>
                 {
                     TxtConnectionStatus.Text = "连接失败";
-                    TxtConnectionStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68)); // 红色
+                    TxtConnectionStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));
+                    
+                    // 清空班级列表
+                    CmbClassSelection.Items.Clear();
+                    CmbClassSelection.Items.Add("（无可用班级）");
+                    CmbClassSelection.SelectedIndex = 0;
+                    CmbClassSelection.IsEnabled = false;
+                    _currentWhiteboards.Clear();
                 });
             }
         }
@@ -483,6 +591,21 @@ namespace Ink_Canvas.Windows
         
         [Newtonsoft.Json.JsonProperty("email")]
         public string Email { get; set; }
+    }
+    
+    /// <summary>
+    /// 班级选择项
+    /// </summary>
+    public class ClassSelectionItem
+    {
+        public string DisplayText { get; set; }
+        public string ClassName { get; set; }
+        public string TeacherName { get; set; }
+        
+        public override string ToString()
+        {
+            return DisplayText;
+        }
     }
     
     #endregion
