@@ -18,11 +18,21 @@ namespace Ink_Canvas.Helpers
         private const string APP_ID = "app_WkjocWqsrVY7T6zQV2CfiA";
         private const string APP_SECRET = "o7dx5b5ASGUMcM72PCpmRQYAhSijqaOVHoGyBK0IxbA";
         private const int BATCH_SIZE = 10; // 批量上传大小
+        private const int MAX_RETRY_COUNT = 3; // 最大重试次数
 
         /// <summary>
-        /// 上传队列（线程安全）
+        /// 上传队列项
         /// </summary>
-        private static readonly ConcurrentQueue<string> _uploadQueue = new ConcurrentQueue<string>();
+        private class UploadQueueItem
+        {
+            public string FilePath { get; set; }
+            public int RetryCount { get; set; }
+        }
+
+        /// <summary>
+        /// 上传队列
+        /// </summary>
+        private static readonly ConcurrentQueue<UploadQueueItem> _uploadQueue = new ConcurrentQueue<UploadQueueItem>();
 
         /// <summary>
         /// 队列处理锁，防止并发处理
@@ -153,9 +163,13 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 将文件加入上传队列
         /// </summary>
-        private static void EnqueueFile(string filePath)
+        private static void EnqueueFile(string filePath, int retryCount = 0)
         {
-            _uploadQueue.Enqueue(filePath);
+            _uploadQueue.Enqueue(new UploadQueueItem
+            {
+                FilePath = filePath,
+                RetryCount = retryCount
+            });
 
             // 如果队列达到批量大小，触发批量上传
             if (_uploadQueue.Count >= BATCH_SIZE)
@@ -177,15 +191,15 @@ namespace Ink_Canvas.Helpers
 
             try
             {
-                var filesToUpload = new List<string>();
+                var filesToUpload = new List<UploadQueueItem>();
 
                 // 从队列中取出最多BATCH_SIZE个文件
-                while (filesToUpload.Count < BATCH_SIZE && _uploadQueue.TryDequeue(out string filePath))
+                while (filesToUpload.Count < BATCH_SIZE && _uploadQueue.TryDequeue(out UploadQueueItem item))
                 {
-                    // 再次检查文件是否存在（可能在队列中时被删除）
-                    if (File.Exists(filePath))
+                    // 再次检查文件是否存在
+                    if (File.Exists(item.FilePath))
                     {
-                        filesToUpload.Add(filePath);
+                        filesToUpload.Add(item);
                     }
                 }
 
@@ -251,11 +265,59 @@ namespace Ink_Canvas.Helpers
                     return;
                 }
 
-                // 并发上传所有文件（共享白板信息）
-                var uploadTasks = filesToUpload.Select(filePath => UploadFileInternalAsync(filePath, sharedWhiteboard, apiBaseUrl, userToken));
+                // 并发上传所有文件（共享白板信息），并处理失败重试
+                var uploadTasks = filesToUpload.Select(async item =>
+                {
+                    try
+                    {
+                        var success = await UploadFileInternalAsync(item.FilePath, sharedWhiteboard, apiBaseUrl, userToken);
+                        if (!success)
+                        {
+                            // 检查是否是可重试的错误
+                            if (IsRetryableError(item.FilePath))
+                            {
+                                // 检查重试次数
+                                if (item.RetryCount < MAX_RETRY_COUNT)
+                                {
+                                    LogHelper.WriteLogToFile($"上传失败，将重试 ({item.RetryCount + 1}/{MAX_RETRY_COUNT}): {Path.GetFileName(item.FilePath)}", LogHelper.LogType.Event);
+                                    EnqueueFile(item.FilePath, item.RetryCount + 1);
+                                }
+                                else
+                                {
+                                    LogHelper.WriteLogToFile($"上传失败，已达到最大重试次数: {Path.GetFileName(item.FilePath)}", LogHelper.LogType.Error);
+                                }
+                            }
+                        }
+                        return success;
+                    }
+                    catch (Exception ex)
+                    {
+                        // 检查是否是可重试的错误（超时、网络错误等）
+                        var errorMessage = ex.Message.ToLower();
+                        bool isRetryable = errorMessage.Contains("超时") || 
+                                          errorMessage.Contains("timeout") ||
+                                          errorMessage.Contains("网络错误") ||
+                                          errorMessage.Contains("network");
+                        
+                        if (isRetryable && IsRetryableError(item.FilePath))
+                        {
+                            // 检查重试次数
+                            if (item.RetryCount < MAX_RETRY_COUNT)
+                            {
+                                LogHelper.WriteLogToFile($"上传失败({ex.Message})，将重试 ({item.RetryCount + 1}/{MAX_RETRY_COUNT}): {Path.GetFileName(item.FilePath)}", LogHelper.LogType.Event);
+                                EnqueueFile(item.FilePath, item.RetryCount + 1);
+                            }
+                            else
+                            {
+                                LogHelper.WriteLogToFile($"上传失败，已达到最大重试次数: {Path.GetFileName(item.FilePath)}", LogHelper.LogType.Error);
+                            }
+                        }
+                        return false;
+                    }
+                });
                 await Task.WhenAll(uploadTasks);
 
-                // 如果队列中还有文件，继续处理
+                // 如果队列达到批量大小，继续处理
                 if (_uploadQueue.Count >= BATCH_SIZE)
                 {
                     _ = ProcessUploadQueueAsync();
@@ -385,9 +447,46 @@ namespace Ink_Canvas.Helpers
             }
             catch (Exception ex)
             {
+                // 记录错误信息，抛出异常以便调用方判断是否可重试
                 LogHelper.WriteLogToFile($"上传笔记时出错: {ex.Message}", LogHelper.LogType.Error);
-                return false;
+                throw;
             }
+        }
+
+        /// <summary>
+        /// 判断错误是否可重试（超时、网络错误等）
+        /// </summary>
+        private static bool IsRetryableError(string filePath)
+        {
+            // 检查文件是否存在
+            if (!File.Exists(filePath))
+            {
+                return false; // 文件不存在，不可重试
+            }
+
+            // 检查文件扩展名
+            var fileExtension = Path.GetExtension(filePath).ToLower();
+            if (fileExtension != ".png" && fileExtension != ".icstk")
+            {
+                return false; // 文件格式错误，不可重试
+            }
+
+            // 检查文件大小
+            try
+            {
+                var fileInfo = new FileInfo(filePath);
+                if (fileInfo.Length > 10 * 1024 * 1024)
+                {
+                    return false; // 文件过大，不可重试
+                }
+            }
+            catch
+            {
+                return false; // 无法读取文件信息，不可重试
+            }
+
+            // 其他错误（超时、网络错误等）可以重试
+            return true;
         }
     }
 }
