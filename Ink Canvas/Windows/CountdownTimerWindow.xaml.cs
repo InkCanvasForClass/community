@@ -22,6 +22,21 @@ namespace Ink_Canvas
             timer.Elapsed += Timer_Elapsed;
             timer.Interval = 50;
             InitializeUI();
+
+            // 应用主题
+            ApplyTheme();
+        }
+
+        public static Window CreateTimerWindow()
+        {
+            if (MainWindow.Settings.RandSettings?.UseNewStyleUI == true)
+            {
+                return new NewStyleTimerWindow();
+            }
+            else
+            {
+                return new CountdownTimerWindow();
+            }
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)
@@ -34,38 +49,72 @@ namespace Ink_Canvas
 
             TimeSpan timeSpan = DateTime.Now - startTime;
             TimeSpan totalTimeSpan = new TimeSpan(hour, minute, second);
-            TimeSpan leftTimeSpan = totalTimeSpan - timeSpan;
-            if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
             double spentTimePercent = timeSpan.TotalMilliseconds / (totalSeconds * 1000.0);
+            
             Application.Current.Dispatcher.Invoke(() =>
             {
-                ProcessBarTime.CurrentValue = 1 - spentTimePercent;
-                TextBlockHour.Text = leftTimeSpan.Hours.ToString("00");
-                TextBlockMinute.Text = leftTimeSpan.Minutes.ToString("00");
-                TextBlockSecond.Text = leftTimeSpan.Seconds.ToString("00");
-                TbCurrentTime.Text = leftTimeSpan.ToString(@"hh\:mm\:ss");
-                if (spentTimePercent >= 1)
+                if (!isOvertimeMode)
                 {
-                    ProcessBarTime.CurrentValue = 0;
-                    TextBlockHour.Text = "00";
-                    TextBlockMinute.Text = "00";
-                    TextBlockSecond.Text = "00";
-                    timer.Stop();
-                    isTimerRunning = false;
-                    SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
-                    BtnStartCover.Visibility = Visibility.Visible;
-                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                    BorderStopTime.Visibility = Visibility.Collapsed;
+                    TimeSpan leftTimeSpan = totalTimeSpan - timeSpan;
+                    if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
+                    
+                    ProcessBarTime.CurrentValue = 1 - spentTimePercent;
+                    TextBlockHour.Text = leftTimeSpan.Hours.ToString("00");
+                    TextBlockMinute.Text = leftTimeSpan.Minutes.ToString("00");
+                    TextBlockSecond.Text = leftTimeSpan.Seconds.ToString("00");
+                    TbCurrentTime.Text = leftTimeSpan.ToString(@"hh\:mm\:ss");
+                    
+                    if (spentTimePercent >= 1 && MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true)
+                    {
+                        isOvertimeMode = true;
+                        ProcessBarTime.CurrentValue = 0;
+                        ProcessBarTime.Visibility = Visibility.Collapsed;
+                        BorderStopTime.Visibility = Visibility.Collapsed;
+                        
+                        // 播放提醒音
+                        PlayTimerSound();
+                    }
+                    else if (spentTimePercent >= 1)
+                    {
+                        ProcessBarTime.CurrentValue = 0;
+                        TextBlockHour.Text = "00";
+                        TextBlockMinute.Text = "00";
+                        TextBlockSecond.Text = "00";
+                        timer.Stop();
+                        isTimerRunning = false;
+                        SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
+                        BtnStartCover.Visibility = Visibility.Visible;
+                        var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                        if (textForeground != null)
+                        {
+                            TextBlockHour.Foreground = textForeground;
+                        }
+                        else
+                        {
+                            TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                        }
+                        BorderStopTime.Visibility = Visibility.Collapsed;
+                        
+                        // 播放提醒音
+                        PlayTimerSound();
+                    }
+                }
+                else
+                {
+                    TimeSpan overtimeSpan = timeSpan - totalTimeSpan;
+                    TextBlockHour.Text = overtimeSpan.Hours.ToString("00");
+                    TextBlockMinute.Text = overtimeSpan.Minutes.ToString("00");
+                    TextBlockSecond.Text = overtimeSpan.Seconds.ToString("00");
+                    TbCurrentTime.Text = overtimeSpan.ToString(@"hh\:mm\:ss");
+                    
+                    if (MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true)
+                    {
+                        TextBlockHour.Foreground = Brushes.Red;
+                        TextBlockMinute.Foreground = Brushes.Red;
+                        TextBlockSecond.Foreground = Brushes.Red;
+                    }
                 }
             });
-            if (spentTimePercent >= 1)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    //Play sound
-                    PlayTimerSound();
-                });
-            }
         }
 
         SoundPlayer player = new SoundPlayer();
@@ -82,23 +131,41 @@ namespace Ink_Canvas
         bool isTimerRunning = false;
         bool isPaused = false;
         bool useLegacyUI = false;
+        bool isOvertimeMode = false; 
 
         Timer timer = new Timer();
 
         private void Grid_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (isTimerRunning) return;
+
+            var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+
             if (ProcessBarTime.Visibility == Visibility.Visible && isTimerRunning == false)
             {
                 ProcessBarTime.Visibility = Visibility.Collapsed;
                 GridAdjustHour.Visibility = Visibility.Visible;
-                TextBlockHour.Foreground = Brushes.Black;
+                if (textForeground != null)
+                {
+                    TextBlockHour.Foreground = textForeground;
+                }
+                else
+                {
+                    TextBlockHour.Foreground = Brushes.Black;
+                }
             }
             else
             {
                 ProcessBarTime.Visibility = Visibility.Visible;
                 GridAdjustHour.Visibility = Visibility.Collapsed;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                if (textForeground != null)
+                {
+                    TextBlockHour.Foreground = textForeground;
+                }
+                else
+                {
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                }
 
                 if (hour == 0 && minute == 0 && second == 0)
                 {
@@ -223,7 +290,14 @@ namespace Ink_Canvas
                 BtnResetCover.Visibility = Visibility.Visible;
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground3 != null)
+                    TextBlockHour.Foreground = textForeground3;
+                else
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                
+                isOvertimeMode = false;
+                ProcessBarTime.Visibility = Visibility.Visible;
             }
             else if (isTimerRunning && isPaused)
             {
@@ -233,13 +307,20 @@ namespace Ink_Canvas
                 BtnResetCover.Visibility = Visibility.Visible;
                 BtnStartCover.Visibility = Visibility.Collapsed;
                 BorderStopTime.Visibility = Visibility.Collapsed;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground3 != null)
+                    TextBlockHour.Foreground = textForeground3;
+                else
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 isTimerRunning = false;
                 timer.Stop();
                 isPaused = false;
                 ProcessBarTime.CurrentValue = 0;
                 ProcessBarTime.IsPaused = false;
+                
+                isOvertimeMode = false;
+                ProcessBarTime.Visibility = Visibility.Visible;
             }
             else
             {
@@ -283,7 +364,11 @@ namespace Ink_Canvas
                 //继续
                 startTime += DateTime.Now - pauseTime;
                 ProcessBarTime.IsPaused = false;
-                TextBlockHour.Foreground = Brushes.Black;
+                var textForeground1 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground1 != null)
+                    TextBlockHour.Foreground = textForeground1;
+                else
+                    TextBlockHour.Foreground = Brushes.Black;
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 isPaused = false;
                 timer.Start();
@@ -295,7 +380,11 @@ namespace Ink_Canvas
                 //暂停
                 pauseTime = DateTime.Now;
                 ProcessBarTime.IsPaused = true;
-                TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
+                var textForeground3 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground3 != null)
+                    TextBlockHour.Foreground = textForeground3;
+                else
+                    TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 isPaused = true;
@@ -307,7 +396,11 @@ namespace Ink_Canvas
                 startTime = DateTime.Now;
                 totalSeconds = ((hour * 60) + minute) * 60 + second;
                 ProcessBarTime.IsPaused = false;
-                TextBlockHour.Foreground = Brushes.Black;
+                var textForeground2 = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground2 != null)
+                    TextBlockHour.Foreground = textForeground2;
+                else
+                    TextBlockHour.Foreground = Brushes.Black;
                 SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
                 BtnResetCover.Visibility = Visibility.Collapsed;
 
@@ -330,6 +423,8 @@ namespace Ink_Canvas
 
                 isPaused = false;
                 isTimerRunning = true;
+                isOvertimeMode = false; 
+                ProcessBarTime.Visibility = Visibility.Visible;
                 timer.Start();
                 UpdateStopTime();
                 BorderStopTime.Visibility = Visibility.Visible;
@@ -346,9 +441,47 @@ namespace Ink_Canvas
             }
         }
 
+        private void ApplyTheme()
+        {
+            try
+            {
+                // 根据主题设置文本颜色
+                var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
+                if (textForeground != null)
+                {
+                    TextBlockHour.Foreground = textForeground;
+                    TextBlockMinute.Foreground = textForeground;
+                    TextBlockSecond.Foreground = textForeground;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用倒计时窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         public void RefreshUI()
         {
             InitializeUI();
+        }
+
+        /// <summary>
+        /// 刷新主题，当主窗口主题切换时调用
+        /// </summary>
+        public void RefreshTheme()
+        {
+            try
+            {
+                // 重新应用主题
+                ApplyTheme();
+
+                // 强制刷新UI
+                InvalidateVisual();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新计时器窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         private void UpdateButtonTexts()

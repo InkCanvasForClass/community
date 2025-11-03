@@ -40,6 +40,7 @@
 
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
             <c:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <c:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <c:IntNumberToString x:Key="IntNumberToString" />
             <c:IntNumberToString2 x:Key="IntNumberToString2" />
 
@@ -189,12 +190,18 @@
                                     <!-- Crash Action -->
                                     <Button Width="40" Height="40" Margin="0,5,0,0" Style="{StaticResource NavButton}"
                                             Click="NavCrashAction_Click" Tag="crashaction" ToolTip="崩溃处理">
-                                        <Image Width="24" Height="24">
+                                        <Image Width="22" Height="22">
                                             <Image.Source>
                                                 <DrawingImage>
                                                     <DrawingImage.Drawing>
-                                                        <GeometryDrawing Brush="White"
-                                                            Geometry="M13 14H11V9H13M13 18H11V16H13M1 21H23L12 2L1 21Z"/>
+                                                        <GeometryDrawing>
+                                                            <GeometryDrawing.Pen>
+                                                                <Pen Brush="White" Thickness="2" StartLineCap="Round" EndLineCap="Round" LineJoin="Round"/>
+                                                            </GeometryDrawing.Pen>
+                                                            <GeometryDrawing.Geometry>
+                                                                <PathGeometry Figures="M10.863 4.09101L2.75699 17.625C2.58988 17.9144 2.50145 18.2425 2.5005 18.5766C2.49954 18.9108 2.58609 19.2394 2.75153 19.5297C2.91698 19.8201 3.15555 20.062 3.44353 20.2316C3.7315 20.4011 4.05884 20.4923 4.39299 20.496H20.607C20.941 20.4922 21.2682 20.401 21.556 20.2315C21.8438 20.062 22.0823 19.8202 22.2477 19.53C22.4131 19.2398 22.4997 18.9114 22.4989 18.5774C22.4981 18.2434 22.4098 17.9154 22.243 17.626L14.137 4.09001C13.9664 3.80851 13.7262 3.57575 13.4394 3.4142C13.1527 3.25266 12.8291 3.16779 12.5 3.16779C12.1709 3.16779 11.8473 3.25266 11.5605 3.4142C11.2738 3.57575 11.0335 3.80851 10.863 4.09001V4.09101Z M9.5 13.5H15.5"/>
+                                                            </GeometryDrawing.Geometry>
+                                                        </GeometryDrawing>
                                                     </DrawingImage.Drawing>
                                                 </DrawingImage>
                                             </Image.Source>
@@ -603,6 +610,14 @@
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
                                     </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Name="UIAccessTopMostPanel" Visibility="Collapsed">
+                                        <TextBlock Foreground="#fafafa" Text="UIA置顶" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchUIAccessTopMost"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Name="UIAccessTopMostDescription" Text="# 开启UIA置顶后，软件需要管理员启动才能置顶，关闭此功能需要完全关闭软件后再手动启动，无法使用重启来关闭此功能" TextWrapping="Wrap" Foreground="#a1a1aa" Visibility="Collapsed" />
                                     <ui:ToggleSwitch OnContent="" OffContent=""
                                                      Name="ToggleSwitchIsAutoUpdate" Header="自动检查更新"
                                                      FontFamily="Microsoft YaHei UI"
@@ -625,6 +640,13 @@
                                         <TextBlock Text="# 稳定版提供可靠更新，测试版提供新功能抢先体验" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     </ui:SimpleStackPanel>
                                     
+                                    <!-- 手动更新按钮 -->
+                                    <Button x:Name="ManualUpdateButton" Content="手动更新" Margin="0,8,0,0"
+                                            Width="120" HorizontalAlignment="Left" Click="ManualUpdateButton_Click"
+                                            Visibility="{Binding ElementName=ToggleSwitchIsAutoUpdate, Path=IsOn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
+                                    <TextBlock Text="# 点击后立即检查并下载最新版本" 
+                                               TextWrapping="Wrap" Foreground="#a1a1aa" 
+                                               Visibility="{Binding ElementName=ToggleSwitchIsAutoUpdate, Path=IsOn, Converter={StaticResource InverseBooleanToVisibilityConverter}}"/>
                                     <!-- 版本修复按钮 -->
                                     <Button x:Name="FixVersionButton" Content="版本修复" Margin="0,8,0,0"
                                             Width="120" HorizontalAlignment="Left" Click="FixVersionButton_Click"/>
@@ -1071,9 +1093,11 @@
                                                   SelectedIndex="0"
                                                   SelectionChanged="ComboBoxFloatingBarImg_SelectionChanged">
                                             <ComboBoxItem Content="“ICC-CE”默认" FontFamily="Microsoft YaHei UI" />
-                                            <ComboBoxItem Content="“ICC-CE”黑色透明版" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="“ICC-CE”无阴影" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="“ICC-CE”深色" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="“ICC-CE”深色呼吸版" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="“ICC-CE”白色透明版" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="“ICC-CE”黑色透明版" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="酷安斗鸡眼滑稽" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="酷安受虐滑稽" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="酷安呲牙笑" FontFamily="Microsoft YaHei UI" />
@@ -2005,7 +2029,7 @@
                                                          FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchNotifyPreviousPage_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="#开启后会记录上次播放的页数，点击“是”后会在进入放映状态时自动跳转"
+                                    <TextBlock Text="#开启后会记录上次播放的页数，点击“是”后会自动跳转"
                                                TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="进入放映时回到首页" VerticalAlignment="Center"
@@ -2800,17 +2824,11 @@
                                                TextWrapping="Wrap" Foreground="#a1a1aa" Margin="0,0,0,8" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
                                         <Button Name="BtnUnregisterFileAssociation" Content="取消文件关联" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnUnregisterFileAssociation_Click"
-                                                Background="#FFDC3545" Foreground="White" BorderBrush="#FFBD2130" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                                Padding="15,5" Margin="0,0,8,0" Click="BtnUnregisterFileAssociation_Click" />
                                         <Button Name="BtnCheckFileAssociation" Content="检查关联状态" 
-                                                Padding="12,6" Margin="0,0,8,0" Click="BtnCheckFileAssociation_Click"
-                                                Background="#FF17A2B8" Foreground="White" BorderBrush="#FF138496" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                                Padding="15,5" Margin="0,0,8,0" Click="BtnCheckFileAssociation_Click" />
                                         <Button Name="BtnRegisterFileAssociation" Content="重新注册关联" 
-                                                Padding="12,6" Click="BtnRegisterFileAssociation_Click"
-                                                Background="#FF28A745" Foreground="White" BorderBrush="#FF1E7E34" 
-                                                FontFamily="Microsoft YaHei UI" FontSize="12" />
+                                                Padding="15,5" Click="BtnRegisterFileAssociation_Click" />
                                     </ui:SimpleStackPanel>
                                     <TextBlock Name="TextBlockFileAssociationStatus" Text="" 
                                                Foreground="#a1a1aa" FontSize="12" Margin="0,4,0,0" />
@@ -3060,6 +3078,30 @@
                                     </ui:SimpleStackPanel>
                                     
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="定时自动保存墨迹" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableAutoSaveStrokes" IsOn="False"
+                                                         FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchEnableAutoSaveStrokes_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#a1a1aa" Text="保存间隔" VerticalAlignment="Center"
+                                                   FontSize="12" Margin="0,0,16,0" />
+                                        <ComboBox Name="ComboBoxAutoSaveStrokesInterval" Width="120" 
+                                                  SelectionChanged="ComboBoxAutoSaveStrokesInterval_SelectionChanged">
+                                            <ComboBoxItem Content="1分钟" Tag="1" />
+                                            <ComboBoxItem Content="3分钟" Tag="3" />
+                                            <ComboBoxItem Content="5分钟" Tag="5" />
+                                            <ComboBoxItem Content="10分钟" Tag="10" />
+                                            <ComboBoxItem Content="15分钟" Tag="15" />
+                                            <ComboBoxItem Content="30分钟" Tag="30" />
+                                            <ComboBoxItem Content="60分钟" Tag="60" />
+                                        </ComboBox>
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 开启后将在设定时间间隔自动保存墨迹，仅在画布可见且有墨迹时才会保存" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="墨迹全页面保存" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent=""
@@ -3146,6 +3188,17 @@
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                           StrokeThickness="1" Margin="0,8,0,8" />
                                     
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,0">
+                                        <Button Name="BtnDlassSettingsManage" Content="Dlass设置管理" 
+                                                HorizontalAlignment="Left" 
+                                                Click="BtnDlassSettingsManage_Click" 
+                                                Padding="15,5" 
+                                                Margin="0,0,0,0"/>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
+                                          StrokeThickness="1" Margin="0,8,0,8" />
+                                    
                                     <TextBlock Margin="0,0,0,8" Text="收纳模式" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="20" />
                                     
@@ -3226,6 +3279,15 @@
                                                          Toggled="ToggleSwitchShowRandomAndSingleDraw_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用快抽悬浮按钮"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableQuickDraw"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableQuickDraw_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="直接调用外部点名"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent=""
@@ -3275,6 +3337,62 @@
                                                    FontFamily="Consolas"
                                                    Text="{Binding ElementName=RandWindowOnceMaxStudentsSlider, Path=Value, Converter={StaticResource IntNumberToString}}" />
                                     </ui:SimpleStackPanel>
+                                    
+                                    <!-- 新点名UI设置 -->
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
+                                          Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
+                                    <TextBlock Foreground="#fafafa" Text="新点名UI设置" 
+                                               FontSize="16" FontWeight="Bold" Margin="0,10,0,5" />
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用新点名UI"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchUseNewRollCallUI"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchUseNewRollCallUI_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用机器学习避免重复"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableMLAvoidance"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableMLAvoidance_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="避免重复历史记录数量" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider x:Name="MLAvoidanceHistorySlider" Minimum="5"
+                                                Maximum="50" Width="168" FontFamily="Microsoft YaHei UI"
+                                                ValueChanged="MLAvoidanceHistorySlider_ValueChanged"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="20" TickFrequency="5"
+                                                TickPlacement="None" AutoToolTipPlacement="None" />
+                                        <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
+                                                   FontFamily="Consolas"
+                                                   Text="{Binding ElementName=MLAvoidanceHistorySlider, Path=Value, Converter={StaticResource IntNumberToString}}" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="避免重复权重" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider x:Name="MLAvoidanceWeightSlider" Minimum="0.1"
+                                                Maximum="1.0" Width="168" FontFamily="Microsoft YaHei UI"
+                                                ValueChanged="MLAvoidanceWeightSlider_ValueChanged"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="0.8" TickFrequency="0.1"
+                                                TickPlacement="None" AutoToolTipPlacement="None" />
+                                        <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
+                                                   FontFamily="Consolas"
+                                                   Text="{Binding ElementName=MLAvoidanceWeightSlider, Path=Value, StringFormat={}{0:P0}}" />
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <TextBlock Text="# 机器学习算法会分析最近的点名历史，智能避免重复选择相同人员" 
+                                               TextWrapping="Wrap" Foreground="#a1a1aa" Margin="0,5,0,0" />
+                                    
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                           Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                     <TextBlock Foreground="#fafafa" Text="计时器设置" 
@@ -3287,6 +3405,33 @@
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" 
                                                          FontWeight="Bold" 
                                                          Toggled="ToggleSwitchUseLegacyTimerUI_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="新计时器UI"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchUseNewStyleUI"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchUseNewStyleUI_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用正计时"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableOvertimeCountUp"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableOvertimeCountUp_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="超时醒目数字"
+                                                   VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableOvertimeRedText"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableOvertimeRedText_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="计时器提醒音量" VerticalAlignment="Center"
@@ -3307,6 +3452,35 @@
                                                 Click="ButtonSelectCustomTimerSound_Click" Padding="10,3"/>
                                         <Button Name="ButtonResetTimerSound" Content="重置" FontFamily="Microsoft YaHei UI" 
                                                 Click="ButtonResetTimerSound_Click" Padding="10,3" Margin="5,0,0,0"/>
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="渐进提醒" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent=""
+                                                         Name="ToggleSwitchEnableProgressiveReminder"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" 
+                                                         FontWeight="Bold" 
+                                                         Toggled="ToggleSwitchEnableProgressiveReminder_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="渐进提醒音量" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Slider x:Name="ProgressiveReminderVolumeSlider" Minimum="0"
+                                                Maximum="1" Width="168" FontFamily="Microsoft YaHei UI"
+                                                ValueChanged="ProgressiveReminderVolumeSlider_ValueChanged"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="1" TickFrequency="0.1"
+                                                TickPlacement="None" AutoToolTipPlacement="None" />
+                                        <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
+                                                   FontFamily="Consolas"
+                                                   Text="{Binding ElementName=ProgressiveReminderVolumeSlider, Path=Value, StringFormat={}{0:P0}}" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
+                                        <TextBlock Foreground="#fafafa" Text="自定义渐进提醒音频：" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <Button Name="ButtonSelectCustomProgressiveReminderSound" Content="选择文件" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonSelectCustomProgressiveReminderSound_Click" Padding="10,3"/>
+                                        <Button Name="ButtonResetProgressiveReminderSound" Content="重置" FontFamily="Microsoft YaHei UI" 
+                                                Click="ButtonResetProgressiveReminderSound_Click" Padding="10,3" Margin="5,0,0,0"/>
                                     </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                             </GroupBox>
@@ -3857,7 +4031,7 @@
                                 CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown" MouseUp="BorderStrokeSelectionClone_MouseUp">
                             <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_copy_24_regular.png"
+                                <Image Source="{DynamicResource StrokeSelectionCloneIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                 <TextBlock Text="克隆" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
@@ -3869,7 +4043,7 @@
                                 MouseUp="BorderStrokeSelectionCloneToNewBoard_MouseUp"
                                 Visibility="{Binding Visibility, ElementName=GridBackgroundCover}">
                             <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_copy_add_24_regular.png"
+                                <Image Source="{DynamicResource StrokeSelectionCloneToNewBoardIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                 <TextBlock Text="克隆至新页" FontSize="8" Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
@@ -3897,10 +4071,10 @@
                             <ui:SimpleStackPanel VerticalAlignment="Center" Margin="0,-10">
                                 <ui:SimpleStackPanel Orientation="Horizontal">
                                     <Image MouseDown="Border_MouseDown" MouseUp="ImageFlipHorizontal_MouseUp"
-                                           Source="/Resources/Icons-Fluent/ic_fluent_flip_horizontal_24_regular.png"
+                                           Source="{DynamicResource StrokeSelectionFlipHorizontalIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="30" Width="30" />
                                     <Image MouseDown="Border_MouseDown" MouseUp="ImageFlipVertical_MouseUp"
-                                           Source="/Resources/Icons-Fluent/ic_fluent_flip_vertical_24_regular.png"
+                                           Source="{DynamicResource StrokeSelectionFlipVerticalIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="30" Width="30" />
                                 </ui:SimpleStackPanel>
                                 <TextBlock Text="翻转" FontSize="10" HorizontalAlignment="Center"
@@ -3914,21 +4088,21 @@
                             <ui:SimpleStackPanel VerticalAlignment="Center" Spacing="5" Margin="0,-10">
                                 <ui:SimpleStackPanel Orientation="Horizontal" Spacing="5">
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridPenWidthDecrease_MouseUp">
-                                        <Image Source="/Resources/Icons-Fluent/ic_fluent_edit_24_regular.png"
+                                        <Image Source="{DynamicResource StrokeSelectionPenWidthIcon}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                         <TextBlock Text="-" Foreground="{DynamicResource FloatBarForeground}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                                    Margin="0,0,-2,-7" FontSize="15" />
                                     </Grid>
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridPenWidthIncrease_MouseUp">
-                                        <Image Source="/Resources/Icons-Fluent/ic_fluent_edit_24_regular.png"
+                                        <Image Source="{DynamicResource StrokeSelectionPenWidthIcon}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                         <TextBlock Text="+" Foreground="{DynamicResource FloatBarForeground}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                                    Margin="0,0,-3,-4" FontSize="11" />
                                     </Grid>
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridPenWidthRestore_MouseUp">
-                                        <Image Source="/Resources/Icons-Fluent/ic_fluent_edit_24_regular.png"
+                                        <Image Source="{DynamicResource StrokeSelectionPenWidthIcon}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                         <Image Source="{DynamicResource AndroidRefreshDrawingImage}"
                                                VerticalAlignment="Bottom" HorizontalAlignment="Right"
@@ -3945,7 +4119,7 @@
                                 CornerRadius="{Binding ElementName=BorderStrokeSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown" MouseUp="BorderStrokeSelectionDelete_MouseUp">
                             <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_delete_24_regular.png"
+                                <Image Source="{DynamicResource StrokeSelectionDeleteIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                 <TextBlock Margin="0,5,0,0" Text="删除" FontSize="10"
                                            Foreground="{DynamicResource FloatBarForeground}"
@@ -3969,7 +4143,7 @@
                                 CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageClone_MouseUp">
                             <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_copy_24_regular.png"
+                                <Image Source="{DynamicResource ImageSelectionCloneIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                 <TextBlock Text="克隆" FontSize="10" Foreground="{DynamicResource FloatBarForeground}"
                                            HorizontalAlignment="Center" />
@@ -3985,7 +4159,7 @@
                                 Visibility="{Binding Visibility, ElementName=GridBackgroundCover}">
                             <ui:SimpleStackPanel VerticalAlignment="Center"
                                                  HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_copy_add_24_regular.png"
+                                <Image Source="{DynamicResource ImageSelectionCloneToNewBoardIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality"
                                        Height="25"
                                        Width="25" />
@@ -4028,14 +4202,14 @@
                             <ui:SimpleStackPanel VerticalAlignment="Center" Spacing="5" Margin="0,-10">
                                 <ui:SimpleStackPanel Orientation="Horizontal" Spacing="10">
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridImageScaleDecrease_MouseUp">
-                                        <Image Source="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular.png"
+                                        <Image Source="{DynamicResource ImageSelectionScaleIcon1}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                         <TextBlock Text="-" Foreground="{DynamicResource FloatBarForeground}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
                                                    Margin="0,0,-2,-7" FontSize="15" />
                                     </Grid>
                                     <Grid MouseDown="Border_MouseDown" MouseUp="GridImageScaleIncrease_MouseUp">
-                                        <Image Source="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular.png"
+                                        <Image Source="{DynamicResource ImageSelectionScaleIcon2}"
                                                RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                         <TextBlock Text="+" Foreground="{DynamicResource FloatBarForeground}"
                                                    VerticalAlignment="Bottom" HorizontalAlignment="Right"
@@ -4052,7 +4226,7 @@
                                 CornerRadius="{Binding ElementName=BorderImageSelectionControl, Path=CornerRadius}"
                                 Width="40" MouseDown="Border_MouseDown" MouseUp="BorderImageDelete_MouseUp">
                             <ui:SimpleStackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                                <Image Source="/Resources/Icons-Fluent/ic_fluent_delete_24_regular.png"
+                                <Image Source="{DynamicResource ImageSelectionDeleteIcon}"
                                        RenderOptions.BitmapScalingMode="HighQuality" Height="25" Width="25" />
                                 <TextBlock Margin="0,5,0,0" Text="删除" FontSize="10"
                                            Foreground="{DynamicResource FloatBarForeground}"
@@ -4401,7 +4575,7 @@
                                                                              VerticalAlignment="Center"
                                                                              HorizontalAlignment="Center"
                                                                              Margin="0,3,0,0">
-                                                            <Image Source="/Resources/new-icons/multi-touch.png"
+                                                            <Image Source="{DynamicResource MultiTouchIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4432,7 +4606,7 @@
                                                             Orientation="Horizontal" Spacing="4"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center">
-                                                            <Image Source="/Resources/new-icons/hand-move.png"
+                                                            <Image Source="{DynamicResource HandMoveIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4463,7 +4637,7 @@
                                                             Orientation="Horizontal" Spacing="4"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center">
-                                                            <Image Source="/Resources/new-icons/zoom.png"
+                                                            <Image Source="{DynamicResource ZoomIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4492,7 +4666,7 @@
                                                             Orientation="Horizontal" Spacing="4"
                                                             VerticalAlignment="Center"
                                                             HorizontalAlignment="Center">
-                                                            <Image Source="/Resources/new-icons/rotate.png"
+                                                            <Image Source="{DynamicResource RotateIcon}"
                                                                    RenderOptions.BitmapScalingMode="HighQuality"
                                                                    Height="16"
                                                                    Width="16" />
@@ -4861,7 +5035,7 @@
                                                                             <Controls:UniformGrid Columns="5"
                                                                                 Width="270"
                                                                                 Margin="0">
-                                                                                <Border BorderBrush="Black"
+                                                                                <Border BorderBrush="{DynamicResource FloatBarBorderBrush}"
                                                                                     BorderThickness="1"
                                                                                     CornerRadius="100" Width="45"
                                                                                     MouseDown="Border_MouseDown"
@@ -4887,7 +5061,7 @@
                                                                                 <Border
                                                                                     x:Name="BoardBorderPenColorBlack"
                                                                                     Background="Black"
-                                                                                    BorderBrush="Black"
+                                                                                    BorderBrush="#D3D3D3"
                                                                                     BorderThickness="1.5"
                                                                                     CornerRadius="100"
                                                                                     Width="45"
@@ -5570,7 +5744,7 @@
                                                                          Margin="0,0,0,0" Spacing="4">
                                                         <Border x:Name="BoardCircleEraserTabButton"
                                                                 MouseDown="SwitchToCircleEraser"
-                                                                Background="#553b82f6" Height="20" Width="40"
+                                                                Background="{DynamicResource BoardFloatBarButtonBackgroundPointerOverKey}" Height="20" Width="40"
                                                                 CornerRadius="3">
                                                             <Canvas>
                                                                 <ui:SimpleStackPanel
@@ -5578,7 +5752,7 @@
                                                                     Visibility="Visible" Orientation="Horizontal"
                                                                     Canvas.Left="11" Canvas.Right="11"
                                                                     Canvas.Bottom="0">
-                                                                    <Border Width="18" Height="2" Background="#2563eb"
+                                                                    <Border Width="18" Height="2" Background="{DynamicResource BoardFloatBarButtonButtonBackgroundPressedKey}"
                                                                             CornerRadius="1" />
                                                                 </ui:SimpleStackPanel>
                                                                 <ui:SimpleStackPanel Orientation="Vertical" Height="20"
@@ -5588,24 +5762,23 @@
                                                                         HorizontalAlignment="Center" Margin="0,3">
                                                                         <TextBlock
                                                                             x:Name="BoardCircleEraserTabButtonText"
-                                                                            Foreground="#172554" FontWeight="Medium"
+                                                                            Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                             FontSize="9" TextAlignment="Center"
-                                                                            Text="圆形擦"
-                                                                            Margin="2,1,0,0" />
+                                                                            Text="圆形擦" />
                                                                     </ui:SimpleStackPanel>
                                                                 </ui:SimpleStackPanel>
                                                             </Canvas>
                                                         </Border>
                                                         <Border x:Name="BoardRectangleEraserTabButton"
                                                                 MouseDown="SwitchToRectangleEraser"
-                                                                Background="Transparent"
+                                                                Background="{DynamicResource BoardFloatBarButtonBackgroundKey}"
                                                                 Height="20" Width="40" CornerRadius="3">
                                                             <Canvas>
                                                                 <ui:SimpleStackPanel Visibility="Collapsed"
                                                                     x:Name="BoardRectangleEraserTabButtonIndicator"
                                                                     Orientation="Horizontal" Canvas.Left="11"
                                                                     Canvas.Right="11" Canvas.Bottom="0">
-                                                                    <Border Width="18" Height="2" Background="#2563eb"
+                                                                    <Border Width="18" Height="2" Background="{DynamicResource BoardFloatBarButtonButtonBackgroundPressedKey}"
                                                                             CornerRadius="1" />
                                                                 </ui:SimpleStackPanel>
                                                                 <ui:SimpleStackPanel Orientation="Vertical" Height="20"
@@ -5615,10 +5788,9 @@
                                                                         HorizontalAlignment="Center" Margin="0,3">
                                                                         <TextBlock
                                                                             x:Name="BoardRectangleEraserTabButtonText"
-                                                                            Foreground="#172554" FontWeight="Medium"
+                                                                            Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                             FontSize="9" TextAlignment="Center"
-                                                                            Text="黑板擦"
-                                                                            Margin="2,1,0,0" />
+                                                                            Text="黑板擦" />
                                                                     </ui:SimpleStackPanel>
                                                                 </ui:SimpleStackPanel>
                                                             </Canvas>
@@ -5956,7 +6128,7 @@
                                                                     </Image.Source>
                                                                 </Image>
                                                                 <TextBlock Text="截图" FontSize="10" 
-                                                                                  Foreground="#1f2937" VerticalAlignment="Center"/>
+                                                                                  Foreground="{DynamicResource TextForeground}" VerticalAlignment="Center"/>
                                                             </ui:SimpleStackPanel>
                                                         </Border>
                                                         <!-- Select Image Option -->
@@ -5986,7 +6158,7 @@
                                                                     </Image.Source>
                                                                 </Image>
                                                                 <TextBlock Text="选择图片" FontSize="10"
-                                                                                  Foreground="#1f2937" VerticalAlignment="Center"/>
+                                                                                  Foreground="{DynamicResource TextForeground}" VerticalAlignment="Center"/>
                                                             </ui:SimpleStackPanel>
                                                         </Border>
                                                     </ui:SimpleStackPanel>
@@ -7634,14 +7806,14 @@
                                             <DrawingImage>
                                                 <DrawingImage.Drawing>
                                                     <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                        <GeometryDrawing x:Name="ClearIconGeometry" Brush="#b91c1c"
+                                                        <GeometryDrawing x:Name="ClearIconGeometry" Brush="{DynamicResource RedBrush}"
                                                                          Geometry="F1 M24,24z M0,0z M8.53333,2.37333L7.92,4.21333 2.56,4.21333C2.4,4.21333 2.26667,4.27556 2.16,4.4 2.05333,4.50667 2,4.63111 2,4.77333L2,5.89333C2,6.03556 2.05333,6.16889 2.16,6.29333 2.26667,6.4 2.4,6.45333 2.56,6.45333L21.44,6.45333C21.6,6.45333 21.7333,6.4 21.84,6.29333 21.9467,6.16889 22,6.03556 22,5.89333L22,4.77333C22,4.63111 21.9467,4.50667 21.84,4.4 21.7333,4.27556 21.6,4.21333 21.44,4.21333L16.08,4.21333 15.4667,2.37333C15.4311,2.26667 15.36,2.17778 15.2533,2.10667 15.1644,2.03556 15.0578,2 14.9333,2L9.06667,2C8.94222,2 8.82667,2.03556 8.72,2.10667 8.63111,2.17778 8.56889,2.26667 8.53333,2.37333z M19.7867,8.10667L18.7467,20.9867C18.7111,21.2711 18.5867,21.5111 18.3733,21.7067 18.1778,21.9022 17.9378,22 17.6533,22L6.37333,22C6.08889,22 5.84,21.9022 5.62667,21.7067 5.41333,21.5111 5.28889,21.2711 5.25333,20.9867L4.21333,8.10667 19.7867,8.10667z M8.66667,12.56L8.66667,16.9867C8.66667,17.1467 8.72,17.28 8.82667,17.3867 8.93333,17.4933 9.06667,17.5467 9.22667,17.5467L9.78667,17.5467C9.92889,17.5467 10.0533,17.4933 10.16,17.3867 10.2844,17.28 10.3467,17.1467 10.3467,16.9867L10.3467,12.56C10.3467,12.4 10.2844,12.2667 10.16,12.16 10.0533,12.0533 9.92889,12 9.78667,12L9.22667,12C9.06667,12 8.93333,12.0533 8.82667,12.16 8.72,12.2667 8.66667,12.4 8.66667,12.56z M14.2133,12C14.0711,12 13.9467,12.0533 13.84,12.16 13.7333,12.2667 13.68,12.4 13.68,12.56L13.68,16.9867C13.68,17.1467 13.7333,17.28 13.84,17.3867 13.9467,17.4933 14.0711,17.5467 14.2133,17.5467L14.7733,17.5467C14.9333,17.5467 15.0667,17.4933 15.1733,17.3867 15.28,17.28 15.3333,17.1467 15.3333,16.9867L15.3333,12.56C15.3333,12.4 15.28,12.2667 15.1733,12.16 15.0667,12.0533 14.9333,12 14.7733,12L14.2133,12z" />
                                                     </DrawingGroup>
                                                 </DrawingImage.Drawing>
                                             </DrawingImage>
                                         </Image.Source>
                                     </Image>
-                                    <TextBlock x:Name="TrashBinToolbarTextBlock" Text="清空" Foreground="#B91C1C"
+                                    <TextBlock x:Name="TrashBinToolbarTextBlock" Text="清空" Foreground="{DynamicResource RedBrush}"
                                                FontWeight="Bold" FontSize="8" Margin="0,1,0,0" TextAlignment="Center" />
                                 </ui:SimpleStackPanel>
                                 <ui:SimpleStackPanel Name="StackPanelCanvasControls" Visibility="Visible"
@@ -7871,7 +8043,7 @@
                                                                         Orientation="Horizontal" Width="270">
                                                                         <Controls:UniformGrid Columns="5" Width="270"
                                                                             Margin="0">
-                                                                            <Border BorderBrush="Black"
+                                                                            <Border BorderBrush="{DynamicResource FloatBarBorderBrush}"
                                                                                 BorderThickness="1"
                                                                                 CornerRadius="100" Width="45"
                                                                                 MouseDown="Border_MouseDown"
@@ -7893,7 +8065,7 @@
                                                                                 </Grid>
                                                                             </Border>
                                                                             <Border x:Name="BorderPenColorBlack"
-                                                                                Background="Black" BorderBrush="Black"
+                                                                                Background="Black" BorderBrush="#D3D3D3"
                                                                                 BorderThickness="1.5"
                                                                                 CornerRadius="100"
                                                                                 Width="45"
@@ -8562,7 +8734,7 @@
                                                                          MouseDown="Image_MouseDown"
                                                                          MouseUp="BtnDrawLine_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/line.png"
+                                                        <Image Source="{DynamicResource GeoIconLine}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画直线" FontSize="8" HorizontalAlignment="Center" />
@@ -8572,7 +8744,7 @@
                                                                          MouseUp="BtnDrawDashedLine_Click"
                                                                          Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/dashed-line.png"
+                                                        <Image Source="{DynamicResource GeoIconDashedLine}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画虚线" FontSize="8" HorizontalAlignment="Center" />
@@ -8582,7 +8754,7 @@
                                                                          MouseUp="BtnDrawDotLine_Click"
                                                                          Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/dotted-line.png"
+                                                        <Image Source="{DynamicResource GeoIconDotLine}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画点线" FontSize="8" HorizontalAlignment="Center" />
@@ -8591,7 +8763,7 @@
                                                                          MouseDown="Image_MouseDown"
                                                                          MouseUp="BtnDrawArrow_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/arrow.png"
+                                                        <Image Source="{DynamicResource GeoIconArrow}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画箭头" FontSize="8" HorizontalAlignment="Center" />
@@ -8602,7 +8774,7 @@
                                                                          Margin="0,0,0,0" Height="38" Width="32"
                                                                          Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/paralle-lines.png"
+                                                            Source="{DynamicResource GeoIconParallelLine}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="4平行线" FontSize="8" HorizontalAlignment="Center" />
@@ -8611,7 +8783,7 @@
                                                                          Margin="0,0,0,0" Height="38" Width="32"
                                                                          Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/centered-square.png"
+                                                            Source="{DynamicResource GeoIconRectangleCenter}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="中心正方" FontSize="8" HorizontalAlignment="Center" />
@@ -8619,7 +8791,7 @@
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawCircle_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/centered-circle.png"
+                                                            Source="{DynamicResource GeoIconCircle}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="中心圆" FontSize="8" HorizontalAlignment="Center" />
@@ -8628,7 +8800,7 @@
                                                                          Margin="0,0,0,0" Height="38" Width="32"
                                                                          Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/centered-circle-dashed.png"
+                                                            Source="{DynamicResource GeoIconDashedCircle}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2"
                                                             Height="19" Width="19" />
@@ -8638,7 +8810,7 @@
                                                                          Margin="0,0,0,0" Height="38" Width="32"
                                                                          Orientation="Vertical">
                                                         <Image
-                                                            Source="/Resources/Icons-png/geo-icons/centered-oval.png"
+                                                            Source="{DynamicResource GeoIconEllipseCenter}"
                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                             Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="中心椭圆" FontSize="8" HorizontalAlignment="Center" />
@@ -8668,7 +8840,7 @@
                                                                      Margin="4,0,4,6">
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawCuboid_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/cube.png"
+                                                        <Image Source="{DynamicResource GeoIconCuboid}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="长方体" FontSize="8" HorizontalAlignment="Center" />
@@ -8676,7 +8848,7 @@
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawRectangle_Click"
                                                                          Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/square.png"
+                                                        <Image Source="{DynamicResource GeoIconRectangle}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="正方形" FontSize="8" HorizontalAlignment="Center" />
@@ -8684,14 +8856,14 @@
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawCylinder_Click"
                                                                          Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/cylinder.png"
+                                                        <Image Source="{DynamicResource GeoIconCylinder}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画圆柱" FontSize="8" HorizontalAlignment="Center" />
                                                     </ui:SimpleStackPanel>
                                                     <ui:SimpleStackPanel MouseUp="BtnDrawCone_Click" Margin="0,0,0,0"
                                                                          Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="/Resources/Icons-png/geo-icons/cone.png"
+                                                        <Image Source="{DynamicResource GeoIconCone}"
                                                                RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,4,0,2" Height="19" Width="19" />
                                                         <Label Content="画圆锥" FontSize="8" HorizontalAlignment="Center" />
@@ -8900,14 +9072,14 @@
                                             <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center"
                                                                  Margin="0,0,0,0" Spacing="4">
                                                 <Border x:Name="CircleEraserTabButton" MouseDown="SwitchToCircleEraser"
-                                                        Background="#553b82f6" Height="20" Width="40" CornerRadius="3">
+                                                        Background="{DynamicResource FloatBarButtonBackgroundPointerOverKey}" Height="20" Width="40" CornerRadius="3">
                                                     <Canvas>
                                                         <ui:SimpleStackPanel x:Name="CircleEraserTabButtonIndicator"
                                                                              Visibility="Visible"
                                                                              Orientation="Horizontal"
                                                                              Canvas.Left="11" Canvas.Right="11"
                                                                              Canvas.Bottom="0">
-                                                            <Border Width="18" Height="2" Background="#2563eb"
+                                                            <Border Width="18" Height="2" Background="{DynamicResource FloatBarButtonButtonBackgroundPressedKey}"
                                                                     CornerRadius="1" />
                                                         </ui:SimpleStackPanel>
                                                         <ui:SimpleStackPanel Orientation="Vertical" Height="20"
@@ -8916,10 +9088,9 @@
                                                                 Orientation="Horizontal"
                                                                 HorizontalAlignment="Center" Margin="0,3">
                                                                 <TextBlock x:Name="CircleEraserTabButtonText"
-                                                                           Foreground="#172554" FontWeight="Medium"
+                                                                           Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                            FontSize="9" TextAlignment="Center"
-                                                                           Text="圆形擦"
-                                                                           Margin="2,1,0,0" />
+                                                                           Text="圆形擦" />
                                                             </ui:SimpleStackPanel>
                                                         </ui:SimpleStackPanel>
                                                     </Canvas>
@@ -8932,7 +9103,7 @@
                                                                              x:Name="RectangleEraserTabButtonIndicator"
                                                                              Orientation="Horizontal" Canvas.Left="11"
                                                                              Canvas.Right="11" Canvas.Bottom="0">
-                                                            <Border Width="18" Height="2" Background="#2563eb"
+                                                            <Border Width="18" Height="2" Background="{DynamicResource FloatBarButtonButtonBackgroundPressedKey}"
                                                                     CornerRadius="1" />
                                                         </ui:SimpleStackPanel>
                                                         <ui:SimpleStackPanel Orientation="Vertical" Height="20"
@@ -8941,10 +9112,9 @@
                                                                 Orientation="Horizontal"
                                                                 HorizontalAlignment="Center" Margin="0,3">
                                                                 <TextBlock x:Name="RectangleEraserTabButtonText"
-                                                                           Foreground="#172554" FontWeight="Medium"
+                                                                           Foreground="{DynamicResource FloatBarForeground}" FontWeight="Medium"
                                                                            FontSize="9" TextAlignment="Center"
-                                                                           Text="黑板擦"
-                                                                           Margin="2,1,0,0" />
+                                                                           Text="黑板擦" />
                                                             </ui:SimpleStackPanel>
                                                         </ui:SimpleStackPanel>
                                                     </Canvas>
@@ -9293,7 +9463,7 @@
 
                             MouseUp="TwoFingerGestureBorder_MouseUp" Background="Transparent"
                             Orientation="Vertical" HorizontalAlignment="Center" Width="36" Margin="0">
-                            <Image x:Name="EnableTwoFingerGestureBtn" Source="/Resources/new-icons/gesture.png"
+                            <Image x:Name="EnableTwoFingerGestureBtn" Source="{DynamicResource GestureIcon}"
                                    RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="18"
                                    Margin="0,3,0,0" />
                             <TextBlock x:Name="gestureiconText" Text="手势" Foreground="{DynamicResource FloatBarForeground}" FontSize="8"
@@ -9322,7 +9492,7 @@
                                 </Border>
                                 <ui:SimpleStackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                                      HorizontalAlignment="Center" Margin="0,3,0,0">
-                                    <Image Source="/Resources/new-icons/multi-touch.png"
+                                    <Image Source="{DynamicResource MultiTouchIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="多指书写" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
@@ -9346,7 +9516,7 @@
                                 <ui:SimpleStackPanel Opacity="1" x:Name="TwoFingerGestureSimpleStackPanel"
                                                      Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                                      HorizontalAlignment="Center">
-                                    <Image Source="/Resources/new-icons/hand-move.png"
+                                    <Image Source="{DynamicResource HandMoveIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="双指移动" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
@@ -9371,7 +9541,7 @@
                                     Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
                                     Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
-                                    <Image Source="/Resources/new-icons/zoom.png"
+                                    <Image Source="{DynamicResource ZoomIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="双指缩放" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">
@@ -9396,7 +9566,7 @@
                                     Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
                                     Orientation="Horizontal" Spacing="4" VerticalAlignment="Center"
                                     HorizontalAlignment="Center">
-                                    <Image Source="/Resources/new-icons/rotate.png"
+                                    <Image Source="{DynamicResource RotateIcon}"
                                            RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
                                     <Label Content="双指旋转" FontSize="10" VerticalAlignment="Center" />
                                     <Viewbox Width="36" Height="18" Margin="4,0,0,0">

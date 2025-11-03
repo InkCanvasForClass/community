@@ -14,12 +14,12 @@
     <SolidColorBrush x:Key="IconForeground" Color="#18181b" />
     <SolidColorBrush x:Key="TextForeground" Color="Black" />
 
-    <SolidColorBrush x:Key="RedBrush" Color="DarkRed" />
+    <SolidColorBrush x:Key="RedBrush" Color="#B91C1C" />
     <SolidColorBrush x:Key="PurpleBrush" Color="DarkBlue" />
 
-    <Color x:Key="FloatBarButtonBackgroundKey">Transparent</Color>
-    <Color x:Key="FloatBarButtonBackgroundPointerOverKey">#66FFFFFF</Color>
-    <Color x:Key="FloatBarButtonButtonBackgroundPressedKey">#99FFFFFF</Color>
+    <SolidColorBrush x:Key="FloatBarButtonBackgroundKey" Color="Transparent" />
+    <SolidColorBrush x:Key="FloatBarButtonBackgroundPointerOverKey" Color="#222563EB" />
+    <SolidColorBrush x:Key="FloatBarButtonButtonBackgroundPressedKey" Color="#442563EB" />
     
     <!-- 白板模式浮动栏颜色 -->
     <SolidColorBrush x:Key="BoardFloatBarBackground" Color="#f4f4f5" />
@@ -30,6 +30,11 @@
     <SolidColorBrush x:Key="BoardFloatBarSelectedBorderBrush" Color="#2563eb" />
     <SolidColorBrush x:Key="BoardFloatBarSelectedForeground" Color="White" />
     
+    <!-- 橡皮擦按钮颜色 -->
+    <SolidColorBrush x:Key="BoardFloatBarButtonBackgroundKey" Color="Transparent" />
+    <SolidColorBrush x:Key="BoardFloatBarButtonBackgroundPointerOverKey" Color="#222563EB" />
+    <SolidColorBrush x:Key="BoardFloatBarButtonButtonBackgroundPressedKey" Color="#442563EB" />
+    
     <!-- 历史回滚窗口主题颜色 -->
     <SolidColorBrush x:Key="HistoryWindowPrimaryBrush" Color="#2563eb"/>
     <SolidColorBrush x:Key="HistoryWindowPrimaryHoverBrush" Color="#1d4ed8"/>
@@ -39,12 +44,109 @@
     <SolidColorBrush x:Key="HistoryWindowTextPrimaryBrush" Color="#1f2937"/>
     <SolidColorBrush x:Key="HistoryWindowTextSecondaryBrush" Color="#6b7280"/>
     
-    <!-- 快速面板图标资源 - 浅色主题 -->
+    <!-- 快速面板图标资源 -->
     <BitmapImage x:Key="QuickPanelPersonMoneyIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_person_money_24_regular.png"/>
     <BitmapImage x:Key="QuickPanelPeopleMoneyIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_people_money_24_regular.png"/>
     <BitmapImage x:Key="QuickPanelTimerIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_timer_24_regular.png"/>
+    
+    <!-- 墨迹选中栏图标资源 -->
+    <BitmapImage x:Key="StrokeSelectionCloneIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_copy_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionCloneToNewBoardIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_copy_add_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionFlipHorizontalIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_flip_horizontal_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionFlipVerticalIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_flip_vertical_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionPenWidthIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_edit_24_regular.png"/>
+    <BitmapImage x:Key="StrokeSelectionDeleteIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_delete_24_regular.png"/>
+    
+    <!-- 图片选中栏图标资源 -->
+    <BitmapImage x:Key="ImageSelectionCloneIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_copy_24_regular.png"/>
+    <BitmapImage x:Key="ImageSelectionCloneToNewBoardIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_copy_add_24_regular.png"/>
+    <BitmapImage x:Key="ImageSelectionScaleIcon1" UriSource="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular.png"/>
+    <BitmapImage x:Key="ImageSelectionScaleIcon2" UriSource="/Resources/Icons-Fluent/ic_fluent_scale_fit_24_regular.png"/>
+    <BitmapImage x:Key="ImageSelectionDeleteIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_delete_24_regular.png"/>
+    
     <BitmapImage x:Key="QuickPanelBlackboardIcon" UriSource="/Resources/new-icons/blackboard.png"/>
     <BitmapImage x:Key="QuickPanelEndSlideshowIcon" UriSource="/Resources/new-icons/end-slides-show.png"/>
     <BitmapImage x:Key="QuickPanelEyeIcon" UriSource="/Resources/new-icons/eye.png"/>
     <BitmapImage x:Key="QuickPanelChevronLeftIcon" UriSource="/Resources/new-icons/chevron-left.png"/>
+    
+    <!-- 几何面板图标资源 -->
+    <BitmapImage x:Key="GeoIconLine" UriSource="/Resources/Icons-png/geo-icons/line.png"/>
+    <BitmapImage x:Key="GeoIconDashedLine" UriSource="/Resources/Icons-png/geo-icons/dashed-line.png"/>
+    <BitmapImage x:Key="GeoIconDotLine" UriSource="/Resources/Icons-png/geo-icons/dotted-line.png"/>
+    <BitmapImage x:Key="GeoIconArrow" UriSource="/Resources/Icons-png/geo-icons/arrow.png"/>
+    <BitmapImage x:Key="GeoIconParallelLine" UriSource="/Resources/Icons-png/geo-icons/paralle-lines.png"/>
+    <BitmapImage x:Key="GeoIconRectangleCenter" UriSource="/Resources/Icons-png/geo-icons/centered-square.png"/>
+    <BitmapImage x:Key="GeoIconCircle" UriSource="/Resources/Icons-png/geo-icons/centered-circle.png"/>
+    <BitmapImage x:Key="GeoIconDashedCircle" UriSource="/Resources/Icons-png/geo-icons/centered-circle-dashed.png"/>
+    <BitmapImage x:Key="GeoIconEllipseCenter" UriSource="/Resources/Icons-png/geo-icons/centered-oval.png"/>
+    <BitmapImage x:Key="GeoIconCuboid" UriSource="/Resources/Icons-png/geo-icons/cube.png"/>
+    <BitmapImage x:Key="GeoIconRectangle" UriSource="/Resources/Icons-png/geo-icons/square.png"/>
+    <BitmapImage x:Key="GeoIconCylinder" UriSource="/Resources/Icons-png/geo-icons/cylinder.png"/>
+    <BitmapImage x:Key="GeoIconCone" UriSource="/Resources/Icons-png/geo-icons/cone.png"/>
+    
+    <!-- 点名窗口主题颜色 -->
+    <SolidColorBrush x:Key="RandWindowBackground" Color="#F0F3F9"/>
+    <SolidColorBrush x:Key="RandWindowBorderBrush" Color="#0066BF"/>
+    <SolidColorBrush x:Key="RandWindowTextForeground" Color="Black"/>
+    <SolidColorBrush x:Key="RandWindowButtonBackground" Color="#FBFBFD"/>
+    <SolidColorBrush x:Key="RandWindowButtonForeground" Color="Black"/>
+    <SolidColorBrush x:Key="RandWindowPrimaryButtonBackground" Color="#0066BF"/>
+    <SolidColorBrush x:Key="RandWindowPrimaryButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="RandWindowSecondaryButtonBackground" Color="#00B894"/>
+    <SolidColorBrush x:Key="RandWindowSecondaryButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="RandWindowCloseButtonBackground" Color="#E32A34"/>
+    <SolidColorBrush x:Key="RandWindowCloseButtonForeground" Color="White"/>
+    
+    
+    <!-- 倒计时窗口主题颜色 -->
+    <SolidColorBrush x:Key="TimerWindowBackground" Color="#F0F3F9"/>
+    <SolidColorBrush x:Key="TimerWindowBorderBrush" Color="#0066BF"/>
+    <SolidColorBrush x:Key="TimerWindowTextForeground" Color="#5B5D5F"/>
+    <SolidColorBrush x:Key="TimerWindowButtonBackground" Color="#FBFBFD"/>
+    <SolidColorBrush x:Key="TimerWindowButtonForeground" Color="Black"/>
+    <SolidColorBrush x:Key="TimerWindowPrimaryButtonBackground" Color="#0066BF"/>
+    <SolidColorBrush x:Key="TimerWindowPrimaryButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="TimerWindowStopTimeBackground" Color="#E8EAF0"/>
+    <SolidColorBrush x:Key="TimerWindowStopTimeForeground" Color="Black"/>
+    
+    <!-- 倒计时窗口时钟图标 -->
+    <BitmapImage x:Key="TimerWindowClockIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_timer_24_regular.png"/>
+    
+    <!-- 倒计时窗口主题颜色 -->
+    <SolidColorBrush x:Key="NewTimerWindowBackground" Color="White"/>
+    <SolidColorBrush x:Key="NewTimerWindowBorderBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="NewTimerWindowTextForeground" Color="#333333"/>
+    <SolidColorBrush x:Key="NewTimerWindowButtonBackground" Color="#F0F0F0"/>
+    <SolidColorBrush x:Key="NewTimerWindowButtonForeground" Color="#666666"/>
+    <SolidColorBrush x:Key="NewTimerWindowDigitForeground" Color="#333333"/>
+    <SolidColorBrush x:Key="NewTimerWindowTitleForeground" Color="#333333"/>
+    <SolidColorBrush x:Key="NewTimerWindowPrimaryButtonBackground" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="NewTimerWindowPrimaryButtonForeground" Color="White"/>
+    
+    <!-- 说明书窗口主题颜色 -->
+    <SolidColorBrush x:Key="OperatingGuideWindowBackground" Color="#F0F3F9"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowBorderBrush" Color="#0066BF"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowTextForeground" Color="Black"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowButtonBackground" Color="#FBFBFD"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowButtonForeground" Color="Black"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowFullscreenButtonBackground" Color="#FBFBFD"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowFullscreenButtonForeground" Color="Black"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowCloseButtonBackground" Color="#E32A34"/>
+    <SolidColorBrush x:Key="OperatingGuideWindowCloseButtonForeground" Color="White"/>
+    
+    <!-- 说明书窗口图标资源 -->
+    <BitmapImage x:Key="OperatingGuideWindowKeyboardIcon" UriSource="/Resources/Icons-Fluent/ic_fluent_keyboard_24_regular.png"/>
+    <BitmapImage x:Key="OperatingGuideWindowControlIcon1" UriSource="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"/>
+    <BitmapImage x:Key="OperatingGuideWindowControlIcon2" UriSource="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"/>
+    <BitmapImage x:Key="OperatingGuideWindowControlIcon3" UriSource="/Resources/Icons-Fluent/ic_fluent_control_button_24_regular.png"/>
+    
+    <!-- 手势选项面板图标资源 - 浅色主题 -->
+    <BitmapImage x:Key="MultiTouchIcon" UriSource="/Resources/new-icons/multi-touch.png"/>
+    <BitmapImage x:Key="HandMoveIcon" UriSource="/Resources/new-icons/hand-move.png"/>
+    <BitmapImage x:Key="ZoomIcon" UriSource="/Resources/new-icons/zoom.png"/>
+    <BitmapImage x:Key="RotateIcon" UriSource="/Resources/new-icons/rotate.png"/>
+    
+    <!-- 浮动栏手势按钮图标资源 - 浅色主题 -->
+    <BitmapImage x:Key="GestureIcon" UriSource="/Resources/new-icons/gesture.png"/>
+    <BitmapImage x:Key="GestureIconEnabled" UriSource="/Resources/new-icons/gesture-enabled.png"/>
 </ResourceDictionary>

@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -132,6 +133,23 @@ namespace Ink_Canvas
                     var fs = new FileStream(savePathWithName, FileMode.Create);
                     inkCanvas.Strokes.Save(fs);
                     fs.Close();
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var delayMinutes = Settings?.Dlass?.AutoUploadDelayMinutes ?? 0;
+                            if (delayMinutes > 0)
+                            {
+                                await Task.Delay(TimeSpan.FromMinutes(delayMinutes));
+                            }
+
+                            await Helpers.DlassNoteUploader.UploadNoteFileAsync(savePathWithName);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    });
+                    
                     // 保存元素信息
                     var elementInfos = new List<CanvasElementInfo>();
                     foreach (var child in inkCanvas.Children)
@@ -310,6 +328,23 @@ namespace Ink_Canvas
                     var fs = new FileStream(savePathWithName, FileMode.Create);
                     inkCanvas.Strokes.Save(fs);
                     fs.Close();
+
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var delayMinutes = Settings?.Dlass?.AutoUploadDelayMinutes ?? 0;
+                            if (delayMinutes > 0)
+                            {
+                                await Task.Delay(TimeSpan.FromMinutes(delayMinutes));
+                            }
+
+                            await Helpers.DlassNoteUploader.UploadNoteFileAsync(imagePathWithName);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    });
                 }
             }
 

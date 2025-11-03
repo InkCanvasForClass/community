@@ -29,6 +29,8 @@ namespace Ink_Canvas
         public ModeSettings ModeSettings { get; set; } = new ModeSettings();
         [JsonProperty("camera")]
         public CameraSettings Camera { get; set; } = new CameraSettings();
+        [JsonProperty("dlass")]
+        public DlassSettings Dlass { get; set; } = new DlassSettings();
     }
 
     public class Canvas
@@ -462,6 +464,12 @@ namespace Ink_Canvas
         [JsonProperty("isAutoEnterAnnotationAfterKillHite")]
         public bool IsAutoEnterAnnotationAfterKillHite { get; set; }
 
+        [JsonProperty("isEnableAutoSaveStrokes")]
+        public bool IsEnableAutoSaveStrokes { get; set; } = true;
+
+        [JsonProperty("autoSaveStrokesIntervalMinutes")]
+        public int AutoSaveStrokesIntervalMinutes { get; set; } = 5;
+
         [JsonProperty("floatingWindowInterceptor")]
         public FloatingWindowInterceptorSettings FloatingWindowInterceptor { get; set; } = new FloatingWindowInterceptorSettings();
     }
@@ -591,6 +599,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isAlwaysOnTop")]
         public bool IsAlwaysOnTop { get; set; } = true;
+
+        [JsonProperty("enableUIAccessTopMost")]
+        public bool EnableUIAccessTopMost { get; set; } = false;
     }
 
     public class InkToShape
@@ -631,10 +642,32 @@ namespace Ink_Canvas
         public List<CustomPickNameBackground> CustomPickNameBackgrounds { get; set; } = new List<CustomPickNameBackground>();
         [JsonProperty("useLegacyTimerUI")]
         public bool UseLegacyTimerUI { get; set; } = false;
+        [JsonProperty("useNewStyleUI")]
+        public bool UseNewStyleUI { get; set; } = true;
         [JsonProperty("timerVolume")]
         public double TimerVolume { get; set; } = 1.0;
         [JsonProperty("customTimerSoundPath")]
         public string CustomTimerSoundPath { get; set; } = "";
+        [JsonProperty("enableOvertimeCountUp")]
+        public bool EnableOvertimeCountUp { get; set; } = false;
+        [JsonProperty("enableOvertimeRedText")]
+        public bool EnableOvertimeRedText { get; set; } = false;
+        [JsonProperty("enableProgressiveReminder")]
+        public bool EnableProgressiveReminder { get; set; } = false;
+        [JsonProperty("progressiveReminderVolume")]
+        public double ProgressiveReminderVolume { get; set; } = 1.0;
+        [JsonProperty("progressiveReminderSoundPath")]
+        public string ProgressiveReminderSoundPath { get; set; } = "";
+        [JsonProperty("useNewRollCallUI")]
+        public bool UseNewRollCallUI { get; set; } = true;
+        [JsonProperty("enableMLAvoidance")]
+        public bool EnableMLAvoidance { get; set; } = true;
+        [JsonProperty("mlAvoidanceHistoryCount")]
+        public int MLAvoidanceHistoryCount { get; set; } = 20;
+        [JsonProperty("mlAvoidanceWeight")]
+        public double MLAvoidanceWeight { get; set; } = 0.8;
+        [JsonProperty("enableQuickDraw")]
+        public bool EnableQuickDraw { get; set; } = true;
     }
 
     public class CustomPickNameBackground
@@ -692,5 +725,26 @@ namespace Ink_Canvas
 
         [JsonProperty("selectedCameraIndex")]
         public int SelectedCameraIndex { get; set; } = 0;
+    }
+
+    public class DlassSettings
+    {
+        [JsonProperty("userToken")]
+        public string UserToken { get; set; } = string.Empty;
+
+        [JsonProperty("savedTokens")]
+        public List<string> SavedTokens { get; set; } = new List<string>();
+
+        [JsonProperty("selectedClassName")]
+        public string SelectedClassName { get; set; } = string.Empty;
+
+        [JsonProperty("apiBaseUrl")]
+        public string ApiBaseUrl { get; set; } = "https://dlass.tech";
+
+        [JsonProperty("isAutoUploadNotes")]
+        public bool IsAutoUploadNotes { get; set; } = false;
+
+        [JsonProperty("autoUploadDelayMinutes")]
+        public int AutoUploadDelayMinutes { get; set; } = 0;
     }
 }

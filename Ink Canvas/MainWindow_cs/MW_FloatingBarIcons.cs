@@ -80,8 +80,7 @@ namespace Ink_Canvas
                 // 多指书写模式启用时，手势功能被禁用
                 TwoFingerGestureSimpleStackPanel.Opacity = 0.5;
                 TwoFingerGestureSimpleStackPanel.IsHitTestVisible = false;
-                EnableTwoFingerGestureBtn.Source =
-                    new BitmapImage(new Uri("/Resources/new-icons/gesture.png", UriKind.Relative));
+                EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIcon");
 
                 // 根据主题设置颜色
                 if (Settings.Appearance.Theme == 1) // 深色主题
@@ -117,8 +116,7 @@ namespace Ink_Canvas
 
                 if (hasGestureEnabled)
                 {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri("/Resources/new-icons/gesture-enabled.png", UriKind.Relative));
+                    EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIconEnabled");
 
                     BoardGesture.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                     BoardGestureGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -130,8 +128,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    EnableTwoFingerGestureBtn.Source =
-                        new BitmapImage(new Uri("/Resources/new-icons/gesture.png", UriKind.Relative));
+                    EnableTwoFingerGestureBtn.Source = (BitmapImage)Application.Current.FindResource("GestureIcon");
 
                     // 根据主题设置颜色
                     if (Settings.Appearance.Theme == 1) // 深色主题
@@ -176,11 +173,16 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 在屏幕模式（非放映模式）下，不显示手势按钮
             if (currentMode == 0)
             {
-                EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
-                return;
+                if (GridTransparencyFakeBackground.Background != Brushes.Transparent && isVisible)
+                {
+                }
+                else
+                {
+                    EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    return;
+                }
             }
 
             if (StackPanelCanvasControls.Visibility != Visibility.Visible
@@ -383,7 +385,7 @@ namespace Ink_Canvas
                 var slideAnimation = new DoubleAnimation
                 {
                     From = 0, // 滑动距离
-                    To = BorderSettings.RenderTransform.Value.OffsetX - 440,
+                    To = BorderSettings.RenderTransform.Value.OffsetX - 490,
                     Duration = TimeSpan.FromSeconds(0.6)
                 };
                 slideAnimation.EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut };
@@ -396,18 +398,13 @@ namespace Ink_Canvas
                 {
                     BorderSettings.Visibility = Visibility.Collapsed;
                     isOpeningOrHidingSettingsPane = false;
-                    // 在设置面板完全关闭后，根据情况恢复无焦点模式状态
-                    if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
+                    if (isTemporarilyDisablingNoFocusMode)
                     {
-                        // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
-                        Settings.Advanced.IsNoFocusMode = true;
-                        ToggleSwitchNoFocusMode.IsOn = true; // 同步更新设置面板中的开关状态
+                        isTemporarilyDisablingNoFocusMode = false;
                         ApplyNoFocusMode();
                     }
-                    // 如果用户在设置中修改了无焦点模式，则保持用户的修改
                 };
 
-                BorderSettings.Visibility = Visibility.Visible;
                 BorderSettings.RenderTransform = new TranslateTransform();
 
                 isOpeningOrHidingSettingsPane = true;
@@ -475,12 +472,26 @@ namespace Ink_Canvas
                     HideFloatingBarHighlight();
                 }
 
+                // 根据主题选择高光颜色
+                Color highlightColor;
+                bool isDarkTheme = Settings.Appearance.Theme == 1 ||
+                                   (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+
+                if (isDarkTheme)
+                {
+                    highlightColor = Color.FromRgb(102, 204, 255); // #66ccff for dark theme
+                }
+                else
+                {
+                    highlightColor = Color.FromRgb(30, 58, 138); // Keep current color for light theme
+                }
+
                 switch (mode)
                 {
                     case "pen":
                     case "color":
                         {
-                            PenIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            PenIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             PenIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
                             BoardPen.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -492,7 +503,7 @@ namespace Ink_Canvas
                         }
                     case "eraser":
                         {
-                            CircleEraserIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            CircleEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             CircleEraserIconGeometry.Geometry =
                                 Geometry.Parse(GetCorrectIcon("eraserCircle", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -505,7 +516,7 @@ namespace Ink_Canvas
                         }
                     case "eraserByStrokes":
                         {
-                            StrokeEraserIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            StrokeEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             StrokeEraserIconGeometry.Geometry =
                                 Geometry.Parse(GetCorrectIcon("eraserStroke", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -518,7 +529,7 @@ namespace Ink_Canvas
                         }
                     case "select":
                         {
-                            LassoSelectIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            LassoSelectIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             LassoSelectIconGeometry.Geometry =
                                 Geometry.Parse(GetCorrectIcon("lassoSelect", true));
                             BoardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -531,7 +542,7 @@ namespace Ink_Canvas
                         }
                     case "cursor":
                         {
-                            CursorIconGeometry.Brush = new SolidColorBrush(Color.FromRgb(30, 58, 138));
+                            CursorIconGeometry.Brush = new SolidColorBrush(highlightColor);
                             CursorIconGeometry.Geometry =
                                 Geometry.Parse(GetCorrectIcon("cursor", true));
                             // 根据主题设置颜色
@@ -915,7 +926,7 @@ namespace Ink_Canvas
         #region 主要的工具按鈕事件
 
         /// <summary>
-        ///     浮動工具欄的"套索選"按鈕事件，重定向到舊UI的<c>BtnSelect_Click</c>方法
+        /// 浮動工具欄的"套索選"按鈕事件，重定向到舊UI的<c>BtnSelect_Click</c>方法
         /// </summary>
         /// <param name="sender">sender</param>
         /// <param name="e">MouseButtonEventArgs</param>
@@ -1041,7 +1052,18 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            new CountdownTimerWindow().Show();
+            // 参考老计时器的窗口置顶功能：在白板模式下停止窗口置顶
+            if (currentMode == 1) // 白板模式
+            {
+                Topmost = false;
+            }
+
+            var timerWindow = CountdownTimerWindow.CreateTimerWindow();
+            timerWindow.Show();
+            if (currentMode == 1) // 白板模式
+            {
+                timerWindow.Topmost = true;
+            }
         }
 
         private void OperatingGuideWindowIcon_MouseUp(object sender, MouseButtonEventArgs e)
@@ -1065,11 +1087,20 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            var randWindow = new RandWindow(Settings);
-            randWindow.Show();
+            // 根据设置决定使用哪个点名窗口
+            if (Settings.RandSettings.UseNewRollCallUI)
+            {
+                // 使用新点名UI - 随机抽模式
+                new NewStyleRollCallWindow(Settings, false).ShowDialog();
+            }
+            else
+            {
+                // 使用默认的随机点名窗口
+                var randWindow = new RandWindow(Settings);
+                randWindow.Show();
 
-            // 使用延迟确保窗口完全显示后再强制置顶
-            randWindow.Dispatcher.BeginInvoke(new Action(() =>
+                // 使用延迟确保窗口完全显示后再强制置顶
+                randWindow.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
@@ -1106,6 +1137,7 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"强制置顶RandWindow失败: {ex.Message}", LogHelper.LogType.Error);
                 }
             }), DispatcherPriority.Loaded);
+            }
         }
 
         public void CheckEraserTypeTab()
@@ -1212,14 +1244,30 @@ namespace Ink_Canvas
                 {
                     MessageBox.Show("无法调用外部点名：" + ex.Message);
 
-                    // 调用失败时回退到默认的随机点名窗口
-                    new RandWindow(Settings, true).ShowDialog();
+                    // 调用失败时回退到相应的点名窗口
+                    if (Settings.RandSettings.UseNewRollCallUI)
+                    {
+                        new NewStyleRollCallWindow(Settings, true).ShowDialog(); // 单次抽模式
+                    }
+                    else
+                    {
+                        new RandWindow(Settings, true).ShowDialog();
+                    }
                 }
             }
             else
             {
-                // 使用默认的随机点名窗口
-                new RandWindow(Settings, true).ShowDialog();
+                // 根据设置决定使用哪个点名窗口
+                if (Settings.RandSettings.UseNewRollCallUI)
+                {
+                    // 使用新点名UI - 单次抽模式
+                    new NewStyleRollCallWindow(Settings, true).ShowDialog();
+                }
+                else
+                {
+                    // 使用默认的随机点名窗口
+                    new RandWindow(Settings, true).ShowDialog();
+                }
             }
         }
 
@@ -1977,8 +2025,6 @@ namespace Ink_Canvas
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
 
-            ExitMultiTouchModeIfNeeded();
-
             SetFloatingBarHighlightPosition("pen");
 
             // 记录当前是否已经是批注模式且是否为高光显示模式
@@ -2683,11 +2729,9 @@ namespace Ink_Canvas
             // 如果当前在设置面板中，需要先恢复无焦点模式状态
             if (BorderSettings.Visibility == Visibility.Visible)
             {
-                // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
-                if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
+                if (isTemporarilyDisablingNoFocusMode)
                 {
-                    Settings.Advanced.IsNoFocusMode = true;
-                    ToggleSwitchNoFocusMode.IsOn = true;
+                    isTemporarilyDisablingNoFocusMode = false;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
@@ -2702,11 +2746,9 @@ namespace Ink_Canvas
         {
             if (BorderSettings.Visibility == Visibility.Visible)
             {
-                // 如果用户没有在设置中修改无焦点模式，则恢复之前的状态
-                if (!userChangedNoFocusModeInSettings && wasNoFocusModeBeforeSettings)
+                if (isTemporarilyDisablingNoFocusMode)
                 {
-                    Settings.Advanced.IsNoFocusMode = true;
-                    ToggleSwitchNoFocusMode.IsOn = true;
+                    isTemporarilyDisablingNoFocusMode = false;
                     ApplyNoFocusMode();
                 }
                 SaveSettingsToFile();
@@ -2752,12 +2794,12 @@ namespace Ink_Canvas
             }
             else
             {
-                // 临时禁用无焦点模式以避免下拉选项被遮挡
+                BorderSettings.Visibility = Visibility.Visible;
                 wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
                 userChangedNoFocusModeInSettings = false; // 重置用户修改标志
                 if (wasNoFocusModeBeforeSettings)
                 {
-                    Settings.Advanced.IsNoFocusMode = false;
+                    isTemporarilyDisablingNoFocusMode = true;
                     ApplyNoFocusMode();
                 }
 
@@ -2770,7 +2812,7 @@ namespace Ink_Canvas
                 // 滑动动画
                 var slideAnimation = new DoubleAnimation
                 {
-                    From = BorderSettings.RenderTransform.Value.OffsetX - 440, // 滑动距离
+                    From = BorderSettings.RenderTransform.Value.OffsetX - 490, // 滑动距离
                     To = 0,
                     Duration = TimeSpan.FromSeconds(0.6)
                 };
@@ -2782,7 +2824,6 @@ namespace Ink_Canvas
 
                 sb.Completed += (s, _) => { isOpeningOrHidingSettingsPane = false; };
 
-                BorderSettings.Visibility = Visibility.Visible;
                 BorderSettings.RenderTransform = new TranslateTransform();
 
                 isOpeningOrHidingSettingsPane = true;
@@ -2825,42 +2866,13 @@ namespace Ink_Canvas
             // 恢复非笔画元素
             RestoreNonStrokeElements(preservedElements);
 
-            CancelSingleFingerDragMode();
-
             if (Settings.Canvas.ClearCanvasAndClearTimeMachine) timeMachine.ClearStrokeHistory();
 
-            // 清空墨迹后模拟用户重新手动开关多指书写功能
-            SimulateMultiTouchToggle();
+            CancelSingleFingerDragMode();
+
         }
 
         private bool lastIsInMultiTouchMode;
-
-        /// <summary>
-        /// 模拟用户重新手动开关多指书写功能
-        /// </summary>
-        private void SimulateMultiTouchToggle()
-        {
-            try
-            {
-                // 检查多指书写模式是否启用
-                if (ToggleSwitchEnableMultiTouchMode != null && ToggleSwitchEnableMultiTouchMode.IsOn)
-                {
-                    // 先关闭多指书写模式
-                    ToggleSwitchEnableMultiTouchMode.IsOn = false;
-
-                    // 使用Dispatcher.BeginInvoke确保UI更新完成后再重新开启
-                    Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        // 重新开启多指书写模式
-                        ToggleSwitchEnableMultiTouchMode.IsOn = true;
-                    }), DispatcherPriority.Background);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"模拟多指书写开关时发生错误: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
         private void CancelSingleFingerDragMode()
         {
@@ -2870,8 +2882,6 @@ namespace Ink_Canvas
 
             if (isSingleFingerDragMode) BtnFingerDragMode_Click(BtnFingerDragMode, null);
             isLongPressSelected = false;
-
-            ResetTouchStates();
         }
 
         /// <summary>
@@ -2883,17 +2893,6 @@ namespace Ink_Canvas
             {
                 // 清空触摸点计数器
                 dec.Clear();
-
-
-                // 重置单指拖动模式状态
-                if (isSingleFingerDragMode)
-                {
-                    isSingleFingerDragMode = false;
-                    if (BtnFingerDragMode != null)
-                    {
-                        BtnFingerDragMode.Content = "单指\n拖动";
-                    }
-                }
 
                 // 重置手掌擦状态
                 if (isPalmEraserActive)
@@ -3089,7 +3088,15 @@ namespace Ink_Canvas
                         }
 
                         StackPanelPPTButtons.Visibility = Visibility.Collapsed;
-                        Topmost = false;
+                        
+                        if (Settings.Advanced.EnableUIAccessTopMost)
+                        {
+                            Topmost = true;
+                        }
+                        else
+                        {
+                            Topmost = false;
+                        }
                         break;
                 }
             }
@@ -3687,6 +3694,34 @@ namespace Ink_Canvas
                     default:
                         position = marginOffset;
                         break;
+                }
+
+                // 根据主题设置高光颜色
+                Color highlightBackgroundColor;
+                Color highlightBarColor;
+                bool isDarkTheme = Settings.Appearance.Theme == 1 ||
+                                   (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
+
+                if (isDarkTheme)
+                {
+                    highlightBackgroundColor = Color.FromArgb(21, 102, 204, 255);
+                    highlightBarColor = Color.FromRgb(102, 204, 255);
+                }
+                else
+                {
+                    highlightBackgroundColor = Color.FromArgb(21, 59, 130, 246);
+                    highlightBarColor = Color.FromRgb(37, 99, 235);
+                }
+
+                // 设置高光背景颜色
+                FloatingbarSelectionBG.Background = new SolidColorBrush(highlightBackgroundColor);
+                if (FloatingbarSelectionBG.Child is System.Windows.Controls.Canvas canvas && canvas.Children.Count > 0)
+                {
+                    var firstChild = canvas.Children[0];
+                    if (firstChild is Border innerBorder)
+                    {
+                        innerBorder.Background = new SolidColorBrush(highlightBarColor);
+                    }
                 }
 
                 // 设置高光位置

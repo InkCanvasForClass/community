@@ -34,6 +34,9 @@ namespace Ink_Canvas
             // 加载背景
             LoadBackground(settings);
 
+            // 应用主题
+            ApplyTheme(settings);
+
             // 设置窗口为置顶
             Topmost = true;
 
@@ -75,6 +78,65 @@ namespace Ink_Canvas
             }
         }
 
+        private void ApplyTheme(Settings settings)
+        {
+            try
+            {
+                if (settings.Appearance.Theme == 0) // 浅色主题
+                {
+                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
+                }
+                else if (settings.Appearance.Theme == 1) // 深色主题
+                {
+                    iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
+                }
+                else // 跟随系统主题
+                {
+                    bool isSystemLight = IsSystemThemeLight();
+                    if (isSystemLight)
+                    {
+                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Light);
+                    }
+                    else
+                    {
+                        iNKORE.UI.WPF.Modern.ThemeManager.SetRequestedTheme(this, iNKORE.UI.WPF.Modern.ElementTheme.Dark);
+                    }
+                }
+
+                // 根据主题设置窗口背景
+                if (settings.RandSettings.SelectedBackgroundIndex <= 0)
+                {
+                    // 没有自定义背景时，使用主题背景色
+                    var backgroundBrush = Application.Current.FindResource("RandWindowBackground") as SolidColorBrush;
+                    if (backgroundBrush != null)
+                    {
+                        MainBorder.Background = backgroundBrush;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"应用点名窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private bool IsSystemThemeLight()
+        {
+            var light = false;
+            try
+            {
+                var registryKey = Microsoft.Win32.Registry.CurrentUser;
+                var themeKey =
+                    registryKey.OpenSubKey("software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
+                var keyValue = 0;
+                if (themeKey != null) keyValue = (int)themeKey.GetValue("SystemUsesLightTheme");
+                if (keyValue == 1) light = true;
+            }
+            catch { }
+
+            return light;
+        }
+
         public RandWindow(Settings settings, bool IsAutoClose)
         {
             InitializeComponent();
@@ -87,6 +149,9 @@ namespace Ink_Canvas
 
             // 加载背景
             LoadBackground(settings);
+
+            // 应用主题
+            ApplyTheme(settings);
 
             // 设置窗口为置顶
             Topmost = true;
@@ -411,6 +476,25 @@ namespace Ink_Canvas
         {
             // 窗口关闭时的清理工作
             // 这里可以添加必要的清理代码
+        }
+
+        /// <summary>
+        /// 刷新主题，当主窗口主题切换时调用
+        /// </summary>
+        public void RefreshTheme()
+        {
+            try
+            {
+                // 重新应用主题
+                ApplyTheme(MainWindow.Settings);
+
+                // 强制刷新UI
+                InvalidateVisual();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新点名窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         #region Win32 API 声明

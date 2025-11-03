@@ -18,7 +18,10 @@ namespace Ink_Canvas
 
         private void ColorSwitchCheck()
         {
-            HideSubPanels("color");
+            if (penType != 1)
+            {
+                HideSubPanels("color");
+            }
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
             {
                 if (currentMode == 1)

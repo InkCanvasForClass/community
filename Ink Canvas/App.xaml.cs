@@ -38,9 +38,11 @@ namespace Ink_Canvas
         // 新增：标记是否通过--show参数启动
         public static bool StartWithShowMode = false;
         // 新增：保存看门狗进程对象
-        private static Process watchdogProcess;
+        public static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
         public static bool IsAppExitByUser;
+        // 新增：标记是否启用了UIA置顶功能
+        public static bool IsUIAccessTopMostEnabled;
         // 新增：退出信号文件路径
         private static string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + Process.GetCurrentProcess().Id + ".flag");
         // 新增：崩溃日志文件路径
@@ -436,7 +438,6 @@ namespace Ink_Canvas
             {
                 _splashScreen.CloseSplashScreen();
                 _isSplashScreenShown = false;
-                LogHelper.WriteLogToFile("启动画面已关闭");
             }
             catch (Exception ex)
             {
@@ -629,7 +630,7 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile("App | 检测到最终应用启动（更新后的应用）");
             }
 
-            // 在应用启动时自动释放IACore相关DLL
+            // 释放IACore相关DLL
             if (_isSplashScreenShown)
             {
                 SetSplashMessage("正在初始化组件...");
@@ -643,6 +644,22 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"释放IACore DLL时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 释放UIAccess DLL
+            if (_isSplashScreenShown)
+            {
+                SetSplashMessage("正在初始化组件...");
+                SetSplashProgress(50);
+                await Task.Delay(300);
+            }
+            try
+            {
+                UIAccessDllExtractor.ExtractUIAccessDlls();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"释放UIAccess DLL时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
             // 记录应用启动（设备标识符）
@@ -689,6 +706,20 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"App | 清理更新标记文件失败: {ex.Message}", LogHelper.LogType.Warning);
                 }
+
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(3000);
+                        LogHelper.WriteLogToFile("App | 最终应用启动，删除AutoUpdate文件夹");
+                        AutoUpdateHelper.DeleteUpdatesFolder();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"App | 删除AutoUpdate文件夹失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                });
             }
 
             // 如果不是最终应用启动，才检查更新标记文件
@@ -1016,7 +1047,7 @@ namespace Ink_Canvas
         }
 
         // 看门狗进程
-        private void StartWatchdogIfNeeded()
+        public static void StartWatchdogIfNeeded()
         {
             // 避免递归启动
             if (Environment.GetCommandLineArgs().Contains("--watchdog")) return;
@@ -1055,7 +1086,13 @@ namespace Ink_Canvas
                         Thread.Sleep(2000);
                     }
                     // 主进程异常退出，自动重启前判断崩溃后操作
-                    SyncCrashActionFromSettings(); // 新增：同步设置
+                    SyncCrashActionFromSettings(); // 同步设置
+                    
+                    if (IsUIAccessTopMostEnabled)
+                    {
+                        Environment.Exit(0);
+                    }
+                    
                     if (CrashAction == CrashActionType.SilentRestart)
                     {
                         StartupCount.Increment();
@@ -1068,7 +1105,6 @@ namespace Ink_Canvas
                         string exePath = Process.GetCurrentProcess().MainModule.FileName;
                         Process.Start(exePath);
                     }
-                    // CrashActionType.NoAction 时不重启，直接退出
                 }
                 catch { }
                 Environment.Exit(0);

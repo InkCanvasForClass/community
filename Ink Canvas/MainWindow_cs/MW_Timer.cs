@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace Ink_Canvas
 {
@@ -61,8 +62,10 @@ namespace Ink_Canvas
         private Timer timerCheckAutoFold = new Timer();
         private string AvailableLatestVersion;
         private Timer timerCheckAutoUpdateWithSilence = new Timer();
+        private Timer timerCheckAutoUpdateRetry = new Timer();
         private bool isHidingSubPanelsWhenInking; // 避免书写时触发二次关闭二级菜单导致动画不连续
-
+        private int updateCheckRetryCount = 0;
+        private const int MAX_UPDATE_CHECK_RETRIES = 6;
         private Timer timerDisplayTime = new Timer();
         private Timer timerDisplayDate = new Timer();
         private Timer timerNtpSync = new Timer();
@@ -117,6 +120,8 @@ namespace Ink_Canvas
             timerCheckAutoFold.Interval = 500;
             timerCheckAutoUpdateWithSilence.Elapsed += timerCheckAutoUpdateWithSilence_Elapsed;
             timerCheckAutoUpdateWithSilence.Interval = 1000 * 60 * 10;
+            timerCheckAutoUpdateRetry.Elapsed += timerCheckAutoUpdateRetry_Elapsed;
+            timerCheckAutoUpdateRetry.Interval = 1000 * 60 * 10;
             WaterMarkTime.DataContext = nowTimeVM;
             WaterMarkDate.DataContext = nowTimeVM;
             timerDisplayTime.Elapsed += TimerDisplayTime_Elapsed;
@@ -144,6 +149,55 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"程序启动时NTP同步失败: {ex.Message}", LogHelper.LogType.Error);
                 }
             });
+
+            // 初始化定时保存墨迹定时器
+            InitAutoSaveStrokesTimer();
+        }
+
+        // 初始化定时保存墨迹定时器
+        private void InitAutoSaveStrokesTimer()
+        {
+            if (autoSaveStrokesTimer == null)
+            {
+                autoSaveStrokesTimer = new DispatcherTimer();
+                autoSaveStrokesTimer.Tick += AutoSaveStrokesTimer_Tick;
+            }
+
+            // 根据设置更新定时器间隔和启动状态
+            UpdateAutoSaveStrokesTimer();
+        }
+
+        // 更新定时保存墨迹定时器状态
+        private void UpdateAutoSaveStrokesTimer()
+        {
+            if (autoSaveStrokesTimer == null) return;
+
+            autoSaveStrokesTimer.Stop();
+
+            if (Settings.Automation.IsEnableAutoSaveStrokes)
+            {
+                int intervalMinutes = Settings.Automation.AutoSaveStrokesIntervalMinutes;
+                if (intervalMinutes < 1) intervalMinutes = 1; // 最小间隔1分钟
+                autoSaveStrokesTimer.Interval = TimeSpan.FromMinutes(intervalMinutes);
+                autoSaveStrokesTimer.Start();
+            }
+        }
+
+        // 定时保存墨迹定时器事件处理
+        private void AutoSaveStrokesTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                // 只有在画布可见且有墨迹时才保存
+                if (inkCanvas.Visibility == Visibility.Visible && inkCanvas.Strokes.Count > 0)
+                {
+                    // 静默保存
+                    SaveInkCanvasStrokes(false, false);
+                }
+            }
+            catch (Exception)
+            {
+            }
         }
 
         // NTP同步定时器事件处理
@@ -828,6 +882,93 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"AutoUpdate | Error in silent update check: {ex.Message}", LogHelper.LogType.Error);
                 // 出错时重新启动计时器，稍后再检查
                 timerCheckAutoUpdateWithSilence.Start();
+            }
+        }
+
+        // 检查更新失败重试定时器事件处理
+        private async void timerCheckAutoUpdateRetry_Elapsed(object sender, ElapsedEventArgs e)
+        {
+            // 停止定时器，避免重复触发
+            timerCheckAutoUpdateRetry.Stop();
+
+            try
+            {
+                // 检查是否启用了自动更新
+                if (!Settings.Startup.IsAutoUpdate)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Auto update is disabled, stopping retry timer");
+                    return;
+                }
+
+                // 增加重试计数
+                updateCheckRetryCount++;
+                LogHelper.WriteLogToFile($"AutoUpdate | Retry check attempt {updateCheckRetryCount}/{MAX_UPDATE_CHECK_RETRIES}");
+
+                // 检查是否超过最大重试次数
+                if (updateCheckRetryCount > MAX_UPDATE_CHECK_RETRIES)
+                {
+                    LogHelper.WriteLogToFile("AutoUpdate | Maximum retry attempts reached, stopping retry timer", LogHelper.LogType.Warning);
+                    return;
+                }
+
+                // 执行更新检查
+                LogHelper.WriteLogToFile("AutoUpdate | Retrying update check after failure");
+
+                // 清除之前的更新状态
+                AvailableLatestVersion = null;
+                AvailableLatestLineGroup = null;
+
+                // 使用当前选择的更新通道检查更新
+                var (remoteVersion, lineGroup, apiReleaseNotes) = await AutoUpdateHelper.CheckForUpdates(Settings.Startup.UpdateChannel);
+                AvailableLatestVersion = remoteVersion;
+                AvailableLatestLineGroup = lineGroup;
+
+                if (AvailableLatestVersion != null)
+                {
+                    // 检查更新成功，重置重试计数
+                    updateCheckRetryCount = 0;
+                    LogHelper.WriteLogToFile($"AutoUpdate | Retry successful, found new version: {AvailableLatestVersion}");
+
+                    // 停止重试定时器，因为已经找到了更新
+                    return;
+                }
+                else
+                {
+                    // 检查更新仍然失败，继续重试
+                    LogHelper.WriteLogToFile($"AutoUpdate | Retry {updateCheckRetryCount} failed, will retry in 10 minutes");
+
+                    // 重新启动定时器，10分钟后再次尝试
+                    timerCheckAutoUpdateRetry.Start();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Error in retry check: {ex.Message}", LogHelper.LogType.Error);
+
+                // 出错时也重新启动定时器，稍后再检查
+                if (updateCheckRetryCount <= MAX_UPDATE_CHECK_RETRIES)
+                {
+                    timerCheckAutoUpdateRetry.Start();
+                }
+            }
+        }
+
+        // 重置更新检查重试状态
+        public void ResetUpdateCheckRetry()
+        {
+            try
+            {
+                // 停止重试定时器
+                timerCheckAutoUpdateRetry.Stop();
+
+                // 重置重试计数
+                updateCheckRetryCount = 0;
+
+                LogHelper.WriteLogToFile("AutoUpdate | Update check retry state reset");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"AutoUpdate | Error resetting retry state: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }

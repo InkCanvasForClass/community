@@ -1,0 +1,39 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <!-- 新点名窗口主题资源 -->
+    
+    <!-- 浅色主题资源 -->
+    <SolidColorBrush x:Key="NewRollCallWindowBackgroundLight" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="NewRollCallWindowBorderBrushLight" Color="#E4E4E7"/>
+    <SolidColorBrush x:Key="NewRollCallWindowTitleForegroundLight" Color="#18181B"/>
+    <SolidColorBrush x:Key="NewRollCallWindowDigitForegroundLight" Color="#18181B"/>
+    <SolidColorBrush x:Key="NewRollCallWindowButtonBackgroundLight" Color="#F4F4F5"/>
+    <SolidColorBrush x:Key="NewRollCallWindowButtonForegroundLight" Color="#18181B"/>
+    <SolidColorBrush x:Key="NewRollCallWindowPrimaryButtonBackgroundLight" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="NewRollCallWindowPrimaryButtonForegroundLight" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="NewRollCallWindowSecondaryTextForegroundLight" Color="#71717A"/>
+    
+    <!-- 深色主题资源 -->
+    <SolidColorBrush x:Key="NewRollCallWindowBackgroundDark" Color="#1f1f1f"/>
+    <SolidColorBrush x:Key="NewRollCallWindowBorderBrushDark" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="NewRollCallWindowTitleForegroundDark" Color="White"/>
+    <SolidColorBrush x:Key="NewRollCallWindowDigitForegroundDark" Color="White"/>
+    <SolidColorBrush x:Key="NewRollCallWindowButtonBackgroundDark" Color="#2a2a2a"/>
+    <SolidColorBrush x:Key="NewRollCallWindowButtonForegroundDark" Color="White"/>
+    <SolidColorBrush x:Key="NewRollCallWindowPrimaryButtonBackgroundDark" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="NewRollCallWindowPrimaryButtonForegroundDark" Color="White"/>
+    <SolidColorBrush x:Key="NewRollCallWindowSecondaryTextForegroundDark" Color="#9ca3af"/>
+    
+    <!-- 默认资源绑定 -->
+    <SolidColorBrush x:Key="NewRollCallWindowBackground" Color="#1f1f1f"/>
+    <SolidColorBrush x:Key="NewRollCallWindowBorderBrush" Color="#E0E0E0"/>
+    <SolidColorBrush x:Key="NewRollCallWindowTitleForeground" Color="White"/>
+    <SolidColorBrush x:Key="NewRollCallWindowDigitForeground" Color="White"/>
+    <SolidColorBrush x:Key="NewRollCallWindowButtonBackground" Color="#2a2a2a"/>
+    <SolidColorBrush x:Key="NewRollCallWindowButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="NewRollCallWindowPrimaryButtonBackground" Color="#4CAF50"/>
+    <SolidColorBrush x:Key="NewRollCallWindowPrimaryButtonForeground" Color="White"/>
+    <SolidColorBrush x:Key="NewRollCallWindowSecondaryTextForeground" Color="#9ca3af"/>
+    
+</ResourceDictionary>

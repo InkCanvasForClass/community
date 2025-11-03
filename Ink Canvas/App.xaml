@@ -232,7 +232,7 @@
                             ContextMenu="{StaticResource SysTrayMenu}"
                             IconSource="/Resources/icc.ico"/>
                 <ResourceDictionary.MergedDictionaries>
-                <ui:ThemeResources RequestedTheme="Light"/>
+                <ui:ThemeResources/>
                 <ui:XamlControlsResources />
                 <ResourceDictionary Source="Resources/SeewoImageDictionary.xaml"/>
                 <ResourceDictionary Source="Resources/DrawShapeImageDictionary.xaml"/>
