@@ -343,7 +343,7 @@
                                         <ui:ToggleSwitch x:Name="ToggleSwitchAutoUploadNotes"
                                                          Header="自动上传笔记"
                                                          FontSize="14"
-                                                         Foreground="{StaticResource TextForeground}"
+                                                         Foreground="White"
                                                          Toggled="ToggleSwitchAutoUploadNotes_Toggled">
                                         </ui:ToggleSwitch>
                                         
