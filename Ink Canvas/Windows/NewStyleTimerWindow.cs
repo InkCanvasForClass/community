@@ -130,8 +130,8 @@ namespace Ink_Canvas
 
                     bool shouldShowRed = MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true;
 
-                    SetDigitDisplay("Digit1Display", displayHours / 10, shouldShowRed);
-                    SetDigitDisplay("Digit2Display", displayHours % 10, shouldShowRed);
+                    SetDigitDisplay("Digit1Display", Math.Abs(displayHours / 10) % 10, shouldShowRed);
+                    SetDigitDisplay("Digit2Display", (displayHours % 10 + 10) % 10, shouldShowRed);
                     SetDigitDisplay("Digit3Display", overtimeSpan.Minutes / 10, shouldShowRed);
                     SetDigitDisplay("Digit4Display", overtimeSpan.Minutes % 10, shouldShowRed);
                     SetDigitDisplay("Digit5Display", overtimeSpan.Seconds / 10, shouldShowRed);

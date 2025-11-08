@@ -169,9 +169,8 @@ namespace Ink_Canvas
                     seconds = timeSpan.Seconds;
                 }
 
-                // 更新小时显示
-                SetDigitDisplay("MinHour1Display", hours / 10, shouldShowRed);
-                SetDigitDisplay("MinHour2Display", hours % 10, shouldShowRed);
+                SetDigitDisplay("MinHour1Display", Math.Abs(hours / 10) % 10, shouldShowRed);
+                SetDigitDisplay("MinHour2Display", (hours % 10 + 10) % 10, shouldShowRed);
                 
                 // 更新分钟显示
                 SetDigitDisplay("MinMinute1Display", minutes / 10, shouldShowRed);
