@@ -246,6 +246,24 @@ namespace Ink_Canvas
                     // 使用System.IO.Compression.FileSystem来创建ZIP
                     ZipFile.CreateFromDirectory(tempDir, zipFileName);
 
+                    // 异步上传ZIP文件到Dlass
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var delayMinutes = Settings?.Dlass?.AutoUploadDelayMinutes ?? 0;
+                            if (delayMinutes > 0)
+                            {
+                                await Task.Delay(TimeSpan.FromMinutes(delayMinutes));
+                            }
+
+                            await Helpers.DlassNoteUploader.UploadNoteFileAsync(zipFileName);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    });
+
                     if (newNotice) ShowNotification($"多页面墨迹成功保存至压缩包 {zipFileName}");
                 }
                 finally

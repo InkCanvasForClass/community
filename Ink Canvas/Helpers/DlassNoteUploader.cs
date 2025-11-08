@@ -100,9 +100,9 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 异步上传笔记文件到Dlass（支持PNG和ICSTK格式）
+        /// 异步上传笔记文件到Dlass（支持PNG、ICSTK和ZIP格式）
         /// </summary>
-        /// <param name="filePath">文件路径（支持PNG和ICSTK）</param>
+        /// <param name="filePath">文件路径（支持PNG、ICSTK和ZIP）</param>
         /// <returns>是否成功加入队列（不等待实际上传完成）</returns>
         public static async Task<bool> UploadNoteFileAsync(string filePath)
         {
@@ -122,15 +122,16 @@ namespace Ink_Canvas.Helpers
                 }
 
                 var fileExtension = Path.GetExtension(filePath).ToLower();
-                if (fileExtension != ".png" && fileExtension != ".icstk")
+                if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".zip")
                 {
                     return false;
                 }
 
                 var fileInfo = new FileInfo(filePath);
-                if (fileInfo.Length > 10 * 1024 * 1024)
+                long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+                if (fileInfo.Length > maxSize)
                 {
-                    LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过10MB限制", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过{maxSize / 1024 / 1024}MB限制", LogHelper.LogType.Error);
                     return false;
                 }
 
@@ -348,16 +349,17 @@ namespace Ink_Canvas.Helpers
 
                 // 检查文件扩展名
                 var fileExtension = Path.GetExtension(filePath).ToLower();
-                if (fileExtension != ".png" && fileExtension != ".icstk")
+                if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".zip")
                 {
                     return false;
                 }
 
-                // 检查文件大小（最大10MB）
+                // 检查文件大小（最大10MB，ZIP文件可能更大，允许50MB）
                 var fileInfo = new FileInfo(filePath);
-                if (fileInfo.Length > 10 * 1024 * 1024)
+                long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+                if (fileInfo.Length > maxSize)
                 {
-                    LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过10MB限制", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过{maxSize / 1024 / 1024}MB限制", LogHelper.LogType.Error);
                     return false;
                 }
 
@@ -417,9 +419,24 @@ namespace Ink_Canvas.Helpers
                 // 准备上传参数
                 var fileName = Path.GetFileNameWithoutExtension(filePath);
                 var title = fileName;
-                var fileType = fileExtension == ".icstk" ? "墨迹文件" : "笔记";
+                string fileType;
+                string tags;
+                if (fileExtension == ".zip")
+                {
+                    fileType = "多页面墨迹压缩包";
+                    tags = "自动上传,多页面,zip,压缩包";
+                }
+                else if (fileExtension == ".icstk")
+                {
+                    fileType = "墨迹文件";
+                    tags = "自动上传,墨迹,icstk";
+                }
+                else
+                {
+                    fileType = "笔记";
+                    tags = "自动上传,笔记,png";
+                }
                 var description = $"自动上传的{fileType} - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-                var tags = fileExtension == ".icstk" ? "自动上传,墨迹,icstk" : "自动上传,笔记,png";
 
                 // 创建API客户端并上传文件
                 using (var apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken))
@@ -466,7 +483,7 @@ namespace Ink_Canvas.Helpers
 
             // 检查文件扩展名
             var fileExtension = Path.GetExtension(filePath).ToLower();
-            if (fileExtension != ".png" && fileExtension != ".icstk")
+            if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".zip")
             {
                 return false; // 文件格式错误，不可重试
             }
@@ -475,7 +492,8 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var fileInfo = new FileInfo(filePath);
-                if (fileInfo.Length > 10 * 1024 * 1024)
+                long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+                if (fileInfo.Length > maxSize)
                 {
                     return false; // 文件过大，不可重试
                 }
