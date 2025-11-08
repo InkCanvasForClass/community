@@ -3104,8 +3104,6 @@ namespace Ink_Canvas
                 // 创建并显示悬浮按钮
                 _quickDrawFloatingButton = new QuickDrawFloatingButton();
                 _quickDrawFloatingButton.Show();
-                
-                LogHelper.WriteLogToFile("快抽悬浮按钮已显示", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {

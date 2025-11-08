@@ -742,7 +742,6 @@ namespace Ink_Canvas
                     ICCWaterMarkDark.Visibility = Visibility.Collapsed;
                 }
 
-                // 新增：确保在白板模式下基础浮动栏被隐藏
                 ViewboxFloatingBar.Visibility = Visibility.Collapsed;
             }
             else
@@ -3048,11 +3047,8 @@ namespace Ink_Canvas
                         SaveStrokes(true);
                         ClearStrokes(true);
 
-                        // 总是恢复备份墨迹，不管是否在PPT模式
-                        // PPT墨迹和白板墨迹应该分别管理，不应该互相影响
                         RestoreStrokes();
 
-                        // 新增：在白板模式下隐藏基础浮动栏
                         ViewboxFloatingBar.Visibility = Visibility.Collapsed;
 
                         BtnSwitch.Content = "屏幕";
@@ -3203,7 +3199,6 @@ namespace Ink_Canvas
                 CheckEnableTwoFingerGestureBtnVisibility(false);
                 HideSubPanels("cursor");
 
-                // 新增：在屏幕模式下显示基础浮动栏
                 if (currentMode == 0)
                 {
                     ViewboxFloatingBar.Visibility = Visibility.Visible;
@@ -3214,7 +3209,6 @@ namespace Ink_Canvas
                 AnimationsHelper.ShowWithSlideFromLeftAndFade(StackPanelCanvasControls);
                 CheckEnableTwoFingerGestureBtnVisibility(true);
 
-                // 新增：在批注模式下显示基础浮动栏
                 if (currentMode == 0)
                 {
                     ViewboxFloatingBar.Visibility = Visibility.Visible;
@@ -3358,7 +3352,7 @@ namespace Ink_Canvas
             }
         }
 
-        // 新增：插入图片方法
+        // 插入图片方法
         private async void InsertImage_MouseUp_New(object sender, MouseButtonEventArgs e)
         {
             var dialog = new OpenFileDialog
@@ -3590,8 +3584,6 @@ namespace Ink_Canvas
                 // 检查浮动栏是否处于收起状态
                 if (isFloatingBarFolded || (BorderFloatingBarMainControls != null && BorderFloatingBarMainControls.Visibility == Visibility.Collapsed))
                 {
-                    // 在收起状态下，仍然需要设置高光位置，但可能需要调整计算方式
-                    // 这里先隐藏高光，等浮动栏展开时再显示
                     FloatingbarSelectionBG.Visibility = Visibility.Hidden;
                     return;
                 }
