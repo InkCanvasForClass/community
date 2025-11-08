@@ -798,25 +798,16 @@ namespace Ink_Canvas
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
-            if (!isTimerRunning)
+            if (isTimerRunning)
             {
-                UpdateDigitDisplays();
-                isOvertimeMode = false;
-            }
-            else if (isTimerRunning && isPaused)
-            {
-                UpdateDigitDisplays();
-                StartPauseIcon.Data = Geometry.Parse(PlayIconData);
-                isTimerRunning = false;
                 timer.Stop();
-                isPaused = false;
-                isOvertimeMode = false;
+                isTimerRunning = false;
             }
-            else
-            {
-                startTime = DateTime.Now;
-                Timer_Elapsed(timer, null);
-            }
+            
+            isPaused = false;
+            isOvertimeMode = false;
+            UpdateDigitDisplays();
+            StartPauseIcon.Data = Geometry.Parse(PlayIconData);
         }
 
         private void PlayTimerSound()
