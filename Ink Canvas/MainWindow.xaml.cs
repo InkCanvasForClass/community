@@ -63,10 +63,6 @@ namespace Ink_Canvas
         // 悬浮窗拦截管理器
         private FloatingWindowInterceptorManager _floatingWindowInterceptorManager;
 
-        // 快抽悬浮按钮拖动相关
-        private bool _quickDrawButtonIsDragging = false;
-        private Point _quickDrawButtonDragStartPoint;
-        private Point _quickDrawButtonWindowStartPoint;
 
         // 设置面板相关状态
         private bool userChangedNoFocusModeInSettings;
@@ -3083,7 +3079,7 @@ namespace Ink_Canvas
         {
             try
             {
-                var quickDrawButton = FindName("QuickDrawFloatingButton") as Border;
+                var quickDrawButton = FindName("QuickDrawFloatingButton") as Controls.QuickDrawFloatingButtonControl;
                 if (quickDrawButton == null) return;
 
                 // 检查设置是否启用快抽功能
@@ -3100,132 +3096,6 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"显示快抽悬浮按钮失败: {ex.Message}", LogHelper.LogType.Error);
             }
-        }
-
-        /// <summary>
-        /// 快抽按钮点击事件
-        /// </summary>
-        private void QuickDrawFloatingButton_Click(object sender, MouseButtonEventArgs e)
-        {
-            try
-            {
-                // 如果正在拖动，不触发点击事件
-                if (_quickDrawButtonIsDragging) return;
-                
-                // 打开快抽窗口
-                var quickDrawWindow = new QuickDrawWindow();
-                quickDrawWindow.ShowDialog();
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"打开快抽窗口失败: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        /// <summary>
-        /// 快抽按钮拖动区域鼠标按下事件
-        /// </summary>
-        private void QuickDrawFloatingButton_DragArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            _quickDrawButtonIsDragging = false;
-            var quickDrawButton = FindName("QuickDrawFloatingButton") as Border;
-            if (quickDrawButton == null) return;
-
-            // 记录鼠标在屏幕上的初始位置
-            _quickDrawButtonDragStartPoint = quickDrawButton.PointToScreen(e.GetPosition(quickDrawButton));
-            
-            // 记录按钮的初始位置（相对于Grid）
-            var parentGrid = quickDrawButton.Parent as Grid;
-            if (parentGrid != null)
-            {
-                var transform = quickDrawButton.TransformToVisual(parentGrid);
-                var currentPos = transform.Transform(new Point(0, 0));
-                _quickDrawButtonWindowStartPoint = currentPos;
-            }
-            else
-            {
-                var currentMargin = quickDrawButton.Margin;
-                _quickDrawButtonWindowStartPoint = new Point(
-                    double.IsNaN(currentMargin.Left) ? 0 : currentMargin.Left,
-                    double.IsNaN(currentMargin.Top) ? 0 : currentMargin.Top);
-            }
-            
-            ((UIElement)sender).CaptureMouse();
-            e.Handled = true;
-        }
-
-        /// <summary>
-        /// 快抽按钮拖动区域鼠标移动事件
-        /// </summary>
-        private void QuickDrawFloatingButton_DragArea_MouseMove(object sender, MouseEventArgs e)
-        {
-            var quickDrawButton = FindName("QuickDrawFloatingButton") as Border;
-            if (quickDrawButton == null) return;
-
-            if (e.LeftButton == MouseButtonState.Pressed && ((UIElement)sender).IsMouseCaptured)
-            {
-                // 获取鼠标在屏幕上的当前位置
-                Point currentScreenPoint = quickDrawButton.PointToScreen(e.GetPosition(quickDrawButton));
-                Vector diff = currentScreenPoint - _quickDrawButtonDragStartPoint;
-                
-                if (!_quickDrawButtonIsDragging && (Math.Abs(diff.X) > 3 || Math.Abs(diff.Y) > 3))
-                {
-                    _quickDrawButtonIsDragging = true;
-                    // 切换到绝对定位模式
-                    quickDrawButton.HorizontalAlignment = HorizontalAlignment.Left;
-                    quickDrawButton.VerticalAlignment = VerticalAlignment.Top;
-                }
-                
-                if (_quickDrawButtonIsDragging)
-                {
-                    // 计算新位置
-                    var parentGrid = quickDrawButton.Parent as Grid;
-                    if (parentGrid != null)
-                    {
-                        // 计算屏幕坐标相对于Grid的位置
-                        var gridPoint = parentGrid.PointFromScreen(currentScreenPoint);
-                        var startGridPoint = parentGrid.PointFromScreen(_quickDrawButtonDragStartPoint);
-                        
-                        // 计算相对于初始位置的偏移
-                        double offsetX = gridPoint.X - startGridPoint.X;
-                        double offsetY = gridPoint.Y - startGridPoint.Y;
-                        
-                        // 新位置 = 初始位置 + 偏移
-                        double newLeft = _quickDrawButtonWindowStartPoint.X + offsetX;
-                        double newTop = _quickDrawButtonWindowStartPoint.Y + offsetY;
-                        
-                        // 限制在Grid范围内
-                        newLeft = Math.Max(0, Math.Min(newLeft, parentGrid.ActualWidth - quickDrawButton.ActualWidth));
-                        newTop = Math.Max(0, Math.Min(newTop, parentGrid.ActualHeight - quickDrawButton.ActualHeight));
-                        
-                        // 更新Margin
-                        quickDrawButton.Margin = new Thickness(newLeft, newTop, 0, 0);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// 快抽按钮拖动区域鼠标释放事件
-        /// </summary>
-        private void QuickDrawFloatingButton_DragArea_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (((UIElement)sender).IsMouseCaptured)
-            {
-                ((UIElement)sender).ReleaseMouseCapture();
-            }
-            
-            if (_quickDrawButtonIsDragging)
-            {
-                Dispatcher.BeginInvoke(new Action(() => { _quickDrawButtonIsDragging = false; }), 
-                    DispatcherPriority.Background);
-            }
-            else
-            {
-                _quickDrawButtonIsDragging = false;
-            }
-            
-            e.Handled = true;
         }
 
 
