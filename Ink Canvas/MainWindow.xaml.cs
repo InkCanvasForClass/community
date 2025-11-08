@@ -254,8 +254,10 @@ namespace Ink_Canvas
             };
             // 初始化无焦点模式开关
             ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
+            ApplyNoFocusMode();
             // 初始化窗口置顶开关
             ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
+            ApplyAlwaysOnTop();
 
             // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
             Activated += Window_Activated;
@@ -394,12 +396,6 @@ namespace Ink_Canvas
         public static string settingsFileName = Path.Combine("Configs", "Settings.json");
         private bool isLoaded;
         private bool forcePointEraser;
-
-        private void Window_SourceInitialized(object sender, EventArgs e)
-        {
-            ApplyNoFocusMode();
-            ApplyAlwaysOnTop();
-        }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -565,7 +561,9 @@ namespace Ink_Canvas
             InitializePluginSystem();
             // 确保开关和设置同步
             ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
+            ApplyNoFocusMode();
             ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
+            ApplyAlwaysOnTop();
 
             // 初始化UIA置顶开关
             ToggleSwitchUIAccessTopMost.IsOn = Settings.Advanced.EnableUIAccessTopMost;
