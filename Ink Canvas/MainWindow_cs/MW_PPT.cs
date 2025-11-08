@@ -667,7 +667,23 @@ namespace Ink_Canvas
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    var activePresentation = _pptManager?.GetCurrentActivePresentation();
+                    Presentation activePresentation = null;
+                    int currentSlide = 0;
+                    int totalSlides = 0;
+
+                    if (wn?.View != null && wn.Presentation != null)
+                    {
+                        activePresentation = wn.Presentation;
+                        currentSlide = wn.View.CurrentShowPosition;
+                        totalSlides = activePresentation.Slides.Count;
+                    }
+                    else
+                    {
+                        activePresentation = _pptManager?.GetCurrentActivePresentation();
+                        currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                        totalSlides = _pptManager?.SlidesCount ?? 0;
+                    }
+
                     if (activePresentation != null)
                     {
                         if (Settings.PowerPointSettings.IsSupportWPS)
@@ -691,8 +707,6 @@ namespace Ink_Canvas
                     }
 
                     // 更新UI状态
-                    var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
-                    var totalSlides = _pptManager?.SlidesCount ?? 0;
                     _pptUIManager?.UpdateSlideShowStatus(true, currentSlide, totalSlides);
 
                     // 设置浮动栏透明度和边距
@@ -807,20 +821,19 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    var activePresentation = _pptManager?.GetCurrentActivePresentation();
-                    if (activePresentation != null)
+                    if (wn?.View == null || wn.Presentation == null)
                     {
-                        if (Settings.PowerPointSettings.IsSupportWPS)
-                        {
-                        }
-                        else
-                        {
-                            _multiPPTInkManager?.SwitchToPresentation(activePresentation);
-                        }
+                        return;
                     }
 
-                    var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
-                    var totalSlides = _pptManager?.SlidesCount ?? 0;
+                    var currentSlide = wn.View.CurrentShowPosition;
+                    var activePresentation = wn.Presentation;
+                    var totalSlides = activePresentation.Slides.Count;
+
+                    if (!Settings.PowerPointSettings.IsSupportWPS)
+                    {
+                        _multiPPTInkManager?.SwitchToPresentation(activePresentation);
+                    }
 
                     // 使用防抖机制处理页面切换
                     HandleSlideSwitchWithDebounce(currentSlide, totalSlides);
