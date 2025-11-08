@@ -13,6 +13,7 @@
         ResizeMode="NoResize"
         WindowState="Maximized"
         Loaded="Window_Loaded"
+        SourceInitialized="Window_SourceInitialized"
         Background="Transparent"
         ShowInTaskbar="False"
         Title="InkCanvasforClass"
