@@ -123,7 +123,7 @@ namespace Ink_Canvas
         [JsonIgnore]
         public bool IsEnableTwoFingerGestureTranslateOrRotation => IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation;
         [JsonProperty("isEnableMultiTouchMode")]
-        public bool IsEnableMultiTouchMode { get; set; } = true;
+        public bool IsEnableMultiTouchMode { get; set; } = false;
         [JsonProperty("isEnableTwoFingerZoom")]
         public bool IsEnableTwoFingerZoom { get; set; } = true;
         [JsonProperty("isEnableTwoFingerTranslate")]
