@@ -418,7 +418,7 @@
                                                                Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
                                                 </Button>
                                                 <Button x:Name="ClearListBtn" Width="90" Height="40" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
-                                                        BorderThickness="0" Click="ClearList_Click" Cursor="Hand">
+                                                        BorderThickness="0" Click="ClearList_Click" Cursor="Hand" Margin="0,0,10,0">
                                                     <Button.Template>
                                                         <ControlTemplate TargetType="Button">
                                                             <Border Background="{TemplateBinding Background}" CornerRadius="8">
@@ -427,6 +427,18 @@
                                                         </ControlTemplate>
                                                     </Button.Template>
                                                     <TextBlock Text="清空名单" FontSize="14" 
+                                                               Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
+                                                </Button>
+                                                <Button x:Name="ViewHistoryBtn" Width="90" Height="40" Background="{DynamicResource NewRollCallWindowButtonBackground}" 
+                                                        BorderThickness="0" Click="ViewHistory_Click" Cursor="Hand">
+                                                    <Button.Template>
+                                                        <ControlTemplate TargetType="Button">
+                                                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Button.Template>
+                                                    <TextBlock Text="查看历史" FontSize="14" 
                                                                Foreground="{DynamicResource NewRollCallWindowButtonForeground}"/>
                                                 </Button>
                                             </StackPanel>

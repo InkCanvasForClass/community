@@ -856,6 +856,21 @@ namespace Ink_Canvas
             }
         }
 
+        private void ViewHistory_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 打开历史记录查看窗口
+                var historyWindow = new RollCallHistoryWindow();
+                historyWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开历史记录失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                LogHelper.WriteLogToFile($"打开历史记录失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         private void LoadNamesFromFile()
         {
             try
