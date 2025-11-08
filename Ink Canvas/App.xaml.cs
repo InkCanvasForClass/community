@@ -706,6 +706,20 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"App | 清理更新标记文件失败: {ex.Message}", LogHelper.LogType.Warning);
                 }
+
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await Task.Delay(3000);
+                        LogHelper.WriteLogToFile("App | 最终应用启动，删除AutoUpdate文件夹");
+                        AutoUpdateHelper.DeleteUpdatesFolder();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"App | 删除AutoUpdate文件夹失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+                });
             }
 
             // 如果不是最终应用启动，才检查更新标记文件

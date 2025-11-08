@@ -592,7 +592,7 @@ namespace Ink_Canvas
                         ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
                         BoardToggleSwitchEnableTwoFingerTranslate.IsOn = false;
                         Settings.Gesture.IsEnableTwoFingerTranslate = false;
-                        if (!isInMultiTouchMode) ToggleSwitchEnableMultiTouchMode.IsOn = true;
+                        // if (!isInMultiTouchMode) ToggleSwitchEnableMultiTouchMode.IsOn = true;
                     }
                     else
                     {

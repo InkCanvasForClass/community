@@ -14,6 +14,10 @@ namespace Ink_Canvas
     /// </summary>
     public partial class QuickDrawFloatingButton : Window
     {
+        private bool isDragging = false;
+        private Point dragStartPoint;
+        private Point windowStartPoint;
+
         public QuickDrawFloatingButton()
         {
             InitializeComponent();
@@ -21,6 +25,14 @@ namespace Ink_Canvas
             // 设置无焦点状态
             this.Focusable = false;
             this.ShowInTaskbar = false;
+            
+            // 窗口句柄创建后应用无焦点模式
+            this.SourceInitialized += QuickDrawFloatingButton_SourceInitialized;
+        }
+
+        private void QuickDrawFloatingButton_SourceInitialized(object sender, EventArgs e)
+        {
+            ApplyNoFocusMode();
         }
 
 
@@ -29,12 +41,13 @@ namespace Ink_Canvas
             // 设置位置到屏幕右下角稍微靠近中部
             SetPositionToBottomRight();
             
+            // 应用无焦点模式
+            ApplyNoFocusMode();
+            
             // 应用置顶
             ApplyFloatingButtonTopmost();
             
-            // 如果主窗口在无焦点模式下，启动置顶维护
-            if (MainWindow.Settings?.Advanced?.IsNoFocusMode == true && 
-                MainWindow.Settings?.Advanced?.EnableUIAccessTopMost != true)
+            if (MainWindow.Settings?.Advanced?.EnableUIAccessTopMost != true)
             {
                 StartTopmostMaintenance();
             }
@@ -62,6 +75,9 @@ namespace Ink_Canvas
         {
             try
             {
+                // 如果正在拖动，不触发点击事件
+                if (isDragging) return;
+                
                 // 打开快抽窗口
                 var quickDrawWindow = new QuickDrawWindow();
                 quickDrawWindow.ShowDialog();
@@ -70,6 +86,68 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"打开快抽窗口失败: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        private void DragArea_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            isDragging = false;
+            // 记录鼠标在屏幕上的初始位置
+            dragStartPoint = this.PointToScreen(e.GetPosition(this));
+            // 记录窗口的初始位置
+            windowStartPoint = new Point(this.Left, this.Top);
+            ((UIElement)sender).CaptureMouse();
+            e.Handled = true;
+        }
+
+        private void DragArea_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && ((UIElement)sender).IsMouseCaptured)
+            {
+                // 获取鼠标在屏幕上的当前位置
+                Point currentScreenPoint = this.PointToScreen(e.GetPosition(this));
+                Vector diff = currentScreenPoint - dragStartPoint;
+                
+                if (!isDragging && (Math.Abs(diff.X) > 3 || Math.Abs(diff.Y) > 3))
+                {
+                    isDragging = true;
+                }
+                
+                if (isDragging)
+                {
+                    // 使用窗口初始位置加上鼠标移动的距离
+                    double newLeft = windowStartPoint.X + diff.X;
+                    double newTop = windowStartPoint.Y + diff.Y;
+                    
+                    // 限制在屏幕范围内
+                    var workingArea = SystemParameters.WorkArea;
+                    newLeft = Math.Max(workingArea.Left, Math.Min(newLeft, workingArea.Right - this.Width));
+                    newTop = Math.Max(workingArea.Top, Math.Min(newTop, workingArea.Bottom - this.Height));
+                    
+                    this.Left = newLeft;
+                    this.Top = newTop;
+                }
+            }
+        }
+
+        private void DragArea_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (((UIElement)sender).IsMouseCaptured)
+            {
+                ((UIElement)sender).ReleaseMouseCapture();
+            }
+            
+            // 延迟重置拖动状态，避免触发点击事件
+            if (isDragging)
+            {
+                Dispatcher.BeginInvoke(new Action(() => { isDragging = false; }), 
+                    DispatcherPriority.Background);
+            }
+            else
+            {
+                isDragging = false;
+            }
+            
+            e.Handled = true;
         }
 
 
@@ -105,6 +183,7 @@ namespace Ink_Canvas
         private static extern uint GetCurrentProcessId();
 
         private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_NOACTIVATE = 0x08000000;
         private const int WS_EX_TOPMOST = 0x00000008;
         private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
         private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
@@ -117,6 +196,26 @@ namespace Ink_Canvas
         // 添加定时器来维护置顶状态
         private DispatcherTimer topmostMaintenanceTimer;
         private bool isTopmostMaintenanceEnabled;
+
+        /// <summary>
+        /// 应用无焦点模式
+        /// </summary>
+        private void ApplyNoFocusMode()
+        {
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero) return;
+                
+                int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                
+                // 悬浮快抽窗口始终启用无焦点模式
+                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+            }
+            catch (Exception)
+            {
+            }
+        }
 
         /// <summary>
         /// 应用悬浮按钮置顶
@@ -194,11 +293,7 @@ namespace Ink_Canvas
                     return;
                 }
 
-                if (MainWindow.Settings?.Advanced?.IsNoFocusMode != true)
-                {
-                    StopTopmostMaintenance();
-                    return;
-                }
+                // 悬浮快抽窗口始终启用无焦点模式，不需要检查主窗口设置
 
                 var hwnd = new WindowInteropHelper(this).Handle;
                 if (hwnd == IntPtr.Zero) return;
@@ -232,6 +327,12 @@ namespace Ink_Canvas
                     if ((exStyle & WS_EX_TOPMOST) == 0)
                     {
                         SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+                    }
+                    
+                    // 确保无焦点模式样式正确
+                    if ((exStyle & WS_EX_NOACTIVATE) == 0)
+                    {
+                        SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
                     }
                 }
             }

@@ -1846,6 +1846,62 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void BtnDlassSettingsManage_Click(object sender, RoutedEventArgs e)
+        {
+            if (isOpeningOrHidingSettingsPane) return;
+            HideSubPanels();
+            try
+            {
+                // 检查是否是第一次打开（检查用户是否已设置Token）
+                bool hasToken = !string.IsNullOrEmpty(Settings?.Dlass?.UserToken?.Trim());
+                bool isFirstTime = !hasToken;
+                
+                if (isFirstTime)
+                {
+                    // 第一次打开，询问用户是否已注册
+                    var result = MessageBox.Show(
+                        "您是否已经注册了Dlass账号？\n\n" +
+                        "• 如果已注册：将直接打开设置管理页面\n" +
+                        "• 如果未注册：将打开浏览器跳转到注册页面",
+                        "Dlass账号注册",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Question);
+                    
+                    if (result == MessageBoxResult.No)
+                    {
+                        // 用户未注册，打开浏览器
+                        try
+                        {
+                            Process.Start(new ProcessStartInfo
+                            {
+                                FileName = "https://dlass.tech/dashboard",
+                                UseShellExecute = true
+                            });
+                            LogHelper.WriteLogToFile("已打开浏览器跳转到Dlass注册页面", LogHelper.LogType.Event);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"打开浏览器时出错: {ex.Message}", LogHelper.LogType.Error);
+                            MessageBox.Show($"无法打开浏览器。请手动访问: https://dlass.tech/dashboard", 
+                                "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        return; // 不打开设置窗口
+                    }
+                    // 如果用户选择"是"，继续打开设置窗口
+                }
+                
+                // 打开设置管理窗口
+                var dlassSettingsWindow = new Windows.DlassSettingsWindow();
+                dlassSettingsWindow.Owner = this;
+                dlassSettingsWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"打开Dlass设置管理窗口时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"打开Dlass设置管理窗口时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void ToggleSwitchAutoDelSavedFiles_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2672,8 +2728,8 @@ namespace Ink_Canvas
 
             if (ToggleSwitchEnableOvertimeRedText.IsOn && !ToggleSwitchEnableOvertimeCountUp.IsOn)
             {
-                ToggleSwitchEnableOvertimeRedText.IsOn = false;
-                return;
+                ToggleSwitchEnableOvertimeCountUp.IsOn = true;
+                Settings.RandSettings.EnableOvertimeCountUp = true;
             }
             
             Settings.RandSettings.EnableOvertimeRedText = ToggleSwitchEnableOvertimeRedText.IsOn;

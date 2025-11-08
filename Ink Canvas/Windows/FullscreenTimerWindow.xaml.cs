@@ -125,9 +125,8 @@ namespace Ink_Canvas
                     seconds = timeSpan.Seconds;
                 }
 
-                // 更新小时显示
-                SetDigitDisplay("FullHour1Display", hours / 10, shouldShowRed);
-                SetDigitDisplay("FullHour2Display", hours % 10, shouldShowRed);
+                SetDigitDisplay("FullHour1Display", Math.Abs(hours / 10) % 10, shouldShowRed);
+                SetDigitDisplay("FullHour2Display", (hours % 10 + 10) % 10, shouldShowRed);
                 
                 // 更新分钟显示
                 SetDigitDisplay("FullMinute1Display", minutes / 10, shouldShowRed);

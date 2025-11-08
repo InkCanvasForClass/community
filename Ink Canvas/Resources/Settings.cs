@@ -29,6 +29,8 @@ namespace Ink_Canvas
         public ModeSettings ModeSettings { get; set; } = new ModeSettings();
         [JsonProperty("camera")]
         public CameraSettings Camera { get; set; } = new CameraSettings();
+        [JsonProperty("dlass")]
+        public DlassSettings Dlass { get; set; } = new DlassSettings();
     }
 
     public class Canvas
@@ -121,7 +123,7 @@ namespace Ink_Canvas
         [JsonIgnore]
         public bool IsEnableTwoFingerGestureTranslateOrRotation => IsEnableTwoFingerTranslate || IsEnableTwoFingerRotation;
         [JsonProperty("isEnableMultiTouchMode")]
-        public bool IsEnableMultiTouchMode { get; set; } = true;
+        public bool IsEnableMultiTouchMode { get; set; } = false;
         [JsonProperty("isEnableTwoFingerZoom")]
         public bool IsEnableTwoFingerZoom { get; set; } = true;
         [JsonProperty("isEnableTwoFingerTranslate")]
@@ -723,5 +725,26 @@ namespace Ink_Canvas
 
         [JsonProperty("selectedCameraIndex")]
         public int SelectedCameraIndex { get; set; } = 0;
+    }
+
+    public class DlassSettings
+    {
+        [JsonProperty("userToken")]
+        public string UserToken { get; set; } = string.Empty;
+
+        [JsonProperty("savedTokens")]
+        public List<string> SavedTokens { get; set; } = new List<string>();
+
+        [JsonProperty("selectedClassName")]
+        public string SelectedClassName { get; set; } = string.Empty;
+
+        [JsonProperty("apiBaseUrl")]
+        public string ApiBaseUrl { get; set; } = "https://dlass.tech";
+
+        [JsonProperty("isAutoUploadNotes")]
+        public bool IsAutoUploadNotes { get; set; } = false;
+
+        [JsonProperty("autoUploadDelayMinutes")]
+        public int AutoUploadDelayMinutes { get; set; } = 0;
     }
 }

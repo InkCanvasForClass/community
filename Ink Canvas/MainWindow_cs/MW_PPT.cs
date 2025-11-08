@@ -667,7 +667,23 @@ namespace Ink_Canvas
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    var activePresentation = _pptManager?.GetCurrentActivePresentation();
+                    Presentation activePresentation = null;
+                    int currentSlide = 0;
+                    int totalSlides = 0;
+
+                    if (wn?.View != null && wn.Presentation != null)
+                    {
+                        activePresentation = wn.Presentation;
+                        currentSlide = wn.View.CurrentShowPosition;
+                        totalSlides = activePresentation.Slides.Count;
+                    }
+                    else
+                    {
+                        activePresentation = _pptManager?.GetCurrentActivePresentation();
+                        currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
+                        totalSlides = _pptManager?.SlidesCount ?? 0;
+                    }
+
                     if (activePresentation != null)
                     {
                         if (Settings.PowerPointSettings.IsSupportWPS)
@@ -691,8 +707,6 @@ namespace Ink_Canvas
                     }
 
                     // 更新UI状态
-                    var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
-                    var totalSlides = _pptManager?.SlidesCount ?? 0;
                     _pptUIManager?.UpdateSlideShowStatus(true, currentSlide, totalSlides);
 
                     // 设置浮动栏透明度和边距
@@ -744,37 +758,34 @@ namespace Ink_Canvas
                         PenIcon_Click(null, null);
                         // 然后设置颜色
                         BtnColorRed_Click(null, null);
-                        Dispatcher.BeginInvoke(new Action(() =>
+                        try
                         {
-                            try
+                            if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
                             {
-                                if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                                UpdateCurrentToolMode("pen");
+                                SetFloatingBarHighlightPosition("pen");
+                                if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
                                 {
-                                    UpdateCurrentToolMode("pen");
-                                    SetFloatingBarHighlightPosition("pen");
-                                    if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
+                                    // 根据显示模式选择显示哪个面板
+                                    if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                                     {
-                                        // 根据显示模式选择显示哪个面板
-                                        if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
-                                        {
-                                            // 单行显示模式
-                                            QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
-                                        }
-                                        else
-                                        {
-                                            // 双行显示模式
-                                            QuickColorPalettePanel.Visibility = Visibility.Visible;
-                                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
-                                        }
+                                        // 单行显示模式
+                                        QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
+                                    }
+                                    else
+                                    {
+                                        // 双行显示模式
+                                        QuickColorPalettePanel.Visibility = Visibility.Visible;
+                                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
                                     }
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"PPT进入批注模式后同步浮动栏高光状态失败: {ex.Message}", LogHelper.LogType.Error);
-                            }
-                        }), DispatcherPriority.Loaded);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"PPT进入批注模式后同步浮动栏高光状态失败: {ex.Message}", LogHelper.LogType.Error);
+                        }
                     }
 
                     isEnteredSlideShowEndEvent = false;
@@ -807,20 +818,19 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    var activePresentation = _pptManager?.GetCurrentActivePresentation();
-                    if (activePresentation != null)
+                    if (wn?.View == null || wn.Presentation == null)
                     {
-                        if (Settings.PowerPointSettings.IsSupportWPS)
-                        {
-                        }
-                        else
-                        {
-                            _multiPPTInkManager?.SwitchToPresentation(activePresentation);
-                        }
+                        return;
                     }
 
-                    var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
-                    var totalSlides = _pptManager?.SlidesCount ?? 0;
+                    var currentSlide = wn.View.CurrentShowPosition;
+                    var activePresentation = wn.Presentation;
+                    var totalSlides = activePresentation.Slides.Count;
+
+                    if (!Settings.PowerPointSettings.IsSupportWPS)
+                    {
+                        _multiPPTInkManager?.SwitchToPresentation(activePresentation);
+                    }
 
                     // 使用防抖机制处理页面切换
                     HandleSlideSwitchWithDebounce(currentSlide, totalSlides);
@@ -1135,6 +1145,9 @@ namespace Ink_Canvas
         {
             try
             {
+                ClearStrokes(true);
+                timeMachine.ClearStrokeHistory();
+
                 StrokeCollection strokes = null;
                 if (Settings.PowerPointSettings.IsSupportWPS)
                 {
@@ -1145,9 +1158,8 @@ namespace Ink_Canvas
                     strokes = _multiPPTInkManager?.LoadSlideStrokes(slideIndex);
                 }
 
-                if (strokes != null)
+                if (strokes != null && strokes.Count > 0)
                 {
-                    inkCanvas.Strokes.Clear();
                     inkCanvas.Strokes.Add(strokes);
                 }
             }
@@ -1278,7 +1290,6 @@ namespace Ink_Canvas
                 // 获取当前页面索引
                 var currentSlideIndex = _pptManager?.GetCurrentSlideNumber() ?? 0;
 
-
                 // 验证页面索引的有效性
                 if (newSlideIndex <= 0)
                 {
@@ -1311,10 +1322,9 @@ namespace Ink_Canvas
                         }
                     }
                 }
-                else if (inkCanvas.Strokes.Count > 0 && currentSlideIndex <= 0)
-                {
-                }
 
+                ClearStrokes(true);
+                timeMachine.ClearStrokeHistory();
                 StrokeCollection newStrokes = null;
                 if (Settings.PowerPointSettings.IsSupportWPS)
                 {
@@ -1324,9 +1334,9 @@ namespace Ink_Canvas
                 {
                     newStrokes = _multiPPTInkManager?.SwitchToSlide(newSlideIndex, null);
                 }
-                if (newStrokes != null)
+                
+                if (newStrokes != null && newStrokes.Count > 0)
                 {
-                    inkCanvas.Strokes.Clear();
                     inkCanvas.Strokes.Add(newStrokes);
                 }
 

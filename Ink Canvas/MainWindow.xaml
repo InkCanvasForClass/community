@@ -3188,6 +3188,17 @@
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                           StrokeThickness="1" Margin="0,8,0,8" />
                                     
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,0">
+                                        <Button Name="BtnDlassSettingsManage" Content="Dlass设置管理" 
+                                                HorizontalAlignment="Left" 
+                                                Click="BtnDlassSettingsManage_Click" 
+                                                Padding="15,5" 
+                                                Margin="0,0,0,0"/>
+                                    </ui:SimpleStackPanel>
+                                    
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
+                                          StrokeThickness="1" Margin="0,8,0,8" />
+                                    
                                     <TextBlock Margin="0,0,0,8" Text="收纳模式" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="20" />
                                     

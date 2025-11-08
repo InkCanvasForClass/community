@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 
@@ -65,6 +66,22 @@ namespace Ink_Canvas
             {
                 ShowNotification($"截图成功保存至 {savePath}");
             }
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    var delayMinutes = Settings?.Dlass?.AutoUploadDelayMinutes ?? 0;
+                    if (delayMinutes > 0)
+                    {
+                        await Task.Delay(TimeSpan.FromMinutes(delayMinutes));
+                    }
+
+                    await Helpers.DlassNoteUploader.UploadNoteFileAsync(savePath);
+                }
+                catch (Exception)
+                {
+                }
+            });
         }
 
         // 获取日期文件夹路径

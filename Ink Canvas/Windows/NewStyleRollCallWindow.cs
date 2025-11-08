@@ -126,9 +126,10 @@ namespace Ink_Canvas
         private DateTime lastActivityTime = DateTime.Now;
         
         // 机器学习相关
-        private RollCallHistoryData historyData = new RollCallHistoryData();
-        private int maxRecentHistory = 20;
-        private double avoidanceWeight = 0.8; // 避免重复的权重
+        private static RollCallHistoryData historyData = null;
+        private static readonly object historyLock = new object();
+        private static int maxRecentHistory = 20;
+        private static double avoidanceWeight = 0.8; // 避免重复的权重
         private const double FREQUENCY_WEIGHT = 0.2; // 频率平衡的权重
         
         // 单次抽相关
@@ -394,13 +395,13 @@ namespace Ink_Canvas
             switch (selectedRollCallMode)
             {
                 case "Random":
-                    return SelectNamesWithML(availableNames, count);
+                    return SelectNamesWithML(availableNames, count, random);
                 case "Sequential":
                     return SelectNamesSequentially(availableNames, count);
                 case "Group":
                     return SelectNamesInGroups(availableNames, count);
                 default:
-                    return SelectNamesWithML(availableNames, count);
+                    return SelectNamesWithML(availableNames, count, random);
             }
         }
 
@@ -471,18 +472,25 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="availableNames">可用名单</param>
         /// <param name="count">需要选择的人数</param>
+        /// <param name="random">随机数生成器</param>
         /// <returns>选择的人员名单</returns>
-        private List<string> SelectNamesWithML(List<string> availableNames, int count)
+        public static List<string> SelectNamesWithML(List<string> availableNames, int count, Random random)
         {
             if (availableNames == null || availableNames.Count == 0)
                 return new List<string>();
+
+            // 确保历史数据已初始化
+            if (historyData == null)
+            {
+                LoadRollCallHistory();
+            }
 
             // 检查是否启用机器学习避免重复
             bool enableML = MainWindow.Settings?.RandSettings?.EnableMLAvoidance ?? true;
             if (!enableML)
             {
                 // 如果禁用机器学习，使用简单随机选择
-                return SelectNamesRandomly(availableNames, count);
+                return SelectNamesRandomly(availableNames, count, random);
             }
 
             var selectedNames = new List<string>();
@@ -490,7 +498,7 @@ namespace Ink_Canvas
 
             for (int i = 0; i < count && remainingNames.Count > 0; i++)
             {
-                string selectedName = SelectSingleNameWithML(remainingNames, selectedNames);
+                string selectedName = SelectSingleNameWithML(remainingNames, selectedNames, random);
                 if (!string.IsNullOrEmpty(selectedName))
                 {
                     selectedNames.Add(selectedName);
@@ -504,7 +512,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 简单随机选择点名人员
         /// </summary>
-        private List<string> SelectNamesRandomly(List<string> availableNames, int count)
+        private static List<string> SelectNamesRandomly(List<string> availableNames, int count, Random random)
         {
             if (availableNames == null || availableNames.Count == 0)
                 return new List<string>();
@@ -525,7 +533,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 使用机器学习算法选择单个人员
         /// </summary>
-        private string SelectSingleNameWithML(List<string> availableNames, List<string> alreadySelected)
+        private static string SelectSingleNameWithML(List<string> availableNames, List<string> alreadySelected, Random random)
         {
             if (availableNames.Count == 0) return null;
             if (availableNames.Count == 1) return availableNames[0];
@@ -554,15 +562,15 @@ namespace Ink_Canvas
             }
 
             // 使用加权随机选择
-            return WeightedRandomSelection(nameWeights);
+            return WeightedRandomSelection(nameWeights, random);
         }
 
         /// <summary>
         /// 计算避免最近重复的权重
         /// </summary>
-        private double CalculateRecentAvoidanceWeight(string name)
+        private static double CalculateRecentAvoidanceWeight(string name)
         {
-            if (historyData.History == null || historyData.History.Count == 0)
+            if (historyData == null || historyData.History == null || historyData.History.Count == 0)
                 return 0.0;
 
             // 获取最近记录
@@ -576,9 +584,9 @@ namespace Ink_Canvas
         /// <summary>
         /// 计算频率平衡权重
         /// </summary>
-        private double CalculateFrequencyWeight(string name)
+        private static double CalculateFrequencyWeight(string name)
         {
-            if (historyData.NameFrequency == null || !historyData.NameFrequency.ContainsKey(name))
+            if (historyData == null || historyData.NameFrequency == null || !historyData.NameFrequency.ContainsKey(name))
                 return 0.5; // 如果从未被选中，给予中等权重
 
             int totalSelections = historyData.NameFrequency.Values.Sum();
@@ -594,7 +602,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 加权随机选择
         /// </summary>
-        private string WeightedRandomSelection(Dictionary<string, double> nameWeights)
+        private static string WeightedRandomSelection(Dictionary<string, double> nameWeights, Random random)
         {
             if (nameWeights.Count == 0) return null;
 
@@ -619,15 +627,23 @@ namespace Ink_Canvas
         /// <summary>
         /// 更新点名历史记录
         /// </summary>
-        private void UpdateRollCallHistory(List<string> selectedNames)
+        public static void UpdateRollCallHistory(List<string> selectedNames)
         {
             if (selectedNames == null || selectedNames.Count == 0) return;
 
-            // 更新历史记录
-            if (historyData.History == null)
-                historyData.History = new List<string>();
+            // 确保历史数据已初始化
+            if (historyData == null)
+            {
+                LoadRollCallHistory();
+            }
 
-            historyData.History.AddRange(selectedNames);
+            lock (historyLock)
+            {
+                // 更新历史记录
+                if (historyData.History == null)
+                    historyData.History = new List<string>();
+
+                historyData.History.AddRange(selectedNames);
 
             // 保持历史记录不超过100条
             if (historyData.History.Count > 100)
@@ -647,18 +663,20 @@ namespace Ink_Canvas
                     historyData.NameFrequency[name] = 1;
             }
 
-            historyData.LastUpdate = DateTime.Now;
+                historyData.LastUpdate = DateTime.Now;
 
-            // 保存到文件
-            SaveRollCallHistory();
+                // 保存到文件
+                SaveRollCallHistory();
+            }
         }
+
         #endregion
 
         #region 数据持久化
         /// <summary>
         /// 加载点名历史记录
         /// </summary>
-        private void LoadRollCallHistory()
+        private static void LoadRollCallHistory()
         {
             try
             {
@@ -695,7 +713,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 保存点名历史记录
         /// </summary>
-        private void SaveRollCallHistory()
+        private static void SaveRollCallHistory()
         {
             try
             {
@@ -835,6 +853,21 @@ namespace Ink_Canvas
             {
                 MessageBox.Show($"导入名单失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
                 LogHelper.WriteLogToFile($"导入名单失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ViewHistory_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 打开历史记录查看窗口
+                var historyWindow = new RollCallHistoryWindow();
+                historyWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"打开历史记录失败: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                LogHelper.WriteLogToFile($"打开历史记录失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -1292,8 +1325,9 @@ namespace Ink_Canvas
                 // 动画结束，显示最终结果
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // 使用60个数字进行抽选
-                    var selectedNumbers = SelectMultipleNumbers(currentCount);
+                    // 使用降重抽选方法选择数字
+                    var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
+                    var selectedNumbers = SelectNamesWithML(numberList, currentCount, random);
                     
                     // 更新历史记录
                     UpdateRollCallHistory(selectedNumbers);
@@ -1384,8 +1418,8 @@ namespace Ink_Canvas
             // 动画结束，显示最终结果
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // 根据选择的模式进行不同的点名逻辑
-                var selectedNames = SelectNamesByMode(nameList, currentCount);
+                // 使用降重抽选方法
+                var selectedNames = SelectNamesWithML(nameList, currentCount, random);
                 
                 // 更新历史记录
                 UpdateRollCallHistory(selectedNames);
@@ -1442,8 +1476,12 @@ namespace Ink_Canvas
             // 动画结束，显示最终结果
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // 根据选择的数量进行抽选
-                var selectedNumbers = SelectMultipleNumbers(currentCount);
+                // 使用降重抽选方法选择数字
+                var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
+                var selectedNumbers = SelectNamesWithML(numberList, currentCount, random);
+                
+                // 更新历史记录
+                UpdateRollCallHistory(selectedNumbers);
                 
                 if (selectedNumbers.Count == 1)
                 {
@@ -1482,7 +1520,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 选择多个数字（不重复）
+        /// 选择多个数字
         /// </summary>
         private List<string> SelectMultipleNumbers(int count)
         {

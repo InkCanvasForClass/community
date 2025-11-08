@@ -130,8 +130,8 @@ namespace Ink_Canvas
 
                     bool shouldShowRed = MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true;
 
-                    SetDigitDisplay("Digit1Display", displayHours / 10, shouldShowRed);
-                    SetDigitDisplay("Digit2Display", displayHours % 10, shouldShowRed);
+                    SetDigitDisplay("Digit1Display", Math.Abs(displayHours / 10) % 10, shouldShowRed);
+                    SetDigitDisplay("Digit2Display", (displayHours % 10 + 10) % 10, shouldShowRed);
                     SetDigitDisplay("Digit3Display", overtimeSpan.Minutes / 10, shouldShowRed);
                     SetDigitDisplay("Digit4Display", overtimeSpan.Minutes % 10, shouldShowRed);
                     SetDigitDisplay("Digit5Display", overtimeSpan.Seconds / 10, shouldShowRed);
@@ -430,10 +430,12 @@ namespace Ink_Canvas
             if (isPaused) return null;
             
             var elapsed = DateTime.Now - startTime;
-            var totalSeconds = hour * 3600 + minute * 60 + second;
-            var remaining = totalSeconds - elapsed.TotalSeconds;
+            var totalTimeSpan = new TimeSpan(hour, minute, second);
+            var leftTimeSpan = totalTimeSpan - elapsed;
             
-            return TimeSpan.FromSeconds(remaining);
+            if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
+            
+            return leftTimeSpan;
         }
 
         public void StopTimer()
@@ -796,25 +798,16 @@ namespace Ink_Canvas
 
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
-            if (!isTimerRunning)
+            if (isTimerRunning)
             {
-                UpdateDigitDisplays();
-                isOvertimeMode = false;
-            }
-            else if (isTimerRunning && isPaused)
-            {
-                UpdateDigitDisplays();
-                StartPauseIcon.Data = Geometry.Parse(PlayIconData);
-                isTimerRunning = false;
                 timer.Stop();
-                isPaused = false;
-                isOvertimeMode = false;
+                isTimerRunning = false;
             }
-            else
-            {
-                startTime = DateTime.Now;
-                Timer_Elapsed(timer, null);
-            }
+            
+            isPaused = false;
+            isOvertimeMode = false;
+            UpdateDigitDisplays();
+            StartPauseIcon.Data = Geometry.Parse(PlayIconData);
         }
 
         private void PlayTimerSound()

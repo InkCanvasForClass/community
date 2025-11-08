@@ -99,7 +99,7 @@ namespace Ink_Canvas
         {
             const int animationTimes = 100; // 动画次数
             const int sleepTime = 5; // 每次动画间隔（毫秒）
-            
+
             new System.Threading.Thread(() =>
             {
                 if (nameList.Count > 0)
@@ -121,7 +121,7 @@ namespace Ink_Canvas
         private void StartNameDrawAnimation(int animationTimes, int sleepTime)
         {
             List<string> usedNames = new List<string>();
-            
+
             for (int i = 0; i < animationTimes; i++)
             {
                 // 随机选择一个名字进行动画显示，避免立即重复
@@ -130,25 +130,29 @@ namespace Ink_Canvas
                 {
                     randomName = nameList[random.Next(0, nameList.Count)];
                 } while (usedNames.Count > 0 && usedNames[usedNames.Count - 1] == randomName);
-                
+
                 usedNames.Add(randomName);
-                
+
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     MainResultDisplay.Text = randomName;
                 });
-                
+
                 System.Threading.Thread.Sleep(sleepTime);
             }
-            
+
             // 动画结束，显示最终结果
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // 随机选择一个最终名字
-                string finalName = nameList[random.Next(0, nameList.Count)];
+                // 使用降重抽选方法选择最终名字
+                var selectedNames = NewStyleRollCallWindow.SelectNamesWithML(nameList, 1, random);
+                string finalName = selectedNames.Count > 0 ? selectedNames[0] : nameList[random.Next(0, nameList.Count)];
                 MainResultDisplay.Text = finalName;
+
+                // 更新历史记录
+                NewStyleRollCallWindow.UpdateRollCallHistory(new List<string> { finalName });
             });
-            
+
             // 显示结果后，等待一段时间让用户看到结果，然后关闭窗口
             new System.Threading.Thread(() =>
             {
@@ -166,7 +170,7 @@ namespace Ink_Canvas
         private void StartNumberDrawAnimation(int animationTimes, int sleepTime)
         {
             List<int> usedNumbers = new List<int>();
-            
+
             for (int i = 0; i < animationTimes; i++)
             {
                 // 随机选择一个数字进行动画显示，避免立即重复
@@ -175,25 +179,30 @@ namespace Ink_Canvas
                 {
                     randomNumber = random.Next(1, 61); // 1-60
                 } while (usedNumbers.Count > 0 && usedNumbers[usedNumbers.Count - 1] == randomNumber);
-                
+
                 usedNumbers.Add(randomNumber);
-                
+
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     MainResultDisplay.Text = randomNumber.ToString();
                 });
-                
+
                 System.Threading.Thread.Sleep(sleepTime);
             }
-            
+
             // 动画结束，显示最终结果
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // 随机选择一个最终数字
-                int finalNumber = random.Next(1, 61);
-                MainResultDisplay.Text = finalNumber.ToString();
+                // 使用降重抽选方法选择最终数字
+                var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
+                var selectedNumbers = NewStyleRollCallWindow.SelectNamesWithML(numberList, 1, random);
+                string finalNumber = selectedNumbers.Count > 0 ? selectedNumbers[0] : random.Next(1, 61).ToString();
+                MainResultDisplay.Text = finalNumber;
+
+                // 更新历史记录
+                NewStyleRollCallWindow.UpdateRollCallHistory(new List<string> { finalNumber });
             });
-            
+
             // 显示结果后，等待一段时间让用户看到结果，然后关闭窗口
             new System.Threading.Thread(() =>
             {
