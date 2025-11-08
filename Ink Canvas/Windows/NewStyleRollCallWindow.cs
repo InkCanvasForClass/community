@@ -1325,9 +1325,9 @@ namespace Ink_Canvas
                 // 动画结束，显示最终结果
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // 使用降重抽选方法选择数字
+                    // 根据选择的模式进行不同的抽选逻辑
                     var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
-                    var selectedNumbers = SelectNamesWithML(numberList, currentCount, random);
+                    var selectedNumbers = SelectNamesByMode(numberList, currentCount);
                     
                     // 更新历史记录
                     UpdateRollCallHistory(selectedNumbers);
@@ -1418,8 +1418,8 @@ namespace Ink_Canvas
             // 动画结束，显示最终结果
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // 使用降重抽选方法
-                var selectedNames = SelectNamesWithML(nameList, currentCount, random);
+                // 根据选择的模式进行不同的抽选逻辑
+                var selectedNames = SelectNamesByMode(nameList, currentCount);
                 
                 // 更新历史记录
                 UpdateRollCallHistory(selectedNames);
@@ -1476,9 +1476,9 @@ namespace Ink_Canvas
             // 动画结束，显示最终结果
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // 使用降重抽选方法选择数字
+                // 根据选择的模式进行不同的抽选逻辑
                 var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
-                var selectedNumbers = SelectNamesWithML(numberList, currentCount, random);
+                var selectedNumbers = SelectNamesByMode(numberList, currentCount);
                 
                 // 更新历史记录
                 UpdateRollCallHistory(selectedNumbers);
