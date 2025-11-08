@@ -430,10 +430,12 @@ namespace Ink_Canvas
             if (isPaused) return null;
             
             var elapsed = DateTime.Now - startTime;
-            var totalSeconds = hour * 3600 + minute * 60 + second;
-            var remaining = totalSeconds - elapsed.TotalSeconds;
+            var totalTimeSpan = new TimeSpan(hour, minute, second);
+            var leftTimeSpan = totalTimeSpan - elapsed;
             
-            return TimeSpan.FromSeconds(remaining);
+            if (leftTimeSpan.Milliseconds > 0) leftTimeSpan += new TimeSpan(0, 0, 1);
+            
+            return leftTimeSpan;
         }
 
         public void StopTimer()
