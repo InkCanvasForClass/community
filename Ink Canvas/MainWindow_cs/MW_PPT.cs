@@ -1145,6 +1145,9 @@ namespace Ink_Canvas
         {
             try
             {
+                ClearStrokes(true);
+                timeMachine.ClearStrokeHistory();
+
                 StrokeCollection strokes = null;
                 if (Settings.PowerPointSettings.IsSupportWPS)
                 {
@@ -1155,9 +1158,8 @@ namespace Ink_Canvas
                     strokes = _multiPPTInkManager?.LoadSlideStrokes(slideIndex);
                 }
 
-                if (strokes != null)
+                if (strokes != null && strokes.Count > 0)
                 {
-                    inkCanvas.Strokes.Clear();
                     inkCanvas.Strokes.Add(strokes);
                 }
             }
@@ -1288,7 +1290,6 @@ namespace Ink_Canvas
                 // 获取当前页面索引
                 var currentSlideIndex = _pptManager?.GetCurrentSlideNumber() ?? 0;
 
-
                 // 验证页面索引的有效性
                 if (newSlideIndex <= 0)
                 {
@@ -1321,10 +1322,9 @@ namespace Ink_Canvas
                         }
                     }
                 }
-                else if (inkCanvas.Strokes.Count > 0 && currentSlideIndex <= 0)
-                {
-                }
 
+                ClearStrokes(true);
+                timeMachine.ClearStrokeHistory();
                 StrokeCollection newStrokes = null;
                 if (Settings.PowerPointSettings.IsSupportWPS)
                 {
@@ -1334,9 +1334,9 @@ namespace Ink_Canvas
                 {
                     newStrokes = _multiPPTInkManager?.SwitchToSlide(newSlideIndex, null);
                 }
-                if (newStrokes != null)
+                
+                if (newStrokes != null && newStrokes.Count > 0)
                 {
-                    inkCanvas.Strokes.Clear();
                     inkCanvas.Strokes.Add(newStrokes);
                 }
 
