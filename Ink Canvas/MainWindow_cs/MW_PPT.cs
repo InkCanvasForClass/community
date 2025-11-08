@@ -758,37 +758,34 @@ namespace Ink_Canvas
                         PenIcon_Click(null, null);
                         // 然后设置颜色
                         BtnColorRed_Click(null, null);
-                        Dispatcher.BeginInvoke(new Action(() =>
+                        try
                         {
-                            try
+                            if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
                             {
-                                if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                                UpdateCurrentToolMode("pen");
+                                SetFloatingBarHighlightPosition("pen");
+                                if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
                                 {
-                                    UpdateCurrentToolMode("pen");
-                                    SetFloatingBarHighlightPosition("pen");
-                                    if (Settings.Appearance.IsShowQuickColorPalette && QuickColorPalettePanel != null && QuickColorPaletteSingleRowPanel != null)
+                                    // 根据显示模式选择显示哪个面板
+                                    if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
                                     {
-                                        // 根据显示模式选择显示哪个面板
-                                        if (Settings.Appearance.QuickColorPaletteDisplayMode == 0)
-                                        {
-                                            // 单行显示模式
-                                            QuickColorPalettePanel.Visibility = Visibility.Collapsed;
-                                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
-                                        }
-                                        else
-                                        {
-                                            // 双行显示模式
-                                            QuickColorPalettePanel.Visibility = Visibility.Visible;
-                                            QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
-                                        }
+                                        // 单行显示模式
+                                        QuickColorPalettePanel.Visibility = Visibility.Collapsed;
+                                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Visible;
+                                    }
+                                    else
+                                    {
+                                        // 双行显示模式
+                                        QuickColorPalettePanel.Visibility = Visibility.Visible;
+                                        QuickColorPaletteSingleRowPanel.Visibility = Visibility.Collapsed;
                                     }
                                 }
                             }
-                            catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"PPT进入批注模式后同步浮动栏高光状态失败: {ex.Message}", LogHelper.LogType.Error);
-                            }
-                        }), DispatcherPriority.Loaded);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"PPT进入批注模式后同步浮动栏高光状态失败: {ex.Message}", LogHelper.LogType.Error);
+                        }
                     }
 
                     isEnteredSlideShowEndEvent = false;
