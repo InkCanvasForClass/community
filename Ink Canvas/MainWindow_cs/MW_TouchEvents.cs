@@ -391,12 +391,20 @@ namespace Ink_Canvas
             {
                 var stroke = GetStrokeVisual(e.StylusDevice.Id).Stroke;
 
-                inkCanvas.Strokes.Add(stroke);
-                await Task.Delay(5);
-                inkCanvas.Children.Remove(GetVisualCanvas(e.StylusDevice.Id));
+                if (stroke != null)
+                {
+                    inkCanvas.Strokes.Add(stroke);
+                    await Task.Delay(5);
+                    inkCanvas.Children.Remove(GetVisualCanvas(e.StylusDevice.Id));
 
-                inkCanvas_StrokeCollected(inkCanvas,
-                new InkCanvasStrokeCollectedEventArgs(stroke));
+                    inkCanvas_StrokeCollected(inkCanvas,
+                    new InkCanvasStrokeCollectedEventArgs(stroke));
+                }
+                else
+                {
+                    await Task.Delay(5);
+                    inkCanvas.Children.Remove(GetVisualCanvas(e.StylusDevice.Id));
+                }
             }
             catch (Exception ex)
             {
