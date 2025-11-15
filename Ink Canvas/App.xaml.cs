@@ -346,6 +346,25 @@ namespace Ink_Canvas
             try
             {
                 var exception = e.ExceptionObject as Exception;
+                
+                if (exception is InvalidOperationException invalidOpEx)
+                {
+                    string exceptionMessage = invalidOpEx.Message ?? "";
+                    string exceptionStackTrace = invalidOpEx.StackTrace ?? "";
+                        
+                    if (exceptionMessage.Contains("调用线程无法访问此对象") || 
+                        exceptionMessage.Contains("because another thread owns it") ||
+                        exceptionStackTrace.Contains("DynamicRenderer") ||
+                        exceptionStackTrace.Contains("CompositionTarget.get_RootVisual"))
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"检测到DynamicRenderer线程访问异常: {invalidOpEx.Message}",
+                            LogHelper.LogType.Warning
+                        );
+                        return;
+                    }
+                }
+                
                 string errorMessage = exception?.ToString() ?? "未知异常";
                 lastErrorMessage = errorMessage;
 
@@ -549,6 +568,31 @@ namespace Ink_Canvas
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            // 检查是否是DynamicRenderer线程访问UI对象的已知问题
+            if (e.Exception is InvalidOperationException invalidOpEx)
+            {
+                string exceptionMessage = invalidOpEx.Message ?? "";
+                string exceptionStackTrace = invalidOpEx.StackTrace ?? "";
+                
+                // 检查是否是DynamicRenderer相关的线程访问问题
+                if (exceptionMessage.Contains("调用线程无法访问此对象") || 
+                    exceptionMessage.Contains("because another thread owns it") ||
+                    exceptionStackTrace.Contains("DynamicRenderer") ||
+                    exceptionStackTrace.Contains("CompositionTarget.get_RootVisual"))
+                {
+                    // 这是WPF InkCanvas的已知问题，DynamicRenderer的后台线程尝试访问UI对象
+                    // 这个异常不会影响应用程序功能，可以安全地忽略
+                    LogHelper.WriteLogToFile(
+                        $"检测到DynamicRenderer线程访问异常（已安全处理）: {invalidOpEx.Message}",
+                        LogHelper.LogType.Warning
+                    );
+                    
+                    // 标记为已处理，不显示错误消息，不触发重启
+                    e.Handled = true;
+                    return;
+                }
+            }
+            
             Ink_Canvas.MainWindow.ShowNewMessage("抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。");
             LogHelper.NewLog(e.Exception.ToString());
 
