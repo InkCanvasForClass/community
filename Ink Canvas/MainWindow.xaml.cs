@@ -777,6 +777,8 @@ namespace Ink_Canvas
             // 停止置顶维护定时器
             StopTopmostMaintenance();
 
+            UninstallKeyboardHook();
+
             // 从Z-Order管理器中移除主窗口
             WindowZOrderManager.UnregisterWindow(this);
 
@@ -1833,7 +1835,40 @@ namespace Ink_Canvas
         private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
         [DllImport("kernel32.dll")]
         private static extern uint GetCurrentProcessId();
+        
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        private const int WH_KEYBOARD_LL = 13;
+        private const int WM_KEYDOWN = 0x0100;
+        private const int WM_KEYUP = 0x0101;
+        private const int WM_SYSKEYDOWN = 0x0104;
+        private const int WM_SYSKEYUP = 0x0105;
+
+        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct KBDLLHOOKSTRUCT
+        {
+            public uint vkCode;
+            public uint scanCode;
+            public uint flags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        private LowLevelKeyboardProc _keyboardProc;
+        private IntPtr _keyboardHookId = IntPtr.Zero;
 
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
@@ -1851,6 +1886,67 @@ namespace Ink_Canvas
         private DispatcherTimer autoSaveStrokesTimer;
         private bool isTopmostMaintenanceEnabled;
 
+        private IntPtr KeyboardHookProc(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode >= 0)
+            {
+                if (Settings.Advanced.IsNoFocusMode && 
+                    BtnPPTSlideShowEnd.Visibility == Visibility.Visible && 
+                    currentMode == 0)
+                {
+                    KBDLLHOOKSTRUCT hookStruct = (KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(KBDLLHOOKSTRUCT));
+                    uint vkCode = hookStruct.vkCode;
+                    
+                    if (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN)
+                    {
+                        if (vkCode == 0x22 || vkCode == 0x28 || vkCode == 0x27 || 
+                            vkCode == 0x4E || vkCode == 0x20)
+                        {
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                BtnPPTSlidesDown_Click(null, null);
+                            }), DispatcherPriority.Normal);
+                            return (IntPtr)1;
+                        }
+                        else if (vkCode == 0x21 || vkCode == 0x26 || vkCode == 0x25 || 
+                                 vkCode == 0x50)
+                        {
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                BtnPPTSlidesUp_Click(null, null);
+                            }), DispatcherPriority.Normal);
+                            return (IntPtr)1;
+                        }
+                    }
+                }
+            }
+            return CallNextHookEx(_keyboardHookId, nCode, wParam, lParam);
+        }
+
+        private void InstallKeyboardHook()
+        {
+            if (_keyboardHookId == IntPtr.Zero)
+            {
+                _keyboardProc = KeyboardHookProc;
+                _keyboardHookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardProc,
+                    GetModuleHandle(null), 0);
+                if (_keyboardHookId == IntPtr.Zero)
+                {
+                    LogHelper.WriteLogToFile("安装低级键盘钩子失败", LogHelper.LogType.Error);
+                }
+            }
+        }
+
+        private void UninstallKeyboardHook()
+        {
+            if (_keyboardHookId != IntPtr.Zero)
+            {
+                UnhookWindowsHookEx(_keyboardHookId);
+                _keyboardHookId = IntPtr.Zero;
+                _keyboardProc = null;
+            }
+        }
+
         private void ApplyNoFocusMode()
         {
             var hwnd = new WindowInteropHelper(this).Handle;
@@ -1862,10 +1958,12 @@ namespace Ink_Canvas
             if (shouldBeNoFocus)
             {
                 SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+                InstallKeyboardHook();
             }
             else
             {
                 SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
+                UninstallKeyboardHook();
             }
         }
 
