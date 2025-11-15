@@ -424,8 +424,14 @@ namespace Ink_Canvas
             BtnLeftWhiteBoardSwitchNextLabel.Text = isLastPage ? "新页面" : "下一页";
             BtnRightWhiteBoardSwitchNextLabel.Text = isLastPage ? "新页面" : "下一页";
 
-            // 始终允许点击"下一页/新页面"按钮（除非已达最大页数）
-            BtnWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
+            if (isLastPage)
+            {
+                BtnWhiteBoardSwitchNext.IsEnabled = !isMaxPage;
+            }
+            else
+            {
+                BtnWhiteBoardSwitchNext.IsEnabled = true;
+            }
 
             // 获取主题颜色资源
             var iconForegroundBrush = Application.Current.FindResource("IconForeground") as SolidColorBrush;
