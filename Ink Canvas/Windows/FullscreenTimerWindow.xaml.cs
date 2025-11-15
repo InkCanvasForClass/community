@@ -1,7 +1,9 @@
 using System;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Timers;
@@ -33,7 +35,65 @@ namespace Ink_Canvas
             updateTimer.Start();
             
             parentWindow.TimerCompleted += ParentWindow_TimerCompleted;
+            
+            // 确保窗口置顶
+            Loaded += FullscreenTimerWindow_Loaded;
         }
+        
+        private void FullscreenTimerWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // 使用延迟确保窗口完全加载后再应用置顶
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                ApplyTopmost();
+            }), System.Windows.Threading.DispatcherPriority.Loaded);
+        }
+        
+        #region Win32 API 声明和置顶管理
+        [DllImport("user32.dll")]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        [DllImport("user32.dll")]
+        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll")]
+        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        private const int GWL_EXSTYLE = -20;
+        private const int WS_EX_TOPMOST = 0x00000008;
+        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_SHOWWINDOW = 0x0040;
+
+        /// <summary>
+        /// 应用全屏窗口置顶
+        /// </summary>
+        private void ApplyTopmost()
+        {
+            try
+            {
+                var hwnd = new WindowInteropHelper(this).Handle;
+                if (hwnd == IntPtr.Zero) return;
+
+                // 设置WPF的Topmost属性
+                Topmost = true;
+
+                // 使用Win32 API强制置顶
+                int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
+
+                // 使用SetWindowPos确保窗口在最顶层
+                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"应用全屏窗口置顶失败: {ex.Message}");
+            }
+        }
+        #endregion
 
         private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
         {

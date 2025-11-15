@@ -52,6 +52,26 @@ namespace Ink_Canvas
 
             // 添加窗口加载事件处理，确保置顶
             Loaded += TimerWindow_Loaded;
+            
+            // 暂停主窗口的置顶维护
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.PauseTopmostMaintenance();
+            }
+            
+            // 窗口关闭时恢复主窗口的置顶维护
+            Closing += TimerWindow_Closing;
+        }
+        
+        private void TimerWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // 恢复主窗口的置顶维护
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.ResumeTopmostMaintenance();
+            }
         }
 
 
@@ -115,6 +135,12 @@ namespace Ink_Canvas
                         isTimerRunning = false;
                         StartPauseIcon.Data = Geometry.Parse(PlayIconData);
                         PlayTimerSound();
+                        
+                        // 禁用全屏按钮
+                        if (FullscreenBtn != null)
+                        {
+                            FullscreenBtn.IsEnabled = false;
+                        }
                         
                         TimerCompleted?.Invoke(this, EventArgs.Empty);
                         HandleTimerCompletion();
@@ -337,7 +363,7 @@ namespace Ink_Canvas
                 minimizedWindow = new MinimizedTimerWindow(this);
                 minimizedWindow.Show();
                 
-                // 确保最小化窗口也置顶
+                // 确保最小化窗口也置顶（窗口加载时会自动应用）
                 minimizedWindow.Topmost = true;
                 
                 // 隐藏主窗口
@@ -793,6 +819,12 @@ namespace Ink_Canvas
 
                 // 保存到最近计时记录
                 SaveRecentTimer();
+                
+                // 启用全屏按钮
+                if (FullscreenBtn != null)
+                {
+                    FullscreenBtn.IsEnabled = true;
+                }
             }
         }
 
@@ -808,6 +840,12 @@ namespace Ink_Canvas
             isOvertimeMode = false;
             UpdateDigitDisplays();
             StartPauseIcon.Data = Geometry.Parse(PlayIconData);
+            
+            // 禁用全屏按钮
+            if (FullscreenBtn != null)
+            {
+                FullscreenBtn.IsEnabled = false;
+            }
         }
 
         private void PlayTimerSound()
@@ -884,6 +922,13 @@ namespace Ink_Canvas
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             isTimerRunning = false;
+            
+            // 恢复主窗口的置顶维护
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.ResumeTopmostMaintenance();
+            }
         }
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -1292,6 +1337,10 @@ namespace Ink_Canvas
 
         private void Fullscreen_Click(object sender, RoutedEventArgs e)
         {
+            if (!isTimerRunning)
+            {
+                return;
+            }
             ShowFullscreenTimer();
         }
 
@@ -1304,7 +1353,7 @@ namespace Ink_Canvas
             fullscreenWindow = new FullscreenTimerWindow(this);
             fullscreenWindow.Show();
             
-            // 确保全屏窗口也置顶
+            // 确保全屏窗口也置顶（窗口加载时会自动应用）
             fullscreenWindow.Topmost = true;
             
             // 隐藏主窗口
@@ -1384,10 +1433,6 @@ namespace Ink_Canvas
                 var hwnd = new WindowInteropHelper(this).Handle;
                 if (hwnd == IntPtr.Zero) return;
 
-                // 强制激活窗口
-                Activate();
-                Focus();
-
                 // 设置WPF的Topmost属性
                 Topmost = true;
 
@@ -1397,8 +1442,9 @@ namespace Ink_Canvas
                 SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
 
                 // 2. 使用SetWindowPos确保窗口在最顶层
+                // 使用HWND_TOPMOST确保窗口始终在所有其他窗口之上，包括主窗口
                 SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW | SWP_NOOWNERZORDER);
+                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
 
                 LogHelper.WriteLogToFile("计时器窗口已应用置顶", LogHelper.LogType.Trace);
             }

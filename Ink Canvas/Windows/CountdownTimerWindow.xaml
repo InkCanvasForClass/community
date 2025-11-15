@@ -8,6 +8,7 @@
         xmlns:processbars="clr-namespace:Ink_Canvas.ProcessBars"
         ui:ThemeManager.RequestedTheme="Light" Topmost="True" Background="Transparent"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
+        ResizeMode="CanMinimize"
         Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
         Title="Ink Canvas 画板 - 计时器" Height="700" Width="1100">
     <Border Background="{DynamicResource TimerWindowBackground}" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource TimerWindowBorderBrush}" Margin="60">

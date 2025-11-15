@@ -7,6 +7,7 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         Topmost="True" Background="Transparent"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
+        ResizeMode="NoResize"
         WindowStartupLocation="Manual" Title="计时器" Height="200" Width="600"
         MouseLeftButtonDown="Window_MouseLeftButtonDown" MouseLeftButtonUp="Window_MouseLeftButtonUp"
         MouseEnter="Window_MouseEnter" MouseLeave="Window_MouseLeave" MouseMove="Window_MouseMove">

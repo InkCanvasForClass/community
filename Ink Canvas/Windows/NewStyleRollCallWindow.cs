@@ -67,6 +67,25 @@ namespace Ink_Canvas
             // 初始化点名相关变量
             InitializeRollCallData();
             
+            if (isSingleDrawMode)
+            {
+                if (ControlOptionsGrid != null)
+                {
+                    ControlOptionsGrid.Opacity = 0.4;
+                    ControlOptionsGrid.IsHitTestVisible = false;
+                }
+                if (StartRollCallBtn != null)
+                {
+                    StartRollCallBtn.Opacity = 0.4;
+                    StartRollCallBtn.IsEnabled = false;
+                }
+                if (ResetBtn != null)
+                {
+                    ResetBtn.Opacity = 0.4;
+                    ResetBtn.IsEnabled = false;
+                }
+            }
+            
             // 单次抽模式：自动开始抽选
             if (isSingleDrawMode)
             {
@@ -101,6 +120,27 @@ namespace Ink_Canvas
             
             // 初始化点名相关变量
             InitializeRollCallData();
+            
+            // 单次抽模式：禁用控制面板，阻止用户点击按钮
+            if (isSingleDrawMode)
+            {
+                if (ControlOptionsGrid != null)
+                {
+                    ControlOptionsGrid.Opacity = 0.4;
+                    ControlOptionsGrid.IsHitTestVisible = false;
+                }
+                // 禁用开始点名和重置按钮
+                if (StartRollCallBtn != null)
+                {
+                    StartRollCallBtn.Opacity = 0.4;
+                    StartRollCallBtn.IsEnabled = false;
+                }
+                if (ResetBtn != null)
+                {
+                    ResetBtn.Opacity = 0.4;
+                    ResetBtn.IsEnabled = false;
+                }
+            }
             
             // 单次抽模式：自动开始抽选
             if (isSingleDrawMode)
@@ -1671,6 +1711,21 @@ namespace Ink_Canvas
                         System.Threading.Thread.Sleep(autoCloseWaitTime);
                         Application.Current.Dispatcher.Invoke(() =>
                         {
+                            if (ControlOptionsGrid != null)
+                            {
+                                ControlOptionsGrid.Opacity = 1;
+                                ControlOptionsGrid.IsHitTestVisible = true;
+                            }
+                            if (StartRollCallBtn != null)
+                            {
+                                StartRollCallBtn.Opacity = 1;
+                                StartRollCallBtn.IsEnabled = true;
+                            }
+                            if (ResetBtn != null)
+                            {
+                                ResetBtn.Opacity = 1;
+                                ResetBtn.IsEnabled = true;
+                            }
                             Close();
                         });
                     }).Start();
@@ -1743,6 +1798,22 @@ namespace Ink_Canvas
                         System.Threading.Thread.Sleep(autoCloseWaitTime);
                         Application.Current.Dispatcher.Invoke(() =>
                         {
+                            if (ControlOptionsGrid != null)
+                            {
+                                ControlOptionsGrid.Opacity = 1;
+                                ControlOptionsGrid.IsHitTestVisible = true;
+                            }
+                            // 恢复开始点名和重置按钮
+                            if (StartRollCallBtn != null)
+                            {
+                                StartRollCallBtn.Opacity = 1;
+                                StartRollCallBtn.IsEnabled = true;
+                            }
+                            if (ResetBtn != null)
+                            {
+                                ResetBtn.Opacity = 1;
+                                ResetBtn.IsEnabled = true;
+                            }
                             Close();
                         });
                     }).Start();

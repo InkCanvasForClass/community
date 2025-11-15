@@ -8,6 +8,7 @@
         xmlns:controls="clr-namespace:Ink_Canvas.Windows.Controls"
         Topmost="True" Background="Transparent"
         mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
+        ResizeMode="CanMinimize"
         Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
         MouseMove="Window_MouseMove" MouseEnter="Window_MouseEnter"
         Title="Ink Canvas 画板 - 计时器" Height="450" Width="900">
@@ -714,12 +715,17 @@
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <!-- 全屏按钮 -->
                                 <Button x:Name="FullscreenBtn" Width="80" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                BorderThickness="0" Click="Fullscreen_Click" Cursor="Hand" Margin="0,0,30,0">
+                                BorderThickness="0" Click="Fullscreen_Click" Cursor="Hand" Margin="0,0,30,0" IsEnabled="False">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                                            <Border x:Name="border" Background="{TemplateBinding Background}" CornerRadius="8" Opacity="1">
                                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Button.Template>
                                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
