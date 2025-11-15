@@ -1956,6 +1956,28 @@ namespace Ink_Canvas
             }
         }
 
+        public void PauseTopmostMaintenance()
+        {
+            if (topmostMaintenanceTimer != null && isTopmostMaintenanceEnabled)
+            {
+                topmostMaintenanceTimer.Stop();
+            }
+        }
+
+        public void ResumeTopmostMaintenance()
+        {
+            if (Settings.Advanced.IsAlwaysOnTop && 
+                Settings.Advanced.IsNoFocusMode && 
+                !Settings.Advanced.EnableUIAccessTopMost)
+            {
+                if (topmostMaintenanceTimer != null && !isTopmostMaintenanceEnabled)
+                {
+                    topmostMaintenanceTimer.Start();
+                    isTopmostMaintenanceEnabled = true;
+                }
+            }
+        }
+
         /// <summary>
         /// 置顶维护定时器事件
         /// </summary>
