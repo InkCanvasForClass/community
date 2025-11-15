@@ -665,6 +665,62 @@ namespace Ink_Canvas
         }
 
         /// <summary>
+        /// 根据频率统计更新保存的概率
+        /// </summary>
+        private static void UpdateProbabilitiesByFrequency()
+        {
+            if (historyData == null || historyData.NameFrequency == null || historyData.NameFrequency.Count == 0)
+                return;
+
+            if (historyData.NameProbabilities == null)
+                historyData.NameProbabilities = new Dictionary<string, double>();
+
+            // 计算总选中次数
+            int totalSelections = historyData.NameFrequency.Values.Sum();
+            if (totalSelections == 0)
+                return;
+
+            // 计算平均频率
+            int uniqueNamesCount = historyData.NameFrequency.Keys.Count;
+            if (uniqueNamesCount == 0)
+                return;
+
+            double averageFrequency = 1.0 / uniqueNamesCount;
+
+            // 遍历所有在频率统计中的人员
+            foreach (var kvp in historyData.NameFrequency)
+            {
+                string name = kvp.Key;
+                int nameCount = kvp.Value;
+
+                // 获取当前保存的概率（如果不存在则使用默认值）
+                double currentProbability = historyData.NameProbabilities.ContainsKey(name) 
+                    ? historyData.NameProbabilities[name] 
+                    : DEFAULT_PROBABILITY;
+
+                // 计算该名字的选中频率
+                double nameFrequency = (double)nameCount / totalSelections;
+
+                // 如果该名字的频率低于平均频率，则增加概率并保存
+                if (nameFrequency < averageFrequency)
+                {
+                    // 计算频率差异比例
+                    double frequencyRatio = nameFrequency / averageFrequency;
+                    double boostFactor = FREQUENCY_BOOST_FACTOR * (1.0 - frequencyRatio);
+                    
+                    // 增加概率
+                    double boostedProbability = currentProbability * (1.0 + boostFactor);
+                    
+                    // 限制最大概率，避免过高
+                    boostedProbability = Math.Min(boostedProbability, DEFAULT_PROBABILITY * 2.0);
+                    
+                    // 保存更新后的概率
+                    historyData.NameProbabilities[name] = boostedProbability;
+                }
+            }
+        }
+
+        /// <summary>
         /// 基于概率的随机选择
         /// </summary>
         private static string ProbabilityBasedRandomSelection(Dictionary<string, double> nameProbabilities, Random random)
@@ -829,6 +885,9 @@ namespace Ink_Canvas
                         }
                     }
                 }
+
+                // 根据频率统计更新概率
+                UpdateProbabilitiesByFrequency();
 
                 historyData.LastUpdate = DateTime.Now;
 
