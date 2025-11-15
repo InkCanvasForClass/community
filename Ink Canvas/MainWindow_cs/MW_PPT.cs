@@ -630,7 +630,7 @@ namespace Ink_Canvas
 
                 isStopInkReplay = true;
 
-                await Application.Current.Dispatcher.InvokeAsync(() =>
+                await Application.Current.Dispatcher.InvokeAsync(async () =>
                 {
                     Presentation activePresentation = null;
                     int currentSlide = 0;
@@ -1254,7 +1254,6 @@ namespace Ink_Canvas
                     inkCanvas.Strokes.Add(newStrokes);
                 }
 
-                // 注意：LockInkForSlide已经在SwitchToSlide中调用，这里不需要重复调用
             }
             catch (Exception ex)
             {
