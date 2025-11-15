@@ -104,7 +104,6 @@ namespace Ink_Canvas
 
         #region PPT Managers
         private PPTManager _pptManager;
-        private MultiPPTInkManager _multiPPTInkManager;
         private PPTInkManager _singlePPTInkManager;
         private PPTUIManager _pptUIManager;
 
@@ -135,19 +134,9 @@ namespace Ink_Canvas
                 _pptManager.PresentationClose += OnPPTPresentationClose;
                 _pptManager.SlideShowStateChanged += OnPPTSlideShowStateChanged;
 
-                if (Settings.PowerPointSettings.IsSupportWPS)
-                {
-                    _singlePPTInkManager = new PPTInkManager();
-                    _singlePPTInkManager.IsAutoSaveEnabled = Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
-                    _singlePPTInkManager.AutoSaveLocation = Settings.Automation.AutoSavedStrokesLocation;
-                }
-                else
-                {
-                    _multiPPTInkManager = new MultiPPTInkManager();
-                    _multiPPTInkManager.IsAutoSaveEnabled = Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
-                    _multiPPTInkManager.AutoSaveLocation = Settings.Automation.AutoSavedStrokesLocation;
-                    _multiPPTInkManager.PPTManager = _pptManager;
-                }
+                _singlePPTInkManager = new PPTInkManager();
+                _singlePPTInkManager.IsAutoSaveEnabled = Settings.PowerPointSettings.IsAutoSaveStrokesInPowerPoint;
+                _singlePPTInkManager.AutoSaveLocation = Settings.Automation.AutoSavedStrokesLocation;
 
                 // 初始化UI管理器
                 _pptUIManager = new PPTUIManager(this);
@@ -430,12 +419,10 @@ namespace Ink_Canvas
             try
             {
                 _pptManager?.Dispose();
-                _multiPPTInkManager?.Dispose();
                 _singlePPTInkManager?.Dispose();
                 _longPressTimer?.Stop();
                 _longPressTimer = null;
                 _pptManager = null;
-                _multiPPTInkManager = null;
                 _singlePPTInkManager = null;
                 _pptUIManager = null;
 
@@ -521,14 +508,7 @@ namespace Ink_Canvas
                     else
                     {
                         LogHelper.WriteLogToFile("PPT连接已断开", LogHelper.LogType.Event);
-                        if (Settings.PowerPointSettings.IsSupportWPS)
-                        {
-                            _singlePPTInkManager?.ClearAllStrokes();
-                        }
-                        else
-                        {
-                            _multiPPTInkManager?.ClearAllStrokes();
-                        }
+                        _singlePPTInkManager?.ClearAllStrokes();
                     }
                 });
             }
@@ -553,14 +533,7 @@ namespace Ink_Canvas
                         TimeMachineHistories[0] = null;
                     }
 
-                    if (Settings.PowerPointSettings.IsSupportWPS)
-                    {
-                        _singlePPTInkManager?.InitializePresentation(pres);
-                    }
-                    else
-                    {
-                        _multiPPTInkManager?.InitializePresentation(pres);
-                    }
+                    _singlePPTInkManager?.InitializePresentation(pres);
 
                     // 处理跳转到首页或上次播放页的逻辑
                     HandlePresentationOpenNavigation(pres);
@@ -594,15 +567,7 @@ namespace Ink_Canvas
             {
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    if (Settings.PowerPointSettings.IsSupportWPS)
-                    {
-                        _singlePPTInkManager?.SaveAllStrokesToFile(pres);
-                    }
-                    else
-                    {
-                        _multiPPTInkManager?.SaveAllStrokesToFile(pres);
-                        _multiPPTInkManager?.RemovePresentation(pres);
-                    }
+                    _singlePPTInkManager?.SaveAllStrokesToFile(pres);
 
                     _pptUIManager?.UpdateConnectionStatus(false);
                 });
@@ -686,12 +651,15 @@ namespace Ink_Canvas
 
                     if (activePresentation != null)
                     {
-                        if (Settings.PowerPointSettings.IsSupportWPS)
+                        if (_singlePPTInkManager != null)
                         {
-                        }
-                        else
-                        {
-                            _multiPPTInkManager?.SwitchToPresentation(activePresentation);
+                            try
+                            {
+                                _singlePPTInkManager.InitializePresentation(activePresentation);
+                            }
+                            catch (Exception)
+                            {
+                            }
                         }
                     }
 
@@ -754,6 +722,7 @@ namespace Ink_Canvas
                     if (Settings.PowerPointSettings.IsShowCanvasAtNewSlideShow &&
                         !Settings.Automation.IsAutoFoldInPPTSlideShow)
                     {
+                        await Task.Delay(300);
                         // 先进入批注模式，这会显示调色盘
                         PenIcon_Click(null, null);
                         // 然后设置颜色
@@ -827,11 +796,6 @@ namespace Ink_Canvas
                     var activePresentation = wn.Presentation;
                     var totalSlides = activePresentation.Slides.Count;
 
-                    if (!Settings.PowerPointSettings.IsSupportWPS)
-                    {
-                        _multiPPTInkManager?.SwitchToPresentation(activePresentation);
-                    }
-
                     // 使用防抖机制处理页面切换
                     HandleSlideSwitchWithDebounce(currentSlide, totalSlides);
 
@@ -879,14 +843,7 @@ namespace Ink_Canvas
                 if (isEnteredSlideShowEndEvent) return;
                 isEnteredSlideShowEndEvent = true;
 
-                if (Settings.PowerPointSettings.IsSupportWPS)
-                {
-                    _singlePPTInkManager?.SaveAllStrokesToFile(pres);
-                }
-                else
-                {
-                    _multiPPTInkManager?.SaveAllStrokesToFile(pres);
-                }
+                _singlePPTInkManager?.SaveAllStrokesToFile(pres);
 
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
@@ -1148,15 +1105,7 @@ namespace Ink_Canvas
                 ClearStrokes(true);
                 timeMachine.ClearStrokeHistory();
 
-                StrokeCollection strokes = null;
-                if (Settings.PowerPointSettings.IsSupportWPS)
-                {
-                    strokes = _singlePPTInkManager?.LoadSlideStrokes(slideIndex);
-                }
-                else
-                {
-                    strokes = _multiPPTInkManager?.LoadSlideStrokes(slideIndex);
-                }
+                StrokeCollection strokes = _singlePPTInkManager?.LoadSlideStrokes(slideIndex);
 
                 if (strokes != null && strokes.Count > 0)
                 {
@@ -1176,19 +1125,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (Settings.PowerPointSettings.IsSupportWPS)
-                {
-                    _singlePPTInkManager?.ResetLockState();
-                }
-                else
-                {
-                    var activePresentation = _pptManager?.GetCurrentActivePresentation();
-                    if (activePresentation != null)
-                    {
-                        _multiPPTInkManager?.SwitchToPresentation(activePresentation);
-                        _multiPPTInkManager?.ResetCurrentPresentationLockState();
-                    }
-                }
+                _singlePPTInkManager?.ResetLockState();
             }
             catch (Exception ex)
             {
@@ -1300,40 +1237,17 @@ namespace Ink_Canvas
                 // 如果有当前墨迹且不是第一次切换，先保存到当前页面
                 if (inkCanvas.Strokes.Count > 0 && currentSlideIndex > 0 && currentSlideIndex != newSlideIndex)
                 {
-                    bool canWrite = false;
-                    if (Settings.PowerPointSettings.IsSupportWPS)
-                    {
-                        canWrite = _singlePPTInkManager?.CanWriteInk(currentSlideIndex) == true;
-                    }
-                    else
-                    {
-                        canWrite = _multiPPTInkManager?.CanWriteInk(currentSlideIndex) == true;
-                    }
+                    bool canWrite = _singlePPTInkManager?.CanWriteInk(currentSlideIndex) == true;
 
                     if (canWrite)
                     {
-                        if (Settings.PowerPointSettings.IsSupportWPS)
-                        {
-                            _singlePPTInkManager?.SaveCurrentSlideStrokes(currentSlideIndex, inkCanvas.Strokes);
-                        }
-                        else
-                        {
-                            _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlideIndex, inkCanvas.Strokes);
-                        }
+                        _singlePPTInkManager?.SaveCurrentSlideStrokes(currentSlideIndex, inkCanvas.Strokes);
                     }
                 }
 
                 ClearStrokes(true);
                 timeMachine.ClearStrokeHistory();
-                StrokeCollection newStrokes = null;
-                if (Settings.PowerPointSettings.IsSupportWPS)
-                {
-                    newStrokes = _singlePPTInkManager?.SwitchToSlide(newSlideIndex, null);
-                }
-                else
-                {
-                    newStrokes = _multiPPTInkManager?.SwitchToSlide(newSlideIndex, null);
-                }
+                StrokeCollection newStrokes = _singlePPTInkManager?.SwitchToSlide(newSlideIndex, null);
                 
                 if (newStrokes != null && newStrokes.Count > 0)
                 {
@@ -1474,14 +1388,7 @@ namespace Ink_Canvas
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     if (currentSlide > 0)
                     {
-                        if (Settings.PowerPointSettings.IsSupportWPS)
-                        {
-                            _singlePPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
-                        }
-                        else
-                        {
-                            _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
-                        }
+                        _singlePPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
                     }
 
                     // 保存截图（如果启用）
@@ -1521,14 +1428,7 @@ namespace Ink_Canvas
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     if (currentSlide > 0)
                     {
-                        if (Settings.PowerPointSettings.IsSupportWPS)
-                        {
-                            _singlePPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
-                        }
-                        else
-                        {
-                            _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
-                        }
+                        _singlePPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
                     }
 
                     // 保存截图（如果启用）
@@ -1688,14 +1588,7 @@ namespace Ink_Canvas
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
-                        if (Settings.PowerPointSettings.IsSupportWPS)
-                        {
-                            _singlePPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
-                        }
-                        else
-                        {
-                            _multiPPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
-                        }
+                        _singlePPTInkManager?.SaveCurrentSlideStrokes(currentSlide, inkCanvas.Strokes);
                         timeMachine.ClearStrokeHistory();
                     });
                 }

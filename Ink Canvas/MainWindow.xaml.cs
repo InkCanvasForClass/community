@@ -325,13 +325,11 @@ namespace Ink_Canvas
                     {
                         if (gest.ApplicationGesture == ApplicationGesture.Left)
                         {
-                            // 直接发送翻页请求到PPT放映软件
-                            SendKeyToPPTSlideShow(false); // 下一页
+                            BtnPPTSlidesDown_Click(null, null); // 下一页
                         }
                         if (gest.ApplicationGesture == ApplicationGesture.Right)
                         {
-                            // 直接发送翻页请求到PPT放映软件
-                            SendKeyToPPTSlideShow(true); // 上一页
+                            BtnPPTSlidesUp_Click(null, null); // 上一页
                         }
                     }
             }
@@ -2346,47 +2344,6 @@ namespace Ink_Canvas
         }
         #endregion
 
-        #region PPT翻页直接传递
-        /// <summary>
-        /// 直接发送翻页请求到PPT放映软件，让PPT软件处理翻页
-        /// </summary>
-        /// <param name="isPrevious">是否为上一页</param>
-        private void SendKeyToPPTSlideShow(bool isPrevious)
-        {
-            try
-            {
-                // 查找PPT放映窗口并发送按键
-                var pptWindows = Process.GetProcessesByName("POWERPNT");
-                var wpsWindows = Process.GetProcessesByName("wpp");
-
-                foreach (var process in pptWindows.Concat(wpsWindows))
-                {
-                    if (process.MainWindowHandle != IntPtr.Zero)
-                    {
-                        // 激活PPT窗口
-                        SetForegroundWindow(process.MainWindowHandle);
-
-                        // 发送翻页按键消息
-                        int keyCode = isPrevious ? 0x21 : 0x22; // VK_PRIOR : VK_NEXT
-
-                        // 发送按键按下和释放消息
-                        PostMessage(process.MainWindowHandle, 0x0100, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYDOWN
-                        PostMessage(process.MainWindowHandle, 0x0101, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYUP
-
-                        break;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // 如果直接发送失败，回退到原来的方法
-                if (isPrevious)
-                    BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
-                else
-                    BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
-            }
-        }
-        #endregion
 
         /// <summary>
         /// 初始化文件关联状态显示
