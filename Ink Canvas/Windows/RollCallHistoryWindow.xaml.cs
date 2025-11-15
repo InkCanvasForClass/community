@@ -48,19 +48,74 @@ namespace Ink_Canvas
                     return;
                 }
 
-                // 按时间倒序显示（最新的在上方）
-                // 由于历史记录是按时间顺序添加的，所以直接反转即可
-                var reversedHistory = historyData.History.ToList();
-                reversedHistory.Reverse();
+                // 计算每个名字的总累计抽选次数（用于统计信息）
+                var nameCountDict = new System.Collections.Generic.Dictionary<string, int>();
+                if (historyData.NameFrequency != null && historyData.NameFrequency.Count > 0)
+                {
+                    // 使用已保存的频率统计
+                    foreach (var kvp in historyData.NameFrequency)
+                    {
+                        nameCountDict[kvp.Key] = kvp.Value;
+                    }
+                }
+                else
+                {
+                    // 如果没有频率统计，从历史记录中计算
+                    foreach (var name in historyData.History)
+                    {
+                        if (nameCountDict.ContainsKey(name))
+                            nameCountDict[name]++;
+                        else
+                            nameCountDict[name] = 1;
+                    }
+                }
 
-                // 显示历史记录，每行一个
-                TextBoxHistory.Text = string.Join(Environment.NewLine, reversedHistory);
+                // 计算历史记录中每条记录出现时的累计次数（按时间正序）
+                var historyWithCount = new System.Collections.Generic.List<System.Tuple<string, int>>();
+                var runningCount = new System.Collections.Generic.Dictionary<string, int>();
+                foreach (var name in historyData.History)
+                {
+                    if (runningCount.ContainsKey(name))
+                        runningCount[name]++;
+                    else
+                        runningCount[name] = 1;
+                    historyWithCount.Add(new System.Tuple<string, int>(name, runningCount[name]));
+                }
+
+                // 按时间倒序显示（最新的在上方）
+                historyWithCount.Reverse();
+
+                // 显示历史记录，每行显示：名字 (累计X次)
+                var historyLines = new System.Collections.Generic.List<string>();
+                foreach (var item in historyWithCount)
+                {
+                    historyLines.Add($"{item.Item1} (最近累计{item.Item2}次)");
+                }
 
                 // 显示统计信息
                 int totalCount = historyData.History.Count;
                 string lastUpdate = historyData.LastUpdate.ToString("yyyy-MM-dd HH:mm:ss");
-                string header = $"共 {totalCount} 条记录，最后更新：{lastUpdate}\n\n";
-                TextBoxHistory.Text = header + TextBoxHistory.Text;
+                
+                // 计算累计统计信息
+                var statsLines = new System.Collections.Generic.List<string>();
+                statsLines.Add($"");
+                statsLines.Add($"");
+                statsLines.Add($"累计抽选次数统计：");
+                
+                // 按累计次数降序排序显示
+                var sortedStats = nameCountDict.OrderByDescending(kvp => kvp.Value).ToList();
+                foreach (var kvp in sortedStats)
+                {
+                    statsLines.Add($"  {kvp.Key}: {kvp.Value}次");
+                }
+                
+                statsLines.Add($"");
+                statsLines.Add($"共 {totalCount} 条记录，最后更新：{lastUpdate}");
+                
+                // 组合历史记录和统计信息
+                TextBoxHistory.Text = string.Join(Environment.NewLine, historyLines) + 
+                                     Environment.NewLine + 
+                                     string.Join(Environment.NewLine, statsLines);
             }
             catch (Exception ex)
             {
@@ -174,7 +229,6 @@ namespace Ink_Canvas
             }
             catch
             {
-                // 如果无法读取注册表，默认使用浅色主题
                 light = true;
             }
             return light;
