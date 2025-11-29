@@ -1051,17 +1051,38 @@ namespace Ink_Canvas
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-            // 参考老计时器的窗口置顶功能：在白板模式下停止窗口置顶
-            if (currentMode == 1) // 白板模式
+            if (Settings.RandSettings?.UseNewStyleUI == true)
             {
-                Topmost = false;
+                if (TimerContainer != null && TimerControl != null)
+                {
+                    TimerContainer.Visibility = Visibility.Visible;
+                    if (MinimizedTimerContainer != null)
+                    {
+                        MinimizedTimerContainer.Visibility = Visibility.Collapsed;
+                    }
+                    TimerControl.CloseRequested += (s, args) =>
+                    {
+                        TimerContainer.Visibility = Visibility.Collapsed;
+                        if (MinimizedTimerContainer != null)
+                        {
+                            MinimizedTimerContainer.Visibility = Visibility.Collapsed;
+                        }
+                    };
+                }
             }
-
-            var timerWindow = CountdownTimerWindow.CreateTimerWindow();
-            timerWindow.Show();
-            if (currentMode == 1) // 白板模式
+            else
             {
-                timerWindow.Topmost = true;
+                if (currentMode == 1)
+                {
+                    Topmost = false;
+                }
+
+                var timerWindow = CountdownTimerWindow.CreateTimerWindow();
+                timerWindow.Show();
+                if (currentMode == 1)
+                {
+                    timerWindow.Topmost = true;
+                }
             }
         }
 

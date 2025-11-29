@@ -29,14 +29,7 @@ namespace Ink_Canvas
 
         public static Window CreateTimerWindow()
         {
-            if (MainWindow.Settings.RandSettings?.UseNewStyleUI == true)
-            {
-                return new NewStyleTimerWindow();
-            }
-            else
-            {
-                return new CountdownTimerWindow();
-            }
+            return new CountdownTimerWindow();
         }
 
         private void Timer_Elapsed(object sender, ElapsedEventArgs e)

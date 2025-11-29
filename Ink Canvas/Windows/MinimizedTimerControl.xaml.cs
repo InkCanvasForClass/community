@@ -1,151 +1,83 @@
 using System;
-using System.Runtime.InteropServices;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Shapes;
-using System.Windows.Media.Animation;
 
 namespace Ink_Canvas.Windows
 {
-    public partial class MinimizedTimerWindow : Window
+    /// <summary>
+    /// 最小化计时器窗口
+    /// </summary>
+    public partial class MinimizedTimerControl : UserControl
     {
         private TimerControl parentControl;
         private System.Timers.Timer updateTimer;
-        private bool isMouseOver = false;
-        private bool isDragging = false;
-        private Point lastMousePosition;
 
-        public MinimizedTimerWindow(TimerControl parent)
+        public MinimizedTimerControl()
         {
             InitializeComponent();
-            parentControl = parent;
-            
-            var mainWindow = Application.Current.MainWindow as MainWindow;
-            if (mainWindow != null)
-            {
-                this.Left = mainWindow.Left;
-                this.Top = mainWindow.Top;
-            }
-            
-            ScaleWindowForResolution();
             
             updateTimer = new System.Timers.Timer(100);
             updateTimer.Elapsed += UpdateTimer_Elapsed;
             updateTimer.Start();
             
-            parentControl.TimerCompleted += ParentWindow_TimerCompleted;
-            
-            // 应用主题
             ApplyTheme();
             
-            // 确保窗口置顶
-            Loaded += MinimizedTimerWindow_Loaded;
+            Unloaded += MinimizedTimerControl_Unloaded;
         }
         
-        private void MinimizedTimerWindow_Loaded(object sender, RoutedEventArgs e)
+        private void MinimizedTimerControl_Unloaded(object sender, RoutedEventArgs e)
         {
-            // 使用延迟确保窗口完全加载后再应用置顶
-            Dispatcher.BeginInvoke(new Action(() =>
+            if (parentControl != null)
             {
-                ApplyTopmost();
-            }), System.Windows.Threading.DispatcherPriority.Loaded);
-        }
-        
-        #region Win32 API 声明和置顶管理
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll")]
-        private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_TOPMOST = 0x00000008;
-        private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_NOACTIVATE = 0x0010;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-
-        /// <summary>
-        /// 应用最小化窗口置顶
-        /// </summary>
-        private void ApplyTopmost()
-        {
-            try
-            {
-                var hwnd = new WindowInteropHelper(this).Handle;
-                if (hwnd == IntPtr.Zero) return;
-
-                // 设置WPF的Topmost属性
-                Topmost = true;
-
-                // 使用Win32 API强制置顶
-                int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
-                SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_TOPMOST);
-
-                // 使用SetWindowPos确保窗口在最顶层
-                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0,
-                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                parentControl.TimerCompleted -= ParentControl_TimerCompleted;
             }
-            catch (Exception ex)
+            
+            if (updateTimer != null)
             {
-                System.Diagnostics.Debug.WriteLine($"应用最小化窗口置顶失败: {ex.Message}");
-            }
-        }
-        #endregion
-
-        /// <summary>
-        /// 根据屏幕分辨率和 DPI 缩放窗口大小（保持原始尺寸，使用Transform缩放）
-        /// </summary>
-        private void ScaleWindowForResolution()
-        {
-            try
-            {
-                // 获取屏幕尺寸（考虑 DPI 缩放）
-                double screenWidth = SystemParameters.PrimaryScreenWidth;
-                double screenHeight = SystemParameters.PrimaryScreenHeight;
-                
-                // 基准分辨率（1920x1080）
-                const double baseWidth = 1920.0;
-                const double baseHeight = 1080.0;
-                
-                // 计算缩放比例（使用较小的比例以保持比例）
-                double scaleX = screenWidth / baseWidth;
-                double scaleY = screenHeight / baseHeight;
-                double scale = Math.Min(scaleX, scaleY);
-                
-                // 限制最小和最大缩放，避免过小或过大
-                scale = Math.Max(0.5, Math.Min(2.0, scale));
-                
-                // 应用缩放变换到整个窗口内容
-                var scaleTransform = this.FindName("WindowScaleTransform") as ScaleTransform;
-                if (scaleTransform != null)
-                {
-                    scaleTransform.ScaleX = scale;
-                    scaleTransform.ScaleY = scale;
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"缩放窗口大小时出错: {ex.Message}");
+                updateTimer.Stop();
+                updateTimer.Dispose();
             }
         }
 
-        private void UpdateTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        public void SetParentControl(TimerControl parent)
+        {
+            if (parentControl != null)
+            {
+                parentControl.TimerCompleted -= ParentControl_TimerCompleted;
+            }
+            
+            parentControl = parent;
+            
+            if (parentControl != null)
+            {
+                parentControl.TimerCompleted += ParentControl_TimerCompleted;
+                UpdateTimeDisplay();
+            }
+        }
+
+        private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (parentControl != null)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    if (ShouldCloseWindow())
+                    if (this.Visibility != Visibility.Visible)
                     {
-                        this.Close();
+                        return;
+                    }
+                    
+                    if (ShouldHide())
+                    {
+                        this.Visibility = Visibility.Collapsed;
+                        var parent = this.Parent as FrameworkElement;
+                        if (parent != null)
+                        {
+                            parent.Visibility = Visibility.Collapsed;
+                        }
                         return;
                     }
                     
@@ -154,9 +86,14 @@ namespace Ink_Canvas.Windows
             }
         }
         
-        private bool ShouldCloseWindow()
+        private bool ShouldHide()
         {
             if (parentControl == null) return true;
+            
+            if (parentControl.IsFullscreenWindowOpen)
+            {
+                return true;
+            }
             
             if (MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true)
             {
@@ -239,11 +176,11 @@ namespace Ink_Canvas.Windows
             }
         }
         
-        private void ParentWindow_TimerCompleted(object sender, EventArgs e)
+        private void ParentControl_TimerCompleted(object sender, EventArgs e)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
-                this.Close();
+                Visibility = Visibility.Collapsed;
             });
         }
 
@@ -259,7 +196,6 @@ namespace Ink_Canvas.Windows
                     path.Data = geometry;
                 }
                 
-                // 设置颜色
                 if (isRed)
                 {
                     path.Fill = Brushes.Red;
@@ -280,10 +216,6 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        /// <summary>
-        /// 设置最小化窗口冒号显示颜色
-        /// </summary>
-        /// <param name="isRed">是否显示为红色</param>
         private void SetColonDisplay(bool isRed = false)
         {
             var colon1 = this.FindName("MinColon1Display") as TextBlock;
@@ -336,7 +268,6 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-
                 bool isLightTheme = IsLightTheme();
                 if (!isLightTheme)
                 {
@@ -367,17 +298,14 @@ namespace Ink_Canvas.Windows
             }
             catch
             {
-                // 如果获取主题失败，默认使用浅色主题
             }
             return true;
         }
 
-        // 设置深色主题下的灰色边框
         private void SetDarkThemeBorder()
         {
             try
             {
-                // 找到Border元素并设置灰色边框
                 var border = this.FindName("MainBorder") as Border;
                 if (border != null)
                 {
@@ -389,89 +317,155 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        private void Window_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            // 记录点击时间
-            lastClickTime = DateTime.Now;
-            // 开始拖动
-            isDragging = true;
-            lastMousePosition = e.GetPosition(this);
-            this.CaptureMouse();
-        }
-
-        private void Window_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (isDragging)
-            {
-                var currentPosition = e.GetPosition(this);
-                var deltaX = currentPosition.X - lastMousePosition.X;
-                var deltaY = currentPosition.Y - lastMousePosition.Y;
-                
-                this.Left += deltaX;
-                this.Top += deltaY;
-            }
-        }
-
-        private void Window_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (isDragging)
-            {
-                isDragging = false;
-                this.ReleaseMouseCapture();
-                
-                var clickDuration = DateTime.Now - lastClickTime;
-                if (clickDuration.TotalMilliseconds < 200)
-                {
-                    this.Close();
-                }
-            }
-        }
-
-        private DateTime lastClickTime = DateTime.Now;
-
-        private void Window_MouseEnter(object sender, MouseEventArgs e)
-        {
-            isMouseOver = true;
-            // 鼠标进入时显示关闭按钮
-            if (CloseButton != null)
-            {
-                CloseButton.Opacity = 1.0;
-            }
-        }
-
-        private void Window_MouseLeave(object sender, MouseEventArgs e)
-        {
-            isMouseOver = false;
-            // 鼠标离开时隐藏关闭按钮
-            if (CloseButton != null)
-            {
-                CloseButton.Opacity = 0.7;
-            }
-        }
-
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
             if (parentControl != null)
             {
                 parentControl.StopTimer();
             }
-            this.Close();
+            Visibility = Visibility.Collapsed;
         }
-
-        protected override void OnClosed(EventArgs e)
+        
+        private bool isDragging = false;
+        private bool isDragStarted = false;
+        private Point dragStartPoint;
+        private Point containerStartPosition;
+        private const double DragThreshold = 5.0; // 拖动阈值，像素
+        
+        private void MainBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            if (parentControl != null)
+            if (e.ClickCount == 2)
             {
-                parentControl.TimerCompleted -= ParentWindow_TimerCompleted;
+                // 双击：恢复主窗口
+                if (parentControl != null)
+                {
+                    parentControl.UpdateActivityTime();
+                    
+                    var mainWindow = Application.Current.MainWindow as MainWindow;
+                    if (mainWindow != null)
+                    {
+                        var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
+                        var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
+                        
+                        if (timerContainer != null && minimizedContainer != null)
+                        {
+                            timerContainer.Visibility = Visibility.Visible;
+                            minimizedContainer.Visibility = Visibility.Collapsed;
+                        }
+                    }
+                }
+                e.Handled = true;
+            }
+            else if (e.ClickCount == 1)
+            {
+                // 单击：准备拖动或点击
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow != null)
+                {
+                    var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
+                    if (minimizedContainer != null)
+                    {
+                        var point = e.GetPosition(minimizedContainer);
+                        var mainWindowPoint = minimizedContainer.TransformToAncestor(mainWindow).Transform(point);
+                        
+                        // 初始化拖动状态，但不立即开始拖动
+                        isDragging = false;
+                        isDragStarted = false;
+                        dragStartPoint = mainWindowPoint;
+                        
+                        var margin = minimizedContainer.Margin;
+                        containerStartPosition = new Point(margin.Left, margin.Top);
+                        
+                        if (double.IsNaN(containerStartPosition.X) || containerStartPosition.X < 0) containerStartPosition.X = 0;
+                        if (double.IsNaN(containerStartPosition.Y) || containerStartPosition.Y < 0) containerStartPosition.Y = 0;
+                        
+                        // 捕获鼠标并订阅事件，等待判断是拖动还是点击
+                        minimizedContainer.CaptureMouse();
+                        minimizedContainer.MouseMove += MinimizedContainer_MouseMove;
+                        minimizedContainer.MouseLeftButtonUp += MinimizedContainer_MouseLeftButtonUp;
+                        e.Handled = true;
+                    }
+                }
+            }
+        }
+        
+        private void MinimizedContainer_MouseMove(object sender, MouseEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow == null) return;
+            
+            var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
+            if (minimizedContainer == null) return;
+            
+            var currentPoint = e.GetPosition(mainWindow);
+            var deltaX = currentPoint.X - dragStartPoint.X;
+            var deltaY = currentPoint.Y - dragStartPoint.Y;
+            var distance = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            // 如果移动距离超过阈值，开始拖动
+            if (!isDragStarted && distance > DragThreshold)
+            {
+                isDragStarted = true;
+                isDragging = true;
             }
             
-            // 清理资源
-            if (updateTimer != null)
+            // 如果已经开始拖动，更新位置
+            if (isDragging)
             {
-                updateTimer.Stop();
-                updateTimer.Dispose();
+                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
+                
+                var newX = containerStartPosition.X + deltaX;
+                var newY = containerStartPosition.Y + deltaY;
+                
+                if (newX < 0) newX = 0;
+                if (newY < 0) newY = 0;
+                
+                minimizedContainer.Margin = new Thickness(newX, newY, 0, 0);
+                minimizedContainer.HorizontalAlignment = HorizontalAlignment.Left;
+                minimizedContainer.VerticalAlignment = VerticalAlignment.Top;
+                
+                if (timerContainer != null)
+                {
+                    timerContainer.Margin = new Thickness(newX, newY, 0, 0);
+                    timerContainer.HorizontalAlignment = HorizontalAlignment.Left;
+                    timerContainer.VerticalAlignment = VerticalAlignment.Top;
+                }
             }
-            base.OnClosed(e);
         }
+        
+        private void MinimizedContainer_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow == null) return;
+            
+            var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
+            if (minimizedContainer != null)
+            {
+                minimizedContainer.ReleaseMouseCapture();
+                minimizedContainer.MouseMove -= MinimizedContainer_MouseMove;
+                minimizedContainer.MouseLeftButtonUp -= MinimizedContainer_MouseLeftButtonUp;
+            }
+            
+            // 如果没有开始拖动（移动距离小于阈值），则视为单击，恢复主窗口
+            if (!isDragStarted)
+            {
+                if (parentControl != null)
+                {
+                    parentControl.UpdateActivityTime();
+                    
+                    var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
+                    if (timerContainer != null && minimizedContainer != null)
+                    {
+                        timerContainer.Visibility = Visibility.Visible;
+                        minimizedContainer.Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
+            
+            isDragging = false;
+            isDragStarted = false;
+        }
+
     }
 }
+

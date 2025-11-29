@@ -7,6 +7,7 @@
         xmlns:c="clr-namespace:Ink_Canvas.Converter"
         xmlns:Controls="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
         xmlns:controls="clr-namespace:Ink_Canvas.Controls"
+        xmlns:Windows="clr-namespace:Ink_Canvas.Windows"
         mc:Ignorable="d"
         AllowsTransparency="True"
         WindowStyle="None"
@@ -37,6 +38,8 @@
             <!-- 合并新橡皮擦资源 -->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="MainWindow_cs/MW_Eraser.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/Light.xaml"/>
+                <ResourceDictionary Source="Resources/Styles/Dark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
@@ -9950,6 +9953,27 @@
                 </ui:SimpleStackPanel>
             </Border>
         </Viewbox>
+        
+        <Border x:Name="TimerContainer" 
+                Visibility="Collapsed"
+                Panel.ZIndex="998"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="900"
+                Height="500">
+            <Windows:TimerControl x:Name="TimerControl"/>
+        </Border>
+        
+        <Border x:Name="MinimizedTimerContainer" 
+                Visibility="Collapsed"
+                Panel.ZIndex="997"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="20,20,0,0"
+                Width="600"
+                Height="200">
+            <Windows:MinimizedTimerControl x:Name="MinimizedTimerControl"/>
+        </Border>
     </Grid>
 </Window>
 

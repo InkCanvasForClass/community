@@ -268,6 +268,74 @@ namespace Ink_Canvas
 
             // 为滑块控件添加触摸事件支持
             AddTouchSupportToSliders();
+            
+            // 初始化计时器控件事件
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (TimerControl != null)
+                {
+                    TimerControl.ShowMinimizedRequested += TimerControl_ShowMinimizedRequested;
+                    TimerControl.HideMinimizedRequested += TimerControl_HideMinimizedRequested;
+                }
+                
+                if (MinimizedTimerControl != null && TimerControl != null)
+                {
+                    MinimizedTimerControl.SetParentControl(TimerControl);
+                }
+            }), DispatcherPriority.Loaded);
+        }
+        
+        private void TimerControl_ShowMinimizedRequested(object sender, EventArgs e)
+        {
+            var timerContainer = FindName("TimerContainer") as FrameworkElement;
+            var minimizedContainer = FindName("MinimizedTimerContainer") as FrameworkElement;
+            
+            if (timerContainer != null && minimizedContainer != null)
+            {
+                double x = 0, y = 0;
+                
+                if (timerContainer.HorizontalAlignment == HorizontalAlignment.Center && 
+                    timerContainer.VerticalAlignment == VerticalAlignment.Center)
+                {
+                    var timerPoint = timerContainer.TransformToAncestor(this).Transform(new Point(0, 0));
+                    x = timerPoint.X;
+                    y = timerPoint.Y;
+                }
+                else
+                {
+                    var timerMargin = timerContainer.Margin;
+                    x = double.IsNaN(timerMargin.Left) ? 0 : timerMargin.Left;
+                    y = double.IsNaN(timerMargin.Top) ? 0 : timerMargin.Top;
+                }
+                
+                minimizedContainer.Margin = new Thickness(x, y, 0, 0);
+                minimizedContainer.HorizontalAlignment = HorizontalAlignment.Left;
+                minimizedContainer.VerticalAlignment = VerticalAlignment.Top;
+                
+                timerContainer.Margin = new Thickness(x, y, 0, 0);
+                timerContainer.HorizontalAlignment = HorizontalAlignment.Left;
+                timerContainer.VerticalAlignment = VerticalAlignment.Top;
+                
+                timerContainer.Visibility = Visibility.Collapsed;
+                minimizedContainer.Visibility = Visibility.Visible;
+            }
+        }
+        
+        private void TimerControl_HideMinimizedRequested(object sender, EventArgs e)
+        {
+            var timerContainer = FindName("TimerContainer") as FrameworkElement;
+            var minimizedContainer = FindName("MinimizedTimerContainer") as FrameworkElement;
+            
+            if (timerContainer != null && minimizedContainer != null)
+            {
+                minimizedContainer.Visibility = Visibility.Collapsed;
+                timerContainer.Visibility = Visibility.Visible;
+                
+                if (TimerControl != null)
+                {
+                    TimerControl.UpdateActivityTime();
+                }
+            }
         }
 
 
@@ -615,6 +683,34 @@ namespace Ink_Canvas
                     }
                 }), DispatcherPriority.Loaded);
             }
+            
+            // 初始化计时器控件关联
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (TimerControl != null && MinimizedTimerControl != null)
+                {
+                    MinimizedTimerControl.SetParentControl(TimerControl);
+                    
+                    TimerControl.ShowMinimizedRequested += (s, args) =>
+                    {
+                        if (TimerContainer != null && MinimizedTimerContainer != null && MinimizedTimerControl != null)
+                        {
+                            TimerContainer.Visibility = Visibility.Collapsed;
+                            MinimizedTimerContainer.Visibility = Visibility.Visible;
+                            MinimizedTimerControl.Visibility = Visibility.Visible;
+                        }
+                    };
+                    
+                    TimerControl.HideMinimizedRequested += (s, args) =>
+                    {
+                        if (MinimizedTimerContainer != null && MinimizedTimerControl != null)
+                        {
+                            MinimizedTimerContainer.Visibility = Visibility.Collapsed;
+                            MinimizedTimerControl.Visibility = Visibility.Collapsed;
+                        }
+                    };
+                }
+            }), DispatcherPriority.Loaded);
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)

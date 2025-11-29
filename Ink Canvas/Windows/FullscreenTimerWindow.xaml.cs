@@ -8,33 +8,45 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Timers;
 
-namespace Ink_Canvas
+namespace Ink_Canvas.Windows
 {
     /// <summary>
     /// 全屏计时器窗口
     /// </summary>
     public partial class FullscreenTimerWindow : Window
     {
-        private NewStyleTimerWindow parentWindow;
+        private TimerControl parentControl;
         private System.Timers.Timer updateTimer;
+        private Visibility previousTimerContainerVisibility = Visibility.Visible;
 
-        public FullscreenTimerWindow(NewStyleTimerWindow parent)
+        public FullscreenTimerWindow(TimerControl parent)
         {
             InitializeComponent();
-            parentWindow = parent;
+            parentControl = parent;
             
-            // 设置窗口位置和大小
             this.Left = 0;
             this.Top = 0;
             this.Width = SystemParameters.PrimaryScreenWidth;
             this.Height = SystemParameters.PrimaryScreenHeight;
             
-            // 启动更新定时器
             updateTimer = new System.Timers.Timer(100); 
             updateTimer.Elapsed += UpdateTimer_Elapsed;
             updateTimer.Start();
             
-            parentWindow.TimerCompleted += ParentWindow_TimerCompleted;
+            parentControl.TimerCompleted += ParentWindow_TimerCompleted;
+            
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.PauseTopmostMaintenance();
+                
+                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
+                if (timerContainer != null)
+                {
+                    previousTimerContainerVisibility = timerContainer.Visibility;
+                    timerContainer.Visibility = Visibility.Collapsed;
+                }
+            }
             
             // 确保窗口置顶
             Loaded += FullscreenTimerWindow_Loaded;
@@ -97,7 +109,7 @@ namespace Ink_Canvas
 
         private void UpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            if (parentWindow != null)
+            if (parentControl != null)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -114,16 +126,16 @@ namespace Ink_Canvas
         
         private bool ShouldCloseWindow()
         {
-            if (parentWindow == null) return true;
+            if (parentControl == null) return true;
             
             if (MainWindow.Settings.RandSettings?.EnableOvertimeCountUp == true)
             {
-                if (parentWindow.IsTimerRunning)
+                if (parentControl.IsTimerRunning)
                 {
                     return false;
                 }
                 
-                var remainingTime = parentWindow.GetRemainingTime();
+                var remainingTime = parentControl.GetRemainingTime();
                 if (remainingTime.HasValue && remainingTime.Value.TotalSeconds < 0)
                 {
                     return false;
@@ -133,16 +145,15 @@ namespace Ink_Canvas
             }
             else
             {
-                return !parentWindow.IsTimerRunning;
+                return !parentControl.IsTimerRunning;
             }
         }
 
         private void UpdateTimeDisplay()
         {
-            if (parentWindow == null) return;
+            if (parentControl == null) return;
 
-            // 获取剩余时间
-            var remainingTime = parentWindow.GetRemainingTime();
+            var remainingTime = parentControl.GetRemainingTime();
             if (remainingTime.HasValue)
             {
                 var timeSpan = remainingTime.Value;
@@ -153,10 +164,10 @@ namespace Ink_Canvas
 
                 if (isOvertimeMode)
                 {
-                    var totalTimeSpan = parentWindow.GetTotalTimeSpan();
+                    var totalTimeSpan = parentControl.GetTotalTimeSpan();
                     if (totalTimeSpan.HasValue)
                     {
-                        var elapsedTime = parentWindow.GetElapsedTime();
+                        var elapsedTime = parentControl.GetElapsedTime();
                         if (elapsedTime.HasValue)
                         {
                             var overtimeSpan = elapsedTime.Value - totalTimeSpan.Value;
@@ -188,11 +199,9 @@ namespace Ink_Canvas
                 SetDigitDisplay("FullHour1Display", Math.Abs(hours / 10) % 10, shouldShowRed);
                 SetDigitDisplay("FullHour2Display", (hours % 10 + 10) % 10, shouldShowRed);
                 
-                // 更新分钟显示
                 SetDigitDisplay("FullMinute1Display", minutes / 10, shouldShowRed);
                 SetDigitDisplay("FullMinute2Display", minutes % 10, shouldShowRed);
                 
-                // 更新秒显示
                 SetDigitDisplay("FullSecond1Display", seconds / 10, shouldShowRed);
                 SetDigitDisplay("FullSecond2Display", seconds % 10, shouldShowRed);
                 
@@ -283,23 +292,32 @@ namespace Ink_Canvas
 
         private void ExitFullscreen()
         {
-            // 恢复主窗口
-            if (parentWindow != null)
-            {
-                // 清除全屏模式标志
-                parentWindow.SetFullscreenMode(false);
-                parentWindow.Show();
-                parentWindow.Activate();
-                parentWindow.WindowState = WindowState.Normal;
-            }
             this.Close();
         }
 
         protected override void OnClosed(EventArgs e)
         {
-            if (parentWindow != null)
+            var mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
             {
-                parentWindow.TimerCompleted -= ParentWindow_TimerCompleted;
+                mainWindow.ResumeTopmostMaintenance();
+                
+                var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
+                if (timerContainer != null && previousTimerContainerVisibility == Visibility.Visible)
+                {
+                    timerContainer.Visibility = Visibility.Visible;
+                    
+                    // 重置5秒最小化计时
+                    if (parentControl != null)
+                    {
+                        parentControl.UpdateActivityTime();
+                    }
+                }
+            }
+            
+            if (parentControl != null)
+            {
+                parentControl.TimerCompleted -= ParentWindow_TimerCompleted;
             }
             
             // 清理资源
