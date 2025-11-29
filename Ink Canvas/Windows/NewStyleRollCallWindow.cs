@@ -170,15 +170,15 @@ namespace Ink_Canvas
         private static RollCallHistoryData historyData = null;
         private static readonly object historyLock = new object();
         private static int maxRecentHistory = 20;
-        private static double avoidanceWeight = 0.8; // 避免重复的权重
-        private const double FREQUENCY_WEIGHT = 0.2; // 频率平衡的权重
+        private static double avoidanceWeight = 0.8; 
+        private const double FREQUENCY_WEIGHT = 0.2; 
         
         // 概率相关
-        private const double DEFAULT_PROBABILITY = 1.0; // 默认概率
-        private const double BASE_PROBABILITY_DECAY_FACTOR = 0.5; // 基础概率衰减因子
-        private const double MIN_PROBABILITY = 0.1; // 最小概率
-        private const double PROBABILITY_RECOVERY_RATE = 0.1; // 概率恢复速率
-        private const double FREQUENCY_BOOST_FACTOR = 0.5; // 频率平衡增强因子
+        private const double DEFAULT_PROBABILITY = 1.0; 
+        private const double BASE_PROBABILITY_DECAY_FACTOR = 0.5; 
+        private const double MIN_PROBABILITY = 0.01; 
+        private const double PROBABILITY_RECOVERY_RATE = 0.2; 
+        private const double FREQUENCY_BOOST_FACTOR = 2.0; 
         
         // 单次抽相关
         private bool isSingleDrawMode = false;
@@ -692,13 +692,22 @@ namespace Ink_Canvas
                 // 计算频率差异比例
                 double frequencyRatio = nameFrequency / averageFrequency;
 
-                double boostFactor = FREQUENCY_BOOST_FACTOR * (1.0 - frequencyRatio);
+                double frequencyGap = 1.0 - frequencyRatio;
+                double boostFactor = FREQUENCY_BOOST_FACTOR * frequencyGap * frequencyGap; 
                 
                 // 增加概率
                 double boostedProbability = baseProbability * (1.0 + boostFactor);
                 
-                // 限制最大概率，避免过高
-                return Math.Min(boostedProbability, DEFAULT_PROBABILITY * 2.0);
+                return Math.Min(boostedProbability, DEFAULT_PROBABILITY * 10.0);
+            }
+            else if (nameFrequency > averageFrequency)
+            {
+                double frequencyRatio = nameFrequency / averageFrequency;
+                
+                double reductionFactor = 1.0 - (frequencyRatio - 1.0) * 0.3; 
+                reductionFactor = Math.Max(reductionFactor, MIN_PROBABILITY / DEFAULT_PROBABILITY);
+                
+                return baseProbability * reductionFactor;
             }
 
             return baseProbability;
@@ -746,16 +755,27 @@ namespace Ink_Canvas
                 {
                     // 计算频率差异比例
                     double frequencyRatio = nameFrequency / averageFrequency;
-                    double boostFactor = FREQUENCY_BOOST_FACTOR * (1.0 - frequencyRatio);
+                    double frequencyGap = 1.0 - frequencyRatio;
+                    double boostFactor = FREQUENCY_BOOST_FACTOR * frequencyGap * frequencyGap; 
                     
                     // 增加概率
                     double boostedProbability = currentProbability * (1.0 + boostFactor);
                     
                     // 限制最大概率，避免过高
-                    boostedProbability = Math.Min(boostedProbability, DEFAULT_PROBABILITY * 2.0);
+                    boostedProbability = Math.Min(boostedProbability, DEFAULT_PROBABILITY * 10.0);
                     
                     // 保存更新后的概率
                     historyData.NameProbabilities[name] = boostedProbability;
+                }
+                else if (nameFrequency > averageFrequency)
+                {
+                    double frequencyRatio = nameFrequency / averageFrequency;
+                    
+                    double reductionFactor = 1.0 - (frequencyRatio - 1.0) * 0.3; 
+                    reductionFactor = Math.Max(reductionFactor, MIN_PROBABILITY / DEFAULT_PROBABILITY);
+                    
+                    double reducedProbability = currentProbability * reductionFactor;
+                    historyData.NameProbabilities[name] = reducedProbability;
                 }
             }
         }
@@ -893,8 +913,29 @@ namespace Ink_Canvas
                     // 降重：被选中的人员概率降低
                     double currentProbability = GetNameProbability(name);
 
-                    double decayFactor = BASE_PROBABILITY_DECAY_FACTOR * (1.0 + avoidanceWeight);
-                    decayFactor = Math.Min(decayFactor, 0.95); 
+                    double frequencyBasedDecay = 1.0;
+                    if (historyData.NameFrequency != null && historyData.NameFrequency.ContainsKey(name))
+                    {
+                        int totalSelections = historyData.NameFrequency.Values.Sum();
+                        if (totalSelections > 0)
+                        {
+                            int uniqueNamesCount = historyData.NameFrequency.Keys.Count;
+                            if (uniqueNamesCount > 0)
+                            {
+                                double nameFrequency = (double)historyData.NameFrequency[name] / totalSelections;
+                                double averageFrequency = 1.0 / uniqueNamesCount;
+                                
+                                if (nameFrequency > averageFrequency)
+                                {
+                                    double frequencyRatio = nameFrequency / averageFrequency;
+                                    frequencyBasedDecay = 1.0 - (frequencyRatio - 1.0) * 0.2; 
+                                }
+                            }
+                        }
+                    }
+                    
+                    double decayFactor = BASE_PROBABILITY_DECAY_FACTOR * (1.0 + avoidanceWeight) * frequencyBasedDecay;
+                    decayFactor = Math.Min(decayFactor, 0.85); 
                     
                     double newProbability = currentProbability * decayFactor;
                     newProbability = Math.Max(newProbability, MIN_PROBABILITY); // 确保不低于最小概率

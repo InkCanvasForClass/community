@@ -663,9 +663,9 @@ namespace Ink_Canvas
         [JsonProperty("enableMLAvoidance")]
         public bool EnableMLAvoidance { get; set; } = true;
         [JsonProperty("mlAvoidanceHistoryCount")]
-        public int MLAvoidanceHistoryCount { get; set; } = 20;
+        public int MLAvoidanceHistoryCount { get; set; } = 50;
         [JsonProperty("mlAvoidanceWeight")]
-        public double MLAvoidanceWeight { get; set; } = 0.8;
+        public double MLAvoidanceWeight { get; set; } = 1.0;
         [JsonProperty("enableQuickDraw")]
         public bool EnableQuickDraw { get; set; } = true;
     }

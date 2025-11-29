@@ -3374,7 +3374,7 @@
                                         <Slider x:Name="MLAvoidanceHistorySlider" Minimum="5"
                                                 Maximum="50" Width="168" FontFamily="Microsoft YaHei UI"
                                                 ValueChanged="MLAvoidanceHistorySlider_ValueChanged"
-                                                FontSize="20" IsSnapToTickEnabled="True" Value="20" TickFrequency="5"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="50" TickFrequency="5"
                                                 TickPlacement="None" AutoToolTipPlacement="None" />
                                         <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
                                                    FontFamily="Consolas"
@@ -3387,7 +3387,7 @@
                                         <Slider x:Name="MLAvoidanceWeightSlider" Minimum="0.1"
                                                 Maximum="1.0" Width="168" FontFamily="Microsoft YaHei UI"
                                                 ValueChanged="MLAvoidanceWeightSlider_ValueChanged"
-                                                FontSize="20" IsSnapToTickEnabled="True" Value="0.8" TickFrequency="0.1"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="1.0" TickFrequency="0.1"
                                                 TickPlacement="None" AutoToolTipPlacement="None" />
                                         <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
                                                    FontFamily="Consolas"
