@@ -619,7 +619,9 @@ namespace Ink_Canvas
         [JsonProperty("isInkToShapeRounded")]
         public bool IsInkToShapeRounded { get; set; } = true;
         [JsonProperty("lineStraightenSensitivity")]
-        public double LineStraightenSensitivity { get; set; } = 0.20; // 直线检测灵敏度，值越小越严格（0.05-2.0）
+        public double LineStraightenSensitivity { get; set; } = 0.20;
+        [JsonProperty("lineNormalizationThreshold")]
+        public double LineNormalizationThreshold { get; set; } = 0.5; 
     }
 
     public class RandSettings

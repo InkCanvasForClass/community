@@ -331,15 +331,15 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
             }
-            catch (HttpRequestException httpEx)
+            catch (HttpRequestException)
             {
                 return false;
             }
-            catch (TaskCanceledException timeoutEx)
+            catch (TaskCanceledException)
             {
                 return false;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
