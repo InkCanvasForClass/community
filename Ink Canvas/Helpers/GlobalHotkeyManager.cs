@@ -78,6 +78,16 @@ namespace Ink_Canvas.Helpers
                 {
                     UnregisterHotkey(hotkeyName);
                 }
+                else
+                {
+                    try
+                    {
+                        HotkeyManager.Current.Remove(hotkeyName);
+                    }
+                    catch
+                    {
+                    }
+                }
 
                 // 创建快捷键信息
                 var hotkeyInfo = new HotkeyInfo
@@ -112,9 +122,8 @@ namespace Ink_Canvas.Helpers
 
                 return true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"注册全局快捷键 {hotkeyName} 失败: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
         }

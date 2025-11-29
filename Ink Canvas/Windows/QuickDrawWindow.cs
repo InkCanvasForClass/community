@@ -215,10 +215,6 @@ namespace Ink_Canvas
         }
 
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            // 窗口关闭时的清理工作
-        }
 
         private void WindowDragMove(object sender, MouseButtonEventArgs e)
         {
@@ -281,11 +277,26 @@ namespace Ink_Canvas
         /// </summary>
         private void QuickDrawWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.PauseTopmostMaintenance();
+            }
+
             // 使用延迟确保窗口完全加载后再应用置顶
             Dispatcher.BeginInvoke(new Action(() =>
             {
                 ApplyQuickDrawWindowTopmost();
             }), DispatcherPriority.Loaded);
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            MainWindow mainWindow = Application.Current.MainWindow as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.ResumeTopmostMaintenance();
+            }
         }
         #endregion
     }

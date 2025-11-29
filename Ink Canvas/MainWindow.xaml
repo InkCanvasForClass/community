@@ -6,6 +6,8 @@
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:c="clr-namespace:Ink_Canvas.Converter"
         xmlns:Controls="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
+        xmlns:controls="clr-namespace:Ink_Canvas.Controls"
+        xmlns:Windows="clr-namespace:Ink_Canvas.Windows"
         mc:Ignorable="d"
         AllowsTransparency="True"
         WindowStyle="None"
@@ -3370,7 +3372,7 @@
                                         <Slider x:Name="MLAvoidanceHistorySlider" Minimum="5"
                                                 Maximum="50" Width="168" FontFamily="Microsoft YaHei UI"
                                                 ValueChanged="MLAvoidanceHistorySlider_ValueChanged"
-                                                FontSize="20" IsSnapToTickEnabled="True" Value="20" TickFrequency="5"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="50" TickFrequency="5"
                                                 TickPlacement="None" AutoToolTipPlacement="None" />
                                         <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
                                                    FontFamily="Consolas"
@@ -3383,7 +3385,7 @@
                                         <Slider x:Name="MLAvoidanceWeightSlider" Minimum="0.1"
                                                 Maximum="1.0" Width="168" FontFamily="Microsoft YaHei UI"
                                                 ValueChanged="MLAvoidanceWeightSlider_ValueChanged"
-                                                FontSize="20" IsSnapToTickEnabled="True" Value="0.8" TickFrequency="0.1"
+                                                FontSize="20" IsSnapToTickEnabled="True" Value="1.0" TickFrequency="0.1"
                                                 TickPlacement="None" AutoToolTipPlacement="None" />
                                         <TextBlock VerticalAlignment="Center" Margin="12,0,16,0" FontSize="14"
                                                    FontFamily="Consolas"
@@ -3956,6 +3958,14 @@
                     </Image.RenderTransform>
                 </Image>
             </Canvas>
+            
+            <!-- 快抽悬浮按钮 -->
+            <controls:QuickDrawFloatingButtonControl x:Name="QuickDrawFloatingButton"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,0,200"
+                    Visibility="Collapsed"
+                    Panel.ZIndex="1001"/>
         </Grid>
 
         <Canvas IsHitTestVisible="False">
@@ -9941,6 +9951,27 @@
                 </ui:SimpleStackPanel>
             </Border>
         </Viewbox>
+        
+        <Border x:Name="TimerContainer" 
+                Visibility="Collapsed"
+                Panel.ZIndex="998"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Width="900"
+                Height="500">
+            <Windows:TimerControl x:Name="TimerControl"/>
+        </Border>
+        
+        <Border x:Name="MinimizedTimerContainer" 
+                Visibility="Collapsed"
+                Panel.ZIndex="997"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Margin="20,20,0,0"
+                Width="600"
+                Height="200">
+            <Windows:MinimizedTimerControl x:Name="MinimizedTimerControl"/>
+        </Border>
     </Grid>
 </Window>
 

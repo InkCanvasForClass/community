@@ -79,7 +79,7 @@ namespace Ink_Canvas
 
                         for (int i = 1; i <= totalSlides; i++)
                         {
-                            var slideStrokes = _multiPPTInkManager?.LoadSlideStrokes(i);
+                            var slideStrokes = _singlePPTInkManager?.LoadSlideStrokes(i);
                             if (slideStrokes != null && slideStrokes.Count > 0)
                             {
                                 allPageStrokes.Add(slideStrokes);
@@ -245,6 +245,24 @@ namespace Ink_Canvas
 
                     // 使用System.IO.Compression.FileSystem来创建ZIP
                     ZipFile.CreateFromDirectory(tempDir, zipFileName);
+
+                    // 异步上传ZIP文件到Dlass
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            var delayMinutes = Settings?.Dlass?.AutoUploadDelayMinutes ?? 0;
+                            if (delayMinutes > 0)
+                            {
+                                await Task.Delay(TimeSpan.FromMinutes(delayMinutes));
+                            }
+
+                            await Helpers.DlassNoteUploader.UploadNoteFileAsync(zipFileName);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    });
 
                     if (newNotice) ShowNotification($"多页面墨迹成功保存至压缩包 {zipFileName}");
                 }
@@ -563,7 +581,7 @@ namespace Ink_Canvas
                 timeMachine.ClearStrokeHistory();
 
                 // 重置PPT墨迹存储
-                _multiPPTInkManager?.ClearAllStrokes();
+                _singlePPTInkManager?.ClearAllStrokes();
 
                 // 读取所有页面的墨迹文件
                 var files = Directory.GetFiles(tempDir, "page_*.icstk");
@@ -577,7 +595,7 @@ namespace Ink_Canvas
                             var strokes = new StrokeCollection(fs);
                             if (strokes.Count > 0)
                             {
-                                _multiPPTInkManager?.ForceSaveSlideStrokes(pageNumber, strokes);
+                                _singlePPTInkManager?.ForceSaveSlideStrokes(pageNumber, strokes);
                             }
                         }
                     }
@@ -587,7 +605,7 @@ namespace Ink_Canvas
                 if (_pptManager?.IsInSlideShow == true)
                 {
                     int currentSlide = _pptManager.GetCurrentSlideNumber();
-                    var currentStrokes = _multiPPTInkManager?.LoadSlideStrokes(currentSlide);
+                    var currentStrokes = _singlePPTInkManager?.LoadSlideStrokes(currentSlide);
                     if (currentStrokes != null && currentStrokes.Count > 0)
                     {
                         inkCanvas.Strokes.Add(currentStrokes);

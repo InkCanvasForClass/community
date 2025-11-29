@@ -7,49 +7,31 @@ namespace Ink_Canvas
     {
         private void Window_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            // 只有在PPT放映模式下才响应鼠标滚轮翻页
-            if (StackPanelPPTControls.Visibility != Visibility.Visible ||
-                currentMode != 0 ||
-                BtnPPTSlideShowEnd.Visibility != Visibility.Visible ||
-                PPTManager?.IsInSlideShow != true) return;
-
-            // 直接发送翻页请求到PPT放映软件，不通过软件处理
+            if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || currentMode != 0) return;
             if (e.Delta >= 120)
             {
-                // 上一页 - 发送PageUp键到PPT放映窗口
-                SendKeyToPPTSlideShow(true);
+                BtnPPTSlidesUp_Click(null, null);
             }
             else if (e.Delta <= -120)
             {
-                // 下一页 - 发送PageDown键到PPT放映窗口
-                SendKeyToPPTSlideShow(false);
+                BtnPPTSlidesDown_Click(null, null);
             }
         }
 
         private void Main_Grid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            // 只有在PPT放映模式下才响应键盘翻页快捷键
-            if (StackPanelPPTControls.Visibility != Visibility.Visible ||
-                currentMode != 0 ||
-                BtnPPTSlideShowEnd.Visibility != Visibility.Visible ||
-                PPTManager?.IsInSlideShow != true) return;
+            if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible || currentMode != 0) return;
 
-            // 直接发送翻页请求到PPT放映软件，不通过软件处理
-            if (e.Key == Key.Down || e.Key == Key.PageDown || e.Key == Key.Right || e.Key == Key.N ||
-                e.Key == Key.Space)
+            if (e.Key == Key.Down || e.Key == Key.PageDown || e.Key == Key.Right || e.Key == Key.N || e.Key == Key.Space)
             {
-                e.Handled = true; // 阻止事件继续传播
-                SendKeyToPPTSlideShow(false); // 下一页
+                BtnPPTSlidesDown_Click(null, null);
             }
-            else if (e.Key == Key.Up || e.Key == Key.PageUp || e.Key == Key.Left || e.Key == Key.P)
+            if (e.Key == Key.Up || e.Key == Key.PageUp || e.Key == Key.Left || e.Key == Key.P)
             {
-                e.Handled = true; // 阻止事件继续传播
-                SendKeyToPPTSlideShow(true); // 上一页
+                BtnPPTSlidesUp_Click(null, null);
             }
         }
 
-        // 保留PPT翻页快捷键处理
-        // 以下方法保留供全局快捷键调用
 
         private void HotKey_Undo(object sender, ExecutedRoutedEventArgs e)
         {

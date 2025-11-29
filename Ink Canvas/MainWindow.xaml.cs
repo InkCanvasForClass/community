@@ -28,6 +28,9 @@ using Application = System.Windows.Application;
 using Brushes = System.Windows.Media.Brushes;
 using Button = System.Windows.Controls.Button;
 using Cursor = System.Windows.Input.Cursor;
+using MouseEventArgs = System.Windows.Input.MouseEventArgs;
+using HorizontalAlignment = System.Windows.HorizontalAlignment;
+using VerticalAlignment = System.Windows.VerticalAlignment;
 using Cursors = System.Windows.Input.Cursors;
 using DpiChangedEventArgs = System.Windows.DpiChangedEventArgs;
 using File = System.IO.File;
@@ -60,8 +63,6 @@ namespace Ink_Canvas
         // 悬浮窗拦截管理器
         private FloatingWindowInterceptorManager _floatingWindowInterceptorManager;
 
-        // 快抽悬浮按钮
-        private QuickDrawFloatingButton _quickDrawFloatingButton;
 
         // 设置面板相关状态
         private bool userChangedNoFocusModeInSettings;
@@ -267,6 +268,74 @@ namespace Ink_Canvas
 
             // 为滑块控件添加触摸事件支持
             AddTouchSupportToSliders();
+            
+            // 初始化计时器控件事件
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (TimerControl != null)
+                {
+                    TimerControl.ShowMinimizedRequested += TimerControl_ShowMinimizedRequested;
+                    TimerControl.HideMinimizedRequested += TimerControl_HideMinimizedRequested;
+                }
+                
+                if (MinimizedTimerControl != null && TimerControl != null)
+                {
+                    MinimizedTimerControl.SetParentControl(TimerControl);
+                }
+            }), DispatcherPriority.Loaded);
+        }
+        
+        private void TimerControl_ShowMinimizedRequested(object sender, EventArgs e)
+        {
+            var timerContainer = FindName("TimerContainer") as FrameworkElement;
+            var minimizedContainer = FindName("MinimizedTimerContainer") as FrameworkElement;
+            
+            if (timerContainer != null && minimizedContainer != null)
+            {
+                double x = 0, y = 0;
+                
+                if (timerContainer.HorizontalAlignment == HorizontalAlignment.Center && 
+                    timerContainer.VerticalAlignment == VerticalAlignment.Center)
+                {
+                    var timerPoint = timerContainer.TransformToAncestor(this).Transform(new Point(0, 0));
+                    x = timerPoint.X;
+                    y = timerPoint.Y;
+                }
+                else
+                {
+                    var timerMargin = timerContainer.Margin;
+                    x = double.IsNaN(timerMargin.Left) ? 0 : timerMargin.Left;
+                    y = double.IsNaN(timerMargin.Top) ? 0 : timerMargin.Top;
+                }
+                
+                minimizedContainer.Margin = new Thickness(x, y, 0, 0);
+                minimizedContainer.HorizontalAlignment = HorizontalAlignment.Left;
+                minimizedContainer.VerticalAlignment = VerticalAlignment.Top;
+                
+                timerContainer.Margin = new Thickness(x, y, 0, 0);
+                timerContainer.HorizontalAlignment = HorizontalAlignment.Left;
+                timerContainer.VerticalAlignment = VerticalAlignment.Top;
+                
+                timerContainer.Visibility = Visibility.Collapsed;
+                minimizedContainer.Visibility = Visibility.Visible;
+            }
+        }
+        
+        private void TimerControl_HideMinimizedRequested(object sender, EventArgs e)
+        {
+            var timerContainer = FindName("TimerContainer") as FrameworkElement;
+            var minimizedContainer = FindName("MinimizedTimerContainer") as FrameworkElement;
+            
+            if (timerContainer != null && minimizedContainer != null)
+            {
+                minimizedContainer.Visibility = Visibility.Collapsed;
+                timerContainer.Visibility = Visibility.Visible;
+                
+                if (TimerControl != null)
+                {
+                    TimerControl.UpdateActivityTime();
+                }
+            }
         }
 
 
@@ -324,13 +393,11 @@ namespace Ink_Canvas
                     {
                         if (gest.ApplicationGesture == ApplicationGesture.Left)
                         {
-                            // 直接发送翻页请求到PPT放映软件
-                            SendKeyToPPTSlideShow(false); // 下一页
+                            BtnPPTSlidesDown_Click(null, null); // 下一页
                         }
                         if (gest.ApplicationGesture == ApplicationGesture.Right)
                         {
-                            // 直接发送翻页请求到PPT放映软件
-                            SendKeyToPPTSlideShow(true); // 上一页
+                            BtnPPTSlidesUp_Click(null, null); // 上一页
                         }
                     }
             }
@@ -402,6 +469,9 @@ namespace Ink_Canvas
             //加载设置
             LoadSettings(true);
             AutoBackupManager.Initialize(Settings);
+
+            // 初始化Dlass上传队列（恢复上次的上传队列）
+            DlassNoteUploader.InitializeQueue();
 
             // 检查保存路径是否可用，不可用则修正
             try
@@ -616,6 +686,34 @@ namespace Ink_Canvas
                     }
                 }), DispatcherPriority.Loaded);
             }
+            
+            // 初始化计时器控件关联
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                if (TimerControl != null && MinimizedTimerControl != null)
+                {
+                    MinimizedTimerControl.SetParentControl(TimerControl);
+                    
+                    TimerControl.ShowMinimizedRequested += (s, args) =>
+                    {
+                        if (TimerContainer != null && MinimizedTimerContainer != null && MinimizedTimerControl != null)
+                        {
+                            TimerContainer.Visibility = Visibility.Collapsed;
+                            MinimizedTimerContainer.Visibility = Visibility.Visible;
+                            MinimizedTimerControl.Visibility = Visibility.Visible;
+                        }
+                    };
+                    
+                    TimerControl.HideMinimizedRequested += (s, args) =>
+                    {
+                        if (MinimizedTimerContainer != null && MinimizedTimerControl != null)
+                        {
+                            MinimizedTimerContainer.Visibility = Visibility.Collapsed;
+                            MinimizedTimerControl.Visibility = Visibility.Collapsed;
+                        }
+                    };
+                }
+            }), DispatcherPriority.Loaded);
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -676,11 +774,7 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile("Ink Canvas closing", LogHelper.LogType.Event);
             try
             {
-                if (_quickDrawFloatingButton != null)
-                {
-                    _quickDrawFloatingButton.Close();
-                    _quickDrawFloatingButton = null;
-                }
+                // 快抽按钮现在集成在主窗口中，不需要单独关闭
             }
             catch (Exception ex)
             {
@@ -781,6 +875,8 @@ namespace Ink_Canvas
 
             // 停止置顶维护定时器
             StopTopmostMaintenance();
+
+            UninstallKeyboardHook();
 
             // 从Z-Order管理器中移除主窗口
             WindowZOrderManager.UnregisterWindow(this);
@@ -1838,7 +1934,40 @@ namespace Ink_Canvas
         private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
         [DllImport("kernel32.dll")]
         private static extern uint GetCurrentProcessId();
+        
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc lpfn, IntPtr hMod, uint dwThreadId);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string lpModuleName);
+
+        private const int WH_KEYBOARD_LL = 13;
+        private const int WM_KEYDOWN = 0x0100;
+        private const int WM_KEYUP = 0x0101;
+        private const int WM_SYSKEYDOWN = 0x0104;
+        private const int WM_SYSKEYUP = 0x0105;
+
+        private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct KBDLLHOOKSTRUCT
+        {
+            public uint vkCode;
+            public uint scanCode;
+            public uint flags;
+            public uint time;
+            public IntPtr dwExtraInfo;
+        }
+
+        private LowLevelKeyboardProc _keyboardProc;
+        private IntPtr _keyboardHookId = IntPtr.Zero;
 
         private const int GWL_EXSTYLE = -20;
         private const int WS_EX_NOACTIVATE = 0x08000000;
@@ -1856,6 +1985,67 @@ namespace Ink_Canvas
         private DispatcherTimer autoSaveStrokesTimer;
         private bool isTopmostMaintenanceEnabled;
 
+        private IntPtr KeyboardHookProc(int nCode, IntPtr wParam, IntPtr lParam)
+        {
+            if (nCode >= 0)
+            {
+                if (Settings.Advanced.IsNoFocusMode && 
+                    BtnPPTSlideShowEnd.Visibility == Visibility.Visible && 
+                    currentMode == 0)
+                {
+                    KBDLLHOOKSTRUCT hookStruct = (KBDLLHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(KBDLLHOOKSTRUCT));
+                    uint vkCode = hookStruct.vkCode;
+                    
+                    if (wParam == (IntPtr)WM_KEYDOWN || wParam == (IntPtr)WM_SYSKEYDOWN)
+                    {
+                        if (vkCode == 0x22 || vkCode == 0x28 || vkCode == 0x27 || 
+                            vkCode == 0x4E || vkCode == 0x20)
+                        {
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                BtnPPTSlidesDown_Click(null, null);
+                            }), DispatcherPriority.Normal);
+                            return (IntPtr)1;
+                        }
+                        else if (vkCode == 0x21 || vkCode == 0x26 || vkCode == 0x25 || 
+                                 vkCode == 0x50)
+                        {
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                BtnPPTSlidesUp_Click(null, null);
+                            }), DispatcherPriority.Normal);
+                            return (IntPtr)1;
+                        }
+                    }
+                }
+            }
+            return CallNextHookEx(_keyboardHookId, nCode, wParam, lParam);
+        }
+
+        private void InstallKeyboardHook()
+        {
+            if (_keyboardHookId == IntPtr.Zero)
+            {
+                _keyboardProc = KeyboardHookProc;
+                _keyboardHookId = SetWindowsHookEx(WH_KEYBOARD_LL, _keyboardProc,
+                    GetModuleHandle(null), 0);
+                if (_keyboardHookId == IntPtr.Zero)
+                {
+                    LogHelper.WriteLogToFile("安装低级键盘钩子失败", LogHelper.LogType.Error);
+                }
+            }
+        }
+
+        private void UninstallKeyboardHook()
+        {
+            if (_keyboardHookId != IntPtr.Zero)
+            {
+                UnhookWindowsHookEx(_keyboardHookId);
+                _keyboardHookId = IntPtr.Zero;
+                _keyboardProc = null;
+            }
+        }
+
         private void ApplyNoFocusMode()
         {
             var hwnd = new WindowInteropHelper(this).Handle;
@@ -1867,10 +2057,12 @@ namespace Ink_Canvas
             if (shouldBeNoFocus)
             {
                 SetWindowLong(hwnd, GWL_EXSTYLE, exStyle | WS_EX_NOACTIVATE);
+                InstallKeyboardHook();
             }
             else
             {
                 SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_NOACTIVATE);
+                UninstallKeyboardHook();
             }
         }
 
@@ -1958,6 +2150,28 @@ namespace Ink_Canvas
                 topmostMaintenanceTimer.Stop();
                 isTopmostMaintenanceEnabled = false;
                 LogHelper.WriteLogToFile("停止置顶维护定时器", LogHelper.LogType.Trace);
+            }
+        }
+
+        public void PauseTopmostMaintenance()
+        {
+            if (topmostMaintenanceTimer != null && isTopmostMaintenanceEnabled)
+            {
+                topmostMaintenanceTimer.Stop();
+            }
+        }
+
+        public void ResumeTopmostMaintenance()
+        {
+            if (Settings.Advanced.IsAlwaysOnTop && 
+                Settings.Advanced.IsNoFocusMode && 
+                !Settings.Advanced.EnableUIAccessTopMost)
+            {
+                if (topmostMaintenanceTimer != null && !isTopmostMaintenanceEnabled)
+                {
+                    topmostMaintenanceTimer.Start();
+                    isTopmostMaintenanceEnabled = true;
+                }
             }
         }
 
@@ -2349,47 +2563,6 @@ namespace Ink_Canvas
         }
         #endregion
 
-        #region PPT翻页直接传递
-        /// <summary>
-        /// 直接发送翻页请求到PPT放映软件，让PPT软件处理翻页
-        /// </summary>
-        /// <param name="isPrevious">是否为上一页</param>
-        private void SendKeyToPPTSlideShow(bool isPrevious)
-        {
-            try
-            {
-                // 查找PPT放映窗口并发送按键
-                var pptWindows = Process.GetProcessesByName("POWERPNT");
-                var wpsWindows = Process.GetProcessesByName("wpp");
-
-                foreach (var process in pptWindows.Concat(wpsWindows))
-                {
-                    if (process.MainWindowHandle != IntPtr.Zero)
-                    {
-                        // 激活PPT窗口
-                        SetForegroundWindow(process.MainWindowHandle);
-
-                        // 发送翻页按键消息
-                        int keyCode = isPrevious ? 0x21 : 0x22; // VK_PRIOR : VK_NEXT
-
-                        // 发送按键按下和释放消息
-                        PostMessage(process.MainWindowHandle, 0x0100, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYDOWN
-                        PostMessage(process.MainWindowHandle, 0x0101, (IntPtr)keyCode, IntPtr.Zero); // WM_KEYUP
-
-                        break;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // 如果直接发送失败，回退到原来的方法
-                if (isPrevious)
-                    BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
-                else
-                    BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
-            }
-        }
-        #endregion
 
         /// <summary>
         /// 初始化文件关联状态显示
@@ -3082,30 +3255,18 @@ namespace Ink_Canvas
         {
             try
             {
+                var quickDrawButton = FindName("QuickDrawFloatingButton") as Controls.QuickDrawFloatingButtonControl;
+                if (quickDrawButton == null) return;
+
                 // 检查设置是否启用快抽功能
-                if (Settings?.RandSettings?.EnableQuickDraw != true)
+                if (Settings?.RandSettings?.EnableQuickDraw == true)
                 {
-                    // 如果设置未启用，确保悬浮按钮被关闭
-                    if (_quickDrawFloatingButton != null)
-                    {
-                        _quickDrawFloatingButton.Close();
-                        _quickDrawFloatingButton = null;
-                    }
-                    return;
+                    quickDrawButton.Visibility = Visibility.Visible;
                 }
-
-                // 如果已经存在悬浮按钮，先关闭它
-                if (_quickDrawFloatingButton != null)
+                else
                 {
-                    _quickDrawFloatingButton.Close();
-                    _quickDrawFloatingButton = null;
+                    quickDrawButton.Visibility = Visibility.Collapsed;
                 }
-
-                // 创建并显示悬浮按钮
-                _quickDrawFloatingButton = new QuickDrawFloatingButton();
-                _quickDrawFloatingButton.Show();
-                
-                LogHelper.WriteLogToFile("快抽悬浮按钮已显示", LogHelper.LogType.Trace);
             }
             catch (Exception ex)
             {

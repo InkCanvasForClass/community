@@ -281,8 +281,16 @@ namespace Ink_Canvas.Helpers
                                 // 应用旋转
                                 Bitmap rotatedFrame = ApplyRotation(sourceFrame);
 
-                                // 应用分辨率调整
-                                _currentFrame = ResizeImage(rotatedFrame, _resolutionWidth, _resolutionHeight);
+                                int targetWidth = _resolutionWidth;
+                                int targetHeight = _resolutionHeight;
+                                
+                                if (_rotationAngle == 1 || _rotationAngle == 3) 
+                                {
+                                    targetWidth = _resolutionHeight;
+                                    targetHeight = _resolutionWidth;
+                                }
+
+                                _currentFrame = ResizeImageWithAspectRatio(rotatedFrame, targetWidth, targetHeight);
 
                                 rotatedFrame?.Dispose();
                             }
@@ -355,6 +363,33 @@ namespace Ink_Canvas.Helpers
             var rotated = new Bitmap(source);
             rotated.RotateFlip(rotationType);
             return rotated;
+        }
+
+        /// <summary>
+        /// 调整图像大小
+        /// </summary>
+        private Bitmap ResizeImageWithAspectRatio(Bitmap source, int targetWidth, int targetHeight)
+        {
+            if (source.Width == targetWidth && source.Height == targetHeight)
+                return new Bitmap(source);
+
+            double scaleX = (double)targetWidth / source.Width;
+            double scaleY = (double)targetHeight / source.Height;
+            double scale = Math.Min(scaleX, scaleY);
+
+            // 计算实际尺寸
+            int actualWidth = (int)(source.Width * scale);
+            int actualHeight = (int)(source.Height * scale);
+
+            var resized = new Bitmap(actualWidth, actualHeight, PixelFormat.Format24bppRgb);
+            using (var graphics = Graphics.FromImage(resized))
+            {
+                graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
+                graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
+                graphics.DrawImage(source, 0, 0, actualWidth, actualHeight);
+            }
+            return resized;
         }
 
         /// <summary>

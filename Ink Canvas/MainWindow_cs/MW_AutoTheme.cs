@@ -536,6 +536,17 @@ namespace Ink_Canvas
                         operatingGuideWindow.RefreshTheme();
                     }
                 }
+                
+                // 刷新计时器控件
+                if (TimerControl != null)
+                {
+                    TimerControl.RefreshTheme();
+                }
+                
+                if (MinimizedTimerControl != null)
+                {
+                    MinimizedTimerControl.RefreshTheme();
+                }
             }
             catch (Exception)
             {

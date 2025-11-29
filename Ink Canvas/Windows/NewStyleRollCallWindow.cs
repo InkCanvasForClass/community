@@ -32,6 +32,7 @@ namespace Ink_Canvas
     {
         public List<string> History { get; set; } = new List<string>();
         public Dictionary<string, int> NameFrequency { get; set; } = new Dictionary<string, int>();
+        public Dictionary<string, double> NameProbabilities { get; set; } = new Dictionary<string, double>();
         public DateTime LastUpdate { get; set; } = DateTime.Now;
     }
 
@@ -65,6 +66,25 @@ namespace Ink_Canvas
             
             // 初始化点名相关变量
             InitializeRollCallData();
+            
+            if (isSingleDrawMode)
+            {
+                if (ControlOptionsGrid != null)
+                {
+                    ControlOptionsGrid.Opacity = 0.4;
+                    ControlOptionsGrid.IsHitTestVisible = false;
+                }
+                if (StartRollCallBtn != null)
+                {
+                    StartRollCallBtn.Opacity = 0.4;
+                    StartRollCallBtn.IsEnabled = false;
+                }
+                if (ResetBtn != null)
+                {
+                    ResetBtn.Opacity = 0.4;
+                    ResetBtn.IsEnabled = false;
+                }
+            }
             
             // 单次抽模式：自动开始抽选
             if (isSingleDrawMode)
@@ -101,6 +121,27 @@ namespace Ink_Canvas
             // 初始化点名相关变量
             InitializeRollCallData();
             
+            // 单次抽模式：禁用控制面板，阻止用户点击按钮
+            if (isSingleDrawMode)
+            {
+                if (ControlOptionsGrid != null)
+                {
+                    ControlOptionsGrid.Opacity = 0.4;
+                    ControlOptionsGrid.IsHitTestVisible = false;
+                }
+                // 禁用开始点名和重置按钮
+                if (StartRollCallBtn != null)
+                {
+                    StartRollCallBtn.Opacity = 0.4;
+                    StartRollCallBtn.IsEnabled = false;
+                }
+                if (ResetBtn != null)
+                {
+                    ResetBtn.Opacity = 0.4;
+                    ResetBtn.IsEnabled = false;
+                }
+            }
+            
             // 单次抽模式：自动开始抽选
             if (isSingleDrawMode)
             {
@@ -129,8 +170,15 @@ namespace Ink_Canvas
         private static RollCallHistoryData historyData = null;
         private static readonly object historyLock = new object();
         private static int maxRecentHistory = 20;
-        private static double avoidanceWeight = 0.8; // 避免重复的权重
-        private const double FREQUENCY_WEIGHT = 0.2; // 频率平衡的权重
+        private static double avoidanceWeight = 0.8; 
+        private const double FREQUENCY_WEIGHT = 0.2; 
+        
+        // 概率相关
+        private const double DEFAULT_PROBABILITY = 1.0; 
+        private const double BASE_PROBABILITY_DECAY_FACTOR = 0.5; 
+        private const double MIN_PROBABILITY = 0.01; 
+        private const double PROBABILITY_RECOVERY_RATE = 0.2; 
+        private const double FREQUENCY_BOOST_FACTOR = 2.0; 
         
         // 单次抽相关
         private bool isSingleDrawMode = false;
@@ -531,38 +579,230 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 使用机器学习算法选择单个人员
+        /// 使用概率算法选择单个人员
         /// </summary>
         private static string SelectSingleNameWithML(List<string> availableNames, List<string> alreadySelected, Random random)
         {
             if (availableNames.Count == 0) return null;
             if (availableNames.Count == 1) return availableNames[0];
 
-            // 计算每个人员的权重
-            var nameWeights = new Dictionary<string, double>();
+            // 确保历史数据已初始化
+            if (historyData == null)
+            {
+                LoadRollCallHistory();
+            }
+
+            // 初始化概率字典
+            if (historyData.NameProbabilities == null)
+            {
+                historyData.NameProbabilities = new Dictionary<string, double>();
+            }
+
+            // 获取每个人员的概率
+            var nameProbabilities = new Dictionary<string, double>();
 
             foreach (string name in availableNames)
             {
                 if (alreadySelected.Contains(name)) continue;
 
-                double weight = 1.0; // 基础权重
-
-                // 1. 避免最近重复的权重计算
-                double recentAvoidanceWeight = CalculateRecentAvoidanceWeight(name);
-                weight *= (1.0 - recentAvoidanceWeight * avoidanceWeight);
-
-                // 2. 频率平衡权重计算
-                double frequencyWeight = CalculateFrequencyWeight(name);
-                weight *= (1.0 + frequencyWeight * FREQUENCY_WEIGHT);
-
-                // 3. 确保权重不为负数
-                weight = Math.Max(weight, 0.1);
-
-                nameWeights[name] = weight;
+                // 获取基础概率
+                double baseProbability = GetNameProbability(name);
+                
+                // 根据最近历史记录调整概率
+                double adjustedProbability = AdjustProbabilityByRecentHistory(name, baseProbability);
+                
+                double finalProbability = AdjustProbabilityByFrequency(name, adjustedProbability);
+                
+                nameProbabilities[name] = finalProbability;
             }
 
-            // 使用加权随机选择
-            return WeightedRandomSelection(nameWeights, random);
+            // 使用概率进行加权随机选择
+            return ProbabilityBasedRandomSelection(nameProbabilities, random);
+        }
+
+        /// <summary>
+        /// 获取人员的概率
+        /// </summary>
+        private static double GetNameProbability(string name)
+        {
+            if (historyData == null || historyData.NameProbabilities == null)
+                return DEFAULT_PROBABILITY;
+
+            if (historyData.NameProbabilities.ContainsKey(name))
+            {
+                return historyData.NameProbabilities[name];
+            }
+            else
+            {
+                // 新人员，初始化默认概率
+                historyData.NameProbabilities[name] = DEFAULT_PROBABILITY;
+                return DEFAULT_PROBABILITY;
+            }
+        }
+
+        /// <summary>
+        /// 根据最近历史记录调整概率
+        /// </summary>
+        private static double AdjustProbabilityByRecentHistory(string name, double baseProbability)
+        {
+            if (historyData == null || historyData.History == null || historyData.History.Count == 0)
+                return baseProbability;
+
+            // 获取最近记录
+            var recentHistory = historyData.History.Skip(Math.Max(0, historyData.History.Count - maxRecentHistory)).ToList();
+            int recentCount = recentHistory.Count(n => n == name);
+
+            if (recentCount == 0)
+                return baseProbability; 
+
+            double recentFrequency = (double)recentCount / Math.Min(recentHistory.Count, maxRecentHistory);
+            
+            double reductionFactor = 1.0 - (recentFrequency * avoidanceWeight);
+            reductionFactor = Math.Max(reductionFactor, MIN_PROBABILITY / DEFAULT_PROBABILITY); // 确保不会降得太低
+            
+            return baseProbability * reductionFactor;
+        }
+
+        private static double AdjustProbabilityByFrequency(string name, double baseProbability)
+        {
+            if (historyData == null || historyData.NameFrequency == null || historyData.NameFrequency.Count == 0)
+                return baseProbability;
+
+            // 计算总选中次数
+            int totalSelections = historyData.NameFrequency.Values.Sum();
+            if (totalSelections == 0)
+                return baseProbability;
+
+            // 获取该名字的选中次数
+            int nameCount = historyData.NameFrequency.ContainsKey(name) ? historyData.NameFrequency[name] : 0;
+
+            // 计算该名字的选中频率
+            double nameFrequency = (double)nameCount / totalSelections;
+
+            // 计算平均频率（假设有N个不同的人）
+            int uniqueNamesCount = historyData.NameFrequency.Keys.Count;
+            if (uniqueNamesCount == 0)
+                return baseProbability;
+
+            double averageFrequency = 1.0 / uniqueNamesCount;
+
+            // 如果该名字的频率低于平均频率，则增加概率
+            if (nameFrequency < averageFrequency)
+            {
+                // 计算频率差异比例
+                double frequencyRatio = nameFrequency / averageFrequency;
+
+                double frequencyGap = 1.0 - frequencyRatio;
+                double boostFactor = FREQUENCY_BOOST_FACTOR * frequencyGap * frequencyGap; 
+                
+                // 增加概率
+                double boostedProbability = baseProbability * (1.0 + boostFactor);
+                
+                return Math.Min(boostedProbability, DEFAULT_PROBABILITY * 10.0);
+            }
+            else if (nameFrequency > averageFrequency)
+            {
+                double frequencyRatio = nameFrequency / averageFrequency;
+                
+                double reductionFactor = 1.0 - (frequencyRatio - 1.0) * 0.3; 
+                reductionFactor = Math.Max(reductionFactor, MIN_PROBABILITY / DEFAULT_PROBABILITY);
+                
+                return baseProbability * reductionFactor;
+            }
+
+            return baseProbability;
+        }
+
+        /// <summary>
+        /// 根据频率统计更新保存的概率
+        /// </summary>
+        private static void UpdateProbabilitiesByFrequency()
+        {
+            if (historyData == null || historyData.NameFrequency == null || historyData.NameFrequency.Count == 0)
+                return;
+
+            if (historyData.NameProbabilities == null)
+                historyData.NameProbabilities = new Dictionary<string, double>();
+
+            // 计算总选中次数
+            int totalSelections = historyData.NameFrequency.Values.Sum();
+            if (totalSelections == 0)
+                return;
+
+            // 计算平均频率
+            int uniqueNamesCount = historyData.NameFrequency.Keys.Count;
+            if (uniqueNamesCount == 0)
+                return;
+
+            double averageFrequency = 1.0 / uniqueNamesCount;
+
+            // 遍历所有在频率统计中的人员
+            foreach (var kvp in historyData.NameFrequency)
+            {
+                string name = kvp.Key;
+                int nameCount = kvp.Value;
+
+                // 获取当前保存的概率（如果不存在则使用默认值）
+                double currentProbability = historyData.NameProbabilities.ContainsKey(name) 
+                    ? historyData.NameProbabilities[name] 
+                    : DEFAULT_PROBABILITY;
+
+                // 计算该名字的选中频率
+                double nameFrequency = (double)nameCount / totalSelections;
+
+                // 如果该名字的频率低于平均频率，则增加概率并保存
+                if (nameFrequency < averageFrequency)
+                {
+                    // 计算频率差异比例
+                    double frequencyRatio = nameFrequency / averageFrequency;
+                    double frequencyGap = 1.0 - frequencyRatio;
+                    double boostFactor = FREQUENCY_BOOST_FACTOR * frequencyGap * frequencyGap; 
+                    
+                    // 增加概率
+                    double boostedProbability = currentProbability * (1.0 + boostFactor);
+                    
+                    // 限制最大概率，避免过高
+                    boostedProbability = Math.Min(boostedProbability, DEFAULT_PROBABILITY * 10.0);
+                    
+                    // 保存更新后的概率
+                    historyData.NameProbabilities[name] = boostedProbability;
+                }
+                else if (nameFrequency > averageFrequency)
+                {
+                    double frequencyRatio = nameFrequency / averageFrequency;
+                    
+                    double reductionFactor = 1.0 - (frequencyRatio - 1.0) * 0.3; 
+                    reductionFactor = Math.Max(reductionFactor, MIN_PROBABILITY / DEFAULT_PROBABILITY);
+                    
+                    double reducedProbability = currentProbability * reductionFactor;
+                    historyData.NameProbabilities[name] = reducedProbability;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 基于概率的随机选择
+        /// </summary>
+        private static string ProbabilityBasedRandomSelection(Dictionary<string, double> nameProbabilities, Random random)
+        {
+            if (nameProbabilities.Count == 0) return null;
+
+            double totalProbability = nameProbabilities.Values.Sum();
+            if (totalProbability <= 0) return nameProbabilities.Keys.First();
+
+            double randomValue = random.NextDouble() * totalProbability;
+            double currentProbability = 0;
+
+            foreach (var kvp in nameProbabilities)
+            {
+                currentProbability += kvp.Value;
+                if (randomValue <= currentProbability)
+                {
+                    return kvp.Key;
+                }
+            }
+
+            return nameProbabilities.Keys.Last();
         }
 
         /// <summary>
@@ -600,7 +840,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 加权随机选择
+        /// 加权随机选择（保留用于兼容，实际已改用概率选择）
         /// </summary>
         private static string WeightedRandomSelection(Dictionary<string, double> nameWeights, Random random)
         {
@@ -639,29 +879,96 @@ namespace Ink_Canvas
 
             lock (historyLock)
             {
+                // 初始化概率字典
+                if (historyData.NameProbabilities == null)
+                {
+                    historyData.NameProbabilities = new Dictionary<string, double>();
+                }
+
                 // 更新历史记录
                 if (historyData.History == null)
                     historyData.History = new List<string>();
 
                 historyData.History.AddRange(selectedNames);
 
-            // 保持历史记录不超过100条
-            if (historyData.History.Count > 100)
-            {
-                historyData.History = historyData.History.Skip(historyData.History.Count - 100).ToList();
-            }
+                // 保持历史记录不超过100条
+                if (historyData.History.Count > 100)
+                {
+                    historyData.History = historyData.History.Skip(historyData.History.Count - 100).ToList();
+                }
 
-            // 更新频率统计
-            if (historyData.NameFrequency == null)
-                historyData.NameFrequency = new Dictionary<string, int>();
+                // 更新频率统计
+                if (historyData.NameFrequency == null)
+                    historyData.NameFrequency = new Dictionary<string, int>();
 
-            foreach (string name in selectedNames)
-            {
-                if (historyData.NameFrequency.ContainsKey(name))
-                    historyData.NameFrequency[name]++;
-                else
-                    historyData.NameFrequency[name] = 1;
-            }
+                // 更新概率：降重机制
+                foreach (string name in selectedNames)
+                {
+                    // 更新频率统计
+                    if (historyData.NameFrequency.ContainsKey(name))
+                        historyData.NameFrequency[name]++;
+                    else
+                        historyData.NameFrequency[name] = 1;
+
+                    // 降重：被选中的人员概率降低
+                    double currentProbability = GetNameProbability(name);
+
+                    double frequencyBasedDecay = 1.0;
+                    if (historyData.NameFrequency != null && historyData.NameFrequency.ContainsKey(name))
+                    {
+                        int totalSelections = historyData.NameFrequency.Values.Sum();
+                        if (totalSelections > 0)
+                        {
+                            int uniqueNamesCount = historyData.NameFrequency.Keys.Count;
+                            if (uniqueNamesCount > 0)
+                            {
+                                double nameFrequency = (double)historyData.NameFrequency[name] / totalSelections;
+                                double averageFrequency = 1.0 / uniqueNamesCount;
+                                
+                                if (nameFrequency > averageFrequency)
+                                {
+                                    double frequencyRatio = nameFrequency / averageFrequency;
+                                    frequencyBasedDecay = 1.0 - (frequencyRatio - 1.0) * 0.2; 
+                                }
+                            }
+                        }
+                    }
+                    
+                    double decayFactor = BASE_PROBABILITY_DECAY_FACTOR * (1.0 + avoidanceWeight) * frequencyBasedDecay;
+                    decayFactor = Math.Min(decayFactor, 0.85); 
+                    
+                    double newProbability = currentProbability * decayFactor;
+                    newProbability = Math.Max(newProbability, MIN_PROBABILITY); // 确保不低于最小概率
+                    historyData.NameProbabilities[name] = newProbability;
+                }
+
+                if (historyData.History != null && historyData.History.Count > 0)
+                {
+                    int historyCount = historyData.History.Count;
+                    int skipCount = Math.Max(0, historyCount - maxRecentHistory);
+                    var recentHistory = historyData.History.Skip(skipCount).ToList();
+                    var recentNames = new HashSet<string>(recentHistory);
+
+                    var allNames = historyData.NameProbabilities.Keys.ToList();
+                    foreach (string name in allNames)
+                    {
+                        if (!recentNames.Contains(name))
+                        {
+                            double currentProbability = historyData.NameProbabilities[name];
+                            if (currentProbability < DEFAULT_PROBABILITY)
+                            {
+                                double newProbability = Math.Min(
+                                    currentProbability + PROBABILITY_RECOVERY_RATE,
+                                    DEFAULT_PROBABILITY
+                                );
+                                historyData.NameProbabilities[name] = newProbability;
+                            }
+                        }
+                    }
+                }
+
+                // 根据频率统计更新概率
+                UpdateProbabilitiesByFrequency();
 
                 historyData.LastUpdate = DateTime.Now;
 
@@ -697,6 +1004,11 @@ namespace Ink_Canvas
                 if (data != null)
                 {
                     historyData = data;
+                    // 确保概率字典已初始化
+                    if (historyData.NameProbabilities == null)
+                    {
+                        historyData.NameProbabilities = new Dictionary<string, double>();
+                    }
                 }
                 else
                 {
@@ -1325,9 +1637,9 @@ namespace Ink_Canvas
                 // 动画结束，显示最终结果
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    // 使用降重抽选方法选择数字
+                    // 根据选择的模式进行不同的抽选逻辑
                     var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
-                    var selectedNumbers = SelectNamesWithML(numberList, currentCount, random);
+                    var selectedNumbers = SelectNamesByMode(numberList, currentCount);
                     
                     // 更新历史记录
                     UpdateRollCallHistory(selectedNumbers);
@@ -1418,8 +1730,8 @@ namespace Ink_Canvas
             // 动画结束，显示最终结果
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // 使用降重抽选方法
-                var selectedNames = SelectNamesWithML(nameList, currentCount, random);
+                // 根据选择的模式进行不同的抽选逻辑
+                var selectedNames = SelectNamesByMode(nameList, currentCount);
                 
                 // 更新历史记录
                 UpdateRollCallHistory(selectedNames);
@@ -1440,6 +1752,21 @@ namespace Ink_Canvas
                         System.Threading.Thread.Sleep(autoCloseWaitTime);
                         Application.Current.Dispatcher.Invoke(() =>
                         {
+                            if (ControlOptionsGrid != null)
+                            {
+                                ControlOptionsGrid.Opacity = 1;
+                                ControlOptionsGrid.IsHitTestVisible = true;
+                            }
+                            if (StartRollCallBtn != null)
+                            {
+                                StartRollCallBtn.Opacity = 1;
+                                StartRollCallBtn.IsEnabled = true;
+                            }
+                            if (ResetBtn != null)
+                            {
+                                ResetBtn.Opacity = 1;
+                                ResetBtn.IsEnabled = true;
+                            }
                             Close();
                         });
                     }).Start();
@@ -1476,9 +1803,9 @@ namespace Ink_Canvas
             // 动画结束，显示最终结果
             Application.Current.Dispatcher.Invoke(() =>
             {
-                // 使用降重抽选方法选择数字
+                // 根据选择的模式进行不同的抽选逻辑
                 var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
-                var selectedNumbers = SelectNamesWithML(numberList, currentCount, random);
+                var selectedNumbers = SelectNamesByMode(numberList, currentCount);
                 
                 // 更新历史记录
                 UpdateRollCallHistory(selectedNumbers);
@@ -1512,6 +1839,22 @@ namespace Ink_Canvas
                         System.Threading.Thread.Sleep(autoCloseWaitTime);
                         Application.Current.Dispatcher.Invoke(() =>
                         {
+                            if (ControlOptionsGrid != null)
+                            {
+                                ControlOptionsGrid.Opacity = 1;
+                                ControlOptionsGrid.IsHitTestVisible = true;
+                            }
+                            // 恢复开始点名和重置按钮
+                            if (StartRollCallBtn != null)
+                            {
+                                StartRollCallBtn.Opacity = 1;
+                                StartRollCallBtn.IsEnabled = true;
+                            }
+                            if (ResetBtn != null)
+                            {
+                                ResetBtn.Opacity = 1;
+                                ResetBtn.IsEnabled = true;
+                            }
                             Close();
                         });
                     }).Start();

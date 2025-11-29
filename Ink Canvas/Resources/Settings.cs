@@ -619,7 +619,9 @@ namespace Ink_Canvas
         [JsonProperty("isInkToShapeRounded")]
         public bool IsInkToShapeRounded { get; set; } = true;
         [JsonProperty("lineStraightenSensitivity")]
-        public double LineStraightenSensitivity { get; set; } = 0.20; // 直线检测灵敏度，值越小越严格（0.05-2.0）
+        public double LineStraightenSensitivity { get; set; } = 0.20;
+        [JsonProperty("lineNormalizationThreshold")]
+        public double LineNormalizationThreshold { get; set; } = 0.5; 
     }
 
     public class RandSettings
@@ -663,9 +665,9 @@ namespace Ink_Canvas
         [JsonProperty("enableMLAvoidance")]
         public bool EnableMLAvoidance { get; set; } = true;
         [JsonProperty("mlAvoidanceHistoryCount")]
-        public int MLAvoidanceHistoryCount { get; set; } = 20;
+        public int MLAvoidanceHistoryCount { get; set; } = 50;
         [JsonProperty("mlAvoidanceWeight")]
-        public double MLAvoidanceWeight { get; set; } = 0.8;
+        public double MLAvoidanceWeight { get; set; } = 1.0;
         [JsonProperty("enableQuickDraw")]
         public bool EnableQuickDraw { get; set; } = true;
     }

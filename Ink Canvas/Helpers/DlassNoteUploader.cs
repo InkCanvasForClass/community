@@ -19,6 +19,22 @@ namespace Ink_Canvas.Helpers
         private const string APP_SECRET = "o7dx5b5ASGUMcM72PCpmRQYAhSijqaOVHoGyBK0IxbA";
         private const int BATCH_SIZE = 10; // 批量上传大小
         private const int MAX_RETRY_COUNT = 3; // 最大重试次数
+        private const string QUEUE_FILE_NAME = "DlassUploadQueue.json"; 
+
+        /// <summary>
+        /// 上传队列项
+        /// </summary>
+        private class UploadQueueItemData
+        {
+            [JsonProperty("file_path")]
+            public string FilePath { get; set; }
+
+            [JsonProperty("retry_count")]
+            public int RetryCount { get; set; }
+
+            [JsonProperty("added_time")]
+            public DateTime AddedTime { get; set; }
+        }
 
         /// <summary>
         /// 上传队列项
@@ -38,6 +54,205 @@ namespace Ink_Canvas.Helpers
         /// 队列处理锁，防止并发处理
         /// </summary>
         private static readonly SemaphoreSlim _queueProcessingLock = new SemaphoreSlim(1, 1);
+
+        /// <summary>
+        /// 队列保存锁，防止并发保存
+        /// </summary>
+        private static readonly SemaphoreSlim _queueSaveLock = new SemaphoreSlim(1, 1);
+
+        /// <summary>
+        /// 是否已初始化队列
+        /// </summary>
+        private static bool _isQueueInitialized = false;
+
+        /// <summary>
+        /// 获取队列文件路径
+        /// </summary>
+        private static string GetQueueFilePath()
+        {
+            var configsDir = Path.Combine(App.RootPath, "Configs");
+            if (!Directory.Exists(configsDir))
+            {
+                Directory.CreateDirectory(configsDir);
+            }
+            return Path.Combine(configsDir, QUEUE_FILE_NAME);
+        }
+
+        /// <summary>
+        /// 初始化上传队列
+        /// </summary>
+        public static void InitializeQueue()
+        {
+            if (_isQueueInitialized)
+            {
+                return;
+            }
+
+            try
+            {
+                var queueFilePath = GetQueueFilePath();
+                if (!File.Exists(queueFilePath))
+                {
+                    _isQueueInitialized = true;
+                    return;
+                }
+
+                var jsonContent = File.ReadAllText(queueFilePath);
+                if (string.IsNullOrWhiteSpace(jsonContent))
+                {
+                    _isQueueInitialized = true;
+                    return;
+                }
+
+                var queueData = JsonConvert.DeserializeObject<List<UploadQueueItemData>>(jsonContent);
+                if (queueData == null || queueData.Count == 0)
+                {
+                    _isQueueInitialized = true;
+                    return;
+                }
+
+                int restoredCount = 0;
+                int skippedCount = 0;
+
+                foreach (var item in queueData)
+                {
+                    // 验证文件是否存在
+                    if (!File.Exists(item.FilePath))
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    // 验证文件格式和大小
+                    var fileExtension = Path.GetExtension(item.FilePath).ToLower();
+                    if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".zip")
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    try
+                    {
+                        var fileInfo = new FileInfo(item.FilePath);
+                        long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+                        if (fileInfo.Length > maxSize)
+                        {
+                            skippedCount++;
+                            continue;
+                        }
+                    }
+                    catch
+                    {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    // 恢复队列项
+                    _uploadQueue.Enqueue(new UploadQueueItem
+                    {
+                        FilePath = item.FilePath,
+                        RetryCount = item.RetryCount
+                    });
+                    restoredCount++;
+                }
+
+                _isQueueInitialized = true;
+
+                if (restoredCount > 0)
+                {
+                    LogHelper.WriteLogToFile($"已恢复上传队列：{restoredCount}个文件，跳过{skippedCount}个无效文件", LogHelper.LogType.Event);
+                    // 如果恢复了队列，触发处理
+                    _ = ProcessUploadQueueAsync();
+                }
+                else if (skippedCount > 0)
+                {
+                    LogHelper.WriteLogToFile($"队列恢复完成：跳过{skippedCount}个无效文件", LogHelper.LogType.Event);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"恢复上传队列时出错: {ex.Message}", LogHelper.LogType.Error);
+                _isQueueInitialized = true; // 即使出错也标记为已初始化，避免重复尝试
+            }
+        }
+
+        /// <summary>
+        /// 保存队列到文件
+        /// </summary>
+        private static async Task SaveQueueToFileAsync()
+        {
+            if (!await _queueSaveLock.WaitAsync(1000)) // 最多等待1秒
+            {
+                return; // 如果无法获取锁，跳过保存（避免阻塞）
+            }
+
+            try
+            {
+                var queueData = new List<UploadQueueItemData>();
+                
+                // 将队列转换为可序列化的格式
+                foreach (var item in _uploadQueue)
+                {
+                    queueData.Add(new UploadQueueItemData
+                    {
+                        FilePath = item.FilePath,
+                        RetryCount = item.RetryCount,
+                        AddedTime = DateTime.Now
+                    });
+                }
+
+                var queueFilePath = GetQueueFilePath();
+                
+                // 如果队列为空，清空文件
+                if (queueData.Count == 0)
+                {
+                    ClearQueueFile();
+                    return;
+                }
+
+                var jsonContent = JsonConvert.SerializeObject(queueData, Formatting.Indented);
+                
+                // 使用临时文件写入，然后替换，确保原子性
+                var tempFilePath = queueFilePath + ".tmp";
+                File.WriteAllText(tempFilePath, jsonContent);
+                
+                // 如果原文件存在，先删除
+                if (File.Exists(queueFilePath))
+                {
+                    File.Delete(queueFilePath);
+                }
+                
+                // 重命名临时文件
+                File.Move(tempFilePath, queueFilePath);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存上传队列时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+            finally
+            {
+                _queueSaveLock.Release();
+            }
+        }
+
+        /// <summary>
+        /// 清空队列文件
+        /// </summary>
+        private static void ClearQueueFile()
+        {
+            try
+            {
+                var queueFilePath = GetQueueFilePath();
+                if (File.Exists(queueFilePath))
+                {
+                    File.WriteAllText(queueFilePath, "[]");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"清空队列文件时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
 
         /// <summary>
         /// 上传笔记响应模型
@@ -100,9 +315,9 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 异步上传笔记文件到Dlass（支持PNG和ICSTK格式）
+        /// 异步上传笔记文件到Dlass（支持PNG、ICSTK和ZIP格式）
         /// </summary>
-        /// <param name="filePath">文件路径（支持PNG和ICSTK）</param>
+        /// <param name="filePath">文件路径（支持PNG、ICSTK和ZIP）</param>
         /// <returns>是否成功加入队列（不等待实际上传完成）</returns>
         public static async Task<bool> UploadNoteFileAsync(string filePath)
         {
@@ -122,15 +337,16 @@ namespace Ink_Canvas.Helpers
                 }
 
                 var fileExtension = Path.GetExtension(filePath).ToLower();
-                if (fileExtension != ".png" && fileExtension != ".icstk")
+                if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".zip")
                 {
                     return false;
                 }
 
                 var fileInfo = new FileInfo(filePath);
-                if (fileInfo.Length > 10 * 1024 * 1024)
+                long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+                if (fileInfo.Length > maxSize)
                 {
-                    LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过10MB限制", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过{maxSize / 1024 / 1024}MB限制", LogHelper.LogType.Error);
                     return false;
                 }
 
@@ -170,6 +386,9 @@ namespace Ink_Canvas.Helpers
                 FilePath = filePath,
                 RetryCount = retryCount
             });
+
+            // 异步保存队列到文件
+            _ = Task.Run(async () => await SaveQueueToFileAsync());
 
             // 如果队列达到批量大小，触发批量上传
             if (_uploadQueue.Count >= BATCH_SIZE)
@@ -219,6 +438,11 @@ namespace Ink_Canvas.Helpers
                     if (string.IsNullOrEmpty(selectedClassName))
                     {
                         LogHelper.WriteLogToFile("上传失败：未选择班级", LogHelper.LogType.Error);
+                        // 将文件重新加入队列
+                        foreach (var item in filesToUpload)
+                        {
+                            EnqueueFile(item.FilePath, item.RetryCount);
+                        }
                         return;
                     }
 
@@ -226,6 +450,11 @@ namespace Ink_Canvas.Helpers
                     if (string.IsNullOrEmpty(userToken))
                     {
                         LogHelper.WriteLogToFile("上传失败：未设置用户Token", LogHelper.LogType.Error);
+                        // 将文件重新加入队列
+                        foreach (var item in filesToUpload)
+                        {
+                            EnqueueFile(item.FilePath, item.RetryCount);
+                        }
                         return;
                     }
 
@@ -246,6 +475,11 @@ namespace Ink_Canvas.Helpers
                         if (authResult == null || !authResult.Success || authResult.Whiteboards == null)
                         {
                             LogHelper.WriteLogToFile("上传失败：无法获取白板信息", LogHelper.LogType.Error);
+                            // 将文件重新加入队列
+                            foreach (var item in filesToUpload)
+                            {
+                                EnqueueFile(item.FilePath, item.RetryCount);
+                            }
                             return;
                         }
 
@@ -255,6 +489,11 @@ namespace Ink_Canvas.Helpers
                         if (sharedWhiteboard == null || string.IsNullOrEmpty(sharedWhiteboard.BoardId) || string.IsNullOrEmpty(sharedWhiteboard.SecretKey))
                         {
                             LogHelper.WriteLogToFile($"上传失败：未找到班级'{selectedClassName}'对应的白板", LogHelper.LogType.Error);
+                            // 将文件重新加入队列
+                            foreach (var item in filesToUpload)
+                            {
+                                EnqueueFile(item.FilePath, item.RetryCount);
+                            }
                             return;
                         }
                     }
@@ -262,6 +501,11 @@ namespace Ink_Canvas.Helpers
                 catch (Exception ex)
                 {
                     LogHelper.WriteLogToFile($"批量上传获取白板信息时出错: {ex.Message}", LogHelper.LogType.Error);
+                    // 将文件重新加入队列
+                    foreach (var item in filesToUpload)
+                    {
+                        EnqueueFile(item.FilePath, item.RetryCount);
+                    }
                     return;
                 }
 
@@ -317,6 +561,9 @@ namespace Ink_Canvas.Helpers
                 });
                 await Task.WhenAll(uploadTasks);
 
+                // 上传完成后保存队列状态
+                await SaveQueueToFileAsync();
+
                 // 如果队列达到批量大小，继续处理
                 if (_uploadQueue.Count >= BATCH_SIZE)
                 {
@@ -348,16 +595,17 @@ namespace Ink_Canvas.Helpers
 
                 // 检查文件扩展名
                 var fileExtension = Path.GetExtension(filePath).ToLower();
-                if (fileExtension != ".png" && fileExtension != ".icstk")
+                if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".zip")
                 {
                     return false;
                 }
 
-                // 检查文件大小（最大10MB）
+                // 检查文件大小（最大10MB，ZIP文件可能更大，允许50MB）
                 var fileInfo = new FileInfo(filePath);
-                if (fileInfo.Length > 10 * 1024 * 1024)
+                long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+                if (fileInfo.Length > maxSize)
                 {
-                    LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过10MB限制", LogHelper.LogType.Error);
+                    LogHelper.WriteLogToFile($"上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过{maxSize / 1024 / 1024}MB限制", LogHelper.LogType.Error);
                     return false;
                 }
 
@@ -417,9 +665,24 @@ namespace Ink_Canvas.Helpers
                 // 准备上传参数
                 var fileName = Path.GetFileNameWithoutExtension(filePath);
                 var title = fileName;
-                var fileType = fileExtension == ".icstk" ? "墨迹文件" : "笔记";
+                string fileType;
+                string tags;
+                if (fileExtension == ".zip")
+                {
+                    fileType = "多页面墨迹压缩包";
+                    tags = "自动上传,多页面,zip,压缩包";
+                }
+                else if (fileExtension == ".icstk")
+                {
+                    fileType = "墨迹文件";
+                    tags = "自动上传,墨迹,icstk";
+                }
+                else
+                {
+                    fileType = "笔记";
+                    tags = "自动上传,笔记,png";
+                }
                 var description = $"自动上传的{fileType} - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
-                var tags = fileExtension == ".icstk" ? "自动上传,墨迹,icstk" : "自动上传,笔记,png";
 
                 // 创建API客户端并上传文件
                 using (var apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken))
@@ -466,7 +729,7 @@ namespace Ink_Canvas.Helpers
 
             // 检查文件扩展名
             var fileExtension = Path.GetExtension(filePath).ToLower();
-            if (fileExtension != ".png" && fileExtension != ".icstk")
+            if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".zip")
             {
                 return false; // 文件格式错误，不可重试
             }
@@ -475,7 +738,8 @@ namespace Ink_Canvas.Helpers
             try
             {
                 var fileInfo = new FileInfo(filePath);
-                if (fileInfo.Length > 10 * 1024 * 1024)
+                long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+                if (fileInfo.Length > maxSize)
                 {
                     return false; // 文件过大，不可重试
                 }
@@ -490,4 +754,5 @@ namespace Ink_Canvas.Helpers
         }
     }
 }
+
 

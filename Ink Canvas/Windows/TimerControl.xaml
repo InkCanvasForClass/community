@@ -1,31 +1,35 @@
-<Window x:Class="Ink_Canvas.NewStyleTimerWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Ink_Canvas"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
-        xmlns:controls="clr-namespace:Ink_Canvas.Windows.Controls"
-        Topmost="True" Background="Transparent"
-        mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
-        Loaded="Window_Loaded" Closing="Window_Closing" WindowStartupLocation="CenterScreen"
-        MouseMove="Window_MouseMove" MouseEnter="Window_MouseEnter"
-        Title="Ink Canvas 画板 - 计时器" Height="450" Width="900">
-
-    <Window.Resources>
+<UserControl x:Class="Ink_Canvas.Windows.TimerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:controls="clr-namespace:Ink_Canvas.Windows.Controls"
+             mc:Ignorable="d"
+             d:DesignHeight="450" d:DesignWidth="900">
+    <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Controls/WinUI3CloseButton.xaml" />
                 <ResourceDictionary Source="DigitResources.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
-    </Window.Resources>
+    </UserControl.Resources>
 
-    <Border Background="{DynamicResource NewTimerWindowBackground}" CornerRadius="15" BorderThickness="1" BorderBrush="{DynamicResource NewTimerWindowBorderBrush}" Margin="10" x:Name="MainBorder" MouseLeftButtonDown="WindowDragMove">
+    <Border Background="{DynamicResource NewTimerWindowBackground}" 
+            CornerRadius="15" 
+            BorderThickness="1" 
+            BorderBrush="{DynamicResource NewTimerWindowBorderBrush}" 
+            Margin="10" 
+            x:Name="MainBorder"
+            MouseLeftButtonDown="MainBorder_MouseLeftButtonDown">
         <Grid>
             <controls:WinUI3CloseButton x:Name="CloseButton" 
-                                        HorizontalAlignment="Right" VerticalAlignment="Top" 
-                                        Margin="0,0,0,0" Cursor="Hand" Click="CloseButton_Click"
+                                        HorizontalAlignment="Right" 
+                                        VerticalAlignment="Top" 
+                                        Margin="0,0,0,0" 
+                                        Cursor="Hand" 
+                                        Click="CloseButton_Click"
                                         Content="✕"/>
             <!-- 主要内容区域 -->
             <Grid>
@@ -33,8 +37,16 @@
                 <Viewbox x:Name="MainViewController" Margin="20,20,20,20">
                     <Grid Height="400" Width="900">
                         <!-- 顶部标题栏 -->
-                        <Grid Height="50" Background="{DynamicResource NewTimerWindowBackground}" x:Name="TitleBar" VerticalAlignment="Top" MouseLeftButtonDown="WindowDragMove" Margin="0,0,450,0">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="22,0,0,0">
+                        <Grid Height="50" 
+                              Background="{DynamicResource NewTimerWindowBackground}" 
+                              x:Name="TitleBar" 
+                              VerticalAlignment="Top" 
+                              Margin="0,0,450,0"
+                              MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                            <StackPanel Orientation="Horizontal" 
+                                        HorizontalAlignment="Left" 
+                                        VerticalAlignment="Center" 
+                                        Margin="22,0,0,0">
                                 <!-- 计时器图标 -->
                                 <Path Data="M5 13a7 7 0 1 0 14 0a7 7 0 0 0 -14 0z M14.5 10.5l-2.5 2.5 M17 8l1 -1 M14 3h-4" 
                                       Stroke="{DynamicResource NewTimerWindowTitleForeground}" 
@@ -45,35 +57,56 @@
                                       Stretch="Uniform" 
                                       Margin="0,0,8,0"/>
                                 <!-- 计时文字 -->
-                                <TextBlock Text="计时" FontSize="28" FontWeight="Bold" 
-                                           Foreground="{DynamicResource NewTimerWindowTitleForeground}" x:Name="TitleText"/>
+                                <TextBlock Text="计时" 
+                                           FontSize="28" 
+                                           FontWeight="Bold" 
+                                           Foreground="{DynamicResource NewTimerWindowTitleForeground}" 
+                                           x:Name="TitleText"/>
                             </StackPanel>
                         </Grid>
                         <!-- 主要内容区域 - 分为左右两部分 -->
-                        <Grid HorizontalAlignment="Stretch" VerticalAlignment="Center" 
-                              x:Name="MainContentGrid" Margin="0,-25,0,25">
+                        <Grid HorizontalAlignment="Stretch" 
+                              VerticalAlignment="Center" 
+                              x:Name="MainContentGrid" 
+                              Margin="0,-25,0,25">
                             <!-- 左侧：6位数字显示区域 -->
-                            <Grid HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                  x:Name="MainDisplayGrid" Width="500" Margin="-10,0,0,0">
-                            <!-- 6位数字水平排列 -->
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" 
-                                           x:Name="DigitsPanel">
-                                <!-- 小时组（十位和个位） -->
-                                    <Grid Margin="0,0,20,0" HorizontalAlignment="Center" Width="120">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <!-- 第1位数字（小时十位） -->
-                                        <Grid Margin="0,0,15,0">
-                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                                <!-- 上方+按钮 -->
-                                                <Button x:Name="Digit1PlusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit1Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                            <Grid HorizontalAlignment="Left" 
+                                  VerticalAlignment="Center" 
+                                  x:Name="MainDisplayGrid" 
+                                  Width="500" 
+                                  Margin="-10,0,0,0">
+                                <!-- 6位数字水平排列 -->
+                                <StackPanel Orientation="Horizontal" 
+                                            HorizontalAlignment="Center" 
+                                            x:Name="DigitsPanel">
+                                    <!-- 小时组（十位和个位） -->
+                                    <Grid Margin="0,0,20,0" 
+                                          HorizontalAlignment="Center" 
+                                          Width="120">
+                                        <StackPanel Orientation="Horizontal" 
+                                                    HorizontalAlignment="Center">
+                                            <!-- 第1位数字（小时十位） -->
+                                            <Grid Margin="0,0,15,0">
+                                                <StackPanel Orientation="Vertical" 
+                                                            HorizontalAlignment="Center">
+                                                    <!-- 上方+按钮 -->
+                                                    <Button x:Name="Digit1PlusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit1Plus_Click" 
+                                                            Cursor="Hand" 
+                                                            Margin="0,0,0,15" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M12 5l0 14 M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -83,25 +116,33 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                                <!-- 数字显示 -->
-                                                <Path x:Name="Digit1Display" Data="{StaticResource Digit0}" 
-                                                     Fill="{DynamicResource NewTimerWindowDigitForeground}" 
-                                                     Width="48" Height="48" 
-                                                     HorizontalAlignment="Center" 
-                                                     VerticalAlignment="Center"
-                                                     Stretch="Uniform" 
-                                                     Margin="0,0,0,15"/>
-                                                <!-- 下方-按钮 -->
-                                                <Button x:Name="Digit1MinusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit1Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                                    </Button>
+                                                    <!-- 数字显示 -->
+                                                    <Path x:Name="Digit1Display" 
+                                                          Data="{StaticResource Digit0}" 
+                                                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
+                                                          Width="48" Height="48" 
+                                                          HorizontalAlignment="Center" 
+                                                          VerticalAlignment="Center"
+                                                          Stretch="Uniform" 
+                                                          Margin="0,0,0,15"/>
+                                                    <!-- 下方-按钮 -->
+                                                    <Button x:Name="Digit1MinusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit1Minus_Click" 
+                                                            Cursor="Hand" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -111,23 +152,31 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- 第2位数字（小时个位） -->
-                                        <Grid>
-                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                                <!-- 上方+按钮 -->
-                                                <Button x:Name="Digit2PlusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit2Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                            <!-- 第2位数字（小时个位） -->
+                                            <Grid>
+                                                <StackPanel Orientation="Vertical" 
+                                                            HorizontalAlignment="Center">
+                                                    <!-- 上方+按钮 -->
+                                                    <Button x:Name="Digit2PlusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit2Plus_Click" 
+                                                            Cursor="Hand" 
+                                                            Margin="0,0,0,15" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M12 5l0 14 M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -137,25 +186,33 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                                <!-- 数字显示 -->
-                                                <Path x:Name="Digit2Display" Data="{StaticResource Digit0}" 
-                                                     Fill="{DynamicResource NewTimerWindowDigitForeground}" 
-                                                     Width="48" Height="48" 
-                                                     HorizontalAlignment="Center" 
-                                                     VerticalAlignment="Center"
-                                                     Stretch="Uniform" 
-                                                     Margin="0,0,0,15"/>
-                                                <!-- 下方-按钮 -->
-                                                <Button x:Name="Digit2MinusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit2Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                                    </Button>
+                                                    <!-- 数字显示 -->
+                                                    <Path x:Name="Digit2Display" 
+                                                          Data="{StaticResource Digit0}" 
+                                                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
+                                                          Width="48" Height="48" 
+                                                          HorizontalAlignment="Center" 
+                                                          VerticalAlignment="Center"
+                                                          Stretch="Uniform" 
+                                                          Margin="0,0,0,15"/>
+                                                    <!-- 下方-按钮 -->
+                                                    <Button x:Name="Digit2MinusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit2Minus_Click" 
+                                                            Cursor="Hand" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -165,34 +222,48 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </StackPanel>
-                                </Grid>
-
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
                                     <!-- 冒号分隔符 -->
-                                    <TextBlock x:Name="Colon1Display" Text=":" FontSize="48" FontWeight="Bold" 
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    <TextBlock x:Name="Colon1Display" 
+                                               Text=":" 
+                                               FontSize="48" 
+                                               FontWeight="Bold" 
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"
                                                Foreground="{DynamicResource NewTimerWindowDigitForeground}" 
                                                Margin="-20,0,0,0"/>
-
-                                <!-- 分钟组（十位和个位） -->
-                                    <Grid Margin="0,0,20,0" HorizontalAlignment="Center" Width="120">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <!-- 第3位数字（分钟十位） -->
-                                        <Grid Margin="0,0,15,0">
-                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                                <!-- 上方+按钮 -->
-                                                <Button x:Name="Digit3PlusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit3Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                    <!-- 分钟组（十位和个位） -->
+                                    <Grid Margin="0,0,20,0" 
+                                          HorizontalAlignment="Center" 
+                                          Width="120">
+                                        <StackPanel Orientation="Horizontal" 
+                                                    HorizontalAlignment="Center">
+                                            <!-- 第3位数字（分钟十位） -->
+                                            <Grid Margin="0,0,15,0">
+                                                <StackPanel Orientation="Vertical" 
+                                                            HorizontalAlignment="Center">
+                                                    <!-- 上方+按钮 -->
+                                                    <Button x:Name="Digit3PlusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit3Plus_Click" 
+                                                            Cursor="Hand" 
+                                                            Margin="0,0,0,15" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M12 5l0 14 M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -202,25 +273,33 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                                <!-- 数字显示 -->
-                                                <Path x:Name="Digit3Display" Data="{StaticResource Digit0}" 
-                                                     Fill="{DynamicResource NewTimerWindowDigitForeground}" 
-                                                     Width="48" Height="48" 
-                                                     HorizontalAlignment="Center" 
-                                                     VerticalAlignment="Center"
-                                                     Stretch="Uniform" 
-                                                     Margin="0,0,0,15"/>
-                                                <!-- 下方-按钮 -->
-                                                <Button x:Name="Digit3MinusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit3Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                                    </Button>
+                                                    <!-- 数字显示 -->
+                                                    <Path x:Name="Digit3Display" 
+                                                          Data="{StaticResource Digit0}" 
+                                                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
+                                                          Width="48" Height="48" 
+                                                          HorizontalAlignment="Center" 
+                                                          VerticalAlignment="Center"
+                                                          Stretch="Uniform" 
+                                                          Margin="0,0,0,15"/>
+                                                    <!-- 下方-按钮 -->
+                                                    <Button x:Name="Digit3MinusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit3Minus_Click" 
+                                                            Cursor="Hand" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -230,23 +309,31 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- 第4位数字（分钟个位） -->
-                                        <Grid>
-                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                                <!-- 上方+按钮 -->
-                                                <Button x:Name="Digit4PlusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit4Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                            <!-- 第4位数字（分钟个位） -->
+                                            <Grid>
+                                                <StackPanel Orientation="Vertical" 
+                                                            HorizontalAlignment="Center">
+                                                    <!-- 上方+按钮 -->
+                                                    <Button x:Name="Digit4PlusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit4Plus_Click" 
+                                                            Cursor="Hand" 
+                                                            Margin="0,0,0,15" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M12 5l0 14 M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -256,25 +343,33 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                                <!-- 数字显示 -->
-                                                <Path x:Name="Digit4Display" Data="{StaticResource Digit0}" 
-                                                     Fill="{DynamicResource NewTimerWindowDigitForeground}" 
-                                                     Width="48" Height="48" 
-                                                     HorizontalAlignment="Center" 
-                                                     VerticalAlignment="Center"
-                                                     Stretch="Uniform" 
-                                                     Margin="0,0,0,15"/>
-                                                <!-- 下方-按钮 -->
-                                                <Button x:Name="Digit4MinusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit4Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                                    </Button>
+                                                    <!-- 数字显示 -->
+                                                    <Path x:Name="Digit4Display" 
+                                                          Data="{StaticResource Digit0}" 
+                                                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
+                                                          Width="48" Height="48" 
+                                                          HorizontalAlignment="Center" 
+                                                          VerticalAlignment="Center"
+                                                          Stretch="Uniform" 
+                                                          Margin="0,0,0,15"/>
+                                                    <!-- 下方-按钮 -->
+                                                    <Button x:Name="Digit4MinusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit4Minus_Click" 
+                                                            Cursor="Hand" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -284,34 +379,46 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-                                    </StackPanel>
-                                </Grid>
-
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Grid>
                                     <!-- 冒号分隔符 -->
-                                    <TextBlock x:Name="Colon2Display" Text=":" FontSize="48" FontWeight="Bold" 
-                                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                                    <TextBlock x:Name="Colon2Display" 
+                                               Text=":" 
+                                               FontSize="48" 
+                                               FontWeight="Bold" 
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"
                                                Foreground="{DynamicResource NewTimerWindowDigitForeground}" 
                                                Margin="-20,0,0,0"/>
-
-                                <!-- 秒组（十位和个位） -->
-                                <Grid Width="120">
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                        <!-- 第5位数字（秒十位） -->
-                                        <Grid Margin="0,0,15,0">
-                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                                <!-- 上方+按钮 -->
-                                                <Button x:Name="Digit5PlusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit5Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                    <!-- 秒组（十位和个位） -->
+                                    <Grid Width="120">
+                                        <StackPanel Orientation="Horizontal" 
+                                                    HorizontalAlignment="Center">
+                                            <!-- 第5位数字（秒十位） -->
+                                            <Grid Margin="0,0,15,0">
+                                                <StackPanel Orientation="Vertical" 
+                                                            HorizontalAlignment="Center">
+                                                    <!-- 上方+按钮 -->
+                                                    <Button x:Name="Digit5PlusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit5Plus_Click" 
+                                                            Cursor="Hand" 
+                                                            Margin="0,0,0,15" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M12 5l0 14 M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -321,25 +428,33 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                                <!-- 数字显示 -->
-                                                <Path x:Name="Digit5Display" Data="{StaticResource Digit0}" 
-                                                     Fill="{DynamicResource NewTimerWindowDigitForeground}" 
-                                                     Width="48" Height="48" 
-                                                     HorizontalAlignment="Center" 
-                                                     VerticalAlignment="Center"
-                                                     Stretch="Uniform" 
-                                                     Margin="0,0,0,15"/>
-                                                <!-- 下方-按钮 -->
-                                                <Button x:Name="Digit5MinusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit5Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                                    </Button>
+                                                    <!-- 数字显示 -->
+                                                    <Path x:Name="Digit5Display" 
+                                                          Data="{StaticResource Digit0}" 
+                                                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
+                                                          Width="48" Height="48" 
+                                                          HorizontalAlignment="Center" 
+                                                          VerticalAlignment="Center"
+                                                          Stretch="Uniform" 
+                                                          Margin="0,0,0,15"/>
+                                                    <!-- 下方-按钮 -->
+                                                    <Button x:Name="Digit5MinusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit5Minus_Click" 
+                                                            Cursor="Hand" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -349,23 +464,31 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                            </StackPanel>
-                                        </Grid>
-
-                                        <!-- 第6位数字（秒个位） -->
-                                        <Grid>
-                                            <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
-                                                <!-- 上方+按钮 -->
-                                                <Button x:Name="Digit6PlusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit6Plus_Click" Cursor="Hand" Margin="0,0,0,15" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Grid>
+                                            <!-- 第6位数字（秒个位） -->
+                                            <Grid>
+                                                <StackPanel Orientation="Vertical" 
+                                                            HorizontalAlignment="Center">
+                                                    <!-- 上方+按钮 -->
+                                                    <Button x:Name="Digit6PlusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit6Plus_Click" 
+                                                            Cursor="Hand" 
+                                                            Margin="0,0,0,15" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M12 5l0 14 M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -375,25 +498,33 @@
                                                               Fill="Transparent" 
                                                               Width="20" Height="20" 
                                                               Stretch="Uniform"/>
-                                                </Button>
-                                                <!-- 数字显示 -->
-                                                <Path x:Name="Digit6Display" Data="{StaticResource Digit0}" 
-                                                     Fill="{DynamicResource NewTimerWindowDigitForeground}" 
-                                                     Width="48" Height="48" 
-                                                     HorizontalAlignment="Center" 
-                                                     VerticalAlignment="Center"
-                                                     Stretch="Uniform" 
-                                                     Margin="0,0,0,15"/>
-                                                <!-- 下方-按钮 -->
-                                                <Button x:Name="Digit6MinusBtn" Width="40" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                                BorderThickness="0" Click="Digit6Minus_Click" Cursor="Hand" HorizontalAlignment="Center">
-                                                    <Button.Template>
-                                                        <ControlTemplate TargetType="Button">
-                                                            <Border Background="{TemplateBinding Background}" CornerRadius="15">
-                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                            </Border>
-                                                        </ControlTemplate>
-                                                    </Button.Template>
+                                                    </Button>
+                                                    <!-- 数字显示 -->
+                                                    <Path x:Name="Digit6Display" 
+                                                          Data="{StaticResource Digit0}" 
+                                                          Fill="{DynamicResource NewTimerWindowDigitForeground}" 
+                                                          Width="48" Height="48" 
+                                                          HorizontalAlignment="Center" 
+                                                          VerticalAlignment="Center"
+                                                          Stretch="Uniform" 
+                                                          Margin="0,0,0,15"/>
+                                                    <!-- 下方-按钮 -->
+                                                    <Button x:Name="Digit6MinusBtn" 
+                                                            Width="40" Height="40" 
+                                                            Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                                            BorderThickness="0" 
+                                                            Click="Digit6Minus_Click" 
+                                                            Cursor="Hand" 
+                                                            HorizontalAlignment="Center">
+                                                        <Button.Template>
+                                                            <ControlTemplate TargetType="Button">
+                                                                <Border Background="{TemplateBinding Background}" 
+                                                                        CornerRadius="15">
+                                                                    <ContentPresenter HorizontalAlignment="Center" 
+                                                                                      VerticalAlignment="Center"/>
+                                                                </Border>
+                                                            </ControlTemplate>
+                                                        </Button.Template>
                                                         <Path Data="M5 12l14 0" 
                                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                                               StrokeThickness="2" 
@@ -410,16 +541,22 @@
                                     </Grid>
                                 </StackPanel>
                             </Grid>
-
                             <!-- 分割线 -->
-                            <Border Width="2" Background="{DynamicResource NewTimerWindowButtonForeground}" 
-                                    Opacity="0.3" HorizontalAlignment="Left" VerticalAlignment="Stretch" 
+                            <Border Width="2" 
+                                    Background="{DynamicResource NewTimerWindowButtonForeground}" 
+                                    Opacity="0.3" 
+                                    HorizontalAlignment="Left" 
+                                    VerticalAlignment="Stretch" 
                                     Margin="465,0,0,0"/>
-
                             <!-- 右侧：快捷选项区域 -->
-                            <Grid HorizontalAlignment="Left" VerticalAlignment="Center" 
-                                  x:Name="QuickOptionsGrid" Width="400" Margin="470,0,0,0" Height="200">
-                                <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
+                            <Grid HorizontalAlignment="Left" 
+                                  VerticalAlignment="Center" 
+                                  x:Name="QuickOptionsGrid" 
+                                  Width="400" 
+                                  Margin="470,0,0,0" 
+                                  Height="200">
+                                <StackPanel Orientation="Vertical" 
+                                            HorizontalAlignment="Center">
                                     <!-- Segmented Control -->
                                     <Grid Margin="0,0,0,20">
                                         <Border Background="{DynamicResource NewTimerWindowButtonBackground}" 
@@ -436,7 +573,6 @@
                                                         HorizontalAlignment="Left" 
                                                         VerticalAlignment="Center" 
                                                         Margin="0,0,0,0"/>
-                                                
                                                 <!-- 按钮容器 -->
                                                 <Grid>
                                                     <Button x:Name="CommonTabBtn" 
@@ -446,7 +582,10 @@
                                                             Click="CommonTab_Click" 
                                                             Cursor="Hand" 
                                                             HorizontalAlignment="Left">
-                                                        <TextBlock x:Name="CommonTabText" Text="常用" FontSize="16" FontWeight="Bold" 
+                                                        <TextBlock x:Name="CommonTabText" 
+                                                                   Text="常用" 
+                                                                   FontSize="16" 
+                                                                   FontWeight="Bold" 
                                                                    Foreground="{DynamicResource NewTimerWindowButtonForeground}"/>
                                                     </Button>
                                                     <Button x:Name="RecentTabBtn" 
@@ -456,14 +595,17 @@
                                                             Click="RecentTab_Click" 
                                                             Cursor="Hand" 
                                                             HorizontalAlignment="Right">
-                                                        <TextBlock x:Name="RecentTabText" Text="最近" FontSize="16" FontWeight="Normal" 
-                                                                   Foreground="{DynamicResource NewTimerWindowButtonForeground}" Opacity="0.6"/>
+                                                        <TextBlock x:Name="RecentTabText" 
+                                                                   Text="最近" 
+                                                                   FontSize="16" 
+                                                                   FontWeight="Normal" 
+                                                                   Foreground="{DynamicResource NewTimerWindowButtonForeground}" 
+                                                                   Opacity="0.6"/>
                                                     </Button>
                                                 </Grid>
                                             </Grid>
                                         </Border>
                                     </Grid>
-
                                     <!-- 常用计时区域 -->
                                     <Grid x:Name="CommonTimersGrid" Visibility="Visible">
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
@@ -618,9 +760,8 @@
                                                     </StackPanel>
                                                 </Button>
                                             </StackPanel>
-                                    </StackPanel>
-                                </Grid>
-
+                                        </StackPanel>
+                                    </Grid>
                                     <!-- 最近计时区域 -->
                                     <Grid x:Name="RecentTimersGrid" Visibility="Collapsed">
                                         <StackPanel Orientation="Vertical" HorizontalAlignment="Center">
@@ -662,7 +803,7 @@
                                                     <TextBlock x:Name="RecentTimer3Text" Text="--:--" FontSize="16" FontWeight="Bold" 
                                                                Foreground="{DynamicResource NewTimerWindowButtonForeground}"/>
                                                 </Button>
-                            </StackPanel>
+                                            </StackPanel>
 
                                             <!-- 第二排：最近3个 -->
                                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -708,21 +849,39 @@
                                 </StackPanel>
                             </Grid>
                         </Grid>
-
                         <!-- 底部控制按钮区域 -->
-                        <Grid HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,20">
-                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Grid HorizontalAlignment="Center" 
+                              VerticalAlignment="Bottom" 
+                              Margin="0,0,0,20">
+                            <StackPanel Orientation="Horizontal" 
+                                        HorizontalAlignment="Center">
                                 <!-- 全屏按钮 -->
-                                <Button x:Name="FullscreenBtn" Width="80" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                BorderThickness="0" Click="Fullscreen_Click" Cursor="Hand" Margin="0,0,30,0">
+                                <Button x:Name="FullscreenBtn" 
+                                        Width="80" Height="40" 
+                                        Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                        BorderThickness="0" 
+                                        Click="Fullscreen_Click" 
+                                        Cursor="Hand" 
+                                        Margin="0,0,30,0" 
+                                        IsEnabled="False">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Border x:Name="border" 
+                                                    Background="{TemplateBinding Background}" 
+                                                    CornerRadius="8" 
+                                                    Opacity="1">
+                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                  VerticalAlignment="Center"/>
                                             </Border>
+                                            <ControlTemplate.Triggers>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter TargetName="border" Property="Opacity" Value="0.5"/>
+                                                </Trigger>
+                                            </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Button.Template>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" 
+                                                HorizontalAlignment="Center">
                                         <Path Data="M4 8v-2a2 2 0 0 1 2 -2h2 M4 16v2a2 2 0 0 0 2 2h2 M16 4h2a2 2 0 0 1 2 2v2 M16 20h2a2 2 0 0 0 2 -2v-2" 
                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                               StrokeThickness="2" 
@@ -731,37 +890,55 @@
                                               Width="20" Height="20" 
                                               Stretch="Uniform" 
                                               Margin="0,0,5,0"/>
-                                        <TextBlock Text="全屏" FontSize="16" Foreground="{DynamicResource NewTimerWindowButtonForeground}"/>
+                                        <TextBlock Text="全屏" 
+                                                   FontSize="16" 
+                                                   Foreground="{DynamicResource NewTimerWindowButtonForeground}"/>
                                     </StackPanel>
                                 </Button>
-
                                 <!-- 开始/暂停按钮 -->
-                                <Button x:Name="StartPauseBtn" Width="80" Height="80" Background="{DynamicResource NewTimerWindowPrimaryButtonBackground}" 
-                                BorderThickness="0" Click="StartPause_Click" Cursor="Hand" Margin="0,0,30,0">
+                                <Button x:Name="StartPauseBtn" 
+                                        Width="80" Height="80" 
+                                        Background="{DynamicResource NewTimerWindowPrimaryButtonBackground}" 
+                                        BorderThickness="0" 
+                                        Click="StartPause_Click" 
+                                        Cursor="Hand" 
+                                        Margin="0,0,30,0">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="40">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    CornerRadius="40">
+                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                  VerticalAlignment="Center"/>
                                             </Border>
                                         </ControlTemplate>
                                     </Button.Template>
-                                    <Path x:Name="StartPauseIcon" Data="M6.5 4.00004V20C6.49995 20.178 6.54737 20.3527 6.63738 20.5062C6.72739 20.6597 6.85672 20.7864 7.01202 20.8732C7.16733 20.96 7.34299 21.0038 7.52088 21.0001C7.69878 20.9964 7.87245 20.9453 8.024 20.852L21.024 12.852C21.1696 12.7626 21.2898 12.6373 21.3733 12.4881C21.4567 12.339 21.5005 12.1709 21.5005 12C21.5005 11.8291 21.4567 11.6611 21.3733 11.512C21.2898 11.3628 21.1696 11.2375 21.024 11.148L8.024 3.14804C7.87245 3.0548 7.69878 3.00369 7.52088 2.99997C7.34299 2.99626 7.16733 3.04007 7.01202 3.1269C6.85672 3.21372 6.72739 3.34042 6.63738 3.4939C6.54737 3.64739 6.49995 3.82211 6.5 4.00004Z" 
-                                       Fill="{DynamicResource NewTimerWindowPrimaryButtonForeground}" 
-                                       Width="24" Height="24" Margin="2,0,0,0"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" Stretch="Fill"/>
+                                    <Path x:Name="StartPauseIcon" 
+                                          Data="M6.5 4.00004V20C6.49995 20.178 6.54737 20.3527 6.63738 20.5062C6.72739 20.6597 6.85672 20.7864 7.01202 20.8732C7.16733 20.96 7.34299 21.0038 7.52088 21.0001C7.69878 20.9964 7.87245 20.9453 8.024 20.852L21.024 12.852C21.1696 12.7626 21.2898 12.6373 21.3733 12.4881C21.4567 12.339 21.5005 12.1709 21.5005 12C21.5005 11.8291 21.4567 11.6611 21.3733 11.512C21.2898 11.3628 21.1696 11.2375 21.024 11.148L8.024 3.14804C7.87245 3.0548 7.69878 3.00369 7.52088 2.99997C7.34299 2.99626 7.16733 3.04007 7.01202 3.1269C6.85672 3.21372 6.72739 3.34042 6.63738 3.4939C6.54737 3.64739 6.49995 3.82211 6.5 4.00004Z" 
+                                          Fill="{DynamicResource NewTimerWindowPrimaryButtonForeground}" 
+                                          Width="24" Height="24" 
+                                          Margin="2,0,0,0"
+                                          HorizontalAlignment="Center" 
+                                          VerticalAlignment="Center" 
+                                          Stretch="Fill"/>
                                 </Button>
-
                                 <!-- 重置按钮 -->
-                                <Button x:Name="ResetBtn" Width="80" Height="40" Background="{DynamicResource NewTimerWindowButtonBackground}" 
-                                BorderThickness="0" Click="Reset_Click" Cursor="Hand">
+                                <Button x:Name="ResetBtn" 
+                                        Width="80" Height="40" 
+                                        Background="{DynamicResource NewTimerWindowButtonBackground}" 
+                                        BorderThickness="0" 
+                                        Click="Reset_Click" 
+                                        Cursor="Hand">
                                     <Button.Template>
                                         <ControlTemplate TargetType="Button">
-                                            <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            <Border Background="{TemplateBinding Background}" 
+                                                    CornerRadius="8">
+                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                                  VerticalAlignment="Center"/>
                                             </Border>
                                         </ControlTemplate>
                                     </Button.Template>
-                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal" 
+                                                HorizontalAlignment="Center">
                                         <Path Data="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4 M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4" 
                                               Stroke="{DynamicResource NewTimerWindowButtonForeground}" 
                                               StrokeThickness="2" 
@@ -770,7 +947,9 @@
                                               Width="20" Height="20" 
                                               Stretch="Uniform" 
                                               Margin="0,0,5,0"/>
-                                        <TextBlock Text="重置" FontSize="16" Foreground="{DynamicResource NewTimerWindowButtonForeground}"/>
+                                        <TextBlock Text="重置" 
+                                                   FontSize="16" 
+                                                   Foreground="{DynamicResource NewTimerWindowButtonForeground}"/>
                                     </StackPanel>
                                 </Button>
                             </StackPanel>
@@ -780,4 +959,5 @@
             </Grid>
         </Grid>
     </Border>
-</Window>
+</UserControl>
+
