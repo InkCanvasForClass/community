@@ -31,7 +31,7 @@ namespace Ink_Canvas
         Mutex mutex;
 
         public static string[] StartArgs;
-        public static string RootPath = Environment.GetEnvironmentVariable("APPDATA") + "\\Ink Canvas\\";
+        public static string RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
         // 新增：标记是否通过--board参数启动
         public static bool StartWithBoardMode = false;
@@ -46,7 +46,7 @@ namespace Ink_Canvas
         // 新增：退出信号文件路径
         private static string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + Process.GetCurrentProcess().Id + ".flag");
         // 新增：崩溃日志文件路径
-        private static string crashLogFile = Path.Combine(Environment.GetEnvironmentVariable("APPDATA"), "Ink Canvas", "crash_logs");
+        private static string crashLogFile = Path.Combine(AppDomain.CurrentDomain.SetupInformation.ApplicationBase, "Crashes");
         // 新增：进程ID
         private static int currentProcessId = Process.GetCurrentProcess().Id;
         // 新增：应用启动时间
@@ -107,7 +107,6 @@ namespace Ink_Canvas
 
                 if (isWindows7)
                 {
-                    LogHelper.WriteLogToFile("检测到Windows 7系统，配置TLS协议支持");
 
                     // 启用所有TLS版本以支持Windows 7
                     ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
@@ -117,17 +116,14 @@ namespace Ink_Canvas
                     ServicePointManager.Expect100Continue = false;
                     ServicePointManager.UseNagleAlgorithm = false;
 
-                    LogHelper.WriteLogToFile("TLS协议配置完成，已启用TLS 1.2/1.1/1.0支持");
                 }
                 else
                 {
                     // 对于更新的Windows版本，不进行任何TLS配置，使用系统默认设置
-                    LogHelper.WriteLogToFile($"检测到Windows版本: {osVersion.VersionString}，使用系统默认TLS配置");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"配置TLS协议时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -380,8 +376,11 @@ namespace Ink_Canvas
                 // 尝试在最后时刻记录错误
                 try
                 {
+                    string timeStr = (appStartTime != default(DateTime) && appStartTime != DateTime.MinValue) 
+                        ? appStartTime.ToString("yyyy-MM-dd-HH-mm-ss") 
+                        : DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
                     File.AppendAllText(
-                        Path.Combine(crashLogFile, $"critical_error_{DateTime.Now:yyyyMMdd_HHmmss}.log"),
+                        Path.Combine(crashLogFile, $"Crash_{timeStr}.txt"),
                         $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] 记录未处理异常时发生错误: {ex.Message}\r\n"
                     );
                 }
@@ -519,7 +518,10 @@ namespace Ink_Canvas
                     Directory.CreateDirectory(crashLogFile);
                 }
 
-                string logFileName = Path.Combine(crashLogFile, $"crash_{DateTime.Now:yyyyMMdd}.log");
+                string appStartTimeStr = (appStartTime != default(DateTime) && appStartTime != DateTime.MinValue) 
+                    ? appStartTime.ToString("yyyy-MM-dd-HH-mm-ss") 
+                    : DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss");
+                string logFileName = Path.Combine(crashLogFile, $"Crash_{appStartTimeStr}.txt");
 
                 // 收集系统状态信息
                 string memoryUsage = (Process.GetCurrentProcess().WorkingSet64 / (1024 * 1024)) + " MB";
