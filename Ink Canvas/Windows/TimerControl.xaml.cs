@@ -10,7 +10,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using Newtonsoft.Json;
 using System.Windows.Threading;
-
+using Microsoft.Win32;
 namespace Ink_Canvas.Windows
 {
     /// <summary>
@@ -46,6 +46,46 @@ namespace Ink_Canvas.Windows
             hideTimer = new Timer(1000); // 每秒检查一次
             hideTimer.Elapsed += HideTimer_Elapsed;
             lastActivityTime = DateTime.Now;
+            
+            // 监听主题变化事件
+            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            
+            // 监听卸载事件，清理资源
+            Unloaded += TimerControl_Unloaded;
+        }
+        
+        private void TimerControl_Unloaded(object sender, RoutedEventArgs e)
+        {
+            // 取消订阅主题变化事件
+            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+        }
+        
+        private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        {
+            // 当主题变化时，重新应用主题
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                RefreshTheme();
+            });
+        }
+        
+        /// <summary>
+        /// 刷新主题（供外部调用）
+        /// </summary>
+        public void RefreshTheme()
+        {
+            try
+            {
+                // 重新应用主题
+                ApplyTheme();
+                
+                // 强制刷新UI
+                InvalidateVisual();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新计时器窗口主题出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
         
         #region 事件定义
@@ -296,6 +336,9 @@ namespace Ink_Canvas.Windows
                         SetDarkThemeBorder();
                     }
                 }
+                
+                // 刷新数字和冒号显示的颜色
+                UpdateDigitDisplays();
             }
             catch (Exception ex)
             {
@@ -457,7 +500,7 @@ namespace Ink_Canvas.Windows
                 }
                 else
                 {
-                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    var defaultBrush = this.TryFindResource("NewTimerWindowDigitForeground") as Brush;
                     if (defaultBrush != null)
                     {
                         path.Fill = defaultBrush;
@@ -487,7 +530,7 @@ namespace Ink_Canvas.Windows
                 }
                 else
                 {
-                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    var defaultBrush = this.TryFindResource("NewTimerWindowDigitForeground") as Brush;
                     if (defaultBrush != null)
                     {
                         colon1.Foreground = defaultBrush;
@@ -507,7 +550,7 @@ namespace Ink_Canvas.Windows
                 }
                 else
                 {
-                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    var defaultBrush = this.TryFindResource("NewTimerWindowDigitForeground") as Brush;
                     if (defaultBrush != null)
                     {
                         colon2.Foreground = defaultBrush;

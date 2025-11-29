@@ -12,8 +12,6 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Controls/WinUI3CloseButton.xaml" />
                 <ResourceDictionary Source="DigitResources.xaml" />
-                <ResourceDictionary Source="/Resources/Styles/Light.xaml" />
-                <ResourceDictionary Source="/Resources/Styles/Dark.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>

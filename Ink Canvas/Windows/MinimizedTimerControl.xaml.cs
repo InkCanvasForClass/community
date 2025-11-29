@@ -5,6 +5,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using iNKORE.UI.WPF.Modern;
 
 namespace Ink_Canvas.Windows
 {
@@ -26,11 +28,17 @@ namespace Ink_Canvas.Windows
             
             ApplyTheme();
             
+            // 监听主题变化事件
+            SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
+            
             Unloaded += MinimizedTimerControl_Unloaded;
         }
         
         private void MinimizedTimerControl_Unloaded(object sender, RoutedEventArgs e)
         {
+            // 取消订阅主题变化事件
+            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            
             if (parentControl != null)
             {
                 parentControl.TimerCompleted -= ParentControl_TimerCompleted;
@@ -40,6 +48,34 @@ namespace Ink_Canvas.Windows
             {
                 updateTimer.Stop();
                 updateTimer.Dispose();
+            }
+        }
+        
+        private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        {
+            // 当主题变化时，重新应用主题
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                RefreshTheme();
+            });
+        }
+        
+        /// <summary>
+        /// 刷新主题
+        /// </summary>
+        public void RefreshTheme()
+        {
+            try
+            {
+                // 重新应用主题
+                ApplyTheme();
+                
+                // 强制刷新UI
+                InvalidateVisual();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"刷新最小化计时器窗口主题出错: {ex.Message}");
             }
         }
 
@@ -202,7 +238,7 @@ namespace Ink_Canvas.Windows
                 }
                 else
                 {
-                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    var defaultBrush = this.TryFindResource("NewTimerWindowDigitForeground") as Brush;
                     if (defaultBrush != null)
                     {
                         path.Fill = defaultBrush;
@@ -229,7 +265,7 @@ namespace Ink_Canvas.Windows
                 }
                 else
                 {
-                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    var defaultBrush = this.TryFindResource("NewTimerWindowDigitForeground") as Brush;
                     if (defaultBrush != null)
                     {
                         colon1.Foreground = defaultBrush;
@@ -250,7 +286,7 @@ namespace Ink_Canvas.Windows
                 }
                 else
                 {
-                    var defaultBrush = this.FindResource("NewTimerWindowDigitForeground") as Brush;
+                    var defaultBrush = this.TryFindResource("NewTimerWindowDigitForeground") as Brush;
                     if (defaultBrush != null)
                     {
                         colon2.Foreground = defaultBrush;
@@ -268,16 +304,87 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                bool isLightTheme = IsLightTheme();
-                if (!isLightTheme)
+                if (MainWindow.Settings != null)
                 {
-                    SetDarkThemeBorder();
+                    ApplyTheme(MainWindow.Settings);
+                }
+                else
+                {
+                    bool isLightTheme = IsLightTheme();
+                    if (!isLightTheme)
+                    {
+                        SetDarkThemeBorder();
+                    }
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"应用主题时出错: {ex.Message}");
             }
+        }
+        
+        private void ApplyTheme(Settings settings)
+        {
+            try
+            {
+                if (settings.Appearance.Theme == 0) // 浅色主题
+                {
+                    ThemeManager.SetRequestedTheme(this, ElementTheme.Light);
+                }
+                else if (settings.Appearance.Theme == 1) // 深色主题
+                {
+                    ThemeManager.SetRequestedTheme(this, ElementTheme.Dark);
+                    SetDarkThemeBorder();
+                }
+                else // 跟随系统主题
+                {
+                    bool isSystemLight = IsSystemThemeLight();
+                    if (isSystemLight)
+                    {
+                        ThemeManager.SetRequestedTheme(this, ElementTheme.Light);
+                    }
+                    else
+                    {
+                        ThemeManager.SetRequestedTheme(this, ElementTheme.Dark);
+                        SetDarkThemeBorder();
+                    }
+                }
+                
+                // 刷新数字和冒号显示的颜色
+                if (parentControl != null)
+                {
+                    UpdateTimeDisplay();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"应用最小化计时器窗口主题出错: {ex.Message}");
+            }
+        }
+        
+        private bool IsSystemThemeLight()
+        {
+            var light = false;
+            try
+            {
+                var registryKey = Microsoft.Win32.Registry.CurrentUser;
+                var themeKey = registryKey.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize");
+                if (themeKey != null)
+                {
+                    var value = themeKey.GetValue("AppsUseLightTheme");
+                    if (value != null)
+                    {
+                        light = (int)value == 1;
+                    }
+                    themeKey.Close();
+                }
+            }
+            catch
+            {
+                // 如果读取注册表失败，默认为浅色主题
+                light = true;
+            }
+            return light;
         }
 
         private bool IsLightTheme()
@@ -468,4 +575,5 @@ namespace Ink_Canvas.Windows
 
     }
 }
+
 

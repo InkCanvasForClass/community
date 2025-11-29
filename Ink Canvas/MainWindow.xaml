@@ -38,8 +38,6 @@
             <!-- 合并新橡皮擦资源 -->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="MainWindow_cs/MW_Eraser.xaml"/>
-                <ResourceDictionary Source="Resources/Styles/Light.xaml"/>
-                <ResourceDictionary Source="Resources/Styles/Dark.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
