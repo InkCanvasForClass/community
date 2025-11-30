@@ -325,7 +325,7 @@ namespace Ink_Canvas
                 // 根据当前编辑模式设置不同的光标
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
                 {
-                    inkCanvas.Cursor = Cursors.Cross;
+                    inkCanvas.Cursor = Cursors.Arrow;
                 }
                 else if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
                 {
@@ -1166,67 +1166,6 @@ namespace Ink_Canvas
             }
         }
 
-        // 退出多指书写模式，恢复InkCanvas的TouchDown事件绑定
-        private void ExitMultiTouchModeIfNeeded()
-        {
-            if (isInMultiTouchMode)
-            {
-                inkCanvas.StylusDown -= MainWindow_StylusDown;
-                inkCanvas.StylusMove -= MainWindow_StylusMove;
-                inkCanvas.StylusUp -= MainWindow_StylusUp;
-                inkCanvas.TouchDown -= MainWindow_TouchDown;
-                inkCanvas.TouchDown += Main_Grid_TouchDown;
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
-                    && drawingShapeMode == 0)
-                {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                }
-                // 保存非笔画元素（如图片）
-                var preservedElements = PreserveNonStrokeElements();
-                inkCanvas.Children.Clear();
-                // 恢复非笔画元素
-                RestoreNonStrokeElements(preservedElements);
-                isInMultiTouchMode = false;
-                // 关闭多指书写时，恢复手掌擦开关
-                if (palmEraserWasEnabledBeforeMultiTouch)
-                {
-                    Settings.Canvas.EnablePalmEraser = true;
-                    if (ToggleSwitchEnablePalmEraser != null)
-                        ToggleSwitchEnablePalmEraser.IsOn = true;
-                }
-            }
-        }
-
-        // 进入多指书写模式，绑定Main_Grid_TouchDown
-        private void EnterMultiTouchModeIfNeeded()
-        {
-            if (!isInMultiTouchMode)
-            {
-                inkCanvas.StylusDown += MainWindow_StylusDown;
-                inkCanvas.StylusMove += MainWindow_StylusMove;
-                inkCanvas.StylusUp += MainWindow_StylusUp;
-                inkCanvas.TouchDown += MainWindow_TouchDown;
-                inkCanvas.TouchDown -= Main_Grid_TouchDown;
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
-                    && drawingShapeMode == 0)
-                {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                }
-                // 保存非笔画元素（如图片）
-                var preservedElements = PreserveNonStrokeElements();
-                inkCanvas.Children.Clear();
-                // 恢复非笔画元素
-                RestoreNonStrokeElements(preservedElements);
-                isInMultiTouchMode = true;
-                // 启用多指书写时，自动禁用手掌擦
-                palmEraserWasEnabledBeforeMultiTouch = Settings.Canvas.EnablePalmEraser;
-                Settings.Canvas.EnablePalmEraser = false;
-                if (ToggleSwitchEnablePalmEraser != null)
-                    ToggleSwitchEnablePalmEraser.IsOn = false;
-            }
-        }
 
 
     }
