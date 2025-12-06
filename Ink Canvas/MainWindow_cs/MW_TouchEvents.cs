@@ -709,13 +709,6 @@ namespace Ink_Canvas
                     }
                 }
             }
-            // 如果手掌擦已经激活，直接处理触摸移动事件
-            else if (isPalmEraserActive)
-            {
-                // 更新橡皮擦反馈位置
-                touchPoint = e.GetTouchPoint(inkCanvas);
-                EraserOverlay_PointerMove(sender, touchPoint.Position);
-            }
 
             // 设备1个的时候，记录中心点
             if (dec.Count == 1)
@@ -791,8 +784,8 @@ namespace Ink_Canvas
                 var touchPoint = e.GetTouchPoint(inkCanvas);
                 EraserOverlay_PointerMove(sender, touchPoint.Position);
                 
-                // 阻止进一步处理以避免冲突
-                return;
+                // 标记事件已处理，但不使用return中断其他可能的处理逻辑
+                e.Handled = true;
             }
             
             // 其他触摸移动处理逻辑
@@ -859,7 +852,10 @@ namespace Ink_Canvas
                     inkCanvas_MouseUp(inkCanvas, mouseArgs);
                 }
                 
-                // 在几何绘制完成后立即返回，避免后续状态恢复逻辑干扰
+                // 几何图形绘制也需要更新笔画集合，但跳过手掌擦除状态恢复逻辑
+                UpdateStrokeCollectionOnTouchUp();
+                
+                // 在几何绘制完成后返回，避免后续手掌擦除状态恢复逻辑干扰
                 return;
             }
 
@@ -953,6 +949,14 @@ namespace Ink_Canvas
             inkCanvas.Opacity = 1;
 
             // 当所有触摸点都抬起时，更新笔画集合
+            UpdateStrokeCollectionOnTouchUp();
+        }
+
+        /// <summary>
+        /// 在触摸抬起时更新笔画集合
+        /// </summary>
+        private void UpdateStrokeCollectionOnTouchUp()
+        {
             if (dec.Count == 0 && 
                 lastTouchDownStrokeCollection.Count() != inkCanvas.Strokes.Count() &&
                 !(drawingShapeMode == 9 && !isFirstTouchCuboid))
@@ -961,6 +965,17 @@ namespace Ink_Canvas
                 if (currentMode == 0) whiteboardIndex = 0;
                 strokeCollections[whiteboardIndex] = lastTouchDownStrokeCollection;
             }
+        }
+
+        /// <summary>
+        /// 重置所有触摸相关状态，
+        /// </summary>
+        private void ResetTouchStates()
+        {
+            dec.Clear();
+            isTouchDown = false;
+            ViewboxFloatingBar.IsHitTestVisible = true;
+            BlackboardUIGridForInkReplay.IsHitTestVisible = true;
         }
 
         private void inkCanvas_ManipulationStarting(object sender, ManipulationStartingEventArgs e)
