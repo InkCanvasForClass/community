@@ -937,17 +937,6 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 重置所有触摸相关状态，
-        /// </summary>
-        private void ResetTouchStates()
-        {
-            dec.Clear();
-            isTouchDown = false;
-            ViewboxFloatingBar.IsHitTestVisible = true;
-            BlackboardUIGridForInkReplay.IsHitTestVisible = true;
-        }
-
         private void inkCanvas_ManipulationStarting(object sender, ManipulationStartingEventArgs e)
         {
             e.Mode = ManipulationModes.All;
