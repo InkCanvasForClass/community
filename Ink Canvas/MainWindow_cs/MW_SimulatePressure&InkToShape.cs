@@ -859,30 +859,61 @@ namespace Ink_Canvas
             // 快速检查：计算几个关键点与直线的距离
             if (stroke.StylusPoints.Count >= 10)
             {
-                // 取中点和1/4、3/4位置的点，快速检查偏差
-                int quarterIdx = stroke.StylusPoints.Count / 4;
-                int midIdx = stroke.StylusPoints.Count / 2;
-                int threeQuarterIdx = quarterIdx * 3;
-
-                Point quarterPoint = stroke.StylusPoints[quarterIdx].ToPoint();
-                Point midPoint = stroke.StylusPoints[midIdx].ToPoint();
-                Point threeQuarterPoint = stroke.StylusPoints[threeQuarterIdx].ToPoint();
-
-                double quarterDeviation = DistanceFromLineToPoint(start, end, quarterPoint);
-                double midDeviation = DistanceFromLineToPoint(start, end, midPoint);
-                double threeQuarterDeviation = DistanceFromLineToPoint(start, end, threeQuarterPoint);
-
-                // 使用相对偏差：偏差与线长的比例，并使用灵敏度进行调整
-                double quickRelativeThreshold = lineLength * quickThreshold;
-
-                // 记录检测到的偏差
-                Debug.WriteLine($"Deviations: q={quarterDeviation}, m={midDeviation}, tq={threeQuarterDeviation}, threshold={quickRelativeThreshold}");
-
-                if (quarterDeviation > quickRelativeThreshold ||
-                    midDeviation > quickRelativeThreshold ||
-                    threeQuarterDeviation > quickRelativeThreshold)
+                List<Point> checkPoints;
+                
+                // 使用采样点进行更准确的判断
+                if (Settings.Canvas.HighPrecisionLineStraighten)
                 {
-                    return false;
+                    var allPoints = stroke.StylusPoints.Select(p => p.ToPoint()).ToList();
+                    checkPoints = SamplePointsByDistance(allPoints, 10.0);
+                    Debug.WriteLine($"高精度模式快速检查：原始点数={allPoints.Count}, 采样点数={checkPoints.Count}");
+                }
+                else
+                {
+                    // 取中点和1/4、3/4位置的点
+                    int quarterIdx = stroke.StylusPoints.Count / 4;
+                    int midIdx = stroke.StylusPoints.Count / 2;
+                    int threeQuarterIdx = quarterIdx * 3;
+
+                    checkPoints = new List<Point>
+                    {
+                        stroke.StylusPoints[quarterIdx].ToPoint(),
+                        stroke.StylusPoints[midIdx].ToPoint(),
+                        stroke.StylusPoints[threeQuarterIdx].ToPoint()
+                    };
+                }
+
+                // 计算所有检查点与直线的平均偏差
+                double totalDeviation = 0;
+                double maxDeviation = 0;
+                int validPointCount = 0;
+
+                foreach (Point checkPoint in checkPoints)
+                {
+                    double deviation = DistanceFromLineToPoint(start, end, checkPoint);
+                    totalDeviation += deviation;
+                    maxDeviation = Math.Max(maxDeviation, deviation);
+                    validPointCount++;
+                }
+
+                if (validPointCount > 0)
+                {
+                    double avgDeviation = totalDeviation / validPointCount;
+                    // 使用相对偏差：偏差与线长的比例，并使用灵敏度进行调整
+                    double quickRelativeThreshold = lineLength * quickThreshold;
+
+                    // 使用平均偏差和最大偏差的综合判断
+                    double deviationThreshold = Settings.Canvas.HighPrecisionLineStraighten 
+                        ? Math.Max(avgDeviation, maxDeviation * 0.7) // 高精度模式更严格
+                        : maxDeviation;
+
+                    // 记录检测到的偏差
+                    Debug.WriteLine($"Deviations: avg={avgDeviation:F2}, max={maxDeviation:F2}, threshold={quickRelativeThreshold:F2}, highPrecision={Settings.Canvas.HighPrecisionLineStraighten}");
+
+                    if (deviationThreshold > quickRelativeThreshold)
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -1177,14 +1208,29 @@ namespace Ink_Canvas
                 return false;
             }
 
+            List<Point> workingPoints = points;
+            if (Settings.Canvas.HighPrecisionLineStraighten)
+            {
+                workingPoints = SamplePointsByDistance(points, 10.0);
+                Debug.WriteLine($"高精度模式：原始点数={points.Count}, 采样后点数={workingPoints.Count}");
+            }
+
             // 使用总最小二乘法(TLS/PCA)进行直线拟合
-            int n = points.Count - 8;
+            int n = workingPoints.Count - 8;
+            if (n < 1)
+            {
+                // 如果采样后点数太少，回退到原始方法
+                n = points.Count - 8;
+                workingPoints = points;
+            }
+
             List<Point> filteredPoints = new List<Point>();
 
             // 收集过滤后的点（跳过前 4 个和后 4 个点，用于计算直线方向）
-            for (int i = 4; i < n + 4; i++)
+            int skipCount = Math.Min(4, n / 2); // 确保跳过数量不超过一半
+            for (int i = skipCount; i < n + skipCount && i < workingPoints.Count; i++)
             {
-                filteredPoints.Add(points[i]);
+                filteredPoints.Add(workingPoints[i]);
             }
 
             // 计算中心点（使用过滤后的点）
@@ -1244,7 +1290,8 @@ namespace Ink_Canvas
             double maxProjection = double.MinValue;
 
             // 计算所有点在直线方向上的投影
-            foreach (Point p in points)
+            List<Point> pointsForProjection = Settings.Canvas.HighPrecisionLineStraighten ? workingPoints : points;
+            foreach (Point p in pointsForProjection)
             {
                 // 相对于过滤点中心的投影
                 double projection = (p.X - centerX) * directionX + (p.Y - centerY) * directionY;
@@ -1451,6 +1498,43 @@ namespace Ink_Canvas
             }
 
             return points;
+        }
+
+        /// <summary>
+        /// 高精度模式
+        /// </summary>
+        private List<Point> SamplePointsByDistance(List<Point> points, double sampleInterval = 10.0)
+        {
+            if (points == null || points.Count < 2)
+                return points;
+
+            List<Point> sampledPoints = new List<Point>();
+            sampledPoints.Add(points[0]); // 总是包含起点
+
+            double accumulatedDistance = 0;
+            Point lastSampledPoint = points[0];
+
+            for (int i = 1; i < points.Count; i++)
+            {
+                double segmentDistance = GetDistance(lastSampledPoint, points[i]);
+                accumulatedDistance += segmentDistance;
+
+                // 当累积距离达到采样间隔时，添加当前点
+                if (accumulatedDistance >= sampleInterval)
+                {
+                    sampledPoints.Add(points[i]);
+                    lastSampledPoint = points[i];
+                    accumulatedDistance = 0; // 重置累积距离
+                }
+            }
+
+            // 总是包含终点（如果还没有包含）
+            if (sampledPoints.Count == 0 || GetDistance(sampledPoints.Last(), points.Last()) > 1.0)
+            {
+                sampledPoints.Add(points.Last());
+            }
+
+            return sampledPoints;
         }
 
         // New method: Gets distance from point to a line defined by two points
