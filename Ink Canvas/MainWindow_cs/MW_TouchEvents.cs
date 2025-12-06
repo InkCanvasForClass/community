@@ -536,12 +536,7 @@ namespace Ink_Canvas
                 // 橡皮状态下只return，保证橡皮状态可保持
                 return;
             }
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
-            {
-                // 套索选状态下不直接return，允许触摸事件继续处理
-                dec.Add(e.TouchDevice.Id);
-                return;
-            }
+            // 几何绘制模式优先处理，即使在Select模式下也要允许几何绘制
             if (drawingShapeMode != 0)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
@@ -554,6 +549,11 @@ namespace Ink_Canvas
                 // 设置起始点
                 if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
 
+                return;
+            }
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+            {
+                dec.Add(e.TouchDevice.Id);
                 return;
             }
             if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
@@ -583,92 +583,18 @@ namespace Ink_Canvas
 
         private void inkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
-            // 检查触摸是否发生在浮动栏区域，如果是则允许事件传播到浮动栏按钮
-            var touchPoint = e.GetTouchPoint(this);
-            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
-                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
-
-            // 如果触摸发生在浮动栏区域，不阻止事件传播，让浮动栏按钮能够接收触摸事件
-            if (floatingBarBounds.Contains(touchPoint.Position))
-            {
-                // 不设置 ViewboxFloatingBar.IsHitTestVisible = false，让浮动栏按钮能够接收触摸事件
-                return;
-            }
-
-            // 橡皮状态下不做任何切换，直接return，保证橡皮可持续
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
-                || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
-            {
-                return;
-            }
-            if (drawingShapeMode != 0)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                SetCursorBasedOnEditingMode(inkCanvas);
-                inkCanvas.CaptureTouch(e.TouchDevice);
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-
-                isTouchDown = true;
-
-                if (dec.Count == 0)
-                {
-                    var inkTouchPoint = e.GetTouchPoint(inkCanvas);
-                    // 对于双曲线绘制，第一笔时记录起点，第二笔时不更新起点
-                    if (drawingShapeMode == 24 || drawingShapeMode == 25)
-                    {
-                        // 双曲线绘制：第一笔记录起点，第二笔保持第一笔的起点
-                        if (drawMultiStepShapeCurrentStep == 0)
-                        {
-                            iniP = inkTouchPoint.Position;
-                        }
-                        // 第二笔时不更新iniP，保持第一笔的起点
-                    }
-                    else
-                    {
-                        // 其他图形正常记录起点
-                        iniP = inkTouchPoint.Position;
-                    }
-                    lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
-                }
-                dec.Add(e.TouchDevice.Id);
-                return;
-            }
-
-            // 非几何绘制模式下的正常触摸处理
-            SetCursorBasedOnEditingMode(inkCanvas);
             inkCanvas.CaptureTouch(e.TouchDevice);
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-            lastTouchDownTime = DateTime.Now;
-            dec.Add(e.TouchDevice.Id);
 
-            // 设备1个的时候，记录中心点
+            dec.Add(e.TouchDevice.Id);
+            //设备1个的时候，记录中心点
             if (dec.Count == 1)
             {
-                touchPoint = e.GetTouchPoint(inkCanvas);
+                var touchPoint = e.GetTouchPoint(inkCanvas);
                 centerPoint = touchPoint.Position;
 
-                if (drawingShapeMode != 0)
-                {
-                    // 对于双曲线绘制，第一笔时记录起点，第二笔时不更新起点
-                    if (drawingShapeMode == 24 || drawingShapeMode == 25)
-                    {
-                        // 双曲线绘制：第一笔记录起点，第二笔保持第一笔的起点
-                        if (drawMultiStepShapeCurrentStep == 0)
-                        {
-                            iniP = touchPoint.Position;
-                        }
-                        // 第二笔时不更新iniP，保持第一笔的起点
-                    }
-                    else
-                    {
-                        // 其他图形正常记录起点
-                        iniP = touchPoint.Position;
-                    }
-                }
-
-                // 记录第一根手指点击时的 StrokeCollection
+                //记录第一根手指点击时的 StrokeCollection
                 lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
             }
             //设备两个及两个以上，将画笔功能关闭
@@ -677,35 +603,8 @@ namespace Ink_Canvas
                 if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None ||
                     inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
-                var timeSinceLastTouch = (DateTime.Now - lastTouchDownTime).TotalMilliseconds;
-                if (timeSinceLastTouch < MULTI_TOUCH_DELAY_MS && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
-                {
-                    if (!isMultiTouchTimerActive)
-                    {
-                        isMultiTouchTimerActive = true;
-                        var remainingTime = MULTI_TOUCH_DELAY_MS - timeSinceLastTouch;
-                        System.Threading.Tasks.Task.Delay((int)remainingTime).ContinueWith(_ =>
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                if (dec.Count > 1 && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
-                                {
-                                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                                }
-                                isMultiTouchTimerActive = false;
-                            });
-                        });
-                    }
-                    return;
-                }
-
                 lastInkCanvasEditingMode = inkCanvas.EditingMode;
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
-                    && drawingShapeMode == 0)
-                {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
-                }
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
             }
         }
 
