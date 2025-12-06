@@ -533,10 +533,8 @@ namespace Ink_Canvas
 
             if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
             {
-                // 橡皮状态下只return，保证橡皮状态可保持
                 return;
             }
-            // 几何绘制模式优先处理，即使在Select模式下也要允许几何绘制
             if (drawingShapeMode != 0)
             {
                 inkCanvas.EditingMode = InkCanvasEditingMode.None;
