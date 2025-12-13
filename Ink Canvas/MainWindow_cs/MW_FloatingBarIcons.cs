@@ -2996,10 +2996,10 @@ namespace Ink_Canvas
                         ClearStrokes(true);
                         RestoreStrokes(true);
 
-                        // 新增：在屏幕模式下恢复基础浮动栏的显示
+                        // 在屏幕模式下恢复基础浮动栏的显示
                         ViewboxFloatingBar.Visibility = Visibility.Visible;
 
-                        // 新增：退出白板时自动收纳功能 - 等待浮动栏完全展开后再收纳
+                        // 退出白板时自动收纳功能 - 等待浮动栏完全展开后再收纳
                         if (Settings.Automation.IsAutoFoldWhenExitWhiteboard && !isFloatingBarFolded)
                         {
                             // 使用异步延迟，等待浮动栏展开动画完成后再收纳
