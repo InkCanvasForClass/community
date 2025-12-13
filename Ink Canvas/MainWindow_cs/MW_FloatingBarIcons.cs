@@ -1042,6 +1042,8 @@ namespace Ink_Canvas
             {
                 if (TimerContainer != null && TimerControl != null)
                 {
+                    // 每次打开计时器窗口时重置计时器
+                    TimerControl.ResetTimerState();
                     TimerContainer.Visibility = Visibility.Visible;
                     if (MinimizedTimerContainer != null)
                     {

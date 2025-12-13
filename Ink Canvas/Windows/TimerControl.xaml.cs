@@ -70,7 +70,7 @@ namespace Ink_Canvas.Windows
         }
         
         /// <summary>
-        /// 刷新主题（供外部调用）
+        /// 刷新主题
         /// </summary>
         public void RefreshTheme()
         {
@@ -1505,6 +1505,72 @@ namespace Ink_Canvas.Windows
         
         private void HandleTimerCompletion()
         {
+            // 计时器结束时，如果显示的是最小化视图，恢复到主窗口视图
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow != null)
+                {
+                    var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
+                    var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
+                    
+                    // 如果最小化视图可见，恢复到主窗口视图
+                    if (minimizedContainer != null && minimizedContainer.Visibility == Visibility.Visible)
+                    {
+                        HideMinimizedRequested?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+            });
+            
+            // 重置计时器状态
+            ResetTimerState();
+        }
+        
+        /// <summary>
+        /// 重置计时器状态
+        /// </summary>
+        public void ResetTimerState()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                // 停止计时器
+                if (isTimerRunning)
+                {
+                    timer.Stop();
+                    isTimerRunning = false;
+                    isPaused = false;
+                    
+                    if (hideTimer != null)
+                    {
+                        hideTimer.Stop();
+                    }
+                }
+                
+                // 重置时间到默认值
+                hour = 0;
+                minute = 5;
+                second = 0;
+                
+                // 更新显示
+                UpdateDigitDisplays();
+                SetColonDisplay(false);
+                
+                // 重置图标
+                if (StartPauseIcon != null)
+                {
+                    StartPauseIcon.Data = Geometry.Parse(PlayIconData);
+                }
+                
+                // 重置状态标志
+                isOvertimeMode = false;
+                hasPlayedProgressiveReminder = false;
+                
+                // 禁用全屏按钮
+                if (FullscreenBtn != null)
+                {
+                    FullscreenBtn.IsEnabled = false;
+                }
+            });
         }
         
         private void HideTimer_Elapsed(object sender, ElapsedEventArgs e)
