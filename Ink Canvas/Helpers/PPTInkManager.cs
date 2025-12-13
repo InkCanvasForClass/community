@@ -273,7 +273,9 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 保存所有墨迹到文件
         /// </summary>
-        public void SaveAllStrokesToFile(Presentation presentation)
+        /// <param name="presentation">演示文稿对象</param>
+        /// <param name="currentSlideIndex">当前播放的页码，如果提供则使用此值保存位置，否则使用_lockedSlideIndex</param>
+        public void SaveAllStrokesToFile(Presentation presentation, int currentSlideIndex = -1)
         {
             if (!IsAutoSaveEnabled || string.IsNullOrEmpty(AutoSaveLocation) || presentation == null) return;
 
@@ -290,7 +292,18 @@ namespace Ink_Canvas.Helpers
                     // 保存位置信息
                     try
                     {
-                        File.WriteAllText(Path.Combine(folderPath, "Position"), _lockedSlideIndex.ToString());
+                        // 优先使用传入的当前页码，否则使用锁定的页码
+                        int positionToSave = currentSlideIndex > 0 ? currentSlideIndex : _lockedSlideIndex;
+                        // 如果都没有有效值，尝试使用最后切换的页码
+                        if (positionToSave <= 0 && _lastSwitchSlideIndex > 0)
+                        {
+                            positionToSave = _lastSwitchSlideIndex;
+                        }
+                        
+                        if (positionToSave > 0)
+                        {
+                            File.WriteAllText(Path.Combine(folderPath, "Position"), positionToSave.ToString());
+                        }
                     }
                     catch (Exception ex)
                     {

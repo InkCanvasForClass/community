@@ -598,13 +598,52 @@ namespace Ink_Canvas
                 historyData.NameProbabilities = new Dictionary<string, double>();
             }
 
+            // 过滤掉已选择的人员
+            var candidateNames = availableNames.Where(name => !alreadySelected.Contains(name)).ToList();
+            if (candidateNames.Count == 0) return null;
+            if (candidateNames.Count == 1) return candidateNames[0];
+
+            // 检查极差：当极差达到3时，从被抽选次数最少的人中抽选
+            if (historyData.NameFrequency != null && historyData.NameFrequency.Count > 0)
+            {
+                // 获取所有候选人员的被抽选次数
+                var candidateFrequencies = new Dictionary<string, int>();
+                foreach (string name in candidateNames)
+                {
+                    int count = historyData.NameFrequency.ContainsKey(name) ? historyData.NameFrequency[name] : 0;
+                    candidateFrequencies[name] = count;
+                }
+
+                // 计算极差（最大值 - 最小值）
+                if (candidateFrequencies.Count > 0)
+                {
+                    int maxCount = candidateFrequencies.Values.Max();
+                    int minCount = candidateFrequencies.Values.Min();
+                    int range = maxCount - minCount;
+
+                    // 当极差达到3时，只从被抽选次数最少的人中抽选
+                    if (range >= 3)
+                    {
+                        var leastSelectedNames = candidateFrequencies
+                            .Where(kvp => kvp.Value == minCount)
+                            .Select(kvp => kvp.Key)
+                            .ToList();
+
+                        if (leastSelectedNames.Count > 0)
+                        {
+                            // 只从被抽选次数最少的人中随机选择
+                            int randomIndex = random.Next(0, leastSelectedNames.Count);
+                            return leastSelectedNames[randomIndex];
+                        }
+                    }
+                }
+            }
+
             // 获取每个人员的概率
             var nameProbabilities = new Dictionary<string, double>();
 
-            foreach (string name in availableNames)
+            foreach (string name in candidateNames)
             {
-                if (alreadySelected.Contains(name)) continue;
-
                 // 获取基础概率
                 double baseProbability = GetNameProbability(name);
                 

@@ -12,7 +12,6 @@
         AllowsTransparency="True"
         WindowStyle="None"
         ResizeMode="NoResize"
-        WindowState="Maximized"
         Loaded="Window_Loaded"
         Background="Transparent"
         ShowInTaskbar="False"
@@ -604,6 +603,13 @@
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchNoFocusMode"
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchNoFocusMode_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="窗口无边框模式" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchWindowMode"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchWindowMode_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="窗口置顶" VerticalAlignment="Center"
@@ -3214,14 +3220,14 @@
                                     </ui:SimpleStackPanel>
                                     <TextBlock Text="# 开启后，退出收纳模式时将自动切换至批注模式，便于快速批注" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="退出PPT放映后自动恢复浮动栏状态"
+                                        <TextBlock Foreground="#fafafa" Text="退出PPT放映后自动收纳浮动栏"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent=""
                                                          Name="ToggleSwitchAutoFoldAfterPPTSlideShow"
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled" />
                                     </ui:SimpleStackPanel>
-                                    <TextBlock Text="# 开启后，如果进入PPT放映前为收纳模式则退出后也为收纳模式，如果进入前不是收纳模式则退出后也不是收纳模式" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <TextBlock Text="# 开启后，退出PPT放映后会自动收纳浮动栏" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="退出白板时自动收纳"
                                                    VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />

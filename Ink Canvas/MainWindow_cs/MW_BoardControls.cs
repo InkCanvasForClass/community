@@ -206,9 +206,6 @@ namespace Ink_Canvas
                 // 检查是否保存了多指书写模式状态
                 if (savedMultiTouchModeStates[pageIndex])
                 {
-                    // 恢复多指书写模式
-                    EnterMultiTouchModeIfNeeded();
-
                     // 更新UI状态
                     if (ToggleSwitchEnableMultiTouchMode != null)
                     {
@@ -219,9 +216,6 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    // 确保多指书写模式关闭
-                    ExitMultiTouchModeIfNeeded();
-
                     // 更新UI状态
                     if (ToggleSwitchEnableMultiTouchMode != null)
                     {

@@ -795,6 +795,7 @@ namespace Ink_Canvas
                 ToggleSwitchIsLogEnabled.IsOn = Settings.Advanced.IsLogEnabled;
                 ToggleSwitchIsSaveLogByDate.IsOn = Settings.Advanced.IsSaveLogByDate;
                 ToggleSwitchIsSecondConfimeWhenShutdownApp.IsOn = Settings.Advanced.IsSecondConfirmWhenShutdownApp;
+                ToggleSwitchWindowMode.IsOn = Settings.Advanced.WindowMode;
                 ToggleSwitchIsSpecialScreen.IsOn = Settings.Advanced.IsSpecialScreen;
                 ToggleSwitchIsQuadIR.IsOn = Settings.Advanced.IsQuadIR;
                 ToggleSwitchEraserBindTouchMultiplier.IsOn = Settings.Advanced.EraserBindTouchMultiplier;
