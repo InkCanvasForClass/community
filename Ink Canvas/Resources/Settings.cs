@@ -602,6 +602,9 @@ namespace Ink_Canvas
 
         [JsonProperty("enableUIAccessTopMost")]
         public bool EnableUIAccessTopMost { get; set; } = false;
+
+        [JsonProperty("windowMode")]
+        public bool WindowMode { get; set; } = true; 
     }
 
     public class InkToShape

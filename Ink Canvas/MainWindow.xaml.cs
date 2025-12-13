@@ -514,6 +514,9 @@ namespace Ink_Canvas
             // 加载自定义背景颜色
             LoadCustomBackgroundColor();
 
+            // 设置窗口模式
+            SetWindowMode();
+
             // 注册设置面板滚动事件
             if (SettingsPanelScrollViewer != null)
             {
@@ -766,6 +769,22 @@ namespace Ink_Canvas
                         }
                     });
                 }).Start();
+            }
+        }
+
+        private void SetWindowMode()
+        {
+            if (Settings.Advanced.WindowMode)
+            {
+                WindowState = WindowState.Normal;
+                Left = 0.0;
+                Top = 0.0;
+                Height = SystemParameters.PrimaryScreenHeight;
+                Width = SystemParameters.PrimaryScreenWidth;
+            }
+            else // 全屏
+            {
+                WindowState = WindowState.Maximized;
             }
         }
 

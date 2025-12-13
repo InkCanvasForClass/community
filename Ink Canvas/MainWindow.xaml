@@ -12,7 +12,6 @@
         AllowsTransparency="True"
         WindowStyle="None"
         ResizeMode="NoResize"
-        WindowState="Maximized"
         Loaded="Window_Loaded"
         Background="Transparent"
         ShowInTaskbar="False"
@@ -604,6 +603,13 @@
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchNoFocusMode"
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchNoFocusMode_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="无边框窗口模式" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchWindowMode"
+                                                         IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchWindowMode_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <TextBlock Foreground="#fafafa" Text="窗口置顶" VerticalAlignment="Center"

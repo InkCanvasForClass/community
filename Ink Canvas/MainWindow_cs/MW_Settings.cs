@@ -2532,6 +2532,14 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchWindowMode_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Advanced.WindowMode = ToggleSwitchWindowMode.IsOn;
+            SaveSettingsToFile();
+            SetWindowMode();
+        }
+
         private void ToggleSwitchIsAutoBackupBeforeUpdate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
