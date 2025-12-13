@@ -3016,7 +3016,7 @@ namespace Ink_Canvas
                         RestoreStrokes(true);
 
                         // 退出白板模式时取消全屏
-                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper && Settings.Advanced.IsEnableAvoidFullScreenHelperForWhiteboard)
+                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
                         {
                             // 恢复为非画板模式，重新启用全屏限制
                             AvoidFullScreenHelper.SetBoardMode(false);
@@ -3085,7 +3085,7 @@ namespace Ink_Canvas
                         RestoreStrokes();
 
                         // 进入白板模式时全屏
-                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper && Settings.Advanced.IsEnableAvoidFullScreenHelperForWhiteboard)
+                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
                         {
                             // 设置为画板模式，允许全屏操作
                             AvoidFullScreenHelper.SetBoardMode(true);
