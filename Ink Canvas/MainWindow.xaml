@@ -2246,19 +2246,6 @@
                                     <TextBlock TextWrapping="Wrap" Foreground="#a1a1aa"
                                                Text="# 避免画布全屏，重启icc后生效。" />
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="白板模式自动全屏" VerticalAlignment="Center"
-                                                   FontSize="14" Margin="0,0,16,0" />
-                                        <Border Background="#27272a" CornerRadius="4" Padding="6,2">
-                                            <TextBlock Foreground="#a1a1aa" Text="需启用避免全屏助手" FontSize="11" />
-                                        </Border>
-                                        <ui:ToggleSwitch OnContent="" OffContent=""
-                                                         Name="ToggleSwitchIsEnableAvoidFullScreenHelperForWhiteboard"
-                                                         Toggled="ToggleSwitchIsEnableAvoidFullScreenHelperForWhiteboard_OnToggled"
-                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold" />
-                                    </ui:SimpleStackPanel>
-                                    <TextBlock TextWrapping="Wrap" Foreground="#a1a1aa"
-                                               Text="# 进入白板模式时自动全屏，退出时恢复到工作区域大小。" />
-                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                     
                                         <TextBlock Foreground="#fafafa" Text="启用EdgeGestureUtil"
                                                    VerticalAlignment="Center"

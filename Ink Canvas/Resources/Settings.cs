@@ -582,9 +582,6 @@ namespace Ink_Canvas
         [JsonProperty("isEnableAvoidFullScreenHelper")]
         public bool IsEnableAvoidFullScreenHelper { get; set; }
 
-        [JsonProperty("isEnableAvoidFullScreenHelperForWhiteboard")]
-        public bool IsEnableAvoidFullScreenHelperForWhiteboard { get; set; }
-
         [JsonProperty("isAutoBackupBeforeUpdate")]
         public bool IsAutoBackupBeforeUpdate { get; set; } = true;
 
