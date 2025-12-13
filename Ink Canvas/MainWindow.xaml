@@ -605,7 +605,7 @@
                                                          Toggled="ToggleSwitchNoFocusMode_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="无边框窗口模式" VerticalAlignment="Center"
+                                        <TextBlock Foreground="#fafafa" Text="窗口无边框模式" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchWindowMode"
                                                          IsOn="True" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
