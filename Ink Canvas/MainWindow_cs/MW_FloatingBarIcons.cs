@@ -3015,6 +3015,22 @@ namespace Ink_Canvas
                         ClearStrokes(true);
                         RestoreStrokes(true);
 
+                        // 退出白板模式时取消全屏
+                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                        {
+                            // 恢复为非画板模式，重新启用全屏限制
+                            AvoidFullScreenHelper.SetBoardMode(false);
+
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                // 退出白板模式，恢复到工作区域大小
+                                var workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+                                MainWindow.MoveWindow(new WindowInteropHelper(this).Handle, 
+                                    workingArea.Left, workingArea.Top,
+                                    workingArea.Width, workingArea.Height, true);
+                            }), DispatcherPriority.ApplicationIdle);
+                        }
+
                         // 在屏幕模式下恢复基础浮动栏的显示
                         ViewboxFloatingBar.Visibility = Visibility.Visible;
 
@@ -3070,6 +3086,19 @@ namespace Ink_Canvas
                         ClearStrokes(true);
 
                         RestoreStrokes();
+
+                        // 进入白板模式时全屏
+                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                        {
+                            // 设置为画板模式，允许全屏操作
+                            AvoidFullScreenHelper.SetBoardMode(true);
+                            Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                MainWindow.MoveWindow(new WindowInteropHelper(this).Handle, 0, 0,
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
+                                    System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
+                            }), DispatcherPriority.ApplicationIdle);
+                        }
 
                         ViewboxFloatingBar.Visibility = Visibility.Collapsed;
 
