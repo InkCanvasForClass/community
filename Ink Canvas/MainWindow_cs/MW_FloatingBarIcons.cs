@@ -1812,7 +1812,7 @@ namespace Ink_Canvas
             });
         }
 
-        public async void PureViewboxFloatingBarMarginAnimationInPPTMode()
+        public async void PureViewboxFloatingBarMarginAnimationInPPTMode(bool isRetry = false)
         {
             // 新增：在白板模式下不执行浮动栏动画
             if (currentMode == 1)
@@ -1908,6 +1908,25 @@ namespace Ink_Canvas
             {
                 ViewboxFloatingBar.Margin = new Thickness(pos.X, pos.Y, -2000, -200);
             });
+
+            if (Settings.ModeSettings.IsPPTOnlyMode && !isRetry)
+            {
+                await Task.Delay(2000); // 等待动画完成后再检查
+                
+                bool isFloatingBarVisible = false;
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    // 检查浮动栏是否真的显示了
+                    isFloatingBarVisible = ViewboxFloatingBar.Visibility == Visibility.Visible &&
+                                          ViewboxFloatingBar.Margin.Left >= 0 &&
+                                          ViewboxFloatingBar.Margin.Top >= 0;
+                });
+
+                if (!isFloatingBarVisible)
+                {
+                    PureViewboxFloatingBarMarginAnimationInPPTMode(true);
+                }
+            }
         }
 
         internal async void CursorIcon_Click(object sender, RoutedEventArgs e)

@@ -303,7 +303,6 @@ namespace Ink_Canvas.Helpers
                         if (positionToSave > 0)
                         {
                             File.WriteAllText(Path.Combine(folderPath, "Position"), positionToSave.ToString());
-                            LogHelper.WriteLogToFile($"已保存PPT播放位置: {positionToSave}", LogHelper.LogType.Trace);
                         }
                     }
                     catch (Exception ex)

@@ -3022,7 +3022,6 @@ namespace Ink_Canvas
                     else if (!isInSlideShow && IsVisible)
                     {
                         Hide();
-                        LogHelper.WriteLogToFile("PPT放映结束，隐藏主窗口（仅PPT模式）", LogHelper.LogType.Trace);
                     }
                 }
                 else
