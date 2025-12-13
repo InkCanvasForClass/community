@@ -628,17 +628,30 @@ namespace Ink_Canvas
                 isMultiTouchTimerActive = false;
             }
 
+            if (dec.Count == 0)
+            {
+                isSingleFingerDragMode = false;
+                if (drawingShapeMode == 0
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.Select
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.None)
+                {
+                    if (lastInkCanvasEditingMode != InkCanvasEditingMode.None)
+                    {
+                        inkCanvas.EditingMode = lastInkCanvasEditingMode;
+                    }
+                }
+            }
+
             if (drawingShapeMode != 0)
             {
                 isTouchDown = false;
                 ViewboxFloatingBar.IsHitTestVisible = true;
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 
-                // 对于双曲线等需要多步绘制的图形，触摸抬手时应该进入下一步
                 if (drawingShapeMode == 24 || drawingShapeMode == 25)
                 {
-                    // 双曲线绘制：触摸抬手时进入下一步，但不自动触发鼠标抬起事件
-                    // 让用户继续绘制第二笔
                     if (drawMultiStepShapeCurrentStep == 0)
                     {
                         // 第一笔完成，进入第二笔
@@ -657,7 +670,6 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    // 其他单步绘制的图形，触摸抬手时完成绘制
                     var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
                     {
                         RoutedEvent = MouseLeftButtonUpEvent,
@@ -688,24 +700,37 @@ namespace Ink_Canvas
 
         private void Main_Grid_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
-            if (e.Manipulators.Count() != 0) return;
-            if (drawingShapeMode == 0
-                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
-                && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+            if (e.Manipulators.Count() == 0)
             {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+                if (dec.Count > 0)
+                {
+                    dec.Clear();
+                }
+                isSingleFingerDragMode = false;
+                
+                if (drawingShapeMode == 0
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.Select)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    lastInkCanvasEditingMode = InkCanvasEditingMode.Ink;
+                }
             }
         }
 
         private void Main_Grid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
             if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
-            if ((dec.Count >= 2 && (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
-                                    StackPanelPPTControls.Visibility != Visibility.Visible ||
-                                    StackPanelPPTButtons.Visibility == Visibility.Collapsed)) ||
-                isSingleFingerDragMode)
+            
+            bool hasMultipleManipulators = e.Manipulators.Count() >= 2;
+            bool shouldUseTwoFingerGesture = (dec.Count >= 2 && hasMultipleManipulators && 
+                                             (Settings.PowerPointSettings.IsEnableTwoFingerGestureInPresentationMode ||
+                                              StackPanelPPTControls.Visibility != Visibility.Visible ||
+                                              StackPanelPPTButtons.Visibility == Visibility.Collapsed)) ||
+                                            isSingleFingerDragMode;
+            
+            if (shouldUseTwoFingerGesture)
             {
                 var md = e.DeltaManipulation;
                 var trans = md.Translation; // 获得位移矢量
