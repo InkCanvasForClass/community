@@ -835,49 +835,53 @@ namespace Ink_Canvas
                     var previousSlide = _currentSlideShowPosition > 0 ? _currentSlideShowPosition : 
                                        (_pptManager?.GetCurrentSlideNumber() ?? 0);
 
-                    // 先保存当前页墨迹的副本
-                    StrokeCollection strokesToSave = null;
-                    if (previousSlide > 0 && previousSlide != currentSlide && inkCanvas.Strokes.Count > 0)
-                    {
-                        strokesToSave = inkCanvas.Strokes.Clone();
-                    }
-
                     if (_isInkClearedByButton)
                     {
                         _isInkClearedByButton = false;
                     }
-                    else if (inkCanvas.Strokes.Count > 0)
+                    else
                     {
-                        ClearStrokes(true);
-                        timeMachine.ClearStrokeHistory();
+                        StrokeCollection strokesToSave = null;
+                        if (previousSlide > 0 && previousSlide != currentSlide && inkCanvas.Strokes.Count > 0)
+                        {
+                            strokesToSave = inkCanvas.Strokes.Clone();
+                        }
+
+                        // 清除墨迹
+                        if (inkCanvas.Strokes.Count > 0)
+                        {
+                            ClearStrokes(true);
+                            timeMachine.ClearStrokeHistory();
+                        }
+
+                        // 异步保存之前页面的墨迹
+                        if (strokesToSave != null && previousSlide > 0 && previousSlide != currentSlide)
+                        {
+                            Task.Run(() =>
+                            {
+                                try
+                                {
+                                    Application.Current.Dispatcher.Invoke(() =>
+                                    {
+                                        bool canWrite = _singlePPTInkManager?.CanWriteInk(previousSlide) == true;
+                                        if (canWrite)
+                                        {
+                                            _singlePPTInkManager?.SaveCurrentSlideStrokes(previousSlide, strokesToSave);
+                                        }
+                                    });
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogHelper.WriteLogToFile($"异步保存PPT页面墨迹失败: {ex}", LogHelper.LogType.Error);
+                                }
+                            });
+                        }
                     }
 
                     // 更新当前播放页码
                     _currentSlideShowPosition = currentSlide;
 
-                    // 异步保存之前页面的墨迹（不阻塞翻页操作）
-                    if (strokesToSave != null && previousSlide > 0 && previousSlide != currentSlide)
-                    {
-                        Task.Run(() =>
-                        {
-                            try
-                            {
-                                Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    bool canWrite = _singlePPTInkManager?.CanWriteInk(previousSlide) == true;
-                                    if (canWrite)
-                                    {
-                                        _singlePPTInkManager?.SaveCurrentSlideStrokes(previousSlide, strokesToSave);
-                                    }
-                                });
-                            }
-                            catch (Exception ex)
-                            {
-                                LogHelper.WriteLogToFile($"异步保存PPT页面墨迹失败: {ex}", LogHelper.LogType.Error);
-                            }
-                        });
-                    }
-                    LoadCurrentSlideInk(currentSlide, skipClear: true); // 跳过清除，因为已在上面清除
+                    LoadCurrentSlideInk(currentSlide, skipClear: true);
                     _pptUIManager?.UpdateCurrentSlideNumber(currentSlide, totalSlides);
 
                 });
