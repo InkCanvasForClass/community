@@ -473,13 +473,23 @@ namespace Ink_Canvas
                     highlightColor = Color.FromRgb(30, 58, 138); // Keep current color for light theme
                 }
 
+                bool useLegacyUI = Settings.Appearance.UseLegacyFloatingBarUI;
+                
                 switch (mode)
                 {
                     case "pen":
                     case "color":
                         {
-                            PenIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            PenIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
+                            if (useLegacyUI)
+                            {
+                                PenIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                PenIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("pen", false));
+                            }
+                            else
+                            {
+                                PenIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                PenIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
+                            }
                             BoardPen.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardPenGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -490,9 +500,18 @@ namespace Ink_Canvas
                         }
                     case "eraser":
                         {
-                            CircleEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            CircleEraserIconGeometry.Geometry =
-                                Geometry.Parse(GetCorrectIcon("eraserCircle", true));
+                            if (useLegacyUI)
+                            {
+                                CircleEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                CircleEraserIconGeometry.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("eraserCircle", false));
+                            }
+                            else
+                            {
+                                CircleEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                CircleEraserIconGeometry.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("eraserCircle", true));
+                            }
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraserGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -503,9 +522,18 @@ namespace Ink_Canvas
                         }
                     case "eraserByStrokes":
                         {
-                            StrokeEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            StrokeEraserIconGeometry.Geometry =
-                                Geometry.Parse(GetCorrectIcon("eraserStroke", true));
+                            if (useLegacyUI)
+                            {
+                                StrokeEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                StrokeEraserIconGeometry.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("eraserStroke", false));
+                            }
+                            else
+                            {
+                                StrokeEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                StrokeEraserIconGeometry.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("eraserStroke", true));
+                            }
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraserGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -516,9 +544,18 @@ namespace Ink_Canvas
                         }
                     case "select":
                         {
-                            LassoSelectIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            LassoSelectIconGeometry.Geometry =
-                                Geometry.Parse(GetCorrectIcon("lassoSelect", true));
+                            if (useLegacyUI)
+                            {
+                                LassoSelectIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                LassoSelectIconGeometry.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("lassoSelect", false));
+                            }
+                            else
+                            {
+                                LassoSelectIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                LassoSelectIconGeometry.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("lassoSelect", true));
+                            }
                             BoardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardSelectGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -529,9 +566,18 @@ namespace Ink_Canvas
                         }
                     case "cursor":
                         {
-                            CursorIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            CursorIconGeometry.Geometry =
-                                Geometry.Parse(GetCorrectIcon("cursor", true));
+                            if (useLegacyUI)
+                            {
+                                CursorIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                CursorIconGeometry.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("cursor", false));
+                            }
+                            else
+                            {
+                                CursorIconGeometry.Brush = new SolidColorBrush(highlightColor);
+                                CursorIconGeometry.Geometry =
+                                    Geometry.Parse(GetCorrectIcon("cursor", true));
+                            }
                             // 根据主题设置颜色
                             if (Settings.Appearance.Theme == 1) // 深色主题
                             {
