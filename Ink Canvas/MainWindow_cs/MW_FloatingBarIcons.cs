@@ -2963,22 +2963,16 @@ namespace Ink_Canvas
             {
                 // 清空触摸点计数器
                 dec.Clear();
-
-                // 确保触摸事件能正常响应
-                inkCanvas.IsHitTestVisible = true;
-                inkCanvas.IsManipulationEnabled = true;
-
-                // 释放所有触摸捕获
-                inkCanvas.ReleaseAllTouchCaptures();
-
-                // 恢复UI元素的触摸响应
-                ViewboxFloatingBar.IsHitTestVisible = true;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = true;
-
-
+                
+                // 通过调用专门的方法来恢复手掌擦除状态，确保所有相关状态都被正确清理
+                RecoverFromPalmEraserState();
             }
             catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"重置触摸状态失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
                 LogHelper.WriteLogToFile($"重置触摸状态失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
