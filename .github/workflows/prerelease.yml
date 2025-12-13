@@ -21,7 +21,7 @@ on:
 
 jobs:
   prerelease:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta'
     runs-on: windows-latest
     permissions:
       contents: write
