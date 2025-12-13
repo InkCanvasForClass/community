@@ -2182,6 +2182,7 @@ namespace Ink_Canvas
             Settings.Advanced.EdgeGestureUtilOnlyAffectBlackboardMode = false;
             Settings.Advanced.IsEnableFullScreenHelper = false;
             Settings.Advanced.IsEnableAvoidFullScreenHelper = false;
+            Settings.Advanced.IsEnableAvoidFullScreenHelperForWhiteboard = false;
             Settings.Advanced.IsEnableForceFullScreen = false;
             Settings.Advanced.IsEnableDPIChangeDetection = false;
             Settings.Advanced.IsEnableResolutionChangeDetection = false;
@@ -2440,6 +2441,13 @@ namespace Ink_Canvas
             {
                 AvoidFullScreenHelper.StopAvoidFullScreen(this);
             }
+        }
+
+        private void ToggleSwitchIsEnableAvoidFullScreenHelperForWhiteboard_OnToggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.Advanced.IsEnableAvoidFullScreenHelperForWhiteboard = ToggleSwitchIsEnableAvoidFullScreenHelperForWhiteboard.IsOn;
+            SaveSettingsToFile();
         }
 
         private void ToggleSwitchIsEnableEdgeGestureUtil_Toggled(object sender, RoutedEventArgs e)

@@ -805,6 +805,7 @@ namespace Ink_Canvas
                 ToggleSwitchIsEnableResolutionChangeDetection.IsOn = Settings.Advanced.IsEnableResolutionChangeDetection;
                 ToggleSwitchIsEnableDPIChangeDetection.IsOn = Settings.Advanced.IsEnableDPIChangeDetection;
                 ToggleSwitchIsEnableAvoidFullScreenHelper.IsOn = Settings.Advanced.IsEnableAvoidFullScreenHelper;
+                ToggleSwitchIsEnableAvoidFullScreenHelperForWhiteboard.IsOn = Settings.Advanced.IsEnableAvoidFullScreenHelperForWhiteboard;
                 ToggleSwitchIsAutoBackupBeforeUpdate.IsOn = Settings.Advanced.IsAutoBackupBeforeUpdate;
                 ToggleSwitchIsAutoBackupEnabled.IsOn = Settings.Advanced.IsAutoBackupEnabled;
 
