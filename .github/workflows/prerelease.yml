@@ -210,6 +210,26 @@ jobs:
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
+      - name: Install Inno Setup Unofficial Language Files
+        run: |
+          # 创建临时目录用于下载文件
+          New-Item -ItemType Directory -Path "temp_lang" -Force
+          
+          # 下载英语英国版语言文件
+          Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/EnglishBritish.isl" -OutFile "temp_lang\EnglishBritish.isl"
+          
+          # 下载简体中文版语言文件
+          Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "temp_lang\ChineseSimplified.isl"
+          
+          # 将文件移动到 Inno Setup 的语言目录
+          Move-Item -Path "temp_lang\EnglishBritish.isl" -Destination "C:\Program Files (x86)\Inno Setup 6\Languages\EnglishBritish.isl" -Force
+          Move-Item -Path "temp_lang\ChineseSimplified.isl" -Destination "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl" -Force
+          
+          # 清理临时目录
+          Remove-Item -Path "temp_lang" -Recurse -Force
+          
+          Write-Host "✅ Inno Setup unofficial language files installed successfully" -ForegroundColor Green
+
       - name: Cache NuGet packages and obj files
         id: cache-nuget
         uses: actions/cache@v4
@@ -279,9 +299,9 @@ jobs:
           # 替换版本信息
           $issContent = $issContent -replace '#define MyAppVersion ".*"', "#define MyAppVersion `"$version`""
           
-          # 替换源文件路径为相对路径
-          $issContent = $issContent -replace 'Source: ".*\\{#MyAppExeName}";', 'Source: "release\{#MyAppExeName}";'
-          $issContent = $issContent -replace 'Source: ".*\\InkCanvasForClass.exe.config";', 'Source: "release\InkCanvasForClass.exe.config";'
+          # 替换源文件路径为相对路径（考虑到ISS文件在build目录下，需要返回上级目录）
+          $issContent = $issContent -replace 'Source: ".*\\{#MyAppExeName}";', 'Source: "..\release\{#MyAppExeName}";'
+          $issContent = $issContent -replace 'Source: ".*\\InkCanvasForClass.exe.config";', 'Source: "..\release\InkCanvasForClass.exe.config";'
           
           # 更新输出目录为当前目录
           $issContent = $issContent -replace 'OutputDir=.*', 'OutputDir=.'
@@ -289,8 +309,8 @@ jobs:
           # 更新默认安装目录
           $issContent = $issContent -replace 'DefaultDirName=.*', 'DefaultDirName={autopf}\{#MyAppName}'
           
-          # 更新许可证文件路径
-          $issContent = $issContent -replace 'LicenseFile=.*', 'LicenseFile=LICENSE'
+          # 更新许可证文件路径为相对路径（考虑到ISS文件在build目录下，需要返回上级目录）
+          $issContent = $issContent -replace 'LicenseFile=.*', 'LicenseFile=..\LICENSE'
           
           # 保存修改后的 ISS 文件
           $issContent | Set-Content -Path $issPath -Encoding UTF8
