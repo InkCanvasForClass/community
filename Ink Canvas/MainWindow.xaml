@@ -1215,6 +1215,7 @@
                                             <ComboBoxItem Content="osu!玩家语录" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="励志立志的名言警句" FontFamily="Microsoft YaHei UI" />
                                             <ComboBoxItem Content="高考祝福语" FontFamily="Microsoft YaHei UI" />
+                                            <ComboBoxItem Content="一言（Hitokoto API）" FontFamily="Microsoft YaHei UI" />
                                         </ComboBox>
                                     </ui:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
@@ -1943,6 +1944,19 @@
                                         </ui:SimpleStackPanel>
                                         <TextBlock
                                             Text="# 开启该选项后，长按PPT翻页按钮可以连续翻页，提高翻页效率。"
+                                            TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <ui:SimpleStackPanel Orientation="Horizontal"
+                                                             HorizontalAlignment="Left" Margin="0,6,0,0">
+                                            <TextBlock Foreground="#fafafa" Text="点击翻页时跳过转场动画，直接切到下一张"
+                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
+                                            <ui:ToggleSwitch OnContent="" OffContent=""
+                                                             Name="ToggleSwitchSkipAnimationsWhenGoNext"
+                                                             IsOn="False"
+                                                             FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                             Toggled="ToggleSwitchSkipAnimationsWhenGoNext_OnToggled" />
+                                        </ui:SimpleStackPanel>
+                                        <TextBlock
+                                            Text="# 开启该选项后，点击下一页按钮时会跳过幻灯片之间的转场动画，直接跳转到下一张幻灯片。不会影响幻灯片内的元素动画。"
                                             TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     </ui:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
@@ -3944,7 +3958,12 @@
                        MouseUp="inkCanvas_MouseUp"
                        ManipulationStarting="inkCanvas_ManipulationStarting"
                        SelectionChanged="inkCanvas_SelectionChanged"
-                       StrokeCollected="inkCanvas_StrokeCollected" ClipToBounds="False" Background="Transparent" />
+                       StrokeCollected="inkCanvas_StrokeCollected" 
+                       ClipToBounds="False" 
+                       Background="Transparent"
+                       RenderOptions.BitmapScalingMode="LowQuality"
+                       RenderOptions.EdgeMode="Aliased"
+                       RenderOptions.CachingHint="Cache" />
             
             <Canvas x:Name="EraserOverlayCanvas" 
                     Background="Transparent" 

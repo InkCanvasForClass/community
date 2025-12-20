@@ -1,4 +1,5 @@
 ﻿using Microsoft.Office.Interop.PowerPoint;
+using Microsoft.Office.Core;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -718,7 +719,7 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        public bool TryNavigateNext()
+        public bool TryNavigateNext(bool skipAnimations = false)
         {
             try
             {
@@ -729,8 +730,54 @@ namespace Ink_Canvas.Helpers
                 if (slideShowWindow?.View != null)
                 {
                     slideShowWindow.Activate();
-                    slideShowWindow.View.Next();
-                    return true;
+
+                    var view = slideShowWindow.View;
+                    var currentPosition = 0;
+                    var totalSlides = 0;
+
+                    try
+                    {
+                        currentPosition = view.CurrentShowPosition;
+                        totalSlides = slideShowWindow.Presentation?.Slides?.Count ?? 0;
+                    }
+                    catch
+                    {
+                    }
+
+                    if (skipAnimations && currentPosition > 0 && totalSlides > 0 && currentPosition < totalSlides)
+                    {
+                        try
+                        {
+                            view.GotoSlide(currentPosition + 1, MsoTriState.msoFalse);
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"跳过转场动画跳转到下一页失败: {ex}", LogHelper.LogType.Warning);
+                            try
+                            {
+                                view.Next();
+                                return true;
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            view.Next();
+                            return true;
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"调用下一页失败: {ex}", LogHelper.LogType.Warning);
+                            return false;
+                        }
+                    }
                 }
                 return false;
             }

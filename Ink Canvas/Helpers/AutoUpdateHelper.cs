@@ -244,14 +244,45 @@ namespace Ink_Canvas.Helpers
 
             foreach (var group in groups)
             {
-                // 跳过"智教联盟"和"inkeys"线路组，不参与延迟检测和排序
+                string testUrl = null;
                 if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
                 {
-                    LogHelper.WriteLogToFile($"AutoUpdate | 跳过{group.GroupName}线路组延迟检测");
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(group.DownloadUrlFormat))
+                        {
+                            testUrl = group.DownloadUrlFormat.Replace("{0}", "test");
+                        }
+                    }
+                    catch
+                    {
+                        testUrl = null;
+                    }
+                }
+                else
+                {
+                    testUrl = group.VersionUrl;
+                }
+
+                if (string.IsNullOrEmpty(testUrl))
+                {
+                    LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 缺少可用测速地址，跳过", LogHelper.LogType.Warning);
                     continue;
                 }
-                LogHelper.WriteLogToFile($"AutoUpdate | 检测线路组: {group.GroupName} ({group.VersionUrl})");
-                var delay = await GetUrlDelay(group.VersionUrl);
+
+                LogHelper.WriteLogToFile($"AutoUpdate | 检测线路组: {group.GroupName} ({testUrl})");
+
+                long delay;
+
+                if (group.GroupName == "智教联盟" || group.GroupName == "inkeys")
+                {
+                    delay = await GetDownloadUrlDelay(testUrl);
+                }
+                else
+                {
+                    delay = await GetUrlDelay(testUrl);
+                }
+
                 if (delay >= 0)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 线路组 {group.GroupName} 延迟: {delay}ms");
@@ -269,20 +300,12 @@ namespace Ink_Canvas.Helpers
                 .Select(x => x.group)
                 .ToList();
 
-            // 将"inkeys"线路组插入到最前面（如果存在）
-            var inkeysGroup = groups.FirstOrDefault(g => g.GroupName == "inkeys");
+            var inkeysGroup = orderedGroups.FirstOrDefault(g => g.GroupName == "inkeys");
             if (inkeysGroup != null)
             {
+                orderedGroups.Remove(inkeysGroup);
                 orderedGroups.Insert(0, inkeysGroup);
-                LogHelper.WriteLogToFile("AutoUpdate | inkeys线路组已插入到首位");
-            }
-
-            // 将"智教联盟"线路组插入到第二位（如果存在）
-            var zhiJiaoGroup = groups.FirstOrDefault(g => g.GroupName == "智教联盟");
-            if (zhiJiaoGroup != null)
-            {
-                orderedGroups.Insert(1, zhiJiaoGroup);
-                LogHelper.WriteLogToFile("AutoUpdate | 智教联盟线路组已插入到第二位");
+                LogHelper.WriteLogToFile("AutoUpdate | inkeys线路组已默认优先");
             }
 
             if (orderedGroups.Count > 0)
@@ -299,6 +322,47 @@ namespace Ink_Canvas.Helpers
             }
 
             return orderedGroups;
+        }
+
+        private static async Task<long> GetDownloadUrlDelay(string url)
+        {
+            try
+            {
+                var osVersion = Environment.OSVersion;
+                bool isWindows7 = osVersion.Version.Major == 6 && osVersion.Version.Minor == 1;
+
+                if (isWindows7)
+                {
+                    using (var handler = new HttpClientHandler())
+                    {
+                        handler.ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true;
+
+                        using (var client = new HttpClient(handler))
+                        {
+                            client.Timeout = TimeSpan.FromSeconds(5);
+                            var sw = Stopwatch.StartNew();
+                            var resp = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+                            sw.Stop();
+                            return sw.ElapsedMilliseconds;
+                        }
+                    }
+                }
+                else
+                {
+                    using (var client = new HttpClient())
+                    {
+                        client.Timeout = TimeSpan.FromSeconds(5);
+                        var sw = Stopwatch.StartNew();
+                        var resp = await client.SendAsync(new HttpRequestMessage(HttpMethod.Head, url));
+                        sw.Stop();
+                        return sw.ElapsedMilliseconds;
+                    }
+                }
+            }
+            catch
+            {
+                return -1;
+            }
         }
 
         // 获取远程版本号
@@ -727,23 +791,13 @@ namespace Ink_Canvas.Helpers
 
                 SaveDownloadStatus(false);
 
-                // 优先尝试"inkeys"线路组和"智教联盟"线路组
-                var zhiJiaoGroup = groups.FirstOrDefault(g => g.GroupName == "智教联盟");
+                // 优先尝试"inkeys"线路组
                 var inkeysGroup = groups.FirstOrDefault(g => g.GroupName == "inkeys");
-                if (inkeysGroup != null || zhiJiaoGroup != null)
+                if (inkeysGroup != null)
                 {
-                    var priorityGroups = new List<UpdateLineGroup>();
-                    if (inkeysGroup != null)
-                    {
-                        priorityGroups.Add(inkeysGroup);
-                        LogHelper.WriteLogToFile("AutoUpdate | 下载时优先尝试inkeys线路组");
-                    }
-                    if (zhiJiaoGroup != null)
-                    {
-                        priorityGroups.Add(zhiJiaoGroup);
-                        LogHelper.WriteLogToFile("AutoUpdate | 下载时优先尝试智教联盟线路组");
-                    }
-                    groups = priorityGroups.Concat(groups.Where(g => g.GroupName != "智教联盟" && g.GroupName != "inkeys")).ToList();
+                    groups.Remove(inkeysGroup);
+                    groups.Insert(0, inkeysGroup);
+                    LogHelper.WriteLogToFile("AutoUpdate | 下载时优先尝试inkeys线路组");
                 }
 
                 // 依次尝试每个线路组

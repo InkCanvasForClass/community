@@ -702,21 +702,7 @@ namespace Ink_Canvas
                     BlackBoardWaterMark.Visibility = Visibility.Collapsed;
                 }
 
-                if (Settings.Appearance.ChickenSoupSource == 0)
-                {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.OSUPlayerYuLu.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.OSUPlayerYuLu[randChickenSoupIndex];
-                }
-                else if (Settings.Appearance.ChickenSoupSource == 1)
-                {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.MingYanJingJu.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.MingYanJingJu[randChickenSoupIndex];
-                }
-                else if (Settings.Appearance.ChickenSoupSource == 2)
-                {
-                    int randChickenSoupIndex = new Random().Next(ChickenSoup.GaoKaoPhrases.Length);
-                    BlackBoardWaterMark.Text = ChickenSoup.GaoKaoPhrases[randChickenSoupIndex];
-                }
+                _ = UpdateChickenSoupTextAsync();
 
                 if (Settings.Canvas.UsingWhiteboard)
                 {
@@ -1912,7 +1898,7 @@ namespace Ink_Canvas
             if (Settings.ModeSettings.IsPPTOnlyMode && !isRetry)
             {
                 await Task.Delay(2000); // 等待动画完成后再检查
-                
+
                 bool isFloatingBarVisible = false;
                 await Dispatcher.InvokeAsync(() =>
                 {
@@ -1993,6 +1979,10 @@ namespace Ink_Canvas
             GridTransparencyFakeBackground.Background = Brushes.Transparent;
 
             GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
+
+            // 点击鼠标按钮退出批注模式时的全屏还原
+            RestoreFullScreenOnExitAnnotationMode();
+
             inkCanvas.Select(new StrokeCollection());
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
 
@@ -2105,6 +2095,21 @@ namespace Ink_Canvas
                 }
 
                 BtnHideInkCanvas.Content = "隐藏\n画板";
+
+                // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
+                if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
+                {
+                    // 设置为画板模式，允许全屏操作
+                    AvoidFullScreenHelper.SetBoardMode(true);
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        MainWindow.MoveWindow(new WindowInteropHelper(this).Handle, 0, 0,
+                            System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
+                            System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
+                    }), DispatcherPriority.ApplicationIdle);
+
+                    isFullScreenApplied = true; // 标记已应用全屏处理
+                }
 
                 StackPanelCanvasControls.Visibility = Visibility.Visible;
                 //AnimationsHelper.ShowWithSlideFromLeftAndFade(StackPanelCanvasControls);
@@ -2947,6 +2952,30 @@ namespace Ink_Canvas
 
         private int currentMode;
 
+        // 退出批注模式时的全屏还原处理
+        private void RestoreFullScreenOnExitAnnotationMode()
+        {
+            if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
+                isFullScreenApplied &&
+                currentMode == 0 && // 不在白板模式
+                BtnPPTSlideShowEnd.Visibility != Visibility.Visible) // 不在PPT放映模式
+            {
+                // 恢复为非画板模式，重新启用全屏限制
+                AvoidFullScreenHelper.SetBoardMode(false);
+
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    // 退出批注模式，恢复到工作区域大小
+                    var workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
+                    MainWindow.MoveWindow(new WindowInteropHelper(this).Handle,
+                        workingArea.Left, workingArea.Top,
+                        workingArea.Width, workingArea.Height, true);
+                }), DispatcherPriority.ApplicationIdle);
+
+                isFullScreenApplied = false; // 标记全屏处理已还原
+            }
+        }
+
         private void BtnSwitch_Click(object sender, RoutedEventArgs e)
         {
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
@@ -3015,8 +3044,9 @@ namespace Ink_Canvas
                         ClearStrokes(true);
                         RestoreStrokes(true);
 
-                        // 退出白板模式时取消全屏
-                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                        // 退出白板模式时取消全屏（仅在非PPT模式下）
+                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
+                            BtnPPTSlideShowEnd.Visibility != Visibility.Visible) // 不在PPT放映模式
                         {
                             // 恢复为非画板模式，重新启用全屏限制
                             AvoidFullScreenHelper.SetBoardMode(false);
@@ -3025,10 +3055,12 @@ namespace Ink_Canvas
                             {
                                 // 退出白板模式，恢复到工作区域大小
                                 var workingArea = System.Windows.Forms.Screen.PrimaryScreen.WorkingArea;
-                                MainWindow.MoveWindow(new WindowInteropHelper(this).Handle, 
+                                MainWindow.MoveWindow(new WindowInteropHelper(this).Handle,
                                     workingArea.Left, workingArea.Top,
                                     workingArea.Width, workingArea.Height, true);
                             }), DispatcherPriority.ApplicationIdle);
+
+                            isFullScreenApplied = false; // 标记全屏处理已还原
                         }
 
                         // 在屏幕模式下恢复基础浮动栏的显示
@@ -3087,8 +3119,9 @@ namespace Ink_Canvas
 
                         RestoreStrokes();
 
-                        // 进入白板模式时全屏
-                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper)
+                        // 进入白板模式时全屏（仅在非PPT模式下）
+                        if (Settings.Advanced.IsEnableAvoidFullScreenHelper &&
+                            BtnPPTSlideShowEnd.Visibility != Visibility.Visible) // 不在PPT放映模式
                         {
                             // 设置为画板模式，允许全屏操作
                             AvoidFullScreenHelper.SetBoardMode(true);
@@ -3098,6 +3131,8 @@ namespace Ink_Canvas
                                     System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
                                     System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
                             }), DispatcherPriority.ApplicationIdle);
+
+                            isFullScreenApplied = true; // 标记已应用全屏处理
                         }
 
                         ViewboxFloatingBar.Visibility = Visibility.Collapsed;
@@ -3135,7 +3170,7 @@ namespace Ink_Canvas
                         }
 
                         StackPanelPPTButtons.Visibility = Visibility.Collapsed;
-                        
+
                         if (Settings.Advanced.EnableUIAccessTopMost)
                         {
                             Topmost = true;
@@ -3155,6 +3190,7 @@ namespace Ink_Canvas
         {
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
             {
+                // 进入批注模式
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
                 inkCanvas.IsHitTestVisible = true;
@@ -3179,6 +3215,21 @@ namespace Ink_Canvas
                 }
 
                 BtnHideInkCanvas.Content = "隐藏\n画板";
+
+                // 进入批注模式时的全屏处理（仅当未应用过全屏处理时）
+                if (Settings.Advanced.IsEnableAvoidFullScreenHelper && !isFullScreenApplied)
+                {
+                    // 设置为画板模式，允许全屏操作
+                    AvoidFullScreenHelper.SetBoardMode(true);
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        MainWindow.MoveWindow(new WindowInteropHelper(this).Handle, 0, 0,
+                            System.Windows.Forms.Screen.PrimaryScreen.Bounds.Width,
+                            System.Windows.Forms.Screen.PrimaryScreen.Bounds.Height, true);
+                    }), DispatcherPriority.ApplicationIdle);
+
+                    isFullScreenApplied = true; // 标记已应用全屏处理
+                }
             }
             else
             {
@@ -3228,6 +3279,9 @@ namespace Ink_Canvas
                 GridTransparencyFakeBackground.Background = Brushes.Transparent;
 
                 GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
+
+                // 退出批注模式时的全屏还原
+                RestoreFullScreenOnExitAnnotationMode();
 
                 if (currentMode != 0)
                 {

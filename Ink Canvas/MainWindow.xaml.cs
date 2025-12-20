@@ -1011,6 +1011,9 @@ namespace Ink_Canvas
                 // 检测到新版本
                 LogHelper.WriteLogToFile($"AutoUpdate | New version available: {AvailableLatestVersion}");
 
+                // 通过 Windows 系统通知提示有新版本
+                WindowsNotificationHelper.ShowNewVersionToast(AvailableLatestVersion);
+
                 // 检查是否是用户选择跳过的版本
                 if (!string.IsNullOrEmpty(Settings.Startup.SkippedVersion) &&
                     Settings.Startup.SkippedVersion == AvailableLatestVersion)

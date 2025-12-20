@@ -59,8 +59,19 @@ namespace Ink_Canvas
         private static SplashScreen _splashScreen;
         private static bool _isSplashScreenShown = false;
 
+        [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
+
         public App()
         {
+            try
+            {
+                SetCurrentProcessExplicitAppUserModelID("InkCanvasForClass.CE");
+            }
+            catch
+            {
+            }
+
             // 配置TLS协议以支持Windows 7
             ConfigureTlsForWindows7();
 

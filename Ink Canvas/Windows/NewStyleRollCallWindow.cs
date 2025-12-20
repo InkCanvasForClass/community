@@ -537,20 +537,34 @@ namespace Ink_Canvas
             bool enableML = MainWindow.Settings?.RandSettings?.EnableMLAvoidance ?? true;
             if (!enableML)
             {
-                // 如果禁用机器学习，使用简单随机选择
+                // 如果禁用机器学习，使用简单不放回随机选择
                 return SelectNamesRandomly(availableNames, count, random);
             }
 
+            var candidatePool = new List<string>(availableNames);
             var selectedNames = new List<string>();
-            var remainingNames = new List<string>(availableNames);
-
-            for (int i = 0; i < count && remainingNames.Count > 0; i++)
+            if (count >= candidatePool.Count)
             {
-                string selectedName = SelectSingleNameWithML(remainingNames, selectedNames, random);
+                return new List<string>(candidatePool);
+            }
+
+            for (int i = 0; i < count && candidatePool.Count > 0; i++)
+            {
+                string selectedName = SelectSingleNameWithMLWithoutReplacement(candidatePool, selectedNames, random);
                 if (!string.IsNullOrEmpty(selectedName))
                 {
                     selectedNames.Add(selectedName);
-                    remainingNames.Remove(selectedName);
+                    candidatePool.Remove(selectedName);
+                }
+                else
+                {
+                    if (candidatePool.Count > 0)
+                    {
+                        int randomIndex = random.Next(0, candidatePool.Count);
+                        selectedName = candidatePool[randomIndex];
+                        selectedNames.Add(selectedName);
+                        candidatePool.RemoveAt(randomIndex);
+                    }
                 }
             }
 
@@ -558,21 +572,34 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 简单随机选择点名人员
+        /// 简单不放回随机选择点名人员
         /// </summary>
         private static List<string> SelectNamesRandomly(List<string> availableNames, int count, Random random)
         {
             if (availableNames == null || availableNames.Count == 0)
                 return new List<string>();
 
-            var selectedNames = new List<string>();
-            var remainingNames = new List<string>(availableNames);
-
-            for (int i = 0; i < count && remainingNames.Count > 0; i++)
+            // 如果请求的数量大于或等于可用名单大小，返回所有名单
+            if (count >= availableNames.Count)
             {
-                int randomIndex = random.Next(remainingNames.Count);
-                selectedNames.Add(remainingNames[randomIndex]);
-                remainingNames.RemoveAt(randomIndex);
+                return new List<string>(availableNames);
+            }
+
+            var candidatePool = new List<string>(availableNames);
+            var selectedNames = new List<string>();
+
+            for (int i = 0; i < count && candidatePool.Count > 0; i++)
+            {
+                int randomIndex = random.Next(0, candidatePool.Count);
+                
+                selectedNames.Add(candidatePool[randomIndex]);
+                
+                int lastIndex = candidatePool.Count - 1;
+                if (randomIndex != lastIndex)
+                {
+                    candidatePool[randomIndex] = candidatePool[lastIndex];
+                }
+                candidatePool.RemoveAt(lastIndex);
             }
 
             return selectedNames;
@@ -581,10 +608,10 @@ namespace Ink_Canvas
         /// <summary>
         /// 使用概率算法选择单个人员
         /// </summary>
-        private static string SelectSingleNameWithML(List<string> availableNames, List<string> alreadySelected, Random random)
+        private static string SelectSingleNameWithMLWithoutReplacement(List<string> candidatePool, List<string> alreadySelected, Random random)
         {
-            if (availableNames.Count == 0) return null;
-            if (availableNames.Count == 1) return availableNames[0];
+            if (candidatePool.Count == 0) return null;
+            if (candidatePool.Count == 1) return candidatePool[0];
 
             // 确保历史数据已初始化
             if (historyData == null)
@@ -599,16 +626,16 @@ namespace Ink_Canvas
             }
 
             // 过滤掉已选择的人员
-            var candidateNames = availableNames.Where(name => !alreadySelected.Contains(name)).ToList();
-            if (candidateNames.Count == 0) return null;
-            if (candidateNames.Count == 1) return candidateNames[0];
+            var validCandidates = candidatePool.Where(name => !alreadySelected.Contains(name)).ToList();
+            if (validCandidates.Count == 0) return null;
+            if (validCandidates.Count == 1) return validCandidates[0];
 
             // 检查极差：当极差达到3时，从被抽选次数最少的人中抽选
             if (historyData.NameFrequency != null && historyData.NameFrequency.Count > 0)
             {
                 // 获取所有候选人员的被抽选次数
                 var candidateFrequencies = new Dictionary<string, int>();
-                foreach (string name in candidateNames)
+                foreach (string name in validCandidates)
                 {
                     int count = historyData.NameFrequency.ContainsKey(name) ? historyData.NameFrequency[name] : 0;
                     candidateFrequencies[name] = count;
@@ -631,7 +658,7 @@ namespace Ink_Canvas
 
                         if (leastSelectedNames.Count > 0)
                         {
-                            // 只从被抽选次数最少的人中随机选择
+                            // 只从被抽选次数最少的人中不放回随机选择
                             int randomIndex = random.Next(0, leastSelectedNames.Count);
                             return leastSelectedNames[randomIndex];
                         }
@@ -639,10 +666,10 @@ namespace Ink_Canvas
                 }
             }
 
-            // 获取每个人员的概率
+            // 获取每个候选人员的概率
             var nameProbabilities = new Dictionary<string, double>();
 
-            foreach (string name in candidateNames)
+            foreach (string name in validCandidates)
             {
                 // 获取基础概率
                 double baseProbability = GetNameProbability(name);
@@ -658,6 +685,7 @@ namespace Ink_Canvas
             // 使用概率进行加权随机选择
             return ProbabilityBasedRandomSelection(nameProbabilities, random);
         }
+
 
         /// <summary>
         /// 获取人员的概率
@@ -878,30 +906,6 @@ namespace Ink_Canvas
             return 1.0 - frequency;
         }
 
-        /// <summary>
-        /// 加权随机选择（保留用于兼容，实际已改用概率选择）
-        /// </summary>
-        private static string WeightedRandomSelection(Dictionary<string, double> nameWeights, Random random)
-        {
-            if (nameWeights.Count == 0) return null;
-
-            double totalWeight = nameWeights.Values.Sum();
-            if (totalWeight <= 0) return nameWeights.Keys.First();
-
-            double randomValue = random.NextDouble() * totalWeight;
-            double currentWeight = 0;
-
-            foreach (var kvp in nameWeights)
-            {
-                currentWeight += kvp.Value;
-                if (randomValue <= currentWeight)
-                {
-                    return kvp.Key;
-                }
-            }
-
-            return nameWeights.Keys.Last();
-        }
 
         /// <summary>
         /// 更新点名历史记录

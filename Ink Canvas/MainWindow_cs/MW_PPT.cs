@@ -524,6 +524,8 @@ namespace Ink_Canvas
         {
             try
             {
+                bool isInSlideShowWhenOpened = _pptManager?.IsInSlideShow == true;
+
                 Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     // 在初始化墨迹管理器之前，先清理画布上的所有墨迹
@@ -546,8 +548,7 @@ namespace Ink_Canvas
                         CheckAndNotifyHiddenSlides(pres);
                     }
 
-                    // 检查自动播放设置
-                    if (Settings.PowerPointSettings.IsNotifyAutoPlayPresentation)
+                    if (Settings.PowerPointSettings.IsNotifyAutoPlayPresentation && !isInSlideShowWhenOpened)
                     {
                         CheckAndNotifyAutoPlaySettings(pres);
                     }
@@ -1022,7 +1023,10 @@ namespace Ink_Canvas
                 }
                 else if (Settings.PowerPointSettings.IsNotifyPreviousPage)
                 {
-                    ShowPreviousPageNotification(pres);
+                    if (_pptManager?.IsInSlideShow != true)
+                    {
+                        ShowPreviousPageNotification(pres);
+                    }
                 }
             }
             catch (Exception ex)
@@ -1134,7 +1138,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) return;
+                if (_pptManager?.IsInSlideShow == true) return;
 
                 bool hasSlideTimings = false;
                 if (pres?.Slides != null)
@@ -1533,7 +1537,9 @@ namespace Ink_Canvas
                         strokesToSave = inkCanvas.Strokes.Clone();
                     }
 
-                    if (_pptManager?.TryNavigateNext() == true)
+                    var skipAnimations = Settings.PowerPointSettings.SkipAnimationsWhenGoNext;
+
+                    if (_pptManager?.TryNavigateNext(skipAnimations: skipAnimations) == true)
                     {
                         var currentSlideAfterNavigate = _pptManager?.GetCurrentSlideNumber() ?? 0;
 

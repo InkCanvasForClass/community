@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using System.Net.Http;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -297,26 +298,86 @@ namespace Ink_Canvas
             }
         }
 
-        private void ComboBoxChickenSoupSource_SelectionChanged(object sender, RoutedEventArgs e)
+        private static readonly HttpClient HitokotoHttpClient = CreateHitokotoClient();
+
+        private static HttpClient CreateHitokotoClient()
+        {
+            var client = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(5)
+            };
+            try
+            {
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("InkCanvas-Hitokoto/1.0");
+            }
+            catch
+            {
+            }
+            return client;
+        }
+
+        private async Task UpdateChickenSoupTextAsync()
+        {
+            try
+            {
+                if (!Settings.Appearance.EnableChickenSoupInWhiteboardMode)
+                {
+                    return;
+                }
+
+                if (Settings.Appearance.ChickenSoupSource == 0)
+                {
+                    int randChickenSoupIndex = new Random().Next(ChickenSoup.OSUPlayerYuLu.Length);
+                    BlackBoardWaterMark.Text = ChickenSoup.OSUPlayerYuLu[randChickenSoupIndex];
+                }
+                else if (Settings.Appearance.ChickenSoupSource == 1)
+                {
+                    int randChickenSoupIndex = new Random().Next(ChickenSoup.MingYanJingJu.Length);
+                    BlackBoardWaterMark.Text = ChickenSoup.MingYanJingJu[randChickenSoupIndex];
+                }
+                else if (Settings.Appearance.ChickenSoupSource == 2)
+                {
+                    int randChickenSoupIndex = new Random().Next(ChickenSoup.GaoKaoPhrases.Length);
+                    BlackBoardWaterMark.Text = ChickenSoup.GaoKaoPhrases[randChickenSoupIndex];
+                }
+                else if (Settings.Appearance.ChickenSoupSource == 3)
+                {
+                    BlackBoardWaterMark.Text = "正在获取一言...";
+
+                    try
+                    {
+                        var response = await HitokotoHttpClient.GetAsync("https://v1.hitokoto.cn/?encode=text");
+                        response.EnsureSuccessStatusCode();
+
+                        var text = await response.Content.ReadAsStringAsync();
+                        if (!string.IsNullOrWhiteSpace(text))
+                        {
+                            BlackBoardWaterMark.Text = text.Trim();
+                        }
+                        else
+                        {
+                            BlackBoardWaterMark.Text = "一言暂时没有返回内容";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"Hitokoto API 请求失败: {ex.Message}", LogHelper.LogType.Warning);
+                        BlackBoardWaterMark.Text = "一言获取失败，请稍后重试";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新白板名言时出错: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        private async void ComboBoxChickenSoupSource_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
             Settings.Appearance.ChickenSoupSource = ComboBoxChickenSoupSource.SelectedIndex;
             SaveSettingsToFile();
-            if (Settings.Appearance.ChickenSoupSource == 0)
-            {
-                int randChickenSoupIndex = new Random().Next(ChickenSoup.OSUPlayerYuLu.Length);
-                BlackBoardWaterMark.Text = ChickenSoup.OSUPlayerYuLu[randChickenSoupIndex];
-            }
-            else if (Settings.Appearance.ChickenSoupSource == 1)
-            {
-                int randChickenSoupIndex = new Random().Next(ChickenSoup.MingYanJingJu.Length);
-                BlackBoardWaterMark.Text = ChickenSoup.MingYanJingJu[randChickenSoupIndex];
-            }
-            else if (Settings.Appearance.ChickenSoupSource == 2)
-            {
-                int randChickenSoupIndex = new Random().Next(ChickenSoup.GaoKaoPhrases.Length);
-                BlackBoardWaterMark.Text = ChickenSoup.GaoKaoPhrases[randChickenSoupIndex];
-            }
+            await UpdateChickenSoupTextAsync();
         }
 
         private void ToggleSwitchEnableViewboxBlackBoardScaleTransform_Toggled(object sender, RoutedEventArgs e)
@@ -575,6 +636,13 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn = ToggleSwitchEnablePPTButtonLongPressPageTurn.IsOn;
+            SaveSettingsToFile();
+        }
+
+        private void ToggleSwitchSkipAnimationsWhenGoNext_OnToggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.SkipAnimationsWhenGoNext = ToggleSwitchSkipAnimationsWhenGoNext.IsOn;
             SaveSettingsToFile();
         }
 

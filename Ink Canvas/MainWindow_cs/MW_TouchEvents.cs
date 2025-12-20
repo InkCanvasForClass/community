@@ -482,8 +482,8 @@ namespace Ink_Canvas
 
             var strokeVisual = new StrokeVisual(inkCanvas.DefaultDrawingAttributes.Clone());
             StrokeVisualList[id] = strokeVisual;
-            StrokeVisualList[id] = strokeVisual;
-            var visualCanvas = new VisualCanvas(strokeVisual);
+            var visualCanvas = new VisualCanvas();
+            strokeVisual.SetVisualCanvas(visualCanvas);
             VisualCanvasList[id] = visualCanvas;
             inkCanvas.Children.Add(visualCanvas);
 
