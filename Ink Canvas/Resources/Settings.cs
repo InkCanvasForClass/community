@@ -285,6 +285,18 @@ namespace Ink_Canvas
         [JsonProperty("enablePPTButtonLongPressPageTurn")]
         public bool EnablePPTButtonLongPressPageTurn { get; set; } = true;
 
+        [JsonProperty("pptLSButtonOpacity")]
+        public double PPTLSButtonOpacity { get; set; } = 0.5;
+
+        [JsonProperty("pptRSButtonOpacity")]
+        public double PPTRSButtonOpacity { get; set; } = 0.5;
+
+        [JsonProperty("pptLBButtonOpacity")]
+        public double PPTLBButtonOpacity { get; set; } = 0.5;
+
+        [JsonProperty("pptRBButtonOpacity")]
+        public double PPTRBButtonOpacity { get; set; } = 0.5;
+
         // -- new --
 
         [JsonProperty("powerPointSupport")]

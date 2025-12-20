@@ -553,6 +553,38 @@ namespace Ink_Canvas
 
                 PPTButtonRBPositionValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonPosition;
 
+                // 初始化PPT翻页按钮透明度滑块值，根据半透明选项设置默认值
+                // 重用之前定义的sopsc和bopsc变量
+                bool isSideHalfOpacity = sopsc.Length >= 2 && sopsc[1] == '2';
+                // 如果透明度为0或未设置，根据半透明选项设置默认值
+                if (Settings.PowerPointSettings.PPTLSButtonOpacity == 0.0 || 
+                    (Settings.PowerPointSettings.PPTLSButtonOpacity == 1.0 && isSideHalfOpacity))
+                {
+                    Settings.PowerPointSettings.PPTLSButtonOpacity = isSideHalfOpacity ? 0.5 : 1.0;
+                }
+                if (Settings.PowerPointSettings.PPTRSButtonOpacity == 0.0 || 
+                    (Settings.PowerPointSettings.PPTRSButtonOpacity == 1.0 && isSideHalfOpacity))
+                {
+                    Settings.PowerPointSettings.PPTRSButtonOpacity = isSideHalfOpacity ? 0.5 : 1.0;
+                }
+                PPTLSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                PPTRSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRSButtonOpacity;
+
+                bool isBottomHalfOpacity = bopsc.Length >= 2 && bopsc[1] == '2';
+                // 如果透明度为0或未设置，根据半透明选项设置默认值
+                if (Settings.PowerPointSettings.PPTLBButtonOpacity == 0.0 || 
+                    (Settings.PowerPointSettings.PPTLBButtonOpacity == 1.0 && isBottomHalfOpacity))
+                {
+                    Settings.PowerPointSettings.PPTLBButtonOpacity = isBottomHalfOpacity ? 0.5 : 1.0;
+                }
+                if (Settings.PowerPointSettings.PPTRBButtonOpacity == 0.0 || 
+                    (Settings.PowerPointSettings.PPTRBButtonOpacity == 1.0 && isBottomHalfOpacity))
+                {
+                    Settings.PowerPointSettings.PPTRBButtonOpacity = isBottomHalfOpacity ? 0.5 : 1.0;
+                }
+                PPTLBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLBButtonOpacity;
+                PPTRBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonOpacity;
+
                 UpdatePPTBtnSlidersStatus();
 
                 UpdatePPTBtnPreview();

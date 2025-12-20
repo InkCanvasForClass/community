@@ -646,6 +646,298 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void PPTLSButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            double roundedValue = Math.Round(PPTLSButtonOpacityValueSlider.Value, 1);
+            PPTLSButtonOpacityValueSlider.Value = roundedValue;
+            Settings.PowerPointSettings.PPTLSButtonOpacity = roundedValue;
+            SaveSettingsToFile();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLSButtonOpacity = roundedValue;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTRSButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            double roundedValue = Math.Round(PPTRSButtonOpacityValueSlider.Value, 1);
+            PPTRSButtonOpacityValueSlider.Value = roundedValue;
+            Settings.PowerPointSettings.PPTRSButtonOpacity = roundedValue;
+            SaveSettingsToFile();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRSButtonOpacity = roundedValue;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTLBButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            double roundedValue = Math.Round(PPTLBButtonOpacityValueSlider.Value, 1);
+            PPTLBButtonOpacityValueSlider.Value = roundedValue;
+            Settings.PowerPointSettings.PPTLBButtonOpacity = roundedValue;
+            SaveSettingsToFile();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLBButtonOpacity = roundedValue;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTRBButtonOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            double roundedValue = Math.Round(PPTRBButtonOpacityValueSlider.Value, 1);
+            PPTRBButtonOpacityValueSlider.Value = roundedValue;
+            Settings.PowerPointSettings.PPTRBButtonOpacity = roundedValue;
+            SaveSettingsToFile();
+            // 更新PPT UI管理器设置
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRBButtonOpacity = roundedValue;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        // 左侧透明度按钮
+        private void PPTLSOpacityPlusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTLSButtonOpacityValueSlider.Value = Math.Min(1.0, PPTLSButtonOpacityValueSlider.Value + 0.1);
+            Settings.PowerPointSettings.PPTLSButtonOpacity = PPTLSButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLSButtonOpacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTLSOpacityMinusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTLSButtonOpacityValueSlider.Value = Math.Max(0.1, PPTLSButtonOpacityValueSlider.Value - 0.1);
+            Settings.PowerPointSettings.PPTLSButtonOpacity = PPTLSButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLSButtonOpacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTLSOpacitySyncBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTRSButtonOpacityValueSlider.Value = PPTLSButtonOpacityValueSlider.Value;
+            Settings.PowerPointSettings.PPTRSButtonOpacity = PPTLSButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        // 右侧透明度按钮
+        private void PPTRSOpacityPlusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTRSButtonOpacityValueSlider.Value = Math.Min(1.0, PPTRSButtonOpacityValueSlider.Value + 0.1);
+            Settings.PowerPointSettings.PPTRSButtonOpacity = PPTRSButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTRSOpacityMinusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTRSButtonOpacityValueSlider.Value = Math.Max(0.1, PPTRSButtonOpacityValueSlider.Value - 0.1);
+            Settings.PowerPointSettings.PPTRSButtonOpacity = PPTRSButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTRSOpacitySyncBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTLSButtonOpacityValueSlider.Value = PPTRSButtonOpacityValueSlider.Value;
+            Settings.PowerPointSettings.PPTLSButtonOpacity = PPTRSButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLSButtonOpacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        // 左下透明度按钮
+        private void PPTLBOpacityPlusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTLBButtonOpacityValueSlider.Value = Math.Min(1.0, PPTLBButtonOpacityValueSlider.Value + 0.1);
+            Settings.PowerPointSettings.PPTLBButtonOpacity = PPTLBButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTLBOpacityMinusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTLBButtonOpacityValueSlider.Value = Math.Max(0.1, PPTLBButtonOpacityValueSlider.Value - 0.1);
+            Settings.PowerPointSettings.PPTLBButtonOpacity = PPTLBButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTLBOpacitySyncBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTRBButtonOpacityValueSlider.Value = PPTLBButtonOpacityValueSlider.Value;
+            Settings.PowerPointSettings.PPTRBButtonOpacity = PPTLBButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        // 右下透明度按钮
+        private void PPTRBOpacityPlusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTRBButtonOpacityValueSlider.Value = Math.Min(1.0, PPTRBButtonOpacityValueSlider.Value + 0.1);
+            Settings.PowerPointSettings.PPTRBButtonOpacity = PPTRBButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTRBOpacityMinusBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTRBButtonOpacityValueSlider.Value = Math.Max(0.1, PPTRBButtonOpacityValueSlider.Value - 0.1);
+            Settings.PowerPointSettings.PPTRBButtonOpacity = PPTRBButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTRBOpacitySyncBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTLBButtonOpacityValueSlider.Value = PPTRBButtonOpacityValueSlider.Value;
+            Settings.PowerPointSettings.PPTLBButtonOpacity = PPTRBButtonOpacityValueSlider.Value;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTLSOpacityResetBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTLSButtonOpacityValueSlider.Value = 0.5;
+            Settings.PowerPointSettings.PPTLSButtonOpacity = 0.5;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLSButtonOpacity = 0.5;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTRSOpacityResetBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTRSButtonOpacityValueSlider.Value = 0.5;
+            Settings.PowerPointSettings.PPTRSButtonOpacity = 0.5;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRSButtonOpacity = 0.5;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTLBOpacityResetBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTLBButtonOpacityValueSlider.Value = 0.5;
+            Settings.PowerPointSettings.PPTLBButtonOpacity = 0.5;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTLBButtonOpacity = 0.5;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
+        private void PPTRBOpacityResetBtn_Clicked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            PPTRBButtonOpacityValueSlider.Value = 0.5;
+            Settings.PowerPointSettings.PPTRBButtonOpacity = 0.5;
+            SaveSettingsToFile();
+            if (_pptUIManager != null)
+            {
+                _pptUIManager.PPTRBButtonOpacity = 0.5;
+                _pptUIManager.UpdateNavigationButtonStyles();
+            }
+            UpdatePPTBtnPreview();
+        }
+
         private void CheckboxEnableLBPPTButton_IsCheckChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -736,13 +1028,37 @@ namespace Ink_Canvas
             if (!isLoaded) return;
             var str = Settings.PowerPointSettings.PPTSButtonsOption.ToString();
             char[] c = str.ToCharArray();
-            c[1] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
+            bool isHalfOpacity = (bool)((CheckBox)sender).IsChecked;
+            c[1] = isHalfOpacity ? '2' : '1';
             Settings.PowerPointSettings.PPTSButtonsOption = int.Parse(new string(c));
+            
+            // 如果开启半透明选项，设置默认透明度为0.5；否则为1.0
+            if (isHalfOpacity)
+            {
+                if (Settings.PowerPointSettings.PPTLSButtonOpacity == 1.0)
+                    Settings.PowerPointSettings.PPTLSButtonOpacity = 0.5;
+                if (Settings.PowerPointSettings.PPTRSButtonOpacity == 1.0)
+                    Settings.PowerPointSettings.PPTRSButtonOpacity = 0.5;
+                PPTLSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                PPTRSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRSButtonOpacity;
+            }
+            else
+            {
+                if (Settings.PowerPointSettings.PPTLSButtonOpacity == 0.5)
+                    Settings.PowerPointSettings.PPTLSButtonOpacity = 1.0;
+                if (Settings.PowerPointSettings.PPTRSButtonOpacity == 0.5)
+                    Settings.PowerPointSettings.PPTRSButtonOpacity = 1.0;
+                PPTLSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                PPTRSButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRSButtonOpacity;
+            }
+            
             SaveSettingsToFile();
             // 更新PPT UI管理器设置
             if (_pptUIManager != null && BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
             {
                 _pptUIManager.PPTSButtonsOption = Settings.PowerPointSettings.PPTSButtonsOption;
+                _pptUIManager.PPTLSButtonOpacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
                 _pptUIManager.UpdateNavigationButtonStyles();
             }
             UpdatePPTBtnPreview();
@@ -787,8 +1103,30 @@ namespace Ink_Canvas
             if (!isLoaded) return;
             var str = Settings.PowerPointSettings.PPTBButtonsOption.ToString();
             char[] c = str.ToCharArray();
-            c[1] = (bool)((CheckBox)sender).IsChecked ? '2' : '1';
+            bool isHalfOpacity = (bool)((CheckBox)sender).IsChecked;
+            c[1] = isHalfOpacity ? '2' : '1';
             Settings.PowerPointSettings.PPTBButtonsOption = int.Parse(new string(c));
+            
+            // 如果开启半透明选项，设置默认透明度为0.5；否则为1.0
+            if (isHalfOpacity)
+            {
+                if (Settings.PowerPointSettings.PPTLBButtonOpacity == 1.0)
+                    Settings.PowerPointSettings.PPTLBButtonOpacity = 0.5;
+                if (Settings.PowerPointSettings.PPTRBButtonOpacity == 1.0)
+                    Settings.PowerPointSettings.PPTRBButtonOpacity = 0.5;
+                PPTLBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLBButtonOpacity;
+                PPTRBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonOpacity;
+            }
+            else
+            {
+                if (Settings.PowerPointSettings.PPTLBButtonOpacity == 0.5)
+                    Settings.PowerPointSettings.PPTLBButtonOpacity = 1.0;
+                if (Settings.PowerPointSettings.PPTRBButtonOpacity == 0.5)
+                    Settings.PowerPointSettings.PPTRBButtonOpacity = 1.0;
+                PPTLBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTLBButtonOpacity;
+                PPTRBButtonOpacityValueSlider.Value = Settings.PowerPointSettings.PPTRBButtonOpacity;
+            }
+            
             SaveSettingsToFile();
             UpdatePPTUIManagerSettings();
             UpdatePPTBtnPreview();
@@ -1020,6 +1358,10 @@ namespace Ink_Canvas
                 _pptUIManager.PPTRBButtonPosition = Settings.PowerPointSettings.PPTRBButtonPosition;
                 _pptUIManager.EnablePPTButtonPageClickable = Settings.PowerPointSettings.EnablePPTButtonPageClickable;
                 _pptUIManager.EnablePPTButtonLongPressPageTurn = Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn;
+                _pptUIManager.PPTLSButtonOpacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
+                _pptUIManager.PPTRSButtonOpacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
+                _pptUIManager.PPTLBButtonOpacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
+                _pptUIManager.PPTRBButtonOpacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
                 _pptUIManager.UpdateNavigationPanelsVisibility();
                 _pptUIManager.UpdateNavigationButtonStyles();
             }
@@ -1030,16 +1372,9 @@ namespace Ink_Canvas
             //new BitmapImage(new Uri("pack://application:,,,/Resources/new-icons/unfold-chevron.png"));
             var bopt = Settings.PowerPointSettings.PPTBButtonsOption.ToString();
             char[] boptc = bopt.ToCharArray();
-            if (boptc[1] == '2')
-            {
-                PPTBtnPreviewLB.Opacity = 0.5;
-                PPTBtnPreviewRB.Opacity = 0.5;
-            }
-            else
-            {
-                PPTBtnPreviewLB.Opacity = 1;
-                PPTBtnPreviewRB.Opacity = 1;
-            }
+            // 使用实际的透明度设置值
+            PPTBtnPreviewLB.Opacity = Settings.PowerPointSettings.PPTLBButtonOpacity;
+            PPTBtnPreviewRB.Opacity = Settings.PowerPointSettings.PPTRBButtonOpacity;
 
             if (boptc[2] == '2')
             {
@@ -1060,16 +1395,8 @@ namespace Ink_Canvas
 
             var sopt = Settings.PowerPointSettings.PPTSButtonsOption.ToString();
             char[] soptc = sopt.ToCharArray();
-            if (soptc[1] == '2')
-            {
-                PPTBtnPreviewLS.Opacity = 0.5;
-                PPTBtnPreviewRS.Opacity = 0.5;
-            }
-            else
-            {
-                PPTBtnPreviewLS.Opacity = 1;
-                PPTBtnPreviewRS.Opacity = 1;
-            }
+            PPTBtnPreviewLS.Opacity = Settings.PowerPointSettings.PPTLSButtonOpacity;
+            PPTBtnPreviewRS.Opacity = Settings.PowerPointSettings.PPTRSButtonOpacity;
 
             if (soptc[2] == '2')
             {

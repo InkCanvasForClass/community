@@ -23,6 +23,10 @@ namespace Ink_Canvas.Helpers
         public int PPTRBButtonPosition { get; set; } = 0;
         public bool EnablePPTButtonPageClickable { get; set; } = true;
         public bool EnablePPTButtonLongPressPageTurn { get; set; } = true;
+        public double PPTLSButtonOpacity { get; set; } = 0.5;
+        public double PPTRSButtonOpacity { get; set; } = 0.5;
+        public double PPTLBButtonOpacity { get; set; } = 0.5;
+        public double PPTRBButtonOpacity { get; set; } = 0.5;
         #endregion
 
         #region Private Fields
@@ -381,10 +385,9 @@ namespace Ink_Canvas.Helpers
                 _mainWindow.PPTLSPageButton.Visibility = pageButtonVisibility;
                 _mainWindow.PPTRSPageButton.Visibility = pageButtonVisibility;
 
-                // 透明度设置
-                var opacity = options[1] == '2' ? 0.5 : 1.0;
-                _mainWindow.PPTBtnLSBorder.Opacity = opacity;
-                _mainWindow.PPTBtnRSBorder.Opacity = opacity;
+                // 透明度设置 - 直接使用用户设置的透明度值
+                _mainWindow.PPTBtnLSBorder.Opacity = PPTLSButtonOpacity;
+                _mainWindow.PPTBtnRSBorder.Opacity = PPTRSButtonOpacity;
 
                 // 颜色主题
                 bool isDarkTheme = options[2] == '2';
@@ -410,10 +413,9 @@ namespace Ink_Canvas.Helpers
                 _mainWindow.PPTLBPageButton.Visibility = pageButtonVisibility;
                 _mainWindow.PPTRBPageButton.Visibility = pageButtonVisibility;
 
-                // 透明度设置
-                var opacity = options[1] == '2' ? 0.5 : 1.0;
-                _mainWindow.PPTBtnLBBorder.Opacity = opacity;
-                _mainWindow.PPTBtnRBBorder.Opacity = opacity;
+                // 透明度设置 - 直接使用用户设置的透明度值
+                _mainWindow.PPTBtnLBBorder.Opacity = PPTLBButtonOpacity;
+                _mainWindow.PPTBtnRBBorder.Opacity = PPTRBButtonOpacity;
 
                 // 颜色主题
                 bool isDarkTheme = options[2] == '2';
