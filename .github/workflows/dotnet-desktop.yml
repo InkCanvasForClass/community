@@ -142,29 +142,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            # NuGet 全局包缓存（已下载的包）
             ~/.nuget/packages
-            # NuGet 缓存目录（包索引）
             ~\AppData\Local\NuGet\Cache
           key: ${{ runner.os }}-nuget-v2-${{ hashFiles('**/*.csproj', '**/packages.config', '**/*.sln', '**/nuget.config') }}
           restore-keys: |
             ${{ runner.os }}-nuget-v2-
 
-      - name: Cache obj/ folders
-        id: cache-obj
-        uses: actions/cache@v4
-        with:
-          path: |
-            # MSBuild 生成的 obj/ 文件夹
-            Ink Canvas/obj
-          key: ${{ runner.os }}-obj-v2-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-obj-v2-
 
-      - name: "Cache debug: show cache hit status"
-        run: |
-          echo "NuGet cache hit: ${{ steps.cache-nuget.outputs.cache-hit }}"
-          echo "Obj cache hit: ${{ steps.cache-obj.outputs.cache-hit }}"
 
       # Removed caching of obj/ folders to avoid cross-version incremental build issues
       # NuGet packages will still be cached; always run restore to ensure packages are present
