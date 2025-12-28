@@ -198,9 +198,7 @@ jobs:
     outputs:
       archive_name: ${{ steps.create_archive.outputs.archive_name }}
       zip_size: ${{ steps.calculate_size.outputs.zip_size }}
-      zip_hash: ${{ steps.calculate_size.outputs.zip_hash }}
       installer_size: ${{ steps.calculate_installer_size.outputs.installer_size }}
-      installer_hash: ${{ steps.calculate_installer_size.outputs.installer_hash }}
     
     steps:
       - name: Checkout code
@@ -343,7 +341,7 @@ jobs:
             Write-Host "Setup file not found: $setupFile"
           }
           
-      - name: Calculate archive size and hash
+      - name: Calculate archive size
         id: calculate_size
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
@@ -352,16 +350,11 @@ jobs:
           # 获取文件大小（字节）
           $fileSize = (Get-Item $archiveName).Length
           
-          # 计算SHA256哈希
-          $hash = (Get-FileHash $archiveName -Algorithm SHA256).Hash
-          
           echo "zip_size=$fileSize" >> $env:GITHUB_OUTPUT
-          echo "zip_hash=$hash" >> $env:GITHUB_OUTPUT
           
           echo "Archive size: $fileSize bytes"
-          echo "SHA256 hash: $hash"
           
-      - name: Calculate installer size and hash
+      - name: Calculate installer size
         id: calculate_installer_size
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
@@ -371,14 +364,9 @@ jobs:
             # 获取文件大小（字节）
             $fileSize = (Get-Item $installerName).Length
             
-            # 计算SHA256哈希
-            $hash = (Get-FileHash $installerName -Algorithm SHA256).Hash
-            
             echo "installer_size=$fileSize" >> $env:GITHUB_OUTPUT
-            echo "installer_hash=$hash" >> $env:GITHUB_OUTPUT
             
             echo "Installer size: $fileSize bytes"
-            echo "SHA256 hash: $hash"
           } else {
             echo "Installer file not found: $installerName"
           }
@@ -395,12 +383,6 @@ jobs:
     needs: [prepare, build]
     if: success()
     runs-on: ubuntu-latest  # 改为 Ubuntu 以使用 Python 签名工具
-    outputs:
-      signatures_created: ${{ steps.sign_artifacts.outputs.signatures_created }}
-      zip_sigstore_file: "InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip.sigstore.json"
-      installer_sigstore_file: "InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe.sigstore.json"
-      zip_sigstore_hash: ${{ steps.calculate_zip_sig_hash.outputs.sigstore_hash }}
-      installer_sigstore_hash: ${{ steps.calculate_installer_sig_hash.outputs.sigstore_hash }}
     permissions:
       contents: write
       id-token: write  # 需要这个权限来验证签名
@@ -416,7 +398,6 @@ jobs:
           python-version: '3.10'
           
       - name: Sign release artifacts with sigstore-python
-        id: sign_artifacts
         uses: sigstore/gh-action-sigstore-python@v3.2.0
         with:
           inputs: |
@@ -427,53 +408,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
-      - name: Check generated signature files
-        run: |
-          version="${{ needs.prepare.outputs.version }}"
-          echo "Checking for generated signature files..."
-          ls -la *.sig* || true
-          echo "Current directory contents:"
-          pwd
-          ls -la
-          
-      - name: Calculate ZIP signature hash
-        id: calculate_zip_sig_hash
-        run: |
-          version="${{ needs.prepare.outputs.version }}"
-          sigstoreFile="InkCanvasForClass.CE.$version.zip.sigstore.json"
-          
-          if [ -f "$sigstoreFile" ]; then
-            # 计算SHA256哈希
-            sigstoreHash=$(sha256sum "$sigstoreFile" | cut -d' ' -f1)
-            
-            echo "sigstore_hash=$sigstoreHash" >> $GITHUB_OUTPUT
-            echo "Sigstore JSON file hash: $sigstoreHash"
-            echo "Sigstore file size: $(stat -c%s "$sigstoreFile") bytes"
-          else
-            echo "Warning: Sigstore file not found: $sigstoreFile"
-            echo "sigstore_hash=" >> $GITHUB_OUTPUT
-          fi
-          
-      - name: Calculate Installer signature hash
-        id: calculate_installer_sig_hash
-        run: |
-          version="${{ needs.prepare.outputs.version }}"
-          sigstoreFile="InkCanvasForClass.CE.$version.Setup.exe.sigstore.json"
-          
-          if [ -f "$sigstoreFile" ]; then
-            # 计算SHA256哈希
-            sigstoreHash=$(sha256sum "$sigstoreFile" | cut -d' ' -f1)
-            
-            echo "sigstore_hash=$sigstoreHash" >> $GITHUB_OUTPUT
-            echo "Sigstore JSON file hash: $sigstoreHash"
-            echo "Sigstore file size: $(stat -c%s "$sigstoreFile") bytes"
-          else
-            echo "Warning: Sigstore file not found: $sigstoreFile"
-            echo "sigstore_hash=" >> $GITHUB_OUTPUT
-          fi
-
       - name: Upload Signed Artifacts
-        if: steps.calculate_zip_sig_hash.outputs.sigstore_hash != '' || steps.calculate_installer_sig_hash.outputs.sigstore_hash != ''
         uses: actions/upload-artifact@v4
         with:
           name: signed-files-${{ needs.prepare.outputs.version }}
@@ -500,7 +435,6 @@ jobs:
           name: signed-files-${{ needs.prepare.outputs.version }}
         continue-on-error: true
           
-          
       - name: Create enhanced changelog with file table
         id: enhanced_changelog
         run: |
@@ -511,38 +445,32 @@ jobs:
           
           # 构建文件信息表格
           fileTable=$'\n## 文件信息 (File Information)\n'
-          fileTable+=$'| 文件名 | 大小 | SHA256 哈希 |\n'
-          fileTable+=$'|--------|------|-------------|\n'
+          fileTable+=$'| 文件名 | 大小 |\n'
+          fileTable+=$'|--------|------|\n'
           
           # ZIP 文件信息
           fileTable+=$'| InkCanvasForClass.CE.'"$version"
-          fileTable+=$'.zip | ${{ needs.build.outputs.zip_size }} bytes | ${{ needs.build.outputs.zip_hash }} |\n'
+          fileTable+=$'.zip | ${{ needs.build.outputs.zip_size }} bytes |\n'
           
           # 安装包文件信息
           installerSize="${{ needs.build.outputs.installer_size }}"
-          installerHash="${{ needs.build.outputs.installer_hash }}"
-          if [ -n "$installerSize" ] && [ -n "$installerHash" ]; then
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe | '"$installerSize"' bytes | '"$installerHash"
-            fileTable+=$' |\n'
+          if [ -n "$installerSize" ]; then
+            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe | '"$installerSize"' bytes |\n'
           fi
           
           # 检查是否有签名文件
           if [ -f "InkCanvasForClass.CE.$version.zip.sigstore.json" ]; then
             sigstoreSize=$(stat -c%s "InkCanvasForClass.CE.$version.zip.sigstore.json")
-            sigstoreHash=$(sha256sum "InkCanvasForClass.CE.$version.zip.sigstore.json" | cut -d' ' -f1)
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.zip.sigstore.json | '"$sigstoreSize"' bytes | '"$sigstoreHash"
-            fileTable+=$' |\n'
+            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.zip.sigstore.json | '"$sigstoreSize"' bytes |\n'
           fi
           
           # 检查安装程序签名文件
           if [ -f "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json" ]; then
             sigstoreSize=$(stat -c%s "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json")
-            sigstoreHash=$(sha256sum "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json" | cut -d' ' -f1)
-            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe.sigstore.json | '"$sigstoreSize"' bytes | '"$sigstoreHash"
-            fileTable+=$' |\n'
+            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe.sigstore.json | '"$sigstoreSize"' bytes |\n'
           fi
           
-          fileTable+=$'\n*文件哈希和大小信息由GitHub Actions自动生成*\n'
+          fileTable+=$'\n*文件大小信息由GitHub Actions自动生成*\n'
           
           # 将表格附加到原始changelog
           enhancedChangelog="${originalChangelog}${fileTable}"
