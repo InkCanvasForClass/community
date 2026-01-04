@@ -96,19 +96,23 @@
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <DebugType>full</DebugType>
     <LangVersion>7.3</LangVersion>
-    <Prefer32Bit>true</Prefer32Bit>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='x86 Debug|x64'">
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <DebugType>full</DebugType>
     <LangVersion>7.3</LangVersion>
-    <Prefer32Bit>true</Prefer32Bit>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
     <DebugType>pdbonly</DebugType>
     <LangVersion>7.3</LangVersion>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="IACore">
@@ -200,8 +204,12 @@
     <EmbeddedResource Include="Resources\IACore\IACore.dll" />
     <EmbeddedResource Include="Resources\IACore\IALoader.dll" />
     <EmbeddedResource Include="Resources\IACore\IAWinFX.dll" />
-    <EmbeddedResource Include="UIAccessDLL_x64.dll" />
-    <EmbeddedResource Include="UIAccessDLL_x86.dll" />
+    <EmbeddedResource Include="UIAccessDLL_x64.dll">
+      <LogicalName>costuraX64\UIAccessDLL_x64.dll</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UIAccessDLL_x86.dll">
+      <LogicalName>costuraX86\UIAccessDLL_x86.dll</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Cursors\Cursor.cur" />

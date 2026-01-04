@@ -1,3 +1,10 @@
 ﻿<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
-  <Costura ExcludeAssemblies="IACore|IALoader|IAWinFX" />
+  <Costura ExcludeAssemblies="IACore|IALoader|IAWinFX">
+    <UnmanagedWinX86Assemblies>
+      UIAccessDLL_x86
+    </UnmanagedWinX86Assemblies>
+    <UnmanagedWinX64Assemblies>
+      UIAccessDLL_x64
+    </UnmanagedWinX64Assemblies>
+  </Costura>
 </Weavers>

@@ -271,6 +271,8 @@ jobs:
         run: |
           Write-Host "🔨 正在构建项目..." -ForegroundColor Cyan
           msbuild /p:platform="AnyCPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal
+          # 同时为 x64 平台执行构建以产生 64 位产物
+          msbuild /p:platform="x64" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal
           
           Write-Host "🏗️ 构建命令执行完成" -ForegroundColor Cyan
           
@@ -283,8 +285,19 @@ jobs:
           # 创建发布目录
           New-Item -ItemType Directory -Path "release" -Force
           
-          # 复制发布文件
+          # 复制发布文件（包含 AnyCPU 与 x64 输出）
           Copy-Item "Ink Canvas\bin\Release\net472\*" "release\" -Recurse -Force
+          # Copy classic x64 msbuild output
+          if (Test-Path "Ink Canvas\bin\x64\Release") {
+            Copy-Item "Ink Canvas\bin\x64\Release\*" "release\" -Recurse -Force
+          }
+          # Also copy dotnet win-x64 output if present
+          if (Test-Path "Ink Canvas\bin\Release\net472\win-x64") {
+            Copy-Item "Ink Canvas\bin\Release\net472\win-x64\*" "release\" -Recurse -Force
+          }
+          # 列出发布目录内容以便诊断
+          Write-Host "Release directory contents:" -ForegroundColor Cyan
+          Get-ChildItem -Path release -Recurse | Sort-Object FullName | Format-Table -AutoSize
           
           # 创建压缩包
           Compress-Archive -Path "release\*" -DestinationPath $archiveName -Force
