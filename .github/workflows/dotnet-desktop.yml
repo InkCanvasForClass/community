@@ -111,7 +111,7 @@ jobs:
       
       - name: Post/Update Preview Comment
         id: create-preview-comment
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-id: ${{ needs.find-or-create-pr-comment.outputs.comment_id }}
@@ -340,7 +340,7 @@ jobs:
           echo "最终评论内容已生成"
       
       - name: Update Final Comment
-        uses: peter-evans/create-or-update-comment@v4
+        uses: peter-evans/create-or-update-comment@v5
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-id: ${{ needs.pr-preview-comment.outputs.comment_id }}
