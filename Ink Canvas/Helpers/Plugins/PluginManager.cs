@@ -503,10 +503,10 @@ namespace Ink_Canvas.Helpers.Plugins
                                 oldHash != currentHash)
                             {
                                 // 文件已变化，执行热重载
-                                Application.Current.Dispatcher.Invoke(() =>
-                                {
-                                    ReloadPlugin(plugin);
-                                });
+                                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                                    {
+                                        ReloadPlugin(plugin);
+                                    }), System.Windows.Threading.DispatcherPriority.Normal);
                             }
                         }
                     }
@@ -1015,7 +1015,7 @@ namespace Ink_Canvas.Helpers.Plugins
             Dictionary<string, bool> defaultConfig = new Dictionary<string, bool>();
 
             // 尝试获取配置锁
-            _configLock.Wait();
+            _configLock.WaitAsync().GetAwaiter().GetResult();
 
             try
             {
@@ -1110,7 +1110,8 @@ namespace Ink_Canvas.Helpers.Plugins
                         if (attempt < maxRetries)
                         {
                             LogHelper.WriteLogToFile($"加载配置失败 (尝试 {attempt}/{maxRetries}): {ex.Message}，将在 {retryDelayMs}ms 后重试", LogHelper.LogType.Warning);
-                            Thread.Sleep(retryDelayMs);
+                            // 使用同步等待但避免 Thread.Sleep 回退
+                            Task.Delay(retryDelayMs).GetAwaiter().GetResult();
                         }
                         else
                         {
@@ -1225,7 +1226,8 @@ namespace Ink_Canvas.Helpers.Plugins
                         if (attempt < maxRetries)
                         {
                             LogHelper.WriteLogToFile($"保存配置失败 (尝试 {attempt}/{maxRetries}): {ex.Message}，将在 {retryDelayMs}ms 后重试", LogHelper.LogType.Warning);
-                            Thread.Sleep(retryDelayMs);
+                            // 使用同步等待但避免 Thread.Sleep 回退
+                            Task.Delay(retryDelayMs).GetAwaiter().GetResult();
                         }
                         else
                         {
@@ -1435,7 +1437,7 @@ namespace Ink_Canvas.Helpers.Plugins
                 // 通知UI更新
                 if (Application.Current != null && Application.Current.Dispatcher != null)
                 {
-                    Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         // 通知任何可能打开的插件设置窗口刷新
                         foreach (Window window in Application.Current.Windows)
@@ -1445,7 +1447,7 @@ namespace Ink_Canvas.Helpers.Plugins
                                 pluginWindow.RefreshPluginList();
                             }
                         }
-                    });
+                    }), System.Windows.Threading.DispatcherPriority.Normal);
                 }
 
                 LogHelper.WriteLogToFile("插件状态已从配置文件重新加载完成");

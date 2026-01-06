@@ -1,6 +1,7 @@
 using Microsoft.Win32;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 
@@ -71,7 +72,7 @@ namespace Ink_Canvas
             Close();
         }
 
-        private void SaveButton_Click(object sender, RoutedEventArgs e)
+        private async void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -94,8 +95,8 @@ namespace Ink_Canvas
                 string newFileName = $"{Guid.NewGuid()}{extension}";
                 string destPath = Path.Combine(backgroundsFolder, newFileName);
 
-                // 复制文件到pictures/picknamebackgrounds文件夹
-                File.Copy(selectedFilePath, destPath);
+                // 复制文件到pictures/picknamebackgrounds文件夹（后台线程）
+                await Task.Run(() => File.Copy(selectedFilePath, destPath));
 
                 // 创建新的自定义背景对象
                 var customBackground = new CustomPickNameBackground(BackgroundNameTextBox.Text, destPath);

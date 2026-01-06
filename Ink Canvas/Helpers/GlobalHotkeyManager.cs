@@ -103,11 +103,11 @@ namespace Ink_Canvas.Helpers
                 {
                     try
                     {
-                        // 确保在主线程中执行
-                        _mainWindow.Dispatcher.Invoke(() =>
+                        // 确保在主线程中执行（使用 BeginInvoke 避免阻塞）
+                        _mainWindow.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             action?.Invoke();
-                        });
+                        }), System.Windows.Threading.DispatcherPriority.Normal);
                     }
                     catch (Exception ex)
                     {

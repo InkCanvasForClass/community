@@ -26,15 +26,15 @@ namespace Ink_Canvas
                 TextBlockNotice.Text = notice;
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(GridNotifications);
 
-                new Thread(() =>
+                Task.Run(async () =>
                 {
-                    Thread.Sleep(notificationShowTime + 300);
+                    await Task.Delay(notificationShowTime + 300).ConfigureAwait(false);
                     if (Environment.TickCount - lastNotificationShowTime >= notificationShowTime)
-                        Application.Current.Dispatcher.Invoke(() =>
+                        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             AnimationsHelper.HideWithSlideAndFade(GridNotifications);
-                        });
-                }).Start();
+                        }), System.Windows.Threading.DispatcherPriority.Normal);
+                });
             }
             catch { }
         }

@@ -44,7 +44,7 @@ namespace Ink_Canvas
             TimeSpan totalTimeSpan = new TimeSpan(hour, minute, second);
             double spentTimePercent = timeSpan.TotalMilliseconds / (totalSeconds * 1000.0);
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (!isOvertimeMode)
                 {

@@ -109,10 +109,17 @@ namespace Ink_Canvas.Helpers
             {
                 if (_config.UseHardwareAcceleration)
                 {
-                    // 使用硬件加速的同步版本
+                    // 使用硬件加速的同步版本，使用 Task.WhenAny 实现超时而不直接调用 Wait
                     var task = _hardwareProcessor.SmoothStrokeWithGPU(originalStroke);
-                    task.Wait(5000); // 5秒超时
-                    result = task.Status == TaskStatus.RanToCompletion ? task.Result : originalStroke;
+                    var completed = Task.WhenAny(task, Task.Delay(5000)).GetAwaiter().GetResult();
+                    if (completed == task && task.Status == TaskStatus.RanToCompletion)
+                    {
+                        result = task.GetAwaiter().GetResult();
+                    }
+                    else
+                    {
+                        result = originalStroke;
+                    }
                 }
                 else
                 {

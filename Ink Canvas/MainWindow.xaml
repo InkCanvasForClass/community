@@ -116,7 +116,7 @@
     <Grid x:Name="Main_Grid">
 
         <!--// 设置界面 //-->
-        <Grid Panel.ZIndex="999" x:Name="BorderSettingsMask" MouseDown="SettingsOverlayClick" IsHitTestVisible="True"
+          <Grid Panel.ZIndex="999" x:Name="BorderSettingsMask" MouseDown="SettingsOverlayClick" TouchDown="SettingsOverlayTouch" IsHitTestVisible="True"
               Margin="0,0,0,0">
             <Border Name="BorderSettings" Background="#ee18181b" ui:ThemeManager.RequestedTheme="Dark" Width="490"
                     HorizontalAlignment="Left" Margin="300,150,0,350" Visibility="Visible">
@@ -4350,7 +4350,7 @@
             TouchDown="GridInkCanvasSelectionCover_TouchDown"
             TouchUp="GridInkCanvasSelectionCover_TouchUp"
             TouchMove="GridInkCanvasSelectionCover_TouchMove"
-                  Background="#01FFFFFF" Opacity="0.01" Visibility="Visible" Margin="1,0,-1,0">
+                Background="#01FFFFFF" Opacity="0.01" Visibility="Visible" IsHitTestVisible="False" Margin="1,0,-1,0">
                 
                 <!-- 选择框 -->
                 <Rectangle Name="SelectionRectangle"

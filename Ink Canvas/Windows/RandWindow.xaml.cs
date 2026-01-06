@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
@@ -161,14 +162,14 @@ namespace Ink_Canvas
             // 添加窗口显示事件处理，确保置顶
             Loaded += RandWindow_Loaded;
 
-            new Thread(() =>
+            Task.Run(async () =>
             {
-                Thread.Sleep(100);
-                Application.Current.Dispatcher.Invoke(() =>
+                await Task.Delay(100).ConfigureAwait(false);
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     BorderBtnRand_MouseUp(BorderBtnRand, null);
-                });
-            }).Start();
+                }));
+            });
         }
 
         public static int randSeed = 0;
@@ -215,7 +216,7 @@ namespace Ink_Canvas
             LabelOutput2.Visibility = Visibility.Collapsed;
             LabelOutput3.Visibility = Visibility.Collapsed;
 
-            new Thread(() =>
+            Task.Run(async () =>
             {
                 var animationPool = new List<int>();
                 for (int num = 1; num <= PeopleCount; num++)
@@ -244,7 +245,7 @@ namespace Ink_Canvas
                     }
                     animationPool.RemoveAt(lastIndex);
 
-                    Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         if (Names.Count != 0)
                         {
@@ -254,12 +255,12 @@ namespace Ink_Canvas
                         {
                             LabelOutput.Content = selectedNumber.ToString();
                         }
-                    });
+                    }));
 
-                    Thread.Sleep(RandWaitingThreadSleepTime);
+                    await Task.Delay(RandWaitingThreadSleepTime).ConfigureAwait(false);
                 }
 
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     var candidatePool = new List<int>();
                     for (int num = 1; num <= PeopleCount; num++)
@@ -334,19 +335,19 @@ namespace Ink_Canvas
                         LabelOutput3.Content = outputString.Trim();
                     }
 
-                    if (isAutoClose)
-                    {
-                        new Thread(() =>
+                        if (isAutoClose)
                         {
-                            Thread.Sleep(RandDoneAutoCloseWaitTime);
-                            Application.Current.Dispatcher.Invoke(() =>
+                            Task.Run(async () =>
                             {
-                                PeopleControlPane.Opacity = 1;
-                                PeopleControlPane.IsHitTestVisible = true;
-                                Close();
+                                await Task.Delay(RandDoneAutoCloseWaitTime).ConfigureAwait(false);
+                                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    PeopleControlPane.Opacity = 1;
+                                    PeopleControlPane.IsHitTestVisible = true;
+                                    Close();
+                                }));
                             });
-                        }).Start();
-                    }
+                        }
                 });
             }).Start();
         }

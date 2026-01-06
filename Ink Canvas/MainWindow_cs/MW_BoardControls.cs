@@ -120,7 +120,7 @@ namespace Ink_Canvas
             _currentCommitType = CommitReason.ClearingCanvas;
             if (isErasedByCode) _currentCommitType = CommitReason.CodeInput;
 
-            inkCanvas.Strokes.Clear();
+            SafeRemoveStrokes(() => inkCanvas.Strokes.Clear());
 
             // 执行内存清理
             PerformLightweightMemoryCleanup();
@@ -158,7 +158,7 @@ namespace Ink_Canvas
                 var targetIndex = isBackupMain ? 0 : CurrentWhiteboardIndex;
 
                 // 先清空当前画布的墨迹
-                inkCanvas.Strokes.Clear();
+                SafeRemoveStrokes(() => inkCanvas.Strokes.Clear());
 
                 // 清空当前画布的所有内容（墨迹和图片）
                 // 这里必须清除图片，因为页面切换时需要完全重置画布状态

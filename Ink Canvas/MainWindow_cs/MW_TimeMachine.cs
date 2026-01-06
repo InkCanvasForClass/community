@@ -62,13 +62,13 @@ namespace Ink_Canvas
                 {
                     foreach (var strokes in item.CurrentStroke)
                         if (!canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Add(strokes);
+                            SafeAddStrokes(() => canvas.Strokes.Add(strokes));
                 }
                 else
                 {
                     foreach (var strokes in item.CurrentStroke)
                         if (canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Remove(strokes);
+                            SafeRemoveStrokes(() => canvas.Strokes.Remove(strokes));
                 }
             }
             else if (item.CommitType == TimeMachineHistoryType.ShapeRecognition)
@@ -77,21 +77,21 @@ namespace Ink_Canvas
                 {
                     foreach (var strokes in item.CurrentStroke)
                         if (canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Remove(strokes);
+                            SafeRemoveStrokes(() => canvas.Strokes.Remove(strokes));
 
                     foreach (var strokes in item.ReplacedStroke)
                         if (!canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Add(strokes);
+                            SafeAddStrokes(() => canvas.Strokes.Add(strokes));
                 }
                 else
                 {
                     foreach (var strokes in item.CurrentStroke)
                         if (!canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Add(strokes);
+                            SafeAddStrokes(() => canvas.Strokes.Add(strokes));
 
                     foreach (var strokes in item.ReplacedStroke)
                         if (canvas.Strokes.Contains(strokes))
-                            canvas.Strokes.Remove(strokes);
+                            SafeRemoveStrokes(() => canvas.Strokes.Remove(strokes));
                 }
             }
             else if (item.CommitType == TimeMachineHistoryType.Manipulation)
@@ -147,24 +147,24 @@ namespace Ink_Canvas
                     if (item.CurrentStroke != null)
                         foreach (var currentStroke in item.CurrentStroke)
                             if (!canvas.Strokes.Contains(currentStroke))
-                                canvas.Strokes.Add(currentStroke);
+                                SafeAddStrokes(() => canvas.Strokes.Add(currentStroke));
 
                     if (item.ReplacedStroke != null)
                         foreach (var replacedStroke in item.ReplacedStroke)
                             if (canvas.Strokes.Contains(replacedStroke))
-                                canvas.Strokes.Remove(replacedStroke);
+                                SafeRemoveStrokes(() => canvas.Strokes.Remove(replacedStroke));
                 }
                 else
                 {
                     if (item.ReplacedStroke != null)
                         foreach (var replacedStroke in item.ReplacedStroke)
                             if (!canvas.Strokes.Contains(replacedStroke))
-                                canvas.Strokes.Add(replacedStroke);
+                                SafeAddStrokes(() => canvas.Strokes.Add(replacedStroke));
 
                     if (item.CurrentStroke != null)
                         foreach (var currentStroke in item.CurrentStroke)
                             if (canvas.Strokes.Contains(currentStroke))
-                                canvas.Strokes.Remove(currentStroke);
+                                SafeRemoveStrokes(() => canvas.Strokes.Remove(currentStroke));
                 }
             }
             else if (item.CommitType == TimeMachineHistoryType.ElementInsert)

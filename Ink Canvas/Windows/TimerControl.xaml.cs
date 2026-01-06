@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Media;
 using System.Timers;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -109,10 +110,10 @@ namespace Ink_Canvas.Windows
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
             // 当主题变化时，重新应用主题
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 RefreshTheme();
-            });
+            }));
         }
 
         /// <summary>
@@ -169,7 +170,7 @@ namespace Ink_Canvas.Windows
             TimeSpan totalTimeSpan = new TimeSpan(hour, minute, second);
             double spentTimePercent = timeSpan.TotalMilliseconds / (totalTimeSpan.TotalMilliseconds);
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 if (!isOvertimeMode)
                 {
@@ -1377,7 +1378,14 @@ namespace Ink_Canvas.Windows
 
                 // 序列化为JSON并保存到文件
                 string jsonContent = JsonConvert.SerializeObject(data, Formatting.Indented);
-                File.WriteAllText(RecentTimersJsonPath, jsonContent);
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        File.WriteAllText(RecentTimersJsonPath, jsonContent);
+                    }
+                    catch { }
+                });
             }
             catch (Exception)
             {
@@ -1552,7 +1560,7 @@ namespace Ink_Canvas.Windows
         private void HandleTimerCompletion()
         {
             // 计时器结束时，如果显示的是最小化视图，恢复到主窗口视图
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 var mainWindow = Application.Current.MainWindow as MainWindow;
                 if (mainWindow != null)
@@ -1566,7 +1574,7 @@ namespace Ink_Canvas.Windows
                         HideMinimizedRequested?.Invoke(this, EventArgs.Empty);
                     }
                 }
-            });
+            }), DispatcherPriority.Normal);
 
             // 重置计时器状态
             ResetTimerState();
@@ -1577,7 +1585,7 @@ namespace Ink_Canvas.Windows
         /// </summary>
         public void ResetTimerState()
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 // 停止计时器
                 if (isTimerRunning)
@@ -1616,14 +1624,14 @@ namespace Ink_Canvas.Windows
                 {
                     FullscreenBtn.IsEnabled = false;
                 }
-            });
+            }), DispatcherPriority.Normal);
         }
 
         private void HideTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (!isTimerRunning || isPaused) return;
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 var timeSinceLastActivity = DateTime.Now - lastActivityTime;
 
@@ -1639,7 +1647,7 @@ namespace Ink_Canvas.Windows
                         }
                     }
                 }
-            });
+            }), DispatcherPriority.Normal);
         }
 
         public void UpdateActivityTime()

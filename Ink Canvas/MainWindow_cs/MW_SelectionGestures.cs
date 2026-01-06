@@ -378,6 +378,7 @@ namespace Ink_Canvas
             {
                 // 使用集中化的工具模式切换方法
                 SetCurrentToolMode(InkCanvasEditingMode.Select);
+                if (GridInkCanvasSelectionCover != null) GridInkCanvasSelectionCover.IsHitTestVisible = false;
             }
         }
 
@@ -403,8 +404,9 @@ namespace Ink_Canvas
                     }
                 }
 
-                // 显示墨迹选择栏和选择框
+                // 显示墨迹选择栏和选择框，并使选择覆盖层可接收输入用于拖动/缩放
                 GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
+                GridInkCanvasSelectionCover.IsHitTestVisible = true;
                 BorderStrokeSelectionClone.Background = Brushes.Transparent;
                 updateBorderStrokeSelectionControlLocation();
                 UpdateSelectionDisplay();
@@ -431,8 +433,9 @@ namespace Ink_Canvas
                 return;
             }
 
-            // 没有选中任何内容，隐藏选择框
+            // 没有选中任何内容，隐藏选择框并禁用覆盖层的命中测试以让画布接收套索输入
             GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+            GridInkCanvasSelectionCover.IsHitTestVisible = false;
             HideSelectionDisplay();
         }
 
@@ -675,6 +678,9 @@ namespace Ink_Canvas
             drawingShapeMode = 0;
             // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.Select);
+            // 进入套索选择时，让画布直接接收触摸/笔以进行套索选择
+            if (GridInkCanvasSelectionCover != null) GridInkCanvasSelectionCover.IsHitTestVisible = false;
+            if (inkCanvas != null) inkCanvas.IsHitTestVisible = true;
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 
@@ -686,6 +692,9 @@ namespace Ink_Canvas
             // 使用集中化的工具模式切换方法
             SetCurrentToolMode(InkCanvasEditingMode.Select);
             inkCanvas.IsManipulationEnabled = true;
+            // 进入套索选择时，让画布直接接收触摸/笔以进行套索选择
+            if (GridInkCanvasSelectionCover != null) GridInkCanvasSelectionCover.IsHitTestVisible = false;
+            if (inkCanvas != null) inkCanvas.IsHitTestVisible = true;
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 

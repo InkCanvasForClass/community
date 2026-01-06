@@ -375,6 +375,7 @@ namespace Ink_Canvas
                 // 设置蒙版为不可点击，并移除背景
                 BorderSettingsMask.IsHitTestVisible = false;
                 BorderSettingsMask.Background = null;
+                BorderSettings.IsHitTestVisible = false;
                 var sb = new Storyboard();
 
                 // 滑动动画
@@ -663,11 +664,11 @@ namespace Ink_Canvas
                     Not_Enter_Blackboard_fir_Mouse_Click = false;
                 }
                 */
-                new Thread(() =>
+                Task.Run(async () =>
                 {
-                    Thread.Sleep(100);
-                    Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
-                }).Start();
+                    await Task.Delay(100).ConfigureAwait(false);
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() => { ViewboxFloatingBarMarginAnimation(60); }), DispatcherPriority.Normal);
+                });
 
                 HideSubPanels();
 
@@ -801,17 +802,17 @@ namespace Ink_Canvas
                     inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) SaveScreenShot(true);
 
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Collapsed)
-                    new Thread(() =>
+                    Task.Run(async () =>
                     {
-                        Thread.Sleep(300);
-                        Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(100, true); });
-                    }).Start();
+                        await Task.Delay(300).ConfigureAwait(false);
+                        Application.Current.Dispatcher.BeginInvoke(new Action(() => { ViewboxFloatingBarMarginAnimation(100, true); }), DispatcherPriority.Normal);
+                    });
                 else
-                    new Thread(() =>
+                    Task.Run(async () =>
                     {
-                        Thread.Sleep(300);
-                        Application.Current.Dispatcher.Invoke(() => { ViewboxFloatingBarMarginAnimation(60); });
-                    }).Start();
+                        await Task.Delay(300).ConfigureAwait(false);
+                        Application.Current.Dispatcher.BeginInvoke(new Action(() => { ViewboxFloatingBarMarginAnimation(60); }), DispatcherPriority.Normal);
+                    });
 
                 if (System.Windows.Controls.Canvas.GetLeft(FloatingbarSelectionBG) != 28) PenIcon_Click(null, null);
 
@@ -867,11 +868,11 @@ namespace Ink_Canvas
             BtnExit.Foreground = Brushes.White;
             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
 
-            new Thread(() =>
+            Task.Run(async () =>
             {
-                Thread.Sleep(200);
-                Application.Current.Dispatcher.Invoke(() => { isDisplayingOrHidingBlackboard = false; });
-            }).Start();
+                await Task.Delay(200).ConfigureAwait(false);
+                Application.Current.Dispatcher.BeginInvoke(new Action(() => { isDisplayingOrHidingBlackboard = false; }), DispatcherPriority.Normal);
+            });
 
             SwitchToDefaultPen(null, null);
             CheckColorTheme(true);
@@ -907,7 +908,7 @@ namespace Ink_Canvas
 
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
-                inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
+                SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes()));
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
             }
             else if (inkCanvas.Strokes.Count > 0)
@@ -1344,20 +1345,20 @@ namespace Ink_Canvas
             isPauseInkReplay = false;
             isRestartInkReplay = false;
             inkReplaySpeed = 1;
-            InkCanvasForInkReplay.Strokes.Clear();
+            SafeRemoveStrokes(() => InkCanvasForInkReplay.Strokes.Clear());
             var strokes = inkCanvas.Strokes.Clone();
             if (inkCanvas.GetSelectedStrokes().Count != 0) strokes = inkCanvas.GetSelectedStrokes().Clone();
             int k = 1, i = 0;
-            new Thread(() =>
+            Task.Run(async () =>
             {
                 isRestartInkReplay = true;
                 while (isRestartInkReplay)
                 {
                     isRestartInkReplay = false;
-                    Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        InkCanvasForInkReplay.Strokes.Clear();
-                    });
+                        SafeRemoveStrokes(() => InkCanvasForInkReplay.Strokes.Clear());
+                    }), DispatcherPriority.Normal);
                     foreach (var stroke in strokes)
                     {
 
@@ -1374,21 +1375,21 @@ namespace Ink_Canvas
 
                                 while (isPauseInkReplay)
                                 {
-                                    Thread.Sleep(10);
+                                    await Task.Delay(10).ConfigureAwait(false);
                                 }
 
                                 if (i++ >= 50)
                                 {
                                     i = 0;
-                                    Thread.Sleep((int)(10 / inkReplaySpeed));
+                                    await Task.Delay((int)(10 / inkReplaySpeed)).ConfigureAwait(false);
                                     if (isStopInkReplay) return;
                                 }
 
-                                Application.Current.Dispatcher.Invoke(() =>
+                                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                                 {
                                     try
                                     {
-                                        InkCanvasForInkReplay.Strokes.Remove(s);
+                                        SafeRemoveStrokes(() => InkCanvasForInkReplay.Strokes.Remove(s));
                                     }
                                     catch { }
 
@@ -1397,8 +1398,8 @@ namespace Ink_Canvas
                                     {
                                         DrawingAttributes = stroke.DrawingAttributes
                                     };
-                                    InkCanvasForInkReplay.Strokes.Add(s);
-                                });
+                                    SafeAddStrokes(() => InkCanvasForInkReplay.Strokes.Add(s));
+                                }), DispatcherPriority.Normal);
                             }
                         }
                         else
@@ -1411,21 +1412,21 @@ namespace Ink_Canvas
 
                                 while (isPauseInkReplay)
                                 {
-                                    Thread.Sleep(10);
+                                    await Task.Delay(10).ConfigureAwait(false);
                                 }
 
                                 if (i++ >= k)
                                 {
                                     i = 0;
-                                    Thread.Sleep((int)(10 / inkReplaySpeed));
+                                    await Task.Delay((int)(10 / inkReplaySpeed)).ConfigureAwait(false);
                                     if (isStopInkReplay) return;
                                 }
 
-                                Application.Current.Dispatcher.Invoke(() =>
+                                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                                 {
                                     try
                                     {
-                                        InkCanvasForInkReplay.Strokes.Remove(s);
+                                        SafeRemoveStrokes(() => InkCanvasForInkReplay.Strokes.Remove(s));
                                     }
                                     catch { }
 
@@ -1434,15 +1435,15 @@ namespace Ink_Canvas
                                     {
                                         DrawingAttributes = stroke.DrawingAttributes
                                     };
-                                    InkCanvasForInkReplay.Strokes.Add(s);
-                                });
+                                    SafeAddStrokes(() => InkCanvasForInkReplay.Strokes.Add(s));
+                                }), DispatcherPriority.Normal);
                             }
                         }
                     }
                 }
 
-                Thread.Sleep(100);
-                Application.Current.Dispatcher.Invoke(() =>
+                await Task.Delay(100).ConfigureAwait(false);
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     InkCanvasForInkReplay.Visibility = Visibility.Collapsed;
                     InkCanvasGridForInkReplay.Visibility = Visibility.Visible;
@@ -1734,14 +1735,32 @@ namespace Ink_Canvas
                     }
                 }
 
-                var marginAnimation = new ThicknessAnimation
+                // 使用 RenderTransform 平移动画（避免频繁触发布局），并使用 EaseOut 曲线（从快到慢）
+                var oldMargin = ViewboxFloatingBar.Margin;
+                var finalMargin = new Thickness(pos.X, pos.Y, 0, -20);
+
+                // 预先设置为目标 Margin，再通过 TranslateTransform 从旧位置平移到新位置
+                ViewboxFloatingBar.Margin = finalMargin;
+
+                var deltaX = oldMargin.Left - finalMargin.Left;
+                var deltaY = oldMargin.Top - finalMargin.Top;
+
+                var tt = ViewboxFloatingBar.RenderTransform as TranslateTransform;
+                if (tt == null)
                 {
-                    Duration = TimeSpan.FromSeconds(0.35),
-                    From = ViewboxFloatingBar.Margin,
-                    To = new Thickness(pos.X, pos.Y, 0, -20),
-                    EasingFunction = new CircleEase()
-                };
-                ViewboxFloatingBar.BeginAnimation(MarginProperty, marginAnimation);
+                    tt = new TranslateTransform();
+                    ViewboxFloatingBar.RenderTransform = tt;
+                    ViewboxFloatingBar.RenderTransformOrigin = new System.Windows.Point(0, 0);
+                }
+
+                tt.X = deltaX;
+                tt.Y = deltaY;
+
+                var ease = new System.Windows.Media.Animation.CubicEase { EasingMode = System.Windows.Media.Animation.EasingMode.EaseOut };
+                var animX = new System.Windows.Media.Animation.DoubleAnimation(0, TimeSpan.FromSeconds(0.35)) { EasingFunction = ease };
+                var animY = new System.Windows.Media.Animation.DoubleAnimation(0, TimeSpan.FromSeconds(0.35)) { EasingFunction = ease };
+                tt.BeginAnimation(TranslateTransform.XProperty, animX);
+                tt.BeginAnimation(TranslateTransform.YProperty, animY);
             });
 
             await Task.Delay(200);
@@ -2871,6 +2890,29 @@ namespace Ink_Canvas
             }
         }
 
+        private void SettingsOverlayTouch(object sender, System.Windows.Input.TouchEventArgs e)
+        {
+            if (isOpeningOrHidingSettingsPane) return;
+
+            // 获取触摸的位置
+            Point clickPoint = e.GetTouchPoint(BorderSettingsMask).Position;
+
+            // 获取BorderSettings的位置和大小
+            Point settingsPosition = BorderSettings.TranslatePoint(new Point(0, 0), BorderSettingsMask);
+            Rect settingsRect = new Rect(
+                settingsPosition.X,
+                settingsPosition.Y,
+                BorderSettings.ActualWidth,
+                BorderSettings.ActualHeight
+            );
+
+            // 如果触摸位置不在设置界面内部，才关闭设置界面
+            if (!settingsRect.Contains(clickPoint))
+            {
+                BtnSettings_Click(null, null);
+            }
+        }
+
         private bool isOpeningOrHidingSettingsPane;
 
         private void BtnSettings_Click(object sender, RoutedEventArgs e)
@@ -2910,7 +2952,11 @@ namespace Ink_Canvas
                 BorderSettingsMask.Visibility = Visibility.Visible;
                 BorderSettingsMask.IsHitTestVisible = true;
                 BorderSettingsMask.Background = new SolidColorBrush(Color.FromArgb(128, 0, 0, 0));
-                
+
+                // 确保设置面板可接受触控与键盘焦点
+                BorderSettings.IsHitTestVisible = true;
+                BorderSettings.Focusable = true;
+
                 // 设置初始位置
                 BorderSettings.RenderTransform = new TranslateTransform(490, 0);
                 
@@ -2929,6 +2975,11 @@ namespace Ink_Canvas
                 sb.Children.Add(slideAnimation);
                 sb.Completed += (s, _) =>
                 {
+                    try
+                    {
+                        BorderSettings.Focus();
+                    }
+                    catch { }
                     isOpeningOrHidingSettingsPane = false;
                 };
                 

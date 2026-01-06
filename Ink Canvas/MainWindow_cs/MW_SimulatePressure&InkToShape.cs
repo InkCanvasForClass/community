@@ -77,25 +77,14 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile("StrokeCollected: 墨迹渐隐管理器为空，无法添加墨迹", LogHelper.LogType.Error);
                 }
 
-                Dispatcher.BeginInvoke(new Action(() =>
+                try
                 {
-                    try
-                    {
-                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink)
-                        {
-                            inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
-                        }
-
-                        if (inkCanvas.Strokes.Contains(e.Stroke))
-                        {
-                            inkCanvas.Strokes.Remove(e.Stroke);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.WriteLogToFile($"延迟移除墨迹时出错: {ex}", LogHelper.LogType.Error);
-                    }
-                }), DispatcherPriority.Background);
+                    SafeRemoveStrokes(() => { if (inkCanvas.Strokes.Contains(e.Stroke)) inkCanvas.Strokes.Remove(e.Stroke); });
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"延迟移除墨迹时出错: {ex}", LogHelper.LogType.Error);
+                }
 
                 return;
             }
@@ -256,8 +245,8 @@ namespace Ink_Canvas
                             // Replace the original stroke with the straightened one
                             SetNewBackupOfStroke();
                             _currentCommitType = CommitReason.ShapeRecognition;
-                            inkCanvas.Strokes.Remove(e.Stroke);
-                            inkCanvas.Strokes.Add(straightStroke);
+                            SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(e.Stroke));
+                            SafeAddStrokes(() => inkCanvas.Strokes.Add(straightStroke));
                             _currentCommitType = CommitReason.UserInput;
 
                             // We can't modify e.Stroke directly, but we need to update newStrokes
@@ -365,8 +354,8 @@ namespace Ink_Canvas
                                     circles.Add(new Circle(result.Centroid, shape.Width / 2.0, stroke));
                                     SetNewBackupOfStroke();
                                     _currentCommitType = CommitReason.ShapeRecognition;
-                                    inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes);
-                                    inkCanvas.Strokes.Add(stroke);
+                                    SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes));
+                                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                                     _currentCommitType = CommitReason.UserInput;
                                     newStrokes = new StrokeCollection();
                                 }
@@ -448,7 +437,7 @@ namespace Ink_Canvas
 
                                                 SetNewBackupOfStroke();
                                                 _currentCommitType = CommitReason.ShapeRecognition;
-                                                inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes);
+                                                SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes));
                                                 newStrokes = new StrokeCollection();
 
                                                 var _pointList = GenerateEllipseGeometry(iniP, endP, false);
@@ -463,7 +452,7 @@ namespace Ink_Canvas
                                                     _stroke,
                                                     _dashedLineStroke
                                                 };
-                                                inkCanvas.Strokes.Add(strokes);
+                                                SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                                                 _currentCommitType = CommitReason.UserInput;
                                                 return;
                                             }
@@ -512,8 +501,8 @@ namespace Ink_Canvas
 
                                     SetNewBackupOfStroke();
                                     _currentCommitType = CommitReason.ShapeRecognition;
-                                    inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes);
-                                    inkCanvas.Strokes.Add(stroke);
+                                    SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes));
+                                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                                     _currentCommitType = CommitReason.UserInput;
                                     GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                                     newStrokes = new StrokeCollection();
@@ -550,8 +539,8 @@ namespace Ink_Canvas
                                     };
                                     SetNewBackupOfStroke();
                                     _currentCommitType = CommitReason.ShapeRecognition;
-                                    inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes);
-                                    inkCanvas.Strokes.Add(stroke);
+                                                SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes));
+                                                SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                                     _currentCommitType = CommitReason.UserInput;
                                     GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                                     newStrokes = new StrokeCollection();
@@ -595,8 +584,8 @@ namespace Ink_Canvas
                                     };
                                     SetNewBackupOfStroke();
                                     _currentCommitType = CommitReason.ShapeRecognition;
-                                    inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes);
-                                    inkCanvas.Strokes.Add(stroke);
+                                    SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(result.InkDrawingNode.Strokes));
+                                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                                     _currentCommitType = CommitReason.UserInput;
                                     GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                                     newStrokes = new StrokeCollection();
@@ -749,8 +738,8 @@ namespace Ink_Canvas
                                 // 替换原始笔画
                                 SetNewBackupOfStroke();
                                 _currentCommitType = CommitReason.ShapeRecognition;
-                                inkCanvas.Strokes.Remove(e.Stroke);
-                                inkCanvas.Strokes.Add(smoothedStroke);
+                                SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(e.Stroke));
+                                SafeAddStrokes(() => inkCanvas.Strokes.Add(smoothedStroke));
                                 _currentCommitType = CommitReason.UserInput;
                             }
                         }
@@ -782,23 +771,46 @@ namespace Ink_Canvas
                 Debug.WriteLine($"异步平滑开始: 原始点数={originalStroke.StylusPoints.Count}");
                 await _inkSmoothingManager.SmoothStrokeAsync(originalStroke, (original, smoothed) =>
                 {
-                    Debug.WriteLine($"异步平滑完成: 原始点数={original.StylusPoints.Count}, 平滑后点数={smoothed.StylusPoints.Count}");
-                    Debug.WriteLine($"墨迹比较: smoothed != original = {smoothed != original}");
-                    Debug.WriteLine($"画布包含原始墨迹: {inkCanvas.Strokes.Contains(original)}");
+                    try
+                    {
+                        Debug.WriteLine($"异步平滑完成: 原始点数={original?.StylusPoints.Count ?? 0}, 平滑后点数={smoothed?.StylusPoints.Count ?? 0}");
+                        Debug.WriteLine($"墨迹比较: smoothed != original = {smoothed != original}");
+                        Debug.WriteLine($"画布包含原始墨迹: {inkCanvas?.Strokes?.Contains(original)}");
 
-                    // 在UI线程上执行笔画替换
-                    if (inkCanvas.Strokes.Contains(original) && smoothed != original)
-                    {
-                        Debug.WriteLine("异步替换原始笔画为平滑后的笔画");
-                        SetNewBackupOfStroke();
-                        _currentCommitType = CommitReason.ShapeRecognition;
-                        inkCanvas.Strokes.Remove(original);
-                        inkCanvas.Strokes.Add(smoothed);
-                        _currentCommitType = CommitReason.UserInput;
+                        // 基本验证：目标笔画有效、点数合理
+                        if (smoothed == null || smoothed.StylusPoints == null || smoothed.StylusPoints.Count < 2)
+                        {
+                            Debug.WriteLine("异步平滑：生成的笔画无效或点数过少，跳过替换");
+                            return;
+                        }
+
+                        // 在UI线程上执行笔画替换，增加异常保护
+                        if (inkCanvas != null && inkCanvas.Strokes.Contains(original) && smoothed != original)
+                        {
+                            Debug.WriteLine("异步替换原始笔画为平滑后的笔画");
+                            try
+                            {
+                                SetNewBackupOfStroke();
+                                _currentCommitType = CommitReason.ShapeRecognition;
+                                SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(original));
+                                SafeAddStrokes(() => inkCanvas.Strokes.Add(smoothed));
+                                _currentCommitType = CommitReason.UserInput;
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"替换笔画时发生异常: {ex.Message}");
+                                LogHelper.WriteLogToFile($"Replace stroke failed: {ex}", LogHelper.LogType.Error);
+                            }
+                        }
+                        else
+                        {
+                            Debug.WriteLine($"异步平滑后的笔画与原始笔画相同或不在画布中，未进行替换 (contains={inkCanvas?.Strokes?.Contains(original)}, different={smoothed != original})");
+                        }
                     }
-                    else
+                    catch (Exception exOuter)
                     {
-                        Debug.WriteLine($"异步平滑后的笔画与原始笔画相同，未进行替换 (contains={inkCanvas.Strokes.Contains(original)}, different={smoothed != original})");
+                        Debug.WriteLine($"异步平滑回调异常: {exOuter.Message}");
+                        LogHelper.WriteLogToFile($"Async smoothing callback exception: {exOuter}", LogHelper.LogType.Error);
                     }
                 });
             }
@@ -2133,12 +2145,12 @@ namespace Ink_Canvas
                 {
                     if (inkCanvas.Strokes.Contains(line.OriginalStroke))
                     {
-                        inkCanvas.Strokes.Remove(line.OriginalStroke);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(line.OriginalStroke));
                     }
                 }
 
                 // 添加新的矩形
-                inkCanvas.Strokes.Add(rectangleStroke);
+                SafeAddStrokes(() => inkCanvas.Strokes.Add(rectangleStroke));
                 _currentCommitType = CommitReason.UserInput;
 
                 // 清理参考线

@@ -1387,16 +1387,16 @@ namespace Ink_Canvas.Helpers
                     Process.Start(startInfo);
                     LogHelper.WriteLogToFile("AutoUpdate | 新版本进程启动命令已执行");
 
-                    // 等待一小段时间确保新进程启动
-                    Thread.Sleep(2000);
+                    // 等待一小段时间确保新进程启动（改为异步 Task 延迟）
+                    await Task.Delay(2000).ConfigureAwait(false);
 
                     // 关闭当前旧软件进程
                     LogHelper.WriteLogToFile("AutoUpdate | 关闭当前旧软件进程");
                     App.IsAppExitByUser = true;
-                    Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         Application.Current.Shutdown();
-                    });
+                    }), System.Windows.Threading.DispatcherPriority.Normal);
                 }
                 catch (Exception ex)
                 {
@@ -1512,7 +1512,7 @@ namespace Ink_Canvas.Helpers
                             break;
                         }
                         LogHelper.WriteLogToFile($"AutoUpdate | 老进程仍在运行，等待中... ({waitCount + 1}/{maxWaitCount})");
-                        Thread.Sleep(1000);
+                        await Task.Delay(1000).ConfigureAwait(false);
                         waitCount++;
                     }
                     catch (ArgumentException)
@@ -1530,7 +1530,7 @@ namespace Ink_Canvas.Helpers
                     {
                         Process oldProcess = Process.GetProcessById(oldProcessId);
                         oldProcess.Kill();
-                        Thread.Sleep(2000); // 等待进程完全结束
+                        await Task.Delay(2000).ConfigureAwait(false); // 等待进程完全结束
                     }
                     catch (Exception ex)
                     {
@@ -1643,7 +1643,7 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"AutoUpdate | 最终应用程序启动成功，PID: {newProcess?.Id}，已标记为最终应用");
 
                         // 等待一小段时间确保最终应用程序启动
-                        Thread.Sleep(2000);
+                        await Task.Delay(2000).ConfigureAwait(false);
 
                         // 结束当前更新进程
                         LogHelper.WriteLogToFile("AutoUpdate | 更新流程完成，结束更新进程");
@@ -1755,7 +1755,7 @@ namespace Ink_Canvas.Helpers
                                 // 文件可能正在使用，等待一下再重试
                                 if (retry < 2)
                                 {
-                                    Thread.Sleep(1000);
+                                    await Task.Delay(1000).ConfigureAwait(false);
                                     continue;
                                 }
                             }
@@ -1772,7 +1772,7 @@ namespace Ink_Canvas.Helpers
 
                         if (retry < 2)
                         {
-                            Thread.Sleep(1000); // 等待1秒后重试
+                            await Task.Delay(1000).ConfigureAwait(false); // 等待1秒后重试
                         }
                     }
                 }
@@ -2004,10 +2004,10 @@ namespace Ink_Canvas.Helpers
                 // 执行安装，静默模式
                 InstallNewVersionApp(remoteVersion, true);
                 App.IsAppExitByUser = true;
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     Application.Current.Shutdown();
-                });
+                }), System.Windows.Threading.DispatcherPriority.Normal);
                 return true;
             }
             catch (Exception ex)
@@ -2134,10 +2134,10 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"AutoUpdate | 手动安装版本: {version}");
                 InstallNewVersionApp(version, true);
                 App.IsAppExitByUser = true;
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     Application.Current.Shutdown();
-                });
+                }), System.Windows.Threading.DispatcherPriority.Normal);
                 return true;
             }
             catch (Exception ex)

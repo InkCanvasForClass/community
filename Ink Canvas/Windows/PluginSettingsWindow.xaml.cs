@@ -9,6 +9,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
@@ -214,7 +215,7 @@ namespace Ink_Canvas.Windows
         /// <summary>
         /// 加载本地插件按钮点击事件
         /// </summary>
-        private void BtnLoadPlugin_Click(object sender, RoutedEventArgs e)
+        private async void BtnLoadPlugin_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -242,11 +243,11 @@ namespace Ink_Canvas.Windows
                     }
 
                     // 如果插件不在Plugins目录下，复制过去
-                    if (!string.Equals(pluginPath, targetPath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        File.Copy(pluginPath, targetPath, true);
-                        pluginPath = targetPath;
-                    }
+                        if (!string.Equals(pluginPath, targetPath, StringComparison.OrdinalIgnoreCase))
+                        {
+                            await Task.Run(() => File.Copy(pluginPath, targetPath, true));
+                            pluginPath = targetPath;
+                        }
 
                     // 加载插件
                     IPlugin plugin = PluginManager.Instance.LoadExternalPlugin(pluginPath);
@@ -332,7 +333,7 @@ namespace Ink_Canvas.Windows
         /// <summary>
         /// 导出插件按钮点击事件
         /// </summary>
-        private void BtnExportPlugin_Click(object sender, RoutedEventArgs e)
+        private async void BtnExportPlugin_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -390,7 +391,7 @@ namespace Ink_Canvas.Windows
                     // 复制插件文件到目标路径
                     if (!string.Equals(pluginPath, targetPath, StringComparison.OrdinalIgnoreCase))
                     {
-                        File.Copy(pluginPath, targetPath, true);
+                        await Task.Run(() => File.Copy(pluginPath, targetPath, true));
                     }
 
                     LogHelper.WriteLogToFile($"插件 {SelectedPlugin.Name} 已成功导出到: {targetPath}");

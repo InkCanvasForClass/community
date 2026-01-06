@@ -18,6 +18,22 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        // UI-safe stroke operations: ensure modifications to inkCanvas.Strokes occur on UI thread
+        private void SafeAddStrokes(Action addAction)
+        {
+            InvokeOnUI(() =>
+            {
+                try { addAction(); } catch { }
+            }, true);
+        }
+
+        private void SafeRemoveStrokes(Action removeAction)
+        {
+            InvokeOnUI(() =>
+            {
+                try { removeAction(); } catch { }
+            }, true);
+        }
         #region Floating Bar Control
 
         private void ImageDrawShape_MouseUp(object sender, MouseButtonEventArgs e)
@@ -586,8 +602,8 @@ namespace Ink_Canvas
                     isWaitUntilNextTouchDown = true;
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke));
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -641,19 +657,19 @@ namespace Ink_Canvas
                     };
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke));
                     }
                     catch { }
 
                     lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                     break;
                 case 8:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     strokes.Add(GenerateDashedLineStrokeCollection(iniP, endP));
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -661,14 +677,14 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 18:
                     _currentCommitType = CommitReason.ShapeDrawing;
                     strokes.Add(GenerateDotLineStrokeCollection(iniP, endP));
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -676,7 +692,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 2:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -699,12 +715,12 @@ namespace Ink_Canvas
                     };
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke));
                     }
                     catch { }
 
                     lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                     break;
                 case 15:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -762,7 +778,7 @@ namespace Ink_Canvas
                         new Point(endP.X + 3 * x * sinTheta, endP.Y + 3 * x * cosTheta)));
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -770,7 +786,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 11:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -780,7 +796,7 @@ namespace Ink_Canvas
                         new Point(iniP.X, endP.Y)));
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -788,7 +804,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 12:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -800,7 +816,7 @@ namespace Ink_Canvas
                         new Point(iniP.X, endP.Y)));
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -808,7 +824,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 13:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -820,7 +836,7 @@ namespace Ink_Canvas
                         new Point(iniP.X, endP.Y)));
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -828,7 +844,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 14:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -841,7 +857,7 @@ namespace Ink_Canvas
                         new Point(iniP.X, endP.Y)));
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -849,7 +865,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 17:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -862,7 +878,7 @@ namespace Ink_Canvas
                         new Point(iniP.X - d / 1.76, iniP.Y + d / 1.76)));
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -870,7 +886,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 3:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -888,12 +904,12 @@ namespace Ink_Canvas
                     };
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke));
                     }
                     catch { }
 
                     lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                     break;
                 case 19:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -913,12 +929,12 @@ namespace Ink_Canvas
                     };
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke));
                     }
                     catch { }
 
                     lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                     break;
                 case 4:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -930,12 +946,12 @@ namespace Ink_Canvas
                     };
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke));
                     }
                     catch { }
 
                     lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                     break;
                 case 5:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -949,12 +965,12 @@ namespace Ink_Canvas
                     };
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke));
                     }
                     catch { }
 
                     lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
 
                     // 如果启用了圆心标记功能，则绘制圆心
                     if (Settings.Canvas.ShowCircleCenter)
@@ -975,12 +991,12 @@ namespace Ink_Canvas
                     };
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStroke);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke));
                     }
                     catch { }
 
                     lastTempStroke = stroke;
-                    inkCanvas.Strokes.Add(stroke);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                     break;
                 case 23:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1037,12 +1053,12 @@ namespace Ink_Canvas
 
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch { }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 10:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1051,7 +1067,7 @@ namespace Ink_Canvas
                         new Point(iniP.X + R, iniP.Y + R));
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -1059,7 +1075,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 24:
                 case 25:
@@ -1176,7 +1192,7 @@ namespace Ink_Canvas
 
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -1184,7 +1200,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 20:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1213,7 +1229,7 @@ namespace Ink_Canvas
                     strokes.Add(stroke.Clone());
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -1221,7 +1237,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 21:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1250,7 +1266,7 @@ namespace Ink_Canvas
                     strokes.Add(stroke.Clone());
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -1258,7 +1274,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 22:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1296,7 +1312,7 @@ namespace Ink_Canvas
                     strokes.Add(stroke.Clone());
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -1304,7 +1320,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 6:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1361,7 +1377,7 @@ namespace Ink_Canvas
                     strokes.Add(stroke.Clone());
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -1369,7 +1385,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 7:
                     _currentCommitType = CommitReason.ShapeDrawing;
@@ -1416,7 +1432,7 @@ namespace Ink_Canvas
                     strokes.Add(stroke.Clone());
                     try
                     {
-                        inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                        SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                     }
                     catch
                     {
@@ -1424,7 +1440,7 @@ namespace Ink_Canvas
                     }
 
                     lastTempStrokeCollection = strokes;
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     break;
                 case 9:
                     // 画长方体
@@ -1438,7 +1454,7 @@ namespace Ink_Canvas
                         strokes.Add(GenerateLineStroke(new Point(iniP.X, iniP.Y), new Point(endP.X, iniP.Y)));
                         try
                         {
-                            inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                            SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                         }
                         catch
                         {
@@ -1446,7 +1462,7 @@ namespace Ink_Canvas
                         }
 
                         lastTempStrokeCollection = strokes;
-                        inkCanvas.Strokes.Add(strokes);
+                        SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                         CuboidFrontRectIniP = iniP;
                         CuboidFrontRectEndP = endP;
                     }
@@ -1507,7 +1523,7 @@ namespace Ink_Canvas
 
                         try
                         {
-                            inkCanvas.Strokes.Remove(lastTempStrokeCollection);
+                            SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStrokeCollection));
                         }
                         catch
                         {
@@ -1515,7 +1531,7 @@ namespace Ink_Canvas
                         }
 
                         lastTempStrokeCollection = strokes;
-                        inkCanvas.Strokes.Add(strokes);
+                        SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     }
 
                     break;
@@ -1559,11 +1575,11 @@ namespace Ink_Canvas
                     try
                     {
                         // 先添加新笔画，再删除旧笔画，减少视觉闪烁
-                        inkCanvas.Strokes.Add(newStroke);
+                        SafeAddStrokes(() => inkCanvas.Strokes.Add(newStroke));
 
                         if (lastTempStroke != null && inkCanvas.Strokes.Contains(lastTempStroke))
                         {
-                            inkCanvas.Strokes.Remove(lastTempStroke);
+                            SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke));
                         }
 
                         lastTempStroke = newStroke;
@@ -1574,10 +1590,10 @@ namespace Ink_Canvas
                         // 如果更新失败，确保清理状态
                         if (lastTempStroke != null && inkCanvas.Strokes.Contains(lastTempStroke))
                         {
-                            try { inkCanvas.Strokes.Remove(lastTempStroke); } catch { }
+                            try { SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(lastTempStroke)); } catch { }
                         }
                         lastTempStroke = newStroke;
-                        try { inkCanvas.Strokes.Add(newStroke); } catch { }
+                        try { SafeAddStrokes(() => inkCanvas.Strokes.Add(newStroke)); } catch { }
                     }
                 }), DispatcherPriority.Render);
             }
@@ -1609,7 +1625,7 @@ namespace Ink_Canvas
                     try
                     {
                         // 先添加新笔画集合，再删除旧笔画集合，减少视觉闪烁
-                        inkCanvas.Strokes.Add(newStrokeCollection);
+                        SafeAddStrokes(() => inkCanvas.Strokes.Add(newStrokeCollection));
 
                         if (lastTempStrokeCollection != null && lastTempStrokeCollection.Count > 0)
                         {
@@ -1617,7 +1633,7 @@ namespace Ink_Canvas
                             {
                                 if (inkCanvas.Strokes.Contains(stroke))
                                 {
-                                    inkCanvas.Strokes.Remove(stroke);
+                                    SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(stroke));
                                 }
                             }
                         }
@@ -1632,11 +1648,11 @@ namespace Ink_Canvas
                         {
                             foreach (var stroke in lastTempStrokeCollection)
                             {
-                                try { inkCanvas.Strokes.Remove(stroke); } catch { }
+                                try { SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(stroke)); } catch { }
                             }
                         }
                         lastTempStrokeCollection = newStrokeCollection;
-                        try { inkCanvas.Strokes.Add(newStrokeCollection); } catch { }
+                        try { SafeAddStrokes(() => inkCanvas.Strokes.Add(newStrokeCollection)); } catch { }
                     }
                 }), DispatcherPriority.Render);
             }
@@ -1952,7 +1968,7 @@ namespace Ink_Canvas
                         }
 
                         ;
-                        if (!opFlag) inkCanvas.Strokes.Remove(drawMultiStepShapeSpecialStrokeCollection);
+                        if (!opFlag) SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(drawMultiStepShapeSpecialStrokeCollection));
                     }
 
                     BtnPen_Click(null, null); //画完还原到笔模式
@@ -2050,7 +2066,7 @@ namespace Ink_Canvas
                 stroke.DrawingAttributes.Height = 2.0;
 
                 // 添加到画布
-                inkCanvas.Strokes.Add(stroke);
+                SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
             }
             catch (Exception ex)
             {

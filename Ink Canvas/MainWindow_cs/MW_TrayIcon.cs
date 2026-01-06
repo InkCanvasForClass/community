@@ -139,16 +139,15 @@ namespace Ink_Canvas
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded)
             {
-                var isInPPTPresentationMode = false;
-                Dispatcher.Invoke(() =>
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    isInPPTPresentationMode = mainWin.BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
-                });
-                if (!mainWin.isFloatingBarFolded)
-                {
-                    if (!isInPPTPresentationMode) mainWin.PureViewboxFloatingBarMarginAnimationInDesktopMode();
-                    else mainWin.PureViewboxFloatingBarMarginAnimationInPPTMode();
-                }
+                    var isInPPTPresentationMode = mainWin.BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
+                    if (!mainWin.isFloatingBarFolded)
+                    {
+                        if (!isInPPTPresentationMode) mainWin.PureViewboxFloatingBarMarginAnimationInDesktopMode();
+                        else mainWin.PureViewboxFloatingBarMarginAnimationInPPTMode();
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Normal);
             }
         }
 

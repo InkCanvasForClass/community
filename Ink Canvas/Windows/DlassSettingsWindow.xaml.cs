@@ -537,7 +537,7 @@ namespace Ink_Canvas.Windows
         /// </summary>
         private async Task TestConnectionAsync()
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 TxtConnectionStatus.Text = "测试中...";
                 TxtConnectionStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(161, 161, 170)); // 灰色
@@ -548,7 +548,7 @@ namespace Ink_Canvas.Windows
                 var userToken = GetUserToken();
                 if (string.IsNullOrEmpty(userToken))
                 {
-                    Dispatcher.Invoke(() =>
+                    Dispatcher.BeginInvoke(new Action(() =>
                     {
                         TxtConnectionStatus.Text = "未设置Token";
                         TxtConnectionStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68)); // 红色
@@ -576,7 +576,7 @@ namespace Ink_Canvas.Windows
                         _currentUser = result.User;
                         var whiteboardCount = whiteboards.Count;
 
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             TxtConnectionStatus.Text = $"已连接 (找到 {whiteboardCount} 个白板)";
                             TxtConnectionStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(34, 197, 94));
@@ -605,7 +605,7 @@ namespace Ink_Canvas.Windows
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"Dlass API连接测试失败: {ex.Message}", LogHelper.LogType.Error);
-                Dispatcher.Invoke(() =>
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
                     TxtConnectionStatus.Text = "连接失败";
                     TxtConnectionStatus.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(239, 68, 68));

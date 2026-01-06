@@ -349,7 +349,7 @@ namespace Ink_Canvas
 
                 if (stroke != null)
                 {
-                    inkCanvas.Strokes.Add(stroke);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(stroke));
                     await Task.Delay(5);
                     inkCanvas.Children.Remove(GetVisualCanvas(e.StylusDevice.Id));
 
@@ -530,6 +530,13 @@ namespace Ink_Canvas
 
         private void InkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            // 调试日志：记录进入触摸预处理时的编辑模式与选择覆盖层状态
+            try
+            {
+                LogHelper.WriteLogToFile($"InkCanvas_PreviewTouchDown | EditingMode={inkCanvas.EditingMode} | GridCoverHitTestVisible={(GridInkCanvasSelectionCover!=null?GridInkCanvasSelectionCover.IsHitTestVisible.ToString():"NA")} | TouchId={e.TouchDevice.Id}");
+            }
+            catch { }
+
             inkCanvas.CaptureTouch(e.TouchDevice);
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;

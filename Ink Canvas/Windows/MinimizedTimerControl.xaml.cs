@@ -54,7 +54,7 @@ namespace Ink_Canvas.Windows
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
             // 当主题变化时，重新应用主题
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 RefreshTheme();
             });
@@ -99,7 +99,7 @@ namespace Ink_Canvas.Windows
         {
             if (parentControl != null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (this.Visibility != Visibility.Visible)
                     {
@@ -214,7 +214,7 @@ namespace Ink_Canvas.Windows
 
         private void ParentControl_TimerCompleted(object sender, EventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 Visibility = Visibility.Collapsed;
             });
