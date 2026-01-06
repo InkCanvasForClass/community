@@ -1,6 +1,7 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -44,7 +45,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void DeleteBackgroundButton_Click(object sender, RoutedEventArgs e)
+        private async void DeleteBackgroundButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is CustomPickNameBackground background)
             {
@@ -52,10 +53,10 @@ namespace Ink_Canvas
                 {
                     try
                     {
-                        // 尝试删除文件
+                        // 尝试删除文件（后台线程）
                         if (File.Exists(background.FilePath))
                         {
-                            File.Delete(background.FilePath);
+                            await Task.Run(() => File.Delete(background.FilePath));
                         }
 
                         // 从列表中移除背景

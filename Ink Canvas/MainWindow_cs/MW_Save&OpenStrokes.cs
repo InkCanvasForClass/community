@@ -245,7 +245,17 @@ namespace Ink_Canvas
                             });
                         }
                     }
-                    File.WriteAllText(Path.ChangeExtension(savePathWithName, ".elements.json"), JsonConvert.SerializeObject(elementInfos, Newtonsoft.Json.Formatting.Indented));
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            File.WriteAllText(Path.ChangeExtension(savePathWithName, ".elements.json"), JsonConvert.SerializeObject(elementInfos, Newtonsoft.Json.Formatting.Indented));
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"保存元素信息失败: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    });
                 }
             }
             catch (Exception ex)
@@ -309,7 +319,17 @@ namespace Ink_Canvas
                         });
                     }
                 }
-                File.WriteAllText(Path.ChangeExtension(xmlPath, ".elements.json"), JsonConvert.SerializeObject(elementInfos, Newtonsoft.Json.Formatting.Indented));
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        File.WriteAllText(Path.ChangeExtension(xmlPath, ".elements.json"), JsonConvert.SerializeObject(elementInfos, Newtonsoft.Json.Formatting.Indented));
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"保存元素信息失败: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                });
 
                 // 异步上传到Dlass
                 _ = Task.Run(async () =>
@@ -405,7 +425,10 @@ namespace Ink_Canvas
 
                     // 创建ZIP文件
                     if (File.Exists(zipFileName))
-                        File.Delete(zipFileName);
+                        Task.Run(() =>
+                        {
+                            try { File.Delete(zipFileName); } catch { }
+                        });
 
                     ZipFile.CreateFromDirectory(tempDir, zipFileName);
 
@@ -512,7 +535,10 @@ namespace Ink_Canvas
 
                     // 使用.NET Framework内置的压缩功能创建ZIP文件
                     if (File.Exists(zipFileName))
-                        File.Delete(zipFileName);
+                        Task.Run(() =>
+                        {
+                            try { File.Delete(zipFileName); } catch { }
+                        });
 
                     // 使用System.IO.Compression.FileSystem来创建ZIP
                     ZipFile.CreateFromDirectory(tempDir, zipFileName);
@@ -902,7 +928,7 @@ namespace Ink_Canvas
                     var currentStrokes = _singlePPTInkManager?.LoadSlideStrokes(currentSlide);
                     if (currentStrokes != null && currentStrokes.Count > 0)
                     {
-                        inkCanvas.Strokes.Add(currentStrokes);
+                        SafeAddStrokes(() => inkCanvas.Strokes.Add(currentStrokes));
                     }
                 }
 
@@ -1029,7 +1055,7 @@ namespace Ink_Canvas
 
                 ClearStrokes(true);
                 timeMachine.ClearStrokeHistory();
-                inkCanvas.Strokes.Add(strokes);
+                SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                 LogHelper.NewLog($"XML Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count}");
 
                 // 恢复元素信息
@@ -1168,7 +1194,7 @@ namespace Ink_Canvas
                 {
                     ClearStrokes(true);
                     timeMachine.ClearStrokeHistory();
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     LogHelper.NewLog($"Strokes Insert: Strokes Count: {inkCanvas.Strokes.Count.ToString()}");
                 }
             }
@@ -1203,7 +1229,7 @@ namespace Ink_Canvas
                     var strokes = new StrokeCollection(ms);
                     ClearStrokes(true);
                     timeMachine.ClearStrokeHistory();
-                    inkCanvas.Strokes.Add(strokes);
+                    SafeAddStrokes(() => inkCanvas.Strokes.Add(strokes));
                     LogHelper.NewLog($"Strokes Insert (2): Strokes Count: {strokes.Count.ToString()}");
                 }
         }

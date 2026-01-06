@@ -1201,7 +1201,7 @@ namespace Ink_Canvas.Helpers
             LogHelper.WriteLogToFile("启动 WPS 进程检测定时器", LogHelper.LogType.Trace);
         }
 
-        private void OnWpsProcessCheckTimerElapsed(object sender, ElapsedEventArgs e)
+        private async void OnWpsProcessCheckTimerElapsed(object sender, ElapsedEventArgs e)
         {
             if (!IsSupportWPS)
             {
@@ -1241,7 +1241,7 @@ namespace Ink_Canvas.Helpers
                 }
 
                 // 多重验证确保准确性
-                if (!PerformMultipleWpsWindowChecks())
+                if (!await PerformMultipleWpsWindowChecksAsync().ConfigureAwait(false))
                 {
                     LogHelper.WriteLogToFile("多重验证显示WPS窗口仍然存在，跳过查杀", LogHelper.LogType.Trace);
                     return;
@@ -1250,8 +1250,8 @@ namespace Ink_Canvas.Helpers
                 // 前台窗口已消失，准备结束WPS进程
                 LogHelper.WriteLogToFile("多重验证确认WPS窗口已消失，准备结束WPS进程", LogHelper.LogType.Event);
 
-                // 安全结束WPS进程
-                SafeTerminateWpsProcess();
+                // 安全结束WPS进程（异步）
+                await SafeTerminateWpsProcessAsync().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -1295,12 +1295,12 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 多重验证WPS窗口状态，确保查杀准确性
         /// </summary>
-        private bool PerformMultipleWpsWindowChecks()
+        private async Task<bool> PerformMultipleWpsWindowChecksAsync()
         {
             try
             {
                 // 第一重验证：等待1秒后再次检查
-                Thread.Sleep(1000);
+                await Task.Delay(1000).ConfigureAwait(false);
                 if (IsForegroundWpsWindowStillActiveOptimized())
                 {
                     LogHelper.WriteLogToFile("第一重验证：WPS窗口仍然存在", LogHelper.LogType.Trace);
@@ -1376,7 +1376,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 安全地结束WPS进程 - 通过释放PPTCOM对象
         /// </summary>
-        private void SafeTerminateWpsProcess()
+        private async Task SafeTerminateWpsProcessAsync()
         {
             try
             {
@@ -1439,7 +1439,7 @@ namespace Ink_Canvas.Helpers
                 GC.WaitForPendingFinalizers();
 
                 // 等待一段时间让COM对象完全释放
-                Thread.Sleep(1000);
+                await Task.Delay(1000).ConfigureAwait(false);
 
                 // 检查进程是否已经结束
                 try

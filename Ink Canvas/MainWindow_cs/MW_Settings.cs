@@ -3009,7 +3009,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void BtnManualBackup_Click(object sender, RoutedEventArgs e)
+        private async void BtnManualBackup_Click(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
 
@@ -3029,7 +3029,7 @@ namespace Ink_Canvas
 
                 // 序列化当前设置并保存到备份文件
                 string settingsJson = JsonConvert.SerializeObject(Settings, Formatting.Indented);
-                File.WriteAllText(backupPath, settingsJson);
+                await Task.Run(() => File.WriteAllText(backupPath, settingsJson));
 
                 LogHelper.WriteLogToFile($"成功创建设置备份: {backupPath}");
                 MessageBox.Show($"设置已成功备份到:\n{backupPath}", "备份成功", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -3778,13 +3778,25 @@ namespace Ink_Canvas
             var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
             try
             {
-                string configsDir = Path.Combine(App.RootPath, "Configs");
-                if (!Directory.Exists(configsDir))
+                // 在后台线程异步写入设置，保持方法签名不变以兼容现有调用点
+                Task.Run(() =>
                 {
-                    Directory.CreateDirectory(configsDir);
-                }
+                    try
+                    {
+                        string configsDir = Path.Combine(App.RootPath, "Configs");
+                        if (!Directory.Exists(configsDir))
+                        {
+                            Directory.CreateDirectory(configsDir);
+                        }
 
-                File.WriteAllText(App.RootPath + settingsFileName, text);
+                        var path = Path.Combine(App.RootPath, settingsFileName);
+                        File.WriteAllText(path, text);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"SaveSettingsToFile async write failed: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                });
             }
             catch { }
         }
@@ -3842,11 +3854,11 @@ namespace Ink_Canvas
                     {
                         try
                         {
-                            // 调用主窗口的AutoUpdate方法，它会自动清除之前的更新状态并使用新通道重新检查
-                            Dispatcher.Invoke(() =>
+                            // 调用主窗口的AutoUpdate方法，它会自动清除之前的更新状态并使用新通道重新检查（非阻塞）
+                            Dispatcher.BeginInvoke(new Action(() =>
                             {
                                 AutoUpdate();
-                            });
+                            }), System.Windows.Threading.DispatcherPriority.Normal);
                         }
                         catch (Exception ex)
                         {

@@ -381,7 +381,7 @@ namespace Ink_Canvas
 
                     if (arg.Contains("EasiNote"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             ShowNotification("“希沃白板 5”已自动关闭");
                         });
@@ -389,7 +389,7 @@ namespace Ink_Canvas
 
                     if (arg.Contains("HiteAnnotation"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             ShowNotification("“鸿合屏幕书写”已自动关闭");
                             if (Settings.Automation.IsAutoKillHiteAnnotation && Settings.Automation.IsAutoEnterAnnotationAfterKillHite)
@@ -412,7 +412,7 @@ namespace Ink_Canvas
 
                     if (arg.Contains("Ink Canvas Annotation") || arg.Contains("Ink Canvas Artistry"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             ShowNewMessage("“ICA”已自动关闭");
                         });
@@ -420,7 +420,7 @@ namespace Ink_Canvas
 
                     if (arg.Contains("\"Ink Canvas.exe\""))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             ShowNotification("“Ink Canvas”已自动关闭");
                         });
@@ -428,7 +428,7 @@ namespace Ink_Canvas
 
                     if (arg.Contains("Inkeys"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             ShowNotification("“智绘教Inkeys”已自动关闭");
                         });
@@ -436,7 +436,7 @@ namespace Ink_Canvas
 
                     if (arg.Contains("VcomTeach"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             ShowNotification("“优教授课端”已自动关闭");
                         });
@@ -444,10 +444,10 @@ namespace Ink_Canvas
 
                     if (arg.Contains("DesktopAnnotation"))
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             ShowNotification("“希沃桌面2.0 桌面批注”已自动关闭");
-                        });
+                        }), System.Windows.Threading.DispatcherPriority.Normal);
                     }
                 }
             }
@@ -1062,7 +1062,7 @@ namespace Ink_Canvas
                 // 空闲状态的判定为不处于批注模式和画板模式
                 bool canSafelyUpdate = false;
 
-                Dispatcher.Invoke(() =>
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
                     try
                     {
@@ -1103,10 +1103,10 @@ namespace Ink_Canvas
                     AutoUpdateHelper.InstallNewVersionApp(AvailableLatestVersion, true);
 
                     // 关闭应用程序
-                    Dispatcher.Invoke(() =>
+                    Dispatcher.BeginInvoke(new Action(() =>
                     {
                         Application.Current.Shutdown();
-                    });
+                    }), System.Windows.Threading.DispatcherPriority.Normal);
                 }
                 else
                 {

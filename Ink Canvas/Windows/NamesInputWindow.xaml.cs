@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using System.Threading.Tasks;
 using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 
 namespace Ink_Canvas
@@ -38,7 +39,17 @@ namespace Ink_Canvas
                 var result = MessageBox.Show("是否保存？", "名单导入", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
-                    File.WriteAllText(App.RootPath + "Names.txt", TextBoxNames.Text);
+                    Task.Run(() =>
+                    {
+                        try
+                        {
+                            File.WriteAllText(App.RootPath + "Names.txt", TextBoxNames.Text);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"保存Names.txt失败: {ex.Message}", LogHelper.LogType.Error);
+                        }
+                    });
                 }
             }
         }

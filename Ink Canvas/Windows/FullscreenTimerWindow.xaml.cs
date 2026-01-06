@@ -111,7 +111,7 @@ namespace Ink_Canvas.Windows
         {
             if (parentControl != null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     if (ShouldCloseWindow())
                     {
@@ -211,7 +211,7 @@ namespace Ink_Canvas.Windows
 
         private void ParentWindow_TimerCompleted(object sender, EventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 this.Close();
             });

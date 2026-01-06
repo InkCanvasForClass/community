@@ -62,6 +62,23 @@ namespace Ink_Canvas
         [DllImport("shell32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         private static extern int SetCurrentProcessExplicitAppUserModelID(string appId);
 
+        // Win32 helpers for watchdog recovery
+        [DllImport("user32.dll")]
+        private static extern bool IsHungAppWindow(IntPtr hWnd);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
+        private const uint SWP_NOMOVE = 0x0002;
+        private const uint SWP_NOSIZE = 0x0001;
+        private const uint SWP_NOACTIVATE = 0x0010;
+        private const uint SWP_SHOWWINDOW = 0x0040;
+        private const int SW_MINIMIZE = 6;
+
         public App()
         {
             try
@@ -653,10 +670,10 @@ namespace Ink_Canvas
                 await Task.Delay(500);
 
                 // 强制刷新UI，确保启动画面显示
-                Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                await Dispatcher.InvokeAsync(() => { }, DispatcherPriority.Render);
             }
 
-            System.Threading.Thread.Sleep(500);
+            await Task.Delay(500);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
@@ -804,7 +821,7 @@ namespace Ink_Canvas
 
                                 while (waitCount < maxWaitCount && !updateProcess.HasExited)
                                 {
-                                    Thread.Sleep(500); // 减少等待间隔到500ms
+                                    await Task.Delay(500); // 非阻塞等待
                                     waitCount++;
                                     LogHelper.WriteLogToFile($"App | 等待更新进程完成... ({waitCount}/{maxWaitCount})");
                                 }
@@ -973,7 +990,7 @@ namespace Ink_Canvas
                 mutex = new Mutex(true, mutexName, out bool tempRet);
 
                 // 额外等待一小段时间确保更新进程完全退出
-                Thread.Sleep(1000);
+                await Task.Delay(1000);
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
             }
 
@@ -1000,16 +1017,16 @@ namespace Ink_Canvas
                     SetSplashProgress(80);
                     Task.Delay(300).ContinueWith(_ =>
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             SetSplashMessage("启动完成！");
                             SetSplashProgress(100);
                             // 延迟关闭启动画面，让用户看到完成消息
                             Task.Delay(500).ContinueWith(__ =>
                             {
-                                Dispatcher.Invoke(() => CloseSplashScreen());
+                                Dispatcher.BeginInvoke(new Action(() => CloseSplashScreen()), DispatcherPriority.Background);
                             });
-                        });
+                        }), DispatcherPriority.Background);
                     });
                 }
             };
@@ -1132,16 +1149,42 @@ namespace Ink_Canvas
                 try
                 {
                     var proc = Process.GetProcessById(pid);
-                    while (!proc.HasExited)
-                    {
-                        // 检查退出信号文件
-                        if (File.Exists(exitSignalFile))
+                        while (!proc.HasExited)
                         {
-                            try { File.Delete(exitSignalFile); } catch { }
-                            Environment.Exit(0);
+                            // 检查退出信号文件
+                            if (File.Exists(exitSignalFile))
+                            {
+                                try { File.Delete(exitSignalFile); } catch { }
+                                Environment.Exit(0);
+                            }
+
+                            try
+                            {
+                                // 如果主窗口句柄可用，检查是否无响应（Hung）并尝试恢复：移除 Topmost 并最小化
+                                IntPtr mainHwnd = proc.MainWindowHandle;
+                                if (mainHwnd != IntPtr.Zero)
+                                {
+                                    bool isHung = false;
+                                    try { isHung = IsHungAppWindow(mainHwnd); } catch { }
+                                    if (isHung)
+                                    {
+                                        try
+                                        {
+                                            SetWindowPos(mainHwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                                            ShowWindow(mainHwnd, SW_MINIMIZE);
+                                            LogHelper.WriteLogToFile("Watchdog: detected hung main window, removed TOPMOST and minimized.", LogHelper.LogType.Warning);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            LogHelper.WriteLogToFile($"Watchdog recovery action failed: {ex.Message}", LogHelper.LogType.Error);
+                                        }
+                                    }
+                                }
+                            }
+                            catch { }
+
+                            try { await Task.Delay(2000).ConfigureAwait(false); } catch { /* ignore delay errors */ }
                         }
-                        Thread.Sleep(2000);
-                    }
                     // 主进程异常退出，自动重启前判断崩溃后操作
                     SyncCrashActionFromSettings(); // 同步设置
 

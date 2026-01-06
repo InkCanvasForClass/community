@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Timers;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -89,15 +90,15 @@ namespace Ink_Canvas
             // 单次抽模式：自动开始抽选
             if (isSingleDrawMode)
             {
-                // 延迟100ms后自动开始抽选
-                new System.Threading.Thread(() =>
+                // 延迟100ms后自动开始抽选（异步，避免阻塞UI）
+                Task.Run(async () =>
                 {
-                    System.Threading.Thread.Sleep(100);
-                    Application.Current.Dispatcher.Invoke(() =>
+                    await Task.Delay(100);
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         StartSingleDraw();
-                    });
-                }).Start();
+                    }));
+                });
             }
         }
 
@@ -145,15 +146,15 @@ namespace Ink_Canvas
             // 单次抽模式：自动开始抽选
             if (isSingleDrawMode)
             {
-                // 延迟100ms后自动开始抽选
-                new System.Threading.Thread(() =>
+                // 延迟100ms后自动开始抽选（异步，避免阻塞UI）
+                Task.Run(async () =>
                 {
-                    System.Threading.Thread.Sleep(100);
-                    Application.Current.Dispatcher.Invoke(() =>
+                    await Task.Delay(100);
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         StartSingleDraw();
-                    });
-                }).Start();
+                    }));
+                });
             }
         }
 
@@ -1078,7 +1079,17 @@ namespace Ink_Canvas
                 }
 
                 string jsonContent = JsonConvert.SerializeObject(historyData, Formatting.Indented);
-                File.WriteAllText(RollCallHistoryJsonPath, jsonContent);
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        File.WriteAllText(RollCallHistoryJsonPath, jsonContent);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"保存点名历史记录失败(异步写入): {ex.Message}", LogHelper.LogType.Error);
+                    }
+                });
             }
             catch (Exception ex)
             {
@@ -1601,16 +1612,16 @@ namespace Ink_Canvas
             const int animationTimes = 100; // 动画次数
             const int sleepTime = 5; // 每次动画间隔（毫秒）
 
-            new System.Threading.Thread(() =>
+            Task.Run(async () =>
             {
                 List<string> usedNames = new List<string>();
 
                 // 确保动画期间主显示区域可见
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     MainResultDisplay.Visibility = Visibility.Visible;
                     MultiResultScrollViewer.Visibility = Visibility.Collapsed;
-                });
+                }));
 
                 for (int i = 0; i < animationTimes; i++)
                 {
@@ -1620,19 +1631,19 @@ namespace Ink_Canvas
                         int randomIndex = new Random().Next(0, nameList.Count);
                         string displayName = nameList[randomIndex];
 
-                        Application.Current.Dispatcher.Invoke(() =>
+                        Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
                             // 确保主显示区域在动画期间保持可见
                             MainResultDisplay.Visibility = Visibility.Visible;
                             MainResultDisplay.Text = displayName;
-                        });
+                        }));
                     }
 
-                    System.Threading.Thread.Sleep(sleepTime);
+                    await Task.Delay(sleepTime);
                 }
 
                 // 动画结束，显示最终结果
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     // 根据选择的模式进行不同的点名逻辑
                     var selectedNames = SelectNamesByMode(nameList, currentCount);
@@ -1648,8 +1659,8 @@ namespace Ink_Canvas
                     isRollCalling = false;
                     StartRollCallBtn.Visibility = Visibility.Visible;
                     StopRollCallBtn.Visibility = Visibility.Collapsed;
-                });
-            }).Start();
+                }));
+            });
         }
 
         private void StartRollCallWithNumbers()
@@ -1671,34 +1682,34 @@ namespace Ink_Canvas
             const int animationTimes = 100; // 动画次数
             const int sleepTime = 5; // 每次动画间隔（毫秒）
 
-            new System.Threading.Thread(() =>
+            Task.Run(async () =>
             {
                 List<int> usedNumbers = new List<int>();
 
                 // 确保动画期间主显示区域可见
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     MainResultDisplay.Visibility = Visibility.Visible;
                     MultiResultScrollViewer.Visibility = Visibility.Collapsed;
-                });
+                }));
 
                 for (int i = 0; i < animationTimes; i++)
                 {
                     // 随机选择一个数字进行动画显示
                     int randomNumber = new Random().Next(1, 61); // 1-60
 
-                    Application.Current.Dispatcher.Invoke(() =>
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         // 确保主显示区域在动画期间保持可见
                         MainResultDisplay.Visibility = Visibility.Visible;
                         MainResultDisplay.Text = randomNumber.ToString();
-                    });
+                    }));
 
-                    System.Threading.Thread.Sleep(sleepTime);
+                    await Task.Delay(sleepTime);
                 }
 
                 // 动画结束，显示最终结果
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     // 根据选择的模式进行不同的抽选逻辑
                     var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
@@ -1715,8 +1726,8 @@ namespace Ink_Canvas
                     isRollCalling = false;
                     StartRollCallBtn.Visibility = Visibility.Visible;
                     StopRollCallBtn.Visibility = Visibility.Collapsed;
-                });
-            }).Start();
+                }));
+            });
         }
 
         private void StopRollCall()
@@ -1749,25 +1760,25 @@ namespace Ink_Canvas
             const int animationTimes = 100; // 动画次数
             const int sleepTime = 5; // 每次动画间隔（毫秒），参考老点名窗口
 
-            new System.Threading.Thread(() =>
+            Task.Run(async () =>
             {
                 if (nameList.Count > 0)
                 {
                     // 有名单时，从名单中抽选
-                    StartSingleDrawNameAnimation(animationTimes, sleepTime);
+                    await StartSingleDrawNameAnimationAsync(animationTimes, sleepTime);
                 }
                 else
                 {
                     // 没有名单时，从1-60数字中抽选
-                    StartSingleDrawNumberAnimation(animationTimes, sleepTime);
+                    await StartSingleDrawNumberAnimationAsync(animationTimes, sleepTime);
                 }
-            }).Start();
+            });
         }
 
         /// <summary>
         /// 单次抽选名单动画
         /// </summary>
-        private void StartSingleDrawNameAnimation(int animationTimes, int sleepTime)
+        private async Task StartSingleDrawNameAnimationAsync(int animationTimes, int sleepTime)
         {
             List<string> usedNames = new List<string>();
 
@@ -1782,16 +1793,16 @@ namespace Ink_Canvas
 
                 usedNames.Add(randomName);
 
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     MainResultDisplay.Text = randomName;
-                });
+                }));
 
-                System.Threading.Thread.Sleep(sleepTime);
+                await Task.Delay(sleepTime);
             }
 
             // 动画结束，显示最终结果
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 // 根据选择的模式进行不同的抽选逻辑
                 var selectedNames = SelectNamesByMode(nameList, currentCount);
@@ -1807,40 +1818,40 @@ namespace Ink_Canvas
                 isRollCalling = false;
                 StartRollCallBtn.Visibility = Visibility.Visible;
                 StopRollCallBtn.Visibility = Visibility.Collapsed;
+            }));
 
-                if (isSingleDrawMode)
+            if (isSingleDrawMode)
+            {
+                Task.Run(async () =>
                 {
-                    new System.Threading.Thread(() =>
+                    await Task.Delay(autoCloseWaitTime);
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        System.Threading.Thread.Sleep(autoCloseWaitTime);
-                        Application.Current.Dispatcher.Invoke(() =>
+                        if (ControlOptionsGrid != null)
                         {
-                            if (ControlOptionsGrid != null)
-                            {
-                                ControlOptionsGrid.Opacity = 1;
-                                ControlOptionsGrid.IsHitTestVisible = true;
-                            }
-                            if (StartRollCallBtn != null)
-                            {
-                                StartRollCallBtn.Opacity = 1;
-                                StartRollCallBtn.IsEnabled = true;
-                            }
-                            if (ResetBtn != null)
-                            {
-                                ResetBtn.Opacity = 1;
-                                ResetBtn.IsEnabled = true;
-                            }
-                            Close();
-                        });
-                    }).Start();
-                }
-            });
+                            ControlOptionsGrid.Opacity = 1;
+                            ControlOptionsGrid.IsHitTestVisible = true;
+                        }
+                        if (StartRollCallBtn != null)
+                        {
+                            StartRollCallBtn.Opacity = 1;
+                            StartRollCallBtn.IsEnabled = true;
+                        }
+                        if (ResetBtn != null)
+                        {
+                            ResetBtn.Opacity = 1;
+                            ResetBtn.IsEnabled = true;
+                        }
+                        Close();
+                    }));
+                });
+            }
         }
 
         /// <summary>
         /// 单次抽选数字动画
         /// </summary>
-        private void StartSingleDrawNumberAnimation(int animationTimes, int sleepTime)
+        private async Task StartSingleDrawNumberAnimationAsync(int animationTimes, int sleepTime)
         {
             List<int> usedNumbers = new List<int>();
 
@@ -1855,16 +1866,16 @@ namespace Ink_Canvas
 
                 usedNumbers.Add(randomNumber);
 
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     MainResultDisplay.Text = randomNumber.ToString();
-                });
+                }));
 
-                System.Threading.Thread.Sleep(sleepTime);
+                await Task.Delay(sleepTime);
             }
 
             // 动画结束，显示最终结果
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 // 根据选择的模式进行不同的抽选逻辑
                 var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
@@ -1894,35 +1905,35 @@ namespace Ink_Canvas
                 isRollCalling = false;
                 StartRollCallBtn.Visibility = Visibility.Visible;
                 StopRollCallBtn.Visibility = Visibility.Collapsed;
+            }));
 
-                if (isSingleDrawMode)
+            if (isSingleDrawMode)
+            {
+                Task.Run(async () =>
                 {
-                    new System.Threading.Thread(() =>
+                    await Task.Delay(autoCloseWaitTime);
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        System.Threading.Thread.Sleep(autoCloseWaitTime);
-                        Application.Current.Dispatcher.Invoke(() =>
+                        if (ControlOptionsGrid != null)
                         {
-                            if (ControlOptionsGrid != null)
-                            {
-                                ControlOptionsGrid.Opacity = 1;
-                                ControlOptionsGrid.IsHitTestVisible = true;
-                            }
-                            // 恢复开始点名和重置按钮
-                            if (StartRollCallBtn != null)
-                            {
-                                StartRollCallBtn.Opacity = 1;
-                                StartRollCallBtn.IsEnabled = true;
-                            }
-                            if (ResetBtn != null)
-                            {
-                                ResetBtn.Opacity = 1;
-                                ResetBtn.IsEnabled = true;
-                            }
-                            Close();
-                        });
-                    }).Start();
-                }
-            });
+                            ControlOptionsGrid.Opacity = 1;
+                            ControlOptionsGrid.IsHitTestVisible = true;
+                        }
+                        // 恢复开始点名和重置按钮
+                        if (StartRollCallBtn != null)
+                        {
+                            StartRollCallBtn.Opacity = 1;
+                            StartRollCallBtn.IsEnabled = true;
+                        }
+                        if (ResetBtn != null)
+                        {
+                            ResetBtn.Opacity = 1;
+                            ResetBtn.IsEnabled = true;
+                        }
+                        Close();
+                    }));
+                });
+            }
         }
 
         /// <summary>
@@ -1953,10 +1964,10 @@ namespace Ink_Canvas
         private void RollCallTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
             // 这里可以实现点名动画效果
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 // 动画逻辑可以在这里实现
-            });
+            }));
         }
         #endregion
 

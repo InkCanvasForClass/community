@@ -67,7 +67,7 @@ namespace Ink_Canvas
         {
             try
             {
-                Dispatcher.Invoke(() =>
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
                     ShowNotification("检测到剪贴板中有图片，右键点击白板可粘贴");
                 });

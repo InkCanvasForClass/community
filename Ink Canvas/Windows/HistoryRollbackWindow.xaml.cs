@@ -293,7 +293,7 @@ namespace Ink_Canvas
                     channel,
                     (percent, text) =>
                     {
-                        Dispatcher.Invoke(() =>
+                        Dispatcher.BeginInvoke(new Action(() =>
                         {
                             DownloadProgressBar.Value = percent;
                             DownloadProgressText.Text = text;

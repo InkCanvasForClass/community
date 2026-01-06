@@ -41,6 +41,34 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+            // UI responsiveness tracking
+            
+
+            // UI responsiveness tracking
+            private long _lastUiRespondMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            private volatile bool _watchdogTriggered = false;
+        // UI 调用辅助：统一在 UI 线程执行委托
+        // 放在 MainWindow 中以便项目中其它类通过 MainWindow.Instance 使用
+        public void InvokeOnUI(Action action, bool beginInvoke = true)
+        {
+            if (action == null) return;
+            try
+            {
+                if (Dispatcher.CheckAccess())
+                {
+                    action();
+                }
+                else
+                {
+                    // 始终使用 BeginInvoke，避免在后台线程上同步阻塞 UI 线程
+                    Dispatcher.BeginInvoke(action, System.Windows.Threading.DispatcherPriority.Normal);
+                }
+            }
+            catch (Exception ex)
+            {
+                try { LogHelper.WriteLogToFile($"InvokeOnUI exception: {ex.Message}", LogHelper.LogType.Error); } catch { }
+            }
+        }
         [DllImport("UIAccessDLL_x86.dll", EntryPoint = "PrepareUIAccess", CallingConvention = CallingConvention.Cdecl)]
         public static extern Int32 PrepareUIAccessX86();
 
@@ -529,6 +557,13 @@ namespace Ink_Canvas
             loadPenCanvas();
             //加载设置
             LoadSettings(true);
+            // 临时缓解：禁用异步墨迹平滑以避免平滑回调导致的冻结
+            try
+            {
+                Settings.Canvas.UseAsyncInkSmoothing = false;
+                LogHelper.WriteLogToFile("临时设置：已禁用 UseAsyncInkSmoothing", LogHelper.LogType.Event);
+            }
+            catch { }
             AutoBackupManager.Initialize(Settings);
 
             // 初始化Dlass上传队列（恢复上次的上传队列）
@@ -571,6 +606,120 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"检测或修正保存路径时出错: {ex.Message}", LogHelper.LogType.Error);
             }
+
+            // 周期性维护定时器：用于长时间运行时做轻量维护（GC 与可选视觉刷新）
+            try
+            {
+                var maintenanceTimer = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Background)
+                {
+                    Interval = TimeSpan.FromSeconds(30)
+                };
+                int runCount = 0;
+                maintenanceTimer.Tick += (s, ev) =>
+                {
+                    runCount++;
+                    // UI 调用辅助：统一在 UI 线程执行委托
+                    // 使用示例：InvokeOnUI(() => { inkCanvas.Strokes.Add(s); });
+                    // 放在 MainWindow 中以便项目中其它类通过 MainWindow.Instance 使用
+
+                    try
+                    {
+                        // 仅做采样日志，避免强制触发 GC 导致 UI 线程长时间暂停
+                        if (runCount % 40 == 0)
+                        {
+                            LogHelper.WriteLogToFile("Maintenance: periodic memory sample (no forced GC)", LogHelper.LogType.Trace);
+                        }
+                    }
+                    catch { }
+                };
+                maintenanceTimer.Start();
+
+                    // UI 调用辅助：统一在 UI 线程执行委托（已移至类级方法）
+            }
+            catch { }
+
+            // 轻量 UI 响应性采样：定期向 Dispatcher 提交空闲任务，测量从提交到执行的延迟，用于记录卡顿样本
+            try
+            {
+                var uiSampler = new System.Windows.Threading.DispatcherTimer(System.Windows.Threading.DispatcherPriority.Background)
+                {
+                    Interval = TimeSpan.FromSeconds(5)
+                };
+                uiSampler.Tick += (s, ev) =>
+                {
+                    try
+                    {
+                        var postedTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            try
+                            {
+                                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                                var delay = now - postedTime;
+                                _lastUiRespondMs = now;
+                                if (delay > 2000)
+                                {
+                                    LogHelper.WriteLogToFile($"UI responsiveness warning: lag {delay}ms", LogHelper.LogType.Warning);
+                                }
+                                // If previously triggered watchdog and UI is responsive again, reset flag
+                                if (_watchdogTriggered && delay < 1000)
+                                {
+                                    _watchdogTriggered = false;
+                                    LogHelper.WriteLogToFile("UI responsiveness restored, watchdog cleared", LogHelper.LogType.Trace);
+                                }
+                            }
+                            catch { }
+                        }), System.Windows.Threading.DispatcherPriority.Background);
+                    }
+                    catch { }
+                };
+                uiSampler.Start();
+                // 启动后台 watchdog 线程，检测 UI beat 是否超时，若超时则去除窗口 Topmost
+                Task.Run(async () =>
+                {
+                    while (true)
+                    {
+                        try
+                        {
+                            await Task.Delay(2000);
+                            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                            var last = System.Threading.Interlocked.Read(ref _lastUiRespondMs);
+                            var diff = now - last;
+                            if (diff > 5000)
+                            {
+                                if (!_watchdogTriggered)
+                                {
+                                    _watchdogTriggered = true;
+                                    try
+                                    {
+                                        var hwnd = new WindowInteropHelper(this).Handle;
+                                        // Remove topmost via SetWindowPos
+                                        SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+                                        // Also clear WS_EX_TOPMOST style to avoid maintenance re-applying Topmost
+                                        try
+                                        {
+                                            int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
+                                            SetWindowLong(hwnd, GWL_EXSTYLE, exStyle & ~WS_EX_TOPMOST);
+                                        }
+                                        catch (Exception innerEx)
+                                        {
+                                            LogHelper.WriteLogToFile($"Watchdog: failed clearing WS_EX_TOPMOST: {innerEx.Message}", LogHelper.LogType.Warning);
+                                        }
+
+                                        LogHelper.WriteLogToFile($"Watchdog: removed TOPMOST after unresponsive {diff}ms", LogHelper.LogType.Warning);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        LogHelper.WriteLogToFile($"Watchdog action failed: {ex.Message}", LogHelper.LogType.Error);
+                                    }
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                });
+            }
+            catch { }
 
             // 加载自定义背景颜色
             LoadCustomBackgroundColor();
@@ -829,24 +978,24 @@ namespace Ink_Canvas
         {
             if (!Settings.Advanced.IsEnableResolutionChangeDetection) return;
             ShowNotification($"检测到显示器信息变化，变为{Screen.PrimaryScreen.Bounds.Width}x{Screen.PrimaryScreen.Bounds.Height}）");
-            new Thread(() =>
-            {
-                var isFloatingBarOutsideScreen = false;
-                var isInPPTPresentationMode = false;
-                Dispatcher.Invoke(() =>
+                // 在UI线程中读取视图状态并执行后续操作，避免在后台线程同步等待
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
-                    isInPPTPresentationMode = BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
-                });
-                if (isFloatingBarOutsideScreen) dpiChangedDelayAction.DebounceAction(3000, null, () =>
-                {
-                    if (!isFloatingBarFolded)
+                    var isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
+                    var isInPPTPresentationMode = BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
+
+                    if (isFloatingBarOutsideScreen)
                     {
-                        if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
-                        else ViewboxFloatingBarMarginAnimation(100, true);
+                        dpiChangedDelayAction.DebounceAction(3000, null, () =>
+                        {
+                            if (!isFloatingBarFolded)
+                            {
+                                if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
+                                else ViewboxFloatingBarMarginAnimation(100, true);
+                            }
+                        });
                     }
-                });
-            }).Start();
+                }), System.Windows.Threading.DispatcherPriority.Background);
         }
 
         public DelayAction dpiChangedDelayAction = new DelayAction();
@@ -858,33 +1007,33 @@ namespace Ink_Canvas
                 ShowNotification($"系统DPI发生变化，从 {e.OldDpi.DpiScaleX}x{e.OldDpi.DpiScaleY} 变化为 {e.NewDpi.DpiScaleX}x{e.NewDpi.DpiScaleY}");
 
                 // 如果TimerContainer可见，调整其尺寸
-                Dispatcher.Invoke(() =>
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
                     var timerContainer = FindName("TimerContainer") as FrameworkElement;
                     if (timerContainer != null && timerContainer.Visibility == Visibility.Visible)
                     {
                         AdjustTimerContainerSize();
                     }
-                });
+                }), System.Windows.Threading.DispatcherPriority.Background);
 
-                new Thread(() =>
+                // 在UI线程中读取视图状态并执行后续操作，避免在后台线程同步等待
+                Dispatcher.BeginInvoke(new Action(() =>
                 {
-                    var isFloatingBarOutsideScreen = false;
-                    var isInPPTPresentationMode = false;
-                    Dispatcher.Invoke(() =>
+                    var isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
+                    var isInPPTPresentationMode = BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
+
+                    if (isFloatingBarOutsideScreen)
                     {
-                        isFloatingBarOutsideScreen = IsOutsideOfScreenHelper.IsOutsideOfScreen(ViewboxFloatingBar);
-                        isInPPTPresentationMode = BtnPPTSlideShowEnd.Visibility == Visibility.Visible;
-                    });
-                    if (isFloatingBarOutsideScreen) dpiChangedDelayAction.DebounceAction(3000, null, () =>
-                    {
-                        if (!isFloatingBarFolded)
+                        dpiChangedDelayAction.DebounceAction(3000, null, () =>
                         {
-                            if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
-                            else ViewboxFloatingBarMarginAnimation(100, true);
-                        }
-                    });
-                }).Start();
+                            if (!isFloatingBarFolded)
+                            {
+                                if (isInPPTPresentationMode) ViewboxFloatingBarMarginAnimation(60);
+                                else ViewboxFloatingBarMarginAnimation(100, true);
+                            }
+                        });
+                    }
+                }), System.Windows.Threading.DispatcherPriority.Background);
             }
         }
 
@@ -1652,7 +1801,9 @@ namespace Ink_Canvas
         {
             // 显示设置面板
             BorderSettings.Visibility = Visibility.Visible;
+            BorderSettings.IsHitTestVisible = true;
             // 设置蒙版为可点击，并添加半透明背景
+            BorderSettingsMask.Visibility = Visibility.Visible;
             BorderSettingsMask.IsHitTestVisible = true;
             BorderSettingsMask.Background = new SolidColorBrush(Color.FromArgb(1, 0, 0, 0));
 
@@ -2595,6 +2746,7 @@ namespace Ink_Canvas
                 };
 
                 // 显示快捷键设置窗口
+                    BorderSettings.IsHitTestVisible = true;
                 hotkeySettingsWindow.ShowDialog();
             }
             catch (Exception ex)

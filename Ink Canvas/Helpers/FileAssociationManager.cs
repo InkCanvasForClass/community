@@ -235,8 +235,8 @@ namespace Ink_Canvas.Helpers
                     ipcEvent.Set();
                 }
 
-                // 等待一段时间让已运行实例处理文件
-                Thread.Sleep(1000);
+                // 等待一段时间让已运行实例处理文件（同步等待，无 Thread.Sleep 回退）
+                Task.Delay(1000).GetAwaiter().GetResult();
 
                 // 清理IPC文件
                 try
@@ -285,8 +285,8 @@ namespace Ink_Canvas.Helpers
                     ipcEvent.Set();
                 }
 
-                // 等待一段时间让已运行实例处理命令
-                Thread.Sleep(1000);
+                // 等待一段时间让已运行实例处理命令（同步等待，无 Thread.Sleep 回退）
+                Task.Delay(1000).GetAwaiter().GetResult();
 
                 // 清理IPC文件
                 try
@@ -335,8 +335,8 @@ namespace Ink_Canvas.Helpers
                     ipcEvent.Set();
                 }
 
-                // 等待一段时间让已运行实例处理命令
-                Thread.Sleep(1000);
+                // 等待一段时间让已运行实例处理命令（同步等待，无 Thread.Sleep 回退）
+                Task.Delay(1000).GetAwaiter().GetResult();
 
                 // 清理IPC文件
                 try

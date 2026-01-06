@@ -8,6 +8,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Threading;
+using System.Threading.Tasks;
 
 namespace Ink_Canvas
 {
@@ -74,15 +75,15 @@ namespace Ink_Canvas
         {
             try
             {
-                // 延迟100ms后开始抽选动画
-                new System.Threading.Thread(() =>
+                // 延迟100ms后开始抽选动画（改为非阻塞异步实现）
+                Task.Run(async () =>
                 {
-                    System.Threading.Thread.Sleep(100);
-                    Application.Current.Dispatcher.Invoke(() =>
+                    await Task.Delay(100).ConfigureAwait(false);
+                    Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         StartQuickDrawAnimation();
-                    });
-                }).Start();
+                    }), DispatcherPriority.Normal);
+                });
             }
             catch (Exception ex)
             {
@@ -98,25 +99,25 @@ namespace Ink_Canvas
             const int animationTimes = 100; // 动画次数
             const int sleepTime = 5; // 每次动画间隔（毫秒）
 
-            new System.Threading.Thread(() =>
+            Task.Run(async () =>
             {
                 if (nameList.Count > 0)
                 {
                     // 有名单时，从名单中抽选
-                    StartNameDrawAnimation(animationTimes, sleepTime);
+                    await StartNameDrawAnimation(animationTimes, sleepTime).ConfigureAwait(false);
                 }
                 else
                 {
                     // 没有名单时，从1-60数字中抽选
-                    StartNumberDrawAnimation(animationTimes, sleepTime);
+                    await StartNumberDrawAnimation(animationTimes, sleepTime).ConfigureAwait(false);
                 }
-            }).Start();
+            });
         }
 
         /// <summary>
         /// 名单抽选动画
         /// </summary>
-        private void StartNameDrawAnimation(int animationTimes, int sleepTime)
+        private async Task StartNameDrawAnimation(int animationTimes, int sleepTime)
         {
             List<string> usedNames = new List<string>();
 
@@ -131,16 +132,16 @@ namespace Ink_Canvas
 
                 usedNames.Add(randomName);
 
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     MainResultDisplay.Text = randomName;
-                });
+                }), DispatcherPriority.Normal);
 
-                System.Threading.Thread.Sleep(sleepTime);
+                await Task.Delay(sleepTime).ConfigureAwait(false);
             }
 
             // 动画结束，显示最终结果
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 // 使用降重抽选方法选择最终名字
                 var selectedNames = NewStyleRollCallWindow.SelectNamesWithML(nameList, 1, random);
@@ -149,23 +150,23 @@ namespace Ink_Canvas
 
                 // 更新历史记录
                 NewStyleRollCallWindow.UpdateRollCallHistory(new List<string> { finalName });
-            });
+            }), DispatcherPriority.Normal);
 
-            // 显示结果后，等待一段时间让用户看到结果，然后关闭窗口
-            new System.Threading.Thread(() =>
+            // 显示结果后，等待一段时间让用户看到结果，然后关闭窗口（异步等待）
+            Task.Run(async () =>
             {
-                System.Threading.Thread.Sleep(autoCloseWaitTime);
-                Application.Current.Dispatcher.Invoke(() =>
+                await Task.Delay(autoCloseWaitTime).ConfigureAwait(false);
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     Close();
-                });
-            }).Start();
+                }), DispatcherPriority.Normal);
+            });
         }
 
         /// <summary>
         /// 数字抽选动画
         /// </summary>
-        private void StartNumberDrawAnimation(int animationTimes, int sleepTime)
+        private async Task StartNumberDrawAnimation(int animationTimes, int sleepTime)
         {
             List<int> usedNumbers = new List<int>();
 
@@ -180,16 +181,16 @@ namespace Ink_Canvas
 
                 usedNumbers.Add(randomNumber);
 
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     MainResultDisplay.Text = randomNumber.ToString();
-                });
+                }), DispatcherPriority.Normal);
 
-                System.Threading.Thread.Sleep(sleepTime);
+                await Task.Delay(sleepTime).ConfigureAwait(false);
             }
 
             // 动画结束，显示最终结果
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 // 使用降重抽选方法选择最终数字
                 var numberList = Enumerable.Range(1, 60).Select(n => n.ToString()).ToList();
@@ -199,17 +200,17 @@ namespace Ink_Canvas
 
                 // 更新历史记录
                 NewStyleRollCallWindow.UpdateRollCallHistory(new List<string> { finalNumber });
-            });
+            }), DispatcherPriority.Normal);
 
-            // 显示结果后，等待一段时间让用户看到结果，然后关闭窗口
-            new System.Threading.Thread(() =>
+            // 显示结果后，等待一段时间让用户看到结果，然后关闭窗口（异步等待）
+            Task.Run(async () =>
             {
-                System.Threading.Thread.Sleep(autoCloseWaitTime);
-                Application.Current.Dispatcher.Invoke(() =>
+                await Task.Delay(autoCloseWaitTime).ConfigureAwait(false);
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                 {
                     Close();
-                });
-            }).Start();
+                }), DispatcherPriority.Normal);
+            });
         }
 
 

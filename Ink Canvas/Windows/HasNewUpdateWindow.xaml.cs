@@ -287,7 +287,7 @@ namespace Ink_Canvas
                 var groups = AutoUpdateHelper.ChannelLineGroups[MainWindow.Settings.Startup.UpdateChannel];
                 downloadSuccess = await AutoUpdateHelper.DownloadSetupFileWithFallback(NewVersion, groups, (percent, text) =>
                 {
-                    Dispatcher.Invoke(() =>
+                    Dispatcher.BeginInvoke(new Action(() =>
                     {
                         // 更新自定义进度条
                         progressFill = FindName("ProgressFill") as Border;
@@ -506,7 +506,7 @@ namespace Ink_Canvas
             LogHelper.WriteLogToFile($"AutoUpdate | 开始安装版本: {version}");
             AutoUpdateHelper.InstallNewVersionApp(version, true);
             App.IsAppExitByUser = true;
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
             {
                 Application.Current.Shutdown();
             });

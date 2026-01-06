@@ -1442,7 +1442,7 @@ namespace Ink_Canvas
                 }
 
                 // 添加到画布
-                inkCanvas.Strokes.Add(clonedStrokes);
+                SafeAddStrokes(() => inkCanvas.Strokes.Add(clonedStrokes));
 
                 // 提交到时间机器以支持撤销
                 timeMachine.CommitStrokeUserInputHistory(clonedStrokes);
@@ -1486,7 +1486,7 @@ namespace Ink_Canvas
                 BtnWhiteBoardAdd_Click(null, null);
 
                 // 添加到新页面的画布
-                inkCanvas.Strokes.Add(clonedStrokes);
+                SafeAddStrokes(() => inkCanvas.Strokes.Add(clonedStrokes));
 
                 // 提交到时间机器以支持撤销
                 timeMachine.CommitStrokeUserInputHistory(clonedStrokes);

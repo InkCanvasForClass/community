@@ -96,7 +96,7 @@ namespace Ink_Canvas.Windows
         /// <param name="progress">进度百分比</param>
         public void SetProgress(int progress)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 // 设置进度条颜色
                 SetProgressBarColor();
@@ -167,7 +167,7 @@ namespace Ink_Canvas.Windows
 
         public void SetLoadingMessage(string message, int actualSplashStyle)
         {
-            Dispatcher.Invoke(() =>
+            Dispatcher.BeginInvoke(new Action(() =>
             {
                 LoadingText.Text = message;
 

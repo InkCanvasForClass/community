@@ -24,9 +24,25 @@ namespace Ink_Canvas.Helpers
         {
             CacheMode = new BitmapCache();
 
+            // VisualCanvas 不应拦截输入事件，绘制层仅用于显示笔迹
+            IsHitTestVisible = false;
+
             RenderOptions.SetBitmapScalingMode(this, BitmapScalingMode.HighQuality);
             RenderOptions.SetEdgeMode(this, EdgeMode.Aliased);
             RenderOptions.SetCachingHint(this, CachingHint.Cache);
+        }
+
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            // Do not return Infinity; clamp to finite values
+            double w = double.IsInfinity(availableSize.Width) ? 0 : availableSize.Width;
+            double h = double.IsInfinity(availableSize.Height) ? 0 : availableSize.Height;
+            return new Size(w, h);
+        }
+
+        protected override Size ArrangeOverride(Size finalSize)
+        {
+            return finalSize;
         }
 
         public void AddVisual(DrawingVisual visual)
@@ -44,6 +60,16 @@ namespace Ink_Canvas.Helpers
             _visuals.Clear();
         }
 
+        public void RemoveVisual(DrawingVisual visual)
+        {
+            if (visual == null) return;
+            // remove from list first, then remove visual child (protected)
+            if (_visuals.Remove(visual))
+            {
+                RemoveVisualChild(visual);
+            }
+        }
+
         public IReadOnlyList<DrawingVisual> Visuals => _visuals;
     }
 
@@ -53,8 +79,19 @@ namespace Ink_Canvas.Helpers
     public class StrokeVisual
     {
         private int _lastDrawnPointCount = 0;
-        private const int INCREMENTAL_DRAW_THRESHOLD = 2;
+        private const int INCREMENTAL_DRAW_THRESHOLD = 1;
         private VisualCanvas _visualCanvas;
+        private Pen _cachedPen;
+        private SolidColorBrush _cachedBrush;
+        private double _cachedWidth = -1;
+        private Color _cachedColor = Colors.Transparent;
+        private DrawingVisual _segmentVisual;
+        private DrawingGroup _drawingGroup;
+        // 绘制分块与节流配置
+        private const int MAX_DRAWINGGROUP_CHILDREN = 64;
+        private const int REDRAW_THROTTLE_MS = 16; // 限制到约 60 FPS 最大负载
+        private long _lastRedrawTimestamp = 0;
+        private readonly List<DrawingVisual> _segmentVisuals = new List<DrawingVisual>();
 
         /// <summary>
         ///     创建显示笔迹的类
@@ -83,12 +120,48 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         public Stroke Stroke { set; get; }
 
+        private void UpdateCachedDrawingTools()
+        {
+            if (Stroke == null) return;
+            var da = Stroke.DrawingAttributes;
+            if (da == null) return;
+
+            if (_cachedBrush == null || _cachedColor != da.Color)
+            {
+                _cachedBrush = new SolidColorBrush(da.Color);
+                _cachedBrush.Freeze();
+                _cachedColor = da.Color;
+            }
+
+            if (_cachedPen == null || Math.Abs(_cachedWidth - da.Width) > 0.01 || _cachedColor != da.Color)
+            {
+                _cachedPen = new Pen(_cachedBrush, da.Width);
+                _cachedPen.StartLineCap = PenLineCap.Round;
+                _cachedPen.EndLineCap = PenLineCap.Round;
+                _cachedPen.LineJoin = PenLineJoin.Round;
+                _cachedPen.Freeze();
+                _cachedWidth = da.Width;
+            }
+        }
+
         /// <summary>
         /// 设置关联的VisualCanvas
         /// </summary>
         public void SetVisualCanvas(VisualCanvas visualCanvas)
         {
             _visualCanvas = visualCanvas;
+            if (_visualCanvas != null && _segmentVisual == null)
+            {
+                // 创建首个绘制块
+                _segmentVisual = new DrawingVisual();
+                _segmentVisuals.Add(_segmentVisual);
+                _drawingGroup = new DrawingGroup();
+                using (var dc = _segmentVisual.RenderOpen())
+                {
+                    dc.DrawDrawing(_drawingGroup);
+                }
+                _visualCanvas.AddVisual(_segmentVisual);
+            }
         }
 
         /// <summary>
@@ -119,43 +192,63 @@ namespace Ink_Canvas.Helpers
             var points = Stroke.StylusPoints;
             var drawingAttributes = Stroke.DrawingAttributes;
 
-            // 创建新的DrawingVisual用于绘制这个点段
-            var segmentVisual = new DrawingVisual();
+            // 使用单个 DrawingVisual 与 DrawingGroup 来追加绘制，减少大量 Visual 分配
+            if (_visualCanvas == null) return;
 
-            RenderOptions.SetBitmapScalingMode(segmentVisual, BitmapScalingMode.HighQuality);
-            RenderOptions.SetEdgeMode(segmentVisual, EdgeMode.Aliased);
-            RenderOptions.SetCachingHint(segmentVisual, CachingHint.Cache);
+            UpdateCachedDrawingTools();
 
-            using (var dc = segmentVisual.RenderOpen())
+            // 构造当前段的几何并加入 DrawingGroup
+            if (endIndex - startIndex >= 2)
             {
-                var pen = new Pen(new SolidColorBrush(drawingAttributes.Color), drawingAttributes.Width);
-                pen.StartLineCap = PenLineCap.Round;
-                pen.EndLineCap = PenLineCap.Round;
-                pen.LineJoin = PenLineJoin.Round;
-
-                // 绘制指定范围内的点段
-                if (endIndex - startIndex >= 2)
+                var geom = new StreamGeometry();
+                using (var ctx = geom.Open())
                 {
-                    // 多个点，绘制线段
-                    for (int i = startIndex; i < endIndex - 1 && i < points.Count - 1; i++)
+                    var first = new Point(points[startIndex].X, points[startIndex].Y);
+                    ctx.BeginFigure(first, false, false);
+                    for (int i = startIndex + 1; i < endIndex && i < points.Count; i++)
                     {
-                        var startPoint = new Point(points[i].X, points[i].Y);
-                        var endPoint = new Point(points[i + 1].X, points[i + 1].Y);
-                        dc.DrawLine(pen, startPoint, endPoint);
+                        ctx.LineTo(new Point(points[i].X, points[i].Y), true, false);
                     }
                 }
-                else if (endIndex - startIndex == 1 && startIndex < points.Count)
-                {
-                    // 只有一个点，绘制圆点
-                    var brush = new SolidColorBrush(drawingAttributes.Color);
-                    var point = points[startIndex];
-                    dc.DrawEllipse(brush, null, new Point(point.X, point.Y),
-                        drawingAttributes.Width / 2, drawingAttributes.Height / 2);
-                }
+                geom.Freeze();
+                var gd = new GeometryDrawing(_cachedBrush, _cachedPen, geom);
+                _drawingGroup.Children.Add(gd);
+            }
+            else if (endIndex - startIndex == 1 && startIndex < points.Count)
+            {
+                var p = points[startIndex];
+                var eg = new EllipseGeometry(new Point(p.X, p.Y), drawingAttributes.Width / 2, drawingAttributes.Height / 2);
+                eg.Freeze();
+                var gd = new GeometryDrawing(_cachedBrush, null, eg);
+                _drawingGroup.Children.Add(gd);
             }
 
-            // 将新的DrawingVisual添加到VisualCanvas中
-            _visualCanvas.AddVisual(segmentVisual);
+            // 如果当前 DrawingGroup 太大，则创建新的分块以继续追加，避免单个 DrawingGroup 过大
+            if (_drawingGroup.Children.Count >= MAX_DRAWINGGROUP_CHILDREN)
+            {
+                // 新建绘制块和绘制组（首次将新组绑定到新的 DrawingVisual）
+                _segmentVisual = new DrawingVisual();
+                _segmentVisuals.Add(_segmentVisual);
+                _drawingGroup = new DrawingGroup();
+                using (var dc = _segmentVisual.RenderOpen())
+                {
+                    dc.DrawDrawing(_drawingGroup);
+                }
+                _visualCanvas.AddVisual(_segmentVisual);
+                return;
+            }
+
+            // 对于当前分块，直接在 DrawingGroup 中追加 GeometryDrawing 即可，避免每次通过 RenderOpen 重绘整个分块
+            if (_segmentVisual == null)
+            {
+                _segmentVisual = new DrawingVisual();
+                _segmentVisuals.Add(_segmentVisual);
+                using (var dc = _segmentVisual.RenderOpen())
+                {
+                    dc.DrawDrawing(_drawingGroup);
+                }
+                _visualCanvas.AddVisual(_segmentVisual);
+            }
         }
 
         /// <summary>
@@ -167,6 +260,14 @@ namespace Ink_Canvas.Helpers
 
             var currentPointCount = Stroke.StylusPoints.Count;
             if (currentPointCount == 0) return;
+
+            // 简单节流：限制重绘频率
+            var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (_lastRedrawTimestamp != 0 && now - _lastRedrawTimestamp < REDRAW_THROTTLE_MS)
+            {
+                return;
+            }
+            _lastRedrawTimestamp = now;
 
             // 计算新增的点数
             int newPointCount = currentPointCount - _lastDrawnPointCount;
@@ -201,9 +302,17 @@ namespace Ink_Canvas.Helpers
         {
             if (_visualCanvas != null)
             {
-                _visualCanvas.Clear();
+                // 移除所有分块视觉
+                foreach (var sv in _segmentVisuals.ToArray())
+                {
+                    _visualCanvas.RemoveVisual(sv);
+                }
+                _segmentVisuals.Clear();
+                _segmentVisual = null;
             }
+            _drawingGroup = new DrawingGroup();
             _lastDrawnPointCount = 0;
+            _lastRedrawTimestamp = 0;
             Redraw();
         }
 

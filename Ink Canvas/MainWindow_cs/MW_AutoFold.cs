@@ -31,11 +31,11 @@ namespace Ink_Canvas
             BtnSwitch_Click(BtnSwitch, null);
             BtnExit.Foreground = Brushes.White;
             ThemeManager.Current.ApplicationTheme = ApplicationTheme.Dark;
-            new Thread(() =>
+            Task.Run(async () =>
             {
-                Thread.Sleep(200);
-                Application.Current.Dispatcher.Invoke(() => { isDisplayingOrHidingBlackboard = false; });
-            }).Start();
+                await Task.Delay(200).ConfigureAwait(false);
+                Application.Current.Dispatcher.BeginInvoke(new Action(() => { isDisplayingOrHidingBlackboard = false; }));
+            });
         }
 
         public async void FoldFloatingBar_MouseUp(object sender, MouseButtonEventArgs e)

@@ -189,7 +189,7 @@ namespace Ink_Canvas
                 var _filtered = inkCanvas.Strokes.HitTest(pt).Where(stroke => !stroke.ContainsPropertyData(IsLockGuid));
                 var filtered = _filtered as Stroke[] ?? _filtered.ToArray();
                 if (!filtered.Any()) return;
-                inkCanvas.Strokes.Remove(new StrokeCollection(filtered));
+                SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(new StrokeCollection(filtered)));
             }
             else
             {
@@ -232,13 +232,13 @@ namespace Ink_Canvas
             var filteredResult = filtered_result as Stroke[] ?? filtered_result.ToArray();
 
             // 替换或删除笔画
-            if (filteredResult.Any())
+                if (filteredResult.Any())
             {
-                inkCanvas.Strokes.Replace(new StrokeCollection(filtered2Replace), new StrokeCollection(filteredResult));
+                InvokeOnUI(() => inkCanvas.Strokes.Replace(new StrokeCollection(filtered2Replace), new StrokeCollection(filteredResult)));
             }
             else
             {
-                inkCanvas.Strokes.Remove(new StrokeCollection(filtered2Replace));
+                SafeRemoveStrokes(() => inkCanvas.Strokes.Remove(new StrokeCollection(filtered2Replace)));
             }
         }
 

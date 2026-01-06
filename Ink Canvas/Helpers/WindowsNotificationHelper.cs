@@ -31,7 +31,7 @@ namespace Ink_Canvas.Helpers
 
         private static void ShowBalloonForWin7(string version)
         {
-            Application.Current?.Dispatcher.Invoke(() =>
+            Application.Current?.Dispatcher.BeginInvoke(new Action(() =>
             {
                 try
                 {
@@ -48,7 +48,7 @@ namespace Ink_Canvas.Helpers
                 catch
                 {
                 }
-            });
+            }), System.Windows.Threading.DispatcherPriority.Normal);
         }
 
         private static void ShowToastForModernWindows(string version)

@@ -13,6 +13,7 @@ using System.Windows.Threading;
 using Microsoft.Win32;
 using Newtonsoft.Json;
 using SystemEvents = Microsoft.Win32.SystemEvents;
+using System.Threading.Tasks;
 
 namespace Ink_Canvas.Windows
 {
@@ -1113,8 +1114,18 @@ namespace Ink_Canvas.Windows
                 var imagePaths = _pptImagePaths[slideIndex];
                 
                 string json = JsonConvert.SerializeObject(imagePaths, Formatting.Indented);
-                File.WriteAllText(jsonFilePath, json);
-                
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        File.WriteAllText(jsonFilePath, json);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"保存PPT图片路径到JSON失败: {ex.Message}", LogHelper.LogType.Error);
+                    }
+                });
+
                 LogHelper.WriteLogToFile($"已保存第{slideIndex}页图片路径到JSON: {jsonFilePath}");
             }
             catch (Exception ex)
