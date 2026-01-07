@@ -294,7 +294,7 @@ jobs:
             
             # 如果有构建产物，显示下载链接
             if [ "$BUILD_SUCCESS" = "true" ]; then
-              NIGHTLY_LINK="https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/app-package.zip"
+              NIGHTLY_LINK="https://hk.gh-proxy.com/https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/app-package.zip"
               echo ""
               echo "## 构建产物"
               if [ -n "$ARTIFACT_URL" ]; then
@@ -396,4 +396,4 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**直链下载 (nightly.link):**" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "[🌙 nightly.link 下载链接](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/app-package.zip)" >> $GITHUB_STEP_SUMMARY
+          echo "[🌙 nightly.link 下载链接](https://hk.gh-proxy.com/https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/app-package.zip)" >> $GITHUB_STEP_SUMMARY
