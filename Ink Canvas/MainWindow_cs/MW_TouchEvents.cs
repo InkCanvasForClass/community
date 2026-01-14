@@ -210,10 +210,28 @@ namespace Ink_Canvas
 
         private void MainWindow_TouchDown(object sender, TouchEventArgs e)
         {
-
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
-                || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
-                || inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
+            // 在多指书写模式下，需要处理橡皮擦功能，所以不直接返回
+            if (isInMultiTouchMode)
+            {
+                // 多指模式下仍需要处理橡皮擦功能
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                    || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+                {
+                    // 在多指模式下，橡皮擦功能仍然可用
+                    return;
+                }
+                
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Select) 
+                    return;
+            }
+            else
+            {
+                // 非多指模式下，原有的行为
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                    || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
+                    || inkCanvas.EditingMode == InkCanvasEditingMode.Select) 
+                    return;
+            }
 
             if (!isHidingSubPanelsWhenInking)
             {
@@ -258,7 +276,6 @@ namespace Ink_Canvas
                 return;
             }
 
-
             // 根据是否为笔尾自动切换橡皮擦/画笔模式
             if (e.StylusDevice.Inverted)
             {
@@ -279,13 +296,26 @@ namespace Ink_Canvas
 
                     return;
                 }
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                
+                // 在多指模式下，保持当前编辑模式，不强制切换到Ink模式
+                if (!isInMultiTouchMode)
                 {
-                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                    {
+                        inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                    }
+                    else
+                    {
+                        LogHelper.WriteLogToFile("保持当前线擦模式");
+                    }
                 }
-                else
+                // 在多指模式下，如果当前是橡皮擦模式，则保持该模式
+                else if (isInMultiTouchMode && 
+                         (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint || 
+                          inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke))
                 {
-                    LogHelper.WriteLogToFile("保持当前线擦模式");
+                    // 保持当前的橡皮擦模式
+                    LogHelper.WriteLogToFile("多指模式下保持橡皮擦模式");
                 }
             }
             inkCanvas.CaptureStylus();
@@ -294,9 +324,28 @@ namespace Ink_Canvas
 
             SetCursorBasedOnEditingMode(inkCanvas);
 
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
-                || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
-                || inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
+            // 在多指模式下，橡皮擦功能仍然可用，因此需要特殊处理
+            if (isInMultiTouchMode)
+            {
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                    || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+                {
+                    // 在多指模式下，橡皮擦功能仍然可用，但仍需要记录触摸点
+                    TouchDownPointsList[e.StylusDevice.Id] = InkCanvasEditingMode.None;
+                    return;
+                }
+                
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Select) 
+                    return;
+            }
+            else
+            {
+                // 非多指模式下，原有的行为
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                    || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke
+                    || inkCanvas.EditingMode == InkCanvasEditingMode.Select) 
+                    return;
+            }
 
             TouchDownPointsList[e.StylusDevice.Id] = InkCanvasEditingMode.None;
         }
@@ -481,40 +530,89 @@ namespace Ink_Canvas
             SetCursorBasedOnEditingMode(inkCanvas);
             inkCanvas.CaptureTouch(e.TouchDevice);
 
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+            // 在多指模式下，橡皮擦功能仍然需要可用
+            if (isInMultiTouchMode)
             {
-                return;
-            }
-            if (drawingShapeMode != 0)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                {
+                    // 在多指模式下，橡皮擦功能仍然可用
+                    return;
+                }
+                
+                if (drawingShapeMode != 0)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
 
-                // 设置触摸状态，类似鼠标事件处理
-                isTouchDown = true;
-                ViewboxFloatingBar.IsHitTestVisible = false;
-                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+                    // 设置触摸状态，类似鼠标事件处理
+                    isTouchDown = true;
+                    ViewboxFloatingBar.IsHitTestVisible = false;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = false;
 
-                // 设置起始点
-                if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
+                    // 设置起始点
+                    if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
 
-                return;
+                    return;
+                }
+                
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+                {
+                    return;
+                }
+                
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                {
+                    return;
+                }
+                
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+                {
+                    return;
+                }
+                
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                }
             }
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+            else
             {
-                return;
-            }
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
-            {
-                return;
-            }
-            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
-            {
-                return;
-            }
-            if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
-            {
-                inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                // 非多指模式下的原有逻辑
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                {
+                    return;
+                }
+                if (drawingShapeMode != 0)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+
+                    // 设置触摸状态，类似鼠标事件处理
+                    isTouchDown = true;
+                    ViewboxFloatingBar.IsHitTestVisible = false;
+                    BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+
+                    // 设置起始点
+                    if (NeedUpdateIniP()) iniP = e.GetTouchPoint(inkCanvas).Position;
+
+                    return;
+                }
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
+                {
+                    return;
+                }
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                {
+                    return;
+                }
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+                {
+                    return;
+                }
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
+                }
             }
         }
 
@@ -547,7 +645,17 @@ namespace Ink_Canvas
             //设备两个及两个以上，将画笔功能关闭
             if (dec.Count > 1 || isSingleFingerDragMode || !Settings.Gesture.IsEnableTwoFingerGesture)
             {
-                if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
+                // 在多指书写模式下，我们仍然需要处理多指手势，但不应干扰正常的书写
+                if (isInMultiTouchMode)
+                {
+                    // 在多指书写模式下，多指触控用于同时书写，而非手势控制
+                    // 不需要切换到None模式，保持当前模式
+                    return;
+                }
+                
+                // 如果不是多指书写模式，但启用了双指手势，则按照原有逻辑处理
+                if (!Settings.Gesture.IsEnableTwoFingerGesture) return;
+                
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None ||
                     inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
                 lastInkCanvasEditingMode = inkCanvas.EditingMode;
@@ -566,7 +674,8 @@ namespace Ink_Canvas
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 
             //手势完成后切回之前的状态
-            if (dec.Count > 1)
+            // 注意：在多指书写模式下，不需要恢复之前的编辑模式
+            if (!isInMultiTouchMode && dec.Count > 1)
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
                     inkCanvas.EditingMode = lastInkCanvasEditingMode;
             dec.Remove(e.TouchDevice.Id);
@@ -575,7 +684,8 @@ namespace Ink_Canvas
             {
                 isSingleFingerDragMode = false;
                 isWaitUntilNextTouchDown = false;
-                if (drawingShapeMode == 0
+                // 在多指模式下，不要自动切换编辑模式
+                if (!isInMultiTouchMode && drawingShapeMode == 0
                     && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
                     && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
                     && inkCanvas.EditingMode != InkCanvasEditingMode.Select
