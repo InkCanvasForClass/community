@@ -540,12 +540,6 @@ namespace Ink_Canvas
             // 在多指模式下，橡皮擦功能仍然需要可用
             if (isInMultiTouchMode)
             {
-                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
-                {
-                    // 在多指模式下，橡皮擦功能仍然可用
-                    // 不直接返回，继续执行后续逻辑以确保橡皮擦功能正常
-                }
-                
                 if (drawingShapeMode != 0)
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.None;
@@ -560,24 +554,19 @@ namespace Ink_Canvas
 
                     return;
                 }
-                
+
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.Select)
                 {
                     return;
                 }
-                
-                if (inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+
+                // 在多指模式下，橡皮擦功能应该保持可用，不应该直接返回
+                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint || 
+                    inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
                 {
-                    return;
+                    // 不返回，继续执行后续逻辑以确保橡皮擦功能正常工作
                 }
-                
-                if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
-                {
-                    return;
-                }
-                
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                else
                 {
                     inkCanvas.EditingMode = InkCanvasEditingMode.Ink;
                 }
