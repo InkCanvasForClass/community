@@ -1,6 +1,6 @@
 name: 功能请求 | Feature Request
 description: 提出你对本项目的功能建议 | Suggest an idea for this project
-labels: [enhancement]
+type: Feature
 body:
   - type: markdown
     attributes:

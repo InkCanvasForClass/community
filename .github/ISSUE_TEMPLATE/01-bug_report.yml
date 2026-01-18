@@ -1,12 +1,14 @@
 name: Bug 报告 | Bug Report
 description: 反馈软件缺陷或异常 | Report a bug to help us improve
-labels: [bug]
+type: Bug
 body:
   - type: markdown
     attributes:
       value: |
         感谢你的反馈！请详细填写以下内容，便于我们定位问题。
         Thank you for your feedback! Please fill out the following information to help us locate the issue.
+        在报告问题之前，请确保你的软件已经更新到最新Beta版本，否则我们可能会无条件直接关闭该Issue，感谢配合！
+        Before reporting the issue, please make sure your software has been updated to the latest Beta version. Otherwise, we may unconditionally close this Issue without any further notice. Thank you for your cooperation!
   - type: input
     id: version
     attributes:
@@ -33,7 +35,7 @@ body:
     id: steps
     attributes:
       label: 复现步骤 | Steps to Reproduce
-      description: 如何复现该问题？如有必要可附截图/录屏 | How to reproduce this bug? Screenshots/recordings if needed
+      description: 如何复现该问题？如有必要可附截图/录屏/触发该问题的文件 | How to reproduce this bug? Screenshots/recordings/specific files if needed
       placeholder: |
         1. 
         2. 
@@ -51,6 +53,6 @@ body:
     id: extra
     attributes:
       label: 其他补充信息 | Additional Info
-      description: 其他相关信息（如日志、配置、特殊环境等）| Any other context, logs, configs, special environment, etc.
+      description: 其他相关信息（如日志文件、崩溃日志文件、配置文件、特殊环境等）| Any other context, logs, crash logs, configs, special environment, etc.
     validations:
       required: false
