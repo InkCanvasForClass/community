@@ -1,5 +1,6 @@
 ﻿using Ink_Canvas.Helpers;
 using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -98,6 +99,13 @@ namespace Ink_Canvas
         }
 
 
+        // 触摸跟踪（用于判断是否是单指触摸以触发切换）
+        private readonly HashSet<int> _leftActiveTouchIds = new HashSet<int>();
+        private bool _leftGestureIsSingleTouch = false;
+
+        private readonly HashSet<int> _rightActiveTouchIds = new HashSet<int>();
+        private bool _rightGestureIsSingleTouch = false;
+
         private void ProcessPageSelection(ListView listView, int index)
         {
             // 隐藏页面列表
@@ -146,22 +154,41 @@ namespace Ink_Canvas
             ProcessPageSelection(BlackBoardLeftSidePageListView, index);
         }
 
+        private void BlackBoardLeftSidePageListView_OnTouchDown(object sender, TouchEventArgs e)
+        {
+            // 记录当前触摸点
+            var id = e.TouchDevice.Id;
+            _leftActiveTouchIds.Add(id);
+            // 如果当前仅有一个触摸点，则标记为单指手势；否则标记为非单指手势
+            _leftGestureIsSingleTouch = _leftActiveTouchIds.Count == 1;
+        }
+
         private void BlackBoardLeftSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
         {
-            // 防止触摸后再触发鼠标事件导致双触发
-            e.Handled = true;
+            var id = e.TouchDevice.Id;
 
-            var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
-            int index = -1;
-            if (container != null)
+            // 仅在手势从开始到结束都保持单指的情况下才触发页面切换
+            if (_leftGestureIsSingleTouch && _leftActiveTouchIds.Count == 1)
             {
-                index = BlackBoardLeftSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
+                var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
+                int index = -1;
+                if (container != null)
+                {
+                    index = BlackBoardLeftSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
+                }
+
+                // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
+                if (index < 0) index = BlackBoardLeftSidePageListView.SelectedIndex;
+
+                ProcessPageSelection(BlackBoardLeftSidePageListView, index);
+
+                // 防止触摸后再触发鼠标事件导致双触发
+                e.Handled = true;
             }
 
-            // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
-            if (index < 0) index = BlackBoardLeftSidePageListView.SelectedIndex;
-
-            ProcessPageSelection(BlackBoardLeftSidePageListView, index);
+            // 清理触摸点记录
+            _leftActiveTouchIds.Remove(id);
+            if (_leftActiveTouchIds.Count == 0) _leftGestureIsSingleTouch = false;
         }
 
         private void BlackBoardRightSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
@@ -179,22 +206,37 @@ namespace Ink_Canvas
             ProcessPageSelection(BlackBoardRightSidePageListView, index);
         }
 
+        private void BlackBoardRightSidePageListView_OnTouchDown(object sender, TouchEventArgs e)
+        {
+            var id = e.TouchDevice.Id;
+            _rightActiveTouchIds.Add(id);
+            _rightGestureIsSingleTouch = _rightActiveTouchIds.Count == 1;
+        }
+
         private void BlackBoardRightSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
         {
-            // 防止触摸后再触发鼠标事件导致双触发
-            e.Handled = true;
+            var id = e.TouchDevice.Id;
 
-            var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
-            int index = -1;
-            if (container != null)
+            if (_rightGestureIsSingleTouch && _rightActiveTouchIds.Count == 1)
             {
-                index = BlackBoardRightSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
+                var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
+                int index = -1;
+                if (container != null)
+                {
+                    index = BlackBoardRightSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
+                }
+
+                // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
+                if (index < 0) index = BlackBoardRightSidePageListView.SelectedIndex;
+
+                ProcessPageSelection(BlackBoardRightSidePageListView, index);
+
+                // 防止触摸后再触发鼠标事件导致双触发
+                e.Handled = true;
             }
 
-            // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
-            if (index < 0) index = BlackBoardRightSidePageListView.SelectedIndex;
-
-            ProcessPageSelection(BlackBoardRightSidePageListView, index);
+            _rightActiveTouchIds.Remove(id);
+            if (_rightActiveTouchIds.Count == 0) _rightGestureIsSingleTouch = false;
         }
 
     }
