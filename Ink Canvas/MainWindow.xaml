@@ -4779,9 +4779,7 @@
                                                     <ListView.ItemTemplate>
                                                         <DataTemplate>
                                                             <ui:SimpleStackPanel Orientation="Vertical"
-                                                                MouseUp="BlackBoardLeftSidePageListView_OnMouseUp"
-                                                                TouchDown="BlackBoardLeftSidePageListView_OnTouchDown"
-                                                                TouchUp="BlackBoardLeftSidePageListView_OnTouchUp">
+                                                                MouseUp="BlackBoardLeftSidePageListView_OnMouseUp">
                                                                 <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>
@@ -6936,9 +6934,7 @@
                                                     <ListView.ItemTemplate>
                                                         <DataTemplate>
                                                             <ui:SimpleStackPanel Orientation="Vertical"
-                                                                MouseUp="BlackBoardRightSidePageListView_OnMouseUp"
-                                                                TouchDown="BlackBoardRightSidePageListView_OnTouchDown"
-                                                                TouchUp="BlackBoardRightSidePageListView_OnTouchUp">
+                                                                MouseUp="BlackBoardRightSidePageListView_OnMouseUp">
                                                                 <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>
