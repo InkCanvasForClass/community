@@ -4779,7 +4779,8 @@
                                                     <ListView.ItemTemplate>
                                                         <DataTemplate>
                                                             <ui:SimpleStackPanel Orientation="Vertical"
-                                                                MouseUp="BlackBoardLeftSidePageListView_OnMouseUp">
+                                                                MouseUp="BlackBoardLeftSidePageListView_OnMouseUp"
+                                                                TouchUp="BlackBoardLeftSidePageListView_OnTouchUp">
                                                                 <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>
@@ -6934,7 +6935,8 @@
                                                     <ListView.ItemTemplate>
                                                         <DataTemplate>
                                                             <ui:SimpleStackPanel Orientation="Vertical"
-                                                                MouseUp="BlackBoardRightSidePageListView_OnMouseUp">
+                                                                MouseUp="BlackBoardRightSidePageListView_OnMouseUp"
+                                                                TouchUp="BlackBoardRightSidePageListView_OnTouchUp">
                                                                 <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>

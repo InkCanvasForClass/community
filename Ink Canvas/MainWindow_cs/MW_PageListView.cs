@@ -98,12 +98,41 @@ namespace Ink_Canvas
         }
 
 
-        private void BlackBoardLeftSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
+        private void ProcessPageSelection(ListView listView, int index)
         {
+            // 隐藏页面列表
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
 
-            // 尝试根据点击的原始来源查找对应的 ListViewItem 容器（支持点击模板内的缩略图）
+            if (index < 0) return;
+
+            // 只有当选择的页面与当前页面不同时才进行切换
+            if (index + 1 != CurrentWhiteboardIndex)
+            {
+                // 隐藏图片选择工具栏
+                if (currentSelectedElement != null)
+                {
+                    // 保存当前编辑模式
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    UnselectElement(currentSelectedElement);
+                    // 恢复编辑模式
+                    inkCanvas.EditingMode = previousEditingMode;
+                    currentSelectedElement = null;
+                }
+
+                SaveStrokes();
+                ClearStrokes(true);
+                CurrentWhiteboardIndex = index + 1;
+                RestoreStrokes();
+                UpdateIndexInfoDisplay();
+            }
+
+            // 无论是否切换页面，都更新选择索引
+            listView.SelectedIndex = index;
+        }
+
+        private void BlackBoardLeftSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
+        {
             var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
             int index = -1;
             if (container != null)
@@ -114,41 +143,29 @@ namespace Ink_Canvas
             // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
             if (index < 0) index = BlackBoardLeftSidePageListView.SelectedIndex;
 
-            var item = index >= 0 ? BlackBoardLeftSidePageListView.Items[index] : BlackBoardLeftSidePageListView.SelectedItem;
+            ProcessPageSelection(BlackBoardLeftSidePageListView, index);
+        }
 
-            if (index >= 0)
+        private void BlackBoardLeftSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
+        {
+            // 防止触摸后再触发鼠标事件导致双触发
+            e.Handled = true;
+
+            var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
+            int index = -1;
+            if (container != null)
             {
-                // 只有当选择的页面与当前页面不同时才进行切换
-                if (index + 1 != CurrentWhiteboardIndex)
-                {
-                    // 隐藏图片选择工具栏
-                    if (currentSelectedElement != null)
-                    {
-                        // 保存当前编辑模式
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        // 恢复编辑模式
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
-
-                    SaveStrokes();
-                    ClearStrokes(true);
-                    CurrentWhiteboardIndex = index + 1;
-                    RestoreStrokes();
-                    UpdateIndexInfoDisplay();
-                }
-                // 无论是否切换页面，都更新选择索引
-                BlackBoardLeftSidePageListView.SelectedIndex = index;
+                index = BlackBoardLeftSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
             }
+
+            // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
+            if (index < 0) index = BlackBoardLeftSidePageListView.SelectedIndex;
+
+            ProcessPageSelection(BlackBoardLeftSidePageListView, index);
         }
 
         private void BlackBoardRightSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-
-            // 尝试根据点击的原始来源查找对应的 ListViewItem 容器（支持点击模板内的缩略图）
             var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
             int index = -1;
             if (container != null)
@@ -159,33 +176,25 @@ namespace Ink_Canvas
             // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
             if (index < 0) index = BlackBoardRightSidePageListView.SelectedIndex;
 
-            var item = index >= 0 ? BlackBoardRightSidePageListView.Items[index] : BlackBoardRightSidePageListView.SelectedItem;
+            ProcessPageSelection(BlackBoardRightSidePageListView, index);
+        }
 
-            if (index >= 0)
+        private void BlackBoardRightSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
+        {
+            // 防止触摸后再触发鼠标事件导致双触发
+            e.Handled = true;
+
+            var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
+            int index = -1;
+            if (container != null)
             {
-                // 只有当选择的页面与当前页面不同时才进行切换
-                if (index + 1 != CurrentWhiteboardIndex)
-                {
-                    // 隐藏图片选择工具栏
-                    if (currentSelectedElement != null)
-                    {
-                        // 保存当前编辑模式
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        // 恢复编辑模式
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
-
-                    SaveStrokes();
-                    ClearStrokes(true);
-                    CurrentWhiteboardIndex = index + 1;
-                    RestoreStrokes();
-                    UpdateIndexInfoDisplay();
-                }
-                // 无论是否切换页面，都更新选择索引
-                BlackBoardRightSidePageListView.SelectedIndex = index;
+                index = BlackBoardRightSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
             }
+
+            // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
+            if (index < 0) index = BlackBoardRightSidePageListView.SelectedIndex;
+
+            ProcessPageSelection(BlackBoardRightSidePageListView, index);
         }
 
     }
