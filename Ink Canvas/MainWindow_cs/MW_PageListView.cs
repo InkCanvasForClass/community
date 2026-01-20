@@ -1,4 +1,6 @@
 ﻿using Ink_Canvas.Helpers;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
@@ -97,11 +99,50 @@ namespace Ink_Canvas
             return null;
         }
 
+        // 触摸与鼠标双触发抑制支持
+        private readonly HashSet<int> _leftActiveTouchIds = new HashSet<int>();
+        private DateTime _lastLeftTouchHandled = DateTime.MinValue;
+
+        private readonly HashSet<int> _rightActiveTouchIds = new HashSet<int>();
+        private DateTime _lastRightTouchHandled = DateTime.MinValue;
+
+        private void ProcessPageSelection(ListView listView, int index)
+        {
+            // 隐藏页面列表
+            AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
+            AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
+
+            if (index < 0) return;
+
+            // 只有当选择的页面与当前页面不同时才进行切换
+            if (index + 1 != CurrentWhiteboardIndex)
+            {
+                // 隐藏图片选择工具栏
+                if (currentSelectedElement != null)
+                {
+                    // 保存当前编辑模式
+                    var previousEditingMode = inkCanvas.EditingMode;
+                    UnselectElement(currentSelectedElement);
+                    // 恢复编辑模式
+                    inkCanvas.EditingMode = previousEditingMode;
+                    currentSelectedElement = null;
+                }
+
+                SaveStrokes();
+                ClearStrokes(true);
+                CurrentWhiteboardIndex = index + 1;
+                RestoreStrokes();
+                UpdateIndexInfoDisplay();
+            }
+
+            // 无论是否切换页面，都更新选择索引
+            listView.SelectedIndex = index;
+        }
 
         private void BlackBoardLeftSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
+            // 忽略紧随触摸后的鼠标事件以防双触发
+            if ((DateTime.UtcNow - _lastLeftTouchHandled) < TimeSpan.FromMilliseconds(500)) return;
 
             // 尝试根据点击的原始来源查找对应的 ListViewItem 容器（支持点击模板内的缩略图）
             var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
@@ -114,39 +155,43 @@ namespace Ink_Canvas
             // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
             if (index < 0) index = BlackBoardLeftSidePageListView.SelectedIndex;
 
-            var item = index >= 0 ? BlackBoardLeftSidePageListView.Items[index] : BlackBoardLeftSidePageListView.SelectedItem;
+            ProcessPageSelection(BlackBoardLeftSidePageListView, index);
+        }
 
-            if (index >= 0)
+        private void BlackBoardLeftSidePageListView_OnTouchDown(object sender, TouchEventArgs e)
+        {
+            _leftActiveTouchIds.Add(e.TouchDevice.Id);
+        }
+
+        private void BlackBoardLeftSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
+        {
+            var id = e.TouchDevice.Id;
+            // 仅在整个触摸过程中只存在单个触摸点时触发切换
+            if (_leftActiveTouchIds.Count == 1)
             {
-                // 只有当选择的页面与当前页面不同时才进行切换
-                if (index + 1 != CurrentWhiteboardIndex)
+                var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
+                int index = -1;
+                if (container != null)
                 {
-                    // 隐藏图片选择工具栏
-                    if (currentSelectedElement != null)
-                    {
-                        // 保存当前编辑模式
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        // 恢复编辑模式
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
-
-                    SaveStrokes();
-                    ClearStrokes(true);
-                    CurrentWhiteboardIndex = index + 1;
-                    RestoreStrokes();
-                    UpdateIndexInfoDisplay();
+                    index = BlackBoardLeftSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
                 }
-                // 无论是否切换页面，都更新选择索引
-                BlackBoardLeftSidePageListView.SelectedIndex = index;
+
+                if (index < 0) index = BlackBoardLeftSidePageListView.SelectedIndex;
+
+                ProcessPageSelection(BlackBoardLeftSidePageListView, index);
+
+                // 标记触摸已处理以抑制随后鼠标事件
+                _lastLeftTouchHandled = DateTime.UtcNow;
+                e.Handled = true;
             }
+
+            _leftActiveTouchIds.Remove(id);
         }
 
         private void BlackBoardRightSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
-            AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
+            // 忽略紧随触摸后的鼠标事件以防双触发
+            if ((DateTime.UtcNow - _lastRightTouchHandled) < TimeSpan.FromMilliseconds(500)) return;
 
             // 尝试根据点击的原始来源查找对应的 ListViewItem 容器（支持点击模板内的缩略图）
             var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
@@ -159,33 +204,35 @@ namespace Ink_Canvas
             // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
             if (index < 0) index = BlackBoardRightSidePageListView.SelectedIndex;
 
-            var item = index >= 0 ? BlackBoardRightSidePageListView.Items[index] : BlackBoardRightSidePageListView.SelectedItem;
+            ProcessPageSelection(BlackBoardRightSidePageListView, index);
+        }
 
-            if (index >= 0)
+        private void BlackBoardRightSidePageListView_OnTouchDown(object sender, TouchEventArgs e)
+        {
+            _rightActiveTouchIds.Add(e.TouchDevice.Id);
+        }
+
+        private void BlackBoardRightSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
+        {
+            var id = e.TouchDevice.Id;
+            if (_rightActiveTouchIds.Count == 1)
             {
-                // 只有当选择的页面与当前页面不同时才进行切换
-                if (index + 1 != CurrentWhiteboardIndex)
+                var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
+                int index = -1;
+                if (container != null)
                 {
-                    // 隐藏图片选择工具栏
-                    if (currentSelectedElement != null)
-                    {
-                        // 保存当前编辑模式
-                        var previousEditingMode = inkCanvas.EditingMode;
-                        UnselectElement(currentSelectedElement);
-                        // 恢复编辑模式
-                        inkCanvas.EditingMode = previousEditingMode;
-                        currentSelectedElement = null;
-                    }
-
-                    SaveStrokes();
-                    ClearStrokes(true);
-                    CurrentWhiteboardIndex = index + 1;
-                    RestoreStrokes();
-                    UpdateIndexInfoDisplay();
+                    index = BlackBoardRightSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
                 }
-                // 无论是否切换页面，都更新选择索引
-                BlackBoardRightSidePageListView.SelectedIndex = index;
+
+                if (index < 0) index = BlackBoardRightSidePageListView.SelectedIndex;
+
+                ProcessPageSelection(BlackBoardRightSidePageListView, index);
+
+                _lastRightTouchHandled = DateTime.UtcNow;
+                e.Handled = true;
             }
+
+            _rightActiveTouchIds.Remove(id);
         }
 
     }
