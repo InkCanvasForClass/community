@@ -5,6 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Ink;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Ink_Canvas
 {
@@ -85,14 +86,37 @@ namespace Ink_Canvas
             scrollViewer.ScrollToVerticalOffset(tarPos.Y);
         }
 
+        private T FindVisualAncestor<T>(DependencyObject d) where T : DependencyObject
+        {
+            var current = d;
+            while (current != null)
+            {
+                if (current is T) return (T)current;
+                current = VisualTreeHelper.GetParent(current);
+            }
+            return null;
+        }
+
 
         private void BlackBoardLeftSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-            var item = BlackBoardLeftSidePageListView.SelectedItem;
-            var index = BlackBoardLeftSidePageListView.SelectedIndex;
-            if (item != null)
+
+            // 尝试根据点击的原始来源查找对应的 ListViewItem 容器（支持点击模板内的缩略图）
+            var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
+            int index = -1;
+            if (container != null)
+            {
+                index = BlackBoardLeftSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
+            }
+
+            // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
+            if (index < 0) index = BlackBoardLeftSidePageListView.SelectedIndex;
+
+            var item = index >= 0 ? BlackBoardLeftSidePageListView.Items[index] : BlackBoardLeftSidePageListView.SelectedItem;
+
+            if (index >= 0)
             {
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
@@ -123,9 +147,21 @@ namespace Ink_Canvas
         {
             AnimationsHelper.HideWithSlideAndFade(BoardBorderLeftPageListView);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderRightPageListView);
-            var item = BlackBoardRightSidePageListView.SelectedItem;
-            var index = BlackBoardRightSidePageListView.SelectedIndex;
-            if (item != null)
+
+            // 尝试根据点击的原始来源查找对应的 ListViewItem 容器（支持点击模板内的缩略图）
+            var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
+            int index = -1;
+            if (container != null)
+            {
+                index = BlackBoardRightSidePageListView.ItemContainerGenerator.IndexFromContainer(container);
+            }
+
+            // 回退到 SelectedIndex（如果无法通过视觉树找到容器）
+            if (index < 0) index = BlackBoardRightSidePageListView.SelectedIndex;
+
+            var item = index >= 0 ? BlackBoardRightSidePageListView.Items[index] : BlackBoardRightSidePageListView.SelectedItem;
+
+            if (index >= 0)
             {
                 // 只有当选择的页面与当前页面不同时才进行切换
                 if (index + 1 != CurrentWhiteboardIndex)
