@@ -4780,9 +4780,9 @@
                                                         <DataTemplate>
                                                             <ui:SimpleStackPanel Orientation="Vertical"
                                                                 MouseUp="BlackBoardLeftSidePageListView_OnMouseUp"
-                                                                TouchDown="BlackBoardLeftSidePageListView_OnTouchDown"
-                                                                TouchUp="BlackBoardLeftSidePageListView_OnTouchUp"
-                                                                TouchMove="BlackBoardLeftSidePageListView_OnTouchMove">
+                                                                PreviewTouchDown="BlackBoardLeftSidePageListView_OnPreviewTouchDown"
+                                                                PreviewTouchUp="BlackBoardLeftSidePageListView_OnPreviewTouchUp"
+                                                                PreviewTouchMove="BlackBoardLeftSidePageListView_OnPreviewTouchMove">
                                                                 <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>
@@ -6938,9 +6938,9 @@
                                                         <DataTemplate>
                                                             <ui:SimpleStackPanel Orientation="Vertical"
                                                                 MouseUp="BlackBoardRightSidePageListView_OnMouseUp"
-                                                                TouchDown="BlackBoardRightSidePageListView_OnTouchDown"
-                                                                TouchUp="BlackBoardRightSidePageListView_OnTouchUp"
-                                                                TouchMove="BlackBoardRightSidePageListView_OnTouchMove">
+                                                                PreviewTouchDown="BlackBoardRightSidePageListView_OnPreviewTouchDown"
+                                                                PreviewTouchUp="BlackBoardRightSidePageListView_OnPreviewTouchUp"
+                                                                PreviewTouchMove="BlackBoardRightSidePageListView_OnPreviewTouchMove">
                                                                 <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>

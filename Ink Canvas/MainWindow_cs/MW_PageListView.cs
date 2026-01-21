@@ -185,13 +185,11 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// <para> 左侧页面列表触摸按下事件 </para>
+        /// <para> 左侧页面列表 PreviewTouchDown：记录起始点 </para>
         /// </summary>
-        private void BlackBoardLeftSidePageListView_OnTouchDown(object sender, TouchEventArgs e)
+        private void BlackBoardLeftSidePageListView_OnPreviewTouchDown(object sender, TouchEventArgs e)
         {
             _leftActiveTouchIds.Add(e.TouchDevice.Id);
-            
-            // 记录触摸起始点
             var touchPoint = e.GetTouchPoint(BlackBoardLeftSidePageListView);
             if (!_leftTouchStartPoints.ContainsKey(e.TouchDevice.Id))
             {
@@ -204,36 +202,38 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// <para> [新增] 左侧页面列表触摸移动事件：实时监测移动距离，一旦超过阈值即作废点击 </para>
+        /// <para> 左侧页面列表 PreviewTouchMove：检测移动距离，超过阈值移除标记（视为滑动） </para>
         /// </summary>
-        private void BlackBoardLeftSidePageListView_OnTouchMove(object sender, TouchEventArgs e)
+        private void BlackBoardLeftSidePageListView_OnPreviewTouchMove(object sender, TouchEventArgs e)
         {
             if (_leftTouchStartPoints.ContainsKey(e.TouchDevice.Id))
             {
                 Point startPoint = _leftTouchStartPoints[e.TouchDevice.Id];
                 Point currentPoint = e.GetTouchPoint(BlackBoardLeftSidePageListView).Position;
-                
-                // 使用 Vector.Length 计算距离
-                if ((currentPoint - startPoint).Length > TouchClickThreshold)
+
+                // 使用平方距离比较以提高性能，且防止误触
+                double deltaX = currentPoint.X - startPoint.X;
+                double deltaY = currentPoint.Y - startPoint.Y;
+                if ((deltaX * deltaX + deltaY * deltaY) > TouchClickThreshold * TouchClickThreshold)
                 {
-                    // 移动距离过大，视为滑动/滚动，从潜在点击列表中移除
+                    // 移动超过阈值，视为意图滑动/滚动，移除起点记录，后续 TouchUp 将不会触发点击
                     _leftTouchStartPoints.Remove(e.TouchDevice.Id);
                 }
             }
         }
 
         /// <summary>
-        /// <para> 左侧页面列表触摸松开事件 </para>
+        /// <para> 左侧页面列表 PreviewTouchUp：如果标记仍存在，说明是点击 </para>
         /// </summary>
-        private void BlackBoardLeftSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
+        private void BlackBoardLeftSidePageListView_OnPreviewTouchUp(object sender, TouchEventArgs e)
         {
             var id = e.TouchDevice.Id;
             
-            // 仅在整个触摸过程中只存在单个触摸点时触发切换（避免多指滚动触发点击）
-            if (_leftActiveTouchIds.Count == 1)
+            // 只有当起始点记录仍存在时，才视为有效点击
+            if (_leftTouchStartPoints.ContainsKey(id))
             {
-                // 新逻辑：如果在 TouchMove 中因为移动过大被移除，这里 ContainsKey 将返回 false
-                if (_leftTouchStartPoints.ContainsKey(id))
+                // 仅允许单指点击触发
+                if (_leftActiveTouchIds.Count == 1)
                 {
                     var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
                     int index = -1;
@@ -246,18 +246,16 @@ namespace Ink_Canvas
 
                     ProcessPageSelection(BlackBoardLeftSidePageListView, index);
 
-                    // 标记触摸已处理以抑制随后鼠标事件
+                    // 标记触摸已处理，防止 ScrollViewer 进一步处理或鼠标事件再次触发
                     _lastLeftTouchHandled = DateTime.UtcNow;
                     e.Handled = true;
-                    
-                    // 消费掉这个点击记录
-                    _leftTouchStartPoints.Remove(id);
                 }
+                
+                // 消费掉这个记录
+                _leftTouchStartPoints.Remove(id);
             }
 
             _leftActiveTouchIds.Remove(id);
-            // 确保清理残留（例如多指情况下的非主触点）
-            if (_leftTouchStartPoints.ContainsKey(id)) _leftTouchStartPoints.Remove(id);
         }
 
 
@@ -284,13 +282,11 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// <para> 右侧页面列表触摸按下事件 </para>
+        /// <para> 右侧页面列表 PreviewTouchDown </para>
         /// </summary>
-        private void BlackBoardRightSidePageListView_OnTouchDown(object sender, TouchEventArgs e)
+        private void BlackBoardRightSidePageListView_OnPreviewTouchDown(object sender, TouchEventArgs e)
         {
             _rightActiveTouchIds.Add(e.TouchDevice.Id);
-
-            // 记录触摸起始点（右侧与左侧保持一致以支持 TouchMove 判断）
             var touchPoint = e.GetTouchPoint(BlackBoardRightSidePageListView);
             if (!_rightTouchStartPoints.ContainsKey(e.TouchDevice.Id))
             {
@@ -303,16 +299,18 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// <para> [新增] 右侧页面列表触摸移动事件 </para>
+        /// <para> 右侧页面列表 PreviewTouchMove </para>
         /// </summary>
-        private void BlackBoardRightSidePageListView_OnTouchMove(object sender, TouchEventArgs e)
+        private void BlackBoardRightSidePageListView_OnPreviewTouchMove(object sender, TouchEventArgs e)
         {
             if (_rightTouchStartPoints.ContainsKey(e.TouchDevice.Id))
             {
                 Point startPoint = _rightTouchStartPoints[e.TouchDevice.Id];
                 Point currentPoint = e.GetTouchPoint(BlackBoardRightSidePageListView).Position;
 
-                if ((currentPoint - startPoint).Length > TouchClickThreshold)
+                double deltaX = currentPoint.X - startPoint.X;
+                double deltaY = currentPoint.Y - startPoint.Y;
+                if ((deltaX * deltaX + deltaY * deltaY) > TouchClickThreshold * TouchClickThreshold)
                 {
                     _rightTouchStartPoints.Remove(e.TouchDevice.Id);
                 }
@@ -320,15 +318,14 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// <para> 右侧页面列表触摸松开事件 </para>
+        /// <para> 右侧页面列表 PreviewTouchUp </para>
         /// </summary>
-        private void BlackBoardRightSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
+        private void BlackBoardRightSidePageListView_OnPreviewTouchUp(object sender, TouchEventArgs e)
         {
             var id = e.TouchDevice.Id;
-            if (_rightActiveTouchIds.Count == 1)
+            if (_rightTouchStartPoints.ContainsKey(id))
             {
-                // 检查该触摸ID是否仍然有效（未因移动过大而被移除）
-                if (_rightTouchStartPoints.ContainsKey(id))
+                if (_rightActiveTouchIds.Count == 1)
                 {
                     var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
                     int index = -1;
@@ -343,13 +340,11 @@ namespace Ink_Canvas
 
                     _lastRightTouchHandled = DateTime.UtcNow;
                     e.Handled = true;
-                    
-                    _rightTouchStartPoints.Remove(id);
                 }
+                _rightTouchStartPoints.Remove(id);
             }
 
             _rightActiveTouchIds.Remove(id);
-            if (_rightTouchStartPoints.ContainsKey(id)) _rightTouchStartPoints.Remove(id);
         }
 
     }
