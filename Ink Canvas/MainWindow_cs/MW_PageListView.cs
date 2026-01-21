@@ -1,4 +1,6 @@
-﻿using Ink_Canvas.Helpers;
+﻿//Ink_Canvas/MainWindows_cs/PageListView.cs
+
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -88,6 +90,8 @@ namespace Ink_Canvas
             scrollViewer.ScrollToVerticalOffset(tarPos.Y);
         }
 
+        /// <summary>
+        /// <para> 查找可视树祖先，用于在点击事件中获取 ListViewItem </para>
         private T FindVisualAncestor<T>(DependencyObject d) where T : DependencyObject
         {
             var current = d;
@@ -106,6 +110,9 @@ namespace Ink_Canvas
         private readonly HashSet<int> _rightActiveTouchIds = new HashSet<int>();
         private DateTime _lastRightTouchHandled = DateTime.MinValue;
 
+        /// <summary>
+        /// <para> 处理页面选择跳转逻辑 </para>
+        /// </summary>
         private void ProcessPageSelection(ListView listView, int index)
         {
             // 隐藏页面列表
@@ -117,7 +124,7 @@ namespace Ink_Canvas
             // 只有当选择的页面与当前页面不同时才进行切换
             if (index + 1 != CurrentWhiteboardIndex)
             {
-                // 隐藏图片选择工具栏
+                // 隐藏图片选择工具栏并退出图片/元素编辑模式
                 if (currentSelectedElement != null)
                 {
                     // 保存当前编辑模式
@@ -128,17 +135,25 @@ namespace Ink_Canvas
                     currentSelectedElement = null;
                 }
 
+                // 保存当前页面墨迹
                 SaveStrokes();
+                // 清空画布
                 ClearStrokes(true);
+                // 切换索引
                 CurrentWhiteboardIndex = index + 1;
+                // 恢复新页面的墨迹
                 RestoreStrokes();
+                // 更新底部页码显示
                 UpdateIndexInfoDisplay();
             }
 
-            // 无论是否切换页面，都更新选择索引
+            // 无论是否切换页面，都更新选择索引以保持UI同步
             listView.SelectedIndex = index;
         }
 
+        /// <summary>
+        /// <para> 左侧页面列表鼠标松开事件 </para>
+        /// </summary>
         private void BlackBoardLeftSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             // 忽略紧随触摸后的鼠标事件以防双触发
@@ -158,15 +173,21 @@ namespace Ink_Canvas
             ProcessPageSelection(BlackBoardLeftSidePageListView, index);
         }
 
+        /// <summary>
+        /// <para> 左侧页面列表触摸按下事件 </para>
+        /// </summary>
         private void BlackBoardLeftSidePageListView_OnTouchDown(object sender, TouchEventArgs e)
         {
             _leftActiveTouchIds.Add(e.TouchDevice.Id);
         }
 
+        /// <summary>
+        /// <para> 左侧页面列表触摸松开事件 </para>
+        /// </summary>
         private void BlackBoardLeftSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
         {
             var id = e.TouchDevice.Id;
-            // 仅在整个触摸过程中只存在单个触摸点时触发切换
+            // 仅在整个触摸过程中只存在单个触摸点时触发切换（避免多指滚动触发点击）
             if (_leftActiveTouchIds.Count == 1)
             {
                 var container = FindVisualAncestor<ListViewItem>(e.OriginalSource as DependencyObject);
@@ -188,6 +209,9 @@ namespace Ink_Canvas
             _leftActiveTouchIds.Remove(id);
         }
 
+        /// <summary>
+        /// <para> 右侧页面列表鼠标松开事件 </para>
+        /// </summary>
         private void BlackBoardRightSidePageListView_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             // 忽略紧随触摸后的鼠标事件以防双触发
@@ -207,11 +231,17 @@ namespace Ink_Canvas
             ProcessPageSelection(BlackBoardRightSidePageListView, index);
         }
 
+        /// <summary>
+        /// <para> 右侧页面列表触摸按下事件 </para>
+        /// </summary>
         private void BlackBoardRightSidePageListView_OnTouchDown(object sender, TouchEventArgs e)
         {
             _rightActiveTouchIds.Add(e.TouchDevice.Id);
         }
 
+        /// <summary>
+        /// <para> 右侧页面列表触摸松开事件 </para>
+        /// </summary>
         private void BlackBoardRightSidePageListView_OnTouchUp(object sender, TouchEventArgs e)
         {
             var id = e.TouchDevice.Id;
