@@ -4781,7 +4781,8 @@
                                                             <ui:SimpleStackPanel Orientation="Vertical"
                                                                 MouseUp="BlackBoardLeftSidePageListView_OnMouseUp"
                                                                 TouchDown="BlackBoardLeftSidePageListView_OnTouchDown"
-                                                                TouchUp="BlackBoardLeftSidePageListView_OnTouchUp">
+                                                                TouchUp="BlackBoardLeftSidePageListView_OnTouchUp"
+                                                                TouchMove="BlackBoardLeftSidePageListView_OnTouchMove">
                                                                 <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>
@@ -6938,7 +6939,8 @@
                                                             <ui:SimpleStackPanel Orientation="Vertical"
                                                                 MouseUp="BlackBoardRightSidePageListView_OnMouseUp"
                                                                 TouchDown="BlackBoardRightSidePageListView_OnTouchDown"
-                                                                TouchUp="BlackBoardRightSidePageListView_OnTouchUp">
+                                                                TouchUp="BlackBoardRightSidePageListView_OnTouchUp"
+                                                                TouchMove="BlackBoardRightSidePageListView_OnTouchMove">
                                                                 <Border Margin="0,4" Width="160" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                                                         BorderThickness="1">
                                                                     <Grid>
