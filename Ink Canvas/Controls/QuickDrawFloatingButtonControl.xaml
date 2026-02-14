@@ -6,15 +6,6 @@
              mc:Ignorable="d"
              Width="65" Height="45">
     
-    <UserControl.Resources>
-        <ResourceDictionary>
-            <!-- 悬浮按钮资源 -->
-            <SolidColorBrush x:Key="QuickDrawFloatingButtonBackground" Color="#80000000"/>
-            <SolidColorBrush x:Key="QuickDrawFloatingButtonBorderBrush" Color="#40000000"/>
-            <SolidColorBrush x:Key="QuickDrawFloatingButtonIconForeground" Color="White"/>
-        </ResourceDictionary>
-    </UserControl.Resources>
-
     <Border Background="{DynamicResource QuickDrawFloatingButtonBackground}" 
             CornerRadius="8" 
             BorderThickness="1" 

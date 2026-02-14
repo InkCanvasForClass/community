@@ -410,6 +410,11 @@ namespace Ink_Canvas
         private DrawingAttributes drawingAttributes;
         private InkSmoothingManager _inkSmoothingManager;
 
+        private DispatcherTimer _brushAutoRestoreTimer;
+
+        private bool _isBoardBrushMode;
+        private double _savedInkWidthBeforeBoardBrush = 5;
+
         private void loadPenCanvas()
         {
             try
@@ -435,6 +440,400 @@ namespace Ink_Canvas
                 inkCanvas.Gesture += InkCanvas_Gesture;
             }
             catch { }
+        }
+
+
+        private static Color GetCanonicalPaletteColorFromHex(string hex, byte alpha)
+        {
+            if (string.IsNullOrWhiteSpace(hex)) return Color.FromArgb(alpha, 255, 0, 0);
+
+            string n = hex.Trim().ToLowerInvariant();
+            if (n.StartsWith("#")) n = n.Substring(1);
+            if (n.Length == 8) n = n.Substring(2, 6); // 去掉 AA
+            else if (n.Length != 6) n = "";
+
+            if (n.Length == 6)
+            {
+                if (n == "ffffff") return Color.FromArgb(alpha, 255, 255, 255);
+                if (n == "fb9650") return Color.FromArgb(alpha, 251, 150, 80);   // 251,150,80 橙
+                if (n == "ffff00") return Color.FromArgb(alpha, 255, 255, 0);
+                if (n == "000000") return Color.FromArgb(alpha, 0, 0, 0);
+                if (n == "2563eb") return Color.FromArgb(alpha, 37, 99, 235);    // 37,99,235 蓝
+                if (n == "ff0000") return Color.FromArgb(alpha, 255, 0, 0);
+                if (n == "16a34a") return Color.FromArgb(alpha, 22, 163, 74);    // 22,163,74 绿
+                if (n == "9333ea") return Color.FromArgb(alpha, 147, 51, 234);    // 147,51,234 紫
+            }
+
+            try
+            {
+                var converted = ColorConverter.ConvertFromString(hex);
+                if (converted is Color parsed)
+                {
+                    byte r = parsed.R, g = parsed.G, b = parsed.B;
+                    if (r == 255 && g == 255 && b == 255) return Color.FromArgb(alpha, 255, 255, 255);
+                    if (r == 251 && g == 150 && b == 80) return Color.FromArgb(alpha, 251, 150, 80);
+                    if (r == 255 && g == 255 && b == 0) return Color.FromArgb(alpha, 255, 255, 0);
+                    if (r == 0 && g == 0 && b == 0) return Color.FromArgb(alpha, 0, 0, 0);
+                    if (r == 37 && g == 99 && b == 235) return Color.FromArgb(alpha, 37, 99, 235);
+                    if (r == 255 && g == 0 && b == 0) return Color.FromArgb(alpha, 255, 0, 0);
+                    if (r == 22 && g == 163 && b == 74) return Color.FromArgb(alpha, 22, 163, 74);
+                    if (r == 147 && g == 51 && b == 234) return Color.FromArgb(alpha, 147, 51, 234);
+                    return Color.FromArgb(alpha, r, g, b);
+                }
+            }
+            catch { }
+            return Color.FromArgb(alpha, 255, 0, 0);
+        }
+
+        /// <param name="color">目标颜色</param>
+        /// <param name="width">目标粗细</param>
+        /// <param name="height">目标高度</param>
+        private void SetBrushAttributesDirectly(Color color, double width, double height)
+        {
+            try
+            {
+                if (!Dispatcher.CheckAccess())
+                {
+                    Dispatcher.Invoke(() => SetBrushAttributesDirectly(color, width, height));
+                    return;
+                }
+
+                if (drawingAttributes == null)
+                {
+                    drawingAttributes = inkCanvas.DefaultDrawingAttributes;
+                }
+
+                Color rgbColor = Color.FromRgb(color.R, color.G, color.B);
+                if (currentMode == 0)
+                {
+                    if (rgbColor == Colors.White) lastDesktopInkColor = 5;
+                    else if (rgbColor == Color.FromRgb(251, 150, 80)) lastDesktopInkColor = 8;
+                    else if (rgbColor == Colors.Yellow) lastDesktopInkColor = 4;
+                    else if (rgbColor == Colors.Black) lastDesktopInkColor = 0;
+                    else if (rgbColor == Color.FromRgb(37, 99, 235)) lastDesktopInkColor = 3;
+                    else if (rgbColor == Colors.Red) lastDesktopInkColor = 1;
+                    else if (rgbColor == Colors.Green || rgbColor == Color.FromRgb(22, 163, 74)) lastDesktopInkColor = 2;
+                    else if (rgbColor == Color.FromRgb(147, 51, 234)) lastDesktopInkColor = 6;
+                }
+                else
+                {
+                    if (rgbColor == Colors.White) lastBoardInkColor = 5;
+                    else if (rgbColor == Color.FromRgb(251, 150, 80)) lastBoardInkColor = 8;
+                    else if (rgbColor == Colors.Yellow) lastBoardInkColor = 4;
+                    else if (rgbColor == Colors.Black) lastBoardInkColor = 0;
+                    else if (rgbColor == Color.FromRgb(37, 99, 235)) lastBoardInkColor = 3;
+                    else if (rgbColor == Colors.Red) lastBoardInkColor = 1;
+                    else if (rgbColor == Colors.Green || rgbColor == Color.FromRgb(22, 163, 74)) lastBoardInkColor = 2;
+                    else if (rgbColor == Color.FromRgb(147, 51, 234)) lastBoardInkColor = 6;
+                }
+
+                var colorWithAlpha = Color.FromArgb(color.A, 0, 0, 0);
+                drawingAttributes.Color = colorWithAlpha;
+                inkCanvas.DefaultDrawingAttributes.Color = colorWithAlpha;
+
+                CheckColorTheme();
+
+                Ink_DefaultColor = inkCanvas.DefaultDrawingAttributes.Color;
+
+                // 粗细与透明度
+                if (penType != 1)
+                {
+                    drawingAttributes.Width = width;
+                    drawingAttributes.Height = height;
+                    inkCanvas.DefaultDrawingAttributes.Width = width;
+                    inkCanvas.DefaultDrawingAttributes.Height = height;
+                }
+
+                if (Settings?.Canvas != null)
+                {
+                    Settings.Canvas.InkWidth = width;
+                    Settings.Canvas.InkAlpha = (int)color.A;
+                }
+
+                if (InkWidthSlider != null) InkWidthSlider.Value = width * 2;
+                if (InkAlphaSlider != null) InkAlphaSlider.Value = color.A;
+                if (BoardInkWidthSlider != null) BoardInkWidthSlider.Value = width * 2;
+                if (BoardInkAlphaSlider != null) BoardInkAlphaSlider.Value = color.A;
+
+                if (penType != 1)
+                {
+                    drawingAttributes.Width = width;
+                    drawingAttributes.Height = height;
+                    inkCanvas.DefaultDrawingAttributes.Width = width;
+                    inkCanvas.DefaultDrawingAttributes.Height = height;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"SetBrushAttributesDirectly: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private const double BoardBrushInkWidth = 300;
+
+        private void BoardBrushModeButton_Click(object sender, RoutedEventArgs e)
+        {
+            _isBoardBrushMode = !_isBoardBrushMode;
+
+            try
+            {
+                if (drawingAttributes == null)
+                    drawingAttributes = inkCanvas.DefaultDrawingAttributes;
+
+                if (penType == 1) return;
+
+                if (_isBoardBrushMode)
+                {
+                    _savedInkWidthBeforeBoardBrush = InkWidthSlider != null ? InkWidthSlider.Value / 2.0 : drawingAttributes.Width;
+                    if (_savedInkWidthBeforeBoardBrush < 0.5) _savedInkWidthBeforeBoardBrush = 2.5;
+
+                    drawingAttributes.Width = BoardBrushInkWidth;
+                    drawingAttributes.Height = BoardBrushInkWidth;
+                    inkCanvas.DefaultDrawingAttributes.Width = BoardBrushInkWidth;
+                    inkCanvas.DefaultDrawingAttributes.Height = BoardBrushInkWidth;
+                    drawingAttributes.IgnorePressure = true;
+                    inkCanvas.DefaultDrawingAttributes.IgnorePressure = true;
+
+                    if (BoardBrushModeButton != null)
+                        BoardBrushModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                }
+                else
+                {
+                    double w = InkWidthSlider != null ? InkWidthSlider.Value / 2.0 : _savedInkWidthBeforeBoardBrush;
+                    if (w < 0.5) w = 2.5;
+
+                    drawingAttributes.Width = w;
+                    drawingAttributes.Height = w;
+                    inkCanvas.DefaultDrawingAttributes.Width = w;
+                    inkCanvas.DefaultDrawingAttributes.Height = w;
+                    drawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
+                    inkCanvas.DefaultDrawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
+
+                    if (BoardInkWidthSlider != null) BoardInkWidthSlider.Value = w * 2;
+                    if (Settings?.Canvas != null) Settings.Canvas.InkWidth = w;
+
+                    if (BoardBrushModeButton != null)
+                        BoardBrushModeButton.ClearValue(BackgroundProperty);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BoardBrushModeButton_Click: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void BoardBrushModeButton_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (sender != BoardBrushModeButton) return;
+            if (lastBorderMouseDownObject != BoardBrushModeButton) return;
+
+            _isBoardBrushMode = !_isBoardBrushMode;
+
+            try
+            {
+                if (drawingAttributes == null)
+                    drawingAttributes = inkCanvas.DefaultDrawingAttributes;
+
+                if (penType == 1) return; 
+
+                if (_isBoardBrushMode)
+                {
+                    _savedInkWidthBeforeBoardBrush = InkWidthSlider != null ? InkWidthSlider.Value / 2.0 : drawingAttributes.Width;
+                    if (_savedInkWidthBeforeBoardBrush < 0.5) _savedInkWidthBeforeBoardBrush = 2.5;
+
+                    drawingAttributes.Width = BoardBrushInkWidth;
+                    drawingAttributes.Height = BoardBrushInkWidth;
+                    inkCanvas.DefaultDrawingAttributes.Width = BoardBrushInkWidth;
+                    inkCanvas.DefaultDrawingAttributes.Height = BoardBrushInkWidth;
+                    drawingAttributes.IgnorePressure = true;
+                    inkCanvas.DefaultDrawingAttributes.IgnorePressure = true;
+
+                    if (BoardBrushModeButton != null)
+                        BoardBrushModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                }
+                else
+                {
+                    double w = InkWidthSlider != null ? InkWidthSlider.Value / 2.0 : _savedInkWidthBeforeBoardBrush;
+                    if (w < 0.5) w = 2.5;
+
+                    drawingAttributes.Width = w;
+                    drawingAttributes.Height = w;
+                    inkCanvas.DefaultDrawingAttributes.Width = w;
+                    inkCanvas.DefaultDrawingAttributes.Height = w;
+                    drawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
+                    inkCanvas.DefaultDrawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
+
+                    if (BoardInkWidthSlider != null) BoardInkWidthSlider.Value = w * 2;
+                    if (Settings?.Canvas != null) Settings.Canvas.InkWidth = w;
+
+                    if (BoardBrushModeButton != null)
+                        BoardBrushModeButton.ClearValue(BackgroundProperty);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BoardBrushModeButton_MouseUp: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void InitBrushAutoRestoreTimer()
+        {
+            if (_brushAutoRestoreTimer == null)
+            {
+                _brushAutoRestoreTimer = new DispatcherTimer();
+                _brushAutoRestoreTimer.Tick += BrushAutoRestoreTimer_Tick;
+            }
+
+            UpdateBrushAutoRestoreTimerInterval();
+        }
+
+        private void UpdateBrushAutoRestoreTimerInterval()
+        {
+            if (_brushAutoRestoreTimer == null) return;
+
+            TimeSpan? nextInterval = null;
+            try
+            {
+                var timesConfig = Settings?.Canvas?.BrushAutoRestoreTimes;
+                if (!string.IsNullOrWhiteSpace(timesConfig))
+                {
+                    var parts = timesConfig
+                        .Split(new[] { ';', '；', ',', '，' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(p => p.Trim())
+                        .ToList();
+
+                    var validTimes = new List<TimeSpan>();
+                    foreach (var part in parts)
+                    {
+                        if (TimeSpan.TryParse(part, out var ts) &&
+                            ts >= TimeSpan.Zero &&
+                            ts < TimeSpan.FromDays(1))
+                        {
+                            validTimes.Add(ts);
+                        }
+                    }
+
+                    if (validTimes.Count > 0)
+                    {
+                        var now = DateTime.Now;
+                        var today = now.Date;
+                        var nowTod = now.TimeOfDay;
+
+                        TimeSpan? todayNext = null;
+                        foreach (var t in validTimes)
+                        {
+                            if (t >= nowTod)
+                            {
+                                if (todayNext == null || t < todayNext.Value)
+                                {
+                                    todayNext = t;
+                                }
+                            }
+                        }
+
+                        DateTime target;
+                        if (todayNext.HasValue)
+                        {
+                            target = today + todayNext.Value;
+                        }
+                        else
+                        {
+                            var firstTime = validTimes.OrderBy(t => t).First();
+                            target = today.AddDays(1) + firstTime;
+                        }
+
+                        var interval = target - now;
+                        if (interval < TimeSpan.FromSeconds(1))
+                        {
+                            interval = TimeSpan.FromSeconds(1);
+                        }
+                        nextInterval = interval;
+                    }
+                }
+            }
+            catch { }
+
+            if (!nextInterval.HasValue)
+            {
+                int seconds = Settings?.Canvas?.BrushAutoRestoreDelaySeconds ?? 0;
+                if (seconds < 1) seconds = 1;
+                nextInterval = TimeSpan.FromSeconds(seconds);
+            }
+
+            _brushAutoRestoreTimer.Interval = nextInterval.Value;
+        }
+
+        internal void ScheduleBrushAutoRestore()
+        {
+            try
+            {
+                if (Settings == null || Settings.Canvas == null || !Settings.Canvas.EnableBrushAutoRestore)
+                {
+                    return;
+                }
+
+                if (_brushAutoRestoreTimer == null)
+                {
+                    InitBrushAutoRestoreTimer();
+                }
+                else
+                {
+                    UpdateBrushAutoRestoreTimerInterval();
+                }
+
+                _brushAutoRestoreTimer.Stop();
+                _brushAutoRestoreTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ScheduleBrushAutoRestore: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void BrushAutoRestoreTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                _brushAutoRestoreTimer.Stop();
+
+                if (Settings == null || Settings.Canvas == null || !Settings.Canvas.EnableBrushAutoRestore)
+                {
+                    return;
+                }
+
+                if (drawingAttributes == null)
+                {
+                    drawingAttributes = inkCanvas.DefaultDrawingAttributes;
+                }
+
+                int alphaConfig = Settings.Canvas.BrushAutoRestoreAlpha;
+                if (alphaConfig < 0) alphaConfig = 0;
+                if (alphaConfig > 255) alphaConfig = 255;
+                byte alpha = (byte)alphaConfig;
+
+                Color targetColor = GetCanonicalPaletteColorFromHex(Settings.Canvas.BrushAutoRestoreColor ?? "", alpha);
+
+                double sliderValue = Settings.Canvas.BrushAutoRestoreWidth;
+                double width;
+                if (sliderValue <= 0)
+                {
+                    width = Settings.Canvas.InkWidth > 0 ? Settings.Canvas.InkWidth : 2.5;
+                }
+                else
+                {
+                    width = sliderValue / 2.0; 
+                }
+
+                SetBrushAttributesDirectly(targetColor, width, width);
+
+                UpdateBrushAutoRestoreTimerInterval();
+                _brushAutoRestoreTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BrushAutoRestoreTimer_Tick: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         //ApplicationGesture lastApplicationGesture = ApplicationGesture.AllGestures;
@@ -530,9 +929,12 @@ namespace Ink_Canvas
             //加载设置
             LoadSettings(true);
             AutoBackupManager.Initialize(Settings);
+            CheckUpdateChannelAndTelemetryConsistency();
 
             // 初始化Dlass上传队列（恢复上次的上传队列）
             DlassNoteUploader.InitializeQueue();
+
+            _ = TelemetryUploader.UploadTelemetryIfNeededAsync();
 
             // 检查保存路径是否可用，不可用则修正
             try
@@ -823,6 +1225,7 @@ namespace Ink_Canvas
                     };
                 }
             }), DispatcherPriority.Loaded);
+            AddTouchSupportToSliders();
         }
 
         private void SystemEventsOnDisplaySettingsChanged(object sender, EventArgs e)
@@ -2716,6 +3119,105 @@ namespace Ink_Canvas
             }
         }
 
+        private void ToggleSwitchBrushAutoRestore_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (!isLoaded) return;
+                Settings.Canvas.EnableBrushAutoRestore = ToggleSwitchBrushAutoRestore.IsOn;
+                SaveSettingsToFile();
+
+                if (Settings.Canvas.EnableBrushAutoRestore)
+                {
+                    InitBrushAutoRestoreTimer();
+                    ScheduleBrushAutoRestore();
+                }
+                else
+                {
+                    if (_brushAutoRestoreTimer != null)
+                    {
+                        _brushAutoRestoreTimer.Stop();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换画笔自动恢复功能时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void BrushAutoRestoreTimesTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            try
+            {
+                if (!isLoaded) return;
+                if (Settings?.Canvas == null) return;
+
+                Settings.Canvas.BrushAutoRestoreTimes = BrushAutoRestoreTimesTextBox.Text ?? string.Empty;
+                SaveSettingsToFile();
+                if (Settings.Canvas.EnableBrushAutoRestore)
+                {
+                    ScheduleBrushAutoRestore();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"BrushAutoRestoreTimes: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ComboBoxBrushAutoRestoreColor_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (!isLoaded) return;
+                if (Settings?.Canvas == null) return;
+
+                if (ComboBoxBrushAutoRestoreColor.SelectedItem is ComboBoxItem item)
+                {
+                    string hex = item.Tag as string ?? string.Empty;
+                    Settings.Canvas.BrushAutoRestoreColor = hex;
+                    SaveSettingsToFile();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新画笔自动恢复目标颜色时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void BrushAutoRestoreWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            try
+            {
+                if (!isLoaded) return;
+                if (Settings?.Canvas == null) return;
+
+                Settings.Canvas.BrushAutoRestoreWidth = e.NewValue;
+                SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新画笔自动恢复目标粗细时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void BrushAutoRestoreAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            try
+            {
+                if (!isLoaded) return;
+                if (Settings?.Canvas == null) return;
+
+                Settings.Canvas.BrushAutoRestoreAlpha = (int)e.NewValue;
+                SaveSettingsToFile();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新画笔自动恢复目标透明度时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         /// <summary>
         /// 更新墨迹渐隐控制开关的可见性
         /// </summary>
@@ -3084,7 +3586,9 @@ namespace Ink_Canvas
                     InkAlphaSlider,
                     HighlighterWidthSlider,
                     MLAvoidanceHistorySlider,
-                    MLAvoidanceWeightSlider
+                    MLAvoidanceWeightSlider,
+                    BrushAutoRestoreWidthSlider,
+                    BrushAutoRestoreAlphaSlider
                 };
 
                 foreach (var slider in sliders)

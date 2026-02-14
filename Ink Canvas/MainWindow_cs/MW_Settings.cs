@@ -6,6 +6,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http;
+using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -29,6 +31,523 @@ namespace Ink_Canvas
     public partial class MainWindow : Window
     {
         #region Behavior
+
+        private bool _isChangingUpdateChannelInternally;
+        private bool _isChangingTelemetryInternally;
+        private bool _isChangingTelemetryPrivacyInternally;
+
+        private static bool PrivacyFileExists()
+        {
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceName = "Ink_Canvas.privacy.txt";
+                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    return stream != null;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string FindPrivacyFile()
+        {
+            // 先尝试从文件系统读取
+            string assemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string[] searchPaths = new string[]
+            {
+                App.RootPath,
+                assemblyDir,
+                Path.GetDirectoryName(assemblyDir) // One level up from assembly directory
+            };
+
+            string foundPath = null;
+            foreach (string searchPath in searchPaths)
+            {
+                if (string.IsNullOrEmpty(searchPath)) continue;
+
+                string testPathTxt = Path.Combine(searchPath, "privacy.txt");
+                string testPathNoExt = Path.Combine(searchPath, "privacy");
+
+                if (File.Exists(testPathTxt))
+                {
+                    foundPath = testPathTxt;
+                    break;
+                }
+                else if (File.Exists(testPathNoExt))
+                {
+                    foundPath = testPathNoExt;
+                    break;
+                }
+            }
+
+            if (foundPath != null && File.Exists(foundPath))
+            {
+                return foundPath;
+            }
+
+            // 回退到嵌入资源
+            try
+            {
+                var assembly = Assembly.GetExecutingAssembly();
+                var resourceName = "Ink_Canvas.privacy.txt";
+                using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                {
+                    if (stream != null)
+                    {
+                        // 返回特殊字符串表示来自嵌入资源
+                        return "embedded";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从程序集资源查找隐私说明失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+
+            return null;
+        }
+
+        private void CheckUpdateChannelAndTelemetryConsistency()
+        {
+            var currentChannel = Settings.Startup.UpdateChannel;
+            bool isTestChannel = currentChannel == UpdateChannel.Preview || currentChannel == UpdateChannel.Beta;
+
+            if (!isTestChannel)
+            {
+                return;
+            }
+            if (!Settings.Startup.HasAcceptedTelemetryPrivacy)
+            {
+                var result = MessageBox.Show(
+                    $"检测到您当前处于 {currentChannel} 通道，但尚未同意隐私说明。\n\n" +
+                    "使用预览/测试通道需要同意隐私说明并启用匿名使用数据上传。\n\n" +
+                    "是否现在同意隐私说明并启用基础数据上传？\n" +
+                    "（选择“否”将自动切换回正式通道）",
+                    "更新通道与隐私协议不匹配",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        // 使用 FindPrivacyFile 方法，支持文件系统和嵌入资源
+                        string privacyPath = FindPrivacyFile();
+
+                        if (string.IsNullOrEmpty(privacyPath))
+                        {
+                            MessageBox.Show(
+                                "未找到隐私说明文件（privacy.txt 或 privacy）。\n\n将切换回正式通道。",
+                                "隐私文件缺失",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
+                        }
+                        else
+                        {
+                            var privacyWindow = new PrivacyAgreementWindow();
+                            privacyWindow.Owner = this;
+                            bool? dialogResult = privacyWindow.ShowDialog();
+
+                            if (dialogResult == true && privacyWindow.UserAccepted)
+                            {
+                                // 用户同意，保存设置
+                                Settings.Startup.HasAcceptedTelemetryPrivacy = true;
+                                Settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.Basic;
+                                
+                                // 更新UI，即使 isLoaded 为 false（启动时）
+                                // 使用标志避免触发事件处理程序
+                                // 使用 Dispatcher 确保在 UI 线程上更新
+                                Dispatcher.BeginInvoke(new Action(() =>
+                                {
+                                    _isChangingTelemetryPrivacyInternally = true;
+                                    _isChangingTelemetryInternally = true;
+                                    try
+                                    {
+                                        if (CheckBoxTelemetryPrivacyAccepted != null)
+                                        {
+                                            CheckBoxTelemetryPrivacyAccepted.IsChecked = true;
+                                        }
+                                        if (ComboBoxTelemetryUploadLevel != null)
+                                        {
+                                            ComboBoxTelemetryUploadLevel.SelectedIndex = 1;
+                                        }
+                                    }
+                                    finally
+                                    {
+                                        _isChangingTelemetryPrivacyInternally = false;
+                                        _isChangingTelemetryInternally = false;
+                                    }
+                                }), DispatcherPriority.Normal);
+
+                                SaveSettingsToFile();
+                                DeviceIdentifier.UpdateUsageChannel(currentChannel);
+                                LogHelper.WriteLogToFile($"启动检测 | 用户同意隐私协议并启用基础遥测，保持 {currentChannel} 通道");
+                                return; // 用户同意，直接返回，不执行后面的切换通道逻辑
+                            }
+                            else
+                            {
+                                // 用户取消或关闭窗口，切换回正式通道
+                                LogHelper.WriteLogToFile($"启动检测 | 用户取消隐私协议，将切换回 Release 通道");
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"启动检测 | 读取隐私文件失败: {ex.Message}", LogHelper.LogType.Error);
+                        MessageBox.Show(
+                            "读取隐私说明文件时出错。\n\n将切换回正式通道。",
+                            "读取隐私文件失败",
+                            MessageBoxButton.OK,
+                            MessageBoxImage.Error);
+                    }
+                }
+                else
+                {
+                    // 用户选择"否"，切换回正式通道
+                    LogHelper.WriteLogToFile($"启动检测 | 用户选择不同意隐私协议，将切换回 Release 通道");
+                }
+
+                // 只有在用户不同意或取消的情况下，才切换回正式通道
+                Settings.Startup.UpdateChannel = UpdateChannel.Release;
+                DeviceIdentifier.UpdateUsageChannel(UpdateChannel.Release);
+                SaveSettingsToFile();
+                
+                Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    _isChangingUpdateChannelInternally = true;
+                    try
+                    {
+                        if (isLoaded && UpdateChannelSelector != null)
+                        {
+                            foreach (var item in UpdateChannelSelector.Items)
+                            {
+                                if (item is RadioButton rb && rb.Tag != null &&
+                                    string.Equals(rb.Tag.ToString(), "Release", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    rb.IsChecked = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isChangingUpdateChannelInternally = false;
+                    }
+                }), DispatcherPriority.Normal);
+
+                LogHelper.WriteLogToFile($"启动检测 | 用户未同意隐私协议，已切换回 Release 通道");
+                return;
+            }
+
+            if (Settings.Startup.TelemetryUploadLevel == TelemetryUploadLevel.None)
+            {
+                var result = MessageBox.Show(
+                    $"检测到您当前处于 {currentChannel} 通道，但匿名使用数据上传已关闭。\n\n" +
+                    "使用预览/测试通道需要启用匿名使用数据上传。\n\n" +
+                    "是否现在启用基础数据上传？\n" +
+                    "（选择“否”将自动切换回正式通道）",
+                    "更新通道与遥测状态不匹配",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    Settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.Basic;
+                    
+                    if (isLoaded && ComboBoxTelemetryUploadLevel != null)
+                    {
+                        ComboBoxTelemetryUploadLevel.SelectedIndex = 1;
+                    }
+
+                    SaveSettingsToFile();
+                    DeviceIdentifier.UpdateUsageChannel(currentChannel);
+                    LogHelper.WriteLogToFile($"启动检测 | 用户启用基础遥测，保持 {currentChannel} 通道");
+                }
+                else
+                {
+                    Settings.Startup.UpdateChannel = UpdateChannel.Release;
+                    DeviceIdentifier.UpdateUsageChannel(UpdateChannel.Release);
+                    SaveSettingsToFile();
+                    
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        _isChangingUpdateChannelInternally = true;
+                        try
+                        {
+                            if (isLoaded && UpdateChannelSelector != null)
+                            {
+                                foreach (var item in UpdateChannelSelector.Items)
+                                {
+                                    if (item is RadioButton rb && rb.Tag != null &&
+                                        string.Equals(rb.Tag.ToString(), "Release", StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        rb.IsChecked = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            _isChangingUpdateChannelInternally = false;
+                        }
+                    }), DispatcherPriority.Normal);
+
+                    LogHelper.WriteLogToFile($"启动检测 | 用户未启用遥测，已切换回 Release 通道");
+                }
+            }
+        }
+
+        private void ComboBoxTelemetryUploadLevel_SelectionChanged(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            if (_isChangingTelemetryInternally) return;
+            var oldLevel = Settings.Startup.TelemetryUploadLevel;
+            var item = ComboBoxTelemetryUploadLevel?.SelectedItem as ComboBoxItem;
+            if (item == null) return;
+
+            var tag = item.Tag?.ToString() ?? "0";
+            var newLevel = TelemetryUploadLevel.None;
+            switch (tag)
+            {
+                case "1":
+                    newLevel = TelemetryUploadLevel.Basic;
+                    break;
+                case "2":
+                    newLevel = TelemetryUploadLevel.Extended;
+                    break;
+                default:
+                    newLevel = TelemetryUploadLevel.None;
+                    break;
+            }
+
+            if (newLevel == TelemetryUploadLevel.None &&
+                oldLevel != TelemetryUploadLevel.None &&
+                Settings.Startup.UpdateChannel != UpdateChannel.Release)
+            {
+                var result = MessageBox.Show(
+                    "关闭匿名使用数据上传后，将无法继续使用预览/测试通道，系统会自动切换回正式通道（Release）。\n\n是否确认关闭？",
+                    "确认关闭遥测",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    _isChangingTelemetryInternally = true;
+                    try
+                    {
+                        int idx = 0;
+                        switch (oldLevel)
+                        {
+                            case TelemetryUploadLevel.Basic:
+                                idx = 1;
+                                break;
+                            case TelemetryUploadLevel.Extended:
+                                idx = 2;
+                                break;
+                            default:
+                                idx = 0;
+                                break;
+                        }
+                        ComboBoxTelemetryUploadLevel.SelectedIndex = idx;
+                    }
+                    finally
+                    {
+                        _isChangingTelemetryInternally = false;
+                    }
+                    return;
+                }
+
+                _isChangingUpdateChannelInternally = true;
+                try
+                {
+                    Settings.Startup.UpdateChannel = UpdateChannel.Release;
+                    DeviceIdentifier.UpdateUsageChannel(UpdateChannel.Release);
+
+                    if (UpdateChannelSelector != null)
+                    {
+                        foreach (var u in UpdateChannelSelector.Items)
+                        {
+                            var rb = u as RadioButton;
+                            if (rb != null && rb.Tag != null && rb.Tag.ToString() == "Release")
+                            {
+                                rb.IsChecked = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                finally
+                {
+                    _isChangingUpdateChannelInternally = false;
+                }
+            }
+
+            if (newLevel != TelemetryUploadLevel.None && !Settings.Startup.HasAcceptedTelemetryPrivacy)
+            {
+                MessageBox.Show(
+                    "在开启匿名使用数据上传前，请先阅读并勾选上方的隐私说明。",
+                    "需要同意隐私说明",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+
+                _isChangingTelemetryInternally = true;
+                try
+                {
+                    Settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.None;
+                    if (ComboBoxTelemetryUploadLevel != null)
+                    {
+                        ComboBoxTelemetryUploadLevel.SelectedIndex = 0;
+                    }
+                }
+                finally
+                {
+                    _isChangingTelemetryInternally = false;
+                }
+
+                return;
+            }
+
+            Settings.Startup.TelemetryUploadLevel = newLevel;
+
+            SaveSettingsToFile();
+            ShowNotification("匿名使用数据上传设置已保存");
+        }
+
+        private void CheckBoxTelemetryPrivacyAccepted_Checked(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            if (_isChangingTelemetryPrivacyInternally) return;
+
+            bool isChecked = CheckBoxTelemetryPrivacyAccepted.IsChecked == true;
+
+            if (isChecked)
+            {
+                if (!PrivacyFileExists())
+                {
+                    MessageBox.Show(
+                        "未找到隐私说明文件（privacy / privacy.txt），暂时无法启用匿名使用数据上传。",
+                        "隐私说明缺失",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
+                    _isChangingTelemetryPrivacyInternally = true;
+                    try
+                    {
+                        CheckBoxTelemetryPrivacyAccepted.IsChecked = false;
+                    }
+                    finally
+                    {
+                        _isChangingTelemetryPrivacyInternally = false;
+                    }
+
+                    Settings.Startup.HasAcceptedTelemetryPrivacy = false;
+                    SaveSettingsToFile();
+                    return;
+                }
+
+                var privacyWindow = new PrivacyAgreementWindow();
+                privacyWindow.Owner = this;
+                bool? dialogResult = privacyWindow.ShowDialog();
+
+                if (dialogResult == true && privacyWindow.UserAccepted)
+                {
+                    Settings.Startup.HasAcceptedTelemetryPrivacy = true;
+                    SaveSettingsToFile();
+                }
+                else
+                {
+                    _isChangingTelemetryPrivacyInternally = true;
+                    try
+                    {
+                        CheckBoxTelemetryPrivacyAccepted.IsChecked = false;
+                    }
+                    finally
+                    {
+                        _isChangingTelemetryPrivacyInternally = false;
+                    }
+
+                    Settings.Startup.HasAcceptedTelemetryPrivacy = false;
+                    SaveSettingsToFile();
+                }
+            }
+            else
+            {
+                // 用户主动取消勾选，提示会关闭遥测并切回正式通道
+                var result = MessageBox.Show(
+                    "取消同意隐私说明后，将关闭匿名使用数据上传，并切回正式通道（Release）。\n\n是否确认？",
+                    "确认取消隐私同意",
+                    MessageBoxButton.YesNo,
+                    MessageBoxImage.Warning);
+
+                if (result != MessageBoxResult.Yes)
+                {
+                    // 撤销取消操作，恢复为已勾选
+                    _isChangingTelemetryPrivacyInternally = true;
+                    try
+                    {
+                        CheckBoxTelemetryPrivacyAccepted.IsChecked = true;
+                    }
+                    finally
+                    {
+                        _isChangingTelemetryPrivacyInternally = false;
+                    }
+                    return;
+                }
+
+                // 1. 关闭遥测等级
+                _isChangingTelemetryInternally = true;
+                try
+                {
+                    Settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.None;
+                    if (ComboBoxTelemetryUploadLevel != null)
+                    {
+                        ComboBoxTelemetryUploadLevel.SelectedIndex = 0;
+                    }
+                }
+                finally
+                {
+                    _isChangingTelemetryInternally = false;
+                }
+
+                // 2. 若当前不是 Release 通道，则切回 Release
+                if (Settings.Startup.UpdateChannel != UpdateChannel.Release)
+                {
+                    _isChangingUpdateChannelInternally = true;
+                    try
+                    {
+                        Settings.Startup.UpdateChannel = UpdateChannel.Release;
+                        DeviceIdentifier.UpdateUsageChannel(UpdateChannel.Release);
+
+                        if (UpdateChannelSelector != null)
+                        {
+                            foreach (var u in UpdateChannelSelector.Items)
+                            {
+                                var rb = u as RadioButton;
+                                if (rb != null && rb.Tag != null && rb.Tag.ToString() == "Release")
+                                {
+                                    rb.IsChecked = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isChangingUpdateChannelInternally = false;
+                    }
+                }
+
+                // 3. 最后真正取消隐私同意并保存
+                Settings.Startup.HasAcceptedTelemetryPrivacy = false;
+                SaveSettingsToFile();
+            }
+        }
 
         private void ToggleSwitchIsAutoUpdate_Toggled(object sender, RoutedEventArgs e)
         {
@@ -137,6 +656,46 @@ namespace Ink_Canvas
             else
             {
                 StopPPTMonitoring();
+            }
+        }
+
+        private void ToggleSwitchUseRotPptLink_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            Settings.PowerPointSettings.UseRotPptLink = ToggleSwitchUseRotPptLink.IsOn;
+            SaveSettingsToFile();
+
+            try
+            {
+                StopPPTMonitoring();
+                if (Settings.PowerPointSettings.UseRotPptLink &&
+                    Settings.PowerPointSettings.EnablePowerPointEnhancement)
+                {
+                    Settings.PowerPointSettings.EnablePowerPointEnhancement = false;
+                    if (ToggleSwitchPowerPointEnhancement != null)
+                    {
+                        ToggleSwitchPowerPointEnhancement.IsOn = false;
+                    }
+                    StopPowerPointProcessMonitoring();
+
+                    SaveSettingsToFile();
+                }
+
+                InitializePPTManagers();
+
+                if (Settings.PowerPointSettings.PowerPointSupport)
+                {
+                    StartPPTMonitoring();
+                }
+
+                LogHelper.WriteLogToFile(
+                    $"已切换 PPT 联动架构为 {(Settings.PowerPointSettings.UseRotPptLink ? "ROT" : "COM")}",
+                    LogHelper.LogType.Event);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换 PPT 联动架构失败: {ex}", LogHelper.LogType.Error);
             }
         }
 
@@ -1778,9 +2337,8 @@ namespace Ink_Canvas
             var NowB = drawingAttributes.Color.B;
             // Trace.WriteLine(BitConverter.GetBytes(((Slider)sender).Value));
             drawingAttributes.Color = Color.FromArgb((byte)((Slider)sender).Value, NowR, NowG, NowB);
-            // drawingAttributes.Width = ((Slider)sender).Value / 2;
-            // Settings.Canvas.InkAlpha = ((Slider)sender).Value;
-            // SaveSettingsToFile();
+            Settings.Canvas.InkAlpha = ((Slider)sender).Value;
+            SaveSettingsToFile();
         }
 
         private void ComboBoxHyperbolaAsymptoteOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1798,9 +2356,9 @@ namespace Ink_Canvas
         private void StartOrStoptimerCheckAutoFold()
         {
             if (Settings.Automation.IsEnableAutoFold)
-                timerCheckAutoFold.Start();
+                _unifiedMainWindowTimer?.Start();
             else
-                timerCheckAutoFold.Stop();
+                _unifiedMainWindowTimer?.Stop();
         }
 
         private void ToggleSwitchAutoFoldInEasiNote_Toggled(object sender, RoutedEventArgs e)
@@ -2765,7 +3323,7 @@ namespace Ink_Canvas
                 isLoaded = false;
                 SetSettingsToRecommendation();
                 SaveSettingsToFile();
-                LoadSettings();
+                LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
                 isLoaded = true;
 
                 ToggleSwitchRunAtStartup.IsOn = false;
@@ -2786,7 +3344,7 @@ namespace Ink_Canvas
                 Settings.Automation.AutoDelSavedFilesDaysThreshold = 15;
                 SetAutoSavedStrokesLocationToDiskDButton_Click(null, null);
                 SaveSettingsToFile();
-                LoadSettings();
+                LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
                 isLoaded = true;
             }
             catch { }
@@ -3877,9 +4435,11 @@ namespace Ink_Canvas
         private async void UpdateChannelSelector_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
+            if (_isChangingUpdateChannelInternally) return;
             var radioButton = sender as RadioButton;
             if (radioButton != null)
             {
+                var oldChannel = Settings.Startup.UpdateChannel;
                 string channel = radioButton.Tag.ToString();
                 UpdateChannel newChannel = channel == "Beta" ? UpdateChannel.Beta 
                     : channel == "Preview" ? UpdateChannel.Preview 
@@ -3891,7 +4451,100 @@ namespace Ink_Canvas
                     return;
                 }
 
+                bool isTestChannel = newChannel == UpdateChannel.Preview || newChannel == UpdateChannel.Beta;
+                if (isTestChannel && !Settings.Startup.HasAcceptedTelemetryPrivacy)
+                {
+                    MessageBox.Show(
+                        "加入预览 / 测试通道前，请先在关于页面勾选“我已阅读并同意 privacy 中的隐私说明”。",
+                        "需要同意隐私说明",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Warning);
+
+                    Settings.Startup.UpdateChannel = oldChannel;
+                    Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        _isChangingUpdateChannelInternally = true;
+                        try
+                        {
+                            if (UpdateChannelSelector != null)
+                            {
+                                string oldChannelTag = oldChannel.ToString();
+                                foreach (var item in UpdateChannelSelector.Items)
+                                {
+                                    if (item is RadioButton rb && rb.Tag != null &&
+                                        string.Equals(rb.Tag.ToString(), oldChannelTag, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                        rb.IsChecked = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        finally
+                        {
+                            _isChangingUpdateChannelInternally = false;
+                        }
+                    }), DispatcherPriority.Normal);
+
+                    SaveSettingsToFile();
+                    LogHelper.WriteLogToFile("Settings | User not accepted privacy, reverted update channel");
+                    return;
+                }
+
+                if (isTestChannel && Settings.Startup.TelemetryUploadLevel == TelemetryUploadLevel.None)
+                {
+                    var result = MessageBox.Show(
+                        "加入预览 / 测试通道需要开启匿名基础数据上传。\n\n是否立即开启匿名基础数据上传？",
+                        "需要开启匿名使用数据上传",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        Settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.Basic;
+                        if (ComboBoxTelemetryUploadLevel != null)
+                        {
+                            ComboBoxTelemetryUploadLevel.SelectedIndex = 1;
+                        }
+                        SaveSettingsToFile();
+                        LogHelper.WriteLogToFile("Settings | Telemetry enabled (Basic) for preview/beta update channel");
+                    }
+                    else
+                    {
+                        Settings.Startup.UpdateChannel = oldChannel;
+                        Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            _isChangingUpdateChannelInternally = true;
+                            try
+                            {
+                                if (UpdateChannelSelector != null)
+                                {
+                                    string oldChannelTag = oldChannel.ToString();
+                                    foreach (var item in UpdateChannelSelector.Items)
+                                    {
+                                        if (item is RadioButton rb && rb.Tag != null &&
+                                            string.Equals(rb.Tag.ToString(), oldChannelTag, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            rb.IsChecked = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                            finally
+                            {
+                                _isChangingUpdateChannelInternally = false;
+                            }
+                        }), DispatcherPriority.Normal);
+
+                        SaveSettingsToFile();
+                        LogHelper.WriteLogToFile("Settings | User declined telemetry, reverted update channel");
+                        return;
+                    }
+                }
+
                 Settings.Startup.UpdateChannel = newChannel;
+                DeviceIdentifier.UpdateUsageChannel(newChannel);
                 LogHelper.WriteLogToFile($"Settings | Update channel changed to {Settings.Startup.UpdateChannel}");
                 SaveSettingsToFile();
 

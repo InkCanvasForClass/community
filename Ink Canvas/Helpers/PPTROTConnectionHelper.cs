@@ -268,8 +268,6 @@ namespace Ink_Canvas.Helpers
 
                             if (currentPriority > 0)
                             {
-                                LogHelper.WriteLogToFile($"ROT扫描: {displayName}: priority={currentPriority}", LogHelper.LogType.Trace);
-                                
                                 if (currentPriority > highestPriority)
                                 {
                                     highestPriority = currentPriority;
@@ -299,15 +297,6 @@ namespace Ink_Canvas.Helpers
                 }
 
                 bestPriority = highestPriority;
-                
-                if (bestApp != null)
-                {
-                    LogHelper.WriteLogToFile($"ROT扫描完成: 找到最佳应用, priority={bestPriority}", LogHelper.LogType.Trace);
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile($"ROT扫描完成: 未找到可用应用", LogHelper.LogType.Trace);
-                }
             }
             catch (Exception ex)
             {

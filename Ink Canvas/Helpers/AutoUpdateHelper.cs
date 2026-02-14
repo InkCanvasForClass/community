@@ -1431,7 +1431,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 开始解压ZIP文件到: {extractPath}");
-                    ZipFile.ExtractToDirectory(zipFilePath, extractPath);
+                    SafeZipExtractor.ExtractZipSafely(zipFilePath, extractPath, overwrite: true);
                     LogHelper.WriteLogToFile("AutoUpdate | ZIP文件解压完成");
                 }
                 catch (Exception ex)

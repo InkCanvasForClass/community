@@ -172,11 +172,12 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (toggleSwitch == null) return;
             toggleSwitch.Background = isOn 
                 ? new SolidColorBrush(Color.FromRgb(53, 132, 228)) 
-                : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                : (ThemeHelper.IsDarkTheme ? ThemeHelper.GetButtonBackgroundBrush() : new SolidColorBrush(Color.FromRgb(225, 225, 225)));
             var innerBorder = toggleSwitch.Child as Border;
             if (innerBorder != null)
             {
                 innerBorder.HorizontalAlignment = isOn ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+                innerBorder.Background = new SolidColorBrush(Colors.White);
             }
         }
 
@@ -199,7 +200,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             var button = this.FindDescendantByName($"{group}{buttonName}Border") as Border;
             if (button != null)
             {
-                // 清除同组其他按钮的选中状态
+                bool isDarkTheme = ThemeHelper.IsDarkTheme;
+                var selectedBrush = isDarkTheme ? new SolidColorBrush(Color.FromRgb(25, 25, 25)) : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                var unselectedBrush = new SolidColorBrush(Colors.Transparent);
+
                 var parent = button.Parent as Panel;
                 if (parent != null)
                 {
@@ -210,24 +214,74 @@ namespace Ink_Canvas.Windows.SettingsViews
                             string childTag = childBorder.Tag?.ToString();
                             if (!string.IsNullOrEmpty(childTag) && childTag.StartsWith(group + "_"))
                             {
-                                childBorder.Background = new SolidColorBrush(Colors.Transparent);
+                                childBorder.Background = unselectedBrush;
                                 var textBlock = childBorder.Child as TextBlock;
                                 if (textBlock != null)
                                 {
                                     textBlock.FontWeight = FontWeights.Normal;
+                                    textBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                                 }
                             }
                         }
                     }
                 }
 
-                // 设置当前按钮为选中状态
-                button.Background = new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                button.Background = selectedBrush;
                 var currentTextBlock = button.Child as TextBlock;
                 if (currentTextBlock != null)
                 {
                     currentTextBlock.FontWeight = FontWeights.Bold;
+                    currentTextBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                 }
+            }
+        }
+
+        private bool GetCurrentSettingValue(string tag)
+        {
+            if (MainWindow.Settings?.Advanced == null) return false;
+
+            try
+            {
+                var advanced = MainWindow.Settings.Advanced;
+                switch (tag)
+                {
+                    case "IsSpecialScreen":
+                        return advanced.IsSpecialScreen;
+                    case "EraserBindTouchMultiplier":
+                        return advanced.EraserBindTouchMultiplier;
+                    case "IsQuadIR":
+                        return advanced.IsQuadIR;
+                    case "IsLogEnabled":
+                        return advanced.IsLogEnabled;
+                    case "IsSaveLogByDate":
+                        return advanced.IsSaveLogByDate;
+                    case "IsSecondConfirmWhenShutdownApp":
+                        return advanced.IsSecondConfirmWhenShutdownApp;
+                    case "IsEnableFullScreenHelper":
+                        return advanced.IsEnableFullScreenHelper;
+                    case "IsEnableAvoidFullScreenHelper":
+                        return advanced.IsEnableAvoidFullScreenHelper;
+                    case "IsEnableEdgeGestureUtil":
+                        return advanced.IsEnableEdgeGestureUtil;
+                    case "IsEnableForceFullScreen":
+                        return advanced.IsEnableForceFullScreen;
+                    case "IsEnableDPIChangeDetection":
+                        return advanced.IsEnableDPIChangeDetection;
+                    case "IsEnableResolutionChangeDetection":
+                        return advanced.IsEnableResolutionChangeDetection;
+                    case "IsAutoBackupBeforeUpdate":
+                        return advanced.IsAutoBackupBeforeUpdate;
+                    case "IsAutoBackupEnabled":
+                        return advanced.IsAutoBackupEnabled;
+                    case "IsEnableUriScheme":
+                        return advanced.IsEnableUriScheme;
+                    default:
+                        return false;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -241,12 +295,12 @@ namespace Ink_Canvas.Windows.SettingsViews
             var border = sender as Border;
             if (border == null) return;
 
-            bool isOn = border.Background.ToString() == "#FF3584E4";
-            bool newState = !isOn;
-            SetToggleSwitchState(border, newState);
-
             string tag = border.Tag?.ToString();
             if (string.IsNullOrEmpty(tag)) return;
+
+            bool currentState = GetCurrentSettingValue(tag);
+            bool newState = !currentState;
+            SetToggleSwitchState(border, newState);
 
             var advanced = MainWindow.Settings.Advanced;
             if (advanced == null) return;
@@ -400,7 +454,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             string group = parts[0];
             string value = parts[1];
 
-            // 清除同组其他按钮的选中状态
+            bool isDarkTheme = ThemeHelper.IsDarkTheme;
+            var selectedBrush = isDarkTheme ? ThemeHelper.GetButtonBackgroundBrush() : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+            var unselectedBrush = new SolidColorBrush(Colors.Transparent);
+
             var parent = border.Parent as Panel;
             if (parent != null)
             {
@@ -411,23 +468,24 @@ namespace Ink_Canvas.Windows.SettingsViews
                         string childTag = childBorder.Tag?.ToString();
                         if (!string.IsNullOrEmpty(childTag) && childTag.StartsWith(group + "_"))
                         {
-                            childBorder.Background = new SolidColorBrush(Colors.Transparent);
+                            childBorder.Background = unselectedBrush;
                             var textBlock = childBorder.Child as TextBlock;
                             if (textBlock != null)
                             {
                                 textBlock.FontWeight = FontWeights.Normal;
+                                textBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                             }
                         }
                     }
                 }
             }
 
-            // 设置当前按钮为选中状态
-            border.Background = new SolidColorBrush(Color.FromRgb(225, 225, 225));
+            border.Background = selectedBrush;
             var currentTextBlock = border.Child as TextBlock;
             if (currentTextBlock != null)
             {
                 currentTextBlock.FontWeight = FontWeights.Bold;
+                currentTextBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
             }
 
             if (MainWindow.Settings.Advanced == null) return;
@@ -525,6 +583,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             try
             {
                 ThemeHelper.ApplyThemeToControl(this);
+                if (_isLoaded)
+                {
+                    LoadSettings();
+                }
             }
             catch (Exception ex)
             {

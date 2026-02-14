@@ -5,6 +5,7 @@
     <RootNamespace>Ink_Canvas</RootNamespace>
     <AssemblyName>InkCanvasForClass</AssemblyName>
     <TargetFramework>net472</TargetFramework>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
@@ -155,6 +156,7 @@
     <PackageReference Include="MicrosoftOfficeCore" Version="15.0.0" />
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
     <PackageReference Include="Microsoft.International.Converters.PinYinConverter" Version="1.0.0" />
+    <PackageReference Include="Sentry" Version="6.0.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
@@ -294,6 +296,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_delete_24_regular.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="privacy.txt" />
+    <EmbeddedResource Include="telemetry_dsn.txt" Condition="Exists('telemetry_dsn.txt')">
+      <Link>telemetry_dsn.txt</Link>
+    </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-Fluent\ic_fluent_cursorWITHdelete_24_regular.png" />

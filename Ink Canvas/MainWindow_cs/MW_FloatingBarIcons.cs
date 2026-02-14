@@ -2423,41 +2423,49 @@ namespace Ink_Canvas
         private void QuickColorWhite_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Colors.White);
+            ScheduleBrushAutoRestore();
         }
 
         private void QuickColorOrange_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Color.FromRgb(251, 150, 80)); // 橙色
+            ScheduleBrushAutoRestore();
         }
 
         private void QuickColorYellow_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Colors.Yellow);
+            ScheduleBrushAutoRestore();
         }
 
         private void QuickColorBlack_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Colors.Black);
+            ScheduleBrushAutoRestore();
         }
 
         private void QuickColorBlue_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Color.FromRgb(37, 99, 235)); // 蓝色
+            ScheduleBrushAutoRestore();
         }
 
         private void QuickColorRed_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Colors.Red);
+            ScheduleBrushAutoRestore();
         }
 
         private void QuickColorGreen_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Color.FromRgb(22, 163, 74));
+            ScheduleBrushAutoRestore();
         }
 
         private void QuickColorPurple_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Color.FromRgb(147, 51, 234));
+            ScheduleBrushAutoRestore();
         }
 
         private void SetQuickColor(Color color)
@@ -3027,6 +3035,8 @@ namespace Ink_Canvas
                     }
 
                     StackPanelPPTButtons.Visibility = Visibility.Visible;
+
+                    CheckClipboardImageAndShowPasteNotificationWhenEnteringBoard();
                 }
 
                 Topmost = true;
@@ -3186,6 +3196,8 @@ namespace Ink_Canvas
                         {
                             Topmost = false;
                         }
+
+                        CheckClipboardImageAndShowPasteNotificationWhenEnteringBoard();
                         break;
                 }
             }

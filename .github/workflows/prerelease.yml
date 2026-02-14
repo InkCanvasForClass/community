@@ -21,6 +21,11 @@ on:
         required: true
         default: true
         type: boolean
+      draft:
+        description: 'Create as draft release'
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.sha }}
@@ -204,78 +209,59 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0
-          fetch-tags: true
-
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2.0.1
-
+          fetch-depth: 1
+      
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
+      
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.x'
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      
+      - name: Restore Package 
+        run: dotnet restore "Ink Canvas.sln" --locked-mode
+      
+      - name: Build the Solution (Release)
+        run: |
+          msbuild /p:platform="AnyCPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal
+
+      - name: Check if exe file is generated
+        id: check-exe
+        run: |
+          $exePath = "Ink Canvas/bin/Release/net472/InkCanvasForClass.exe"
+          
+          if (Test-Path $exePath) {
+            echo "build_success=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "build_success=false" >> $env:GITHUB_OUTPUT
+            exit 1
+          }
 
       - name: Install Inno Setup Unofficial Language Files
+        if: steps.check-exe.outputs.build_success == 'true'
         run: |
           # 创建临时目录用于下载文件
           New-Item -ItemType Directory -Path "temp_lang" -Force
           
           # 下载英语英国版语言文件
-          Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/EnglishBritish.isl" -OutFile "temp_lang\EnglishBritish.isl"
+          Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/EnglishBritish.isl" -OutFile "temp_lang/EnglishBritish.isl"
           
           # 下载简体中文版语言文件
-          Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "temp_lang\ChineseSimplified.isl"
+          Invoke-WebRequest -Uri "https://github.com/jrsoftware/issrc/raw/refs/heads/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "temp_lang/ChineseSimplified.isl"
           
           # 将文件移动到 Inno Setup 的语言目录
-          Move-Item -Path "temp_lang\EnglishBritish.isl" -Destination "C:\Program Files (x86)\Inno Setup 6\Languages\EnglishBritish.isl" -Force
-          Move-Item -Path "temp_lang\ChineseSimplified.isl" -Destination "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl" -Force
+          Move-Item -Path "temp_lang/EnglishBritish.isl" -Destination "C:/Program Files (x86)/Inno Setup 6/Languages/EnglishBritish.isl" -Force
+          Move-Item -Path "temp_lang/ChineseSimplified.isl" -Destination "C:/Program Files (x86)/Inno Setup 6/Languages/ChineseSimplified.isl" -Force
           
           # 清理临时目录
           Remove-Item -Path "temp_lang" -Recurse -Force
-          
-          Write-Host "✅ Inno Setup unofficial language files installed successfully" -ForegroundColor Green
 
-      - name: Cache NuGet packages and obj files
-        id: cache-nuget
-        uses: actions/cache@v4
-        with:
-          path: |
-            # NuGet 全局包缓存（已下载的包）
-            ~/.nuget/packages
-            # NuGet 缓存目录（包索引）
-            ~\AppData\Local\NuGet\Cache
-            # 项目 obj 目录（包含 project.assets.json）
-            Ink Canvas/obj/
-          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj', '**/packages.config', '**/*.sln') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-
-
-      - name: Restore NuGet packages (if cache missed)
-        if: steps.cache-nuget.outputs.cache-hit != 'true'
-        run: |
-          Write-Host "📥 缓存未命中，正在恢复 NuGet 包..." -ForegroundColor Yellow
-          
-          # 恢复解决方案级别的包
-          nuget restore "Ink Canvas.sln" -Verbosity minimal
-          
-          # 恢复项目级别的包
-          msbuild -t:restore "Ink Canvas/InkCanvasForClass.csproj" /p:GitFlow="Github Action" /p:RestorePackagesConfig=true /verbosity:minimal
-          
-          Write-Host "✅ NuGet 包恢复完成" -ForegroundColor Green
-
-      - name: Display version info
-        run: |
-          echo "Building version: ${{ needs.prepare.outputs.version }}"
-          echo "Tag: ${{ needs.prepare.outputs.tag_name }}"
-          echo "Release type: ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }}"
-          
-      - name: Build the Solution
-        run: |
-          Write-Host "🔨 正在构建项目..." -ForegroundColor Cyan
-          msbuild /p:platform="AnyCPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal
-          
-          Write-Host "🏗️ 构建命令执行完成" -ForegroundColor Cyan
-          
       - name: Create Release Archive
         id: create_archive
+        if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $archiveName = "InkCanvasForClass.CE.$version.zip"
@@ -284,51 +270,50 @@ jobs:
           New-Item -ItemType Directory -Path "release" -Force
           
           # 复制发布文件
-          Copy-Item "Ink Canvas\bin\Release\net472\*" "release\" -Recurse -Force
+          Copy-Item "Ink Canvas/bin/Release/net472/*" "release/" -Recurse -Force
           
           # 创建压缩包
-          Compress-Archive -Path "release\*" -DestinationPath $archiveName -Force
+          Compress-Archive -Path "release/*" -DestinationPath $archiveName -Force
           
           echo "archive_name=$archiveName" >> $env:GITHUB_OUTPUT
           
       - name: Prepare Inno Setup script
+        if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           
           # 更新 ISS 文件中的版本信息
-          $issPath = "build\InkCanvasForClass CE.iss"
+          $issPath = "build/InkCanvasForClass CE.iss"
           $issContent = Get-Content -Path $issPath -Raw
           
           # 替换版本信息
           $issContent = $issContent -replace '#define MyAppVersion ".*"', "#define MyAppVersion `"$version`""
           
           # 替换源文件路径为相对路径（考虑到ISS文件在build目录下，需要返回上级目录）
-          $issContent = $issContent -replace 'Source: ".*\\{#MyAppExeName}";', 'Source: "..\release\{#MyAppExeName}";'
-          $issContent = $issContent -replace 'Source: ".*\\InkCanvasForClass.exe.config";', 'Source: "..\release\InkCanvasForClass.exe.config";'
+          $issContent = $issContent -replace 'Source: ".*\\{#MyAppExeName}";', 'Source: "../release/{#MyAppExeName}";'
+          $issContent = $issContent -replace 'Source: ".*\\InkCanvasForClass.exe.config";', 'Source: "../release/InkCanvasForClass.exe.config";'
           
           # 更新输出目录为当前目录
           $issContent = $issContent -replace 'OutputDir=.*', 'OutputDir=.'
           
           # 更新默认安装目录
-          $issContent = $issContent -replace 'DefaultDirName=.*', 'DefaultDirName={autopf}\{#MyAppName}'
+          $issContent = $issContent -replace 'DefaultDirName=.*', 'DefaultDirName={autopf}/{#MyAppName}'
           
           # 更新许可证文件路径为相对路径（考虑到ISS文件在build目录下，需要返回上级目录）
-          $issContent = $issContent -replace 'LicenseFile=.*', 'LicenseFile=..\LICENSE'
+          $issContent = $issContent -replace 'LicenseFile=.*', 'LicenseFile=../LICENSE'
           
           # 保存修改后的 ISS 文件
           $issContent | Set-Content -Path $issPath -Encoding UTF8
           
-          # 显示修改后的 ISS 文件内容
-          Write-Host "Modified ISS file content:"
-          Write-Host $issContent
-          
       - name: Build MSI installer with Inno Setup
+        if: steps.check-exe.outputs.build_success == 'true'
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
         with:
-          path: build\InkCanvasForClass CE.iss
+          path: build/InkCanvasForClass CE.iss
           options: /O.
           
       - name: Rename installer file
+        if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $setupFile = "InkCanvasForClass CE Setup.exe"
@@ -336,13 +321,13 @@ jobs:
           
           if (Test-Path $setupFile) {
             Rename-Item -Path $setupFile -NewName $newSetupName
-            Write-Host "Renamed setup file to: $newSetupName"
           } else {
-            Write-Host "Setup file not found: $setupFile"
+            Write-Error "Setup file not found: $setupFile"
           }
           
       - name: Calculate archive size
         id: calculate_size
+        if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $archiveName = "InkCanvasForClass.CE.$version.zip"
@@ -352,10 +337,9 @@ jobs:
           
           echo "zip_size=$fileSize" >> $env:GITHUB_OUTPUT
           
-          echo "Archive size: $fileSize bytes"
-          
       - name: Calculate installer size
         id: calculate_installer_size
+        if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
           $installerName = "InkCanvasForClass.CE.$version.Setup.exe"
@@ -365,13 +349,12 @@ jobs:
             $fileSize = (Get-Item $installerName).Length
             
             echo "installer_size=$fileSize" >> $env:GITHUB_OUTPUT
-            
-            echo "Installer size: $fileSize bytes"
           } else {
-            echo "Installer file not found: $installerName"
+            Write-Error "Installer file not found: $installerName"
           }
           
       - name: Upload Build Artifacts
+        if: steps.check-exe.outputs.build_success == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: build-files-${{ needs.prepare.outputs.version }}
@@ -379,13 +362,50 @@ jobs:
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe
 
+      - name: Create Build Summary
+        if: always()
+        shell: bash
+        run: |
+          echo "# Release Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check-exe.outputs.build_success }}" = "true" ]; then
+            echo "## ✅ Release Build Successful" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Release Type:** ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            if [ -n "${{ steps.calculate_size.outputs.zip_size }}" ]; then
+              echo "**Archive Size:** ${{ steps.calculate_size.outputs.zip_size }} bytes" >> $GITHUB_STEP_SUMMARY
+            fi
+            
+            if [ -n "${{ steps.calculate_installer_size.outputs.installer_size }}" ]; then
+              echo "**Installer Size:** ${{ steps.calculate_installer_size.outputs.installer_size }} bytes" >> $GITHUB_STEP_SUMMARY
+            fi
+            
+          else
+            echo "## ❌ Release Build Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Event:** ${{ github.event_name }} (${{ github.event.action || 'N/A' }})" >> $GITHUB_STEP_SUMMARY
+            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Check build logs for details." >> $GITHUB_STEP_SUMMARY
+          fi
+
   sign:
     needs: [prepare, build]
     if: success()
-    runs-on: ubuntu-latest  # 改为 Ubuntu 以使用 Python 签名工具
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-      id-token: write  # 需要这个权限来验证签名
+      id-token: write
     steps:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
@@ -419,10 +439,12 @@ jobs:
   release:
     needs: [prepare, build, sign]
     if: success()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     permissions:
       contents: write
-    
+    outputs:
+      enhanced_changelog: ${{steps.enhanced_changelog.outputs.enhanced_changelog}}
+
     steps:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v4
@@ -496,7 +518,7 @@ jobs:
           name: ICC CE ${{ needs.prepare.outputs.version }}
           body: |
             ${{ steps.enhanced_changelog.outputs.enhanced_changelog }}
-          draft: false
+          draft: ${{ github.event.inputs.draft || false }}
           prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
           files: |
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
@@ -506,3 +528,106 @@ jobs:
           fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  post_release:
+    needs: [prepare, release]
+    if: success()
+    runs-on: ubuntu-slim
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-files-${{ needs.prepare.outputs.version }}
+
+      - name: Get beta token
+        uses: octo-sts/action@main
+        id: octo-sts-beta
+        with:
+          scope: InkCanvasForClass/community-beta
+          identity: repo-sync
+
+      - name: Get download token
+        uses: octo-sts/action@main
+        id: octo-sts-downloads
+        with:
+          scope: InkCanvasForClass/downloads
+          identity: repo-sync
+      
+      - name: Sync downloads repos(Universal)
+        env:
+          GITHUB_TOKEN: ${{ steps.octo-sts-downloads.outputs.token }}
+        run: |
+          CONTENT=$(base64 -w0 InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip)
+
+          gh api \
+            --method PUT \
+            /repos/InkCanvasForClass/downloads/contents/${{ case(needs.prepare.outputs.is_prerelease == 'true', 'Beta', 'Release') }}/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip \
+            -f message="Add files via upload" \
+            -f content="$CONTENT" \
+            -f branch="main"
+          
+      - name: Sync downloads repos(Release Only)
+        if: ${{needs.prepare.outputs.is_prerelease == 'false'}}
+        env:
+          GITHUB_TOKEN: ${{ steps.octo-sts-downloads.outputs.token }}
+        run: |
+          CONTENT=$(base64 -w0 InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip)
+
+          gh api \
+            --method PUT \
+            /repos/InkCanvasForClass/downloads/contents/Beta/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip \
+            -f message="Add files via upload" \
+            -f content="$CONTENT" \
+            -f branch="main"
+            
+      - name: Update AutomaticUpdateVersionControl in beta repo
+        env:
+          GITHUB_TOKEN: ${{ steps.octo-sts-beta.outputs.token }}
+        run: |
+          CONTENT=$(echo -n "${{ needs.prepare.outputs.version }}" | base64 -w0)
+
+          SHA=$(gh api /repos/InkCanvasForClass/community-beta/contents/AutomaticUpdateVersionControl.txt --jq '.sha' 2>/dev/null || echo "")
+
+          gh api \
+            --method PUT \
+            /repos/InkCanvasForClass/community-beta/contents/AutomaticUpdateVersionControl.txt \
+            -f message="Update AutomaticUpdateVersionControl.txt" \
+            -f content="$CONTENT" \
+            -f branch="main" \
+            ${SHA:+-f sha="$SHA"}
+      
+      - name: Create GitHub Release on beta repo
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.prepare.outputs.tag_name }}
+          name: ICC CE ${{ needs.prepare.outputs.version }}
+          body: |
+            ${{ needs.release.outputs.enhanced_changelog }}
+          draft: false
+          prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
+          files: |
+            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
+          fail_on_unmatched_files: false
+          repository: "InkCanvasForClass/community-beta"
+        env:
+          GITHUB_TOKEN: ${{ steps.octo-sts-beta.outputs.token }}
+
+      - name: Update community repo AutomaticUpdateVersionControl
+        if: ${{needs.prepare.outputs.is_prerelease == 'false'}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CONTENT=$(echo -n "${{ needs.prepare.outputs.version }}" | base64 -w0)
+
+          SHA=$(gh api /repos/InkCanvasForClass/community/contents/AutomaticUpdateVersionControl.txt --jq '.sha' 2>/dev/null || echo "")
+
+          gh api \
+            --method PUT \
+            /repos/InkCanvasForClass/community/contents/AutomaticUpdateVersionControl.txt \
+            -f message="Update AutomaticUpdateVersionControl.txt" \
+            -f content="$CONTENT" \
+            -f branch="beta" \
+            ${SHA:+-f sha="$SHA"}

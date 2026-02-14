@@ -8,6 +8,35 @@ namespace Ink_Canvas.Windows.SettingsViews
     /// </summary>
     public static class ThemeHelper
     {
+        private static bool IsToggleSwitchThumb(System.Windows.Controls.Border border)
+        {
+            try
+            {
+                if (border == null) return false;
+
+                // ToggleSwitch thumb 常见尺寸：19x19，圆角 10，父级为 48x25 的开关背景
+                if (border.Width < 16 || border.Width > 24 || border.Height < 16 || border.Height > 24)
+                    return false;
+
+                if (border.CornerRadius.TopLeft < 8) return false;
+
+                if (border.Parent is System.Windows.Controls.Border parent)
+                {
+                    if (parent.Width >= 40 && parent.Width <= 60 &&
+                        parent.Height >= 20 && parent.Height <= 35 &&
+                        parent.CornerRadius.TopLeft >= 10)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         /// <summary>
         /// 检查当前是否为深色主题
         /// </summary>
@@ -180,8 +209,12 @@ namespace Ink_Canvas.Windows.SettingsViews
                             }
                             else
                             {
-                                // 其他白色背景（如搜索框）
-                                border.Background = GetTextBoxBackgroundBrush();
+                                // ToggleSwitch thumb 应保持白色，不参与主题背景替换
+                                if (!IsToggleSwitchThumb(border))
+                                {
+                                    // 其他白色背景（如搜索框）
+                                    border.Background = GetTextBoxBackgroundBrush();
+                                }
                             }
                         }
                         else if (color.R == 250 && color.G == 250 && color.B == 250) // #fafafa - 主背景

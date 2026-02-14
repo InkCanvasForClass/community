@@ -182,11 +182,12 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (toggleSwitch == null) return;
             toggleSwitch.Background = isOn 
                 ? new SolidColorBrush(Color.FromRgb(53, 132, 228)) 
-                : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                : (ThemeHelper.IsDarkTheme ? ThemeHelper.GetButtonBackgroundBrush() : new SolidColorBrush(Color.FromRgb(225, 225, 225)));
             var innerBorder = toggleSwitch.Child as Border;
             if (innerBorder != null)
             {
                 innerBorder.HorizontalAlignment = isOn ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+                innerBorder.Background = new SolidColorBrush(Colors.White);
             }
         }
 
@@ -246,27 +247,27 @@ namespace Ink_Canvas.Windows.SettingsViews
                                 if (textBlock != null)
                                 {
                                     textBlock.FontWeight = FontWeights.Normal;
+                                    textBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                                 }
                             }
                         }
                     }
                 }
 
-                // 设置当前按钮为选中状态
-                border.Background = new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                bool isDarkTheme = ThemeHelper.IsDarkTheme;
+                var selectedBrush = isDarkTheme ? new SolidColorBrush(Color.FromRgb(25, 25, 25)) : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                border.Background = selectedBrush;
                 var currentTextBlock = border.Child as TextBlock;
                 if (currentTextBlock != null)
                 {
                     currentTextBlock.FontWeight = FontWeights.Bold;
+                    currentTextBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                 }
 
                 HandleOptionChange(group, value);
             }
         }
 
-        /// <summary>
-        /// 处理选项变化 - 子类需要实现
-        /// </summary>
         protected abstract void HandleOptionChange(string group, string value);
     }
 }

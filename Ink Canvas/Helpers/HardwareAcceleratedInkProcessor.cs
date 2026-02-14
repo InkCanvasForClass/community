@@ -186,11 +186,11 @@ namespace Ink_Canvas.Helpers
         }
 
         /// <summary>
-        /// 释放GPU资源
+        /// 释放GPU相关资源标记
         /// </summary>
         public void Dispose()
         {
-            _renderTarget?.Clear();
+
             _isInitialized = false;
         }
     }

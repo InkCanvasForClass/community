@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -131,6 +131,12 @@ namespace Ink_Canvas
             }
 
             double alpha = inkCanvas.DefaultDrawingAttributes.Color.A;
+            if (penType == 0 && Settings?.Canvas != null)
+            {
+                double settingAlpha = Settings.Canvas.InkAlpha;
+                if (settingAlpha >= 0 && settingAlpha <= 255)
+                    alpha = settingAlpha;
+            }
 
             if (penType == 0)
             {

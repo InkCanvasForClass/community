@@ -160,11 +160,45 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (toggleSwitch == null) return;
             toggleSwitch.Background = isOn 
                 ? new SolidColorBrush(Color.FromRgb(53, 132, 228)) 
-                : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                : (ThemeHelper.IsDarkTheme ? ThemeHelper.GetButtonBackgroundBrush() : new SolidColorBrush(Color.FromRgb(225, 225, 225)));
             var innerBorder = toggleSwitch.Child as Border;
             if (innerBorder != null)
             {
                 innerBorder.HorizontalAlignment = isOn ? System.Windows.HorizontalAlignment.Right : System.Windows.HorizontalAlignment.Left;
+                innerBorder.Background = new SolidColorBrush(Colors.White);
+            }
+        }
+
+        private bool GetCurrentSettingValue(string tag)
+        {
+            if (MainWindow.Settings == null) return false;
+
+            try
+            {
+                switch (tag)
+                {
+                    case "AutoSaveStrokesAtClear":
+                        return MainWindow.Settings.Automation?.IsAutoSaveStrokesAtClear ?? false;
+
+                    case "SaveScreenshotsInDateFolders":
+                        return MainWindow.Settings.Automation?.IsSaveScreenshotsInDateFolders ?? false;
+
+                    case "AutoSaveStrokesAtScreenshot":
+                        return MainWindow.Settings.Automation?.IsAutoSaveStrokesAtScreenshot ?? false;
+
+                    case "AutoSaveScreenShotInPowerPoint":
+                        return MainWindow.Settings.PowerPointSettings?.IsAutoSaveScreenShotInPowerPoint ?? false;
+
+                    case "AutoDelSavedFiles":
+                        return MainWindow.Settings.Automation?.AutoDelSavedFiles ?? false;
+
+                    default:
+                        return false;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -178,12 +212,13 @@ namespace Ink_Canvas.Windows.SettingsViews
             var border = sender as Border;
             if (border == null) return;
 
-            bool isOn = border.Background.ToString() == "#FF3584E4";
-            bool newState = !isOn;
-            SetToggleSwitchState(border, newState);
-
             string tag = border.Tag?.ToString();
             if (string.IsNullOrEmpty(tag)) return;
+
+            bool currentState = GetCurrentSettingValue(tag);
+            bool newState = !currentState;
+            
+            SetToggleSwitchState(border, newState);
 
             switch (tag)
             {
@@ -365,6 +400,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             try
             {
                 ThemeHelper.ApplyThemeToControl(this);
+                if (_isLoaded)
+                {
+                    LoadSettings();
+                }
             }
             catch (Exception ex)
             {

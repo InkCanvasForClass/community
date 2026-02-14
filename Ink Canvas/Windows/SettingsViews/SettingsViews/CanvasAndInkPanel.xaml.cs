@@ -184,11 +184,12 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (toggleSwitch == null) return;
             toggleSwitch.Background = isOn 
                 ? new SolidColorBrush(Color.FromRgb(53, 132, 228)) 
-                : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                : (ThemeHelper.IsDarkTheme ? ThemeHelper.GetButtonBackgroundBrush() : new SolidColorBrush(Color.FromRgb(225, 225, 225)));
             var innerBorder = toggleSwitch.Child as Border;
             if (innerBorder != null)
             {
                 innerBorder.HorizontalAlignment = isOn ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+                innerBorder.Background = new SolidColorBrush(Colors.White);
             }
         }
 
@@ -202,6 +203,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             
             string[] buttonNames = group == "EraserSize" ? buttons : hyperbolaButtons;
             
+            bool isDarkTheme = ThemeHelper.IsDarkTheme;
+            var selectedBrush = isDarkTheme ? new SolidColorBrush(Color.FromRgb(25, 25, 25)) : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+            var unselectedBrush = new SolidColorBrush(Colors.Transparent);
+
             for (int i = 0; i < buttonNames.Length && i <= selectedIndex; i++)
             {
                 var button = this.FindDescendantByName($"{group}{buttonNames[i]}") as Border;
@@ -209,23 +214,86 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     if (i == selectedIndex)
                     {
-                        button.Background = new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                        button.Background = selectedBrush;
                         var textBlock = button.Child as TextBlock;
                         if (textBlock != null)
                         {
                             textBlock.FontWeight = FontWeights.Bold;
+                            textBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                         }
                     }
                     else
                     {
-                        button.Background = new SolidColorBrush(Colors.Transparent);
+                        button.Background = unselectedBrush;
                         var textBlock = button.Child as TextBlock;
                         if (textBlock != null)
                         {
                             textBlock.FontWeight = FontWeights.Normal;
+                            textBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                         }
                     }
                 }
+            }
+        }
+
+        private bool GetCurrentSettingValue(string tag)
+        {
+            if (MainWindow.Settings?.Canvas == null) return false;
+
+            try
+            {
+                var canvas = MainWindow.Settings.Canvas;
+                switch (tag)
+                {
+                    case "ShowCursor":
+                        return canvas.IsShowCursor;
+                    case "EnablePressureTouchMode":
+                        return canvas.EnablePressureTouchMode;
+                    case "DisablePressure":
+                        return canvas.DisablePressure;
+                    case "HideStrokeWhenSelecting":
+                        return canvas.HideStrokeWhenSelecting;
+                    case "ClearCanvasAndClearTimeMachine":
+                        return canvas.ClearCanvasAndClearTimeMachine;
+                    case "ClearCanvasAlsoClearImages":
+                        return canvas.ClearCanvasAlsoClearImages;
+                    case "CompressPicturesUploaded":
+                        return canvas.IsCompressPicturesUploaded;
+                    case "ShowCircleCenter":
+                        return canvas.ShowCircleCenter;
+                    case "FitToCurve":
+                        return canvas.FitToCurve && !canvas.UseAdvancedBezierSmoothing;
+                    case "AdvancedBezierSmoothing":
+                        return canvas.UseAdvancedBezierSmoothing;
+                    case "UseAsyncInkSmoothing":
+                        return canvas.UseAsyncInkSmoothing;
+                    case "UseHardwareAcceleration":
+                        return canvas.UseHardwareAcceleration;
+                    case "AutoStraightenLine":
+                        return canvas.AutoStraightenLine;
+                    case "HighPrecisionLineStraighten":
+                        return canvas.HighPrecisionLineStraighten;
+                    case "LineEndpointSnapping":
+                        return canvas.LineEndpointSnapping;
+                    case "EnableInkFade":
+                        return canvas.EnableInkFade;
+                    case "HideInkFadeControlInPenMenu":
+                        return canvas.HideInkFadeControlInPenMenu;
+                    case "EnableAutoSaveStrokes":
+                        return MainWindow.Settings.Automation?.IsEnableAutoSaveStrokes ?? false;
+                    case "SaveFullPageStrokes":
+                        return MainWindow.Settings.Automation?.IsSaveFullPageStrokes ?? false;
+                    case "SaveStrokesAsXML":
+                        return MainWindow.Settings.Automation?.IsSaveStrokesAsXML ?? false;
+                    case "AutoSaveStrokesInPowerPoint":
+                        return MainWindow.Settings.PowerPointSettings?.IsAutoSaveStrokesInPowerPoint ?? false;
+                    default:
+                        return false;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -239,12 +307,12 @@ namespace Ink_Canvas.Windows.SettingsViews
             var border = sender as Border;
             if (border == null) return;
 
-            bool isOn = border.Background.ToString() == "#FF3584E4";
-            bool newState = !isOn;
-            SetToggleSwitchState(border, newState);
-
             string tag = border.Tag?.ToString();
             if (string.IsNullOrEmpty(tag)) return;
+
+            bool currentState = GetCurrentSettingValue(tag);
+            bool newState = !currentState;
+            SetToggleSwitchState(border, newState);
 
             var canvas = MainWindow.Settings.Canvas;
             if (canvas == null) return;
@@ -406,7 +474,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             string group = parts[0];
             string value = parts[1];
 
-            // 清除同组其他按钮的选中状态
+            bool isDarkTheme = ThemeHelper.IsDarkTheme;
+            var selectedBrush = isDarkTheme ? new SolidColorBrush(Color.FromRgb(25, 25, 25)) : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+            var unselectedBrush = new SolidColorBrush(Colors.Transparent);
+
             var parent = border.Parent as Panel;
             if (parent != null)
             {
@@ -417,23 +488,24 @@ namespace Ink_Canvas.Windows.SettingsViews
                         string childTag = childBorder.Tag?.ToString();
                         if (!string.IsNullOrEmpty(childTag) && childTag.StartsWith(group + "_"))
                         {
-                            childBorder.Background = new SolidColorBrush(Colors.Transparent);
+                            childBorder.Background = unselectedBrush;
                             var textBlock = childBorder.Child as TextBlock;
                             if (textBlock != null)
                             {
                                 textBlock.FontWeight = FontWeights.Normal;
+                                textBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                             }
                         }
                     }
                 }
             }
 
-            // 设置当前按钮为选中状态
-            border.Background = new SolidColorBrush(Color.FromRgb(225, 225, 225));
+            border.Background = selectedBrush;
             var currentTextBlock = border.Child as TextBlock;
             if (currentTextBlock != null)
             {
                 currentTextBlock.FontWeight = FontWeights.Bold;
+                currentTextBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
             }
 
             var canvas = MainWindow.Settings.Canvas;
@@ -601,6 +673,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             try
             {
                 ThemeHelper.ApplyThemeToControl(this);
+                if (_isLoaded)
+                {
+                    LoadSettings();
+                }
             }
             catch (Exception ex)
             {

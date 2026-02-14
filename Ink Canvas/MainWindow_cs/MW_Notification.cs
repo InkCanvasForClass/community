@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using System;
 using System.Linq;
 using System.Threading;
@@ -21,6 +21,10 @@ namespace Ink_Canvas
         {
             try
             {
+                if (TextBlockNotice == null || GridNotifications == null)
+                {
+                    return;
+                }
                 lastNotificationShowTime = Environment.TickCount;
 
                 TextBlockNotice.Text = notice;
@@ -36,7 +40,10 @@ namespace Ink_Canvas
                         });
                 }).Start();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"ShowNotification 异常: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
     }
 }

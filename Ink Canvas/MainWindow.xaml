@@ -861,7 +861,56 @@
                                                          Toggled="ToggleSwitchHideInkFadeControlInPenMenu_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <TextBlock Text="# 开启后，主工具栏上点击笔工具后弹出的上下文菜单中将不显示墨迹渐隐控制开关" TextWrapping="Wrap" Foreground="#a1a1aa" />
-
+                                    <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
+                                          StrokeThickness="1" Margin="0,4,0,4" />
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <TextBlock Foreground="#fafafa" Text="启用画笔自动恢复" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchBrushAutoRestore"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchBrushAutoRestore_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <TextBlock Text="# 启用后，临时修改画笔设置后将在指定时间点自动恢复到你在此处配置的颜色 / 透明度 / 粗细" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                    <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Left"
+                                                         Spacing="4"
+                                                         Visibility="{Binding ElementName=ToggleSwitchBrushAutoRestore, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                        <TextBlock Foreground="#fafafa" Text="自动恢复时间点 (HH:mm，可多个，用 ; 分隔)"
+                                                   FontSize="14" Margin="0,0,0,0" />
+                                        <TextBox Name="BrushAutoRestoreTimesTextBox" Width="260"
+                                                 TextChanged="BrushAutoRestoreTimesTextBox_TextChanged" />
+                                        <TextBlock Foreground="#fafafa" Text="恢复目标颜色" FontSize="14" Margin="0,8,0,0" />
+                                        <ComboBox Name="ComboBoxBrushAutoRestoreColor" Width="260"
+                                                  SelectionChanged="ComboBoxBrushAutoRestoreColor_SelectionChanged">
+                                            <ComboBoxItem Content="默认" Tag="#FFFF0000" />
+                                            <ComboBoxItem Content="黑色" Tag="#FF000000" />
+                                            <ComboBoxItem Content="白色" Tag="#FFFFFFFF" />
+                                            <ComboBoxItem Content="红色" Tag="#FFFF0000" />
+                                            <ComboBoxItem Content="黄色" Tag="#FFFFFF00" />
+                                            <ComboBoxItem Content="蓝色" Tag="#FF2563EB" />
+                                            <ComboBoxItem Content="绿色" Tag="#FF16A34A" />
+                                            <ComboBoxItem Content="橙色" Tag="#FFFB9650" />
+                                            <ComboBoxItem Content="紫色" Tag="#FF9333EA" />
+                                        </ComboBox>
+                                        <TextBlock Foreground="#fafafa" Text="恢复笔粗细" FontSize="14" Margin="0,8,0,0" />
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Slider Name="BrushAutoRestoreWidthSlider" Width="200" Minimum="1" Maximum="20"
+                                                    TickFrequency="1" IsSnapToTickEnabled="True"
+                                                    Value="5"
+                                                    ValueChanged="BrushAutoRestoreWidthSlider_ValueChanged" />
+                                            <TextBlock Foreground="#fafafa"
+                                                       Text="{Binding ElementName=BrushAutoRestoreWidthSlider, Path=Value, StringFormat={}{0:0}px}"
+                                                       FontSize="12" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                        </ui:SimpleStackPanel>
+                                        <TextBlock Foreground="#fafafa" Text="恢复透明度" FontSize="14" Margin="0,8,0,0" />
+                                        <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <Slider Name="BrushAutoRestoreAlphaSlider" Width="200" Minimum="0" Maximum="255"
+                                                    TickFrequency="5" IsSnapToTickEnabled="True"
+                                                    ValueChanged="BrushAutoRestoreAlphaSlider_ValueChanged" />
+                                            <TextBlock Foreground="#fafafa"
+                                                       Text="{Binding ElementName=BrushAutoRestoreAlphaSlider, Path=Value, StringFormat={}{0:0}}"
+                                                       FontSize="12" Margin="12,0,0,0" VerticalAlignment="Center" />
+                                        </ui:SimpleStackPanel>
+                                    </ui:SimpleStackPanel>
                                 </ui:SimpleStackPanel>
                             </GroupBox>
                             <!-- 崩溃后操作设置 -->
@@ -1456,11 +1505,20 @@
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <Image Source="/Resources/Icons-png/Powerpoint.png" Margin="0,0,6,0" Width="28"
                                                Height="28" VerticalAlignment="Center" />
-                                        <TextBlock Foreground="#fafafa" Text="PowerPoint 联动增强(目前已不推荐使用)" VerticalAlignment="Center"
+                                        <TextBlock Foreground="#fafafa" Text="PowerPoint 联动增强" VerticalAlignment="Center"
                                                    FontSize="14" Margin="0,0,16,0" />
                                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchPowerPointEnhancement"
                                                          IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
                                                          Toggled="ToggleSwitchPowerPointEnhancement_Toggled" />
+                                    </ui:SimpleStackPanel>
+                                    <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                        <Image Source="/Resources/Icons-png/Powerpoint.png" Margin="0,0,6,0" Width="28"
+                                               Height="28" VerticalAlignment="Center" />
+                                        <TextBlock Foreground="#fafafa" Text="使用 ROT 联动" VerticalAlignment="Center"
+                                                   FontSize="14" Margin="0,0,16,0" />
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchUseRotPptLink"
+                                                         IsOn="False" FontFamily="Microsoft YaHei UI" FontWeight="Bold"
+                                                         Toggled="ToggleSwitchUseRotPptLink_Toggled" />
                                     </ui:SimpleStackPanel>
                                     <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                         <Image Source="/Resources/Icons-png/WPS.png" Margin="0,0,6,0" Width="28"
@@ -3885,6 +3943,35 @@
                                             <Button x:Name="RefreshDeviceInfoButton" Content="刷新设备信息" 
                                                     Width="120" Height="30" Margin="0,8,0,0"
                                                     Click="RefreshDeviceInfo_Click" />
+
+                                            <Line X1="0" Y1="0" X2="460" Y2="0" Stroke="#3f3f46"
+                                                  StrokeThickness="1" Margin="0,6,0,6" />
+
+                                            <CheckBox x:Name="CheckBoxTelemetryPrivacyAccepted"
+                                                      Margin="0,0,0,2"
+                                                      Foreground="#a1a1aa"
+                                                      FontSize="12"
+                                                      Checked="CheckBoxTelemetryPrivacyAccepted_Checked"
+                                                      Unchecked="CheckBoxTelemetryPrivacyAccepted_Checked">
+                                                <TextBlock>
+                                                    <Run Text="我已阅读并同意 " />
+                                                    <Run Text="privacy" FontWeight="Bold" />
+                                                    <Run Text=" 中的隐私说明" />
+                                                </TextBlock>
+                                            </CheckBox>
+
+                                            <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,2,0,0">
+                                                <TextBlock Text="匿名使用数据上传：" Foreground="#a1a1aa" FontSize="12"
+                                                           VerticalAlignment="Center" />
+                                                <ComboBox x:Name="ComboBoxTelemetryUploadLevel"
+                                                          Width="230"
+                                                          Margin="8,0,0,0"
+                                                          SelectionChanged="ComboBoxTelemetryUploadLevel_SelectionChanged">
+                                                    <ComboBoxItem Tag="0">关闭（不上传）</ComboBoxItem>
+                                                    <ComboBoxItem Tag="1">上传基础数据</ComboBoxItem>
+                                                    <ComboBoxItem Tag="2">上传基础 + 可选数据</ComboBoxItem>
+                                                </ComboBox>
+                                            </ui:SimpleStackPanel>
                                         </ui:SimpleStackPanel>
                                     </Border>
                                     
@@ -8372,31 +8459,44 @@
                                                                        FontSize="17" VerticalAlignment="Center" />
                                                                 <Slider x:Name="InkWidthSlider" Minimum="1"
                                                                         Maximum="20"
-                                                                        Width="208" FontFamily="Microsoft YaHei UI"
+                                                                        Width="200" FontFamily="Microsoft YaHei UI"
                                                                         FontSize="20" IsSnapToTickEnabled="True"
                                                                         Value="5"
                                                                         TickFrequency="0.1" TickPlacement="None"
                                                                         ValueChanged="InkWidthSlider_ValueChanged" />
-                                                                <TextBlock
+                                                                <TextBlock Width="36" TextAlignment="Right"
                                                                     Text="{Binding Value, ElementName=InkWidthSlider, Mode=OneWay}"
-                                                                    FontFamily="Consolas" VerticalAlignment="Bottom"
-                                                                    Margin="10,0,0,4.5" FontSize="15" />
+                                                                    FontFamily="Consolas" VerticalAlignment="Center"
+                                                                    Margin="10,0,0,0" FontSize="15" />
+                                                                <Button x:Name="BoardBrushModeButton" Width="24" Height="24" Margin="8,0,0,0"
+                                                                        Style="{StaticResource NavButton}"
+                                                                        VerticalAlignment="Center"
+                                                                        Click="BoardBrushModeButton_Click"
+                                                                        ToolTip="板刷模式">
+                                                                    <Viewbox Margin="4" Stretch="Uniform">
+                                                                        <Path x:Name="BoardBrushModeIcon" Fill="{DynamicResource FloatBarForeground}" Stretch="Fill">
+                                                                            <Path.Data>
+                                                                                <PathGeometry Figures="M6.7812 6.9375C6.81411 7.06468 6.87172 7.18413 6.95081 7.28903C7.0299 7.39392 7.12891 7.4822 7.24213 7.54882C7.47058 7.68347 7.74313 7.72187 7.99989 7.65557C8.25664 7.58928 8.47657 7.42372 8.61128 7.19531L11.9238 1.57031C12.0584 1.34186 12.0968 1.06928 12.0305 0.812526C11.9642 0.555772 11.7987 0.335869 11.5703 0.201167C11.3418 0.0665197 11.0693 0.028121 10.8125 0.0944166C10.5558 0.160712 10.3358 0.326268 10.2011 0.554683L6.88862 6.17968C6.82183 6.29276 6.77796 6.41788 6.75953 6.54791C6.7411 6.67793 6.74847 6.81031 6.7812 6.9375Z M5.21875 5.09375L10.1662 8.14759C10.7697 8.46231 10.9861 9.26072 10.3308 9.74464L9.70892 9.96117L3.6897 6.43971L3.7074 5.53239C3.99623 4.94715 4.46209 4.71653 5.21875 5.09375Z M3.05377 7.48846L9.04364 10.9631L7.99908 12.5052C7.77811 12.7482 7.86648 13.0797 8.08746 13.2123L9.03766 14.0298H3.66809C1.47755 14.0298 0.471255 11.9653 1.52466 10.1408L3.05377 7.48846Z" />
+                                                                            </Path.Data>
+                                                                        </Path>
+                                                                    </Viewbox>
+                                                                </Button>
                                                             </StackPanel>
                                                             <StackPanel Orientation="Horizontal" Height="30">
                                                                 <Label Margin="0,0,10,0" Content="透明" FontWeight="Bold"
                                                                        Foreground="{DynamicResource FloatBarForeground}"
                                                                        FontSize="17" VerticalAlignment="Center" />
                                                                 <Slider x:Name="InkAlphaSlider" Margin="0,0,0,0"
-                                                                        Minimum="1" Maximum="255" Width="208"
+                                                                        Minimum="1" Maximum="255" Width="200"
                                                                         FontFamily="Microsoft YaHei UI" FontSize="20"
                                                                         IsSnapToTickEnabled="True" Value="255"
                                                                         TickFrequency="1"
                                                                         TickPlacement="None"
                                                                         ValueChanged="InkAlphaSlider_ValueChanged" />
-                                                                <TextBlock
+                                                                <TextBlock Width="36" TextAlignment="Right"
                                                                     Text="{Binding Value, ElementName=InkAlphaSlider, Mode=OneWay}"
-                                                                    FontFamily="Consolas" VerticalAlignment="Bottom"
-                                                                    Margin="10,0,0,4.5" FontSize="15" />
+                                                                    FontFamily="Consolas" VerticalAlignment="Center"
+                                                                    Margin="10,0,0,0" FontSize="15" />
                                                             </StackPanel>
                                                         </ui:SimpleStackPanel>
                                                     </Viewbox>

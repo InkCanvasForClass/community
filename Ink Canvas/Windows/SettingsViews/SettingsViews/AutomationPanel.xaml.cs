@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using Ink_Canvas.Windows.SettingsViews;
+using System.Windows.Media;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
@@ -41,7 +42,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 var automation = MainWindow.Settings.Automation;
 
-                // 设置所有 ToggleSwitch 的状态
+                // 自动收纳相关
                 SetToggleSwitchState("ToggleSwitchAutoFoldInEasiNote", automation.IsAutoFoldInEasiNote);
                 SetToggleSwitchState("ToggleSwitchAutoFoldInEasiCamera", automation.IsAutoFoldInEasiCamera);
                 SetToggleSwitchState("ToggleSwitchAutoFoldInHiteTouchPro", automation.IsAutoFoldInHiteTouchPro);
@@ -62,10 +63,24 @@ namespace Ink_Canvas.Windows.SettingsViews
                 SetToggleSwitchState("ToggleSwitchAutoFoldInEasiNoteIgnoreDesktopAnno", automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno);
                 SetToggleSwitchState("ToggleSwitchAutoFoldInOldZyBoard", automation.IsAutoFoldInOldZyBoard);
                 SetToggleSwitchState("ToggleSwitchKeepFoldAfterSoftwareExit", automation.KeepFoldAfterSoftwareExit);
+
+                // 自动查杀相关
+                SetToggleSwitchState("ToggleSwitchAutoKillPptService", automation.IsAutoKillPptService);
+                SetToggleSwitchState("ToggleSwitchAutoKillEasiNote", automation.IsAutoKillEasiNote);
+                SetToggleSwitchState("ToggleSwitchAutoKillHiteAnnotation", automation.IsAutoKillHiteAnnotation);
+                SetToggleSwitchState("ToggleSwitchAutoEnterAnnotationAfterKillHite", automation.IsAutoEnterAnnotationAfterKillHite);
+                SetToggleSwitchState("ToggleSwitchAutoKillVComYouJiao", automation.IsAutoKillVComYouJiao);
+                SetToggleSwitchState("ToggleSwitchAutoKillSeewoLauncher2DesktopAnnotation", automation.IsAutoKillSeewoLauncher2DesktopAnnotation);
+                SetToggleSwitchState("ToggleSwitchAutoKillInkCanvas", automation.IsAutoKillInkCanvas);
+                SetToggleSwitchState("ToggleSwitchAutoKillICA", automation.IsAutoKillICA);
+                SetToggleSwitchState("ToggleSwitchAutoKillIDT", automation.IsAutoKillIDT);
+
+                _isLoaded = true;
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"AutomationPanel 加载设置时出错: {ex.Message}");
+                _isLoaded = true;
             }
         }
 
@@ -76,24 +91,45 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             try
             {
-                var border = FindName(name) as System.Windows.Controls.Border;
-                if (border != null)
+                var border = FindName(name) as Border;
+                if (border == null) return;
+
+                border.Background = isOn
+                    ? new SolidColorBrush(Color.FromRgb(0x35, 0x84, 0xE4))
+                    : (ThemeHelper.IsDarkTheme ? ThemeHelper.GetButtonBackgroundBrush() : new SolidColorBrush(Color.FromRgb(0xE1, 0xE1, 0xE1)));
+
+                var innerBorder = border.Child as Border;
+                if (innerBorder != null)
                 {
-                    bool currentState = border.Background.ToString().Contains("3584e4");
-                    if (currentState != isOn)
-                    {
-                        border.Background = isOn ? new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x35, 0x84, 0xe4)) : new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xe1, 0xe1, 0xe1));
-                        var innerBorder = border.Child as System.Windows.Controls.Border;
-                        if (innerBorder != null)
-                        {
-                            innerBorder.HorizontalAlignment = isOn ? HorizontalAlignment.Right : HorizontalAlignment.Left;
-                        }
-                    }
+                    innerBorder.HorizontalAlignment = isOn ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+                    // 保持滑块为白色（主题切换时也更稳定）
+                    innerBorder.Background = new SolidColorBrush(Colors.White);
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"AutomationPanel 设置 ToggleSwitch {name} 状态时出错: {ex.Message}");
+            }
+        }
+
+        private static bool IsToggleSwitchOn(Border border)
+        {
+            try
+            {
+                if (border?.Background is SolidColorBrush scb)
+                {
+                    return scb.Color.A == 0xFF &&
+                           scb.Color.R == 0x35 &&
+                           scb.Color.G == 0x84 &&
+                           scb.Color.B == 0xE4;
+                }
+
+                var s = border?.Background?.ToString();
+                return string.Equals(s, "#FF3584E4", StringComparison.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -104,11 +140,10 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             if (!_isLoaded) return;
 
-            var border = sender as System.Windows.Controls.Border;
+            var border = sender as Border;
             if (border == null) return;
 
-            bool currentState = border.Background.ToString().Contains("3584e4");
-            bool newState = !currentState;
+            bool newState = !IsToggleSwitchOn(border);
             SetToggleSwitchState(border.Name, newState);
 
             // 通过 MainWindowSettingsHelper 调用 MainWindow 中的方法

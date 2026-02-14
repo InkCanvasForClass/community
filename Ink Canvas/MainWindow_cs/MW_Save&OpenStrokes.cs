@@ -730,7 +730,7 @@ namespace Ink_Canvas
                 try
                 {
                     // 解压ZIP文件
-                    ZipFile.ExtractToDirectory(zipFilePath, tempDir);
+                    SafeZipExtractor.ExtractZipSafely(zipFilePath, tempDir, overwrite: true);
 
                     // 读取元数据文件
                     string metadataFile = Path.Combine(tempDir, "metadata.txt");

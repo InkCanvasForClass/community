@@ -426,3 +426,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Telemetry DSN configuration file (contains sensitive information)
+telemetry_dsn.txt
+**/telemetry_dsn.txt

@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -108,6 +108,18 @@ namespace Ink_Canvas
         public int InkFadeTime { get; set; } = 3000; // 墨迹渐隐时间（毫秒）
         [JsonProperty("hideInkFadeControlInPenMenu")]
         public bool HideInkFadeControlInPenMenu { get; set; } = false; // 是否在笔工具菜单中隐藏墨迹渐隐控制开关
+        [JsonProperty("enableBrushAutoRestore")]
+        public bool EnableBrushAutoRestore { get; set; } = false;
+        [JsonProperty("brushAutoRestoreDelaySeconds")]
+        public int BrushAutoRestoreDelaySeconds { get; set; } = 30;
+        [JsonProperty("brushAutoRestoreTimes")]
+        public string BrushAutoRestoreTimes { get; set; } = "";
+        [JsonProperty("brushAutoRestoreColor")]
+        public string BrushAutoRestoreColor { get; set; } = "#FFFF0000";
+        [JsonProperty("brushAutoRestoreWidth")]
+        public double BrushAutoRestoreWidth { get; set; } =5;
+        [JsonProperty("brushAutoRestoreAlpha")]
+        public int BrushAutoRestoreAlpha { get; set; } = 255;
 
     }
 
@@ -146,6 +158,25 @@ namespace Ink_Canvas
         Beta
     }
 
+    /// <summary>
+    /// 遥测上传等级
+    /// </summary>
+    public enum TelemetryUploadLevel
+    {
+        /// <summary>
+        /// 不上传任何匿名使用数据
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// 仅上传基础数据
+        /// </summary>
+        Basic = 1,
+        /// <summary>
+        /// 上传基础数据 + 可选数据
+        /// </summary>
+        Extended = 2
+    }
+
     public class Startup
     {
         [JsonProperty("isAutoUpdate")]
@@ -168,6 +199,10 @@ namespace Ink_Canvas
         public bool IsFoldAtStartup { get; set; }
         [JsonProperty("crashAction")]
         public int CrashAction { get; set; }
+        [JsonProperty("telemetryUploadLevel")]
+        public TelemetryUploadLevel TelemetryUploadLevel { get; set; } = TelemetryUploadLevel.None;
+        [JsonProperty("hasAcceptedTelemetryPrivacy")]
+        public bool HasAcceptedTelemetryPrivacy { get; set; } = false;
     }
 
     public class Appearance
@@ -340,6 +375,8 @@ namespace Ink_Canvas
         public bool EnablePPTTimeCapsule { get; set; } = true;
         [JsonProperty("pptTimeCapsulePosition")]
         public int PPTTimeCapsulePosition { get; set; } = 1; 
+        [JsonProperty("useRotPptLink")]
+        public bool UseRotPptLink { get; set; } = false;
     }
 
     public class Automation

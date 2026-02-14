@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using OSVersionExtension;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -46,20 +47,40 @@ namespace Ink_Canvas.Helpers
             {
                 try
                 {
-                    // 1. 尝试从主文件读取设备ID
-                    string deviceId = LoadDeviceIdFromFile(DeviceIdFilePath);
-                    if (!string.IsNullOrEmpty(deviceId))
+                    // 计算当前设备的硬件指纹
+                    string currentHardwareFingerprint = GenerateHardwareFingerprint();
+
+                    // 1. 尝试从主文件读取设备ID及其硬件指纹
+                    var storedInfo = LoadDeviceIdFromFile(DeviceIdFilePath);
+                    if (storedInfo != null && !string.IsNullOrEmpty(storedInfo.DeviceId) && IsValidDeviceId(storedInfo.DeviceId))
                     {
-                        LogHelper.WriteLogToFile($"DeviceIdentifier | 从主文件读取设备ID: {deviceId}");
-                        return deviceId;
+                        if (!string.IsNullOrEmpty(storedInfo.HardwareFingerprint))
+                        {
+                            if (storedInfo.HardwareFingerprint == currentHardwareFingerprint)
+                            {
+                                LogHelper.WriteLogToFile($"DeviceIdentifier | 从主文件读取设备ID且硬件信息一致: {storedInfo.DeviceId}");
+                                return storedInfo.DeviceId;
+                            }
+
+                            LogHelper.WriteLogToFile("DeviceIdentifier | 检测到当前硬件信息与保存的设备ID不一致，将重新生成设备ID");
+                        }
+                        else
+                        {
+                            LogHelper.WriteLogToFile("DeviceIdentifier | 检测到旧格式设备ID文件（无硬件信息），将基于当前硬件重新生成设备ID并升级文件格式");
+                        }
                     }
 
-                    // 2. 生成新的设备ID
-                    string newDeviceId = GenerateDeviceId();
+                    // 2. 基于当前硬件指纹生成新的设备ID
+                    string newDeviceId = GenerateDeviceIdFromFingerprint(currentHardwareFingerprint);
                     LogHelper.WriteLogToFile($"DeviceIdentifier | 生成新设备ID: {newDeviceId}");
 
-                    // 3. 保存到主文件
-                    SaveDeviceIdToFile(DeviceIdFilePath, newDeviceId);
+                    // 3. 保存到主文件（包含硬件指纹）
+                    var newInfo = new DeviceIdInfo
+                    {
+                        DeviceId = newDeviceId,
+                        HardwareFingerprint = currentHardwareFingerprint
+                    };
+                    SaveDeviceIdToFile(DeviceIdFilePath, newInfo);
 
                     return newDeviceId;
                 }
@@ -79,148 +100,165 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                // 收集硬件信息
-                var hardwareInfo = new StringBuilder();
-
-                // 使用反射获取硬件信息，避免直接引用System.Management
-                try
-                {
-                    // 尝试加载System.Management程序集
-                    var assembly = Assembly.Load("System.Management");
-                    if (assembly != null)
-                    {
-                        // CPU信息
-                        try
-                        {
-                            var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
-                            var searcher = Activator.CreateInstance(searcherType, "SELECT ProcessorId FROM Win32_Processor");
-                            var getMethod = searcherType.GetMethod("Get");
-                            var enumerator = getMethod.Invoke(searcher, null);
-
-                            var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
-                            var currentProperty = enumerator.GetType().GetProperty("Current");
-
-                            if ((bool)moveNextMethod.Invoke(enumerator, null))
-                            {
-                                var obj = currentProperty.GetValue(enumerator);
-                                var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
-                                var processorId = indexer.GetValue(obj, new object[] { "ProcessorId" });
-                                hardwareInfo.Append(processorId?.ToString() ?? "");
-                            }
-
-                            var disposeMethod = searcher.GetType().GetMethod("Dispose");
-                            disposeMethod?.Invoke(searcher, null);
-                        }
-                        catch { }
-
-                        // 主板序列号
-                        try
-                        {
-                            var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
-                            var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BaseBoard");
-                            var getMethod = searcherType.GetMethod("Get");
-                            var enumerator = getMethod.Invoke(searcher, null);
-
-                            var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
-                            var currentProperty = enumerator.GetType().GetProperty("Current");
-
-                            if ((bool)moveNextMethod.Invoke(enumerator, null))
-                            {
-                                var obj = currentProperty.GetValue(enumerator);
-                                var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
-                                var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
-                                hardwareInfo.Append(serialNumber?.ToString() ?? "");
-                            }
-
-                            var disposeMethod = searcher.GetType().GetMethod("Dispose");
-                            disposeMethod?.Invoke(searcher, null);
-                        }
-                        catch { }
-
-                        // BIOS序列号
-                        try
-                        {
-                            var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
-                            var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BIOS");
-                            var getMethod = searcherType.GetMethod("Get");
-                            var enumerator = getMethod.Invoke(searcher, null);
-
-                            var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
-                            var currentProperty = enumerator.GetType().GetProperty("Current");
-
-                            if ((bool)moveNextMethod.Invoke(enumerator, null))
-                            {
-                                var obj = currentProperty.GetValue(enumerator);
-                                var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
-                                var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
-                                hardwareInfo.Append(serialNumber?.ToString() ?? "");
-                            }
-
-                            var disposeMethod = searcher.GetType().GetMethod("Dispose");
-                            disposeMethod?.Invoke(searcher, null);
-                        }
-                        catch { }
-
-                        // 主硬盘序列号
-                        try
-                        {
-                            var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
-                            var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_DiskDrive WHERE MediaType='Fixed hard disk media'");
-                            var getMethod = searcherType.GetMethod("Get");
-                            var enumerator = getMethod.Invoke(searcher, null);
-
-                            var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
-                            var currentProperty = enumerator.GetType().GetProperty("Current");
-
-                            if ((bool)moveNextMethod.Invoke(enumerator, null))
-                            {
-                                var obj = currentProperty.GetValue(enumerator);
-                                var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
-                                var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
-                                hardwareInfo.Append(serialNumber?.ToString() ?? "");
-                            }
-
-                            var disposeMethod = searcher.GetType().GetMethod("Dispose");
-                            disposeMethod?.Invoke(searcher, null);
-                        }
-                        catch { }
-                    }
-                }
-                catch { }
-
-                // 如果硬件信息不足，添加系统信息
-                if (hardwareInfo.Length < 10)
-                {
-                    hardwareInfo.Append(Environment.MachineName);
-                    hardwareInfo.Append(Environment.UserName);
-                    hardwareInfo.Append(Environment.OSVersion);
-                }
-
-                // 生成哈希
-                using (var sha256 = SHA256.Create())
-                {
-                    byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(hardwareInfo.ToString()));
-                    string hashString = BitConverter.ToString(hashBytes).Replace("-", "");
-
-                    // 取前25个字符，确保唯一性
-                    string deviceId = hashString.Substring(0, 25);
-
-                    // 添加校验位（第25位）
-                    int checksum = 0;
-                    for (int i = 0; i < 24; i++)
-                    {
-                        checksum += Convert.ToInt32(deviceId[i]);
-                    }
-                    checksum %= 36; // 0-9, A-Z
-                    char checksumChar = checksum < 10 ? (char)(checksum + '0') : (char)(checksum - 10 + 'A');
-
-                    return deviceId.Substring(0, 24) + checksumChar;
-                }
+                // 基于当前硬件指纹生成设备ID
+                string hardwareFingerprint = GenerateHardwareFingerprint();
+                return GenerateDeviceIdFromFingerprint(hardwareFingerprint);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 生成设备ID时出错: {ex.Message}", LogHelper.LogType.Error);
                 return GenerateFallbackDeviceId();
+            }
+        }
+
+        /// <summary>
+        /// 生成当前设备的硬件指纹字符串（用于生成和校验设备ID）
+        /// </summary>
+        private static string GenerateHardwareFingerprint()
+        {
+            // 收集硬件信息
+            var hardwareInfo = new StringBuilder();
+
+            try
+            {
+                var assembly = Assembly.Load("System.Management");
+                if (assembly != null)
+                {
+                    // CPU信息
+                    try
+                    {
+                        var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
+                        var searcher = Activator.CreateInstance(searcherType, "SELECT ProcessorId FROM Win32_Processor");
+                        var getMethod = searcherType.GetMethod("Get");
+                        var enumerator = getMethod.Invoke(searcher, null);
+
+                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
+                        var currentProperty = enumerator.GetType().GetProperty("Current");
+
+                        if ((bool)moveNextMethod.Invoke(enumerator, null))
+                        {
+                            var obj = currentProperty.GetValue(enumerator);
+                            var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
+                            var processorId = indexer.GetValue(obj, new object[] { "ProcessorId" });
+                            hardwareInfo.Append(processorId?.ToString() ?? "");
+                        }
+
+                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
+                        disposeMethod?.Invoke(searcher, null);
+                    }
+                    catch { }
+
+                    // 主板序列号
+                    try
+                    {
+                        var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
+                        var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BaseBoard");
+                        var getMethod = searcherType.GetMethod("Get");
+                        var enumerator = getMethod.Invoke(searcher, null);
+
+                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
+                        var currentProperty = enumerator.GetType().GetProperty("Current");
+
+                        if ((bool)moveNextMethod.Invoke(enumerator, null))
+                        {
+                            var obj = currentProperty.GetValue(enumerator);
+                            var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
+                            var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
+                            hardwareInfo.Append(serialNumber?.ToString() ?? "");
+                        }
+
+                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
+                        disposeMethod?.Invoke(searcher, null);
+                    }
+                    catch { }
+
+                    // BIOS序列号
+                    try
+                    {
+                        var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
+                        var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BIOS");
+                        var getMethod = searcherType.GetMethod("Get");
+                        var enumerator = getMethod.Invoke(searcher, null);
+
+                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
+                        var currentProperty = enumerator.GetType().GetProperty("Current");
+
+                        if ((bool)moveNextMethod.Invoke(enumerator, null))
+                        {
+                            var obj = currentProperty.GetValue(enumerator);
+                            var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
+                            var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
+                            hardwareInfo.Append(serialNumber?.ToString() ?? "");
+                        }
+
+                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
+                        disposeMethod?.Invoke(searcher, null);
+                    }
+                    catch { }
+
+                    // 主硬盘序列号
+                    try
+                    {
+                        var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
+                        var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_DiskDrive WHERE MediaType='Fixed hard disk media'");
+                        var getMethod = searcherType.GetMethod("Get");
+                        var enumerator = getMethod.Invoke(searcher, null);
+
+                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
+                        var currentProperty = enumerator.GetType().GetProperty("Current");
+
+                        if ((bool)moveNextMethod.Invoke(enumerator, null))
+                        {
+                            var obj = currentProperty.GetValue(enumerator);
+                            var indexer = obj.GetType().GetProperty("Item", new[] { typeof(string) });
+                            var serialNumber = indexer.GetValue(obj, new object[] { "SerialNumber" });
+                            hardwareInfo.Append(serialNumber?.ToString() ?? "");
+                        }
+
+                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
+                        disposeMethod?.Invoke(searcher, null);
+                    }
+                    catch { }
+                }
+            }
+            catch
+            {
+            }
+
+            if (hardwareInfo.Length < 10)
+            {
+                hardwareInfo.Append(Environment.MachineName);
+                hardwareInfo.Append(Environment.UserName);
+                hardwareInfo.Append(Environment.OSVersion);
+            }
+
+            return hardwareInfo.ToString();
+        }
+
+        /// <summary>
+        /// 基于硬件指纹生成25字符的设备ID
+        /// </summary>
+        private static string GenerateDeviceIdFromFingerprint(string hardwareFingerprint)
+        {
+            // 生成哈希
+            using (var sha256 = SHA256.Create())
+            {
+                byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(hardwareFingerprint ?? string.Empty));
+                string hashString = BitConverter.ToString(hashBytes).Replace("-", "");
+
+                // 取前25个字符，确保唯一性
+                string deviceId = hashString.Substring(0, 25);
+
+                // 添加校验位（第25位）
+                int checksum = 0;
+                for (int i = 0; i < 24; i++)
+                {
+                    checksum += Convert.ToInt32(deviceId[i]);
+                }
+                checksum %= 36; // 0-9, A-Z
+                char checksumChar = checksum < 10 ? (char)(checksum + '0') : (char)(checksum - 10 + 'A');
+
+                return deviceId.Substring(0, 24) + checksumChar;
             }
         }
 
@@ -282,16 +320,33 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 从文件加载设备ID
         /// </summary>
-        private static string LoadDeviceIdFromFile(string filePath)
+        private static DeviceIdInfo LoadDeviceIdFromFile(string filePath)
         {
             try
             {
                 if (File.Exists(filePath))
                 {
                     string content = File.ReadAllText(filePath).Trim();
+
+                    try
+                    {
+                        var info = JsonConvert.DeserializeObject<DeviceIdInfo>(content);
+                        if (info != null && !string.IsNullOrEmpty(info.DeviceId) && IsValidDeviceId(info.DeviceId))
+                        {
+                            return info;
+                        }
+                    }
+                    catch
+                    {
+                    }
+
                     if (IsValidDeviceId(content))
                     {
-                        return content;
+                        return new DeviceIdInfo
+                        {
+                            DeviceId = content,
+                            HardwareFingerprint = null
+                        };
                     }
                 }
             }
@@ -305,7 +360,7 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 保存设备ID到文件
         /// </summary>
-        private static void SaveDeviceIdToFile(string filePath, string deviceId)
+        private static void SaveDeviceIdToFile(string filePath, DeviceIdInfo info)
         {
             try
             {
@@ -316,7 +371,8 @@ namespace Ink_Canvas.Helpers
                     Directory.CreateDirectory(directory);
                 }
 
-                File.WriteAllText(filePath, deviceId);
+                string json = JsonConvert.SerializeObject(info, Formatting.Indented);
+                File.WriteAllText(filePath, json);
 
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 设备ID已保存到: {filePath}");
             }
@@ -326,6 +382,14 @@ namespace Ink_Canvas.Helpers
             }
         }
 
+        private class DeviceIdInfo
+        {
+            [JsonProperty("deviceId")]
+            public string DeviceId { get; set; }
+
+            [JsonProperty("hardwareFingerprint")]
+            public string HardwareFingerprint { get; set; }
+        }
 
 
         /// <summary>
@@ -342,7 +406,9 @@ namespace Ink_Canvas.Helpers
             [JsonProperty("launchCount")]
             public int LaunchCount { get; set; }
 
-            // 新的秒级精度字段
+            [JsonProperty("systemVersion")]
+            public string SystemVersion { get; set; }
+
             [JsonProperty("totalUsageSeconds")]
             public long TotalUsageSeconds { get; set; }
 
@@ -362,6 +428,9 @@ namespace Ink_Canvas.Helpers
 
             [JsonProperty("lastModified")]
             public DateTime LastModified { get; set; }
+
+            [JsonProperty("updateChannel")]
+            public Ink_Canvas.UpdateChannel UpdateChannel { get; set; } = Ink_Canvas.UpdateChannel.Release;
 
             // 每周统计数据（秒级精度）
             [JsonProperty("weeklyLaunchCount")]
@@ -501,6 +570,20 @@ namespace Ink_Canvas.Helpers
                     // 记录每周启动次数
                     stats.RecordWeeklyLaunch();
 
+                    try
+                    {
+                        var osName = OSVersion.GetOperatingSystem();
+                        var osVersion = OSVersion.GetOSVersion();
+                        string versionText = osVersion != null
+                            ? $"{osName} {osVersion.Version}"
+                            : osName.ToString();
+                        stats.SystemVersion = versionText;
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"DeviceIdentifier | 刷新系统版本信息失败: {ex.Message}", LogHelper.LogType.Warning);
+                    }
+
                     // 计算使用频率
                     CalculateUsageFrequency(stats);
 
@@ -536,8 +619,6 @@ namespace Ink_Canvas.Helpers
                         // 更新秒级精度数据
                         stats.TotalUsageSeconds += sessionSeconds;
 
-
-
                         // 记录每周使用时长（秒级精度）
                         stats.RecordWeeklyUsage(sessionSeconds);
 
@@ -545,7 +626,6 @@ namespace Ink_Canvas.Helpers
                         if (stats.LaunchCount > 0)
                         {
                             stats.AverageSessionSeconds = (double)stats.TotalUsageSeconds / stats.LaunchCount;
-
                         }
                     }
 
@@ -562,6 +642,20 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 记录应用退出失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        public static string GetSystemVersion()
+        {
+            try
+            {
+                var stats = LoadUsageStats();
+                return stats.SystemVersion;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 获取系统版本失败: {ex.Message}", LogHelper.LogType.Error);
+                return null;
             }
         }
 
@@ -937,6 +1031,40 @@ namespace Ink_Canvas.Helpers
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 保存使用统计到文件失败 ({filePath}): {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        public static void UpdateUsageChannel(Ink_Canvas.UpdateChannel channel)
+        {
+            try
+            {
+                lock (fileLock)
+                {
+                    var stats = LoadUsageStats();
+                    if (stats == null)
+                    {
+                        stats = new UsageStats
+                        {
+                            DeviceId = DeviceId,
+                            LastLaunchTime = DateTime.Now,
+                            LaunchCount = 0,
+                            TotalUsageSeconds = 0,
+                            AverageSessionSeconds = 0,
+                            LastUpdateCheck = DateTime.MinValue,
+                            UpdatePriority = UpdatePriority.Medium,
+                            UsageFrequency = UsageFrequency.Medium
+                        };
+                    }
+
+                    stats.UpdateChannel = channel;
+                    SaveUsageStats(stats);
+
+                    LogHelper.WriteLogToFile($"DeviceIdentifier | 更新使用统计中的通道信息: {channel}");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"DeviceIdentifier | 更新通道信息到使用统计失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 

@@ -10,9 +10,6 @@ using Media = System.Windows.Media;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
-    /// <summary>
-    /// 辅助类：用于在新设置面板中调用 MainWindow 中已有的设置处理方法
-    /// </summary>
     public static class MainWindowSettingsHelper
     {
         private static MainWindow GetMainWindow()

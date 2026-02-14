@@ -1,4 +1,4 @@
-name: .NET Build & PR Check
+name: .NET Build & Package
 
 on:
   push:
@@ -8,15 +8,6 @@ on:
     branches: [ main, beta ]
     paths-ignore:
       - '**/*.md'
-      - 'docs/**'
-      - 'Images/**'
-      - 'Manual.md'
-      - 'README.md'
-      - 'UpdateLog.md'
-      - 'CODE_OF_CONDUCT.md'
-      - 'LICENSE'
-      - 'privacy.txt'
-      - 'icc.png'
   workflow_dispatch:
 
 concurrency:
@@ -25,191 +16,44 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
-  find-or-create-pr-comment:
-    name: Find or Create PR Comment
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    outputs:
-      comment_id: ${{ steps.find-comment.outputs.comment_id }}
-    steps:
-      - name: Find existing bot comment
-        id: find-comment
-        run: |
-          # 查找包含特定标记的现有评论
-          COMMENTS=$(gh api \
-            -H "Accept: application/vnd.github.v3+json" \
-            "/repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments" \
-            --jq '.[] | select(.body | contains("<!-- github-action-pr-build -->")) | .id' | head -1)
-          
-          if [ -n "$COMMENTS" ]; then
-            echo "📝 找到现有评论 ID: $COMMENTS"
-            echo "comment_id=$COMMENTS" >> $GITHUB_OUTPUT
-          else
-            echo "📝 未找到现有评论，将创建新评论"
-            echo "comment_id=" >> $GITHUB_OUTPUT
-          fi
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-  pr-preview-comment:
-    name: PR Preview (Building)
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    needs: find-or-create-pr-comment
-    permissions:
-      pull-requests: write
-    outputs:
-      comment_id: ${{ steps.create-preview-comment.outputs.comment-id || '' }}
-    steps:
-      - name: Prepare Preview Comment
-        id: prepare-preview
-        env:
-          GH_REPO: ${{ github.repository }}
-          GH_RUN_ID: ${{ github.run_id }}
-          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          IS_READY_FOR_REVIEW: ${{ github.event.action == 'ready_for_review' }}
-        run: |
-          # 构建预览评论内容
-          {
-            if [ "$IS_READY_FOR_REVIEW" = "true" ]; then
-              echo "# 🚀 PR 准备审查 - 构建预览"
-              echo ""
-              echo "**状态:** 🟡 正在构建（准备审查状态）..."
-            else
-              echo "# 🏗️ PR 构建预览"
-              echo ""
-              echo "**状态:** 🟡 正在构建..."
-            fi
-            
-            echo "**分支提交:** \`$PR_HEAD_SHA\`"
-            echo "**操作:** [查看运行详情](https://github.com/$GH_REPO/actions/runs/$GH_RUN_ID)"
-            echo ""
-            
-            if [ "$IS_READY_FOR_REVIEW" = "true" ]; then
-              echo "> 📋 此 PR 已标记为 **准备审查**，正在进行构建验证"
-            fi
-            
-            echo "---"
-            echo "<!-- github-action-pr-build -->"
-            echo "<!-- build-id: $GH_RUN_ID -->"
-            echo "<!-- event-type: ${{ github.event.action }} -->"
-            echo "<!-- pr-head-sha: $PR_HEAD_SHA -->"
-            echo "<!-- merge-sha: ${{ github.sha }} -->"
-            echo ""
-            echo "🤖 构建完成后，状态将自动更新"
-          } > preview_comment.txt
-          
-          preview_content=$(cat preview_comment.txt)
-          echo "preview_body<<EOF" >> $GITHUB_OUTPUT
-          echo "$preview_content" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-      
-      - name: Post/Update Preview Comment
-        id: create-preview-comment
-        uses: peter-evans/create-or-update-comment@v5
-        continue-on-error: true  # 即使评论失败也继续执行
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-id: ${{ needs.find-or-create-pr-comment.outputs.comment_id }}
-          body: ${{ steps.prepare-preview.outputs.preview_body }}
-          edit-mode: replace
-
   build-and-package:
     name: Build & Package
     runs-on: windows-latest
-    outputs:
-      archive_name: ${{ steps.create-archive.outputs.archive_name }}
-      build_result: ${{ steps.check-exe.outputs.build_success }}
-      artifact_url: ${{ steps.upload-artifact.outputs.artifact-url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 1
-
-      - name: Setup NuGet
-        uses: NuGet/setup-nuget@v2.0.1
-
+      
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
-
-      - name: Cache NuGet global packages
-        id: cache-nuget
-        uses: actions/cache@v4
+      
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
         with:
-          path: |
-            ~/.nuget/packages
-            ~\AppData\Local\NuGet\Cache
-          key: ${{ runner.os }}-nuget-v2-${{ hashFiles('**/*.csproj', '**/packages.config', '**/*.sln', '**/nuget.config') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-v2-
-
-
-
-      # Removed caching of obj/ folders to avoid cross-version incremental build issues
-      # NuGet packages will still be cached; always run restore to ensure packages are present
-      - name: Restore NuGet packages
-        run: |
-          Write-Host "📥 正在恢复 NuGet 包（始终运行以确保依赖可用）..." -ForegroundColor Yellow
-
-          # 恢复解决方案级别的包
-          nuget restore "Ink Canvas.sln" -Verbosity minimal
-
-          # 恢复项目级别的包（兼容 packages.config）
-          msbuild -t:restore "Ink Canvas/InkCanvasForClass.csproj" /p:GitFlow="Github Action" /p:RestorePackagesConfig=true /verbosity:minimal
-
-          Write-Host "✅ NuGet 包恢复完成" -ForegroundColor Green
-
+          dotnet-version: '10.x'
+          cache: true
+          cache-dependency-path: '**/packages.lock.json'
+      
+      - name: Restore Package 
+        run: dotnet restore "Ink Canvas.sln" --locked-mode
+      
       - name: Build the Solution
-        run: |
-          Write-Host "🔨 正在构建项目..." -ForegroundColor Cyan
-          
-          # 如果是 ready_for_review 事件，添加特殊标记
-          if ("${{ github.event.action }}" -eq "ready_for_review") {
-            Write-Host "🚀 PR 准备审查状态构建 - 进行完整验证" -ForegroundColor Magenta
-            $GITFLOW = "Github Action - Ready For Review"
-          } else {
-            $GITFLOW = "Github Action"
-          }
-          
-          # 执行构建
-          msbuild /p:platform="AnyCPU" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal
-          
-          Write-Host "🏗️ 构建命令执行完成" -ForegroundColor Cyan
+        run: msbuild /p:platform="AnyCPU" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal
 
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          Write-Host "🔍 检查是否生成可执行文件..." -ForegroundColor Cyan
-          
           $exePath = "Ink Canvas\bin\Debug\net472\InkCanvasForClass.exe"
           
           if (Test-Path $exePath) {
-            Write-Host "✅ 找到可执行文件: $exePath" -ForegroundColor Green
-            $fileInfo = Get-Item $exePath
-            Write-Host "   文件大小: $($fileInfo.Length) 字节" -ForegroundColor Gray
-            Write-Host "   创建时间: $($fileInfo.CreationTime)" -ForegroundColor Gray
             echo "build_success=true" >> $env:GITHUB_OUTPUT
           } else {
-            Write-Host "❌ 未找到可执行文件: $exePath" -ForegroundColor Red
-            Write-Host "   检查目录内容:" -ForegroundColor Yellow
-            if (Test-Path "Ink Canvas\bin\Debug\net472\") {
-              Get-ChildItem "Ink Canvas\bin\Debug\net472\" -ErrorAction SilentlyContinue | ForEach-Object {
-                Write-Host "   - $($_.Name)" -ForegroundColor Gray
-              }
-            } else {
-              Write-Host "   bin\Debug\net472 目录不存在" -ForegroundColor Red
-            }
             echo "build_success=false" >> $env:GITHUB_OUTPUT
             
-            # 如果是直接触发，则抛出错误
             if ("${{ github.event_name }}" -eq "workflow_dispatch") {
-              Write-Host "🚨 工作流手动触发 - 构建失败，抛出错误！" -ForegroundColor Red -BackgroundColor Black
               exit 1
             }
           }
@@ -221,179 +65,40 @@ jobs:
           GITHUB_SHA: ${{ github.sha }}
           GITHUB_RUN_NUMBER: ${{ github.run_number }}
         run: |
-          # 使用合并提交的短哈希（因为构建使用的是合并后的代码）
           $shortSha = $env:GITHUB_SHA.Substring(0, 7)
           $version = "debug-$shortSha-$env:GITHUB_RUN_NUMBER"
-          $archiveName = "InkCanvasForClass.CE.$version.zip"
-          Write-Host "📦 正在创建归档包: $archiveName" -ForegroundColor Cyan
-          Write-Host "   使用合并提交哈希: $env:GITHUB_SHA" -ForegroundColor Gray
-          Compress-Archive -Path "Ink Canvas\bin\Debug\net472\*" -DestinationPath $archiveName -Force
-          echo "archive_name=$archiveName" >> $env:GITHUB_OUTPUT
-          Write-Host "✅ 已创建归档包: $archiveName" -ForegroundColor Green
+          echo "archive_name=$version" >> $env:GITHUB_OUTPUT
       
       - name: Upload Artifact (if build succeeded)
-        id: upload-artifact
         if: steps.check-exe.outputs.build_success == 'true'
         uses: actions/upload-artifact@v4.5.0
         with:
-          name: app-package
-          path: "*.zip"
+          name: InkCanvasForClass.CE.debug
+          path: "Ink Canvas/bin/Debug/net472/*"
 
-  pr-check-comment:
-    name: PR Check & Comment (Final)
-    needs: [build-and-package, pr-preview-comment]
-    if: always() && github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-    steps:
-      - name: Prepare Final Comment Content
-        id: prepare-final-comment
+      - name: Create Summary
+        if: always()
+        shell: bash
         run: |
-          # 从构建作业获取构建结果
-          BUILD_SUCCESS="${{ needs.build-and-package.outputs.build_result }}"
-          ARTIFACT_URL="${{ needs.build-and-package.outputs.artifact_url }}"
+          echo "# Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
           
-          # 使用 PR 分支的实际提交哈希
-          PR_HEAD_SHA="${{ github.event.pull_request.head.sha }}"
-          
-          # 确定构建状态
-          if [ "$BUILD_SUCCESS" = "true" ]; then
-            STATUS_ICON="✅"
-            STATUS_TEXT="构建成功"
-            COLOR="#00d26a"
+          if [ "${{ steps.check-exe.outputs.build_success }}" = "true" ]; then
+            echo "## ✅ Build Successful" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Version:** ${{ steps.create-archive.outputs.archive_name }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "[Download Artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "[Nightly.link Download](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/InkCanvasForClass.CE.debug.zip) \([GhProxy Fastly Mirror](https://cdn.gh-proxy.com/nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/InkCanvasForClass.CE.debug.zip) / [GhProxy Mirror](https://gh-proxy.com/nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/InkCanvasForClass.CE.debug.zip)\)" >> $GITHUB_STEP_SUMMARY
           else
-            STATUS_ICON="❌"
-            STATUS_TEXT="构建失败"
-            COLOR="#f85149"
+            echo "## ❌ Build Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Event:** ${{ github.event_name }} (${{ github.event.action || 'N/A' }})" >> $GITHUB_STEP_SUMMARY
+            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Check build logs for details." >> $GITHUB_STEP_SUMMARY
           fi
-          
-          # 检查是否是 ready_for_review 事件
-          READY_FOR_REVIEW="${{ github.event.action == 'ready_for_review' }}"
-          
-          # 构建最终评论内容
-          {
-            if [ "$READY_FOR_REVIEW" = "true" ]; then
-              echo "# 🚀 PR 准备审查 - 构建结果"
-              echo ""
-              echo "> 📋 此 PR 已标记为 **准备审查**，构建验证完成"
-              echo ""
-            else
-              echo "# 📋 构建结果摘要"
-              echo ""
-            fi
-            
-            echo "## 本次构建状态"
-            echo ""
-            echo "| 项目 | 结果 |"
-            echo "|------|------|"
-            echo "| 状态 | $STATUS_ICON **$STATUS_TEXT** |"
-            echo "| 事件类型 | \`${{ github.event.action }}\` |"
-            echo "| 分支提交 | \`$PR_HEAD_SHA\` |"
-            echo "| 工作流 | [运行 #${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |"
-            
-            # 如果有构建产物，显示下载链接
-            if [ "$BUILD_SUCCESS" = "true" ]; then
-              NIGHTLY_LINK="https://hk.gh-proxy.com/https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/app-package.zip"
-              echo ""
-              echo "## 构建产物"
-              if [ -n "$ARTIFACT_URL" ]; then
-                echo "- 📦 [下载构建产物]($ARTIFACT_URL)"
-              else
-                echo "- 📦 [下载构建产物](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
-              fi
-              echo "- 🌙 [直链下载 (nightly.link)]($NIGHTLY_LINK)"
-                              
-              if [ "$READY_FOR_REVIEW" = "true" ]; then
-                echo ""
-                echo "## 🎉 审查建议"
-                echo "- ✅ 构建验证通过，代码可以正常编译"
-                echo "- 🔍 请进行代码审查"
-                echo "- 🧪 建议测试构建产物功能"
-              fi
-            else
-              if [ "$READY_FOR_REVIEW" = "true" ]; then
-                echo ""
-                echo "## ⚠️ 审查阻塞"
-                echo "- ❌ 构建失败，需要修复后才能继续审查"
-                echo "- 🔧 请检查构建错误并修复"
-                echo "- 📝 修复后重新标记为准备审查"
-              fi
-            fi
-            
-            echo ""
-            echo "---"
-            echo "<!-- github-action-pr-build -->"
-            echo "<!-- build-id: ${{ github.run_id }} -->"
-            echo "<!-- event-type: ${{ github.event.action }} -->"
-            echo "<!-- pr-head-sha: $PR_HEAD_SHA -->"
-            echo "<!-- merge-sha: ${{ github.sha }} -->"
-            echo ""
-            echo "<sub>🤖 GitHub Actions 自动生成 • 最后更新: $(date -u +'%Y-%m-%d %H:%M:%S UTC')</sub>"
-          } > final_comment.txt
-          
-          # 输出多行内容
-          final_content=$(cat final_comment.txt)
-          echo "final_body<<EOF" >> $GITHUB_OUTPUT
-          echo "$final_content" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-          
-          echo "最终评论内容已生成"
-      
-      - name: Write Final Comment to GitHub Summary
-        run: |
-          echo "# 🚀 最终构建结果 (GitHub Actions Summary)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "> ⚠️ 注意：由于权限限制，评论可能无法发布到 PR。这里是在 GitHub Actions 中的构建结果：" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          cat final_comment.txt >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "---" >> $GITHUB_STEP_SUMMARY
-          echo "**工作流信息：**" >> $GITHUB_STEP_SUMMARY
-          echo "- 事件类型: ${{ github.event_name }} (${{ github.event.action }})" >> $GITHUB_STEP_SUMMARY
-          echo "- 运行编号: #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-          echo "- 运行 ID: ${{ github.run_id }}" >> $GITHUB_STEP_SUMMARY
-      
-      - name: Update Final Comment
-        uses: peter-evans/create-or-update-comment@v5
-        continue-on-error: true  # 即使评论失败也继续执行
-        with:
-          issue-number: ${{ github.event.pull_request.number }}
-          comment-id: ${{ needs.pr-preview-comment.outputs.comment_id }}
-          body: ${{ steps.prepare-final-comment.outputs.final_body }}
-          edit-mode: replace
-
-  final-check:
-    name: Final Check (Manual Trigger)
-    if: always() && github.event_name == 'workflow_dispatch'
-    needs: [build-and-package]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check Build Result
-        id: check-build
-        run: |
-          BUILD_SUCCESS="${{ needs.build-and-package.outputs.build_result }}"
-          
-          if [ "$BUILD_SUCCESS" = "true" ]; then
-            echo "✅ 构建成功 - 工作流完成"
-            echo "status=success" >> $GITHUB_OUTPUT
-          else
-            echo "❌ 构建失败 - 抛出错误"
-            echo "status=failure" >> $GITHUB_OUTPUT
-            exit 1
-          fi
-      
-      - name: Create Summary (if successful)
-        if: steps.check-build.outputs.status == 'success'
-        run: |
-          echo "# 🎉 手动构建完成" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**构建状态:** ✅ 成功" >> $GITHUB_STEP_SUMMARY
-          echo "**提交:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
-          echo "**运行编号:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "[📦 下载构建产物](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**直链下载 (nightly.link):**" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "[🌙 nightly.link 下载链接](https://hk.gh-proxy.com/https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/app-package.zip)" >> $GITHUB_STEP_SUMMARY

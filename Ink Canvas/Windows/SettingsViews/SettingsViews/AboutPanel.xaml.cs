@@ -78,14 +78,14 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
                 else
                 {
-                    AboutCopyright.Text = "© Copyright 2024 Dubi906w 所有";
-                    AboutBottomCopyright.Text = "© Copyright 2024 Dubi906w(Doubx690i/kriastans) 所有";
+                    AboutCopyright.Text = "© Copyright 2025-2026 CJK_mkp 所有";
+                    AboutBottomCopyright.Text = "© Copyright 2025-2026 CJK_mkp 所有";
                 }
             }
             catch (Exception ex)
             {
-                AboutCopyright.Text = "© Copyright 2024 Dubi906w 所有";
-                AboutBottomCopyright.Text = "© Copyright 2024 Dubi906w(Doubx690i/kriastans) 所有";
+                AboutCopyright.Text = "© Copyright 2025-2026 CJK_mkp 所有";
+                AboutBottomCopyright.Text = "© Copyright 2025-2026 CJK_mkp 所有";
                 System.Diagnostics.Debug.WriteLine($"获取版权信息失败: {ex.Message}");
             }
 

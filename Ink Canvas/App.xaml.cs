@@ -20,6 +20,7 @@ using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 using SplashScreen = Ink_Canvas.Windows.SplashScreen;
 using Timer = System.Threading.Timer;
+using Sentry;
 
 namespace Ink_Canvas
 {
@@ -70,6 +71,26 @@ namespace Ink_Canvas
             }
             catch
             {
+            }
+
+            try
+            {
+                var dsn = GetDlassTelemetryDsn();
+                if (!string.IsNullOrWhiteSpace(dsn))
+                {
+                    SentrySdk.Init(options =>
+                    {
+                        options.Dsn = dsn;
+                        options.Debug = false;
+                        options.SendDefaultPii = true;
+                        options.TracesSampleRate = 1.0;
+                        options.IsGlobalModeEnabled = true;
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化 Dlass 遥测失败: {ex}", LogHelper.LogType.Warning);
             }
 
             // 配置TLS协议以支持Windows 7
@@ -657,7 +678,7 @@ namespace Ink_Canvas
                 Application.Current.Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
             }
 
-            System.Threading.Thread.Sleep(500);
+            await Task.Delay(500);
             RootPath = AppDomain.CurrentDomain.SetupInformation.ApplicationBase;
 
             LogHelper.NewLog(string.Format("Ink Canvas Starting (Version: {0})", Assembly.GetExecutingAssembly().GetName().Version));
@@ -728,6 +749,21 @@ namespace Ink_Canvas
                 await Task.Delay(500);
             }
             DeviceIdentifier.RecordAppLaunch();
+            try
+            {
+                var systemVersion = DeviceIdentifier.GetSystemVersion();
+                if (!string.IsNullOrWhiteSpace(systemVersion))
+                {
+                    SentrySdk.ConfigureScope(scope =>
+                    {
+                        scope.SetTag("system_version", systemVersion);
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"App | 初始化系统版本遥测标签失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
             LogHelper.WriteLogToFile($"App | 设备ID: {DeviceIdentifier.GetDeviceId()}");
             LogHelper.WriteLogToFile($"App | 使用频率: {DeviceIdentifier.GetUsageFrequency()}");
             LogHelper.WriteLogToFile($"App | 更新优先级: {DeviceIdentifier.GetUpdatePriority()}");
@@ -990,7 +1026,7 @@ namespace Ink_Canvas
                 mutex = new Mutex(true, mutexName, out bool tempRet);
 
                 // 额外等待一小段时间确保更新进程完全退出
-                Thread.Sleep(1000);
+                await Task.Delay(1000);
                 LogHelper.WriteLogToFile("App | 特殊模式等待完成，继续启动");
             }
 
@@ -1013,7 +1049,15 @@ namespace Ink_Canvas
             {
                 isStartupComplete = true;
                 startupCompleteHeartbeat = DateTime.Now;
-                LogHelper.WriteLogToFile($"启动完成心跳已记录，启动画面显示时长: {(startupCompleteHeartbeat - splashScreenStartTime).TotalSeconds:F2}秒");
+                if (_isSplashScreenShown && splashScreenStartTime != DateTime.MinValue)
+                {
+                    LogHelper.WriteLogToFile($"启动完成心跳已记录，启动画面显示时长: {(startupCompleteHeartbeat - splashScreenStartTime).TotalSeconds:F2}秒");
+                }
+                else
+                {
+                    LogHelper.WriteLogToFile($"启动完成心跳已记录");
+                }
+                LogHelper.WriteLogToFile($"启动时长: {(startupCompleteHeartbeat - appStartupStartTime).TotalSeconds:F2}秒");
                 
                 if (_isSplashScreenShown)
                 {
@@ -1103,7 +1147,7 @@ namespace Ink_Canvas
         }
 
         // 心跳相关
-        private static Timer heartbeatTimer;
+        private static DispatcherTimer heartbeatTimer;
         private static DateTime lastHeartbeat = DateTime.Now;
         private static Timer watchdogTimer;
         private static bool isStartupComplete = false;
@@ -1113,7 +1157,13 @@ namespace Ink_Canvas
 
         private void StartHeartbeatMonitor()
         {
-            heartbeatTimer = new Timer(_ => lastHeartbeat = DateTime.Now, null, 0, 1000);
+            heartbeatTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(1)
+            };
+            heartbeatTimer.Tick += (_, __) => lastHeartbeat = DateTime.Now;
+            heartbeatTimer.Start();
+
             watchdogTimer = new Timer(_ =>
             {
                 if (!isStartupComplete && appStartupStartTime != DateTime.MinValue)
@@ -1235,6 +1285,71 @@ namespace Ink_Canvas
                 }
                 catch { }
                 Environment.Exit(0);
+            }
+        }
+
+        internal static string GetDlassTelemetryDsn()
+        {
+            try
+            {
+                var envDsn = Environment.GetEnvironmentVariable("DLASS_SENTRY_DSN");
+                if (!string.IsNullOrWhiteSpace(envDsn))
+                {
+                    return envDsn;
+                }
+
+                try
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    var resourceName = "Ink_Canvas.telemetry_dsn.txt";
+                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                    {
+                        if (stream != null)
+                        {
+                            using (StreamReader reader = new StreamReader(stream, System.Text.Encoding.UTF8))
+                            {
+                                string dsn = reader.ReadToEnd().Trim();
+                                if (!string.IsNullOrWhiteSpace(dsn))
+                                {
+                                    return dsn;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"从程序集资源读取遥测 DSN 失败: {ex.Message}", LogHelper.LogType.Warning);
+                }
+
+                string assemblyLocation = Assembly.GetExecutingAssembly().Location;
+                string currentDir = Path.GetDirectoryName(assemblyLocation);
+                
+                for (int i = 0; i < 5; i++)
+                {
+                    string dsnFilePath = Path.Combine(currentDir, "telemetry_dsn.txt");
+                    if (File.Exists(dsnFilePath))
+                    {
+                        string dsn = File.ReadAllText(dsnFilePath, System.Text.Encoding.UTF8).Trim();
+                        if (!string.IsNullOrWhiteSpace(dsn))
+                        {
+                            return dsn;
+                        }
+                    }
+                    
+                    DirectoryInfo parentDir = Directory.GetParent(currentDir);
+                    if (parentDir == null)
+                    {
+                        break;
+                    }
+                    currentDir = parentDir.FullName;
+                }
+
+                return string.Empty;
+            }
+            catch
+            {
+                return string.Empty;
             }
         }
 

@@ -161,7 +161,17 @@ namespace Ink_Canvas.Helpers
                 {
                     LogHelper.WriteLogToFile($"已恢复上传队列：{restoredCount}个文件，跳过{skippedCount}个无效文件", LogHelper.LogType.Event);
                     // 如果恢复了队列，触发处理
-                    _ = ProcessUploadQueueAsync();
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await ProcessUploadQueueAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"恢复上传队列后处理时出错: {ex}", LogHelper.LogType.Error);
+                        }
+                    });
                 }
                 else if (skippedCount > 0)
                 {
@@ -357,8 +367,25 @@ namespace Ink_Canvas.Helpers
                 {
                     _ = Task.Run(async () =>
                     {
-                        await Task.Delay(TimeSpan.FromMinutes(delayMinutes));
-                        EnqueueFile(filePath);
+                        try
+                        {
+                            await Task.Delay(TimeSpan.FromMinutes(delayMinutes)).ConfigureAwait(false);
+                            if (MainWindow.Settings?.Dlass?.IsAutoUploadNotes != true)
+                            {
+                                LogHelper.WriteLogToFile($"延迟结束后自动上传已关闭，跳过入队: {filePath}", LogHelper.LogType.Event);
+                                return;
+                            }
+                            if (!File.Exists(filePath))
+                            {
+                                LogHelper.WriteLogToFile($"延迟结束后文件已不存在，跳过入队: {filePath}", LogHelper.LogType.Event);
+                                return;
+                            }
+                            EnqueueFile(filePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"延迟加入上传队列时出错: {ex}", LogHelper.LogType.Error);
+                        }
                     });
                 }
                 else
@@ -387,7 +414,17 @@ namespace Ink_Canvas.Helpers
             });
 
             // 异步保存队列到文件
-            _ = Task.Run(async () => await SaveQueueToFileAsync());
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    await SaveQueueToFileAsync().ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"保存上传队列时出错（后台任务）: {ex}", LogHelper.LogType.Error);
+                }
+            });
 
             // 如果队列达到批量大小，触发批量上传
             if (_uploadQueue.Count >= BATCH_SIZE)
@@ -566,7 +603,17 @@ namespace Ink_Canvas.Helpers
                 // 如果队列达到批量大小，继续处理
                 if (_uploadQueue.Count >= BATCH_SIZE)
                 {
-                    _ = ProcessUploadQueueAsync();
+                    _ = Task.Run(async () =>
+                    {
+                        try
+                        {
+                            await ProcessUploadQueueAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.WriteLogToFile($"继续批量处理上传队列时出错: {ex}", LogHelper.LogType.Error);
+                        }
+                    });
                 }
             }
             finally

@@ -261,11 +261,12 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (toggleSwitch == null) return;
             toggleSwitch.Background = isOn 
                 ? new SolidColorBrush(Color.FromRgb(53, 132, 228)) 
-                : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                : (ThemeHelper.IsDarkTheme ? ThemeHelper.GetButtonBackgroundBrush() : new SolidColorBrush(Color.FromRgb(225, 225, 225)));
             var innerBorder = toggleSwitch.Child as Border;
             if (innerBorder != null)
             {
                 innerBorder.HorizontalAlignment = isOn ? HorizontalAlignment.Right : HorizontalAlignment.Left;
+                innerBorder.Background = new SolidColorBrush(Colors.White);
             }
         }
 
@@ -283,6 +284,10 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             string[] buttonNames = buttons[group];
 
+            bool isDarkTheme = ThemeHelper.IsDarkTheme;
+            var selectedBrush = isDarkTheme ? new SolidColorBrush(Color.FromRgb(25, 25, 25)) : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+            var unselectedBrush = new SolidColorBrush(Colors.Transparent);
+
             for (int i = 0; i < buttonNames.Length; i++)
             {
                 var button = this.FindDescendantByName($"{group}{buttonNames[i]}Border") as Border;
@@ -290,23 +295,78 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     if (i == selectedIndex)
                     {
-                        button.Background = new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                        button.Background = selectedBrush;
                         var textBlock = button.Child as TextBlock;
                         if (textBlock != null)
                         {
                             textBlock.FontWeight = FontWeights.Bold;
+                            textBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                         }
                     }
                     else
                     {
-                        button.Background = new SolidColorBrush(Colors.Transparent);
+                        button.Background = unselectedBrush;
                         var textBlock = button.Child as TextBlock;
                         if (textBlock != null)
                         {
                             textBlock.FontWeight = FontWeights.Normal;
+                            textBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                         }
                     }
                 }
+            }
+        }
+
+        private bool GetCurrentSettingValue(string tag)
+        {
+            if (MainWindow.Settings?.PowerPointSettings == null) return false;
+
+            try
+            {
+                var pptSettings = MainWindow.Settings.PowerPointSettings;
+                switch (tag)
+                {
+                    case "SupportPowerPoint":
+                        return pptSettings.PowerPointSupport;
+                    case "PowerPointEnhancement":
+                        return pptSettings.EnablePowerPointEnhancement;
+                    case "SupportWPS":
+                        return pptSettings.IsSupportWPS;
+                    case "EnableWppProcessKill":
+                        return pptSettings.EnableWppProcessKill;
+                    case "ShowPPTButton":
+                        return pptSettings.ShowPPTButton;
+                    case "EnablePPTButtonPageClickable":
+                        return pptSettings.EnablePPTButtonPageClickable;
+                    case "EnablePPTButtonLongPressPageTurn":
+                        return pptSettings.EnablePPTButtonLongPressPageTurn;
+                    case "SkipAnimationsWhenGoNext":
+                        return pptSettings.SkipAnimationsWhenGoNext;
+                    case "ShowCanvasAtNewSlideShow":
+                        return pptSettings.IsShowCanvasAtNewSlideShow;
+                    case "EnableTwoFingerGestureInPresentationMode":
+                        return pptSettings.IsEnableTwoFingerGestureInPresentationMode;
+                    case "EnableFingerGestureSlideShowControl":
+                        return pptSettings.IsEnableFingerGestureSlideShowControl;
+                    case "ShowGestureButtonInSlideShow":
+                        return pptSettings.ShowGestureButtonInSlideShow;
+                    case "EnablePPTTimeCapsule":
+                        return pptSettings.EnablePPTTimeCapsule;
+                    case "NotifyPreviousPage":
+                        return pptSettings.IsNotifyPreviousPage;
+                    case "AlwaysGoToFirstPageOnReenter":
+                        return pptSettings.IsAlwaysGoToFirstPageOnReenter;
+                    case "NotifyHiddenPage":
+                        return pptSettings.IsNotifyHiddenPage;
+                    case "NotifyAutoPlayPresentation":
+                        return pptSettings.IsNotifyAutoPlayPresentation;
+                    default:
+                        return false;
+                }
+            }
+            catch
+            {
+                return false;
             }
         }
 
@@ -320,12 +380,12 @@ namespace Ink_Canvas.Windows.SettingsViews
             var border = sender as Border;
             if (border == null) return;
 
-            bool isOn = border.Background.ToString() == "#FF3584E4";
-            bool newState = !isOn;
-            SetToggleSwitchState(border, newState);
-
             string tag = border.Tag?.ToString();
             if (string.IsNullOrEmpty(tag)) return;
+
+            bool currentState = GetCurrentSettingValue(tag);
+            bool newState = !currentState;
+            SetToggleSwitchState(border, newState);
 
             var pptSettings = MainWindow.Settings.PowerPointSettings;
             if (pptSettings == null) return;
@@ -443,7 +503,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             string group = parts[0];
             string value = parts[1];
 
-            // 清除同组其他按钮的选中状态
+            bool isDarkTheme = ThemeHelper.IsDarkTheme;
+            var selectedBrush = isDarkTheme ? new SolidColorBrush(Color.FromRgb(25, 25, 25)) : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+            var unselectedBrush = new SolidColorBrush(Colors.Transparent);
+
             var parent = border.Parent as Panel;
             if (parent != null)
             {
@@ -454,23 +517,24 @@ namespace Ink_Canvas.Windows.SettingsViews
                         string childTag = childBorder.Tag?.ToString();
                         if (!string.IsNullOrEmpty(childTag) && childTag.StartsWith(group + "_"))
                         {
-                            childBorder.Background = new SolidColorBrush(Colors.Transparent);
+                            childBorder.Background = unselectedBrush;
                             var textBlock = childBorder.Child as TextBlock;
                             if (textBlock != null)
                             {
                                 textBlock.FontWeight = FontWeights.Normal;
+                                textBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
                             }
                         }
                     }
                 }
             }
 
-            // 设置当前按钮为选中状态
-            border.Background = new SolidColorBrush(Color.FromRgb(225, 225, 225));
+            border.Background = selectedBrush;
             var currentTextBlock = border.Child as TextBlock;
             if (currentTextBlock != null)
             {
                 currentTextBlock.FontWeight = FontWeights.Bold;
+                currentTextBlock.Foreground = ThemeHelper.GetTextPrimaryBrush();
             }
 
             var pptSettings = MainWindow.Settings.PowerPointSettings;
@@ -638,6 +702,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             try
             {
                 ThemeHelper.ApplyThemeToControl(this);
+                if (_isLoaded)
+                {
+                    LoadSettings();
+                }
             }
             catch (Exception ex)
             {

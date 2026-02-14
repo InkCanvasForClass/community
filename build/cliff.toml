@@ -13,12 +13,25 @@ body = """
 {% endif %}\
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | striptags | trim | upper_first }}
-    {% for commit in commits %}
-        - {% if commit.scope %}*({{ commit.scope }})* {% endif %}\
-            {% if commit.breaking %}[**breaking**] {% endif %}\
-            {{ commit.message | upper_first }} ({{commit.id}} by {{commit.author.name}})\
+    {% for commit in commits | unique(attribute="message") %}
+        * {{ commit.message | split(pat="\n") | first | trim }}\
+            {% if commit.remote.username %} by @{{ commit.remote.username }}{%- endif %}\
+            {% if commit.remote.pr_number %} in #{{ commit.remote.pr_number }}{%- endif %}
     {% endfor %}
 {% endfor %}
+
+----
+
+- 该版本有 {{ statistics.commit_count }} 次提交
+- 在提交中检测到 {{ statistics.links | length }} 个关联议题
+{%- if statistics.links | length > 0 %}
+	{%- for link in statistics.links %}
+        {{ "  " }}- [{{ link.text }}]({{ link.href }}) (referenced {{ link.count }} time(s))
+	{%- endfor %}
+{%- endif %}
+
+感谢 {% for contributor in github.contributors %} @{{ contributor.username }} {%- endfor -%} 为本版本做出了贡献
+
 """
 # Remove leading and trailing whitespaces from the changelog's body.
 trim = true
@@ -60,7 +73,7 @@ protect_breaking_commits = false
 # Optionally sets the commit's scope and can decide to exclude commits from further processing.
 
 commit_parsers = [
-    { message = "^(add|新增|添加)", group = "<!-- 0 -->🚀 新增功能" },
+    { message = "^(feat|add|新增|添加)", group = "<!-- 0 -->🚀 新增功能" },
     { message = "^(fix|修复)", group = "<!-- 1 -->🐛 修复" },
     { message = "^doc", group = "<!-- 5 -->📚 文档更改" },
     { message = "^(improve|改进|优化)", group = "<!-- 3 -->⚡ 体验优化" },
@@ -81,7 +94,9 @@ commit_parsers = [
 # Exclude commits that are not matched by any commit parser.
 filter_commits = false
 # An array of link parsers for extracting external references, and turning them into URLs, using regex.
-link_parsers = []
+link_parsers = [
+    { pattern = "#(\\d+)", href = "https://github.com/InkCanvasForClass/community/issues/$1"},
+]
 # Include only the tags that belong to the current branch.
 use_branch_tags = false
 # Order releases topologically instead of chronologically.
