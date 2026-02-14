@@ -743,11 +743,14 @@ namespace Ink_Canvas
 
             var selectionBounds = inkCanvas.GetSelectionBounds();
 
-            // 更新选择框
+            // 向外扩展8像素
+            double expandOffset = 8;
+
+            // 更新选择框，向外扩展8像素
             SelectionRectangle.Visibility = Visibility.Visible;
-            SelectionRectangle.Margin = new Thickness(selectionBounds.Left, selectionBounds.Top, 0, 0);
-            SelectionRectangle.Width = selectionBounds.Width;
-            SelectionRectangle.Height = selectionBounds.Height;
+            SelectionRectangle.Margin = new Thickness(selectionBounds.Left - expandOffset, selectionBounds.Top - expandOffset, 0, 0);
+            SelectionRectangle.Width = selectionBounds.Width + expandOffset * 2;
+            SelectionRectangle.Height = selectionBounds.Height + expandOffset * 2;
 
             // 更新选择点位置
             UpdateSelectionHandles(selectionBounds);
@@ -762,17 +765,17 @@ namespace Ink_Canvas
 
         private void UpdateSelectionHandles(Rect bounds)
         {
-            // 四个角选择点
-            TopLeftHandle.Margin = new Thickness(bounds.Left - 4, bounds.Top - 4, 0, 0);
-            TopRightHandle.Margin = new Thickness(bounds.Right - 4, bounds.Top - 4, 0, 0);
-            BottomLeftHandle.Margin = new Thickness(bounds.Left - 4, bounds.Bottom - 4, 0, 0);
-            BottomRightHandle.Margin = new Thickness(bounds.Right - 4, bounds.Bottom - 4, 0, 0);
+            // 四个边选择点，向外扩展8像素
+            TopHandle.Margin = new Thickness(bounds.Left + bounds.Width / 2 - 4, bounds.Top - 12, 0, 0);
+            BottomHandle.Margin = new Thickness(bounds.Left + bounds.Width / 2 - 4, bounds.Bottom + 4 , 0, 0);
+            LeftHandle.Margin = new Thickness(bounds.Left - 12 , bounds.Top + bounds.Height / 2 - 4, 0, 0);
+            RightHandle.Margin = new Thickness(bounds.Right + 4, bounds.Top + bounds.Height / 2 - 4, 0, 0);
 
-            // 四个边选择点
-            TopHandle.Margin = new Thickness(bounds.Left + bounds.Width / 2 - 4, bounds.Top - 4, 0, 0);
-            BottomHandle.Margin = new Thickness(bounds.Left + bounds.Width / 2 - 4, bounds.Bottom - 4, 0, 0);
-            LeftHandle.Margin = new Thickness(bounds.Left - 4, bounds.Top + bounds.Height / 2 - 4, 0, 0);
-            RightHandle.Margin = new Thickness(bounds.Right - 4, bounds.Top + bounds.Height / 2 - 4, 0, 0);
+            // 四个角选择点，完全位于选择框外部
+            TopLeftHandle.Margin = new Thickness(bounds.Left - 12, bounds.Top - 12, 0, 0);
+            TopRightHandle.Margin = new Thickness(bounds.Right + 4, bounds.Top - 12, 0, 0);
+            BottomLeftHandle.Margin = new Thickness(bounds.Left - 12, bounds.Bottom + 4, 0, 0);
+            BottomRightHandle.Margin = new Thickness(bounds.Right + 4, bounds.Bottom + 4, 0, 0);
         }
 
         private void SelectionHandle_MouseDown(object sender, MouseButtonEventArgs e)
