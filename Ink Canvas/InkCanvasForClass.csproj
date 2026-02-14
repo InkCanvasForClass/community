@@ -269,6 +269,7 @@
     <Resource Include="Resources\DeveloperAvatars\STBBRD.png" />
     <Resource Include="Resources\DeveloperAvatars\WXRIW.png" />
     <Resource Include="Resources\DeveloperAvatars\PrefacedCorg.jpg" />
+    <Resource Include="Resources\DeveloperAvatars\PANDA-JSR.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Resources\Icons-png\down.png" />

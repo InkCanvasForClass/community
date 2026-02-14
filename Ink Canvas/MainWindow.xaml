@@ -4043,6 +4043,7 @@
                                             <RowDefinition />
                                             <RowDefinition />
                                             <RowDefinition />
+                                            <RowDefinition />
                                         </Grid.RowDefinitions>
                                         <ui:SimpleStackPanel Grid.Column="0" Grid.Row="0" Orientation="Vertical">
                                             <Image Source="/Resources/DeveloperAvatars/RaspberryKan.jpg"
@@ -4218,6 +4219,21 @@
                                             <TextBlock Margin="0,0,0,2" VerticalAlignment="Center"
                                                        HorizontalAlignment="Center" FontSize="12" Foreground="White">
                                                 PrefacedCorg
+                                            </TextBlock>
+                                        </ui:SimpleStackPanel>
+                                        <ui:SimpleStackPanel Grid.Column="0" Grid.Row="3" Orientation="Vertical"
+                                                             Margin="0,16,0,0">
+                                            <Image Source="/Resources/DeveloperAvatars/PANDA-JSR.jpg"
+                                                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                                                   RenderOptions.BitmapScalingMode="HighQuality" Width="48"
+                                                   Margin="0,0,0,6" Height="48">
+                                                <Image.Clip>
+                                                    <EllipseGeometry Center="24,24" RadiusX="24" RadiusY="24" />
+                                                </Image.Clip>
+                                            </Image>
+                                            <TextBlock Margin="0,0,0,2" VerticalAlignment="Center"
+                                                       HorizontalAlignment="Center" FontSize="12" Foreground="White">
+                                                PANDA-JSR
                                             </TextBlock>
                                         </ui:SimpleStackPanel>
                                     </Grid>
