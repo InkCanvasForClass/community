@@ -4451,12 +4451,9 @@
                   ManipulationStarting="GridInkCanvasSelectionCover_ManipulationStarting"
                   ManipulationCompleted="GridInkCanvasSelectionCover_ManipulationCompleted"
                   ManipulationDelta="GridInkCanvasSelectionCover_ManipulationDelta"
-            PreviewTouchDown="GridInkCanvasSelectionCover_PreviewTouchDown"
-            PreviewTouchUp="GridInkCanvasSelectionCover_PreviewTouchUp"
-            PreviewTouchMove="GridInkCanvasSelectionCover_PreviewTouchMove"
-            TouchDown="GridInkCanvasSelectionCover_TouchDown"
-            TouchUp="GridInkCanvasSelectionCover_TouchUp"
-            TouchMove="GridInkCanvasSelectionCover_TouchMove"
+                  TouchDown="GridInkCanvasSelectionCover_TouchDown"
+                  TouchUp="GridInkCanvasSelectionCover_TouchUp"
+                  TouchMove="GridInkCanvasSelectionCover_TouchMove"
                   Background="#01FFFFFF" Opacity="0.01" Visibility="Visible" Margin="1,0,-1,0">
                 
                 <!-- 选择框 -->

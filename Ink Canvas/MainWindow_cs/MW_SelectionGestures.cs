@@ -539,10 +539,51 @@ namespace Ink_Canvas
 
         private void GridInkCanvasSelectionCover_TouchDown(object sender, TouchEventArgs e)
         {
+            dec.Add(e.TouchDevice.Id);
+            //设备1个的时候，记录中心点
+            if (dec.Count == 1)
+            {
+                var touchPoint = e.GetTouchPoint(null);
+                centerPoint = touchPoint.Position;
+                lastTouchPointOnGridInkCanvasCover = touchPoint.Position;
+            }
         }
 
         private void GridInkCanvasSelectionCover_TouchUp(object sender, TouchEventArgs e)
         {
+            dec.Remove(e.TouchDevice.Id);
+            if (dec.Count >= 1) return;
+            isProgramChangeStrokeSelection = false;
+            
+            var touchUpPoint = e.GetTouchPoint(null).Position;
+            if (lastTouchPointOnGridInkCanvasCover == touchUpPoint)
+            {
+                var touchPointInCanvas = e.GetTouchPoint(inkCanvas).Position;
+                var selectionBounds = inkCanvas.GetSelectionBounds();
+                
+                if (!(touchPointInCanvas.X < selectionBounds.Left) &&
+                    !(touchPointInCanvas.Y < selectionBounds.Top) &&
+                    !(touchPointInCanvas.X > selectionBounds.Right) &&
+                    !(touchPointInCanvas.Y > selectionBounds.Bottom))
+                {
+                    return;
+                }
+                isProgramChangeStrokeSelection = true;
+                inkCanvas.Select(new StrokeCollection());
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                isProgramChangeStrokeSelection = false;
+                StrokesSelectionClone = new StrokeCollection();
+            }
+            else if (inkCanvas.GetSelectedStrokes().Count == 0)
+            {
+                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
+                StrokesSelectionClone = new StrokeCollection();
+            }
+            else
+            {
+                GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
+                StrokesSelectionClone = new StrokeCollection();
+            }
         }
 
         private void GridInkCanvasSelectionCover_TouchMove(object sender, TouchEventArgs e)
@@ -581,92 +622,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void GridInkCanvasSelectionCover_PreviewTouchMove(object sender, TouchEventArgs e)
-        {
-            // 预览触摸移动事件 - 用于更精确的触摸处理
-            if (inkCanvas.GetSelectedStrokes().Count > 0 && dec.Count == 1)
-            {
-                var currentTouchPoint = e.GetTouchPoint(inkCanvas).Position;
-
-                // 检查是否有有效的起始触摸点
-                if (lastTouchPointOnGridInkCanvasCover != new Point(0, 0))
-                {
-                    var delta = currentTouchPoint - lastTouchPointOnGridInkCanvasCover;
-
-                    // 只有当移动距离足够大时才进行拖动（避免微小移动造成的抖动）
-                    if (Math.Abs(delta.X) > 1 || Math.Abs(delta.Y) > 1)
-                    {
-                        // 创建变换矩阵
-                        var matrix = new Matrix();
-                        matrix.Translate(delta.X, delta.Y);
-
-                        // 对选中的墨迹应用变换
-                        var selectedStrokes = inkCanvas.GetSelectedStrokes();
-                        foreach (var stroke in selectedStrokes)
-                        {
-                            stroke.Transform(matrix, false);
-                        }
-
-                        // 更新选中栏位置
-                        updateBorderStrokeSelectionControlLocation();
-
-                        // 更新最后触摸点
-                        lastTouchPointOnGridInkCanvasCover = currentTouchPoint;
-                    }
-                }
-            }
-        }
-
         private Point lastTouchPointOnGridInkCanvasCover = new Point(0, 0);
-
-        private void GridInkCanvasSelectionCover_PreviewTouchDown(object sender, TouchEventArgs e)
-        {
-            dec.Add(e.TouchDevice.Id);
-            //设备1个的时候，记录中心点
-            if (dec.Count == 1)
-            {
-                var touchPoint = e.GetTouchPoint(null);
-                centerPoint = touchPoint.Position;
-                lastTouchPointOnGridInkCanvasCover = touchPoint.Position;
-            }
-        }
-
-        private void GridInkCanvasSelectionCover_PreviewTouchUp(object sender, TouchEventArgs e)
-        {
-            dec.Remove(e.TouchDevice.Id);
-            if (dec.Count >= 1) return;
-            isProgramChangeStrokeSelection = false;
-            
-            var touchUpPoint = e.GetTouchPoint(null).Position;
-            if (lastTouchPointOnGridInkCanvasCover == touchUpPoint)
-            {
-                var touchPointInCanvas = e.GetTouchPoint(inkCanvas).Position;
-                var selectionBounds = inkCanvas.GetSelectionBounds();
-                
-                if (!(touchPointInCanvas.X < selectionBounds.Left) &&
-                    !(touchPointInCanvas.Y < selectionBounds.Top) &&
-                    !(touchPointInCanvas.X > selectionBounds.Right) &&
-                    !(touchPointInCanvas.Y > selectionBounds.Bottom))
-                {
-                    return;
-                }
-                isProgramChangeStrokeSelection = true;
-                inkCanvas.Select(new StrokeCollection());
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                isProgramChangeStrokeSelection = false;
-                StrokesSelectionClone = new StrokeCollection();
-            }
-            else if (inkCanvas.GetSelectedStrokes().Count == 0)
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
-                StrokesSelectionClone = new StrokeCollection();
-            }
-            else
-            {
-                GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
-                StrokesSelectionClone = new StrokeCollection();
-            }
-        }
 
         private void LassoSelect_Click(object sender, RoutedEventArgs e)
         {
