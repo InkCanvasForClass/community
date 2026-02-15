@@ -818,6 +818,48 @@ namespace Ink_Canvas
             }
         }
 
+        private void SelectionHandle_TouchDown(object sender, TouchEventArgs e)
+        {
+            if (sender is Rectangle handle)
+            {
+                isResizing = true;
+                currentResizeHandle = handle.Name;
+                var touchPoint = e.GetTouchPoint(inkCanvas);
+                resizeStartPoint = touchPoint.Position;
+                originalSelectionBounds = inkCanvas.GetSelectionBounds();
+                e.Handled = true;
+            }
+        }
+
+        private void SelectionHandle_TouchMove(object sender, TouchEventArgs e)
+        {
+            if (!isResizing || !(sender is Rectangle handle)) return;
+
+            var touchPoint = e.GetTouchPoint(inkCanvas);
+            var currentPoint = touchPoint.Position;
+            var delta = new Point(currentPoint.X - resizeStartPoint.X, currentPoint.Y - resizeStartPoint.Y);
+
+            var newBounds = CalculateNewBounds(originalSelectionBounds, delta, currentResizeHandle);
+
+            // 应用新的边界到选中的墨迹
+            ApplyBoundsToStrokes(newBounds);
+
+            // 更新选择框显示
+            UpdateSelectionDisplay();
+
+            e.Handled = true;
+        }
+
+        private void SelectionHandle_TouchUp(object sender, TouchEventArgs e)
+        {
+            if (sender is Rectangle handle)
+            {
+                isResizing = false;
+                currentResizeHandle = "";
+                e.Handled = true;
+            }
+        }
+
         private Rect CalculateNewBounds(Rect originalBounds, Point delta, string handleName)
         {
             var newBounds = originalBounds;
