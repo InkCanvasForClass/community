@@ -496,6 +496,12 @@ namespace Ink_Canvas
             {
                 if (dec.Count >= 1)
                 {
+                    // 单指时，让TouchMove处理拖动
+                    if (dec.Count == 1 && inkCanvas.GetSelectedStrokes().Count > 0)
+                    {
+                        return;
+                    }
+
                     bool disableScale = dec.Count >= 3;
                     var md = e.DeltaManipulation;
                     var trans = md.Translation; // 获得位移矢量
