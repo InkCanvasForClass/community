@@ -1,10 +1,12 @@
-﻿using iNKORE.UI.WPF.Modern;
+using iNKORE.UI.WPF.Modern;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Application = System.Windows.Application;
 using ui = iNKORE.UI.WPF.Modern.Controls;
 
@@ -35,22 +37,38 @@ namespace Ink_Canvas
 
             if (theme == "Light")
             {
+                // 先加载主题
                 var rd1 = new ResourceDictionary
-                { Source = new Uri("Resources/Styles/Light.xaml", UriKind.Relative) };
+                {
+                    Source = new Uri("Resources/Styles/Light.xaml", UriKind.Relative)
+                };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
 
-                // 在主题资源之后添加其他资源
-                var rd2 = new ResourceDictionary
-                { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd2);
+                // 异步加载图形资源，避免阻塞启动
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100);
+                    Dispatcher.Invoke(() =>
+                    {
+                        var rd2 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd2);
 
-                var rd3 = new ResourceDictionary
-                { Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd3);
+                        var rd3 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd3);
 
-                var rd4 = new ResourceDictionary
-                { Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd4);
+                        var rd4 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd4);
+                    });
+                });
 
                 ThemeManager.SetRequestedTheme(window, ElementTheme.Light);
 
