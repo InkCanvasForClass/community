@@ -101,21 +101,35 @@ namespace Ink_Canvas
             }
             else if (theme == "Dark")
             {
+                // 先加载主题
                 var rd1 = new ResourceDictionary { Source = new Uri("Resources/Styles/Dark.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
 
-                // 在主题资源之后添加其他资源
-                var rd2 = new ResourceDictionary
-                { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd2);
+                // 异步加载图形资源，避免阻塞启动
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100);
+                    Dispatcher.Invoke(() =>
+                    {
+                        var rd2 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd2);
 
-                var rd3 = new ResourceDictionary
-                { Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd3);
+                        var rd3 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd3);
 
-                var rd4 = new ResourceDictionary
-                { Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd4);
+                        var rd4 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd4);
+                    });
+                });
 
                 ThemeManager.SetRequestedTheme(window, ElementTheme.Dark);
 
