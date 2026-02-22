@@ -1148,6 +1148,17 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"启动IPC监听器时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
+            // 初始化上传帮助类
+            try
+            {
+                LogHelper.WriteLogToFile("初始化上传帮助类");
+                Helpers.UploadHelper.Initialize();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化上传帮助类时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
         }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)

@@ -31,6 +31,7 @@ namespace Ink_Canvas
         public CameraSettings Camera { get; set; } = new CameraSettings();
         [JsonProperty("dlass")]
         public DlassSettings Dlass { get; set; } = new DlassSettings();
+
         [JsonProperty("security")]
         public Security Security { get; set; } = new Security();
     }
@@ -854,4 +855,6 @@ namespace Ink_Canvas
         [JsonProperty("autoUploadDelayMinutes")]
         public int AutoUploadDelayMinutes { get; set; } = 0;
     }
+
+
 }

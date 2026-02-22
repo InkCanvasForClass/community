@@ -58,7 +58,7 @@ namespace Ink_Canvas
             var path = savePath;
             var hideNotification = isHideNotification;
 
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
             {
                 try
                 {
@@ -84,11 +84,8 @@ namespace Ink_Canvas
                         Dispatcher.Invoke(() => ShowNotification($"截图成功保存至 {path}"));
                     }
 
-                    if (Settings?.Dlass?.AutoUploadDelayMinutes > 0)
-                    {
-                        Task.Delay(TimeSpan.FromMinutes(Settings.Dlass.AutoUploadDelayMinutes)).GetAwaiter().GetResult();
-                        Helpers.DlassNoteUploader.UploadNoteFileAsync(path).GetAwaiter().GetResult();
-                    }
+                    // 使用上传帮助类上传到所有启用的服务
+                    await Helpers.UploadHelper.UploadFileAsync(path);
                 }
                 catch (Exception ex)
                 {
@@ -365,13 +362,8 @@ namespace Ink_Canvas
             {
                 try
                 {
-                    var delayMinutes = Settings?.Dlass?.AutoUploadDelayMinutes ?? 0;
-                    if (delayMinutes > 0)
-                    {
-                        await Task.Delay(TimeSpan.FromMinutes(delayMinutes));
-                    }
-
-                    await Helpers.DlassNoteUploader.UploadNoteFileAsync(savePath);
+                    // 使用上传帮助类上传到所有启用的服务
+                    await Helpers.UploadHelper.UploadFileAsync(savePath);
                 }
                 catch (Exception)
                 {
