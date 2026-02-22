@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Ink_Canvas.Helpers
@@ -62,19 +63,23 @@ namespace Ink_Canvas.Helpers
     {
         private static readonly List<IUploadProvider> _providers = new List<IUploadProvider>();
         private static bool _initialized;
+        private static readonly object s_sync = new object();
 
         /// <summary>
         /// 初始化上传帮助类
         /// </summary>
         public static void Initialize()
         {
-            if (_initialized)
-                return;
+            lock (s_sync)
+            {
+                if (_initialized)
+                    return;
 
-            // 注册默认上传提供者
-            RegisterProvider(new DlassUploadProvider());
+                // 注册默认上传提供者
+                RegisterProviderInternal(new DlassUploadProvider());
 
-            _initialized = true;
+                _initialized = true;
+            }
         }
 
         /// <summary>
@@ -83,9 +88,24 @@ namespace Ink_Canvas.Helpers
         /// <param name="provider">上传提供者</param>
         public static void RegisterProvider(IUploadProvider provider)
         {
-            if (provider != null && !_providers.Contains(provider))
+            if (provider == null)
+                return;
+
+            lock (s_sync)
             {
-                _providers.Add(provider);
+                RegisterProviderInternal(provider);
+            }
+        }
+
+        private static void RegisterProviderInternal(IUploadProvider provider)
+        {
+            if (provider != null)
+            {
+                bool providerExists = _providers.Any(p => p.GetType() == provider.GetType());
+                if (!providerExists)
+                {
+                    _providers.Add(provider);
+                }
             }
         }
 
@@ -101,9 +121,15 @@ namespace Ink_Canvas.Helpers
                 Initialize();
             }
 
+            List<IUploadProvider> providersSnapshot;
+            lock (s_sync)
+            {
+                providersSnapshot = new List<IUploadProvider>(_providers);
+            }
+
             bool anySuccess = false;
 
-            foreach (var provider in _providers)
+            foreach (var provider in providersSnapshot)
             {
                 try
                 {
@@ -135,7 +161,11 @@ namespace Ink_Canvas.Helpers
             {
                 Initialize();
             }
-            return new List<IUploadProvider>(_providers);
+
+            lock (s_sync)
+            {
+                return new List<IUploadProvider>(_providers);
+            }
         }
 
         /// <summary>
@@ -148,7 +178,11 @@ namespace Ink_Canvas.Helpers
             {
                 Initialize();
             }
-            return _providers.FindAll(p => p.IsEnabled);
+
+            lock (s_sync)
+            {
+                return _providers.FindAll(p => p.IsEnabled);
+            }
         }
     }
 }

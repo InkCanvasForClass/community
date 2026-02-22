@@ -852,8 +852,13 @@ namespace Ink_Canvas
         [JsonProperty("isAutoUploadNotes")]
         public bool IsAutoUploadNotes { get; set; } = false;
 
+        private int _autoUploadDelayMinutes = 0;
         [JsonProperty("autoUploadDelayMinutes")]
-        public int AutoUploadDelayMinutes { get; set; } = 0;
+        public int AutoUploadDelayMinutes
+        {
+            get { return _autoUploadDelayMinutes; }
+            set { _autoUploadDelayMinutes = Math.Max(0, value); }
+        }
     }
 
 
