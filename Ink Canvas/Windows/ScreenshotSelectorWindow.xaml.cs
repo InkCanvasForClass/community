@@ -1112,8 +1112,19 @@ namespace Ink_Canvas
                 int screenHeight = (int)(_currentSelection.Height * dpiScale);
 
                 SelectedArea = new DrawingRectangle(screenX, screenY, screenWidth, screenHeight);
+            }
+
+            if (SelectedArea.HasValue)
+            {
                 DialogResult = true;
             }
+            else
+            {
+                HintText.Text = "请先选择截图区域";
+                HintTextBorder.Visibility = Visibility.Visible;
+                return;
+            }
+
             Close();
         }
 

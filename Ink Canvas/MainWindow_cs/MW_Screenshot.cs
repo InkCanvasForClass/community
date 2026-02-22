@@ -162,14 +162,13 @@ namespace Ink_Canvas
 
         internal async Task SaveAreaScreenShotToDesktop()
         {
+            var originalVisibility = Visibility;
             try
             {
-                var originalVisibility = Visibility;
                 Visibility = Visibility.Hidden;
                 await Task.Delay(200);
 
                 var screenshotResult = await ShowScreenshotSelector();
-                Visibility = originalVisibility;
 
                 if (!screenshotResult.HasValue)
                 {
@@ -235,8 +234,11 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                Visibility = Visibility.Visible;
                 ShowNotification($"截图失败: {ex.Message}");
+            }
+            finally
+            {
+                Visibility = originalVisibility;
             }
         }
 
