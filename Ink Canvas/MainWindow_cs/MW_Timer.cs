@@ -556,10 +556,12 @@ namespace Ink_Canvas
 
                 if (arg != "/F")
                 {
-                    var p = new Process();
-                    p.StartInfo = new ProcessStartInfo("taskkill", arg);
-                    p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    p.Start();
+                    using (var p = new Process())
+                    {
+                        p.StartInfo = new ProcessStartInfo("taskkill", arg);
+                        p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        p.Start();
+                    }
 
                     if (arg.Contains("EasiNote"))
                     {

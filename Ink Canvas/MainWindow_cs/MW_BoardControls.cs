@@ -163,7 +163,6 @@ namespace Ink_Canvas
         /// <remarks>
         /// - 根据参数设置当前提交类型
         /// - 清除画布上的所有墨迹
-        /// - 执行轻量级内存清理
         /// - 恢复当前提交类型为用户输入
         /// </remarks>
         private void ClearStrokes(bool isErasedByCode)
@@ -173,21 +172,7 @@ namespace Ink_Canvas
 
             inkCanvas.Strokes.Clear();
 
-            // 执行内存清理
-            PerformLightweightMemoryCleanup();
-
             _currentCommitType = CommitReason.UserInput;
-        }
-
-        /// <summary>
-        /// 执行内存清理
-        /// </summary>
-        private void PerformLightweightMemoryCleanup()
-        {
-            Task.Run(() =>
-            {
-                GC.Collect();
-            });
         }
 
         private static HashSet<UIElement> CollectRemovedElementsFromHistory(TimeMachineHistory[] history)
