@@ -105,13 +105,10 @@ namespace Ink_Canvas
         public bool LineEndpointSnapping { get; set; } = true; // 是否启用直线端点吸附
         [JsonProperty("lineEndpointSnappingThreshold")]
         public int LineEndpointSnappingThreshold { get; set; } = 15; // 直线端点吸附的距离阈值（像素）
-
         [JsonProperty("usingWhiteboard")]
         public bool UsingWhiteboard { get; set; }
-
         [JsonProperty("customBackgroundColor")]
         public string CustomBackgroundColor { get; set; } = "#162924";
-
         [JsonProperty("hyperbolaAsymptoteOption")]
         public OptionalOperation HyperbolaAsymptoteOption { get; set; } = OptionalOperation.Ask;
         [JsonProperty("isCompressPicturesUploaded")]
@@ -124,8 +121,6 @@ namespace Ink_Canvas
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
         public bool ShowCircleCenter { get; set; }
-
-        // 墨迹渐隐功能设置
         [JsonProperty("enableInkFade")]
         public bool EnableInkFade { get; set; } = false;
         [JsonProperty("inkFadeTime")]
@@ -451,6 +446,7 @@ namespace Ink_Canvas
 
         [JsonProperty("isAutoFoldInEasiNote3")]
         public bool IsAutoFoldInEasiNote3 { get; set; }
+        
         [JsonProperty("isAutoFoldInEasiNote3C")]
         public bool IsAutoFoldInEasiNote3C { get; set; }
 
