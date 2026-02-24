@@ -380,10 +380,6 @@ namespace Ink_Canvas.Helpers
                                 }
                             }
                         }
-                        else
-                        {
-                            LogHelper.WriteLogToFile($"[{GetType().Name}] 上传成功: {Path.GetFileName(item.FilePath)}", LogHelper.LogType.Event);
-                        }
                         return success;
                     }
                     catch (OperationCanceledException)

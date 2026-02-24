@@ -27,7 +27,6 @@ namespace Ink_Canvas.Helpers
                 // 检查文件是否存在
                 if (!File.Exists(filePath))
                 {
-                    LogHelper.WriteLogToFile($"[WebDAV] 上传失败：文件不存在 - {filePath}", LogHelper.LogType.Error);
                     return false;
                 }
 
@@ -40,7 +39,6 @@ namespace Ink_Canvas.Helpers
                 // 验证设置
                 if (string.IsNullOrEmpty(webDavUrl))
                 {
-                    LogHelper.WriteLogToFile("[WebDAV] 上传失败：未设置WebDav地址", LogHelper.LogType.Error);
                     return false;
                 }
 
@@ -63,14 +61,7 @@ namespace Ink_Canvas.Helpers
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    // 确保目录存在
-                    var directoryPath = Path.GetDirectoryName(targetPath);
-                    if (!string.IsNullOrEmpty(directoryPath))
-                    {
-                        await EnsureDirectoryExistsAsync(client, directoryPath, cancellationToken);
-                    }
-
-                    // 上传文件
+                    // 先直接尝试上传文件
                     using (var fileStream = File.OpenRead(filePath))
                     {
                         // 检查取消令牌
@@ -79,25 +70,39 @@ namespace Ink_Canvas.Helpers
                         var result = await client.PutFile(targetPath, fileStream);
                         if (result.IsSuccessful)
                         {
-                            LogHelper.WriteLogToFile($"[WebDAV] 上传成功：{filePath} -> {targetPath}", LogHelper.LogType.Event);
                             return true;
                         }
                         else
                         {
-                            LogHelper.WriteLogToFile($"[WebDAV] 上传失败：{filePath}, 状态码: {result.StatusCode}, 原因: {result.Description}", LogHelper.LogType.Error);
-                            return false;
+                            // 上传失败，尝试创建目录
+                            var directoryPath = Path.GetDirectoryName(targetPath);
+                            if (!string.IsNullOrEmpty(directoryPath))
+                            {
+                                await EnsureDirectoryExistsAsync(client, directoryPath, cancellationToken);
+                                
+                                // 再次尝试上传文件
+                                cancellationToken.ThrowIfCancellationRequested();
+                                using (var retryStream = File.OpenRead(filePath))
+                                {
+                                    var retryResult = await client.PutFile(targetPath, retryStream);
+                                    return retryResult.IsSuccessful;
+                                }
+                            }
+                            else
+                            {
+                                // 没有目录路径，直接返回失败
+                                return false;
+                            }
                         }
                     }
                 }
             }
             catch (OperationCanceledException)
             {
-                LogHelper.WriteLogToFile("[WebDAV] 上传被取消", LogHelper.LogType.Event);
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"[WebDAV] 上传异常：{ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
         }
@@ -129,17 +134,12 @@ namespace Ink_Canvas.Helpers
                     cancellationToken.ThrowIfCancellationRequested();
                     
                     // 尝试创建目录
-                    var result = await client.Mkcol(currentPath);
-                    // 如果目录已存在，忽略错误（409 Conflict）
-                    if (!result.IsSuccessful && result.StatusCode != 409)
-                    {
-                        LogHelper.WriteLogToFile($"[WebDAV] 创建目录失败：{currentPath}, 状态码: {result.StatusCode}", LogHelper.LogType.Warning);
-                    }
+                    await client.Mkcol(currentPath);
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"[WebDAV] 确保目录存在时出错：{ex.Message}", LogHelper.LogType.Error);
+                // 静默处理目录创建错误
             }
         }
 

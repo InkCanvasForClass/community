@@ -46,25 +46,14 @@ namespace Ink_Canvas.Helpers
 
                 // 调用WebDavUploader进行实际上传
                 var success = await WebDavUploader.UploadFileAsync(filePath, cancellationToken);
-                if (success)
-                {
-                    LogHelper.WriteLogToFile($"[WebDavUploadQueue] 上传成功: {Path.GetFileName(filePath)}", LogHelper.LogType.Event);
-                }
-                else
-                {
-                    LogHelper.WriteLogToFile($"[WebDavUploadQueue] 上传失败: {Path.GetFileName(filePath)}", LogHelper.LogType.Error);
-                }
-
                 return success;
             }
             catch (OperationCanceledException)
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // 记录错误信息，抛出异常以便调用方判断是否可重试
-                LogHelper.WriteLogToFile($"[WebDavUploadQueue] 上传文件时出错: {ex.Message}", LogHelper.LogType.Error);
                 throw;
             }
         }

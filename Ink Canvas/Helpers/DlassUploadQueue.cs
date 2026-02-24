@@ -161,12 +161,10 @@ namespace Ink_Canvas.Helpers
 
                     if (uploadResult != null && uploadResult.Success)
                     {
-                        LogHelper.WriteLogToFile($"[DlassUploadQueue] 笔记上传成功：{fileName} -> {uploadResult.FileUrl}", LogHelper.LogType.Event);
                         return true;
                     }
                     else
                     {
-                        LogHelper.WriteLogToFile($"[DlassUploadQueue] 上传失败：服务器响应失败 - {uploadResult?.Message ?? "未知错误"}", LogHelper.LogType.Error);
                         return false;
                     }
                 }
@@ -179,10 +177,8 @@ namespace Ink_Canvas.Helpers
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                // 记录错误信息，抛出异常以便调用方判断是否可重试
-                LogHelper.WriteLogToFile($"[DlassUploadQueue] 上传笔记时出错: {ex.Message}", LogHelper.LogType.Error);
                 throw;
             }
         }
@@ -252,9 +248,8 @@ namespace Ink_Canvas.Helpers
             {
                 throw;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                LogHelper.WriteLogToFile($"[DlassUploadQueue] 获取白板信息时出错: {ex.Message}", LogHelper.LogType.Error);
                 return null;
             }
         }
