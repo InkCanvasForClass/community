@@ -38,22 +38,6 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
 
-                // 检查文件扩展名
-                var fileExtension = Path.GetExtension(filePath).ToLower();
-                if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".xml" && fileExtension != ".zip")
-                {
-                    return false;
-                }
-
-                // 检查文件大小（最大10MB，ZIP文件可能更大，允许50MB）
-                var fileInfo = new FileInfo(filePath);
-                long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
-                if (fileInfo.Length > maxSize)
-                {
-                    LogHelper.WriteLogToFile($"[WebDavUploadQueue] 上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过{maxSize / 1024 / 1024}MB限制", LogHelper.LogType.Error);
-                    return false;
-                }
-
                 // 检查WebDAV是否仍然启用
                 if (!WebDavUploader.IsWebDavEnabled())
                 {
@@ -72,6 +56,10 @@ namespace Ink_Canvas.Helpers
                 }
 
                 return success;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {

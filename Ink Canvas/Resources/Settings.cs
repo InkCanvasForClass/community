@@ -863,7 +863,6 @@ namespace Ink_Canvas
             set { _autoUploadDelayMinutes = Math.Max(0, value); }
         }
 
-        // WebDav设置
         [JsonProperty("webDavUrl")]
         public string WebDavUrl { get; set; } = string.Empty;
 

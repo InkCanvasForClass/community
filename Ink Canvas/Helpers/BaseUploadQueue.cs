@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -36,7 +37,7 @@ namespace Ink_Canvas.Helpers
     /// <summary>
     /// 通用上传队列基类
     /// </summary>
-    public abstract class BaseUploadQueue
+    public abstract class BaseUploadQueue : IDisposable
     {
         protected const int BATCH_SIZE = 10; // 批量上传大小
         protected const int MAX_RETRY_COUNT = 3; // 最大重试次数
@@ -62,9 +63,19 @@ namespace Ink_Canvas.Helpers
         protected bool _isQueueInitialized = false;
 
         /// <summary>
+        /// 是否已释放资源
+        /// </summary>
+        private bool _disposed = false;
+
+        /// <summary>
         /// 队列文件名
         /// </summary>
         protected abstract string QueueFileName { get; }
+
+        /// <summary>
+        /// 允许的文件扩展名
+        /// </summary>
+        protected virtual HashSet<string> AllowedExtensions => new HashSet<string> { ".png", ".icstk", ".xml", ".zip" };
 
         /// <summary>
         /// 获取队列文件路径
@@ -77,6 +88,16 @@ namespace Ink_Canvas.Helpers
                 Directory.CreateDirectory(configsDir);
             }
             return Path.Combine(configsDir, QueueFileName);
+        }
+
+        /// <summary>
+        /// 获取最大文件大小
+        /// </summary>
+        /// <param name="extension">文件扩展名</param>
+        /// <returns>最大文件大小（字节）</returns>
+        protected virtual long GetMaxFileSize(string extension)
+        {
+            return extension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
         }
 
         /// <summary>
@@ -271,7 +292,7 @@ namespace Ink_Canvas.Helpers
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await SaveQueueToFileAsync().ConfigureAwait(false);
+                    await SaveQueueToFileAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {
@@ -306,7 +327,7 @@ namespace Ink_Canvas.Helpers
 
                 // 从队列中取出最多BATCH_SIZE个文件
                 int count = 0;
-                while (_uploadQueue.TryDequeue(out UploadQueueItem item) && count < BATCH_SIZE)
+                while (count < BATCH_SIZE && _uploadQueue.TryDequeue(out UploadQueueItem item))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     
@@ -392,7 +413,7 @@ namespace Ink_Canvas.Helpers
                             // 检查重试次数
                             if (item.RetryCount < MAX_RETRY_COUNT)
                             {
-                                LogHelper.WriteLogToFile($"[{GetType().Name}] 上传失败({ex.Message})，将重试 ({item.RetryCount + 1}/{MAX_RETRY_COUNT}): {Path.GetFileName(item.FilePath)}", LogHelper.LogType.Event);
+                                LogHelper.WriteLogToFile($"[{GetType().Name}] 上传失败({ex.Message})，将重试 ({item.RetryCount + 1}/{MAX_RETRY_COUNT}): {Path.GetFileName(item.FilePath)}", LogHelper.LogType.Error);
                                 EnqueueFile(item.FilePath, item.RetryCount + 1, cancellationToken);
                             }
                             else
@@ -407,10 +428,10 @@ namespace Ink_Canvas.Helpers
                         return false;
                     }
                 });
-                await Task.WhenAll(uploadTasks);
+                await Task.WhenAll(uploadTasks).ConfigureAwait(false);
 
                 // 上传完成后保存队列状态
-                await SaveQueueToFileAsync(cancellationToken);
+                await SaveQueueToFileAsync(cancellationToken).ConfigureAwait(false);
 
                 // 检查队列中是否还有文件，如果有就继续处理
                 if (_uploadQueue.Count > 0)
@@ -437,20 +458,21 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 验证文件是否有效
         /// </summary>
-        protected bool IsValidFile(string filePath)
+        protected virtual bool IsValidFile(string filePath)
         {
             try
             {
                 var fileExtension = Path.GetExtension(filePath).ToLower();
-                if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".xml" && fileExtension != ".zip")
+                if (!AllowedExtensions.Contains(fileExtension))
                 {
                     return false;
                 }
 
                 var fileInfo = new FileInfo(filePath);
-                long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+                long maxSize = GetMaxFileSize(fileExtension);
                 if (fileInfo.Length > maxSize)
                 {
+                    LogHelper.WriteLogToFile($"[{GetType().Name}] 上传失败：文件过大（{fileInfo.Length / 1024 / 1024:F2}MB），超过{maxSize / 1024 / 1024}MB限制", LogHelper.LogType.Error);
                     return false;
                 }
 
@@ -547,6 +569,40 @@ namespace Ink_Canvas.Helpers
                 LogHelper.WriteLogToFile($"[{GetType().Name}] 加入上传队列时出错: {ex.Message}", LogHelper.LogType.Error);
                 return false;
             }
+        }
+
+        /// <summary>
+        /// 释放资源
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// 释放资源
+        /// </summary>
+        /// <param name="disposing">是否手动释放</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _queueProcessingLock?.Dispose();
+                    _queueSaveLock?.Dispose();
+                }
+                _disposed = true;
+            }
+        }
+
+        /// <summary>
+        /// 析构函数
+        /// </summary>
+        ~BaseUploadQueue()
+        {
+            Dispose(false);
         }
     }
 }

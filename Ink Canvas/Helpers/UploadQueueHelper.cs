@@ -12,7 +12,7 @@ namespace Ink_Canvas.Helpers
     {
         private static readonly List<BaseUploadQueue> _queues = new List<BaseUploadQueue>();
         private static readonly object _syncLock = new object();
-        private static bool _initialized = false;
+        private static volatile bool _initialized = false;
 
         /// <summary>
         /// 初始化所有上传队列
@@ -27,7 +27,14 @@ namespace Ink_Canvas.Helpers
                 // 初始化所有注册的队列
                 foreach (var queue in _queues)
                 {
-                    queue.InitializeQueue();
+                    try
+                    {
+                        queue.InitializeQueue();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[UploadQueueHelper] 初始化队列时出错: {ex.Message}", LogHelper.LogType.Error);
+                    }
                 }
 
                 _initialized = true;
@@ -47,12 +54,15 @@ namespace Ink_Canvas.Helpers
             {
                 if (!_queues.Contains(queue))
                 {
-                    _queues.Add(queue);
-                    
-                    // 如果已经初始化，立即初始化新队列
-                    if (_initialized)
+                    try
                     {
+                        // 先初始化队列，再添加到列表
                         queue.InitializeQueue();
+                        _queues.Add(queue);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.WriteLogToFile($"[UploadQueueHelper] 注册队列时出错: {ex.Message}", LogHelper.LogType.Error);
                     }
                 }
             }
@@ -62,11 +72,11 @@ namespace Ink_Canvas.Helpers
         /// 获取所有注册的上传队列
         /// </summary>
         /// <returns>上传队列列表</returns>
-        public static List<BaseUploadQueue> GetAllQueues()
+        public static IReadOnlyList<BaseUploadQueue> GetAllQueues()
         {
             lock (_syncLock)
             {
-                return new List<BaseUploadQueue>(_queues);
+                return new List<BaseUploadQueue>(_queues).AsReadOnly();
             }
         }
 

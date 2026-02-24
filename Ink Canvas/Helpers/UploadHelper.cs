@@ -36,15 +36,7 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public class DlassUploadProvider : IUploadProvider
     {
-        private static readonly DlassUploadQueue _queue = new DlassUploadQueue();
-
-        /// <summary>
-        /// 静态构造函数
-        /// </summary>
-        static DlassUploadProvider()
-        {
-            UploadQueueHelper.RegisterQueue(_queue);
-        }
+        public static readonly DlassUploadQueue Queue = new DlassUploadQueue();
 
         /// <summary>
         /// 提供者名称
@@ -64,7 +56,7 @@ namespace Ink_Canvas.Helpers
         /// <returns>是否上传成功</returns>
         public async Task<bool> UploadAsync(string filePath, CancellationToken cancellationToken = default)
         {
-            return await _queue.UploadFileAsync(filePath, cancellationToken);
+            return await Queue.UploadFileAsync(filePath, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -73,15 +65,7 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     public class WebDavUploadProvider : IUploadProvider
     {
-        private static readonly WebDavUploadQueue _queue = new WebDavUploadQueue();
-
-        /// <summary>
-        /// 静态构造函数
-        /// </summary>
-        static WebDavUploadProvider()
-        {
-            UploadQueueHelper.RegisterQueue(_queue);
-        }
+        public static readonly WebDavUploadQueue Queue = new WebDavUploadQueue();
 
         /// <summary>
         /// 提供者名称
@@ -101,7 +85,7 @@ namespace Ink_Canvas.Helpers
         /// <returns>是否上传成功</returns>
         public async Task<bool> UploadAsync(string filePath, CancellationToken cancellationToken = default)
         {
-            return await _queue.UploadFileAsync(filePath, cancellationToken);
+            return await Queue.UploadFileAsync(filePath, cancellationToken).ConfigureAwait(false);
         }
     }
 
@@ -129,6 +113,10 @@ namespace Ink_Canvas.Helpers
                 // 注册默认上传提供者
                 RegisterProviderInternal(new DlassUploadProvider());
                 RegisterProviderInternal(new WebDavUploadProvider());
+
+                // 注册上传队列
+                UploadQueueHelper.RegisterQueue(DlassUploadProvider.Queue);
+                UploadQueueHelper.RegisterQueue(WebDavUploadProvider.Queue);
 
                 // 初始化所有上传队列
                 UploadQueueHelper.InitializeAllQueues();

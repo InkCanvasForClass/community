@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ink_Canvas.Helpers
@@ -54,7 +55,8 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 获取访问令牌（Access Token）
         /// </summary>
-        public async Task<string> GetAccessTokenAsync()
+        /// <param name="cancellationToken">取消令牌</param>
+        public async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
         {
             if (!string.IsNullOrEmpty(_userToken))
             {
@@ -68,6 +70,8 @@ namespace Ink_Canvas.Helpers
 
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 var requestData = new
                 {
                     app_id = _appId,
@@ -78,7 +82,7 @@ namespace Ink_Canvas.Helpers
                 var json = JsonConvert.SerializeObject(requestData);
                 var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync("/oauth/token", content);
+                var response = await _httpClient.PostAsync("/oauth/token", content, cancellationToken);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -93,13 +97,13 @@ namespace Ink_Canvas.Helpers
                     throw new Exception($"获取Access Token失败: {response.StatusCode}");
                 }
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (HttpRequestException httpEx)
             {
                 throw new Exception($"获取Access Token时网络错误: {httpEx.Message}", httpEx);
-            }
-            catch (TaskCanceledException timeoutEx)
-            {
-                throw new Exception("获取Access Token时请求超时", timeoutEx);
             }
             catch (Exception ex)
             {
@@ -110,14 +114,19 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 发送GET请求
         /// </summary>
-        public async Task<T> GetAsync<T>(string endpoint, bool requireAuth = true)
+        /// <param name="endpoint">API端点</param>
+        /// <param name="requireAuth">是否需要认证</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        public async Task<T> GetAsync<T>(string endpoint, bool requireAuth = true, CancellationToken cancellationToken = default)
         {
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 string token = null;
                 if (requireAuth)
                 {
-                    token = await GetAccessTokenAsync();
+                    token = await GetAccessTokenAsync(cancellationToken);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Get, endpoint);
@@ -134,7 +143,7 @@ namespace Ink_Canvas.Helpers
                     }
                 }
 
-                var response = await _httpClient.SendAsync(request);
+                var response = await _httpClient.SendAsync(request, cancellationToken);
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -150,13 +159,13 @@ namespace Ink_Canvas.Helpers
                     throw new Exception($"API请求失败: {response.StatusCode} - {content}");
                 }
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (HttpRequestException httpEx)
             {
                 throw new Exception($"发送请求时出错: {httpEx.Message}", httpEx);
-            }
-            catch (TaskCanceledException timeoutEx)
-            {
-                throw new Exception($"请求超时: {endpoint}", timeoutEx);
             }
             catch (Exception ex)
             {
@@ -167,14 +176,20 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 发送POST请求
         /// </summary>
-        public async Task<T> PostAsync<T>(string endpoint, object data = null, bool requireAuth = true)
+        /// <param name="endpoint">API端点</param>
+        /// <param name="data">请求数据</param>
+        /// <param name="requireAuth">是否需要认证</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        public async Task<T> PostAsync<T>(string endpoint, object data = null, bool requireAuth = true, CancellationToken cancellationToken = default)
         {
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 string token = null;
                 if (requireAuth)
                 {
-                    token = await GetAccessTokenAsync();
+                    token = await GetAccessTokenAsync(cancellationToken);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
@@ -197,7 +212,7 @@ namespace Ink_Canvas.Helpers
                     request.Content = new StringContent(json, Encoding.UTF8, "application/json");
                 }
 
-                var response = await _httpClient.SendAsync(request);
+                var response = await _httpClient.SendAsync(request, cancellationToken);
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -213,13 +228,13 @@ namespace Ink_Canvas.Helpers
                     throw new Exception($"API请求失败: {response.StatusCode} - {content}");
                 }
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (HttpRequestException httpEx)
             {
                 throw new Exception($"发送请求时出错: {httpEx.Message}", httpEx);
-            }
-            catch (TaskCanceledException timeoutEx)
-            {
-                throw new Exception($"请求超时: {endpoint}", timeoutEx);
             }
             catch (Exception ex)
             {
@@ -230,14 +245,20 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 发送PUT请求
         /// </summary>
-        public async Task<T> PutAsync<T>(string endpoint, object data = null, bool requireAuth = true)
+        /// <param name="endpoint">API端点</param>
+        /// <param name="data">请求数据</param>
+        /// <param name="requireAuth">是否需要认证</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        public async Task<T> PutAsync<T>(string endpoint, object data = null, bool requireAuth = true, CancellationToken cancellationToken = default)
         {
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 string token = null;
                 if (requireAuth)
                 {
-                    token = await GetAccessTokenAsync();
+                    token = await GetAccessTokenAsync(cancellationToken);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Put, endpoint);
@@ -261,7 +282,7 @@ namespace Ink_Canvas.Helpers
                     request.Content = new StringContent(json, Encoding.UTF8, "application/json");
                 }
 
-                var response = await _httpClient.SendAsync(request);
+                var response = await _httpClient.SendAsync(request, cancellationToken);
                 var content = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -277,13 +298,13 @@ namespace Ink_Canvas.Helpers
                     throw new Exception($"API请求失败: {response.StatusCode} - {content}");
                 }
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (HttpRequestException httpEx)
             {
                 throw new Exception($"发送请求时出错: {httpEx.Message}", httpEx);
-            }
-            catch (TaskCanceledException timeoutEx)
-            {
-                throw new Exception($"请求超时: {endpoint}", timeoutEx);
             }
             catch (Exception ex)
             {
@@ -294,14 +315,19 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 发送DELETE请求
         /// </summary>
-        public async Task<bool> DeleteAsync(string endpoint, bool requireAuth = true)
+        /// <param name="endpoint">API端点</param>
+        /// <param name="requireAuth">是否需要认证</param>
+        /// <param name="cancellationToken">取消令牌</param>
+        public async Task<bool> DeleteAsync(string endpoint, bool requireAuth = true, CancellationToken cancellationToken = default)
         {
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 string token = null;
                 if (requireAuth)
                 {
-                    token = await GetAccessTokenAsync();
+                    token = await GetAccessTokenAsync(cancellationToken);
                 }
 
                 var request = new HttpRequestMessage(HttpMethod.Delete, endpoint);
@@ -319,7 +345,7 @@ namespace Ink_Canvas.Helpers
                     }
                 }
 
-                var response = await _httpClient.SendAsync(request);
+                var response = await _httpClient.SendAsync(request, cancellationToken);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -330,11 +356,11 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
             }
-            catch (HttpRequestException)
+            catch (OperationCanceledException)
             {
-                return false;
+                throw;
             }
-            catch (TaskCanceledException)
+            catch (HttpRequestException)
             {
                 return false;
             }
@@ -354,10 +380,13 @@ namespace Ink_Canvas.Helpers
         /// <param name="title">笔记标题（可选）</param>
         /// <param name="description">笔记描述（可选）</param>
         /// <param name="tags">笔记标签（可选）</param>
-        public async Task<T> UploadNoteAsync<T>(string endpoint, string filePath, string boardId, string secretKey, string title = null, string description = null, string tags = null)
+        /// <param name="cancellationToken">取消令牌</param>
+        public async Task<T> UploadNoteAsync<T>(string endpoint, string filePath, string boardId, string secretKey, string title = null, string description = null, string tags = null, CancellationToken cancellationToken = default)
         {
             try
             {
+                cancellationToken.ThrowIfCancellationRequested();
+                
                 if (!File.Exists(filePath))
                 {
                     throw new FileNotFoundException($"文件不存在: {filePath}");
@@ -394,7 +423,7 @@ namespace Ink_Canvas.Helpers
 
                 request.Content = content;
 
-                var response = await _httpClient.SendAsync(request);
+                var response = await _httpClient.SendAsync(request, cancellationToken);
                 var responseContent = await response.Content.ReadAsStringAsync();
 
                 if (response.IsSuccessStatusCode)
@@ -410,13 +439,13 @@ namespace Ink_Canvas.Helpers
                     throw new Exception($"上传文件失败: {response.StatusCode} - {responseContent}");
                 }
             }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
             catch (HttpRequestException httpEx)
             {
                 throw new Exception($"上传文件时网络错误: {httpEx.Message}", httpEx);
-            }
-            catch (TaskCanceledException timeoutEx)
-            {
-                throw new Exception($"上传文件超时: {endpoint}", timeoutEx);
             }
             catch (Exception ex)
             {

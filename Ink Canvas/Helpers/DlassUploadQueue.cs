@@ -104,22 +104,6 @@ namespace Ink_Canvas.Helpers
                     return false;
                 }
 
-                // 检查文件扩展名
-                var fileExtension = Path.GetExtension(filePath).ToLower();
-                if (fileExtension != ".png" && fileExtension != ".icstk" && fileExtension != ".xml" && fileExtension != ".zip")
-                {
-                    return false;
-                }
-
-                // 检查文件大小（最大10MB，ZIP文件可能更大，允许50MB）
-                var fileInfo = new FileInfo(filePath);
-                long maxSize = fileExtension == ".zip" ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
-                if (fileInfo.Length > maxSize)
-                {
-                    LogHelper.WriteLogToFile($"[DlassUploadQueue] 上传失败：文件过大（{fileInfo.Length / 1024 / 1024}MB），超过{maxSize / 1024 / 1024}MB限制", LogHelper.LogType.Error);
-                    return false;
-                }
-
                 // 获取白板信息
                 var whiteboard = await GetWhiteboardInfo(cancellationToken);
                 if (whiteboard == null)
@@ -133,6 +117,7 @@ namespace Ink_Canvas.Helpers
 
                 // 准备上传参数
                 var fileName = Path.GetFileNameWithoutExtension(filePath);
+                var fileExtension = Path.GetExtension(filePath).ToLower();
                 var title = fileName;
                 string fileType;
                 string tags;
@@ -159,7 +144,8 @@ namespace Ink_Canvas.Helpers
                 var description = $"自动上传的{fileType} - {DateTime.Now:yyyy-MM-dd HH:mm:ss}";
 
                 // 创建API客户端并上传文件
-                using (var apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken))
+                var apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken);
+                try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     
@@ -170,7 +156,8 @@ namespace Ink_Canvas.Helpers
                         whiteboard.SecretKey,
                         title,
                         description,
-                        tags);
+                        tags,
+                        cancellationToken);
 
                     if (uploadResult != null && uploadResult.Success)
                     {
@@ -183,6 +170,14 @@ namespace Ink_Canvas.Helpers
                         return false;
                     }
                 }
+                finally
+                {
+                    apiClient.Dispose();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
@@ -218,7 +213,8 @@ namespace Ink_Canvas.Helpers
                 var apiBaseUrl = MainWindow.Settings?.Dlass?.ApiBaseUrl ?? "https://dlass.tech";
 
                 // 创建API客户端并获取白板信息
-                using (var apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken))
+                var apiClient = new DlassApiClient(APP_ID, APP_SECRET, apiBaseUrl, userToken);
+                try
                 {
                     var authData = new
                     {
@@ -227,7 +223,7 @@ namespace Ink_Canvas.Helpers
                         user_token = userToken
                     };
 
-                    var authResult = await apiClient.PostAsync<AuthWithTokenResponse>("/api/whiteboard/framework/auth-with-token", authData, requireAuth: false);
+                    var authResult = await apiClient.PostAsync<AuthWithTokenResponse>("/api/whiteboard/framework/auth-with-token", authData, requireAuth: false, cancellationToken: cancellationToken);
 
                     if (authResult == null || !authResult.Success || authResult.Whiteboards == null)
                     {
@@ -247,6 +243,14 @@ namespace Ink_Canvas.Helpers
 
                     return whiteboard;
                 }
+                finally
+                {
+                    apiClient.Dispose();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception ex)
             {
