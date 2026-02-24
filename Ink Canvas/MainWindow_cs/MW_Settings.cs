@@ -1364,7 +1364,9 @@ namespace Ink_Canvas
                 {
                     if (isUpdatingSelectAll) return;
                     isUpdatingSelectAll = true;
-                    selectAllCheckBox.IsChecked = categoryCheckBoxes.Values.All(cb => cb.IsChecked == true);
+                    // 检查所有分类复选框是否都被勾选
+                    bool allChecked = categoryCheckBoxes.Values.All(cb => cb.IsChecked == true);
+                    selectAllCheckBox.IsChecked = allChecked;
                     isUpdatingSelectAll = false;
                 };
                 checkBox.Unchecked += (s, args) =>
