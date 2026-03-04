@@ -3,6 +3,7 @@ using System;
 using System.Windows;
 using Application = System.Windows.Forms.Application;
 using File = System.IO.File;
+using Path = System.IO.Path;
 
 namespace Ink_Canvas
 {
@@ -24,13 +25,29 @@ namespace Ink_Canvas
         /// 7. 保存快捷方式
         /// 8. 捕获可能的异常，确保方法不会因异常而崩溃
         /// </remarks>
+        private const string CurrentStartupShortcutName = "Ink Canvas Annotation";
+        private const string LegacyStartupShortcutName = "InkCanvas";
+
+        private static string GetStartupShortcutPath(string shortcutName)
+        {
+            return Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.Startup),
+                $"{shortcutName}.lnk");
+        }
+
+        public static bool IsAutoStartEnabled()
+        {
+            return File.Exists(GetStartupShortcutPath(CurrentStartupShortcutName)) ||
+                   File.Exists(GetStartupShortcutPath(LegacyStartupShortcutName));
+        }
+
         public static bool StartAutomaticallyCreate(string exeName)
         {
             try
             {
                 var shell = new WshShell();
-                var shortcut = (IWshShortcut)shell.CreateShortcut(
-                    Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + exeName + ".lnk");
+                var startupShortcutPath = GetStartupShortcutPath(exeName);
+                var shortcut = (IWshShortcut)shell.CreateShortcut(startupShortcutPath);
                 //设置快捷方式的目标所在的位置(源程序完整路径)
                 shortcut.TargetPath = Application.ExecutablePath;
                 //应用程序的工作目录
@@ -45,7 +62,10 @@ namespace Ink_Canvas
                 shortcut.Save();
                 return true;
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                Helpers.LogHelper.WriteLogToFile($"创建开机自启动快捷方式失败: {ex}", Helpers.LogHelper.LogType.Error);
+            }
 
             return false;
         }
@@ -64,11 +84,14 @@ namespace Ink_Canvas
         {
             try
             {
-                File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\" + exeName +
-                            ".lnk");
+                var startupShortcutPath = GetStartupShortcutPath(exeName);
+                File.Delete(startupShortcutPath);
                 return true;
             }
-            catch (Exception) { }
+            catch (Exception ex)
+            {
+                Helpers.LogHelper.WriteLogToFile($"删除开机自启动快捷方式失败: {ex}", Helpers.LogHelper.LogType.Error);
+            }
 
             return false;
         }

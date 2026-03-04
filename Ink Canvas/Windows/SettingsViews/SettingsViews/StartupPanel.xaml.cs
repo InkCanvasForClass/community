@@ -89,8 +89,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 if (toggleSwitchRunAtStartup != null)
                 {
                     // 检查启动项是否存在
-                    bool runAtStartup = System.IO.File.Exists(
-                        Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\Ink Canvas Annotation.lnk");
+                    bool runAtStartup = MainWindow.IsAutoStartEnabled();
                     SetToggleSwitchState(toggleSwitchRunAtStartup, runAtStartup);
                 }
 
@@ -179,8 +178,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     case "RunAtStartup":
                         // 检查启动项是否存在
-                        return System.IO.File.Exists(
-                            Environment.GetFolderPath(Environment.SpecialFolder.Startup) + "\\Ink Canvas Annotation.lnk");
+                        return MainWindow.IsAutoStartEnabled();
                     case "FoldAtStartup":
                         return MainWindow.Settings.Startup?.IsFoldAtStartup ?? false;
                     case "NoFocusMode":
@@ -197,8 +195,9 @@ namespace Ink_Canvas.Windows.SettingsViews
                         return false;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"读取启动页设置值失败: {ex.Message}");
                 return false;
             }
         }

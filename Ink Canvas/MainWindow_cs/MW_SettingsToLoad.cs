@@ -170,8 +170,9 @@ namespace Ink_Canvas
             {
                 ProcessProtectionManager.ApplyFromSettings();
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"应用进程保护设置失败: {ex}", LogHelper.LogType.Warning);
             }
 
             // Startup
@@ -212,21 +213,14 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"加载遥测设置失败: {ex}", LogHelper.LogType.Warning);
             }
 
             try
             {
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) +
-                                "\\Ink Canvas Annotation.lnk"))
-                {
-                    ToggleSwitchRunAtStartup.IsOn = true;
-                }
-                else
-                {
-                    ToggleSwitchRunAtStartup.IsOn = false;
-                }
+                ToggleSwitchRunAtStartup.IsOn = IsAutoStartEnabled();
             }
             catch (Exception ex)
             {

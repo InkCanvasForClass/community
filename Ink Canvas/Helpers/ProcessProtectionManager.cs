@@ -23,6 +23,20 @@ namespace Ink_Canvas.Helpers
             "AutoUpdate"
         };
 
+        private static readonly string DebugTag = "[ProcessProtectionManager]";
+
+        private static void WriteDebugLog(string message, Exception ex = null)
+        {
+            if (ex == null)
+            {
+                System.Diagnostics.Debug.WriteLine($"{DebugTag} {message}");
+                return;
+            }
+
+            System.Diagnostics.Debug.WriteLine($"{DebugTag} {message}: {ex.Message}");
+        }
+
+
         public static bool Enabled
         {
             get { lock (_lock) return _enabled; }
@@ -70,7 +84,10 @@ namespace Ink_Canvas.Helpers
                     {
                         LogHelper.WriteLogToFile($"ProcessProtectionManager.SetEnabled 后台执行失败: {ex.Message}", LogHelper.LogType.Warning);
                     }
-                    catch { }
+                    catch (Exception logEx)
+                    {
+                        WriteDebugLog("写入告警日志失败", logEx);
+                    }
                 }
             });
         }
@@ -104,7 +121,7 @@ namespace Ink_Canvas.Helpers
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"[ProcessProtectionManager] 写日志失败: {ex.Message}");
+                    WriteDebugLog("写日志失败", ex);
                 }
 
                 var normPath = NormalizePath(targetPath);
@@ -139,14 +156,14 @@ namespace Ink_Canvas.Helpers
                     {
                         foreach (var kv in fallbackFiles)
                         {
-                            try { kv.Value.Dispose(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                            try { kv.Value.Dispose(); } catch (Exception ex) { WriteDebugLog("释放文件锁失败", ex); }
                         }
                     }
                     if (fallbackDirs != null)
                     {
                         foreach (var kv in fallbackDirs)
                         {
-                            try { kv.Value.Dispose(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                            try { kv.Value.Dispose(); } catch (Exception ex) { WriteDebugLog("释放文件锁失败", ex); }
                         }
                     }
 
@@ -161,7 +178,7 @@ namespace Ink_Canvas.Helpers
                             Enable(rescanRoot: false, rescanDirs: dirsChain);
                         }
                     }
-                    catch { }
+                    catch (Exception ex) { WriteDebugLog("降级路径恢复保护失败", ex); }
                 }
                 return;
             }
@@ -199,14 +216,14 @@ namespace Ink_Canvas.Helpers
                 {
                     foreach (var kv in releasedFiles)
                     {
-                        try { kv.Value.Dispose(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                        try { kv.Value.Dispose(); } catch (Exception ex) { WriteDebugLog("释放文件锁失败", ex); }
                     }
                 }
                 if (releasedDirs != null)
                 {
                     foreach (var kv in releasedDirs)
                     {
-                        try { kv.Value.Dispose(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                        try { kv.Value.Dispose(); } catch (Exception ex) { WriteDebugLog("释放文件锁失败", ex); }
                     }
                 }
 
@@ -221,8 +238,9 @@ namespace Ink_Canvas.Helpers
                         Enable(rescanRoot: false, rescanDirs: dirsToToggle);
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    WriteDebugLog("恢复目录/文件保护失败", ex);
                 }
 
                 Interlocked.Exchange(ref _writeGate, 0);
@@ -305,8 +323,9 @@ namespace Ink_Canvas.Helpers
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                WriteDebugLog("启用保护失败", ex);
             }
         }
 
@@ -323,13 +342,13 @@ namespace Ink_Canvas.Helpers
             {
                 foreach (var kv in _lockedFiles)
                 {
-                    try { kv.Value.Dispose(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                    try { kv.Value.Dispose(); } catch (Exception ex) { WriteDebugLog("释放文件锁失败", ex); }
                 }
                 _lockedFiles.Clear();
 
                 foreach (var kv in _lockedDirs)
                 {
-                    try { kv.Value.Dispose(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                    try { kv.Value.Dispose(); } catch (Exception ex) { WriteDebugLog("释放文件锁失败", ex); }
                 }
                 _lockedDirs.Clear();
             }
@@ -356,8 +375,9 @@ namespace Ink_Canvas.Helpers
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                WriteDebugLog("遍历锁定对象时发生异常", ex);
             }
         }
 
@@ -388,8 +408,9 @@ namespace Ink_Canvas.Helpers
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                WriteDebugLog("遍历锁定对象时发生异常", ex);
             }
         }
 
@@ -408,8 +429,9 @@ namespace Ink_Canvas.Helpers
                     var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     _lockedFiles[filePath] = fs;
                 }
-                catch
+                catch (Exception ex)
                 {
+                    WriteDebugLog("锁定文件失败", ex);
                 }
             }
         }
@@ -432,8 +454,9 @@ namespace Ink_Canvas.Helpers
                         _lockedDirs[dirPath] = handle;
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
+                    WriteDebugLog("锁定目录失败", ex);
                 }
             }
         }
@@ -450,8 +473,9 @@ namespace Ink_Canvas.Helpers
                 if (string.IsNullOrWhiteSpace(p)) return p;
                 return Path.GetFullPath(p.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
             }
-            catch
+            catch (Exception ex)
             {
+                WriteDebugLog("路径规范化失败", ex);
                 return p;
             }
         }
@@ -478,8 +502,9 @@ namespace Ink_Canvas.Helpers
                     dir = NormalizePath(Path.GetDirectoryName(dir));
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                WriteDebugLog("构建目录链失败", ex);
             }
             return list;
         }
@@ -505,8 +530,9 @@ namespace Ink_Canvas.Helpers
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                WriteDebugLog("排除路径检查失败", ex);
             }
             return false;
         }
