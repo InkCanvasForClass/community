@@ -125,8 +125,9 @@ namespace Ink_Canvas.Helpers
 
                 return false;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[IACoreDllExtractor] 校验DLL失败: {filePath}, {ex.Message}");
                 return false;
             }
         }
