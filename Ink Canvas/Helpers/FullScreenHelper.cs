@@ -25,9 +25,9 @@ namespace Ink_Canvas.Helpers
                 var obj = Activator.CreateInstance(Type.GetTypeFromCLSID(CLSID_TaskbarList));
                 (obj as ITaskbarList2)?.MarkFullscreenWindow(hwnd, isFullscreen);
             }
-            catch
+            catch (Exception ex)
             {
-                //应该不会挂
+                System.Diagnostics.Debug.WriteLine($"[FullScreenHelper] 标记任务栏全屏状态失败: {ex.Message}");
             }
         }
 
@@ -286,9 +286,9 @@ namespace Ink_Canvas.Helpers
                         }
                     }
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // 这里也不需要日志啥的，只是为了防止上面有逗比逻辑，在消息循环里面炸了
+                    System.Diagnostics.Debug.WriteLine($"[FullScreenHelper] 处理全屏 Hook 消息失败: {ex.Message}");
                 }
             }
 
