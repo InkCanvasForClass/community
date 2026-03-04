@@ -76,8 +76,9 @@ namespace Ink_Canvas.Helpers
                     (int)(bottomRight.X - topLeft.X),
                     (int)(bottomRight.Y - topLeft.Y));
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"获取窗口屏幕边界失败: {ex.Message}", LogHelper.LogType.Warning);
                 // 如果无法获取精确位置，返回窗口的Left和Top
                 return new Rectangle(
                     (int)window.Left,
@@ -97,8 +98,9 @@ namespace Ink_Canvas.Helpers
             {
                 return Screen.AllScreens.Length > 1;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"检测多屏状态失败: {ex.Message}", LogHelper.LogType.Warning);
                 return false;
             }
         }
@@ -113,8 +115,9 @@ namespace Ink_Canvas.Helpers
             {
                 return Screen.PrimaryScreen;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"获取主屏幕失败: {ex.Message}", LogHelper.LogType.Warning);
                 return null;
             }
         }
@@ -129,8 +132,9 @@ namespace Ink_Canvas.Helpers
             {
                 return Screen.AllScreens;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"获取屏幕列表失败: {ex.Message}", LogHelper.LogType.Warning);
                 return new Screen[] { Screen.PrimaryScreen };
             }
         }
@@ -147,8 +151,9 @@ namespace Ink_Canvas.Helpers
                 var windowScreen = GetWindowScreen(window);
                 return windowScreen == Screen.PrimaryScreen;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"检测窗口是否在主屏幕失败: {ex.Message}", LogHelper.LogType.Warning);
                 return true; // 出错时假设在主屏幕
             }
         }
