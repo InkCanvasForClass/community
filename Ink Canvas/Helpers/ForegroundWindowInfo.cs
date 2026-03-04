@@ -115,9 +115,9 @@ namespace Ink_Canvas.Helpers
                 Process process = Process.GetProcessById((int)processId);
                 return process.MainModule.FileName;
             }
-            catch
+            catch (Exception ex)
             {
-                // Process with the given ID not found
+                Debug.WriteLine($"[ForegroundWindowInfo] 获取前台进程路径失败: {ex.Message}");
                 return "Unknown";
             }
         }
