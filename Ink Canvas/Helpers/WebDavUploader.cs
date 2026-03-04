@@ -101,8 +101,9 @@ namespace Ink_Canvas.Helpers
             {
                 throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"WebDav 上传失败: {ex.Message}", LogHelper.LogType.Warning);
                 return false;
             }
         }
@@ -137,9 +138,9 @@ namespace Ink_Canvas.Helpers
                     await client.Mkcol(currentPath);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // 静默处理目录创建错误
+                LogHelper.WriteLogToFile($"WebDav 创建目录失败: {directoryPath}, {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
@@ -162,8 +163,9 @@ namespace Ink_Canvas.Helpers
                 new Uri(webDavUrl);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"WebDav 地址无效: {webDavUrl}, {ex.Message}", LogHelper.LogType.Warning);
                 return false;
             }
         }
