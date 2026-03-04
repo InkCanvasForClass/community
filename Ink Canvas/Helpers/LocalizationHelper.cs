@@ -1,4 +1,5 @@
 using Ink_Canvas.Properties;
+using System;
 using System.Globalization;
 using System.Threading;
 
@@ -40,8 +41,9 @@ namespace Ink_Canvas.Helpers
                 CurrentCulture = culture;
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"[LocalizationHelper] 切换语言失败: {ex.Message}");
                 return false;
             }
         }
