@@ -24,8 +24,9 @@ namespace Ink_Canvas.Helpers
                     ShowToastForModernWindows(version);
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                LogHelper.WriteLogToFile($"显示更新通知失败: {ex.Message}", LogHelper.LogType.Warning);
             }
         }
 
@@ -45,8 +46,9 @@ namespace Ink_Canvas.Helpers
                         $"发现新版本！：{version}",
                         BalloonIcon.Info);
                 }
-                catch
+                catch (Exception ex)
                 {
+                    LogHelper.WriteLogToFile($"显示 Win7 气泡通知失败: {ex.Message}", LogHelper.LogType.Warning);
                 }
             });
         }
