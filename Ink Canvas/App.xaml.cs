@@ -1079,6 +1079,8 @@ namespace Ink_Canvas
             {
                 isStartupComplete = true;
                 startupCompleteHeartbeat = DateTime.Now;
+                startupCompleteTicksUtc = DateTime.UtcNow.Ticks;
+                Interlocked.Exchange(ref lastHeartbeatTicksUtc, startupCompleteTicksUtc);
                 if (_isSplashScreenShown && splashScreenStartTime != DateTime.MinValue)
                 {
                     LogHelper.WriteLogToFile($"启动完成心跳已记录，启动画面显示时长: {(startupCompleteHeartbeat - splashScreenStartTime).TotalSeconds:F2}秒");
@@ -1189,13 +1191,14 @@ namespace Ink_Canvas
 
         // 心跳相关
         private static DispatcherTimer heartbeatTimer;
-        private static DateTime lastHeartbeat = DateTime.Now;
+        private static long lastHeartbeatTicksUtc = DateTime.UtcNow.Ticks;
         private static Timer watchdogTimer;
         private static bool isStartupComplete = false;
         private static DateTime startupCompleteHeartbeat = DateTime.MinValue;
+        private static long startupCompleteTicksUtc = DateTime.MinValue.Ticks;
+        private const int StartupWatchdogGraceSeconds = 30;
         private static DateTime splashScreenStartTime = DateTime.MinValue;
         private static DateTime appStartupStartTime = DateTime.MinValue;
-        private static readonly TimeSpan StartupTimeout = TimeSpan.FromMinutes(2);
 
         /// <summary>
         /// 启动并管理应用的心跳与守护检查定时器，监测启动阶段与主线程是否无响应，并在符合配置的情况下尝试静默重启应用。
@@ -1214,13 +1217,11 @@ namespace Ink_Canvas
             {
                 Interval = TimeSpan.FromSeconds(1)
             };
-            heartbeatTimer.Tick += (_, __) => lastHeartbeat = DateTime.Now;
+            heartbeatTimer.Tick += (_, __) => Interlocked.Exchange(ref lastHeartbeatTicksUtc, DateTime.UtcNow.Ticks);
             heartbeatTimer.Start();
 
             watchdogTimer = new Timer(_ =>
             {
-                var now = DateTime.Now;
-
                 if (IsOobeShowing)
                     return;
 
@@ -1229,8 +1230,8 @@ namespace Ink_Canvas
                     DateTime startTime = _isSplashScreenShown && splashScreenStartTime != DateTime.MinValue
                         ? splashScreenStartTime
                         : appStartupStartTime;
-                    TimeSpan elapsedSinceStart = now - startTime;
-                    if (elapsedSinceStart >= StartupTimeout)
+                    TimeSpan elapsedSinceStart = DateTime.Now - startTime;
+                    if (elapsedSinceStart.TotalMinutes >= 2)
                     {
                         string timeType = _isSplashScreenShown ? "启动画面已显示" : "应用启动开始";
                         LogHelper.WriteLogToFile($"检测到启动假死：{timeType}{elapsedSinceStart.TotalMinutes:F2}分钟，但未收到启动完成心跳，自动重启。", LogHelper.LogType.Error);
@@ -1255,13 +1256,21 @@ namespace Ink_Canvas
                         return;
                     }
                 }
-
-                if (isStartupComplete && (now - lastHeartbeat).TotalSeconds > 10)
+                if (isStartupComplete)
                 {
-                    if (appStartupStartTime != DateTime.MinValue && (now - appStartupStartTime) < StartupTimeout)
+                    var startupCompleteUtc = new DateTime(Interlocked.Read(ref startupCompleteTicksUtc), DateTimeKind.Utc);
+                    if ((DateTime.UtcNow - startupCompleteUtc).TotalSeconds < StartupWatchdogGraceSeconds)
+                    {
                         return;
+                    }
 
-                    LogHelper.NewLog("检测到主线程无响应，自动重启。");
+                    var lastHeartbeatUtc = new DateTime(Interlocked.Read(ref lastHeartbeatTicksUtc), DateTimeKind.Utc);
+                    if ((DateTime.UtcNow - lastHeartbeatUtc).TotalSeconds <= 10)
+                    {
+                        return;
+                    }
+
+                    LogHelper.NewLog($"检测到主线程无响应，自动重启。最后心跳距今 {(DateTime.UtcNow - lastHeartbeatUtc).TotalSeconds:F1} 秒。");
                     SyncCrashActionFromSettings();
                     if (CrashAction == CrashActionType.SilentRestart)
                     {
