@@ -170,7 +170,7 @@
     <PackageReference Include="AForge.Math" Version="2.2.5" />
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
   </ItemGroup>
-  <ItemGroup Condition="'$(OS)' == 'Windows_NT'">
+  <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
     <COMReference Include="IWshRuntimeLibrary">
       <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
       <VersionMajor>1</VersionMajor>
@@ -199,7 +199,7 @@
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
   </ItemGroup>
-  <ItemGroup Condition="'$(OS)' != 'Windows_NT'">
+  <ItemGroup Condition="'$(MSBuildRuntimeType)' != 'Full'">
     <Reference Include="Interop.IWshRuntimeLibrary">
       <HintPath>libs\Interop.IWshRuntimeLibrary.dll</HintPath>
       <Private>False</Private>
