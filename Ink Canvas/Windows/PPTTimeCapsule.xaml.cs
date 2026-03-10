@@ -1,10 +1,6 @@
 using Ink_Canvas.Helpers;
 using Microsoft.Win32;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
@@ -12,7 +8,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
-using File = System.IO.File;
 
 namespace Ink_Canvas.Windows
 {
@@ -22,10 +17,10 @@ namespace Ink_Canvas.Windows
     public partial class PPTTimeCapsule : UserControl, IDisposable
     {
         private System.Timers.Timer timeUpdateTimer;
-        private System.Timers.Timer countdownUpdateTimer; 
+        private System.Timers.Timer countdownUpdateTimer;
         private DateTime lastTime = DateTime.MinValue;
-        private TimerControl parentControl; 
-        private bool wasTimerRunning = false; 
+        private TimerControl parentControl;
+        private bool wasTimerRunning = false;
         private bool isOvertime = false;
         private Storyboard capsuleExpandStoryboard;
         private Storyboard capsuleShrinkStoryboard;
@@ -39,10 +34,10 @@ namespace Ink_Canvas.Windows
             InitializeComponent();
             InitializeTimers();
             ApplyTheme();
-            
+
             // 监听主题变化
             SystemEvents.UserPreferenceChanged += SystemEvents_UserPreferenceChanged;
-            
+
             Loaded += PPTTimeCapsule_Loaded;
             Unloaded += PPTTimeCapsule_Unloaded;
             IsVisibleChanged += PPTTimeCapsule_IsVisibleChanged;
@@ -88,7 +83,7 @@ namespace Ink_Canvas.Windows
             // 时间更新定时器（每秒更新）
             timeUpdateTimer = new System.Timers.Timer(1000);
             timeUpdateTimer.Elapsed += TimeUpdateTimer_Elapsed;
-            
+
             // 倒计时更新定时器
             countdownUpdateTimer = new System.Timers.Timer(250);
             countdownUpdateTimer.Elapsed += CountdownUpdateTimer_Elapsed;
@@ -158,49 +153,49 @@ namespace Ink_Canvas.Windows
         private void UpdateTimeDisplay()
         {
             DateTime now = DateTime.Now;
-            
+
             // 检查小时是否改变
-                if (lastTime != DateTime.MinValue && lastTime.Hour != now.Hour)
-                {
-                    // 先更新数字内容
-                    SetDigitDisplay("Hour1Display", now.Hour / 10);
-                    SetDigitDisplay("Hour2Display", now.Hour % 10);
-                    
-                    // 重置Transform位置到上方
-                    HourContentTransform.Y = -40;
-                    HourPanel.Opacity = 0;
-                    
-                    // 播放小时滚动动画：从上方滚入
-                    PlayHourScrollAnimation();
-                }
-                else if (lastTime == DateTime.MinValue)
-                {
-                    // 首次加载，直接更新显示
-                    SetDigitDisplay("Hour1Display", now.Hour / 10);
-                    SetDigitDisplay("Hour2Display", now.Hour % 10);
-                }
-            
+            if (lastTime != DateTime.MinValue && lastTime.Hour != now.Hour)
+            {
+                // 先更新数字内容
+                SetDigitDisplay("Hour1Display", now.Hour / 10);
+                SetDigitDisplay("Hour2Display", now.Hour % 10);
+
+                // 重置Transform位置到上方
+                HourContentTransform.Y = -40;
+                HourPanel.Opacity = 0;
+
+                // 播放小时滚动动画：从上方滚入
+                PlayHourScrollAnimation();
+            }
+            else if (lastTime == DateTime.MinValue)
+            {
+                // 首次加载，直接更新显示
+                SetDigitDisplay("Hour1Display", now.Hour / 10);
+                SetDigitDisplay("Hour2Display", now.Hour % 10);
+            }
+
             // 检查分钟是否改变
-                if (lastTime != DateTime.MinValue && lastTime.Minute != now.Minute)
-                {
-                    // 先更新数字内容
-                    SetDigitDisplay("Minute1Display", now.Minute / 10);
-                    SetDigitDisplay("Minute2Display", now.Minute % 10);
-                    
-                    // 重置Transform位置到上方
-                    MinuteContentTransform.Y = -40;
-                    MinutePanel.Opacity = 0;
-                    
-                    // 播放分钟滚动动画：从上方滚入
-                    PlayMinuteScrollAnimation();
-                }
-                else if (lastTime == DateTime.MinValue)
-                {
-                    // 首次加载，直接更新显示
-                    SetDigitDisplay("Minute1Display", now.Minute / 10);
-                    SetDigitDisplay("Minute2Display", now.Minute % 10);
-                }
-            
+            if (lastTime != DateTime.MinValue && lastTime.Minute != now.Minute)
+            {
+                // 先更新数字内容
+                SetDigitDisplay("Minute1Display", now.Minute / 10);
+                SetDigitDisplay("Minute2Display", now.Minute % 10);
+
+                // 重置Transform位置到上方
+                MinuteContentTransform.Y = -40;
+                MinutePanel.Opacity = 0;
+
+                // 播放分钟滚动动画：从上方滚入
+                PlayMinuteScrollAnimation();
+            }
+            else if (lastTime == DateTime.MinValue)
+            {
+                // 首次加载，直接更新显示
+                SetDigitDisplay("Minute1Display", now.Minute / 10);
+                SetDigitDisplay("Minute2Display", now.Minute % 10);
+            }
+
             lastTime = now;
         }
 
@@ -210,7 +205,7 @@ namespace Ink_Canvas.Windows
             var scrollAnimation = (Storyboard)Resources["HourScrollAnimation"];
             scrollAnimation.Begin();
         }
-        
+
         private void PlayMinuteScrollAnimation()
         {
             // 新时间从上方滚入（-25到0）
@@ -301,12 +296,12 @@ namespace Ink_Canvas.Windows
             bool wasRunning = wasTimerRunning;
             wasTimerRunning = false;
             CountdownPanel.Visibility = Visibility.Collapsed;
-            
+
             // 重置超时状态
             isOvertime = false;
             // 根据主题恢复倒计时文本颜色
             ApplyTheme();
-            
+
             // 播放胶囊缩短动画
             if (wasRunning)
             {
@@ -320,7 +315,7 @@ namespace Ink_Canvas.Windows
 
             // 检查计时器是否正在运行
             bool isRunning = parentControl.IsTimerRunning;
-            
+
             // 如果状态改变，更新UI
             if (isRunning != wasTimerRunning)
             {
@@ -362,33 +357,33 @@ namespace Ink_Canvas.Windows
 
             var timeSpan = remainingTime.Value;
             bool isOvertimeMode = timeSpan.TotalSeconds < 0;
-            
+
             // 更新倒计时文本
             UpdateCountdownText(timeSpan, isOvertimeMode);
-            
+
             // 根据文本内容动态调整胶囊宽度
             AdjustCapsuleWidthToContent();
         }
-        
+
         /// <summary>
         /// 更新倒计时文本内容
         /// </summary>
         private void UpdateCountdownText(TimeSpan? timeSpan = null, bool? isOvertimeMode = null)
         {
             if (CountdownText == null || parentControl == null) return;
-            
+
             if (!timeSpan.HasValue)
             {
                 var remainingTime = parentControl.GetRemainingTime();
                 if (!remainingTime.HasValue) return;
                 timeSpan = remainingTime.Value;
             }
-            
+
             if (!isOvertimeMode.HasValue)
             {
                 isOvertimeMode = timeSpan.Value.TotalSeconds < 0;
             }
-            
+
             // 处理超时状态
             if (isOvertimeMode.Value)
             {
@@ -397,14 +392,14 @@ namespace Ink_Canvas.Windows
                     isOvertime = true;
                     OnTimerOvertime();
                 }
-                
+
                 // 确保倒计时文本为红色（如果启用了超时红色文本设置）
                 var mainWindow = Application.Current.MainWindow as MainWindow;
                 if (mainWindow != null && MainWindow.Settings.RandSettings?.EnableOvertimeRedText == true)
                 {
                     CountdownText.Foreground = new SolidColorBrush(Colors.Red);
                 }
-                
+
                 // 显示超时时间
                 var overtimeSpan = -timeSpan.Value;
                 if (overtimeSpan.TotalHours >= 1)
@@ -456,14 +451,14 @@ namespace Ink_Canvas.Windows
                 }
             }
         }
-        
+
         /// <summary>
         /// 根据内容动态调整胶囊宽度
         /// </summary>
         private void AdjustCapsuleWidthToContent()
         {
             if (MainCapsule == null || !wasTimerRunning || CountdownText == null) return;
-            
+
             try
             {
                 // 检查文本是否改变（格式变化可能导致宽度变化）
@@ -473,12 +468,12 @@ namespace Ink_Canvas.Windows
                     // 文本未改变，不需要调整
                     return;
                 }
-                
+
                 lastCountdownText = currentText;
-                
+
                 double currentWidth = MainCapsule.ActualWidth;
                 double targetWidth = CalculateTargetWidth();
-                
+
                 // 如果当前宽度与目标宽度差异较大（超过2像素），则调整
                 if (Math.Abs(currentWidth - targetWidth) > 2)
                 {
@@ -496,25 +491,25 @@ namespace Ink_Canvas.Windows
                     {
                         capsuleShrinkStoryboard.Stop();
                     }
-                    
+
                     // 创建新的动画
                     var animation = new DoubleAnimation
                     {
                         From = currentWidth,
                         To = targetWidth,
                         Duration = new Duration(TimeSpan.FromMilliseconds(targetWidth > currentWidth ? 600 : 800)),
-                        EasingFunction = targetWidth > currentWidth 
+                        EasingFunction = targetWidth > currentWidth
                             ? new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.4 }
                             : new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.2 }
                     };
-                    
+
                     var storyboard = new Storyboard();
                     Storyboard.SetTarget(animation, MainCapsule);
                     Storyboard.SetTargetProperty(animation, new PropertyPath(FrameworkElement.WidthProperty));
                     storyboard.Children.Add(animation);
                     currentWidthAnimation = storyboard;
                     storyboard.Begin();
-                    
+
                     storyboard.Completed += (o, args) =>
                     {
                         storyboard.Remove();
@@ -542,22 +537,22 @@ namespace Ink_Canvas.Windows
                     {
                         originalCapsuleWidth = MainCapsule.ActualWidth > 0 ? MainCapsule.ActualWidth : 120;
                     }
-                    
+
                     // 停止当前动画
                     if (currentWidthAnimation != null)
                     {
                         currentWidthAnimation.Stop();
                         currentWidthAnimation = null;
                     }
-                    
+
                     // 根据倒计时文本的实际宽度动态计算目标宽度
                     double targetWidth = CalculateTargetWidth();
-                    
+
                     if (capsuleExpandStoryboard == null)
                     {
                         capsuleExpandStoryboard = (Storyboard)Resources["CapsuleExpandAnimation"];
                     }
-                    
+
                     if (capsuleExpandStoryboard != null)
                     {
                         // 设置动画的目标值
@@ -567,7 +562,7 @@ namespace Ink_Canvas.Windows
                             animation.From = MainCapsule.ActualWidth;
                             animation.To = targetWidth;
                         }
-                        
+
                         capsuleExpandStoryboard.Begin();
                     }
                 }
@@ -577,7 +572,7 @@ namespace Ink_Canvas.Windows
                 LogHelper.WriteLogToFile($"播放胶囊伸长动画失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
-        
+
         /// <summary>
         /// 根据倒计时文本的实际宽度计算目标宽度
         /// </summary>
@@ -588,26 +583,26 @@ namespace Ink_Canvas.Windows
                 // 如果倒计时文本不可用，使用估算值
                 return originalCapsuleWidth + 80;
             }
-            
+
             // 测量倒计时文本的实际宽度
             CountdownText.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             double countdownTextWidth = CountdownText.DesiredSize.Width;
-            
+
             // 测量时间显示面板的宽度
             TimeDisplayPanel.Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
             double timeDisplayWidth = TimeDisplayPanel.DesiredSize.Width;
-            
+
             double targetWidth = timeDisplayWidth + countdownTextWidth + 8 + 32;
-            
+
             // 确保最小宽度不小于原始宽度
             if (targetWidth < originalCapsuleWidth)
             {
                 targetWidth = originalCapsuleWidth;
             }
-            
+
             return targetWidth;
         }
-        
+
         private void PlayCapsuleShrinkAnimation()
         {
             try
@@ -620,15 +615,15 @@ namespace Ink_Canvas.Windows
                         currentWidthAnimation.Stop();
                         currentWidthAnimation = null;
                     }
-                    
+
                     // 重置文本跟踪
                     lastCountdownText = "";
-                    
+
                     if (capsuleShrinkStoryboard == null)
                     {
                         capsuleShrinkStoryboard = (Storyboard)Resources["CapsuleShrinkAnimation"];
                     }
-                    
+
                     if (capsuleShrinkStoryboard != null)
                     {
                         // 设置动画的目标值
@@ -638,7 +633,7 @@ namespace Ink_Canvas.Windows
                             animation.From = MainCapsule.ActualWidth;
                             animation.To = originalCapsuleWidth;
                         }
-                        
+
                         capsuleShrinkStoryboard.Begin();
                     }
                 }
@@ -670,7 +665,7 @@ namespace Ink_Canvas.Windows
                 Dispatcher.BeginInvoke(new Action(() => OnTimerCompleted()), DispatcherPriority.Normal);
                 return;
             }
-            
+
             // 停止倒计时
             StopCountdown();
         }
@@ -682,31 +677,31 @@ namespace Ink_Canvas.Windows
             if (mainWindow != null)
             {
                 mainWindow.AdjustTimerContainerSize();
-                
+
                 // 显示主计时器窗口
                 var timerContainer = mainWindow.FindName("TimerContainer") as FrameworkElement;
                 if (timerContainer != null)
                 {
                     timerContainer.Visibility = Visibility.Visible;
                 }
-                
+
                 // 隐藏最小化计时器容器
                 var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
                 if (minimizedContainer != null)
                 {
                     minimizedContainer.Visibility = Visibility.Collapsed;
                 }
-                
+
                 if (mainWindow.TimerControl != null)
                 {
                     mainWindow.TimerControl.UpdateActivityTime();
-                    
+
                     mainWindow.TimerControl.CloseRequested -= TimerControl_CloseRequested;
                     mainWindow.TimerControl.CloseRequested += TimerControl_CloseRequested;
                 }
             }
         }
-        
+
         private void TimerControl_CloseRequested(object sender, EventArgs e)
         {
             // 当计时器窗口关闭时，隐藏TimerContainer
@@ -718,7 +713,7 @@ namespace Ink_Canvas.Windows
                 {
                     timerContainer.Visibility = Visibility.Collapsed;
                 }
-                
+
                 var minimizedContainer = mainWindow.FindName("MinimizedTimerContainer") as FrameworkElement;
                 if (minimizedContainer != null)
                 {
@@ -828,7 +823,7 @@ namespace Ink_Canvas.Windows
         /// 获取当前倒计时状态
         /// </summary>
         public bool IsCountdownRunning => parentControl != null && parentControl.IsTimerRunning;
-        
+
         /// <summary>
         /// 获取是否超时
         /// </summary>

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
   <PropertyGroup>
     <RuntimeIdentifiers>win;win-x86;win-x64;win-arm64</RuntimeIdentifiers>
     <OutputType>WinExe</OutputType>
@@ -149,21 +149,24 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
     <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.9.27" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="Microsoft.Office.Interop.PowerPoint" Version="15.0.4420.1018" />
     <PackageReference Include="MicrosoftOfficeCore" Version="15.0.0" />
     <PackageReference Include="Microsoft.Toolkit.Uwp.Notifications" Version="7.1.3" />
     <PackageReference Include="Microsoft.International.Converters.PinYinConverter" Version="1.0.0" />
-    <PackageReference Include="Sentry" Version="6.0.0" />
+    <PackageReference Include="Sentry" Version="6.1.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="NHotkey.Wpf" Version="3.0.0" />
-    <PackageReference Include="OSVersionExt" Version="3.0.0" />
-  <PackageReference Include="AForge.Video" Version="2.2.5" />
-  <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+    <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
+    <PackageReference Include="OSVersionExt" Version="4.1.0" />
+    <PackageReference Include="AForge.Video" Version="2.2.5" />
+    <PackageReference Include="AForge.Video.DirectShow" Version="2.2.5" />
+    <PackageReference Include="AForge.Imaging" Version="2.2.5" />
+    <PackageReference Include="AForge.Math" Version="2.2.5" />
+    <PackageReference Include="WebDav.Client" Version="2.9.0" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="IWshRuntimeLibrary">
@@ -299,8 +302,13 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="privacy.txt" />
-    <EmbeddedResource Include="telemetry_dsn.txt" Condition="Exists('telemetry_dsn.txt')">
+    <EmbeddedResource Include="telemetry_dsn.txt" Condition="Exists('telemetry_dsn.txt') AND '$(DLASS_SENTRY_DSN)' == ''">
       <Link>telemetry_dsn.txt</Link>
+    </EmbeddedResource>
+    <EmbeddedResource Include="$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt" Condition="'$(DLASS_SENTRY_DSN)' != ''">
+      <Link>telemetry_dsn.txt</Link>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -564,6 +572,11 @@
     <Compile Remove="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Update="Properties\Strings.en-US.resx">
+      <LogicalName>Ink_Canvas.Properties.Strings.en-US.resources</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="MainWindow.xaml~RF6c3144.TMP" />
     <None Remove="Resources\Cursors\Cursor.cur" />
     <None Remove="Resources\Cursors\Pen.cur" />
@@ -665,4 +678,11 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+  <Target Name="GenerateTelemetryDsn" BeforeTargets="PrepareResources" Condition="'$(DLASS_SENTRY_DSN)' != ''">
+    <WriteLinesToFile File="$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt" Lines="$(DLASS_SENTRY_DSN)" Overwrite="true" />
+  </Target>
+
+  <Target Name="CleanTelemetryDsn" AfterTargets="Build;Clean" Condition="Exists('$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt')">
+    <Delete Files="$(MSBuildProjectDirectory)\telemetry_dsn.generated.txt" />
+  </Target>
 </Project>

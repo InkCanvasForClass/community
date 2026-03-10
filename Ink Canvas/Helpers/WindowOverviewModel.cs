@@ -5,8 +5,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace Ink_Canvas.Helpers
 {
@@ -137,15 +135,15 @@ namespace Ink_Canvas.Helpers
         private Timer _updateTimer;
         private bool _isDisposed = false;
         private readonly int _updateInterval = 1000; // 更新间隔（毫秒）
-        
+
         private readonly Dictionary<uint, ProcessCacheInfo> _processCache = new Dictionary<uint, ProcessCacheInfo>();
         private readonly object _processCacheLock = new object();
         private DateTime _lastProcessCacheCleanup = DateTime.Now;
-        private const int PROCESS_CACHE_CLEANUP_INTERVAL_MS = 30000; 
-        
+        private const int PROCESS_CACHE_CLEANUP_INTERVAL_MS = 30000;
+
         // 窗口缓存，用于增量更新
         private readonly Dictionary<IntPtr, WindowInfo> _windowCache = new Dictionary<IntPtr, WindowInfo>();
-        
+
         /// <summary>
         /// 进程缓存信息
         /// </summary>
@@ -219,26 +217,26 @@ namespace Ink_Canvas.Helpers
                         .Where(kvp => (now - kvp.Value.LastAccessTime).TotalMilliseconds > PROCESS_CACHE_CLEANUP_INTERVAL_MS)
                         .Select(kvp => kvp.Key)
                         .ToList();
-                    
+
                     foreach (var key in keysToRemove)
                     {
                         _processCache.Remove(key);
                     }
-                    
+
                     _lastProcessCacheCleanup = now;
                 }
-                
+
                 // 检查缓存
                 if (_processCache.TryGetValue(processId, out var cachedInfo))
                 {
                     cachedInfo.LastAccessTime = now;
                     return (cachedInfo.ProcessName, cachedInfo.ProcessPath);
                 }
-                
+
                 // 缓存未命中，获取进程信息
                 string processName = "Unknown";
                 string processPath = "Unknown";
-                
+
                 try
                 {
                     Process process = Process.GetProcessById((int)processId);
@@ -256,7 +254,7 @@ namespace Ink_Canvas.Helpers
                 {
                     // 进程可能已退出
                 }
-                
+
                 // 添加到缓存
                 _processCache[processId] = new ProcessCacheInfo
                 {
@@ -264,11 +262,11 @@ namespace Ink_Canvas.Helpers
                     ProcessPath = processPath,
                     LastAccessTime = now
                 };
-                
+
                 return (processName, processPath);
             }
         }
-        
+
         /// <summary>
         /// 检查窗口信息是否发生变化
         /// </summary>
@@ -278,7 +276,7 @@ namespace Ink_Canvas.Helpers
             {
                 return true; // 新窗口
             }
-            
+
             // 检查关键属性是否变化
             return cachedWindow.Rect.Left != rect.Left ||
                    cachedWindow.Rect.Top != rect.Top ||
@@ -338,10 +336,10 @@ namespace Ink_Canvas.Helpers
 
                     // 检查窗口是否发生变化
                     bool windowChanged = HasWindowChanged(hWnd, rect, isMinimized, isMaximized, isFullScreen);
-                    
+
                     // 获取进程信息
                     GetWindowThreadProcessId(hWnd, out uint processId);
-                    
+
                     // 使用缓存的进程信息
                     var (processName, processPath) = GetProcessInfo(processId);
 
@@ -371,7 +369,7 @@ namespace Ink_Canvas.Helpers
                             ProcessId = processId,
                             IsFullScreen = isFullScreen
                         };
-                        
+
                         // 更新缓存以保持ZOrder等属性最新
                         _windowCache[hWnd] = windowInfo;
                     }
@@ -404,7 +402,7 @@ namespace Ink_Canvas.Helpers
                             ProcessId = processId,
                             IsFullScreen = isFullScreen
                         };
-                        
+
                         // 更新缓存
                         _windowCache[hWnd] = windowInfo;
                     }
@@ -600,12 +598,12 @@ namespace Ink_Canvas.Helpers
             {
                 _windows.Clear();
             }
-            
+
             lock (_processCacheLock)
             {
                 _processCache.Clear();
             }
-            
+
             _windowCache.Clear();
         }
     }

@@ -657,11 +657,11 @@
                 </StackPanel>
             </Border>
             
-            <!-- Dlass设置管理 -->
+            <!-- 云存储管理 -->
             <Border Margin="0,25,0,0" BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
                 <StackPanel Orientation="Vertical" Margin="18,18,18,18">
-                    <TextBlock Text="Dlass设置管理" FontWeight="Bold" Foreground="#2e3436" FontSize="18" Margin="0,0,0,12"/>
-                    <Button x:Name="BtnDlassSettingsManage" Tag="dlass_settings" Content="Dlass设置管理" Padding="15,5" HorizontalAlignment="Left" Background="#2563eb" Foreground="White" Click="Button_Click"/>
+                    <TextBlock Text="云存储管理" FontWeight="Bold" Foreground="#2e3436" FontSize="18" Margin="0,0,0,12"/>
+                    <Button x:Name="BtnDlassSettingsManage" Tag="dlass_settings" Content="云存储管理" Padding="15,5" HorizontalAlignment="Left" Background="#2563eb" Foreground="White" Click="Button_Click"/>
                 </StackPanel>
             </Border>
         </StackPanel>

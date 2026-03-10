@@ -18,6 +18,7 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
+using Ink_Canvas.Properties;
 using SplashScreen = Ink_Canvas.Windows.SplashScreen;
 using Timer = System.Threading.Timer;
 using Sentry;
@@ -42,8 +43,12 @@ namespace Ink_Canvas
         public static Process watchdogProcess;
         // 新增：标记是否为软件内主动退出
         public static bool IsAppExitByUser;
+        // 新增：标记是否正在触发安装更新（用于跳过某些交互确认）
+        public static bool IsUpdateInstalling;
         // 新增：标记是否启用了UIA置顶功能
         public static bool IsUIAccessTopMostEnabled;
+        // 新增：标记是否正在显示 OOBE（首次启动向导），看门狗在此期间不判定为卡死/假死
+        public static bool IsOobeShowing;
         // 新增：退出信号文件路径
         private static string watchdogExitSignalFile = Path.Combine(Path.GetTempPath(), "icc_watchdog_exit_" + Process.GetCurrentProcess().Id + ".flag");
         // 新增：崩溃日志文件路径
@@ -416,7 +421,7 @@ namespace Ink_Canvas
                         $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] 记录未处理异常时发生错误: {ex.Message}\r\n"
                     );
                 }
-                catch { }
+                catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
             }
         }
 
@@ -540,6 +545,19 @@ namespace Ink_Canvas
             }
         }
 
+        private static bool IsLaunchByFileOrUri(string[] args)
+        {
+            if (args == null || args.Length == 0) return false;
+            foreach (string a in args)
+            {
+                if (string.IsNullOrWhiteSpace(a)) continue;
+                string t = a.Trim();
+                if (t.StartsWith("icc:", StringComparison.OrdinalIgnoreCase)) return true;
+                if (Path.GetExtension(t).Equals(".icstk", StringComparison.OrdinalIgnoreCase)) return true;
+            }
+            return false;
+        }
+
         // 记录崩溃日志
         private static void WriteCrashLog(string message)
         {
@@ -572,7 +590,7 @@ namespace Ink_Canvas
                 // 同时记录到主日志
                 LogHelper.WriteLogToFile(message, LogHelper.LogType.Error);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         // 增加字段保存崩溃后操作设置
@@ -589,7 +607,7 @@ namespace Ink_Canvas
                     var json = File.ReadAllText(settingsPath);
                     dynamic obj = JsonConvert.DeserializeObject(json);
                     int crashAction = 0;
-                    try { crashAction = (int)(obj["startup"]["crashAction"] ?? 0); } catch { }
+                    try { crashAction = (int)(obj["startup"]["crashAction"] ?? 0); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     CrashAction = (CrashActionType)crashAction;
                 }
                 // 从主窗口同步
@@ -598,7 +616,7 @@ namespace Ink_Canvas
                     CrashAction = (CrashActionType)Ink_Canvas.MainWindow.Settings.Startup.CrashAction;
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         private void App_DispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
@@ -628,7 +646,7 @@ namespace Ink_Canvas
                 }
             }
 
-            Ink_Canvas.MainWindow.ShowNewMessage("抱歉，出现未预期的异常，可能导致 InkCanvasForClass 运行不稳定。\n建议保存墨迹后重启应用。");
+            Ink_Canvas.MainWindow.ShowNewMessage(Strings.GetString("Msg_UnexpectedError"));
             LogHelper.NewLog(e.Exception.ToString());
 
             // 记录到崩溃日志
@@ -644,7 +662,7 @@ namespace Ink_Canvas
                 StartupCount.Increment();
                 if (StartupCount.GetCount() >= 5)
                 {
-                    MessageBox.Show("检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                     StartupCount.Reset();
                     Environment.Exit(1);
                 }
@@ -653,7 +671,7 @@ namespace Ink_Canvas
                     string exePath = Process.GetCurrentProcess().MainModule.FileName;
                     Process.Start(exePath);
                 }
-                catch { }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                 Environment.Exit(1);
             }
             // CrashActionType.NoAction 时不做处理
@@ -661,16 +679,28 @@ namespace Ink_Canvas
 
         private TaskbarIcon _taskbar;
 
+        /// <summary>
+        /// 处理应用启动流程：根据命令行与设置显示启动画面、初始化组件与遥测、处理更新相关逻辑、单实例检查并在必要时通过 IPC 与已运行实例通信，最终创建并显示主窗口并启动文件关联与 IPC 监听器。
+        /// </summary>
+        /// <param name="sender">事件的发送者（通常为 Application 对象）。</param>
+        /// <param name="e">启动事件参数；其 Args 可包含控制启动流程的标志，例如:
+        /// - "--final-app"：表示这是更新后的最终应用启动（会清理更新标记等）
+        /// - "--update-mode"：表示以更新模式启动（跳过主窗口显示）
+        /// - "--board"：直接进入白板模式
+        /// - "--show"：退出收纳模式并恢复浮动栏
+        /// - "--skip-mutex-check"：跳过单实例互斥检查
+        /// - "-m"：允许多实例启动
+        /// 另外也可能包含以 "icc:" 开头的 URI 参数或 .icstk 文件路径用于启动时的 IPC 交互。</param>
         async void App_Startup(object sender, StartupEventArgs e)
         {
             appStartTime = DateTime.Now;
             appStartupStartTime = DateTime.Now;
 
             // 根据设置决定是否显示启动画面
-            if (ShouldShowSplashScreen())
+            if (ShouldShowSplashScreen() && !IsLaunchByFileOrUri(e.Args))
             {
                 ShowSplashScreen();
-                SetSplashMessage("正在启动 Ink Canvas...");
+                SetSplashMessage(Strings.GetString("Splash_Starting"));
                 SetSplashProgress(20);
                 await Task.Delay(500);
 
@@ -905,7 +935,7 @@ namespace Ink_Canvas
                             LogHelper.WriteLogToFile("App | 清理损坏的更新标记文件");
                         }
                     }
-                    catch { }
+                    catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                 }
             }
 
@@ -998,7 +1028,7 @@ namespace Ink_Canvas
                             watchdogProcess.Kill();
                         }
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     Environment.Exit(0);
                 }
             }
@@ -1119,6 +1149,17 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"启动IPC监听器时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
+            // 初始化上传帮助类
+            try
+            {
+                LogHelper.WriteLogToFile("初始化上传帮助类");
+                Helpers.UploadHelper.Initialize();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"初始化上传帮助类时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
         }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -1134,9 +1175,9 @@ namespace Ink_Canvas
                         SenderScrollViewer.ScrollToVerticalOffset(SenderScrollViewer.VerticalOffset - e.Delta * 10 * SystemInformation.MouseWheelScrollLines / (double)120);
                         e.Handled = true;
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         // 用于设置崩溃后操作类型
@@ -1155,6 +1196,17 @@ namespace Ink_Canvas
         private static DateTime splashScreenStartTime = DateTime.MinValue;
         private static DateTime appStartupStartTime = DateTime.MinValue;
 
+        /// <summary>
+        /// 启动并管理应用的心跳与守护检查定时器，监测启动阶段与主线程是否无响应，并在符合配置的情况下尝试静默重启应用。
+        /// </summary>
+        /// <remarks>
+        /// - 启动一个每秒更新心跳时间戳的调度定时器和一个每3秒运行的守护定时器。  
+        /// - 守护定时器在首次运行的启动阶段若检测到超过两分钟未完成启动，会根据 CrashAction 配置尝试静默重启。  
+        /// - 在启动完成后若检测到主线程超过10秒无响应，会根据 CrashAction 配置尝试静默重启。  
+        /// - 对连续重启次数有保护：若重启计数达到或超过5次，会弹出提示并停止自动重启（重置重启计数并退出进程）。  
+        /// - 在 OOBE（首次引导）展示期间不执行守护检查。  
+        /// - 该方法会产生外部可观察的副作用：可能启动新进程并调用 Environment.Exit 终止当前进程，或显示消息框。
+        /// </remarks>
         private void StartHeartbeatMonitor()
         {
             heartbeatTimer = new DispatcherTimer
@@ -1166,6 +1218,9 @@ namespace Ink_Canvas
 
             watchdogTimer = new Timer(_ =>
             {
+                if (IsOobeShowing)
+                    return;
+
                 if (!isStartupComplete && appStartupStartTime != DateTime.MinValue)
                 {
                     DateTime startTime = _isSplashScreenShown && splashScreenStartTime != DateTime.MinValue 
@@ -1182,7 +1237,7 @@ namespace Ink_Canvas
                             StartupCount.Increment();
                             if (StartupCount.GetCount() >= 5)
                             {
-                                MessageBox.Show("检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                                MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                                 StartupCount.Reset();
                                 Environment.Exit(1);
                             }
@@ -1191,7 +1246,7 @@ namespace Ink_Canvas
                                 string exePath = Process.GetCurrentProcess().MainModule.FileName;
                                 Process.Start(exePath);
                             }
-                            catch { }
+                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                             Environment.Exit(1);
                         }
                         return;
@@ -1207,7 +1262,7 @@ namespace Ink_Canvas
                         StartupCount.Increment();
                         if (StartupCount.GetCount() >= 5)
                         {
-                            MessageBox.Show("检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                             StartupCount.Reset();
                             Environment.Exit(1);
                         }
@@ -1216,7 +1271,7 @@ namespace Ink_Canvas
                             string exePath = Process.GetCurrentProcess().MainModule.FileName;
                             Process.Start(exePath);
                         }
-                        catch { }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                         Environment.Exit(1);
                     }
                 }
@@ -1241,7 +1296,16 @@ namespace Ink_Canvas
             watchdogProcess = Process.Start(psi);
         }
 
-        // 看门狗主逻辑
+        /// <summary>
+        /// 作为守护进程监视指定的主进程，并在主进程异常退出时根据配置执行重启或退出操作。
+        /// </summary>
+        /// <remarks>
+        /// 该方法期望命令行参数格式为："--watchdog &lt;pid&gt; &lt;exitSignalFile&gt;"（args[1..3]）。
+        /// - 每 2 秒检查一次指定的主进程是否仍在运行；同时检测退出信号文件，若存在则删除该文件并以代码 0 退出守护进程。  
+        /// - 当主进程退出时，会同步崩溃处理设置（SyncCrashActionFromSettings）。若启用了 UIA 顶层访问（IsUIAccessTopMostEnabled），守护进程直接退出。  
+        /// - 若崩溃动作为 SilentRestart，则增加启动计数并：当连续重启计数达到 5 次及以上时弹出错误对话框、重置计数并以代码 1 退出；否则启动新的主进程实例。  
+        /// 方法对内部异常静默处理，并在完成后确保进程退出。
+        /// </remarks>
         public static void RunWatchdogIfNeeded()
         {
             var args = Environment.GetCommandLineArgs();
@@ -1257,7 +1321,7 @@ namespace Ink_Canvas
                         // 检查退出信号文件
                         if (File.Exists(exitSignalFile))
                         {
-                            try { File.Delete(exitSignalFile); } catch { }
+                            try { File.Delete(exitSignalFile); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                             Environment.Exit(0);
                         }
                         Thread.Sleep(2000);
@@ -1275,15 +1339,18 @@ namespace Ink_Canvas
                         StartupCount.Increment();
                         if (StartupCount.GetCount() >= 5)
                         {
-                            MessageBox.Show("检测到程序已连续重启5次，已停止自动重启。请联系开发者或检查系统环境。", "重启次数过多", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
                             StartupCount.Reset();
                             Environment.Exit(1);
                         }
-                        string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                        Process.Start(exePath);
+                        else
+                        {
+                            string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                            Process.Start(exePath);
+                        }
                     }
                 }
-                catch { }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                 Environment.Exit(0);
             }
         }
@@ -1391,7 +1458,7 @@ namespace Ink_Canvas
                 {
                     LogHelper.WriteLogToFile($"退出处理时发生错误: {ex.Message}", LogHelper.LogType.Error);
                 }
-                catch { }
+                catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
             }
         }
     }

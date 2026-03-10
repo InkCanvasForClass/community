@@ -11,18 +11,28 @@ using MessageBox = iNKORE.UI.WPF.Modern.Controls.MessageBox;
 namespace Ink_Canvas.Windows
 {
     /// <summary>
-    /// DlassSettingsWindow.xaml 的交互逻辑
+    /// 云储存管理窗口
     /// </summary>
-    public partial class DlassSettingsWindow : Window
+    /// <remarks>
+    /// 该窗口包含三个标签页：
+    /// 1. 通用设置 - 管理所有上传提供者的通用设置，包括上传延迟时间和提供者启用/禁用
+    /// 2. Dlass - 管理Dlass服务端连接和设置，包括用户Token、班级选择和自动上传设置
+    /// 3. WebDav - 预留的WebDav连接设置页面
+    /// </remarks>
+    public partial class CloudStorageManagementWindow : Window
     {
         private const string APP_ID = "app_WkjocWqsrVY7T6zQV2CfiA";
         private const string APP_SECRET = "o7dx5b5ASGUMcM72PCpmRQYAhSijqaOVHoGyBK0IxbA";
 
+        // 静态 Regex 实例，用于验证数字输入
+        private static readonly Regex _nonDigitRegex = new Regex("[^0-9]+", RegexOptions.Compiled | RegexOptions.CultureInvariant);
+
         private DlassApiClient _apiClient;
         private List<WhiteboardInfo> _currentWhiteboards = new List<WhiteboardInfo>();
         private UserInfo _currentUser;
+        private bool _isFirstTimeDlassTab = true;
 
-        public DlassSettingsWindow(MainWindow mainWindow = null)
+        public CloudStorageManagementWindow(MainWindow mainWindow = null)
         {
             InitializeComponent();
 
@@ -37,6 +47,12 @@ namespace Ink_Canvas.Windows
 
             // 加载自动上传设置
             LoadAutoUploadSettings();
+
+            // 加载通用设置
+            LoadUniversalUploadSettings();
+
+            // 加载WebDav设置
+            LoadWebDavSettings();
 
             // 初始化API客户端（优先使用用户token）
             InitializeApiClient();
@@ -291,7 +307,7 @@ namespace Ink_Canvas.Windows
                     {
                         delayMinutes = 0;
                     }
-                    TxtUploadDelayMinutes.Text = delayMinutes.ToString();
+
                 }
             }
             catch (Exception ex)
@@ -310,6 +326,42 @@ namespace Ink_Canvas.Windows
                 if (MainWindow.Settings?.Dlass != null)
                 {
                     MainWindow.Settings.Dlass.IsAutoUploadNotes = ToggleSwitchAutoUploadNotes.IsOn;
+
+                    // 同步更新到EnabledProviders列表
+                    if (MainWindow.Settings.Upload != null)
+                    {
+                        if (MainWindow.Settings.Upload.EnabledProviders == null)
+                        {
+                            MainWindow.Settings.Upload.EnabledProviders = new List<string>();
+                        }
+
+                        bool isAutoUploadEnabled = ToggleSwitchAutoUploadNotes.IsOn;
+                        bool isDlassInEnabledProviders = MainWindow.Settings.Upload.EnabledProviders.Contains("Dlass");
+                        bool isAlreadyConsistent = (isAutoUploadEnabled == isDlassInEnabledProviders);
+
+                        // 如果状态已经一致，就不需要更新EnabledProviders列表
+                        if (isAlreadyConsistent)
+                        {
+                            MainWindow.SaveSettingsToFile();
+                            return;
+                        }
+
+                        if (isAutoUploadEnabled)
+                        {
+                            if (!MainWindow.Settings.Upload.EnabledProviders.Contains("Dlass"))
+                            {
+                                MainWindow.Settings.Upload.EnabledProviders.Add("Dlass");
+                            }
+                        }
+                        else
+                        {
+                            MainWindow.Settings.Upload.EnabledProviders.Remove("Dlass");
+                        }
+
+                        // 重新加载通用设置，更新UI
+                        LoadUniversalUploadSettings();
+                    }
+
                     MainWindow.SaveSettingsToFile();
                 }
             }
@@ -319,53 +371,153 @@ namespace Ink_Canvas.Windows
             }
         }
 
+
+
+
+
         /// <summary>
-        /// 上传延迟时间输入框文本改变事件
+        /// 加载通用设置
         /// </summary>
-        private void TxtUploadDelayMinutes_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void LoadUniversalUploadSettings()
         {
             try
             {
-                if (MainWindow.Settings?.Dlass != null && int.TryParse(TxtUploadDelayMinutes.Text, out int delayMinutes))
+                // 加载上传延迟时间
+                if (MainWindow.Settings?.Upload != null)
+                {
+                    var delayMinutes = MainWindow.Settings.Upload.UploadDelayMinutes;
+                    if (delayMinutes < 0 || delayMinutes > 60)
+                    {
+                        delayMinutes = 0;
+                    }
+                    TxtUniversalUploadDelayMinutes.Text = delayMinutes.ToString();
+                }
+
+                // 加载上传提供者列表
+                LoadUploadProvidersList();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"加载通用设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 加载上传提供者列表
+        /// </summary>
+        private void LoadUploadProvidersList()
+        {
+            try
+            {
+                var providers = UploadHelper.GetProviders();
+                LstUploadProviders.ItemsSource = providers;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"加载上传提供者列表时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 通用设置延迟时间输入框文本改变事件
+        /// </summary>
+        private void TxtUniversalUploadDelayMinutes_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            try
+            {
+                if (MainWindow.Settings?.Upload != null && int.TryParse(TxtUniversalUploadDelayMinutes.Text, out int delayMinutes))
                 {
                     // 限制范围在0-60分钟
                     if (delayMinutes < 0)
                     {
                         delayMinutes = 0;
-                        TxtUploadDelayMinutes.Text = "0";
+                        TxtUniversalUploadDelayMinutes.Text = "0";
                     }
                     else if (delayMinutes > 60)
                     {
                         delayMinutes = 60;
-                        TxtUploadDelayMinutes.Text = "60";
+                        TxtUniversalUploadDelayMinutes.Text = "60";
                     }
 
-                    MainWindow.Settings.Dlass.AutoUploadDelayMinutes = delayMinutes;
+                    MainWindow.Settings.Upload.UploadDelayMinutes = delayMinutes;
                     MainWindow.SaveSettingsToFile();
                 }
-                else if (string.IsNullOrWhiteSpace(TxtUploadDelayMinutes.Text))
+                else if (string.IsNullOrWhiteSpace(TxtUniversalUploadDelayMinutes.Text))
                 {
                     // 空文本时设置为0
-                    if (MainWindow.Settings?.Dlass != null)
+                    if (MainWindow.Settings?.Upload != null)
                     {
-                        MainWindow.Settings.Dlass.AutoUploadDelayMinutes = 0;
+                        MainWindow.Settings.Upload.UploadDelayMinutes = 0;
                         MainWindow.SaveSettingsToFile();
                     }
                 }
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"保存上传延迟时间时出错: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"保存通用设置延迟时间时出错: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
         /// <summary>
-        /// 上传延迟时间输入框预览文本输入事件（只允许数字）
+        /// 通用设置延迟时间输入框预览文本输入事件（只允许数字）
         /// </summary>
-        private void TxtUploadDelayMinutes_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void TxtUniversalUploadDelayMinutes_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            Regex regex = new Regex("[^0-9]+");
-            e.Handled = regex.IsMatch(e.Text);
+            e.Handled = _nonDigitRegex.IsMatch(e.Text);
+        }
+
+        /// <summary>
+        /// 上传提供者启用/禁用开关切换事件
+        /// </summary>
+        private void ToggleProviderEnabled_Toggled(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (sender is iNKORE.UI.WPF.Modern.Controls.ToggleSwitch toggleSwitch && toggleSwitch.DataContext is IUploadProvider provider)
+                {
+                    if (MainWindow.Settings?.Upload != null)
+                    {
+                        if (MainWindow.Settings.Upload.EnabledProviders == null)
+                        {
+                            MainWindow.Settings.Upload.EnabledProviders = new List<string>();
+                        }
+
+                        if (toggleSwitch.IsOn)
+                        {
+                            if (!MainWindow.Settings.Upload.EnabledProviders.Contains(provider.Name))
+                            {
+                                MainWindow.Settings.Upload.EnabledProviders.Add(provider.Name);
+                            }
+                        }
+                        else
+                        {
+                            MainWindow.Settings.Upload.EnabledProviders.Remove(provider.Name);
+                        }
+
+                        // 同步更新Dlass的IsAutoUploadNotes设置（如果是Dlass提供者）
+                        if (provider.Name == "Dlass" && MainWindow.Settings.Dlass != null)
+                        {
+                            bool isToggleOn = toggleSwitch.IsOn;
+                            bool isDlassAutoUploadEnabled = MainWindow.Settings.Dlass.IsAutoUploadNotes;
+                            bool isAlreadyConsistent = (isToggleOn == isDlassAutoUploadEnabled);
+
+                            // 如果状态已经一致，就不需要更新
+                            if (!isAlreadyConsistent)
+                            {
+                                MainWindow.Settings.Dlass.IsAutoUploadNotes = toggleSwitch.IsOn;
+                                // 同步更新Dlass标签页中的开关状态
+                                ToggleSwitchAutoUploadNotes.IsOn = toggleSwitch.IsOn;
+                            }
+                        }
+
+                        MainWindow.SaveSettingsToFile();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存上传提供者启用状态时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -530,6 +682,123 @@ namespace Ink_Canvas.Windows
         private void BtnCancel_Click(object sender, RoutedEventArgs e)
         {
             Close();
+        }
+
+        /// <summary>
+        /// TabControl选择改变事件
+        /// </summary>
+        private void TabControl_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            try
+            {
+                if (sender is System.Windows.Controls.TabControl tabControl && tabControl.SelectedItem is System.Windows.Controls.TabItem selectedTab)
+                {
+                    // 检查是否切换到Dlass标签页
+                    if (selectedTab.Tag?.ToString() == "DlassTab" && _isFirstTimeDlassTab)
+                    {
+                        // 检查是否是第一次打开（检查用户是否已设置Token）
+                        bool hasToken = !string.IsNullOrEmpty(GetUserToken()?.Trim());
+                        bool isFirstTime = !hasToken;
+
+                        if (isFirstTime)
+                        {
+                            // 第一次打开，询问用户是否已注册
+                            var result = MessageBox.Show(
+                                "您是否已经注册了Dlass账号？\n\n" +
+                                "• 如果已注册：将打开Dlass管理标签页\n" +
+                                "• 如果未注册：将打开浏览器跳转到注册页面",
+                                "Dlass账号注册",
+                                MessageBoxButton.YesNo,
+                                MessageBoxImage.Question);
+
+                            if (result == MessageBoxResult.No)
+                            {
+                                // 用户未注册，打开浏览器
+                                try
+                                {
+                                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                                    {
+                                        FileName = "https://dlass.tech/dashboard",
+                                        UseShellExecute = true
+                                    });
+                                    LogHelper.WriteLogToFile("已打开浏览器跳转到Dlass注册页面", LogHelper.LogType.Event);
+                                }
+                                catch (Exception ex)
+                                {
+                                    LogHelper.WriteLogToFile($"打开浏览器时出错: {ex.Message}", LogHelper.LogType.Error);
+                                    MessageBox.Show($"无法打开浏览器。请手动访问: https://dlass.tech/dashboard",
+                                        "提示", MessageBoxButton.OK, MessageBoxImage.Information);
+                                }
+                            }
+                            // 如果用户选择"是"，继续打开设置窗口
+                        }
+
+                        // 标记为已打开过Dlass标签页
+                        _isFirstTimeDlassTab = false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"TabControl选择改变事件处理出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+
+
+        /// <summary>
+        /// 加载WebDav设置
+        /// </summary>
+        private void LoadWebDavSettings()
+        {
+            try
+            {
+                if (MainWindow.Settings?.Dlass != null)
+                {
+                    TxtWebDavUrl.Text = MainWindow.Settings.Dlass.WebDavUrl;
+                    TxtWebDavUsername.Text = MainWindow.Settings.Dlass.WebDavUsername;
+                    TxtWebDavPassword.Password = MainWindow.Settings.Dlass.WebDavPassword;
+                    TxtWebDavRootDirectory.Text = MainWindow.Settings.Dlass.WebDavRootDirectory;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"加载WebDav设置时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 保存WebDav设置按钮点击事件
+        /// </summary>
+        private void BtnSaveWebDav_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (MainWindow.Settings?.Dlass != null)
+                {
+                    MainWindow.Settings.Dlass.WebDavUrl = TxtWebDavUrl.Text;
+                    MainWindow.Settings.Dlass.WebDavUsername = TxtWebDavUsername.Text;
+                    MainWindow.Settings.Dlass.WebDavPassword = TxtWebDavPassword.Password;
+                    MainWindow.Settings.Dlass.WebDavRootDirectory = TxtWebDavRootDirectory.Text;
+                    MainWindow.SaveSettingsToFile();
+
+                    MessageBox.Show("WebDav设置已保存", "成功", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"保存WebDav设置时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"保存WebDav设置时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// 取消WebDav设置按钮点击事件
+        /// </summary>
+        private void BtnCancelWebDav_Click(object sender, RoutedEventArgs e)
+        {
+            // 重新加载设置，恢复原值
+            LoadWebDavSettings();
         }
 
         /// <summary>

@@ -1,5 +1,5 @@
-using iNKORE.UI.WPF.Helpers;
 using Ink_Canvas.Windows.SettingsViews;
+using iNKORE.UI.WPF.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -17,17 +17,23 @@ namespace Ink_Canvas.Windows
     {
         private MainWindow _mainWindow;
 
+        /// <summary>
+        /// 初始化设置窗口的 UI、事件和面板并加载初始状态与主题。
+        /// </summary>
+        /// <remarks>
+        /// 构造函数完成以下工作：获取主窗口引用，注册搜索与菜单事件，构建并绑定侧栏条目，挂接各设置面板的滚动/阴影事件，初始化面板数组、滚动容器、标题与名称映射，设置初始选中项与主题状态，为自定义滑块添加触摸支持，预加载所有面板设置，并多次应用主题以确保视觉元素正确呈现（包含延迟再应用以修正标题栏等）。
+        /// </remarks>
         public SettingsWindow()
         {
             InitializeComponent();
-            
+
             // 获取 MainWindow 实例
             _mainWindow = Application.Current.MainWindow as MainWindow;
-            
+
             // 初始化搜索面板事件
             SearchPanelControl.NavigateToItem += SearchPanel_NavigateToItem;
             SearchPanelControl.CloseSearch += SearchPanel_CloseSearch;
-            
+
             // 订阅菜单关闭事件，确保状态同步
             if (MenuButtonContextMenu != null)
             {
@@ -155,6 +161,14 @@ namespace Ink_Canvas.Windows
             SidebarItems.Add(new SidebarItem()
             {
                 Type = SidebarItemType.Item,
+                Title = "安全",
+                Name = "SecurityItem",
+                IconSource = FindResource("SecurityIcon") as DrawingImage,
+                Selected = false,
+            });
+            SidebarItems.Add(new SidebarItem()
+            {
+                Type = SidebarItemType.Item,
                 Title = "更新中心",
                 Name = "UpdateCenterItem",
                 IconSource = FindResource("UpdateCenterIcon") as DrawingImage,
@@ -169,6 +183,7 @@ namespace Ink_Canvas.Windows
                 Selected = false,
             });
             SettingsPanes = new Grid[] {
+                SecurityPane,
                 UpdateCenterPane,
                 AboutPane,
                 CanvasAndInkPane,
@@ -186,6 +201,7 @@ namespace Ink_Canvas.Windows
             };
 
             SettingsPaneScrollViewers = new ScrollViewer[] {
+                SecurityPanel.ScrollViewerEx,
                 UpdateCenterPanel.UpdateCenterScrollViewerEx,
                 SettingsAboutPanel.AboutScrollViewerEx,
                 CanvasAndInkPanel.ScrollViewerEx,
@@ -203,6 +219,7 @@ namespace Ink_Canvas.Windows
             };
 
             SettingsPaneTitles = new string[] {
+                "安全",
                 "更新中心",
                 "关于",
                 "画板和墨迹",
@@ -220,6 +237,7 @@ namespace Ink_Canvas.Windows
             };
 
             SettingsPaneNames = new string[] {
+                "SecurityItem",
                 "UpdateCenterItem",
                 "AboutItem",
                 "CanvasAndInkItem",
@@ -254,9 +272,9 @@ namespace Ink_Canvas.Windows
             PowerPointPanel.IsTopBarNeedNoShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0;
             ThemePanel.IsTopBarNeedShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0.25;
             ThemePanel.IsTopBarNeedNoShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0;
-            
+
             // 监听主题变化
-            ThemePanel.ThemeChanged += (o, s) => 
+            ThemePanel.ThemeChanged += (o, s) =>
             {
                 ApplyTheme();
                 ApplyThemeToAllPanels();
@@ -271,20 +289,22 @@ namespace Ink_Canvas.Windows
             AdvancedPanel.IsTopBarNeedNoShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0;
             SnapshotPanel.IsTopBarNeedShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0.25;
             SnapshotPanel.IsTopBarNeedNoShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0;
+            SecurityPanel.IsTopBarNeedShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0.25;
+            SecurityPanel.IsTopBarNeedNoShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0;
             UpdateCenterPanel.IsTopBarNeedShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0.25;
             UpdateCenterPanel.IsTopBarNeedNoShadowEffect += (o, s) => DropShadowEffectTopBar.Opacity = 0;
 
             _selectedSidebarItemName = "StartupItem";
-            
+
             // 初始化侧边栏项目的主题状态
-            bool isDarkTheme = MainWindow.Settings?.Appearance != null && 
+            bool isDarkTheme = MainWindow.Settings?.Appearance != null &&
                               (MainWindow.Settings.Appearance.Theme == 1 ||
                                (MainWindow.Settings.Appearance.Theme == 2 && !IsSystemThemeLight()));
             foreach (var item in SidebarItems)
             {
                 item.IsDarkTheme = isDarkTheme;
             }
-            
+
             UpdateSidebarItemsSelection();
 
             // 为自定义滑块控件添加触摸支持
@@ -292,13 +312,13 @@ namespace Ink_Canvas.Windows
 
             // 先应用主题，确保标题栏等元素正确显示
             ApplyTheme();
-            
+
             // 加载所有面板的设置
             LoadAllPanelsSettings();
-            
+
             // 通知所有面板应用主题
             ApplyThemeToAllPanels();
-            
+
             // 延迟再次应用主题，确保所有元素都正确应用主题（特别是标题栏）
             Dispatcher.BeginInvoke(new Action(() =>
             {
@@ -306,32 +326,35 @@ namespace Ink_Canvas.Windows
                 ApplyThemeToAllPanels();
             }), System.Windows.Threading.DispatcherPriority.Loaded);
         }
-        
+
         /// <summary>
-        /// 通知所有面板应用主题
+        /// 通知所有已注册的设置面板应用当前主题配置，使各面板更新其视觉样式以匹配窗口主题。
         /// </summary>
+        /// <remarks>
+        /// 对每个面板尝试通过反射调用其 `ApplyTheme` 方法；如果某面板不存在该方法则会跳过，调用过程中发生的异常会被捕获并写入调试输出，但不会中断对其它面板的处理。
+        /// </remarks>
         private void ApplyThemeToAllPanels()
         {
             try
             {
-                bool isDarkTheme = MainWindow.Settings?.Appearance != null && 
+                bool isDarkTheme = MainWindow.Settings?.Appearance != null &&
                                   (MainWindow.Settings.Appearance.Theme == 1 ||
                                    (MainWindow.Settings.Appearance.Theme == 2 && !IsSystemThemeLight()));
-                
+
                 // 使用反射调用所有面板的 ApplyTheme 方法（如果存在）
                 var panels = new UserControl[]
                 {
-                    UpdateCenterPanel, StartupPanel, CanvasAndInkPanel, GesturesPanel, InkRecognitionPanel,
+                    SecurityPanel, UpdateCenterPanel, StartupPanel, CanvasAndInkPanel, GesturesPanel, InkRecognitionPanel,
                     ThemePanel, ShortcutsPanel, CrashActionPanel, PowerPointPanel,
                     AutomationPanel, LuckyRandomPanel, AdvancedPanel, SnapshotPanel,
                     SettingsAboutPanel, AppearancePanel, SearchPanelControl
                 };
-                
+
                 foreach (var panel in panels)
                 {
                     if (panel != null)
                     {
-                        var method = panel.GetType().GetMethod("ApplyTheme", 
+                        var method = panel.GetType().GetMethod("ApplyTheme",
                             System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                         if (method != null)
                         {
@@ -420,14 +443,14 @@ namespace Ink_Canvas.Windows
                     {
                         topBarBackgroundBorderFallback.Background = ThemeHelper.GetBackgroundPrimaryBrush(); // Windows 系统主背景
                     }
-                    
+
                     // 更新侧边栏项目文本颜色
                     foreach (var item in SidebarItems)
                     {
                         // 通过反射或直接访问来更新文本颜色
                         // 这里需要在 XAML 中绑定或通过其他方式更新
                     }
-                    
+
                     // 更新滚动条样式 - 参考 Windows 系统设置
                     var scrollBarTrack = this.FindDescendantByName("ScrollBarBorderTrackBackground") as Border;
                     if (scrollBarTrack != null)
@@ -435,14 +458,14 @@ namespace Ink_Canvas.Windows
                         scrollBarTrack.Background = ThemeHelper.GetScrollBarTrackBrush(); // Windows 系统滚动条轨道
                         scrollBarTrack.Opacity = 0.3;
                     }
-                    
+
                     // 更新侧边栏项目主题
                     foreach (var item in SidebarItems)
                     {
                         item.IsDarkTheme = true;
                     }
                     CollectionViewSource.GetDefaultView(SidebarItems).Refresh();
-                    
+
                     // 更新图标颜色
                     UpdateIconColors(true);
                 }
@@ -501,7 +524,7 @@ namespace Ink_Canvas.Windows
                     {
                         topBarBackgroundBorderFallback.Background = new SolidColorBrush(Color.FromRgb(250, 250, 250));
                     }
-                    
+
                     // 更新滚动条样式
                     var scrollBarTrack = this.FindDescendantByName("ScrollBarBorderTrackBackground") as Border;
                     if (scrollBarTrack != null)
@@ -509,14 +532,14 @@ namespace Ink_Canvas.Windows
                         scrollBarTrack.Background = ThemeHelper.GetScrollBarTrackBrush(); // Windows 系统滚动条轨道
                         scrollBarTrack.Opacity = 0;
                     }
-                    
+
                     // 更新侧边栏项目主题
                     foreach (var item in SidebarItems)
                     {
                         item.IsDarkTheme = false;
                     }
                     CollectionViewSource.GetDefaultView(SidebarItems).Refresh();
-                    
+
                     // 更新图标颜色
                     UpdateIconColors(false);
                 }
@@ -535,14 +558,14 @@ namespace Ink_Canvas.Windows
             try
             {
                 // 根据主题选择颜色
-                Color iconColor = isDarkTheme 
+                Color iconColor = isDarkTheme
                     ? Color.FromRgb(243, 243, 243) // 深色主题使用浅色图标 #F3F3F3
                     : Color.FromRgb(34, 34, 34);   // 浅色主题使用深色图标 #222222
 
                 // 更新每个侧边栏项目的图标
                 foreach (var item in SidebarItems)
                 {
-                    if (item.IconSource is DrawingImage drawingImage && 
+                    if (item.IconSource is DrawingImage drawingImage &&
                         drawingImage.Drawing is DrawingGroup drawingGroup)
                     {
                         // 克隆并更新图标
@@ -550,7 +573,7 @@ namespace Ink_Canvas.Windows
                         item.IconSource = new DrawingImage { Drawing = clonedDrawing };
                     }
                 }
-                
+
                 CollectionViewSource.GetDefaultView(SidebarItems).Refresh();
             }
             catch (Exception ex)
@@ -575,8 +598,8 @@ namespace Ink_Canvas.Windows
                 {
                     var clonedGeometry = geometryDrawing.Geometry?.Clone();
                     var clonedBrush = CloneBrush(geometryDrawing.Brush, newColor);
-                    var clonedPen = geometryDrawing.Pen != null 
-                        ? ClonePen(geometryDrawing.Pen, newColor) 
+                    var clonedPen = geometryDrawing.Pen != null
+                        ? ClonePen(geometryDrawing.Pen, newColor)
                         : null;
 
                     cloned.Children.Add(new GeometryDrawing(clonedBrush, clonedPen, clonedGeometry));
@@ -608,7 +631,7 @@ namespace Ink_Canvas.Windows
                 {
                     return new SolidColorBrush(newColor) { Opacity = solidBrush.Opacity };
                 }
-                else if (originalColor.A > 0 && originalColor != Colors.Transparent && 
+                else if (originalColor.A > 0 && originalColor != Colors.Transparent &&
                          originalColor.R < 50 && originalColor.G < 50 && originalColor.B < 50) // 深色
                 {
                     return new SolidColorBrush(newColor) { Opacity = solidBrush.Opacity };
@@ -641,7 +664,7 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                Color iconColor = isDarkTheme 
+                Color iconColor = isDarkTheme
                     ? Color.FromRgb(243, 243, 243) // 深色主题使用浅色图标 #F3F3F3
                     : Color.FromRgb(34, 34, 34);   // 浅色主题使用深色图标 #222222
 
@@ -677,7 +700,7 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                Color iconColor = isDarkTheme 
+                Color iconColor = isDarkTheme
                     ? Color.FromRgb(243, 243, 243) // 深色主题使用浅色图标 #F3F3F3
                     : Color.FromRgb(34, 34, 34);   // 浅色主题使用深色图标 #222222
 
@@ -739,8 +762,12 @@ namespace Ink_Canvas.Windows
         }
 
         /// <summary>
-        /// 加载所有设置面板的设置
+        /// 预加载并初始化所有设置面板：对每个面板尝试加载设置、启用触摸支持并应用当前主题。
         /// </summary>
+        /// <remarks>
+        /// 该操作在 UI 线程上以 DispatcherPriority.Loaded 异步调度执行，并在完成后再次触发对所有面板的主题应用以确保视觉状态一致。
+        /// 对单个面板的初始化错误会被捕获并处理，不会中断其它面板的预加载流程。
+        /// </remarks>
         private void LoadAllPanelsSettings()
         {
             try
@@ -766,6 +793,7 @@ namespace Ink_Canvas.Windows
                             LuckyRandomPanel,
                             AdvancedPanel,
                             SnapshotPanel,
+                            SecurityPanel,
                             UpdateCenterPanel,
                             SettingsAboutPanel,
                             AppearancePanel
@@ -785,7 +813,7 @@ namespace Ink_Canvas.Windows
                                     {
                                         loadSettingsMethod.Invoke(panel, null);
                                     }
-                                    
+
                                     // 调用 EnableTouchSupport 确保触摸支持已启用
                                     var enableTouchSupportMethod = panel.GetType().GetMethod("EnableTouchSupport",
                                         System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -798,7 +826,7 @@ namespace Ink_Canvas.Windows
                                         // 如果面板没有 EnableTouchSupport 方法，直接使用 MainWindowSettingsHelper
                                         MainWindowSettingsHelper.EnableTouchSupportForControls(panel);
                                     }
-                                    
+
                                     // 调用 ApplyTheme 确保主题已应用
                                     var applyThemeMethod = panel.GetType().GetMethod("ApplyTheme",
                                         System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
@@ -813,7 +841,7 @@ namespace Ink_Canvas.Windows
                                 }
                             }
                         }
-                        
+
                         // 再次应用主题到所有面板，确保主题完全加载
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
@@ -848,7 +876,7 @@ namespace Ink_Canvas.Windows
             public ImageSource IconSource { get; set; }
             private bool _selected = false;
             private bool _isDarkTheme = false;
-            
+
             public bool Selected
             {
                 get => _selected;
@@ -858,7 +886,7 @@ namespace Ink_Canvas.Windows
                     OnPropertyChanged(nameof(_siBackground));
                 }
             }
-            
+
             public bool IsDarkTheme
             {
                 get => _isDarkTheme;
@@ -870,7 +898,7 @@ namespace Ink_Canvas.Windows
                     OnPropertyChanged(nameof(_spStroke));
                 }
             }
-            
+
             public Visibility _spVisibility
             {
                 get => Type == SidebarItemType.Separator ? Visibility.Visible : Visibility.Collapsed;
@@ -893,21 +921,21 @@ namespace Ink_Canvas.Windows
                     return new SolidColorBrush(Colors.Transparent);
                 }
             }
-            
+
             public SolidColorBrush _siForeground
             {
                 get => _isDarkTheme
                     ? ThemeHelper.GetTextPrimaryBrush() // Windows 系统主文字颜色 #F3F3F3
                     : new SolidColorBrush(Color.FromRgb(0, 0, 0));
             }
-            
+
             public SolidColorBrush _spStroke
             {
                 get => _isDarkTheme
                     ? ThemeHelper.GetSeparatorBrush() // Windows 系统分隔线 #3E3E3E
                     : new SolidColorBrush(Color.FromRgb(237, 237, 237));
             }
-            
+
             public event System.ComponentModel.PropertyChangedEventHandler PropertyChanged;
             protected virtual void OnPropertyChanged(string propertyName)
             {
@@ -923,6 +951,16 @@ namespace Ink_Canvas.Windows
         public string[] SettingsPaneTitles;
         public string[] SettingsPaneNames;
 
+        /// <summary>
+        /// 根据当前选中的侧边栏项更新侧边栏条目状态、面板可见性与主题并将视图滚动到顶部。
+        /// </summary>
+        /// <remarks>
+        /// - 将 SidebarItems 中的 Selected 与 SettingsWindowTitle.Text 与字段 _selectedSidebarItemName 同步；
+        /// - 根据应用设置计算并同步每个 SidebarItem 的 IsDarkTheme；
+        /// - 切换各个面板（Pane）的 Visibility，仅显示与 _selectedSidebarItemName 对应的面板；
+        /// - 异步调用所选面板（若存在）的 ApplyTheme 方法以确保新显示面板使用正确主题；
+        /// - 将所有已注册的 SettingsPaneScrollViewers 滚动到顶部以重置视图位置。
+        /// </remarks>
         public void UpdateSidebarItemsSelection()
         {
             foreach (var si in SidebarItems)
@@ -934,9 +972,9 @@ namespace Ink_Canvas.Windows
                 }
             }
             CollectionViewSource.GetDefaultView(SidebarItems).Refresh();
-            
+
             // 确保主题状态同步
-            bool isDarkTheme = MainWindow.Settings?.Appearance != null && 
+            bool isDarkTheme = MainWindow.Settings?.Appearance != null &&
                               (MainWindow.Settings.Appearance.Theme == 1 ||
                                (MainWindow.Settings.Appearance.Theme == 2 && !IsSystemThemeLight()));
             foreach (var si in SidebarItems)
@@ -960,10 +998,11 @@ namespace Ink_Canvas.Windows
                 { "LuckyRandomItem", LuckyRandomPanel },
                 { "AdvancedItem", AdvancedPanel },
                 { "SnapshotItem", SnapshotPanel },
+                { "SecurityItem", SecurityPanel },
                 { "UpdateCenterItem", UpdateCenterPanel },
                 { "AppearanceItem", AppearancePanel }
             };
-            
+
             // 设置面板可见性并应用主题
             if (AboutPane != null) AboutPane.Visibility = _selectedSidebarItemName == "AboutItem" ? Visibility.Visible : Visibility.Collapsed;
             if (CanvasAndInkPane != null) CanvasAndInkPane.Visibility = _selectedSidebarItemName == "CanvasAndInkItem" ? Visibility.Visible : Visibility.Collapsed;
@@ -978,8 +1017,9 @@ namespace Ink_Canvas.Windows
             if (LuckyRandomPane != null) LuckyRandomPane.Visibility = _selectedSidebarItemName == "LuckyRandomItem" ? Visibility.Visible : Visibility.Collapsed;
             if (AdvancedPane != null) AdvancedPane.Visibility = _selectedSidebarItemName == "AdvancedItem" ? Visibility.Visible : Visibility.Collapsed;
             if (SnapshotPane != null) SnapshotPane.Visibility = _selectedSidebarItemName == "SnapshotItem" ? Visibility.Visible : Visibility.Collapsed;
+            if (SecurityPane != null) SecurityPane.Visibility = _selectedSidebarItemName == "SecurityItem" ? Visibility.Visible : Visibility.Collapsed;
             if (UpdateCenterPane != null) UpdateCenterPane.Visibility = _selectedSidebarItemName == "UpdateCenterItem" ? Visibility.Visible : Visibility.Collapsed;
-            
+
             // 为新显示的面板应用主题（延迟执行，确保面板已完全显示）
             if (panelMappings.ContainsKey(_selectedSidebarItemName))
             {
@@ -1136,7 +1176,7 @@ namespace Ink_Canvas.Windows
         {
             // 隐藏搜索界面
             SearchPane.Visibility = Visibility.Collapsed;
-            
+
             // 导航到对应的设置项
             NavigateToSidebarItem(itemName);
         }
@@ -1173,10 +1213,10 @@ namespace Ink_Canvas.Windows
             {
                 MenuButtonContextMenu.PlacementTarget = MenuButtonBorder;
                 MenuButtonContextMenu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
-                
+
                 // 如果菜单已打开，则关闭；如果已关闭，则打开
                 bool isCurrentlyOpen = MenuButtonContextMenu.IsOpen;
-                
+
                 if (isCurrentlyOpen)
                 {
                     // 如果菜单已打开，直接关闭
@@ -1187,7 +1227,7 @@ namespace Ink_Canvas.Windows
                     // 如果菜单未打开，打开菜单
                     MenuButtonContextMenu.IsOpen = true;
                 }
-                
+
                 // 标记事件已处理，防止菜单拦截点击
                 e.Handled = true;
             }
@@ -1197,7 +1237,7 @@ namespace Ink_Canvas.Windows
         {
             // 关闭设置窗口
             Close();
-            
+
             // 调用主窗口的退出方法
             if (_mainWindow != null)
             {
@@ -1209,7 +1249,7 @@ namespace Ink_Canvas.Windows
         {
             // 关闭设置窗口
             Close();
-            
+
             // 调用主窗口的重启方法
             if (_mainWindow != null)
             {

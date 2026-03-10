@@ -21,6 +21,20 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 从配置文件加载用户设置并将其应用到主窗口和相关控件的状态（包括启动、外观、画布、手势、PPT、自动化等各项配置）。
+        /// </summary>
+        /// <param name="isStartup">指示当前为应用启动阶段；为 true 时按启动流程应用启动相关设置（例如触发启动专用动作和启动时的行为）。</param>
+        /// <summary>
+        /// 从当前配置文件重新加载设置并应用到界面（热重载），不触发启动逻辑与自动更新检查。
+        /// 用于配置文件切换后立即生效。
+        /// </summary>
+        public void ReloadSettingsFromFile()
+        {
+            LoadSettings(false, skipAutoUpdateCheck: true);
+        }
+
+        /// <param name="skipAutoUpdateCheck">指示是否跳过自动更新检查；为 true 时不会在加载设置后执行自动更新检测。</param>
         private void LoadSettings(bool isStartup = false, bool skipAutoUpdateCheck = false)
         {
             AppVersionTextBlock.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
@@ -134,6 +148,30 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
+            }
+
+            try
+            {
+                if (Settings?.Appearance != null)
+                {
+                    var preferredLanguage = Settings.Appearance.Language ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(preferredLanguage))
+                    {
+                        LocalizationHelper.TrySetCulture(preferredLanguage);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"从配置应用界面语言失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            try
+            {
+                ProcessProtectionManager.ApplyFromSettings();
+            }
+            catch
+            {
             }
 
             // Startup
@@ -381,6 +419,20 @@ namespace Ink_Canvas
 
                 ComboBoxChickenSoupSource.SelectedIndex = Settings.Appearance.ChickenSoupSource;
 
+                // 初始化自定义按钮的可见性（仅在选择API时显示）
+                if (BtnHitokotoCustomize != null)
+                {
+                    BtnHitokotoCustomize.Visibility = Settings.Appearance.ChickenSoupSource == 3
+                        ? Visibility.Visible
+                        : Visibility.Collapsed;
+                }
+
+                // 初始化HitokotoCategories，如果为空则默认全选
+                if (Settings.Appearance.HitokotoCategories == null || Settings.Appearance.HitokotoCategories.Count == 0)
+                {
+                    Settings.Appearance.HitokotoCategories = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" };
+                }
+
                 ToggleSwitchEnableQuickPanel.IsOn = Settings.Appearance.IsShowQuickPanel;
 
                 ToggleSwitchEnableSplashScreen.IsOn = Settings.Appearance.EnableSplashScreen;
@@ -535,6 +587,10 @@ namespace Ink_Canvas
                     }
                     ComboBoxPPTTimeCapsulePosition.SelectedIndex = position;
                 }
+                if (ToggleSwitchShowPPTSidebarByDefault != null)
+                {
+                    ToggleSwitchShowPPTSidebarByDefault.IsOn = Settings.PowerPointSettings.ShowPPTSidebarByDefault;
+                }
 
                 // -- new --
                 ToggleSwitchShowPPTButton.IsOn = Settings.PowerPointSettings.ShowPPTButton;
@@ -652,6 +708,8 @@ namespace Ink_Canvas
                 ToggleSwitchNotifyAutoPlayPresentation.IsOn = Settings.PowerPointSettings.IsNotifyAutoPlayPresentation;
 
                 ToggleSwitchSupportWPS.IsOn = Settings.PowerPointSettings.IsSupportWPS;
+
+                ToggleSwitchSkipAnimationsWhenGoNext.IsOn = Settings.PowerPointSettings.SkipAnimationsWhenGoNext;
 
                 ToggleSwitchPowerPointEnhancement.IsOn = Settings.PowerPointSettings.EnablePowerPointEnhancement;
 
@@ -1217,8 +1275,17 @@ namespace Ink_Canvas
 
             // 加载画笔自动恢复设置
             LoadBrushAutoRestoreSettings();
+
+            // 刷新配置文件列表
+            try { RefreshConfigProfileList(); } catch (Exception ex) { LogHelper.WriteLogToFile($"刷新配置文件列表失败: {ex.Message}", LogHelper.LogType.Warning); }
         }
 
+        /// <summary>
+        /// 将画笔自动恢复相关的设置应用到界面控件并在启用时初始化自动恢复定时器。
+        /// </summary>
+        /// <remarks>
+        /// 会将 Settings.Canvas 中的 BrushAutoRestore 配置同步到对应的切换开关、时间文本框、颜色下拉框、宽度和透明度滑块；当颜色缺失时会使用默认值 `#FFFF0000`，当宽度无效时使用默认值 `5`。若功能被启用，会初始化并启动定时器以执行自动恢复任务。方法执行过程中会记录加载结果或错误信息到日志。
+        /// </remarks>
         private void LoadBrushAutoRestoreSettings()
         {
             try
@@ -1240,7 +1307,7 @@ namespace Ink_Canvas
                 {
                     if (string.IsNullOrWhiteSpace(Settings.Canvas.BrushAutoRestoreColor))
                     {
-                        Settings.Canvas.BrushAutoRestoreColor = "#FFFF0000"; 
+                        Settings.Canvas.BrushAutoRestoreColor = "#FFFF0000";
                     }
 
                     bool found = false;
@@ -1261,13 +1328,13 @@ namespace Ink_Canvas
                             break;
                         }
                     }
-                    
+
                     if (!found && ComboBoxBrushAutoRestoreColor.Items.Count > 0)
                     {
                         ComboBoxBrushAutoRestoreColor.SelectionChanged -= ComboBoxBrushAutoRestoreColor_SelectionChanged;
                         try
                         {
-                            ComboBoxBrushAutoRestoreColor.SelectedIndex = 0; 
+                            ComboBoxBrushAutoRestoreColor.SelectedIndex = 0;
                             Settings.Canvas.BrushAutoRestoreColor = "#FFFF0000";
                         }
                         finally
@@ -1280,8 +1347,8 @@ namespace Ink_Canvas
                 // 同步粗细滑块
                 if (BrushAutoRestoreWidthSlider != null)
                 {
-                    BrushAutoRestoreWidthSlider.Value = Settings.Canvas.BrushAutoRestoreWidth > 0 
-                        ? Settings.Canvas.BrushAutoRestoreWidth 
+                    BrushAutoRestoreWidthSlider.Value = Settings.Canvas.BrushAutoRestoreWidth > 0
+                        ? Settings.Canvas.BrushAutoRestoreWidth
                         : 5;
                 }
 
@@ -1363,7 +1430,18 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 清理配置文件中的过期设置
+        /// </summary>
         /// <param name="userConfigJson">用户配置的JSON字符串</param>
+        /// <remarks>
+        /// 清理过期设置时：
+        /// 1. 创建默认配置对象
+        /// 2. 将默认配置和用户配置都序列化为JObject
+        /// 3. 递归比较并删除用户配置中多余的键
+        /// 4. 如果有清理操作，重新反序列化并保存
+        /// 5. 记录清理结果到日志
+        /// </remarks>
         private void CleanupObsoleteSettings(string userConfigJson)
         {
             try
@@ -1396,9 +1474,23 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 递归删除用户配置中多余的属性
+        /// </summary>
         /// <param name="userObj">用户配置的JObject</param>
         /// <param name="defaultObj">默认配置的JObject</param>
         /// <param name="hasChanges">是否有变更的引用标志</param>
+        /// <remarks>
+        /// 递归删除多余属性时：
+        /// 1. 检查用户配置和默认配置是否为空
+        /// 2. 获取需要删除的键列表
+        /// 3. 遍历用户配置的所有属性
+        /// 4. 如果默认配置中不存在该属性，标记为删除
+        /// 5. 如果两个属性都是对象类型，递归比较
+        /// 6. 处理数组中的对象（如自定义图标列表等）
+        /// 7. 删除标记的键
+        /// 8. 设置变更标志
+        /// </remarks>
         private void RemoveObsoleteProperties(JObject userObj, JObject defaultObj, ref bool hasChanges)
         {
             if (userObj == null || defaultObj == null)

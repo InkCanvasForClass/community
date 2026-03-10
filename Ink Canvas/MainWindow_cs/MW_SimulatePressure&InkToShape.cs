@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -14,26 +14,94 @@ using Point = System.Windows.Point;
 
 namespace Ink_Canvas
 {
+    /// <summary>
+    /// 主窗口类的部分类，包含压感模拟和墨水到形状识别的功能
+    /// </summary>
+    /// <remarks>
+    /// 本文件主要包含以下功能：
+    /// 1. 压感模拟：根据输入设备类型和设置模拟不同的压感效果
+    /// 2. 墨水到形状识别：将手绘墨迹转换为规则形状（直线、圆形、椭圆、三角形、矩形等）
+    /// 3. 直线自动拉直：将近似直线的墨迹自动拉成直线
+    /// 4. 端点吸附：将直线端点吸附到其他直线的端点
+    /// 5. 矩形参考线系统：通过多条直线构成矩形
+    /// 6. 高级贝塞尔曲线平滑：对墨迹进行平滑处理
+    /// 7. 异步墨水处理：提高性能的异步墨水处理机制
+    /// </remarks>
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 存储新的笔画集合，用于形状识别
+        /// </summary>
         private StrokeCollection newStrokes = new StrokeCollection();
-        private List<Circle> circles = new List<Circle>();
-        private const double LINE_STRAIGHTEN_THRESHOLD = 0.20;
 
+        /// <summary>
+        /// 存储圆形形状的列表
+        /// </summary>
+        private List<Circle> circles = new List<Circle>();
+
+
+
+        /// <summary>
+        /// 矩形参考线的列表
+        /// </summary>
         private List<RectangleGuideLine> rectangleGuideLines = new List<RectangleGuideLine>();
+
+        /// <summary>
+        /// 矩形端点的阈值
+        /// </summary>
         private const double RECTANGLE_ENDPOINT_THRESHOLD = 30.0;
+
+        /// <summary>
+        /// 矩形角度的阈值
+        /// </summary>
         private const double RECTANGLE_ANGLE_THRESHOLD = 15.0;
 
+        /// <summary>
+        /// 矩形参考线类，用于辅助矩形绘制
+        /// </summary>
         private class RectangleGuideLine
         {
+            /// <summary>
+            /// 原始笔画
+            /// </summary>
             public Stroke OriginalStroke { get; set; }
+
+            /// <summary>
+            /// 起始点
+            /// </summary>
             public Point StartPoint { get; set; }
+
+            /// <summary>
+            /// 结束点
+            /// </summary>
             public Point EndPoint { get; set; }
+
+            /// <summary>
+            /// 创建时间
+            /// </summary>
             public DateTime CreatedTime { get; set; }
+
+            /// <summary>
+            /// 角度
+            /// </summary>
             public double Angle { get; set; }
+
+            /// <summary>
+            /// 是否为水平线
+            /// </summary>
             public bool IsHorizontal { get; set; }
+
+            /// <summary>
+            /// 是否为垂直线
+            /// </summary>
             public bool IsVertical { get; set; }
 
+            /// <summary>
+            /// 构造函数
+            /// </summary>
+            /// <param name="stroke">原始笔画</param>
+            /// <param name="start">起始点</param>
+            /// <param name="end">结束点</param>
             public RectangleGuideLine(Stroke stroke, Point start, Point end)
             {
                 OriginalStroke = stroke;
@@ -53,6 +121,27 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理墨水画布的笔画收集事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">笔画收集事件参数</param>
+        /// <remarks>
+        /// 当用户在墨水画布上完成一笔绘制后：
+        /// 1. 检查是否启用墨迹渐隐功能，如果启用则添加到墨迹渐隐管理器
+        /// 2. 根据设置处理压感：
+        ///    - 如果禁用压感，统一压感值为0.5
+        ///    - 如果启用触摸压感模式，根据速度模拟压感
+        /// 3. 如果启用了形状识别：
+        ///    - 检查是否启用了直线自动拉直功能，如果是则尝试拉直线条
+        ///    - 处理形状识别，包括圆形、椭圆、三角形、矩形等
+        /// 4. 检查是否是压感笔书写，如果是则返回
+        /// 5. 根据墨水风格设置模拟压感
+        /// 6. 应用高级贝塞尔曲线平滑（仅在未进行直线拉直时）
+        /// <para>
+        /// 注意：形状识别（圆形、椭圆、三角形、矩形等）仅在32位进程中可用。当 Environment.Is64BitProcess 为 true 时，形状识别功能会被禁用。
+        /// </para>
+        /// </remarks>
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
         {
             // 检查是否启用墨迹渐隐功能
@@ -162,7 +251,7 @@ namespace Ink_Canvas
 
                                         e.Stroke.StylusPoints = stylusPoints;
                                     }
-                                    catch { }
+                                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                                 break;
                             case 0:
                                 if (penType == 0)
@@ -210,7 +299,7 @@ namespace Ink_Canvas
 
                                         e.Stroke.StylusPoints = stylusPoints;
                                     }
-                                    catch { }
+                                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                                 break;
                         }
                     }
@@ -603,7 +692,7 @@ namespace Ink_Canvas
                                 }
                             }
                         }
-                        catch { }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     }
 
                     InkToShapeProcess();
@@ -630,7 +719,7 @@ namespace Ink_Canvas
                         RandWindow.randSeed = (int)(_speed * 100000 * 1000);
                     }
                 }
-                catch { }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                 switch (Settings.Canvas.InkStyle)
                 {
@@ -663,7 +752,7 @@ namespace Ink_Canvas
 
                                 e.Stroke.StylusPoints = stylusPoints;
                             }
-                            catch { }
+                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                         break;
                     case 0:
@@ -712,12 +801,12 @@ namespace Ink_Canvas
 
                                 e.Stroke.StylusPoints = stylusPoints;
                             }
-                            catch { }
+                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                         break;
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
             // 应用高级贝塞尔曲线平滑（仅在未进行直线拉直时）
             Debug.WriteLine($"墨迹平滑检查: UseAdvancedBezierSmoothing={Settings.Canvas.UseAdvancedBezierSmoothing}, wasStraightened={wasStraightened}");
@@ -775,6 +864,15 @@ namespace Ink_Canvas
         /// <summary>
         /// 异步处理笔画平滑
         /// </summary>
+        /// <param name="originalStroke">原始笔画</param>
+        /// <returns>返回一个表示异步操作的Task</returns>
+        /// <remarks>
+        /// 异步处理笔画平滑的流程：
+        /// 1. 调用墨迹平滑管理器的SmoothStrokeAsync方法
+        /// 2. 在平滑完成后，在UI线程上执行笔画替换
+        /// 3. 如果原始笔画仍然存在于画布中且平滑后的笔画不同，则替换原始笔画
+        /// 4. 捕获并记录可能的异常
+        /// </remarks>
         private async Task ProcessStrokeAsync(Stroke originalStroke)
         {
             try
@@ -808,7 +906,21 @@ namespace Ink_Canvas
             }
         }
 
-        // New method: Checks if a stroke is potentially a straight line
+        /// <summary>
+        /// 检查一笔墨迹是否可能是直线
+        /// </summary>
+        /// <param name="stroke">要检查的笔画</param>
+        /// <returns>如果可能是直线则返回true，否则返回false</returns>
+        /// <remarks>
+        /// 检查一笔墨迹是否可能是直线的流程：
+        /// 1. 确保有足够的点来进行线条分析（至少5个点）
+        /// 2. 计算线条长度，确保线条足够长（使用分辨率自适应阈值）
+        /// 3. 检查墨迹复杂度，避免将复杂图形拉直
+        /// 4. 检查是否为明显的曲线
+        /// 5. 根据用户设置的灵敏度值计算阈值
+        /// 6. 快速检查：计算几个关键点与直线的距离
+        /// 7. 根据偏差阈值判断是否可能是直线
+        /// </remarks>
         private bool IsPotentialStraightLine(Stroke stroke)
         {
             // 确保有足够的点来进行线条分析
@@ -910,6 +1022,15 @@ namespace Ink_Canvas
         /// <summary>
         /// 检查墨迹是否为复杂形状
         /// </summary>
+        /// <param name="stroke">要检查的笔画</param>
+        /// <returns>如果是复杂形状则返回true，否则返回false</returns>
+        /// <remarks>
+        /// 检查墨迹是否为复杂形状的流程：
+        /// 1. 确保有足够的点来进行分析（至少10个点）
+        /// 2. 计算直线距离和实际路径长度
+        /// 3. 如果实际路径长度远大于直线距离（2.5倍以上），说明是复杂形状
+        /// 4. 检查方向变化次数，如果超过动态阈值，说明是复杂形状
+        /// </remarks>
         private bool IsComplexShape(Stroke stroke)
         {
             if (stroke.StylusPoints.Count < 10) return false;
@@ -950,6 +1071,17 @@ namespace Ink_Canvas
         /// <summary>
         /// 检查是否为明显的曲线（如圆弧、抛物线等）
         /// </summary>
+        /// <param name="stroke">要检查的笔画</param>
+        /// <returns>如果是明显的曲线则返回true，否则返回false</returns>
+        /// <remarks>
+        /// 检查墨迹是否为明显的曲线的流程：
+        /// 1. 确保有足够的点来进行分析（至少10个点）
+        /// 2. 计算线条长度
+        /// 3. 检查曲率一致性，如果一致则认为是明显的曲线
+        /// 4. 检查中点偏移（对圆弧特别有效）：
+        ///    - 计算中点到直线的距离
+        ///    - 如果中点偏移超过线长的15%，且偏移方向一致，可能是圆弧
+        /// </remarks>
         private bool IsObviousCurve(Stroke stroke)
         {
             if (stroke.StylusPoints.Count < 10) return false;
@@ -987,6 +1119,17 @@ namespace Ink_Canvas
         /// <summary>
         /// 计算方向变化次数
         /// </summary>
+        /// <param name="stroke">要检查的笔画</param>
+        /// <returns>返回方向变化的次数</returns>
+        /// <remarks>
+        /// 计算方向变化次数的流程：
+        /// 1. 确保有足够的点来进行分析（至少3个点）
+        /// 2. 遍历笔画中的每个点（除了第一个和最后一个）
+        /// 3. 计算每个点前后线段的角度变化
+        /// 4. 处理角度跨越问题（超过180度的情况）
+        /// 5. 如果角度变化超过30度，且与上一次角度变化的差异超过15度，认为是方向变化
+        /// 6. 返回方向变化的总次数
+        /// </remarks>
         private int CountDirectionChanges(Stroke stroke)
         {
             if (stroke.StylusPoints.Count < 3) return 0;
@@ -1027,6 +1170,17 @@ namespace Ink_Canvas
         /// <summary>
         /// 检查曲率是否一致（用于识别圆弧等规则曲线）
         /// </summary>
+        /// <param name="stroke">要检查的笔画</param>
+        /// <returns>如果曲率一致则返回true，否则返回false</returns>
+        /// <remarks>
+        /// 检查曲率是否一致的流程：
+        /// 1. 确保有足够的点来进行分析（至少15个点）
+        /// 2. 计算每个点的曲率（使用前后各两个点）
+        /// 3. 过滤掉无效的曲率值（NaN或无穷大），并取绝对值
+        /// 4. 确保有足够的有效曲率值（至少5个）
+        /// 5. 计算曲率的平均值和标准差
+        /// 6. 如果平均曲率大于0.001且标准差与平均值的比例小于0.5，认为曲率一致
+        /// </remarks>
         private bool HasConsistentCurvature(Stroke stroke)
         {
             if (stroke.StylusPoints.Count < 15) return false;
@@ -1106,7 +1260,8 @@ namespace Ink_Canvas
 
             // 使用海伦公式计算面积
             double s = (a + b + c) / 2;
-            double area = Math.Sqrt(s * (s - a) * (s - b) * (s - c));
+            double areaSquared = s * (s - a) * (s - b) * (s - c);
+            double area = areaSquared > 0 ? Math.Sqrt(areaSquared) : 0;
 
             // 曲率 = 4 * 面积 / (a * b * c)
             return 4 * area / (a * b * c);
@@ -1128,6 +1283,25 @@ namespace Ink_Canvas
                     lineEnd.X * lineStart.Y - lineEnd.Y * lineStart.X) / lineLength;
         }
 
+        /// <summary>
+        /// 尝试获取直线的端点
+        /// </summary>
+        /// <param name="stroke">要分析的笔画</param>
+        /// <param name="endpoint1">输出参数：直线的第一个端点</param>
+        /// <param name="endpoint2">输出参数：直线的第二个端点</param>
+        /// <returns>如果成功获取直线端点则返回true，否则返回false</returns>
+        /// <remarks>
+        /// 尝试获取直线端点的流程：
+        /// 1. 确保笔画有足够的点（至少10个点）
+        /// 2. 如果启用高精度直线拉直，则对点数进行采样
+        /// 3. 使用总最小二乘法(TLS/PCA)进行直线拟合
+        /// 4. 计算中心点和协方差矩阵
+        /// 5. 计算特征值和特征向量，确定直线方向
+        /// 6. 计算解释方差比例（拟合优度）
+        /// 7. 计算所有点在直线方向上的投影，找到最小和最大投影值
+        /// 8. 根据投影值计算端点坐标
+        /// 9. 根据解释方差比例判断是否为直线
+        /// </remarks>
         private bool TryGetStraightLineEndpoints(Stroke stroke, out Point endpoint1, out Point endpoint2)
         {
             endpoint1 = new Point();
@@ -1188,7 +1362,8 @@ namespace Ink_Canvas
             // 计算特征值和特征向量
             double trace = covXX + covYY;
             double determinant = covXX * covYY - covXY * covXY;
-            double discriminant = Math.Sqrt(trace * trace - 4 * determinant);
+            double discriminantSquared = trace * trace - 4 * determinant;
+            double discriminant = discriminantSquared > 0 ? Math.Sqrt(discriminantSquared) : 0;
 
             double eigenvalue1 = (trace + discriminant) / 2;
             double eigenvalue2 = (trace - discriminant) / 2;
@@ -1233,7 +1408,7 @@ namespace Ink_Canvas
                 double dx = end.X - start.X;
                 double dy = end.Y - start.Y;
                 double lineLength = Math.Sqrt(dx * dx + dy * dy);
-                
+
                 if (lineLength > 1e-10)
                 {
                     directionX = dx / lineLength;
@@ -1291,7 +1466,19 @@ namespace Ink_Canvas
             return explainedVarianceRatio > threshold;
         }
 
-        // New method: Determines if a stroke should be straightened into a line 
+        /// <summary>
+        /// 确定笔画是否应该被拉成直线
+        /// </summary>
+        /// <param name="stroke">要分析的笔画</param>
+        /// <returns>如果笔画应该被拉成直线则返回true，否则返回false</returns>
+        /// <remarks>
+        /// 确定笔画是否应该被拉成直线的流程：
+        /// 1. 计算线条长度和分辨率自适应阈值
+        /// 2. 如果线条太短，不进行拉直处理
+        /// 3. 检查线条复杂度，如果是复杂形状，不进行拉直处理
+        /// 4. 尝试获取直线端点，判断是否满足直线条件
+        /// 5. 根据判断结果返回相应的布尔值
+        /// </remarks>
         private bool ShouldStraightenLine(Stroke stroke)
         {
             // 分辨率自适应阈值
@@ -1332,6 +1519,28 @@ namespace Ink_Canvas
         /// <summary>
         /// 计算墨迹的直线度评分（0-1，1表示完美直线）
         /// </summary>
+        /// <param name="stroke">要分析的笔画</param>
+        /// <returns>返回直线度评分，范围为0到1，1表示完美直线</returns>
+        /// <remarks>
+        /// 计算墨迹直线度评分的流程：
+        /// 1. 确保笔画有足够的点（至少3个点）
+        /// 2. 计算线条长度
+        /// 3. 计算偏差评分（基于点到直线的距离）：
+        ///    - 计算所有点到直线的平均偏差和最大偏差
+        ///    - 根据偏差计算评分
+        /// 4. 计算方向一致性评分：
+        ///    - 计算每个线段与目标方向的角度差
+        ///    - 将角度差转换为评分
+        /// 5. 计算路径效率评分：
+        ///    - 计算实际路径长度与直线距离的比例
+        /// 6. 计算端点连接度评分（默认满分）
+        /// 7. 综合评分（加权平均）：
+        ///    - 偏差评分：40%
+        ///    - 方向一致性评分：30%
+        ///    - 路径效率评分：20%
+        ///    - 端点连接度评分：10%
+        /// 8. 返回最终评分，确保在0到1之间
+        /// </remarks>
         private double CalculateStraightnessScore(Stroke stroke)
         {
             if (stroke.StylusPoints.Count < 3) return 0;
@@ -1388,6 +1597,24 @@ namespace Ink_Canvas
         /// <summary>
         /// 计算方向一致性评分
         /// </summary>
+        /// <param name="stroke">要分析的笔画</param>
+        /// <returns>返回方向一致性评分，范围为0到1，1表示方向完全一致</returns>
+        /// <remarks>
+        /// 计算方向一致性评分的流程：
+        /// 1. 确保笔画有足够的点（至少5个点）
+        /// 2. 计算目标方向（从起点到终点的方向）
+        /// 3. 计算每个线段与目标方向的角度差：
+        ///    - 遍历笔画中的每个线段
+        ///    - 忽略太短的线段（长度小于2）
+        ///    - 计算线段的角度
+        ///    - 计算与目标方向的角度差
+        ///    - 处理角度跨越问题（超过180度的情况）
+        /// 4. 计算平均角度差
+        /// 5. 将角度差转换为评分（0-1）：
+        ///    - 0度差 = 1分
+        ///    - 90度差 = 0分
+        /// 6. 返回方向一致性评分
+        /// </remarks>
         private double CalculateDirectionConsistency(Stroke stroke)
         {
             if (stroke.StylusPoints.Count < 5) return 1.0;
@@ -1431,7 +1658,23 @@ namespace Ink_Canvas
             return directionScore;
         }
 
-        // New method: Creates a straight line stroke between two points
+        /// <summary>
+        /// 在两点之间创建直线笔画
+        /// </summary>
+        /// <param name="start">直线的起始点</param>
+        /// <param name="end">直线的结束点</param>
+        /// <returns>返回包含直线点集的StylusPointCollection</returns>
+        /// <remarks>
+        /// 在两点之间创建直线笔画的流程：
+        /// 1. 根据是否启用压感触屏模式决定如何设置压感：
+        ///    - 如果未启用压感触屏模式、禁用压感、启用无压感矩形或使用钢笔类型1，则使用均匀粗细（压感值0.5）
+        ///    - 否则，创建带有压感变化的直线：
+        ///      - 计算中点
+        ///      - 从起点到中点：压感从0.4渐变到0.8
+        ///      - 从中点到终点：压感从0.8渐变到0.4
+        /// 2. 使用GeneratePointsBetween方法生成点集
+        /// 3. 返回生成的点集
+        /// </remarks>
         private StylusPointCollection CreateStraightLine(Point start, Point end)
         {
             StylusPointCollection points = new StylusPointCollection();
@@ -1450,13 +1693,13 @@ namespace Ink_Canvas
             else
             {
                 Point midPoint = new Point((start.X + end.X) / 2, (start.Y + end.Y) / 2);
-                
+
                 var startToMid = GeneratePointsBetween(start, midPoint, 0.4f, 0.8f, 8.0);
                 foreach (var pt in startToMid)
                 {
                     points.Add(pt);
                 }
-                
+
                 var midToEnd = GeneratePointsBetween(midPoint, end, 0.8f, 0.4f, 8.0);
                 for (int i = 1; i < midToEnd.Count; i++)
                 {
@@ -1468,8 +1711,21 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        /// 高精度模式
+        /// 根据距离对点数进行采样
         /// </summary>
+        /// <param name="points">原始点列表</param>
+        /// <param name="sampleInterval">采样间隔，默认为10.0</param>
+        /// <returns>返回采样后的点列表</returns>
+        /// <remarks>
+        /// 根据距离对点数进行采样的流程：
+        /// 1. 确保原始点列表不为空且至少有2个点
+        /// 2. 总是包含起点
+        /// 3. 遍历原始点列表，计算累积距离：
+        ///    - 当累积距离达到采样间隔时，添加当前点
+        ///    - 重置累积距离
+        /// 4. 总是包含终点（如果还没有包含）
+        /// 5. 返回采样后的点列表
+        /// </remarks>
         private List<Point> SamplePointsByDistance(List<Point> points, double sampleInterval = 10.0)
         {
             if (points == null || points.Count < 2)
@@ -1504,7 +1760,20 @@ namespace Ink_Canvas
             return sampledPoints;
         }
 
-        // New method: Gets distance from point to a line defined by two points
+        /// <summary>
+        /// 计算点到直线的距离
+        /// </summary>
+        /// <param name="lineStart">直线的起始点</param>
+        /// <param name="lineEnd">直线的结束点</param>
+        /// <param name="point">要计算距离的点</param>
+        /// <returns>返回点到直线的距离</returns>
+        /// <remarks>
+        /// 计算点到直线距离的流程：
+        /// 1. 计算直线的长度
+        /// 2. 如果直线长度为0（即两个点重合），则返回点到该点的距离
+        /// 3. 否则，使用叉积计算点到直线的垂直距离
+        /// 4. 返回计算得到的距离
+        /// </remarks>
         private double DistanceFromLineToPoint(Point lineStart, Point lineEnd, Point point)
         {
             // Calculate distance from point to line defined by lineStart and lineEnd
@@ -1523,6 +1792,23 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="stroke">要检查的 stroke</param>
         /// <returns>如果是直线返回 true，否则返回 false</returns>
+        /// <remarks>
+        /// 判断一个 stroke 是否是直线的流程：
+        /// 1. 检查 stroke 是否为空或没有点，如果是则返回 false
+        /// 2. 检查点的数量：
+        ///    - 如果只有1个点，返回 false
+        ///    - 如果有2个点：
+        ///      - 计算两点之间的距离
+        ///      - 如果距离小于10，返回 false
+        ///      - 否则返回 true
+        ///    - 如果有3个点：
+        ///      - 计算第一个点和第三个点之间的距离
+        ///      - 如果距离小于10，返回 false
+        ///      - 计算第二个点到由第一个点和第三个点组成的直线的距离
+        ///      - 如果距离相对于线段长度很小（小于1%），认为是直线，返回 true
+        ///      - 否则返回 false
+        ///    - 如果点的数量大于3，返回 false
+        /// </remarks>
         private bool IsStraightLine(Stroke stroke)
         {
             if (stroke == null || stroke.StylusPoints.Count == 0)
@@ -1575,7 +1861,44 @@ namespace Ink_Canvas
             return false;
         }
 
-        // New method: Attempts to snap endpoints to existing stroke endpoints
+        private bool IsValidStraightLineSnapTarget(Stroke stroke)
+        {
+            if (stroke == null || stroke.StylusPoints.Count == 0)
+                return false;
+            if (stroke.StylusPoints.Count == 1)
+                return false;
+            if (stroke.StylusPoints.Count <= 3)
+            {
+                if (!IsStraightLine(stroke))
+                    return false;
+                double len = GetDistance(stroke.StylusPoints.First().ToPoint(), stroke.StylusPoints.Last().ToPoint());
+                if (len < 20)
+                    return false;
+                return true;
+            }
+            return IsPotentialStraightLine(stroke);
+        }
+
+        /// <summary>
+        /// 尝试将直线端点吸附到现有笔画的端点
+        /// </summary>
+        /// <param name="start">直线的起始点</param>
+        /// <param name="end">直线的结束点</param>
+        /// <returns>返回吸附后的端点数组，如果没有发生吸附则返回null</returns>
+        /// <remarks>
+        /// 尝试将直线端点吸附到现有笔画端点的流程：
+        /// 1. 检查是否启用了线段端点吸附功能，如果没有启用则返回null
+        /// 2. 初始化吸附状态和吸附后的点
+        /// 3. 获取设置中的吸附距离阈值
+        /// 4. 遍历画布中的所有笔画：
+        ///    - 跳过没有点的笔画
+        ///    - 只对直线进行端点吸附，跳过虚线和点线
+        ///    - 获取笔画的起点和终点
+        ///    - 检查起点是否应该吸附到现有笔画的端点
+        ///    - 检查终点是否应该吸附到现有笔画的端点
+        ///    - 如果两个端点都已经吸附，结束遍历
+        /// 5. 如果发生了吸附，返回吸附后的端点数组，否则返回null
+        /// </remarks>
         private Point[] GetSnappedEndpoints(Point start, Point end)
         {
             if (!Settings.Canvas.LineEndpointSnapping)
@@ -1595,7 +1918,7 @@ namespace Ink_Canvas
                 if (stroke.StylusPoints.Count == 0) continue;
 
                 // 只对直线进行端点吸附，跳过虚线和点线
-                if (!IsStraightLine(stroke))
+                if (!IsValidStraightLineSnapTarget(stroke))
                     continue;
 
                 // Get stroke endpoints
@@ -1645,6 +1968,16 @@ namespace Ink_Canvas
             return null;
         }
 
+        /// <summary>
+        /// 设置新的笔画备份
+        /// </summary>
+        /// <remarks>
+        /// 设置新的笔画备份的流程：
+        /// 1. 克隆当前墨水画布的笔画集合
+        /// 2. 获取当前白板索引
+        /// 3. 如果当前模式为0，则将白板索引设置为0
+        /// 4. 将克隆的笔画集合存储到strokeCollections中对应索引的位置
+        /// </remarks>
         private void SetNewBackupOfStroke()
         {
             lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
@@ -1654,12 +1987,36 @@ namespace Ink_Canvas
             strokeCollections[whiteboardIndex] = lastTouchDownStrokeCollection;
         }
 
+        /// <summary>
+        /// 计算两点之间的距离
+        /// </summary>
+        /// <param name="point1">第一个点</param>
+        /// <param name="point2">第二个点</param>
+        /// <returns>返回两点之间的距离</returns>
+        /// <remarks>
+        /// 使用欧几里得距离公式计算两点之间的距离：
+        /// distance = √[(x2 - x1)² + (y2 - y1)²]
+        /// </remarks>
         public double GetDistance(Point point1, Point point2)
         {
             return Math.Sqrt((point1.X - point2.X) * (point1.X - point2.X) +
                              (point1.Y - point2.Y) * (point1.Y - point2.Y));
         }
 
+        /// <summary>
+        /// 计算点的速度
+        /// </summary>
+        /// <param name="point1">第一个点</param>
+        /// <param name="point2">第二个点（当前点）</param>
+        /// <param name="point3">第三个点</param>
+        /// <returns>返回点的速度</returns>
+        /// <remarks>
+        /// 计算点速度的流程：
+        /// 1. 计算第一个点到第二个点的距离
+        /// 2. 计算第三个点到第二个点的距离
+        /// 3. 将两个距离相加
+        /// 4. 除以20，得到速度值
+        /// </remarks>
         public double GetPointSpeed(Point point1, Point point2, Point point3)
         {
             return (Math.Sqrt((point1.X - point2.X) * (point1.X - point2.X) +
@@ -1671,10 +2028,13 @@ namespace Ink_Canvas
 
         public Point[] FixPointsDirection(Point p1, Point p2)
         {
-            if (Math.Abs(p1.X - p2.X) / Math.Abs(p1.Y - p2.Y) > 8)
+            double deltaY = Math.Abs(p1.Y - p2.Y);
+            double deltaX = Math.Abs(p1.X - p2.X);
+
+            if (deltaY < 1e-10 || deltaX / deltaY > 8)
             {
                 //水平
-                var x = Math.Abs(p1.Y - p2.Y) / 2;
+                var x = deltaY / 2;
                 if (p1.Y > p2.Y)
                 {
                     p1.Y -= x;
@@ -1686,10 +2046,10 @@ namespace Ink_Canvas
                     p2.Y -= x;
                 }
             }
-            else if (Math.Abs(p1.Y - p2.Y) / Math.Abs(p1.X - p2.X) > 8)
+            else if (deltaX < 1e-10 || deltaY / deltaX > 8)
             {
                 //垂直
-                var x = Math.Abs(p1.X - p2.X) / 2;
+                var x = deltaX / 2;
                 if (p1.X > p2.X)
                 {
                     p1.X -= x;
@@ -1708,7 +2068,7 @@ namespace Ink_Canvas
         public StylusPointCollection GenerateFakePressureTriangle(StylusPointCollection points)
         {
             var newPoint = new StylusPointCollection();
-            
+
             if (Settings.InkToShape.IsInkToShapeNoFakePressureTriangle || penType == 1)
             {
                 if (points.Count >= 3)
@@ -1754,9 +2114,9 @@ namespace Ink_Canvas
                     {
                         Point start = points[i].ToPoint();
                         Point end = points[(i + 1) % 3].ToPoint();
-                        
+
                         Point midPoint = GetCenterPoint(start, end);
-                        
+
                         var startToMid = GeneratePointsBetween(start, midPoint, 0.4f, 0.8f, 8.0);
                         if (i == 0)
                         {
@@ -1772,7 +2132,7 @@ namespace Ink_Canvas
                                 newPoint.Add(startToMid[j]);
                             }
                         }
-                        
+
                         var midToEnd = GeneratePointsBetween(midPoint, end, 0.8f, 0.4f, 8.0);
                         for (int j = 1; j < midToEnd.Count; j++)
                         {
@@ -1801,18 +2161,18 @@ namespace Ink_Canvas
         {
             var result = new StylusPointCollection();
             double distance = GetDistance(start, end);
-            
+
             if (distance < minPointInterval)
             {
                 result.Add(new StylusPoint(start.X, start.Y, startPressure));
                 result.Add(new StylusPoint(end.X, end.Y, endPressure));
                 return result;
             }
-            
+
             int pointCount = Math.Max(2, (int)(distance / minPointInterval) + 1);
-            
+
             result.Add(new StylusPoint(start.X, start.Y, startPressure));
-            
+
             for (int i = 1; i < pointCount - 1; i++)
             {
                 double ratio = (double)i / (pointCount - 1);
@@ -1821,16 +2181,16 @@ namespace Ink_Canvas
                 double y = start.Y + (end.Y - start.Y) * ratio;
                 result.Add(new StylusPoint(x, y, (float)pressure));
             }
-            
+
             result.Add(new StylusPoint(end.X, end.Y, endPressure));
-            
+
             return result;
         }
 
         public StylusPointCollection GenerateFakePressureRectangle(StylusPointCollection points)
         {
             var newPoint = new StylusPointCollection();
-            
+
             if (Settings.InkToShape.IsInkToShapeNoFakePressureRectangle || penType == 1)
             {
                 if (points.Count >= 4)
@@ -1869,9 +2229,9 @@ namespace Ink_Canvas
                 {
                     Point start = points[i].ToPoint();
                     Point end = points[(i + 1) % 4].ToPoint();
-                    
+
                     Point midPoint = GetCenterPoint(start, end);
-                    
+
                     var startToMid = GeneratePointsBetween(start, midPoint, 0.4f, 0.8f, 8.0);
                     if (i == 0)
                     {
@@ -1887,7 +2247,7 @@ namespace Ink_Canvas
                             newPoint.Add(startToMid[j]);
                         }
                     }
-                    
+
                     var midToEnd = GeneratePointsBetween(midPoint, end, 0.8f, 0.4f, 8.0);
                     for (int j = 1; j < midToEnd.Count; j++)
                     {
@@ -1899,7 +2259,7 @@ namespace Ink_Canvas
             {
                 return points;
             }
-            
+
             return newPoint;
         }
 

@@ -1,5 +1,4 @@
 using System;
-using Microsoft.Office.Interop.PowerPoint;
 
 namespace Ink_Canvas.Helpers
 {
@@ -41,18 +40,38 @@ namespace Ink_Canvas.Helpers
             set => _inner.IsSupportWPS = value;
         }
 
+        public bool SkipAnimationsWhenNavigating
+        {
+            get => _inner.SkipAnimationsWhenNavigating;
+            set => _inner.SkipAnimationsWhenNavigating = value;
+        }
+
         public int SlidesCount => _inner.SlidesCount;
 
         public object PPTApplication => _inner.PPTApplication;
         #endregion
 
         #region 生命周期管理
+        /// <summary>
+        /// 开始监控本地 PowerPoint 的连接与运行状态，并在状态变化时触发相应事件。
+        /// </summary>
         public void StartMonitoring() => _inner.StartMonitoring();
 
+        /// <summary>
+        /// 停止对 PowerPoint 的监控，断开当前连接并停止触发相关事件。
+        /// </summary>
         public void StopMonitoring() => _inner.StopMonitoring();
 
+        /// <summary>
+        /// 强制断开当前 COM PPT 连接并停止对其监控，同时写入事件日志。
+        /// </summary>
+        /// <remarks>
+        /// 会向日志记录一条事件信息并调用内部管理器停止监控；该方法不会重新启动监控或重新初始化内部管理器实例。
+        /// </remarks>
         public void ReloadConnection()
         {
+            LogHelper.WriteLogToFile("COM PPT 执行热重载：强制断开并重新连接", LogHelper.LogType.Event);
+            _inner.StopMonitoring();
         }
         #endregion
 
@@ -88,4 +107,3 @@ namespace Ink_Canvas.Helpers
         #endregion
     }
 }
-

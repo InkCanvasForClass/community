@@ -3,8 +3,10 @@ using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using OSVersionExtension;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
@@ -32,10 +34,27 @@ namespace Ink_Canvas
     {
         #region Behavior
 
+        /// <summary>
+        /// 内部标记：是否正在内部更改更新通道
+        /// </summary>
         private bool _isChangingUpdateChannelInternally;
+        /// <summary>
+        /// 内部标记：是否正在内部更改遥测设置
+        /// </summary>
         private bool _isChangingTelemetryInternally;
+        /// <summary>
+        /// 内部标记：是否正在内部更改遥测隐私设置
+        /// </summary>
         private bool _isChangingTelemetryPrivacyInternally;
 
+        /// <summary>
+        /// 检查隐私文件是否存在
+        /// </summary>
+        /// <returns>如果隐私文件存在则返回true，否则返回false</returns>
+        /// <remarks>
+        /// 尝试从程序集资源中查找privacy.txt文件
+        /// 如果找到则返回true，否则返回false
+        /// </remarks>
         private static bool PrivacyFileExists()
         {
             try
@@ -53,6 +72,17 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 查找隐私文件
+        /// </summary>
+        /// <returns>隐私文件路径，如果是嵌入资源则返回"embedded"，如果未找到则返回null</returns>
+        /// <remarks>
+        /// 先尝试从文件系统读取，搜索路径包括：
+        /// 1. App.RootPath
+        /// 2. 程序集所在目录
+        /// 3. 程序集所在目录的上一级目录
+        /// 如果文件系统中未找到，则回退到嵌入资源
+        /// </remarks>
         private static string FindPrivacyFile()
         {
             // 先尝试从文件系统读取
@@ -157,7 +187,7 @@ namespace Ink_Canvas
                                 // 用户同意，保存设置
                                 Settings.Startup.HasAcceptedTelemetryPrivacy = true;
                                 Settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.Basic;
-                                
+
                                 // 更新UI，即使 isLoaded 为 false（启动时）
                                 // 使用标志避免触发事件处理程序
                                 // 使用 Dispatcher 确保在 UI 线程上更新
@@ -215,7 +245,7 @@ namespace Ink_Canvas
                 Settings.Startup.UpdateChannel = UpdateChannel.Release;
                 DeviceIdentifier.UpdateUsageChannel(UpdateChannel.Release);
                 SaveSettingsToFile();
-                
+
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     _isChangingUpdateChannelInternally = true;
@@ -258,7 +288,7 @@ namespace Ink_Canvas
                 if (result == MessageBoxResult.Yes)
                 {
                     Settings.Startup.TelemetryUploadLevel = TelemetryUploadLevel.Basic;
-                    
+
                     if (isLoaded && ComboBoxTelemetryUploadLevel != null)
                     {
                         ComboBoxTelemetryUploadLevel.SelectedIndex = 1;
@@ -273,7 +303,7 @@ namespace Ink_Canvas
                     Settings.Startup.UpdateChannel = UpdateChannel.Release;
                     DeviceIdentifier.UpdateUsageChannel(UpdateChannel.Release);
                     SaveSettingsToFile();
-                    
+
                     Dispatcher.BeginInvoke(new Action(() =>
                     {
                         _isChangingUpdateChannelInternally = true;
@@ -303,6 +333,17 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理遥测上传级别选择更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 根据选择的遥测级别执行相应操作：
+        /// 1. 如果选择关闭遥测且当前不是正式通道，提示用户并切换到正式通道
+        /// 2. 如果选择开启遥测但未同意隐私说明，提示用户需要先同意隐私说明
+        /// 3. 保存设置并显示通知
+        /// </remarks>
         private void ComboBoxTelemetryUploadLevel_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -419,6 +460,16 @@ namespace Ink_Canvas
             ShowNotification("匿名使用数据上传设置已保存");
         }
 
+        /// <summary>
+        /// 处理遥测隐私同意复选框状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当用户勾选或取消勾选隐私同意复选框时执行：
+        /// 1. 勾选时：显示隐私协议窗口，用户同意后保存设置
+        /// 2. 取消勾选时：提示用户会关闭遥测并切回正式通道，用户确认后执行相应操作
+        /// </remarks>
         private void CheckBoxTelemetryPrivacyAccepted_Checked(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -549,6 +600,18 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理自动更新开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当自动更新开关状态更改时：
+        /// 1. 保存自动更新设置
+        /// 2. 自动更新关闭时隐藏静默更新选项
+        /// 3. 如果关闭了自动更新，同时也关闭静默更新
+        /// 4. 根据静默更新设置显示或隐藏静默更新时间区域
+        /// </remarks>
         private void ToggleSwitchIsAutoUpdate_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -573,6 +636,16 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理静默自动更新开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当静默自动更新开关状态更改时：
+        /// 1. 保存静默自动更新设置
+        /// 2. 根据静默更新设置显示或隐藏静默更新时间区域
+        /// </remarks>
         private void ToggleSwitchIsAutoUpdateWithSilence_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -585,6 +658,14 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理静默自动更新开始时间选择更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当选择静默自动更新开始时间时，保存设置到文件
+        /// </remarks>
         private void AutoUpdateWithSilenceStartTimeComboBox_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -593,6 +674,14 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理静默自动更新结束时间选择更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当选择静默自动更新结束时间时，保存设置到文件
+        /// </remarks>
         private void AutoUpdateWithSilenceEndTimeComboBox_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -600,6 +689,16 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理开机启动开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当开机启动开关状态更改时：
+        /// 1. 如果开启，删除旧的启动项并创建新的启动项
+        /// 2. 如果关闭，删除所有启动项
+        /// </remarks>
         private void ToggleSwitchRunAtStartup_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -615,6 +714,14 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理启动时折叠开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当启动时折叠开关状态更改时，保存设置到文件
+        /// </remarks>
         private void ToggleSwitchFoldAtStartup_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -622,26 +729,38 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理PowerPoint支持开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当PowerPoint支持开关状态更改时：
+        /// 1. 保存PowerPoint支持设置
+        /// 2. 如果关闭PowerPoint支持，同时也关闭WPS支持
+        /// 3. 如果开启PowerPoint支持，初始化PPT管理器并开始监控
+        /// 4. 如果关闭PowerPoint支持，停止监控
+        /// </remarks>
         private void ToggleSwitchSupportPowerPoint_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
 
             Settings.PowerPointSettings.PowerPointSupport = ToggleSwitchSupportPowerPoint.IsOn;
-            
+
             if (!Settings.PowerPointSettings.PowerPointSupport)
             {
                 if (Settings.PowerPointSettings.IsSupportWPS)
                 {
                     Settings.PowerPointSettings.IsSupportWPS = false;
                     ToggleSwitchSupportWPS.IsOn = false;
-                    
+
                     if (_pptManager != null)
                     {
                         _pptManager.IsSupportWPS = false;
                     }
                 }
             }
-            
+
             SaveSettingsToFile();
 
             // 使用新的PPT管理器
@@ -659,6 +778,20 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理使用ROT PPT链接开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当使用ROT PPT链接开关状态更改时：
+        /// 1. 保存ROT PPT链接设置
+        /// 2. 停止PPT监控
+        /// 3. 如果开启ROT PPT链接且启用了PowerPoint增强，关闭PowerPoint增强
+        /// 4. 初始化PPT管理器
+        /// 5. 如果启用了PowerPoint支持，开始PPT监控
+        /// 6. 记录切换PPT联动架构的日志
+        /// </remarks>
         private void ToggleSwitchUseRotPptLink_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -699,6 +832,14 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理新幻灯片放映时显示画布开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当新幻灯片放映时显示画布开关状态更改时，保存设置到文件
+        /// </remarks>
         private void ToggleSwitchShowCanvasAtNewSlideShow_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -711,6 +852,17 @@ namespace Ink_Canvas
 
         #region Startup
 
+        /// <summary>
+        /// 处理笔尖模式开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当笔尖模式开关状态更改时：
+        /// 1. 同步更新两个笔尖模式开关的状态
+        /// 2. 保存笔尖模式设置
+        /// 3. 根据笔尖模式设置更新边界宽度
+        /// </remarks>
         private void ToggleSwitchEnableNibMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -731,6 +883,16 @@ namespace Ink_Canvas
 
         #region Appearance
 
+        /// <summary>
+        /// 处理显示笔尖模式切换开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当显示笔尖模式切换开关状态更改时：
+        /// 1. 保存显示笔尖模式切换设置
+        /// 2. 根据设置显示或隐藏笔尖模式切换面板
+        /// </remarks>
         private void ToggleSwitchEnableDisPlayNibModeToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -754,6 +916,14 @@ namespace Ink_Canvas
         //    SaveSettingsToFile();
         //}
 
+        /// <summary>
+        /// 处理快速面板开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当快速面板开关状态更改时，保存设置到文件
+        /// </remarks>
         private void ToggleSwitchEnableQuickPanel_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -761,6 +931,14 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理启动屏幕开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当启动屏幕开关状态更改时，保存设置到文件
+        /// </remarks>
         private void ToggleSwitchEnableSplashScreen_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -768,6 +946,14 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理启动屏幕样式选择更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当选择启动屏幕样式时，保存设置到文件
+        /// </remarks>
         private void ComboBoxSplashScreenStyle_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -775,6 +961,18 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理浮动栏缩放值滑块值更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当浮动栏缩放值滑块值更改时：
+        /// 1. 保存浮动栏缩放设置
+        /// 2. 应用缩放值到浮动栏（限制在0.5-1.25范围内）
+        /// 3. 等待UI更新后重新计算浮动栏位置，确保居中计算准确
+        /// 4. 只在屏幕模式下重新计算浮动栏位置
+        /// </remarks>
         private void ViewboxFloatingBarScaleTransformValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -814,6 +1012,16 @@ namespace Ink_Canvas
             }), DispatcherPriority.Render);
         }
 
+        /// <summary>
+        /// 处理浮动栏透明度值滑块值更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当浮动栏透明度值滑块值更改时：
+        /// 1. 保存浮动栏透明度设置
+        /// 2. 应用透明度值到浮动栏
+        /// </remarks>
         private void ViewboxFloatingBarOpacityValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -822,6 +1030,14 @@ namespace Ink_Canvas
             ViewboxFloatingBar.Opacity = Settings.Appearance.ViewboxFloatingBarOpacityValue;
         }
 
+        /// <summary>
+        /// 处理PPT中浮动栏透明度值滑块值更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当PPT中浮动栏透明度值滑块值更改时，保存设置到文件
+        /// </remarks>
         private void ViewboxFloatingBarOpacityInPPTValueSlider_ValueChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -829,6 +1045,17 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理托盘图标开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当托盘图标开关状态更改时：
+        /// 1. 保存托盘图标设置
+        /// 2. 根据设置显示或隐藏托盘图标示例图像
+        /// 3. 根据设置显示或隐藏系统托盘图标
+        /// </remarks>
         private void ToggleSwitchEnableTrayIcon_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -839,6 +1066,17 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 处理展开按钮图像选择更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当选择展开按钮图像类型时：
+        /// 1. 保存展开按钮图像类型设置
+        /// 2. 根据选择的图像类型更新左右展开按钮的图标
+        /// 3. 为不同的图像类型设置不同的大小和旋转角度
+        /// </remarks>
         private void ComboBoxUnFoldBtnImg_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -874,6 +1112,16 @@ namespace Ink_Canvas
 
         private static readonly Lazy<object> HitokotoHttpClient = new Lazy<object>(CreateHitokotoClient, System.Threading.LazyThreadSafetyMode.ExecutionAndPublication);
 
+        /// <summary>
+        /// 创建用于获取一言（Hitokoto）数据的HttpClient
+        /// </summary>
+        /// <returns>创建的HttpClient实例，如果创建失败则返回null</returns>
+        /// <remarks>
+        /// 创建HttpClient时：
+        /// 1. 设置超时时间为5秒
+        /// 2. 尝试设置User-Agent头
+        /// 3. 捕获并记录创建过程中的异常
+        /// </remarks>
         private static object CreateHitokotoClient()
         {
             try
@@ -904,6 +1152,13 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 根据当前外观设置更新白板水印的名言文本。
+        /// </summary>
+        /// <remarks>
+        /// 当配置为内置来源时（0：OSUPlayer、1：名言警句、2：高考俗语）从对应数组中随机选择一条并设置为水印文本；
+        /// 当配置为一言（3）时会异步请求 Hitokoto API 并在请求中显示占位提示，成功时将返回文本设为水印，失败时记录警告日志并设置可读的失败提示文本。此方法会修改 BlackBoardWaterMark.Text，并在发生异常时记录日志且设置合适的回退文本。
+        /// </remarks>
         private async Task UpdateChickenSoupTextAsync()
         {
             try
@@ -941,21 +1196,36 @@ namespace Ink_Canvas
                         }
                         catch (Exception initEx)
                         {
-                            LogHelper.WriteLogToFile($"HTTP 客户端初始化失败: {initEx.Message}", LogHelper.LogType.Warning);
-                            BlackBoardWaterMark.Text = "一言功能不可用（缺少 System.Net.Http）";
+                            LogHelper.WriteLogToFile($"一言 HTTP 客户端初始化失败: {initEx.Message}", LogHelper.LogType.Warning);
+                            BlackBoardWaterMark.Text = "一言功能不可用（HTTP 库不可用）";
                             return;
                         }
 
                         if (clientObj == null || !(clientObj is HttpClient client))
                         {
-                            BlackBoardWaterMark.Text = "一言功能不可用（缺少 System.Net.Http）";
+                            BlackBoardWaterMark.Text = "一言功能不可用（HTTP 库不可用）";
                             return;
                         }
 
-                        var response = await client.GetAsync("https://v1.hitokoto.cn/?encode=text");
+                        // 构建API URL，包含选中的分类参数
+                        var categories = Settings.Appearance.HitokotoCategories;
+                        if (categories == null || categories.Count == 0)
+                        {
+                            // 如果没有选中任何分类，默认全选
+                            categories = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" };
+                            Settings.Appearance.HitokotoCategories = categories;
+                        }
+
+                        var urlBuilder = new StringBuilder("https://v1.hitokoto.cn/?encode=text");
+                        foreach (var category in categories)
+                        {
+                            urlBuilder.Append($"&c={category}");
+                        }
+
+                        var response = await client.GetAsync(urlBuilder.ToString()).ConfigureAwait(true);
                         response.EnsureSuccessStatusCode();
 
-                        var text = await response.Content.ReadAsStringAsync();
+                        var text = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
                         if (!string.IsNullOrWhiteSpace(text))
                         {
                             BlackBoardWaterMark.Text = text.Trim();
@@ -967,23 +1237,199 @@ namespace Ink_Canvas
                     }
                     catch (Exception ex)
                     {
-                        LogHelper.WriteLogToFile($"Hitokoto API 请求失败: {ex.Message}", LogHelper.LogType.Warning);
-                        BlackBoardWaterMark.Text = "一言获取失败，请稍后重试";
+                        LogHelper.WriteLogToFile($"一言 API 请求失败: {ex.Message}", LogHelper.LogType.Warning);
+                        BlackBoardWaterMark.Text = "一言功能不可用";
                     }
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新白板名言时出错: {ex.Message}", LogHelper.LogType.Warning);
+                if (Settings.Appearance.ChickenSoupSource == 3 && BlackBoardWaterMark != null)
+                {
+                    try { BlackBoardWaterMark.Text = "一言功能不可用"; } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
+                }
             }
         }
 
+        /// <summary>
+        /// 处理名言来源选择更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当选择名言来源时：
+        /// 1. 保存名言来源设置
+        /// 2. 异步更新白板水印的名言文本
+        /// </remarks>
         private async void ComboBoxChickenSoupSource_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
             Settings.Appearance.ChickenSoupSource = ComboBoxChickenSoupSource.SelectedIndex;
+
+            if (BtnHitokotoCustomize != null)
+            {
+                BtnHitokotoCustomize.Visibility = ComboBoxChickenSoupSource.SelectedIndex == 3
+                    ? Visibility.Visible
+                    : Visibility.Collapsed;
+            }
+
             SaveSettingsToFile();
             await UpdateChickenSoupTextAsync();
+        }
+
+        private async void BtnHitokotoCustomize_Click(object sender, RoutedEventArgs e)
+        {
+            var categories = new Dictionary<string, string>
+            {
+                { "a", "动画" },
+                { "b", "漫画" },
+                { "c", "游戏" },
+                { "d", "文学" },
+                { "e", "原创" },
+                { "f", "来自网络" },
+                { "g", "其他" },
+                { "h", "影视" },
+                { "i", "诗词" },
+                { "j", "网易云" },
+                { "k", "哲学" },
+                { "l", "抖机灵" }
+            };
+
+            // 创建弹窗内容
+            var contentPanel = new StackPanel
+            {
+                Margin = new Thickness(20),
+                Orientation = System.Windows.Controls.Orientation.Vertical
+            };
+
+            // 全选复选框
+            var selectAllCheckBox = new CheckBox
+            {
+                Content = "全选",
+                FontSize = 14,
+                FontFamily = new FontFamily("Microsoft YaHei UI"),
+                Margin = new Thickness(0, 0, 0, 8)
+            };
+
+            // 存储各个分类的复选框
+            var categoryCheckBoxes = new Dictionary<string, CheckBox>();
+
+            // 创建分类复选框
+            foreach (var category in categories)
+            {
+                var checkBox = new CheckBox
+                {
+                    Content = category.Value,
+                    Tag = category.Key,
+                    FontSize = 13,
+                    FontFamily = new FontFamily("Microsoft YaHei UI"),
+                    IsChecked = Settings.Appearance.HitokotoCategories.Contains(category.Key),
+                    Margin = new Thickness(0, 0, 0, 8)
+                };
+                categoryCheckBoxes[category.Key] = checkBox;
+                contentPanel.Children.Add(checkBox);
+            }
+
+            // 全选复选框逻辑
+            bool isUpdatingSelectAll = false;
+            selectAllCheckBox.IsChecked = Settings.Appearance.HitokotoCategories.Count == categories.Count;
+
+            selectAllCheckBox.Checked += (s, args) =>
+            {
+                if (isUpdatingSelectAll) return;
+                isUpdatingSelectAll = true;
+                foreach (var checkBox in categoryCheckBoxes.Values)
+                {
+                    checkBox.IsChecked = true;
+                }
+                isUpdatingSelectAll = false;
+            };
+
+            selectAllCheckBox.Unchecked += (s, args) =>
+            {
+                if (isUpdatingSelectAll) return;
+                isUpdatingSelectAll = true;
+                foreach (var checkBox in categoryCheckBoxes.Values)
+                {
+                    checkBox.IsChecked = false;
+                }
+                isUpdatingSelectAll = false;
+            };
+
+            // 监听各个复选框的变化，更新全选状态
+            foreach (var checkBox in categoryCheckBoxes.Values)
+            {
+                checkBox.Checked += (s, args) =>
+                {
+                    if (isUpdatingSelectAll) return;
+                    isUpdatingSelectAll = true;
+                    // 检查所有分类复选框是否都被勾选
+                    bool allChecked = categoryCheckBoxes.Values.All(cb => cb.IsChecked == true);
+                    selectAllCheckBox.IsChecked = allChecked;
+                    isUpdatingSelectAll = false;
+                };
+                checkBox.Unchecked += (s, args) =>
+                {
+                    if (isUpdatingSelectAll) return;
+                    isUpdatingSelectAll = true;
+                    selectAllCheckBox.IsChecked = false;
+                    isUpdatingSelectAll = false;
+                };
+            }
+
+            // 将全选复选框添加到顶部
+            var mainPanel = new StackPanel
+            {
+                Margin = new Thickness(0),
+                Orientation = System.Windows.Controls.Orientation.Vertical
+            };
+            mainPanel.Children.Add(selectAllCheckBox);
+            mainPanel.Children.Add(new Separator { Margin = new Thickness(0, 8, 0, 8) });
+            mainPanel.Children.Add(contentPanel);
+
+            var scrollViewer = new ScrollViewer
+            {
+                Content = mainPanel,
+                MaxHeight = 400,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+            };
+
+            // 创建ContentDialog显示自定义内容
+            var contentDialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            {
+                Title = "自定义一言分类",
+                Content = scrollViewer,
+                PrimaryButtonText = "确定",
+                SecondaryButtonText = "取消",
+                DefaultButton = iNKORE.UI.WPF.Modern.Controls.ContentDialogButton.Primary,
+                Owner = this
+            };
+
+            var dialogResult = await contentDialog.ShowAsync();
+
+            if (dialogResult == iNKORE.UI.WPF.Modern.Controls.ContentDialogResult.Primary)
+            {
+                // 保存选中的分类
+                Settings.Appearance.HitokotoCategories = categoryCheckBoxes
+                    .Where(kvp => kvp.Value.IsChecked == true)
+                    .Select(kvp => kvp.Key)
+                    .ToList();
+
+                // 如果没有任何选中，默认全选
+                if (Settings.Appearance.HitokotoCategories.Count == 0)
+                {
+                    Settings.Appearance.HitokotoCategories = categories.Keys.ToList();
+                }
+
+                SaveSettingsToFile();
+
+                // 如果当前正在使用API，更新名言
+                if (Settings.Appearance.ChickenSoupSource == 3 && Settings.Appearance.EnableChickenSoupInWhiteboardMode)
+                {
+                    _ = UpdateChickenSoupTextAsync();
+                }
+            }
         }
 
         private void ToggleSwitchEnableViewboxBlackBoardScaleTransform_Toggled(object sender, RoutedEventArgs e)
@@ -995,6 +1441,17 @@ namespace Ink_Canvas
             LoadSettings();
         }
 
+        /// <summary>
+        /// 处理浮动栏图标选择更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当选择浮动栏图标时：
+        /// 1. 保存浮动栏图标设置
+        /// 2. 更新浮动栏图标
+        /// 3. 保存设置到文件
+        /// </remarks>
         public void ComboBoxFloatingBarImg_SelectionChanged(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -1003,6 +1460,16 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 根据设置更新浮动栏图标
+        /// </summary>
+        /// <remarks>
+        /// 根据设置的浮动栏图标索引更新图标：
+        /// 1. 为不同的图标索引设置不同的图标源
+        /// 2. 为不同的图标设置不同的边距
+        /// 3. 支持自定义图标
+        /// 4. 自定义图标加载失败时使用默认图标
+        /// </remarks>
         public void UpdateFloatingBarIcon()
         {
             int index = Settings.Appearance.FloatingBarImg;
@@ -1010,74 +1477,73 @@ namespace Ink_Canvas
             if (index == 0)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
             else if (index == 1)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-noshadow.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-noshadow.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
             else if (index == 2)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-dark.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-dark.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
             else if (index == 3)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-sharpdark.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-sharpdark.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
             else if (index == 4)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-light-small.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-light-small.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(0.5);
             }
             else if (index == 5)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(
-                        new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-dark-small.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc-transparent-dark-small.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(1.2);
             }
             else if (index == 6)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandoujiyanhuaji.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandoujiyanhuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
             else if (index == 7)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanshounvhuaji.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanshounvhuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
             else if (index == 8)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanciya.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanciya.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
             else if (index == 9)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanneikuhuaji.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuanneikuhuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
             else if (index == 10)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandogeyuanliangwo.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/kuandogeyuanliangwo.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1.5);
             }
             else if (index == 11)
             {
                 FloatingbarHeadIconImg.Source =
-                    new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/tiebahuaji.png"));
+                    CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/tiebahuaji.png"));
                 FloatingbarHeadIconImg.Margin = new Thickness(2, 2, 2, 1);
             }
             else if (index >= 12 && index - 12 < Settings.Appearance.CustomFloatingBarImgs.Count)
@@ -1086,18 +1552,49 @@ namespace Ink_Canvas
                 var customIcon = Settings.Appearance.CustomFloatingBarImgs[index - 12];
                 try
                 {
-                    FloatingbarHeadIconImg.Source = new BitmapImage(new Uri(customIcon.FilePath));
+                    var dpi = VisualTreeHelper.GetDpi(this);
+                    var targetPixels = (int)Math.Round(58 * dpi.DpiScaleX);
+                    var decodePixels = targetPixels * 2;
+                    if (decodePixels < 64) decodePixels = 64;
+                    if (decodePixels > 512) decodePixels = 512;
+
+                    FloatingbarHeadIconImg.Source = CreateBitmapImage(new Uri(customIcon.FilePath), decodePixels);
                     FloatingbarHeadIconImg.Margin = new Thickness(2);
                 }
                 catch
                 {
                     // 如果加载失败，使用默认图标
-                    FloatingbarHeadIconImg.Source = new BitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc.png"));
+                    FloatingbarHeadIconImg.Source = CreateBitmapImage(new Uri("pack://application:,,,/Resources/Icons-png/icc.png"));
                     FloatingbarHeadIconImg.Margin = new Thickness(0.5);
                 }
             }
         }
 
+        private static BitmapImage CreateBitmapImage(Uri uri, int decodePixelWidth = 0)
+        {
+            var image = new BitmapImage();
+            image.BeginInit();
+            image.UriSource = uri;
+            image.CacheOption = BitmapCacheOption.OnLoad;
+            if (decodePixelWidth > 0)
+            {
+                image.DecodePixelWidth = decodePixelWidth;
+            }
+            image.EndInit();
+            image.Freeze();
+            return image;
+        }
+
+        /// <summary>
+        /// 更新组合框中的自定义图标选项
+        /// </summary>
+        /// <remarks>
+        /// 更新自定义图标选项时：
+        /// 1. 保留前12个内置图标选项
+        /// 2. 移除所有现有的自定义图标选项
+        /// 3. 添加新的自定义图标选项
+        /// 4. 为自定义图标选项设置字体
+        /// </remarks>
         public void UpdateCustomIconsInComboBox()
         {
             // 保留前12个内置图标选项
@@ -1116,6 +1613,16 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理添加自定义图标按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当点击添加自定义图标按钮时：
+        /// 1. 显示添加自定义图标窗口
+        /// 2. 如果添加成功，自动选中新添加的图标
+        /// </remarks>
         private void ButtonAddCustomIcon_Click(object sender, RoutedEventArgs e)
         {
             AddCustomIconWindow dialog = new AddCustomIconWindow(this);
@@ -1129,6 +1636,14 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理管理自定义图标按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当点击管理自定义图标按钮时，显示自定义图标管理窗口
+        /// </remarks>
         private void ButtonManageCustomIcons_Click(object sender, RoutedEventArgs e)
         {
             CustomIconWindow dialog = new CustomIconWindow(this);
@@ -1136,6 +1651,18 @@ namespace Ink_Canvas
             dialog.ShowDialog();
         }
 
+        /// <summary>
+        /// 处理白板模式下时间显示开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当白板模式下时间显示开关状态更改时：
+        /// 1. 保存时间显示设置
+        /// 2. 如果当前是白板模式，根据设置显示或隐藏时间和日期水印
+        /// 3. 保存设置到文件
+        /// 4. 重新加载设置以应用更改
+        /// </remarks>
         private void ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -1158,6 +1685,18 @@ namespace Ink_Canvas
             LoadSettings();
         }
 
+        /// <summary>
+        /// 处理白板模式下名言显示开关状态更改事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当白板模式下名言显示开关状态更改时：
+        /// 1. 保存名言显示设置
+        /// 2. 如果当前是白板模式，根据时间显示设置显示或隐藏名言水印
+        /// 3. 保存设置到文件
+        /// 4. 重新加载设置以应用更改
+        /// </remarks>
         private void ToggleSwitchEnableChickenSoupInWhiteboardMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -1229,6 +1768,15 @@ namespace Ink_Canvas
                 _pptUIManager.UpdateNavigationPanelsVisibility();
             }
             UpdatePPTBtnPreview();
+        }
+
+        private void ToggleSwitchShowPPTSidebarByDefault_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            Settings.PowerPointSettings.ShowPPTSidebarByDefault = ToggleSwitchShowPPTSidebarByDefault.IsOn;
+            SaveSettingsToFile();
+            if (BtnPPTSlideShowEnd?.Visibility == Visibility.Visible)
+                UpdatePPTQuickPanelVisibility();
         }
 
         private void ToggleSwitchEnablePPTButtonPageClickable_OnToggled(object sender, RoutedEventArgs e)
@@ -2327,6 +2875,12 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 将画笔不透明度更新为滑块的当前值，并保存到设置中。
+        /// </summary>
+        /// <remarks>
+        /// 使用滑块的当前值作为 alpha 通道更新 drawingAttributes.Color，同时将该值写入 Settings.Canvas.InkAlpha 并持久化配置文件。
+        /// </remarks>
         private void InkAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!isLoaded) return;
@@ -2341,6 +2895,9 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        /// <summary>
+        /// 根据组合框的当前选择更新双曲线渐近线选项（Settings.Canvas.HyperbolaAsymptoteOption），并将更改保存到设置文件。
+        /// </summary>
         private void ComboBoxHyperbolaAsymptoteOption_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2847,59 +3404,21 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
-        private void BtnDlassSettingsManage_Click(object sender, RoutedEventArgs e)
+        private void BtnCloudStorageManagementSettingsManage_Click(object sender, RoutedEventArgs e)
         {
             if (isOpeningOrHidingSettingsPane) return;
             HideSubPanels();
             try
             {
-                // 检查是否是第一次打开（检查用户是否已设置Token）
-                bool hasToken = !string.IsNullOrEmpty(Settings?.Dlass?.UserToken?.Trim());
-                bool isFirstTime = !hasToken;
-
-                if (isFirstTime)
-                {
-                    // 第一次打开，询问用户是否已注册
-                    var result = MessageBox.Show(
-                        "您是否已经注册了Dlass账号？\n\n" +
-                        "• 如果已注册：将直接打开设置管理页面\n" +
-                        "• 如果未注册：将打开浏览器跳转到注册页面",
-                        "Dlass账号注册",
-                        MessageBoxButton.YesNo,
-                        MessageBoxImage.Question);
-
-                    if (result == MessageBoxResult.No)
-                    {
-                        // 用户未注册，打开浏览器
-                        try
-                        {
-                            Process.Start(new ProcessStartInfo
-                            {
-                                FileName = "https://dlass.tech/dashboard",
-                                UseShellExecute = true
-                            });
-                            LogHelper.WriteLogToFile("已打开浏览器跳转到Dlass注册页面", LogHelper.LogType.Event);
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile($"打开浏览器时出错: {ex.Message}", LogHelper.LogType.Error);
-                            MessageBox.Show($"无法打开浏览器。请手动访问: https://dlass.tech/dashboard",
-                                "提示", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                        return; // 不打开设置窗口
-                    }
-                    // 如果用户选择"是"，继续打开设置窗口
-                }
-
                 // 打开设置管理窗口
-                var dlassSettingsWindow = new Windows.DlassSettingsWindow();
-                dlassSettingsWindow.Owner = this;
-                dlassSettingsWindow.ShowDialog();
+                var CloudStorageManagementSettingsWindow = new Windows.CloudStorageManagementWindow();
+                CloudStorageManagementSettingsWindow.Owner = this;
+                CloudStorageManagementSettingsWindow.ShowDialog();
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"打开Dlass设置管理窗口时出错: {ex.Message}", LogHelper.LogType.Error);
-                MessageBox.Show($"打开Dlass设置管理窗口时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+                LogHelper.WriteLogToFile($"打开云存储管理窗口时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"打开云存储管理窗口时发生错误: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -3169,6 +3688,13 @@ namespace Ink_Canvas
 
         #region Reset
 
+        /// <summary>
+        /// 将应用设置重置为推荐的默认配置。
+        /// </summary>
+        /// <remarks>
+        /// 该方法会重新创建全局 Settings 实例并应用推荐值，覆盖大部分子模块配置（如外观、画布、自动化、PPT、手势、高级选项等）。
+        /// 在重置过程中会保留并恢复当前 Settings.Automation 中的 AutoDelSavedFiles 与 AutoDelSavedFilesDaysThreshold 两项值以避免意外删除策略变化。
+        /// </remarks>
         public static void SetSettingsToRecommendation()
         {
             var AutoDelSavedFilesDays = Settings.Automation.AutoDelSavedFiles;
@@ -3316,8 +3842,26 @@ namespace Ink_Canvas
             Settings.Startup.IsFoldAtStartup = false;
         }
 
-        public void BtnResetToSuggestion_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 将应用设置重置为推荐的默认值，并保存与重新加载配置以应用更改。
+        /// </summary>
+        /// <remarks>
+        /// 如果配置重置受安全密码保护，则会提示用户输入密码；在验证失败时中止重置。方法会暂时停止加载标志以避免触发事件、将“开机启动”切换置为关闭，并在完成后显示一条通知。任何内部异常将被吞噬以保证流程不中断。
+        /// </remarks>
+        public async void BtnResetToSuggestion_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                if (sender != null && Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForResetConfig(Settings))
+                {
+                    bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyAsync(Settings, this, "重置配置验证", "请输入安全密码以确认重置配置。");
+                    if (!ok) return;
+                }
+            }
+            catch
+            {
+            }
+
             try
             {
                 isLoaded = false;
@@ -3328,7 +3872,7 @@ namespace Ink_Canvas
 
                 ToggleSwitchRunAtStartup.IsOn = false;
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
             ShowNotification("设置已重置为默认推荐设置~");
         }
@@ -3347,7 +3891,7 @@ namespace Ink_Canvas
                 LoadSettings(isStartup: false, skipAutoUpdateCheck: true);
                 isLoaded = true;
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         #endregion
@@ -3726,6 +4270,159 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"还原设置备份时出错: {ex.Message}", LogHelper.LogType.Error);
                 MessageBox.Show($"还原备份失败: {ex.Message}", "还原失败", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private bool _isRefreshingConfigProfileList;
+        private string _lastAppliedProfileName;
+
+        private void RefreshConfigProfileList()
+        {
+            try
+            {
+                if (ComboBoxConfigProfile == null) return;
+                _isRefreshingConfigProfileList = true;
+                try
+                {
+                    var names = ConfigProfileManager.ListProfileNames();
+                    ComboBoxConfigProfile.ItemsSource = names;
+                    if (names.Count == 0)
+                    {
+                        ComboBoxConfigProfile.SelectedItem = null;
+                    }
+                    else if (_lastAppliedProfileName != null && names.Contains(_lastAppliedProfileName))
+                    {
+                        ComboBoxConfigProfile.SelectedItem = _lastAppliedProfileName;
+                    }
+                    else
+                    {
+                        var selected = ComboBoxConfigProfile.SelectedItem as string;
+                        if (selected != null && names.Contains(selected))
+                            ComboBoxConfigProfile.SelectedItem = selected;
+                        else
+                            ComboBoxConfigProfile.SelectedIndex = 0;
+                    }
+                    if (BtnDeleteConfigProfile != null)
+                        BtnDeleteConfigProfile.IsEnabled = ComboBoxConfigProfile.SelectedItem != null;
+                }
+                finally
+                {
+                    _isRefreshingConfigProfileList = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新配置方案列表失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void ComboBoxConfigProfile_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (BtnDeleteConfigProfile != null)
+                BtnDeleteConfigProfile.IsEnabled = ComboBoxConfigProfile?.SelectedItem != null;
+            if (!isLoaded || _isRefreshingConfigProfileList) return;
+            var name = ComboBoxConfigProfile?.SelectedItem as string;
+            if (string.IsNullOrEmpty(name)) return;
+            try
+            {
+                if (ConfigProfileManager.ApplyProfile(name))
+                {
+                    _lastAppliedProfileName = name;
+                    ReloadSettingsFromFile();
+                    ShowNotification($"已切换至方案「{name}」");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"切换配置方案失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private async void BtnSaveAsConfigProfile_Click(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            var input = new System.Windows.Controls.TextBox
+            {
+                MinWidth = 260,
+                Padding = new Thickness(8, 6, 8, 6),
+                Margin = new Thickness(0, 0, 0, 12)
+            };
+            var label = new System.Windows.Controls.TextBlock
+            {
+                Text = "方案名称",
+                Margin = new Thickness(0, 0, 0, 8)
+            };
+            var content = new iNKORE.UI.WPF.Modern.Controls.SimpleStackPanel { Spacing = 6 };
+            content.Children.Add(label);
+            content.Children.Add(input);
+            var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog
+            {
+                Title = "另存为方案",
+                Content = content,
+                PrimaryButtonText = "保存",
+                SecondaryButtonText = "取消",
+                Owner = this
+            };
+            var result = await dialog.ShowAsync();
+            if (result != iNKORE.UI.WPF.Modern.Controls.ContentDialogResult.Primary) return;
+            var name = input.Text?.Trim();
+            if (string.IsNullOrEmpty(name))
+            {
+                MessageBox.Show("请输入方案名称。", "另存为方案", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            try
+            {
+                var json = JsonConvert.SerializeObject(Settings, Formatting.Indented);
+                if (ConfigProfileManager.SaveAsProfile(name, json))
+                {
+                    _lastAppliedProfileName = name;
+                    RefreshConfigProfileList();
+                    ShowNotification($"已另存为方案：{name}");
+                }
+                else
+                    MessageBox.Show("保存失败，请查看日志。", "另存为方案", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"另存为方案失败: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"保存失败: {ex.Message}", "另存为方案", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void BtnDeleteConfigProfile_Click(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+            var name = ComboBoxConfigProfile?.SelectedItem as string;
+            if (string.IsNullOrEmpty(name))
+            {
+                MessageBox.Show("请先选择要删除的配置文件。", "配置文件", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            try
+            {
+                if (MessageBox.Show($"确定要删除配置文件「{name}」吗？", "确认删除", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes)
+                    return;
+                if (ConfigProfileManager.DeleteProfile(name))
+                {
+                    RefreshConfigProfileList();
+                    var nextName = ComboBoxConfigProfile?.SelectedItem as string;
+                    if (!string.IsNullOrEmpty(nextName) && ConfigProfileManager.ApplyProfile(nextName))
+                    {
+                        _lastAppliedProfileName = nextName;
+                        ReloadSettingsFromFile();
+                        ShowNotification($"已删除方案「{name}」，已切换至「{nextName}」");
+                    }
+                    else
+                        ShowNotification($"已删除方案：{name}");
+                }
+                else
+                    MessageBox.Show("删除配置文件失败，请查看日志。", "配置文件", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"删除配置文件失败: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"删除配置文件失败: {ex.Message}", "配置文件", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -4393,6 +5090,12 @@ namespace Ink_Canvas
 
         #endregion
 
+        /// <summary>
+        /// 将当前内存中的 Settings 序列化为格式化的 JSON 并写入应用程序配置文件（位于 App.RootPath 下的 Configs 目录或根设置文件）。
+        /// </summary>
+        /// <remarks>
+        /// 在写入前会确保目标目录/文件具有写入权限（使用 ProcessProtectionManager）。任何写入失败或异常都会被吞掉，调用方不会收到异常抛出。
+        /// </remarks>
         public static void SaveSettingsToFile()
         {
             var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
@@ -4401,12 +5104,13 @@ namespace Ink_Canvas
                 string configsDir = Path.Combine(App.RootPath, "Configs");
                 if (!Directory.Exists(configsDir))
                 {
-                    Directory.CreateDirectory(configsDir);
+                    ProcessProtectionManager.WithWriteAccess(configsDir, () => Directory.CreateDirectory(configsDir));
                 }
 
-                File.WriteAllText(App.RootPath + settingsFileName, text);
+                var path = App.RootPath + settingsFileName;
+                ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e)
@@ -4441,8 +5145,8 @@ namespace Ink_Canvas
             {
                 var oldChannel = Settings.Startup.UpdateChannel;
                 string channel = radioButton.Tag.ToString();
-                UpdateChannel newChannel = channel == "Beta" ? UpdateChannel.Beta 
-                    : channel == "Preview" ? UpdateChannel.Preview 
+                UpdateChannel newChannel = channel == "Beta" ? UpdateChannel.Beta
+                    : channel == "Preview" ? UpdateChannel.Preview
                     : UpdateChannel.Release;
 
                 // 如果通道没有变化，不需要执行更新检查

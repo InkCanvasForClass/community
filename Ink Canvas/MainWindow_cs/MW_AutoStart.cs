@@ -1,4 +1,4 @@
-﻿using IWshRuntimeLibrary;
+using IWshRuntimeLibrary;
 using System;
 using System.Windows;
 using Application = System.Windows.Forms.Application;
@@ -8,6 +8,22 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 创建开机自启动快捷方式。
+        /// </summary>
+        /// <param name="exeName">可执行文件名，用于命名快捷方式。</param>
+        /// <returns>创建成功返回true，失败返回false。</returns>
+        /// <remarks>
+        /// 操作包括：
+        /// 1. 创建Windows Shell对象
+        /// 2. 在启动文件夹中创建快捷方式
+        /// 3. 设置快捷方式的目标路径为当前可执行文件路径
+        /// 4. 设置工作目录为当前目录
+        /// 5. 设置窗口样式为普通窗口
+        /// 6. 设置快捷方式描述
+        /// 7. 保存快捷方式
+        /// 8. 捕获可能的异常，确保方法不会因异常而崩溃
+        /// </remarks>
         public static bool StartAutomaticallyCreate(string exeName)
         {
             try
@@ -34,6 +50,16 @@ namespace Ink_Canvas
             return false;
         }
 
+        /// <summary>
+        /// 删除开机自启动快捷方式。
+        /// </summary>
+        /// <param name="exeName">可执行文件名，用于定位要删除的快捷方式。</param>
+        /// <returns>删除成功返回true，失败返回false。</returns>
+        /// <remarks>
+        /// 操作包括：
+        /// 1. 在启动文件夹中删除指定名称的快捷方式
+        /// 2. 捕获可能的异常，确保方法不会因异常而崩溃
+        /// </remarks>
         public static bool StartAutomaticallyDel(string exeName)
         {
             try

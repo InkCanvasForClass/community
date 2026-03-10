@@ -1,10 +1,9 @@
+using Sentry;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
-using Sentry;
-using Sentry.Protocol;
 
 namespace Ink_Canvas.Helpers
 {
@@ -122,7 +121,7 @@ namespace Ink_Canvas.Helpers
                         {
                             Id = deviceId,
                             Username = userName,
-                            Email = $"{userName}", 
+                            Email = $"{userName}",
                             IpAddress = "{{auto}}"
                         };
                     });
@@ -137,7 +136,7 @@ namespace Ink_Canvas.Helpers
                     {
                         Id = deviceId,
                         Username = userName,
-                        Email = $"{userName}",  
+                        Email = $"{userName}",
                         IpAddress = "{{auto}}"
                     };
 
@@ -146,7 +145,7 @@ namespace Ink_Canvas.Helpers
                     evt.SetTag("update_channel", settings.Startup.UpdateChannel.ToString());
                     evt.SetTag("app_version", Assembly.GetExecutingAssembly().GetName().Version.ToString());
                     evt.SetTag("os_version", Environment.OSVersion.VersionString);
-                   evt.SetExtra("telemetry_data", telemetryData);
+                    evt.SetExtra("telemetry_data", telemetryData);
 
                     if (crashFiles != null)
                     {

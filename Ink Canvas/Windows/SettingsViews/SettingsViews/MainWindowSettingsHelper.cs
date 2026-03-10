@@ -1,4 +1,3 @@
-using Ink_Canvas;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,7 +69,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                     // 即使找不到控件，也尝试触发事件（可能通过反射调用）
                     var toggledMethodName = toggleSwitchName + "_Toggled";
                     InvokeMainWindowMethod(toggledMethodName, null, new RoutedEventArgs());
-                    
+
                     // 通知新设置面板同步状态
                     NotifySettingsPanelsSyncState(toggleSwitchName);
                     return;
@@ -87,10 +86,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                 // 触发 Toggled 事件
                 var toggledMethodName2 = toggleSwitchName + "_Toggled";
                 InvokeMainWindowMethod(toggledMethodName2, toggleSwitch, new RoutedEventArgs());
-                
+
                 // 通知新设置面板同步状态
                 NotifySettingsPanelsSyncState(toggleSwitchName);
-                
+
                 // 检查是否需要更新主题
                 NotifyThemeUpdateIfNeeded(toggleSwitchName);
             }
@@ -115,18 +114,18 @@ namespace Ink_Canvas.Windows.SettingsViews
                 if (comboBox != null)
                 {
                     comboBox.SelectedItem = selectedItem;
-                    
+
                     // 触发 SelectionChanged 事件
                     var selectionChangedMethodName = comboBoxName + "_SelectionChanged";
                     InvokeMainWindowMethod(selectionChangedMethodName, comboBox, new System.Windows.Controls.SelectionChangedEventArgs(
-                        System.Windows.Controls.Primitives.Selector.SelectionChangedEvent, 
-                        new System.Collections.IList[0], 
+                        System.Windows.Controls.Primitives.Selector.SelectionChangedEvent,
+                        new System.Collections.IList[0],
                         new System.Collections.IList[0]));
                 }
-                
+
                 // 通知新设置面板同步状态
                 NotifySettingsPanelsSyncState(comboBoxName);
-                
+
                 // 检查是否需要更新主题
                 NotifyThemeUpdateIfNeeded(comboBoxName);
             }
@@ -152,16 +151,16 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     var oldValue = slider.Value;
                     slider.Value = value;
-                    
+
                     // 触发 ValueChanged 事件
                     var valueChangedMethodName = sliderName + "_ValueChanged";
-                    InvokeMainWindowMethod(valueChangedMethodName, slider, 
+                    InvokeMainWindowMethod(valueChangedMethodName, slider,
                         new System.Windows.RoutedPropertyChangedEventArgs<double>(oldValue, value));
                 }
-                
+
                 // 通知新设置面板同步状态
                 NotifySettingsPanelsSyncState(sliderName);
-                
+
                 // 检查是否需要更新主题（某些Slider可能影响UI外观）
                 NotifyThemeUpdateIfNeeded(sliderName);
             }
@@ -186,7 +185,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 if (checkBox != null)
                 {
                     checkBox.IsChecked = isChecked;
-                    
+
                     // 尝试多种可能的方法名
                     var methodNames = new[]
                     {
@@ -195,7 +194,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         checkBoxName + "_Checked",
                         checkBoxName + "_Unchecked"
                     };
-                    
+
                     foreach (var methodName in methodNames)
                     {
                         var method = mainWindow.GetType().GetMethod(methodName, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
@@ -236,7 +235,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         {
                             // 调用事件处理方法（它会自动保存设置并触发状态同步）
                             method.Invoke(mainWindow, eventHandlerParams);
-                            
+
                             // 如果提供了控件名称，确保状态同步
                             if (!string.IsNullOrEmpty(controlName))
                             {
@@ -250,7 +249,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 // 如果没有事件处理方法或调用失败，直接修改设置并保存
                 action?.Invoke();
                 MainWindow.SaveSettingsToFile();
-                
+
                 // 如果提供了控件名称，通知面板同步状态
                 if (!string.IsNullOrEmpty(controlName))
                 {
@@ -274,7 +273,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 action?.Invoke();
                 MainWindow.SaveSettingsToFile();
-                
+
                 // 如果提供了控件名称，通知面板同步状态
                 if (!string.IsNullOrEmpty(controlName))
                 {
@@ -302,14 +301,14 @@ namespace Ink_Canvas.Windows.SettingsViews
                 if (textBox != null)
                 {
                     textBox.Text = text;
-                    
+
                     // 触发 TextChanged 事件
                     var textChangedMethodName = textBoxName + "_TextChanged";
                     InvokeMainWindowMethod(textChangedMethodName, textBox, new System.Windows.Controls.TextChangedEventArgs(
                         System.Windows.Controls.Primitives.TextBoxBase.TextChangedEvent,
                         System.Windows.Controls.UndoAction.None));
                 }
-                
+
                 // 通知新设置面板同步状态
                 NotifySettingsPanelsSyncState(textBoxName);
             }
@@ -336,7 +335,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         {
                             // 根据控件名称确定需要同步的面板
                             var panelToSync = GetPanelForControl(controlName);
-                            
+
                             if (panelToSync != null)
                             {
                                 // 获取对应的面板属性
@@ -347,7 +346,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                                     if (panel != null)
                                     {
                                         // 调用 LoadSettings 方法重新加载设置
-                                        var loadMethod = panel.GetType().GetMethod("LoadSettings", 
+                                        var loadMethod = panel.GetType().GetMethod("LoadSettings",
                                             BindingFlags.Public | BindingFlags.Instance);
                                         if (loadMethod != null)
                                         {
@@ -476,7 +475,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 // 获取所有面板属性
                 var panelProperties = settingsWindow.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(p => p.PropertyType.Name.EndsWith("Panel") && 
+                    .Where(p => p.PropertyType.Name.EndsWith("Panel") &&
                                p.PropertyType.IsSubclassOf(typeof(System.Windows.Controls.UserControl)));
 
                 foreach (var panelProp in panelProperties)
@@ -487,7 +486,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         if (panel != null)
                         {
                             // 调用 LoadSettings 方法
-                            var loadMethod = panel.GetType().GetMethod("LoadSettings", 
+                            var loadMethod = panel.GetType().GetMethod("LoadSettings",
                                 BindingFlags.Public | BindingFlags.Instance);
                             if (loadMethod != null)
                             {
@@ -537,12 +536,12 @@ namespace Ink_Canvas.Windows.SettingsViews
                 // 检查是否是主题相关的设置（使用更灵活的匹配）
                 bool isThemeRelated = false;
                 string controlNameLower = controlName.ToLower();
-                
+
                 foreach (var themeControl in themeRelatedControls)
                 {
                     string themeControlLower = themeControl.ToLower();
                     // 检查是否包含或匹配
-                    if (controlNameLower.Contains(themeControlLower) || 
+                    if (controlNameLower.Contains(themeControlLower) ||
                         themeControlLower.Contains(controlNameLower) ||
                         controlNameLower == themeControlLower)
                     {
@@ -581,21 +580,21 @@ namespace Ink_Canvas.Windows.SettingsViews
                     if (window.GetType().Name == "SettingsWindow")
                     {
                         // 使用反射调用 ApplyThemeToAllPanels 方法
-                        var method = window.GetType().GetMethod("ApplyThemeToAllPanels", 
+                        var method = window.GetType().GetMethod("ApplyThemeToAllPanels",
                             BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
                         if (method != null)
                         {
                             method.Invoke(window, null);
                         }
-                        
+
                         // 同时调用 ApplyTheme 方法更新窗口本身
-                        var applyThemeMethod = window.GetType().GetMethod("ApplyTheme", 
+                        var applyThemeMethod = window.GetType().GetMethod("ApplyTheme",
                             BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance);
                         if (applyThemeMethod != null)
                         {
                             applyThemeMethod.Invoke(window, null);
                         }
-                        
+
                         break; // 通常只有一个设置窗口
                     }
                 }
@@ -643,7 +642,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             for (int i = 0; i < Media.VisualTreeHelper.GetChildrenCount(parent); i++)
             {
                 var child = Media.VisualTreeHelper.GetChild(parent, i);
-                
+
                 // 为 Border 控件（ToggleSwitch、选项按钮等）启用触摸支持
                 if (child is Border border)
                 {
@@ -651,7 +650,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                     if (border.Tag != null || border.Cursor == Cursors.Hand)
                     {
                         border.IsManipulationEnabled = true;
-                        
+
                         // 添加触摸事件支持，将触摸事件转换为鼠标事件
                         border.TouchDown += (s, e) =>
                         {
@@ -665,7 +664,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                             border.CaptureTouch(e.TouchDevice);
                             e.Handled = true;
                         };
-                        
+
                         // 添加触摸释放事件
                         border.TouchUp += (s, e) =>
                         {
@@ -704,7 +703,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     radioButton.IsManipulationEnabled = true;
                 }
-                
+
                 // 递归处理子元素
                 EnableTouchSupportForControls(child);
             }

@@ -59,5 +59,13 @@ Name: "{group}\{cm:ProgramOnTheWeb,{#MyAppName}}"; Filename: "{#MyAppURL}"
 Name: "{group}\{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
+[Code]
+function InitializeSetup: Boolean;
+begin
+  Result := True; // Always allow setup to continue
+  if not IsDotNetInstalled(net472, 0) then // Check if .NET Framework version 4.7.2 or compatible is installed
+    SuppressibleMsgBox('警告：未检测到 .NET Framework 4.7.2 或更高版本。应用程序可能无法正常运行。', mbInformation, MB_OK, IDOK);
+end;
+
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent

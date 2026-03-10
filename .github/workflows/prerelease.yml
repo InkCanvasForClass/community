@@ -217,7 +217,6 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.x'
           cache: true
           cache-dependency-path: '**/packages.lock.json'
       
@@ -225,8 +224,10 @@ jobs:
         run: dotnet restore "Ink Canvas.sln" --locked-mode
       
       - name: Build the Solution (Release)
+        env:
+          DLASS_SENTRY_DSN: ${{ secrets.DLASS_SENTRY_DSN }}
         run: |
-          msbuild /p:platform="AnyCPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal
+          msbuild /p:platform="AnyCPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
       - name: Check if exe file is generated
         id: check-exe
@@ -307,7 +308,7 @@ jobs:
           
       - name: Build MSI installer with Inno Setup
         if: steps.check-exe.outputs.build_success == 'true'
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.2
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
         with:
           path: build/InkCanvasForClass CE.iss
           options: /O.
@@ -355,7 +356,7 @@ jobs:
           
       - name: Upload Build Artifacts
         if: steps.check-exe.outputs.build_success == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-files-${{ needs.prepare.outputs.version }}
           path: |
@@ -408,14 +409,14 @@ jobs:
       id-token: write
     steps:
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-files-${{ needs.prepare.outputs.version }}
           
       - name: Setup Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.10'
+          python-version: '3.14'
           
       - name: Sign release artifacts with sigstore-python
         uses: sigstore/gh-action-sigstore-python@v3.2.0
@@ -429,7 +430,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Upload Signed Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: signed-files-${{ needs.prepare.outputs.version }}
           path: |
@@ -447,12 +448,12 @@ jobs:
 
     steps:
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-files-${{ needs.prepare.outputs.version }}
           
       - name: Download Signed Artifacts (if exists)
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: signed-files-${{ needs.prepare.outputs.version }}
         continue-on-error: true
@@ -538,7 +539,7 @@ jobs:
       contents: write
     steps:
       - name: Download Build Artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-files-${{ needs.prepare.outputs.version }}
 
@@ -560,28 +561,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.octo-sts-downloads.outputs.token }}
         run: |
-          CONTENT=$(base64 -w0 InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip)
-
-          gh api \
-            --method PUT \
-            /repos/InkCanvasForClass/downloads/contents/${{ case(needs.prepare.outputs.is_prerelease == 'true', 'Beta', 'Release') }}/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip \
-            -f message="Add files via upload" \
-            -f content="$CONTENT" \
-            -f branch="main"
+          set -e
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-      - name: Sync downloads repos(Release Only)
-        if: ${{needs.prepare.outputs.is_prerelease == 'false'}}
-        env:
-          GITHUB_TOKEN: ${{ steps.octo-sts-downloads.outputs.token }}
-        run: |
-          CONTENT=$(base64 -w0 InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip)
-
-          gh api \
-            --method PUT \
-            /repos/InkCanvasForClass/downloads/contents/Beta/InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip \
-            -f message="Add files via upload" \
-            -f content="$CONTENT" \
-            -f branch="main"
+          REPO_DIR=$(mktemp -d)
+          git clone --depth 1 --filter=blob:none --branch main https://x-access-token:${{ steps.octo-sts-downloads.outputs.token }}@github.com/InkCanvasForClass/downloads.git $REPO_DIR
+          
+          cd $REPO_DIR
+          IS_PRERELEASE="${{ needs.prepare.outputs.is_prerelease }}"
+          VERSION="${{ needs.prepare.outputs.version }}"
+          ZIP_FILE="$GITHUB_WORKSPACE/InkCanvasForClass.CE.$VERSION.zip"
+          
+          if [ "$IS_PRERELEASE" == "true" ]; then
+            mkdir -p Beta
+            cp "$ZIP_FILE" Beta/
+            git add Beta/InkCanvasForClass.CE.$VERSION.zip
+            git commit -m "Add $VERSION PreRelease"
+          else
+            mkdir -p Release Beta
+            cp "$ZIP_FILE" Release/
+            cp "$ZIP_FILE" Beta/
+            git add Release/InkCanvasForClass.CE.$VERSION.zip Beta/InkCanvasForClass.CE.$VERSION.zip
+            git commit -m "Add $VERSION Release"
+          fi
+          git push origin main
             
       - name: Update AutomaticUpdateVersionControl in beta repo
         env:

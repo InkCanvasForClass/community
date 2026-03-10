@@ -35,3 +35,10 @@ body:
       description: 其他补充说明或建议 | Any other context or suggestions
     validations:
       required: false
+  - type: upload
+    id: files
+    attributes:
+      label: 上传有关文件 | Upload relevant files
+      description: "你可以在此处上传相关文件 | You can upload relevant files here."
+    validations:
+      required: false

@@ -1,5 +1,5 @@
-﻿using iNKORE.UI.WPF.Helpers;
 using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Helpers;
 using OSVersionExtension;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,6 @@ using System.IO;
 using System.Management;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading;
 using System.Windows;
 using System.Windows.Controls;
@@ -16,7 +15,6 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Microsoft.Win32;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
@@ -38,7 +36,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                     CopyrightBannerImage.Source =
                         new BitmapImage(new Uri($"file://{App.RootPath + "icc-about-illustrations.png"}"));
                 }
-                catch { }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }
             else
             {
@@ -71,7 +69,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 var copyright = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyCopyrightAttribute>();
                 if (copyright != null && !string.IsNullOrEmpty(copyright.Copyright))
-            {
+                {
                     var copyrightText = copyright.Copyright;
                     AboutCopyright.Text = copyrightText;
                     AboutBottomCopyright.Text = copyrightText.Replace("Copyright ©", "© Copyright") + " 所有";
@@ -93,17 +91,17 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 var assembly = Assembly.GetExecutingAssembly();
                 var filePath = assembly.Location;
-                
+
                 if (File.Exists(filePath))
                 {
                     var bt = File.GetCreationTime(filePath);
-                var m = bt.Month.ToString().PadLeft(2, '0');
-                var d = bt.Day.ToString().PadLeft(2, '0');
-                var h = bt.Hour.ToString().PadLeft(2, '0');
-                var min = bt.Minute.ToString().PadLeft(2, '0');
-                var s = bt.Second.ToString().PadLeft(2, '0');
+                    var m = bt.Month.ToString().PadLeft(2, '0');
+                    var d = bt.Day.ToString().PadLeft(2, '0');
+                    var h = bt.Hour.ToString().PadLeft(2, '0');
+                    var min = bt.Minute.ToString().PadLeft(2, '0');
+                    var s = bt.Second.ToString().PadLeft(2, '0');
                     AboutBuildTime.Text = $"{bt.Year}-{m}-{d} {h}:{min}:{s}";
-            }
+                }
                 else
                 {
                     AboutBuildTime.Text = "获取失败";
@@ -122,8 +120,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 try
                 {
                     var support = TouchTabletDetectHelper.IsTouchEnabled();
-                var touchcount = TouchTabletDetectHelper.GetTouchTabletDevices().Count;
-                    
+                    var touchcount = TouchTabletDetectHelper.GetTouchTabletDevices().Count;
+
                     Dispatcher.BeginInvoke(() =>
                     {
                         if (support)
@@ -145,8 +143,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
                 catch (Exception ex)
                 {
-                Dispatcher.BeginInvoke(() =>
-                        AboutTouchTabletText.Text = "检测失败");
+                    Dispatcher.BeginInvoke(() =>
+                            AboutTouchTabletText.Text = "检测失败");
                     System.Diagnostics.Debug.WriteLine($"检测触摸设备失败: {ex.Message}");
                 }
             });
@@ -173,7 +171,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                     }
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         public static class TouchTabletDetectHelper
@@ -208,43 +206,43 @@ namespace Ink_Canvas.Windows.SettingsViews
 
                 try
                 {
-                ManagementObjectCollection collection;
-                using (var searcher = new ManagementObjectSearcher(@"Select * From Win32_PnPEntity"))
-                    collection = searcher.Get();
+                    ManagementObjectCollection collection;
+                    using (var searcher = new ManagementObjectSearcher(@"Select * From Win32_PnPEntity"))
+                        collection = searcher.Get();
 
-                foreach (var device in collection)
-                {
+                    foreach (var device in collection)
+                    {
                         try
                         {
                             var name = device.GetPropertyValue("Name")?.ToString() ?? "";
                             var description = device.GetPropertyValue("Description")?.ToString() ?? "";
-                            
+
                             if (string.IsNullOrEmpty(name)) continue;
-                            
+
                             var nameLower = name.ToLower();
                             var descLower = description.ToLower();
-                            
-                            if (nameLower.Contains("pentablet") || 
-                                nameLower.Contains("tablet") || 
+
+                            if (nameLower.Contains("pentablet") ||
+                                nameLower.Contains("tablet") ||
                                 nameLower.Contains("touch") ||
                                 nameLower.Contains("digitizer") ||
                                 descLower.Contains("touch") ||
                                 descLower.Contains("digitizer"))
                             {
-                    devices.Add(new USBDeviceInfo(
-                                    device.GetPropertyValue("DeviceID")?.ToString() ?? "",
-                                    device.GetPropertyValue("PNPDeviceID")?.ToString() ?? "",
-                                    description
-                                ));
+                                devices.Add(new USBDeviceInfo(
+                                                device.GetPropertyValue("DeviceID")?.ToString() ?? "",
+                                                device.GetPropertyValue("PNPDeviceID")?.ToString() ?? "",
+                                                description
+                                            ));
                             }
                         }
                         catch
                         {
                             continue;
                         }
-                }
+                    }
 
-                collection.Dispose();
+                    collection.Dispose();
                 }
                 catch (Exception ex)
                 {
@@ -271,10 +269,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             public static DateTimeOffset? GetBuildDateTime(Assembly assembly)
             {
                 try
-            {
-                var path = assembly.Location;
-                    if (string.IsNullOrEmpty(path) || !File.Exists(path))
                 {
+                    var path = assembly.Location;
+                    if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                    {
                         return null;
                     }
 
@@ -284,32 +282,32 @@ namespace Ink_Canvas.Windows.SettingsViews
                         fileStream.Position = 0x3C;
                         fileStream.Read(peHeader, 0, 4);
                         var peHeaderOffset = BitConverter.ToUInt32(peHeader, 0);
-                        
+
                         fileStream.Position = peHeaderOffset;
                         var signature = new byte[4];
                         fileStream.Read(signature, 0, 4);
-                        
+
                         if (signature[0] != 0x50 || signature[1] != 0x45 || signature[2] != 0x00 || signature[3] != 0x00)
                         {
                             return null;
                         }
-                        
+
                         var fileHeader = new byte[Marshal.SizeOf(typeof(_IMAGE_FILE_HEADER))];
                         fileStream.Read(fileHeader, 0, fileHeader.Length);
-                        
+
                         var pinnedBuffer = GCHandle.Alloc(fileHeader, GCHandleType.Pinned);
-                    try
-                    {
-                        var coffHeader = (_IMAGE_FILE_HEADER)Marshal.PtrToStructure(pinnedBuffer.AddrOfPinnedObject(), typeof(_IMAGE_FILE_HEADER));
+                        try
+                        {
+                            var coffHeader = (_IMAGE_FILE_HEADER)Marshal.PtrToStructure(pinnedBuffer.AddrOfPinnedObject(), typeof(_IMAGE_FILE_HEADER));
                             var epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
                             var buildTime = epoch.AddSeconds(coffHeader.TimeDateStamp);
                             return new DateTimeOffset(buildTime.ToLocalTime());
+                        }
+                        finally
+                        {
+                            pinnedBuffer.Free();
+                        }
                     }
-                    finally
-                    {
-                        pinnedBuffer.Free();
-                    }
-                }
                 }
                 catch
                 {
@@ -412,7 +410,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             var border = thumb.Template.FindName("ScrollbarThumbEx", thumb);
             ((Border)border).Background = new SolidColorBrush(Color.FromRgb(138, 138, 138));
         }
-        
+
 
         private void LinkOfficialWebsite_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
@@ -461,7 +459,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 System.Diagnostics.Debug.WriteLine($"打开贡献者名单失败: {ex.Message}");
             }
         }
-        
+
         /// <summary>
         /// 应用主题
         /// </summary>

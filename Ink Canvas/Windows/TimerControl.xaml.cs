@@ -65,29 +65,29 @@ namespace Ink_Canvas.Windows
                 {
                     var dpiScaleX = source.CompositionTarget.TransformToDevice.M11;
                     var dpiScaleY = source.CompositionTarget.TransformToDevice.M22;
-                    
+
                     // 如果DPI缩放因子大于1.25，则适当缩小最大尺寸
                     // 这样可以确保在高DPI屏幕上，计时器窗口的物理像素大小不会过大
                     if (dpiScaleX > 1.25 || dpiScaleY > 1.25)
                     {
                         // 使用较小的缩放因子来限制最大尺寸
                         double scaleFactor = Math.Min(dpiScaleX, dpiScaleY);
-                        
+
                         if (MainViewController != null)
                         {
                             // 计算目标物理像素大小（约1350x750物理像素）
                             // 然后转换为逻辑像素
                             double targetPhysicalWidth = 1350;
                             double targetPhysicalHeight = 750;
-                            
+
                             // 转换为逻辑像素
                             double maxWidth = targetPhysicalWidth / scaleFactor;
                             double maxHeight = targetPhysicalHeight / scaleFactor;
-                            
+
                             // 确保不会小于原始尺寸的70%
                             maxWidth = Math.Max(maxWidth, 900 * 0.7);
                             maxHeight = Math.Max(maxHeight, 500 * 0.7);
-                            
+
                             MainViewController.MaxWidth = maxWidth;
                             MainViewController.MaxHeight = maxHeight;
                         }

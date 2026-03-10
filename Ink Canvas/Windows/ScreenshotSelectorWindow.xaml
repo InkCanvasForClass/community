@@ -11,6 +11,7 @@
         Cursor="Cross"
         KeyDown="Window_KeyDown"
         MouseLeftButtonDown="Window_MouseLeftButtonDown"
+        MouseRightButtonDown="Window_MouseRightButtonDown"
         MouseMove="Window_MouseMove"
         MouseLeftButtonUp="Window_MouseLeftButtonUp">
     
@@ -149,6 +150,15 @@
                         BorderThickness="0"
                         FontWeight="Medium"
                         Click="ConfirmButton_Click" />
+                <Button Name="AddToWhiteboardButton"
+                        Content="添加到白板"
+                        Margin="4,0"
+                        Padding="12,6"
+                        Background="#2563eb"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontWeight="Medium"
+                        Click="AddToWhiteboardButton_Click" />
                 <Button Name="CancelButton"
                         Content="取消"
                         Margin="4,0"
@@ -270,7 +280,7 @@
                 Margin="0,0,0,140"
                 Panel.ZIndex="1000">
             <TextBlock Name="HintText"
-                       Text="拖拽鼠标选择矩形区域，或使用自由绘制模式"
+                       Text="拖拽选择区域，右键或双击可全选屏幕；自由绘制松开后需点击确认"
                        Foreground="White"
                        FontSize="14"
                        FontWeight="Medium" />

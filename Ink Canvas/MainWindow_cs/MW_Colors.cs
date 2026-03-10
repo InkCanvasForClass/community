@@ -14,8 +14,24 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 当前墨水颜色
+        /// </summary>
         private int inkColor = 1;
 
+        /// <summary>
+        /// 颜色切换检查，处理颜色变更和相关UI状态
+        /// </summary>
+        /// <param name="hidePanels">是否隐藏面板</param>
+        /// <remarks>
+        /// - 隐藏相关面板
+        /// - 处理透明背景情况
+        /// - 处理选中笔画的颜色更新
+        /// - 提交笔画属性历史记录
+        /// - 设置工具模式为墨水模式
+        /// - 取消单指拖动模式
+        /// - 检查颜色主题
+        /// </remarks>
         private void ColorSwitchCheck(bool hidePanels = true)
         {
             if (hidePanels)
@@ -76,11 +92,40 @@ namespace Ink_Canvas
             isLongPressSelected = false;
         }
 
-        private bool isUselightThemeColor, isDesktopUselightThemeColor;
-        private int penType; // 0是签字笔，1是荧光笔
-        private int lastDesktopInkColor = 1, lastBoardInkColor = 5;
+        /// <summary>
+        /// 是否使用亮色主题颜色
+        /// </summary>
+        private bool isUselightThemeColor;
+
+        /// <summary>
+        /// 桌面模式是否使用亮色主题颜色
+        /// </summary>
+        private bool isDesktopUselightThemeColor;
+
+        /// <summary>
+        /// 笔类型（0是签字笔，1是荧光笔）
+        /// </summary>
+        private int penType;
+
+        /// <summary>
+        /// 桌面模式最后使用的墨水颜色
+        /// </summary>
+        private int lastDesktopInkColor = 1;
+
+        /// <summary>
+        /// 白板模式最后使用的墨水颜色
+        /// </summary>
+        private int lastBoardInkColor = 5;
+
+        /// <summary>
+        /// 荧光笔颜色
+        /// </summary>
         private int highlighterColor = 102;
 
+        /// <summary>
+        /// 根据当前模式、画笔类型与主题设置，应用并同步画布颜色、笔触颜色与界面配色指示器。
+        /// </summary>
+        /// <param name="changeColorTheme">为 true 时（且非桌面模式）根据白板/黑板设置刷新背景色、水印色和亮/暗主题标志；为 false 则仅同步颜色相关状态。</param>
         private void CheckColorTheme(bool changeColorTheme = false)
         {
             if (changeColorTheme)
@@ -438,6 +483,15 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 检查并更新最后使用的颜色
+        /// </summary>
+        /// <param name="inkColor">墨水颜色</param>
+        /// <param name="isHighlighter">是否为荧光笔</param>
+        /// <remarks>
+        /// - 如果是荧光笔，更新荧光笔颜色
+        /// - 否则，根据当前模式更新相应的最后使用颜色
+        /// </remarks>
         private void CheckLastColor(int inkColor, bool isHighlighter = false)
         {
             if (isHighlighter)
@@ -451,6 +505,16 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 检查并更新笔类型UI状态
+        /// </summary>
+        /// <returns>异步任务</returns>
+        /// <remarks>
+        /// - 根据笔类型显示或隐藏相应的面板
+        /// - 更新标签按钮的样式和状态
+        /// - 执行面板动画
+        /// - 处理签字笔和荧光笔的不同UI状态
+        /// </remarks>
         private async void CheckPenTypeUIState()
         {
             if (penType == 0)
@@ -590,6 +654,17 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 切换到默认签字笔
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 设置笔类型为0（签字笔）
+        /// - 更新笔类型UI状态
+        /// - 检查颜色主题
+        /// - 设置画笔属性（宽度、高度、笔尖形状、是否为荧光笔）
+        /// </remarks>
         private void SwitchToDefaultPen(object sender, MouseButtonEventArgs e)
         {
             penType = 0;
@@ -601,6 +676,18 @@ namespace Ink_Canvas
             drawingAttributes.IsHighlighter = false;
         }
 
+        /// <summary>
+        /// 切换到荧光笔
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 设置笔类型为1（荧光笔）
+        /// - 更新笔类型UI状态
+        /// - 检查颜色主题
+        /// - 设置画笔属性（宽度、高度、笔尖形状、是否为荧光笔）
+        /// - 确保荧光笔模式切换后正确更新颜色和快捷调色板指示器
+        /// </remarks>
         private void SwitchToHighlighterPen(object sender, MouseButtonEventArgs e)
         {
             penType = 1;
@@ -615,60 +702,110 @@ namespace Ink_Canvas
             ColorSwitchCheck(false);
         }
 
+        /// <summary>
+        /// 处理黑色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnColorBlack_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(0);
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理红色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnColorRed_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(1);
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理绿色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnColorGreen_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(2);
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理蓝色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnColorBlue_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(3);
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理黄色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnColorYellow_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(4);
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理白色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnColorWhite_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(5);
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理粉色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnColorPink_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(6);
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理橙色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnColorOrange_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(8);
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理青色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnColorTeal_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(7);
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔黑色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorBlack_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(100, true);
@@ -677,6 +814,11 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔白色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorWhite_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(101, true);
@@ -685,6 +827,11 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔红色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorRed_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(102, true);
@@ -693,6 +840,11 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔黄色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorYellow_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(103, true);
@@ -701,6 +853,11 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔绿色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorGreen_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(104, true);
@@ -709,6 +866,11 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔锌色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorZinc_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(105, true);
@@ -717,6 +879,11 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔蓝色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorBlue_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(106, true);
@@ -725,6 +892,11 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔紫色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorPurple_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(107, true);
@@ -733,6 +905,11 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔青色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorTeal_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(108, true);
@@ -741,6 +918,11 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 处理荧光笔橙色按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
         private void BtnHighlighterColorOrange_Click(object sender, RoutedEventArgs e)
         {
             CheckLastColor(109, true);
@@ -749,6 +931,15 @@ namespace Ink_Canvas
             ColorSwitchCheck();
         }
 
+        /// <summary>
+        /// 将字符串转换为颜色对象
+        /// </summary>
+        /// <param name="colorStr">颜色字符串（格式：#FFFFFFFF）</param>
+        /// <returns>颜色对象</returns>
+        /// <remarks>
+        /// - 解析颜色字符串为ARGB值
+        /// - 转换为Color对象返回
+        /// </remarks>
         private Color StringToColor(string colorStr)
         {
             var argb = new byte[4];
@@ -763,6 +954,15 @@ namespace Ink_Canvas
             return Color.FromArgb(argb[0], argb[1], argb[2], argb[3]); //#FFFFFFFF
         }
 
+        /// <summary>
+        /// 将字符转换为字节
+        /// </summary>
+        /// <param name="c">字符</param>
+        /// <returns>字节值</returns>
+        /// <remarks>
+        /// - 将十六进制字符转换为对应的字节值
+        /// - 支持0-9和A-F字符
+        /// </remarks>
         private static byte toByte(char c)
         {
             var b = (byte)"0123456789ABCDEF".IndexOf(c);

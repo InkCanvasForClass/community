@@ -29,6 +29,9 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 当前工具模式
+        /// </summary>
         private string _currentToolMode = "cursor";
 
         #region "手勢"按鈕
@@ -180,12 +183,32 @@ namespace Ink_Canvas
 
         #region 浮動工具欄的拖動實現
 
+        /// <summary>
+        /// 是否正在拖动浮动工具栏
+        /// </summary>
         private bool isDragDropInEffect;
+        /// <summary>
+        /// 当前位置
+        /// </summary>
         private Point pos;
+        /// <summary>
+        /// 按下鼠标时的位置
+        /// </summary>
         private Point downPos;
-        private Point pointDesktop = new Point(-1, -1); //用于记录上次在桌面时的坐标
-        private Point pointPPT = new Point(-1, -1); //用于记录上次在PPT中的坐标
+        /// <summary>
+        /// 用于记录上次在桌面时的坐标
+        /// </summary>
+        private Point pointDesktop = new Point(-1, -1);
+        /// <summary>
+        /// 用于记录上次在PPT中的坐标
+        /// </summary>
+        private Point pointPPT = new Point(-1, -1);
 
+        /// <summary>
+        /// 浮动工具栏移动事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标事件参数</param>
         private void SymbolIconEmoji_MouseMove(object sender, MouseEventArgs e)
         {
             if (isDragDropInEffect)
@@ -202,6 +225,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 浮动工具栏鼠标按下事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void SymbolIconEmoji_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (isViewboxFloatingBarMarginAnimationRunning)
@@ -216,6 +244,11 @@ namespace Ink_Canvas
             GridForFloatingBarDraging.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// 浮动工具栏鼠标释放事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconEmoji_MouseUp(object sender, MouseButtonEventArgs e)
         {
             isDragDropInEffect = false;
@@ -243,7 +276,7 @@ namespace Ink_Canvas
         #region 隱藏子面板和按鈕背景高亮
 
         /// <summary>
-        /// 隱藏形狀繪製面板
+        /// 隐藏形状绘制面板
         /// </summary>
         private void CollapseBorderDrawShape()
         {
@@ -252,7 +285,7 @@ namespace Ink_Canvas
         }
 
         /// <summary>
-        ///     <c>HideSubPanels</c>的青春版。目前需要修改<c>BorderSettings</c>的關閉機制（改為動畫關閉）。
+        /// HideSubPanels的简化版，立即隐藏所有子面板，无动画效果
         /// </summary>
         private void HideSubPanelsImmediately()
         {
@@ -587,6 +620,11 @@ namespace Ink_Canvas
 
         #region 撤銷重做按鈕
 
+        /// <summary>
+        /// 撤销按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             //if (lastBorderMouseDownObject != sender) return;
@@ -600,6 +638,11 @@ namespace Ink_Canvas
             HideSubPanels();
         }
 
+        /// <summary>
+        /// 重做按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconRedo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             //if (lastBorderMouseDownObject != sender) return;
@@ -617,9 +660,16 @@ namespace Ink_Canvas
 
         #region 白板按鈕和退出白板模式按鈕
 
-        //private bool Not_Enter_Blackboard_fir_Mouse_Click = true;
+        /// <summary>
+        /// 是否正在显示或隐藏黑板
+        /// </summary>
         private bool isDisplayingOrHidingBlackboard;
 
+        /// <summary>
+        /// 白板按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         internal void ImageBlackboard_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
@@ -788,7 +838,7 @@ namespace Ink_Canvas
                 _pptUIManager?.UpdateNavigationPanelsVisibility();
 
                 if (Settings.Automation.IsAutoSaveStrokesAtClear &&
-                    inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) SaveScreenShot(true);
+                    inkCanvas.Strokes.Count > Settings.Automation.MinimumAutomationStrokeNumber) CaptureAndEnqueueScreenshotSave(true);
 
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Collapsed)
                     new Thread(() =>
@@ -868,6 +918,11 @@ namespace Ink_Canvas
         }
 
         #endregion
+        /// <summary>
+        /// 光标图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private async void SymbolIconCursor_Click(object sender, RoutedEventArgs e)
         {
             if (currentMode != 0)
@@ -888,6 +943,11 @@ namespace Ink_Canvas
 
         #region 清空畫布按鈕
 
+        /// <summary>
+        /// 清空画布按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
@@ -909,10 +969,10 @@ namespace Ink_Canvas
                     {
                         var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                         var presentationName = _pptManager?.GetPresentationName() ?? "";
-                        SaveScreenShot(true, $"{presentationName}/{currentSlide}_{DateTime.Now:HH-mm-ss}");
+                        CaptureAndEnqueueScreenshotSave(true, $"{presentationName}/{currentSlide}_{DateTime.Now:HH-mm-ss}");
                     }
                     else
-                        SaveScreenShot(true);
+                        CaptureAndEnqueueScreenshotSave(true);
                 }
 
                 BtnClear_Click(null, null);
@@ -935,10 +995,10 @@ namespace Ink_Canvas
         #region 主要的工具按鈕事件
 
         /// <summary>
-        /// 浮動工具欄的"套索選"按鈕事件，重定向到舊UI的<c>BtnSelect_Click</c>方法
+        /// 浮动工具栏的"套索选"按钮事件，重定向到旧UI的BtnSelect_Click方法
         /// </summary>
-        /// <param name="sender">sender</param>
-        /// <param name="e">MouseButtonEventArgs</param>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         internal void SymbolIconSelect_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
@@ -957,6 +1017,11 @@ namespace Ink_Canvas
 
         #endregion
 
+        /// <summary>
+        /// 浮动工具栏按钮鼠标按下反馈效果处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void FloatingBarToolBtnMouseDownFeedback_Panel(object sender, MouseButtonEventArgs e)
         {
             if (sender is Panel panel)
@@ -984,6 +1049,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 浮动工具栏按钮鼠标离开反馈效果处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标事件参数</param>
         private void FloatingBarToolBtnMouseLeaveFeedback_Panel(object sender, MouseEventArgs e)
         {
             if (sender is Panel panel)
@@ -1039,19 +1109,44 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 设置图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void SymbolIconSettings_Click(object sender, RoutedEventArgs e)
         {
             if (isOpeningOrHidingSettingsPane) return;
             HideSubPanels();
             BtnSettings_Click(null, null);
+
         }
+        /// <summary>
+        /// 截图图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private async void SymbolIconScreenshot_MouseUp(object sender, MouseButtonEventArgs e)
         {
             HideSubPanelsImmediately();
             await Task.Delay(50);
-            SaveScreenShotToDesktop();
+
+            // 白板模式下默认全屏截图到桌面；其余模式默认调用可选区截图
+            if (currentMode == 1)
+            {
+                SaveScreenShotToDesktop();
+            }
+            else
+            {
+                await SaveAreaScreenShotToDesktop();
+            }
         }
 
+        /// <summary>
+        /// 倒计时计时器图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void ImageCountdownTimer_MouseUp(object sender, MouseButtonEventArgs e)
         {
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -1066,10 +1161,10 @@ namespace Ink_Canvas
                 {
                     // 每次打开计时器窗口时重置计时器
                     TimerControl.ResetTimerState();
-                    
+
                     // 根据DPI缩放因子调整TimerContainer的尺寸
                     AdjustTimerContainerSize();
-                    
+
                     TimerContainer.Visibility = Visibility.Visible;
                     if (MinimizedTimerContainer != null)
                     {
@@ -1101,6 +1196,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 操作指南窗口图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void OperatingGuideWindowIcon_MouseUp(object sender, MouseButtonEventArgs e)
         {
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
@@ -1110,6 +1210,11 @@ namespace Ink_Canvas
             new OperatingGuideWindow().Show();
         }
 
+        /// <summary>
+        /// 随机点名图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void SymbolIconRand_MouseUp(object sender, MouseButtonEventArgs e)
         {
             // 如果控件被隐藏，不处理事件
@@ -1175,6 +1280,9 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 检查并更新橡皮擦类型标签的状态
+        /// </summary>
         public void CheckEraserTypeTab()
         {
             if (Settings.Canvas.EraserShapeType == 0)
@@ -1235,6 +1343,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 单次点名图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void SymbolIconRandOne_MouseUp(object sender, MouseButtonEventArgs e)
         {
             // 如果控件被隐藏，不处理事件
@@ -1306,6 +1419,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 墨迹重播按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void GridInkReplayButton_MouseUp(object sender, MouseButtonEventArgs e)
         {
             //if (lastBorderMouseDownObject != sender) return;
@@ -1380,7 +1498,7 @@ namespace Ink_Canvas
                                     {
                                         InkCanvasForInkReplay.Strokes.Remove(s);
                                     }
-                                    catch { }
+                                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                                     stylusPoints.Add(stylusPoint);
                                     s = new Stroke(stylusPoints.Clone())
@@ -1417,7 +1535,7 @@ namespace Ink_Canvas
                                     {
                                         InkCanvasForInkReplay.Strokes.Remove(s);
                                     }
-                                    catch { }
+                                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                                     stylusPoints.Add(stylusPoint);
                                     s = new Stroke(stylusPoints.Clone())
@@ -1455,11 +1573,28 @@ namespace Ink_Canvas
             }).Start();
         }
 
+        /// <summary>
+        /// 是否停止墨迹重播
+        /// </summary>
         private bool isStopInkReplay;
+        /// <summary>
+        /// 是否暂停墨迹重播
+        /// </summary>
         private bool isPauseInkReplay;
+        /// <summary>
+        /// 是否重新开始墨迹重播
+        /// </summary>
         private bool isRestartInkReplay;
+        /// <summary>
+        /// 墨迹重播速度
+        /// </summary>
         private double inkReplaySpeed = 1;
 
+        /// <summary>
+        /// 墨迹重播画布鼠标按下事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void InkCanvasForInkReplay_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ClickCount == 2)
@@ -1485,11 +1620,21 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 墨迹重播播放/暂停按钮鼠标按下事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void InkReplayPlayPauseBorder_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             InkReplayPlayPauseBorder.Background = new SolidColorBrush(Color.FromArgb(34, 9, 9, 11));
         }
 
+        /// <summary>
+        /// 墨迹重播播放/暂停按钮鼠标释放事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void InkReplayPlayPauseBorder_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             InkReplayPlayPauseBorder.Background = new SolidColorBrush(Colors.Transparent);
@@ -1499,11 +1644,21 @@ namespace Ink_Canvas
             InkReplayPauseButtonImage.Visibility = !isPauseInkReplay ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// 墨迹重播停止按钮鼠标按下事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void InkReplayStopButtonBorder_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             InkReplayStopButtonBorder.Background = new SolidColorBrush(Color.FromArgb(34, 9, 9, 11));
         }
 
+        /// <summary>
+        /// 墨迹重播停止按钮鼠标释放事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void InkReplayStopButtonBorder_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             InkReplayStopButtonBorder.Background = new SolidColorBrush(Colors.Transparent);
@@ -1518,11 +1673,21 @@ namespace Ink_Canvas
             isStopInkReplay = true;
         }
 
+        /// <summary>
+        /// 墨迹重播重新开始按钮鼠标按下事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void InkReplayReplayButtonBorder_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             InkReplayReplayButtonBorder.Background = new SolidColorBrush(Color.FromArgb(34, 9, 9, 11));
         }
 
+        /// <summary>
+        /// 墨迹重播重新开始按钮鼠标释放事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void InkReplayReplayButtonBorder_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             InkReplayReplayButtonBorder.Background = new SolidColorBrush(Colors.Transparent);
@@ -1533,11 +1698,21 @@ namespace Ink_Canvas
             InkReplayPauseButtonImage.Visibility = Visibility.Visible;
         }
 
+        /// <summary>
+        /// 墨迹重播速度按钮鼠标按下事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void InkReplaySpeedButtonBorder_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             InkReplaySpeedButtonBorder.Background = new SolidColorBrush(Color.FromArgb(34, 9, 9, 11));
         }
 
+        /// <summary>
+        /// 墨迹重播速度按钮鼠标释放事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void InkReplaySpeedButtonBorder_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             InkReplaySpeedButtonBorder.Background = new SolidColorBrush(Colors.Transparent);
@@ -1548,6 +1723,11 @@ namespace Ink_Canvas
             InkReplaySpeedTextBlock.Text = inkReplaySpeed + "x";
         }
 
+        /// <summary>
+        /// 工具图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
@@ -1573,8 +1753,16 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 浮动工具栏边距动画是否正在运行
+        /// </summary>
         private bool isViewboxFloatingBarMarginAnimationRunning;
 
+        /// <summary>
+        /// 浮动工具栏边距动画处理
+        /// </summary>
+        /// <param name="MarginFromEdge">边缘边距</param>
+        /// <param name="PosXCaculatedWithTaskbarHeight">是否考虑任务栏高度计算位置</param>
         public async void ViewboxFloatingBarMarginAnimation(int MarginFromEdge,
             bool PosXCaculatedWithTaskbarHeight = false)
         {
@@ -1722,6 +1910,9 @@ namespace Ink_Canvas
             });
         }
 
+        /// <summary>
+        /// 桌面模式下的浮动工具栏边距动画处理
+        /// </summary>
         public async void PureViewboxFloatingBarMarginAnimationInDesktopMode()
         {
             // 在白板模式下不执行浮动栏动画
@@ -1826,6 +2017,10 @@ namespace Ink_Canvas
             });
         }
 
+        /// <summary>
+        /// PPT模式下的浮动工具栏边距动画处理
+        /// </summary>
+        /// <param name="isRetry">是否为重试操作</param>
         public async void PureViewboxFloatingBarMarginAnimationInPPTMode(bool isRetry = false)
         {
             // 新增：在白板模式下不执行浮动栏动画
@@ -1943,6 +2138,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 光标图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         internal async void CursorIcon_Click(object sender, RoutedEventArgs e)
         {
             if (lastBorderMouseDownObject is Panel panel)
@@ -1965,9 +2165,9 @@ namespace Ink_Canvas
                 {
                     var currentSlide = _pptManager?.GetCurrentSlideNumber() ?? 0;
                     var presentationName = _pptManager?.GetPresentationName() ?? "";
-                    SaveScreenShot(true, $"{presentationName}/{currentSlide}_{DateTime.Now:HH-mm-ss}");
+                    CaptureAndEnqueueScreenshotSave(true, $"{presentationName}/{currentSlide}_{DateTime.Now:HH-mm-ss}");
                 }
-                else SaveScreenShot(true);
+                else CaptureAndEnqueueScreenshotSave(true);
             }
 
             if (BtnPPTSlideShowEnd.Visibility != Visibility.Visible)
@@ -2054,6 +2254,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 画笔图标点击事件处理，用于切换到批注模式或显示画笔调色盘
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         internal void PenIcon_Click(object sender, RoutedEventArgs e)
         {
 
@@ -2070,6 +2275,9 @@ namespace Ink_Canvas
 
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
+
+            // 停止橡皮擦自动切换计时器（如果正在运行）
+            StopEraserAutoSwitchBackTimer();
 
             SetFloatingBarHighlightPosition("pen");
 
@@ -2280,6 +2488,11 @@ namespace Ink_Canvas
             drawingShapeMode = 0;
         }
 
+        /// <summary>
+        /// 颜色主题切换鼠标释放事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void ColorThemeSwitch_MouseUp(object sender, RoutedEventArgs e)
         {
             isUselightThemeColor = !isUselightThemeColor;
@@ -2287,6 +2500,11 @@ namespace Ink_Canvas
             CheckColorTheme();
         }
 
+        /// <summary>
+        /// 橡皮擦图标点击事件处理，用于切换到橡皮擦模式或显示橡皮擦尺寸面板
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         internal void EraserIcon_Click(object sender, RoutedEventArgs e)
         {
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
@@ -2320,6 +2538,12 @@ namespace Ink_Canvas
             HideSubPanels("eraser"); // 高亮橡皮按钮
             Trace.WriteLine($"Eraser: Eraser button clicked, current size: {eraserWidth}, circle: {isEraserCircleShape}");
 
+            // 如果启用了橡皮擦自动切换功能，停止之前的计时器（如果正在运行）
+            if (Settings.Canvas.EnableEraserAutoSwitchBack)
+            {
+                StopEraserAutoSwitchBackTimer();
+            }
+
             if (isAlreadyEraser)
             {
                 // 已是橡皮状态，再次点击才弹出/收起面板
@@ -2338,6 +2562,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 白板模式下的橡皮擦图标点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void BoardEraserIcon_Click(object sender, RoutedEventArgs e)
         {
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
@@ -2359,6 +2588,12 @@ namespace Ink_Canvas
             SetCursorBasedOnEditingMode(inkCanvas);
             HideSubPanels("eraser"); // 高亮橡皮按钮
 
+            // 如果启用了橡皮擦自动切换功能，停止之前的计时器（如果正在运行）
+            if (Settings.Canvas.EnableEraserAutoSwitchBack)
+            {
+                StopEraserAutoSwitchBackTimer();
+            }
+
             if (isAlreadyEraser)
             {
                 // 已是橡皮状态，再次点击才弹出/收起面板
@@ -2376,6 +2611,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 墨迹擦除图标点击事件处理，用于切换到按笔画擦除模式
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void EraserIconByStrokes_Click(object sender, RoutedEventArgs e)
         {
 
@@ -2408,6 +2648,11 @@ namespace Ink_Canvas
 
         }
 
+        /// <summary>
+        /// 光标删除图标点击事件处理，用于删除选中内容并切换到光标模式
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void CursorWithDelIcon_Click(object sender, RoutedEventArgs e)
         {
 
@@ -2419,55 +2664,90 @@ namespace Ink_Canvas
             CursorIcon_Click(null, null);
         }
 
-        // 快捷调色盘事件处理方法
+        /// <summary>
+        /// 将当前绘笔颜色设置为白色并安排在短时间后自动恢复到之前的笔刷。
+        /// </summary>
         private void QuickColorWhite_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Colors.White);
             ScheduleBrushAutoRestore();
         }
 
+        /// <summary>
+        /// 将快速颜色设置为橙色，并安排稍后自动恢复到先前的画笔颜色。
+        /// </summary>
         private void QuickColorOrange_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Color.FromRgb(251, 150, 80)); // 橙色
             ScheduleBrushAutoRestore();
         }
 
+        /// <summary>
+        /// 将画笔颜色切换为黄色并安排自动恢复为先前的画笔设置。
+        /// </summary>
         private void QuickColorYellow_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Colors.Yellow);
             ScheduleBrushAutoRestore();
         }
 
+        /// <summary>
+        /// 将快速颜色设置为黑色并安排在稍后自动恢复为先前的画笔颜色。
+        /// </summary>
         private void QuickColorBlack_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Colors.Black);
             ScheduleBrushAutoRestore();
         }
 
+        /// <summary>
+        /// 将当前画笔颜色设置为蓝色并安排在一段时间后自动恢复到之前的画笔颜色。
+        /// </summary>
         private void QuickColorBlue_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Color.FromRgb(37, 99, 235)); // 蓝色
             ScheduleBrushAutoRestore();
         }
 
+        /// <summary>
+        /// 将快速颜色切换为红色，并安排稍后自动恢复为先前的画笔颜色。
+        /// </summary>
         private void QuickColorRed_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Colors.Red);
             ScheduleBrushAutoRestore();
         }
 
+        /// <summary>
+        /// 将快速颜色切换为绿色并安排在一段时间后自动恢复先前画笔颜色。
+        /// </summary>
         private void QuickColorGreen_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Color.FromRgb(22, 163, 74));
             ScheduleBrushAutoRestore();
         }
 
+        /// <summary>
+        /// 将当前画笔颜色切换为紫色快捷色并安排自动恢复先前画笔设置。
+        /// </summary>
         private void QuickColorPurple_Click(object sender, RoutedEventArgs e)
         {
             SetQuickColor(Color.FromRgb(147, 51, 234));
             ScheduleBrushAutoRestore();
         }
 
+        /// <summary>
+        /// 设置并应用快速颜色到当前画笔与相关状态，包括必要时切换到批注模式、更新荧光笔属性与颜色索引、记录桌面/白板的最近颜色，以及刷新调色盘指示器和颜色显示。
+        /// </summary>
+        /// <param name="color">要应用的颜色。</param>
+        /// <remarks>
+        /// 此方法会：
+        /// - 在非批注模式时切换到绘制（Ink）模式；
+        /// - 将指定颜色应用到绘图属性和 InkCanvas 的默认绘图属性；
+        /// - 在荧光笔模式下更新荧光笔的内部颜色索引与绘图属性（宽度、笔尖形状、IsHighlighter 等）；
+        /// - 根据当前模式（桌面或白板）记录最近使用的颜色索引；
+        /// - 更新快速调色盘的选中指示器并刷新颜色显示状态。
+        /// </remarks>
         private void SetQuickColor(Color color)
         {
             // 确保当前处于批注模式
@@ -2577,6 +2857,10 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 更新快速调色盘的选中指示器，根据当前选中的颜色显示对应的勾选图标
+        /// </summary>
+        /// <param name="selectedColor">当前选中的颜色</param>
         private void UpdateQuickColorPaletteIndicator(Color selectedColor)
         {
             // 隐藏所有check图标（双行显示）
@@ -2665,6 +2949,11 @@ namespace Ink_Canvas
             return rDiff <= tolerance && gDiff <= tolerance && bDiff <= tolerance;
         }
 
+        /// <summary>
+        /// 选择工具图标鼠标释放事件处理，用于切换到选择模式或选择所有墨迹
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void SelectIcon_MouseUp(object sender, RoutedEventArgs e)
         {
             // 禁用高级橡皮擦系统
@@ -2688,6 +2977,9 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 从图形绘制模式切换到画笔模式的提示处理
+        /// </summary>
         private void DrawShapePromptToPen()
         {
             if (isLongPressSelected)
@@ -2704,6 +2996,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 关闭工具面板鼠标释放事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void CloseBordertools_MouseUp(object sender, MouseButtonEventArgs e)
         {
             HideSubPanels();
@@ -2711,6 +3008,11 @@ namespace Ink_Canvas
 
         #region Left Side Panel
 
+        /// <summary>
+        /// 手指拖动模式切换按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void BtnFingerDragMode_Click(object sender, RoutedEventArgs e)
         {
             if (isSingleFingerDragMode)
@@ -2725,6 +3027,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 撤销按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void BtnUndo_Click(object sender, RoutedEventArgs e)
         {
             if (inkCanvas.GetSelectedStrokes().Count != 0)
@@ -2737,6 +3044,11 @@ namespace Ink_Canvas
             ApplyHistoryToCanvas(item);
         }
 
+        /// <summary>
+        /// 重做按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void BtnRedo_Click(object sender, RoutedEventArgs e)
         {
             if (inkCanvas.GetSelectedStrokes().Count != 0)
@@ -2749,6 +3061,11 @@ namespace Ink_Canvas
             ApplyHistoryToCanvas(item);
         }
 
+        /// <summary>
+        /// 按钮启用状态变更事件处理，用于更新按钮内容的透明度
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">依赖属性变更事件参数</param>
         private void Btn_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
         {
             if (!isLoaded) return;
@@ -2759,7 +3076,7 @@ namespace Ink_Canvas
                 else
                     ((UIElement)((Button)sender).Content).Opacity = 0.25;
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         #endregion Left Side Panel
@@ -2768,8 +3085,24 @@ namespace Ink_Canvas
 
         public static bool CloseIsFromButton;
 
+        /// <summary>
+        /// 退出按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         public void BtnExit_Click(object sender, RoutedEventArgs e)
         {
+            // 立即停止PPT监控，避免关闭过程中定时器继续尝试连接
+            try
+            {
+                _pptManager?.StopMonitoring();
+                LogHelper.WriteLogToFile("PPT监控已停止（准备关闭）", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"停止PPT监控时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
             // 如果当前在设置面板中，需要先恢复无焦点模式状态
             if (BorderSettings.Visibility == Visibility.Visible)
             {
@@ -2786,6 +3119,11 @@ namespace Ink_Canvas
             Close();
         }
 
+        /// <summary>
+        /// 重启按钮点击事件处理
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
         public void BtnRestart_Click(object sender, RoutedEventArgs e)
         {
             if (BorderSettings.Visibility == Visibility.Visible)
@@ -2804,6 +3142,11 @@ namespace Ink_Canvas
             Close();
         }
 
+        /// <summary>
+        /// 设置覆盖层点击事件处理，用于点击设置面板外部时关闭设置面板
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
         private void SettingsOverlayClick(object sender, MouseButtonEventArgs e)
         {
             if (isOpeningOrHidingSettingsPane) return;
@@ -2829,9 +3172,13 @@ namespace Ink_Canvas
 
         private bool isOpeningOrHidingSettingsPane;
         private bool wasNoFocusModeBeforeSettings;
-        private bool userChangedNoFocusModeInSettings;
 
-        private void BtnSettings_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 切换并打开设置面板；在需要时先进行安全密码校验，然后显示设置面板并启动打开动画，同时根据设置暂时调整无焦点模式与遮罩交互状态。
+        /// </summary>
+        /// <param name="sender">发送者</param>
+        /// <param name="e">路由事件参数</param>
+        private async void BtnSettings_Click(object sender, RoutedEventArgs e)
         {
             if (BorderSettings.Visibility == Visibility.Visible)
             {
@@ -2839,9 +3186,22 @@ namespace Ink_Canvas
             }
             else
             {
+                try
+                {
+                    if (Ink_Canvas.Helpers.SecurityManager.IsPasswordRequiredForEnterSettings(Settings))
+                    {
+                        bool ok = await Ink_Canvas.Helpers.SecurityManager.PromptAndVerifyAsync(Settings, this, "进入设置", "请输入安全密码以进入设置。");
+                        if (!ok) return;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.WriteLogToFile($"安全密码校验失败: {ex}", LogHelper.LogType.Error);
+                    return;
+                }
+
                 BorderSettings.Visibility = Visibility.Visible;
                 wasNoFocusModeBeforeSettings = Settings.Advanced.IsNoFocusMode;
-                userChangedNoFocusModeInSettings = false; // 重置用户修改标志
                 if (wasNoFocusModeBeforeSettings)
                 {
                     isTemporarilyDisablingNoFocusMode = true;
@@ -2992,6 +3352,12 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 在屏幕模式、白板与黑板模式之间切换并同步相关的 UI 状态与资源处理。
+        /// </summary>
+        /// <remarks>
+        /// 切换过程中会保存/清理/恢复画笔轨迹，显示或隐藏白板/黑板面板、手势面板与 PPT 控件，调整主题与悬浮工具栏可见性，处理全屏/工作区尺寸恢复或进入全屏，以及在进入白板时检查剪贴板并显示粘贴提示。该方法还会触发隐藏/显示墨迹画布的逻辑（通过调用 BtnHideInkCanvas_Click）。
+        /// </remarks>
         private void BtnSwitch_Click(object sender, RoutedEventArgs e)
         {
             if (GridTransparencyFakeBackground.Background == Brushes.Transparent)
@@ -3047,6 +3413,7 @@ namespace Ink_Canvas
                 switch (++currentMode % 2)
                 {
                     case 0: //屏幕模式
+                        VideoPresenter_OnExitWhiteboardMode();
                         currentMode = 0;
                         GridBackgroundCover.Visibility = Visibility.Collapsed;
                         AnimationsHelper.HideWithSlideAndFade(BlackboardLeftSide);
@@ -3260,7 +3627,7 @@ namespace Ink_Canvas
                         {
                             if (Settings.Automation.IsAutoSaveStrokesAtClear && inkCanvas.Strokes.Count >
                                 Settings.Automation.MinimumAutomationStrokeNumber)
-                                SaveScreenShot(true);
+                                CaptureAndEnqueueScreenshotSave(true);
 
                             //BtnClear_Click(null, null);
                         }
@@ -3276,7 +3643,7 @@ namespace Ink_Canvas
                         {
                             if (Settings.Automation.IsAutoSaveStrokesAtClear && inkCanvas.Strokes.Count >
                                 Settings.Automation.MinimumAutomationStrokeNumber)
-                                SaveScreenShot(true);
+                                CaptureAndEnqueueScreenshotSave(true);
 
                             //BtnClear_Click(null, null);
                         }

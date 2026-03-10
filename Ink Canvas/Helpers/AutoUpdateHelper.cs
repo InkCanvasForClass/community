@@ -288,7 +288,7 @@ namespace Ink_Canvas.Helpers
                     }
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             return -1;
         }
 
@@ -643,20 +643,20 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile("AutoUpdate | 使用GitHub API调用");
                         var response = await client.GetStringAsync(apiUrl);
                         var releases = JArray.Parse(response);
-                        
+
                         if (releases.Count > 0)
                         {
                             var latestRelease = releases[0];
                             string version = latestRelease["tag_name"]?.ToString();
                             string releaseNotes = latestRelease["body"]?.ToString();
                             string downloadUrl = latestRelease["assets"]?.First?["browser_download_url"]?.ToString();
-                            
+
                             DateTime? releaseTime = null;
                             if (latestRelease["published_at"] != null && DateTime.TryParse(latestRelease["published_at"].ToString(), out DateTime parsedTime))
                             {
                                 releaseTime = parsedTime;
                             }
-                            
+
                             if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(downloadUrl))
                                 return (version, downloadUrl, releaseNotes, releaseTime);
                         }
@@ -1130,7 +1130,7 @@ namespace Ink_Canvas.Helpers
                                     // 清理可能损坏的分块文件
                                     if (File.Exists(tempPath))
                                     {
-                                        try { File.Delete(tempPath); } catch { }
+                                        try { File.Delete(tempPath); } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                                     }
 
                                     // 增加重试间隔，避免频繁重试
@@ -1316,11 +1316,17 @@ namespace Ink_Canvas.Helpers
                         return resp.Content.Headers.ContentLength.Value;
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             return -1;
         }
 
-        // 保存下载状态
+        /// <summary>
+        /// 将下载完成状态写入预定义的状态文件以供后续检查。
+        /// </summary>
+        /// <param name="isSuccess">指示下载是否成功；将以字符串形式写入状态文件（"True" 或 "False"）。</param>
+        /// <remarks>
+        /// 如果状态文件路径为空则不执行任何操作；方法内部捕获异常并记录日志，不会向调用方抛出异常。
+        /// </remarks>
         private static void SaveDownloadStatus(bool isSuccess)
         {
             try
@@ -1341,11 +1347,32 @@ namespace Ink_Canvas.Helpers
             }
         }
 
-        // 安装新版本应用 - 优化版本，不使用命令行
+        /// <summary>
+        /// 安装指定版本的更新包并启动新版本进程以完成替换，然后退出当前应用程序。
+        /// </summary>
+        /// <remarks>
+        /// 该方法会临时将 App.IsUpdateInstalling 置为 true、尝试关闭进程保护（并在结束时还原）、在必要时备份当前设置、解压更新 ZIP、启动解压后的新可执行文件（以更新模式传递旧进程 ID、解压路径和目标路径等参数），并在新进程启动后关闭当前进程。方法会记录日志并在遇到错误时安全退出相应步骤，但不会抛出异常给调用方以外的上下文。</remarks>
+        /// <param name="version">要安装的版本号，用于定位更新包文件名（例如 InkCanvasForClass.CE.{version}.zip）。</param>
+        /// <param name="isInSilence">指示是否以静默模式启动新版本（影响传递给新进程的参数和可能的用户提示）。</param>
         public static void InstallNewVersionApp(string version, bool isInSilence)
         {
+            bool wasProcessProtectionEnabled = false;
             try
             {
+                wasProcessProtectionEnabled = ProcessProtectionManager.Enabled;
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                App.IsUpdateInstalling = true;
+                if (wasProcessProtectionEnabled)
+                {
+                    try { ProcessProtectionManager.SetEnabled(false); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+                }
+
                 // 在更新前备份设置文件
                 try
                 {
@@ -1504,6 +1531,18 @@ namespace Ink_Canvas.Helpers
                 if (ex.InnerException != null)
                 {
                     LogHelper.WriteLogToFile($"AutoUpdate | 内部异常: {ex.InnerException.Message}", LogHelper.LogType.Error);
+                }
+            }
+            finally
+            {
+                // 确保无论更新成功还是失败，都恢复标志位和进程保护状态
+                App.IsUpdateInstalling = false;
+                try
+                {
+                    ProcessProtectionManager.SetEnabled(wasProcessProtectionEnabled);
+                }
+                catch
+                {
                 }
             }
         }
@@ -2059,16 +2098,16 @@ namespace Ink_Canvas.Helpers
                 {
                     foreach (string file in Directory.GetFiles(updatesFolderPath, "*", SearchOption.AllDirectories))
                     {
-                        try { File.Delete(file); } catch { }
+                        try { File.Delete(file); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     }
                     foreach (string dir in Directory.GetDirectories(updatesFolderPath))
                     {
-                        try { Directory.Delete(dir, true); } catch { }
+                        try { Directory.Delete(dir, true); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     }
-                    try { Directory.Delete(updatesFolderPath, true); } catch { }
+                    try { Directory.Delete(updatesFolderPath, true); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         // 版本修复方法，强制下载并安装指定通道的最新版本

@@ -1,10 +1,12 @@
-﻿using iNKORE.UI.WPF.Modern;
+using iNKORE.UI.WPF.Modern;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Threading;
 using Application = System.Windows.Application;
 using ui = iNKORE.UI.WPF.Modern.Controls;
 
@@ -12,8 +14,16 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 浮动栏前景色，根据当前主题动态更新。
+        /// </summary>
         private Color FloatBarForegroundColor;
 
+        /// <summary>
+        /// 应用并切换到指定的主题（"Light" 或 "Dark"），更新主题资源并刷新相关 UI 元素以反映主题变化。
+        /// </summary>
+        /// <param name="theme">主题标识，支持 "Light" 或 "Dark"（区分大小写）。</param>
+        /// <param name="autoSwitchIcon">若为 true，则根据主题自动切换并保存浮动工具栏的图标设置。</param>
         private void SetTheme(string theme, bool autoSwitchIcon = false)
         {
             // 清理现有的主题资源
@@ -35,22 +45,38 @@ namespace Ink_Canvas
 
             if (theme == "Light")
             {
+                // 先加载主题
                 var rd1 = new ResourceDictionary
-                { Source = new Uri("Resources/Styles/Light.xaml", UriKind.Relative) };
+                {
+                    Source = new Uri("Resources/Styles/Light.xaml", UriKind.Relative)
+                };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
 
-                // 在主题资源之后添加其他资源
-                var rd2 = new ResourceDictionary
-                { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd2);
+                // 异步加载图形资源，避免阻塞启动
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100);
+                    Dispatcher.Invoke(() =>
+                    {
+                        var rd2 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd2);
 
-                var rd3 = new ResourceDictionary
-                { Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd3);
+                        var rd3 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd3);
 
-                var rd4 = new ResourceDictionary
-                { Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd4);
+                        var rd4 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd4);
+                    });
+                });
 
                 ThemeManager.SetRequestedTheme(window, ElementTheme.Light);
 
@@ -83,21 +109,35 @@ namespace Ink_Canvas
             }
             else if (theme == "Dark")
             {
+                // 先加载主题
                 var rd1 = new ResourceDictionary { Source = new Uri("Resources/Styles/Dark.xaml", UriKind.Relative) };
                 Application.Current.Resources.MergedDictionaries.Add(rd1);
 
-                // 在主题资源之后添加其他资源
-                var rd2 = new ResourceDictionary
-                { Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd2);
+                // 异步加载图形资源，避免阻塞启动
+                _ = Task.Run(async () =>
+                {
+                    await Task.Delay(100);
+                    Dispatcher.Invoke(() =>
+                    {
+                        var rd2 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/DrawShapeImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd2);
 
-                var rd3 = new ResourceDictionary
-                { Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd3);
+                        var rd3 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/SeewoImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd3);
 
-                var rd4 = new ResourceDictionary
-                { Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative) };
-                Application.Current.Resources.MergedDictionaries.Add(rd4);
+                        var rd4 = new ResourceDictionary
+                        {
+                            Source = new Uri("Resources/IconImageDictionary.xaml", UriKind.Relative)
+                        };
+                        Application.Current.Resources.MergedDictionaries.Add(rd4);
+                    });
+                });
 
                 ThemeManager.SetRequestedTheme(window, ElementTheme.Dark);
 
@@ -296,6 +336,18 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理系统主题偏好变化事件，根据当前设置更新应用主题。
+        /// </summary>
+        /// <param name="sender">事件发送者。</param>
+        /// <param name="e">用户偏好变化事件参数。</param>
+        /// <remarks>
+        /// 操作包括：
+        /// 1. 根据当前主题设置（Settings.Appearance.Theme）决定使用哪种主题
+        /// 2. 如果设置为0（浅色主题），则设置为Light主题
+        /// 3. 如果设置为1（深色主题），则设置为Dark主题
+        /// 4. 如果设置为2（跟随系统主题），则根据系统主题设置应用相应的主题
+        /// </remarks>
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
             switch (Settings.Appearance.Theme)
@@ -313,6 +365,17 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 检查系统主题是否为浅色主题。
+        /// </summary>
+        /// <returns>系统主题为浅色返回true，深色返回false。</returns>
+        /// <remarks>
+        /// 操作包括：
+        /// 1. 从注册表中读取系统主题设置
+        /// 2. 检查"SystemUsesLightTheme"键的值
+        /// 3. 如果值为1，则表示系统使用浅色主题
+        /// 4. 捕获可能的异常，确保方法不会因异常而崩溃
+        /// </remarks>
         private bool IsSystemThemeLight()
         {
             var light = false;
@@ -325,7 +388,7 @@ namespace Ink_Canvas
                 if (themeKey != null) keyValue = (int)themeKey.GetValue("SystemUsesLightTheme");
                 if (keyValue == 1) light = true;
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
             return light;
         }

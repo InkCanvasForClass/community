@@ -1,7 +1,5 @@
-using Ink_Canvas;
 using iNKORE.UI.WPF.Helpers;
 using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -283,7 +281,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
         }
 
-        
+
         /// <summary>
         /// 应用主题
         /// </summary>

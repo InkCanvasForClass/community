@@ -1,4 +1,3 @@
-using Ink_Canvas;
 using iNKORE.UI.WPF.Helpers;
 using System;
 using System.IO;
@@ -158,8 +157,8 @@ namespace Ink_Canvas.Windows.SettingsViews
         private void SetToggleSwitchState(Border toggleSwitch, bool isOn)
         {
             if (toggleSwitch == null) return;
-            toggleSwitch.Background = isOn 
-                ? new SolidColorBrush(Color.FromRgb(53, 132, 228)) 
+            toggleSwitch.Background = isOn
+                ? new SolidColorBrush(Color.FromRgb(53, 132, 228))
                 : (ThemeHelper.IsDarkTheme ? ThemeHelper.GetButtonBackgroundBrush() : new SolidColorBrush(Color.FromRgb(225, 225, 225)));
             var innerBorder = toggleSwitch.Child as Border;
             if (innerBorder != null)
@@ -217,7 +216,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 
             bool currentState = GetCurrentSettingValue(tag);
             bool newState = !currentState;
-            
+
             SetToggleSwitchState(border, newState);
 
             switch (tag)
@@ -391,7 +390,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 }
             }
         }
-        
+
         /// <summary>
         /// 应用主题
         /// </summary>

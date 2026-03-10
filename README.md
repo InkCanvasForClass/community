@@ -87,8 +87,10 @@
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="http://blog.jursin.top"><img src="https://avatars.githubusercontent.com/u/127487914?v=4?s=100" width="100px;" alt="Jursin"/><br /><sub><b>Jursin</b></sub></a><br /><a href="#design-Jursin" title="Design">🎨</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Tayasui-rainnya"><img src="https://avatars.githubusercontent.com/u/156585442?v=4?s=100" width="100px;" alt="tayasui rainnya!"/><br /><sub><b>tayasui rainnya!</b></sub></a><br /><a href="#design-Tayasui-rainnya" title="Design">🎨</a></td>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/doudou0720"><img src="https://avatars.githubusercontent.com/u/98651603?v=4?s=100" width="100px;" alt="doudou0720"/><br /><sub><b>doudou0720</b></sub></a><br /><a href="#code-doudou0720" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/doudou0720"><img src="https://avatars.githubusercontent.com/u/98651603?v=4?s=100" width="100px;" alt="doudou0720"/><br /><sub><b>doudou0720</b></sub></a><br /><a href="#code-doudou0720" title="Code">💻</a> <a href="#doc-doudou0720" title="Documentation">📖</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/PANDAJSR"><img src="https://avatars.githubusercontent.com/u/170189561?v=4?s=100" width="100px;" alt="PANDAJSR"/><br /><sub><b>PANDAJSR</b></sub></a><br /><a href="#code-PANDAJSR" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="http://lyxwx.top"><img src="https://avatars.githubusercontent.com/u/66517348?v=4?s=100" width="100px;" alt="流焰xwx"/><br /><sub><b>流焰xwx</b></sub></a><br /><a href="#code-LiuYan-xwx" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Super-Yyt"><img src="https://avatars.githubusercontent.com/u/206630707?v=4?s=100" width="100px;" alt="Super-Yyt"/><br /><sub><b>Super-Yyt</b></sub></a><br /><a href="#infra-Super-Yyt" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a> <a href="#blog-Super-Yyt" title="Blogposts">📝</a></td>
     </tr>
   </tbody>
 </table>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -73,7 +73,7 @@ namespace Ink_Canvas.Helpers
 
                 sb.Begin((FrameworkElement)element);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         public static void ShowWithSlideFromLeftAndFade(UIElement element, double duration = 0.25)
@@ -113,7 +113,7 @@ namespace Ink_Canvas.Helpers
 
                 sb.Begin((FrameworkElement)element);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         public static void ShowWithScaleFromLeft(UIElement element, double duration = 0.2)
@@ -156,7 +156,7 @@ namespace Ink_Canvas.Helpers
 
                 sb.Begin((FrameworkElement)element);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         public static void ShowWithScaleFromRight(UIElement element, double duration = 0.2)
@@ -200,7 +200,7 @@ namespace Ink_Canvas.Helpers
 
                 sb.Begin((FrameworkElement)element);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         public static void HideWithSlideAndFade(UIElement element, double duration = 0.15)
@@ -246,7 +246,7 @@ namespace Ink_Canvas.Helpers
                 element.RenderTransform = new TranslateTransform();
                 sb.Begin((FrameworkElement)element);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
         public static void HideWithFadeOut(UIElement element, double duration = 0.15)

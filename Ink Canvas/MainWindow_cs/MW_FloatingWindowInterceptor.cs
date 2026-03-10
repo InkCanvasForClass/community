@@ -296,6 +296,8 @@ namespace Ink_Canvas
         /// <summary>
         /// 设置拦截规则
         /// </summary>
+        /// <param name="type">拦截类型</param>
+        /// <param name="enabled">是否启用拦截</param>
         private void SetInterceptRule(FloatingWindowInterceptor.InterceptType type, bool enabled)
         {
             try

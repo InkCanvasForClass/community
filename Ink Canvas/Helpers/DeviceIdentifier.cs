@@ -146,7 +146,7 @@ namespace Ink_Canvas.Helpers
                         var disposeMethod = searcher.GetType().GetMethod("Dispose");
                         disposeMethod?.Invoke(searcher, null);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     // 主板序列号
                     try
@@ -170,7 +170,7 @@ namespace Ink_Canvas.Helpers
                         var disposeMethod = searcher.GetType().GetMethod("Dispose");
                         disposeMethod?.Invoke(searcher, null);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     // BIOS序列号
                     try
@@ -194,7 +194,7 @@ namespace Ink_Canvas.Helpers
                         var disposeMethod = searcher.GetType().GetMethod("Dispose");
                         disposeMethod?.Invoke(searcher, null);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     // 主硬盘序列号
                     try
@@ -218,7 +218,7 @@ namespace Ink_Canvas.Helpers
                         var disposeMethod = searcher.GetType().GetMethod("Dispose");
                         disposeMethod?.Invoke(searcher, null);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                 }
             }
             catch
@@ -360,6 +360,11 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 保存设备ID到文件
         /// </summary>
+        /// <remarks>
+        /// 将设备标识信息以格式化的 JSON 写入指定文件，并确保目标目录存在；在失败时记录错误但不抛出异常。
+        /// </remarks>
+        /// <param name="filePath">目标文件的完整路径，用于保存设备标识信息。</param>
+        /// <param name="info">要保存的设备标识信息对象（包含 DeviceId 和 可选的硬件指纹）。</param>
         private static void SaveDeviceIdToFile(string filePath, DeviceIdInfo info)
         {
             try
@@ -368,11 +373,11 @@ namespace Ink_Canvas.Helpers
                 var directory = Path.GetDirectoryName(filePath);
                 if (!Directory.Exists(directory))
                 {
-                    Directory.CreateDirectory(directory);
+                    ProcessProtectionManager.WithWriteAccess(directory, () => Directory.CreateDirectory(directory));
                 }
 
                 string json = JsonConvert.SerializeObject(info, Formatting.Indented);
-                File.WriteAllText(filePath, json);
+                ProcessProtectionManager.WithWriteAccess(filePath, () => File.WriteAllText(filePath, json));
 
                 LogHelper.WriteLogToFile($"DeviceIdentifier | 设备ID已保存到: {filePath}");
             }
@@ -999,7 +1004,7 @@ namespace Ink_Canvas.Helpers
                 var directory = Path.GetDirectoryName(filePath);
                 if (!Directory.Exists(directory))
                 {
-                    Directory.CreateDirectory(directory);
+                    ProcessProtectionManager.WithWriteAccess(directory, () => Directory.CreateDirectory(directory));
                 }
 
                 string json = JsonConvert.SerializeObject(stats, Formatting.Indented);
@@ -1023,7 +1028,7 @@ namespace Ink_Canvas.Helpers
                     checksum.CopyTo(finalData, 0);
                     encryptedData.CopyTo(finalData, checksum.Length);
 
-                    File.WriteAllBytes(filePath, finalData);
+                    ProcessProtectionManager.WithWriteAccess(filePath, () => File.WriteAllBytes(filePath, finalData));
 
                     LogHelper.WriteLogToFile($"DeviceIdentifier | 加密使用统计已保存到: {filePath}");
                 }
@@ -1619,4 +1624,3 @@ namespace Ink_Canvas.Helpers
         }
     }
 }
-

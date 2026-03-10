@@ -64,7 +64,7 @@ namespace Ink_Canvas
             try
             {
                 this.Topmost = true;
-                
+
                 Dispatcher.BeginInvoke(new Action(() =>
                 {
                     this.Activate();
@@ -74,7 +74,7 @@ namespace Ink_Canvas
                 }), DispatcherPriority.Loaded);
 
                 string privacyText = null;
-                
+
                 try
                 {
                     var assembly = Assembly.GetExecutingAssembly();

@@ -53,7 +53,22 @@
                     Click="ButtonCancel_Click"
                     Background="{DynamicResource PrivacyAgreementWindowButtonBackground}"
                     Foreground="{DynamicResource PrivacyAgreementWindowButtonForeground}"
-                    BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"/>
+                    BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
+                    OverridesDefaultStyle="True">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
             <Button Name="ButtonAccept"
                     Content="同意" 
                     FontFamily="Microsoft YaHei UI"
@@ -62,7 +77,22 @@
                     Click="ButtonAccept_Click"
                     Background="{DynamicResource PrivacyAgreementWindowButtonAcceptBackground}"
                     Foreground="{DynamicResource PrivacyAgreementWindowButtonAcceptForeground}"
-                    BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"/>
+                    BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
+                    OverridesDefaultStyle="True">
+                <Button.Template>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center"
+                                              Margin="{TemplateBinding Padding}"
+                                              RecognizesAccessKey="True"/>
+                        </Border>
+                    </ControlTemplate>
+                </Button.Template>
+            </Button>
         </StackPanel>
     </Grid>
 </Window>

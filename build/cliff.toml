@@ -23,10 +23,10 @@ body = """
 ----
 
 - 该版本有 {{ statistics.commit_count }} 次提交
-- 在提交中检测到 {{ statistics.links | length }} 个关联议题
+- 在版本中共有 {{ statistics.links | length }} 个关联议题和合并请求
 {%- if statistics.links | length > 0 %}
 	{%- for link in statistics.links %}
-        {{ "  " }}- [{{ link.text }}]({{ link.href }}) (referenced {{ link.count }} time(s))
+        {{ "  " }}- [{{ link.text }}]({{ link.href }}) (被提及 {{ link.count }} 次)
 	{%- endfor %}
 {%- endif %}
 
@@ -52,7 +52,7 @@ postprocessors = [
 # See https://www.conventionalcommits.org
 conventional_commits = true
 # Exclude commits that do not match the conventional commits specification.
-filter_unconventional = true
+filter_unconventional = false
 # Require all commits to be conventional.
 # Takes precedence over filter_unconventional.
 require_conventional = false
@@ -73,23 +73,25 @@ protect_breaking_commits = false
 # Optionally sets the commit's scope and can decide to exclude commits from further processing.
 
 commit_parsers = [
-    { message = "^(feat|add|新增|添加)", group = "<!-- 0 -->🚀 新增功能" },
-    { message = "^(fix|修复)", group = "<!-- 1 -->🐛 修复" },
-    { message = "^doc", group = "<!-- 5 -->📚 文档更改" },
-    { message = "^(improve|改进|优化)", group = "<!-- 3 -->⚡ 体验优化" },
-    { message = "^refactor", group = "<!-- 2 -->🚜 重构" },
-    { message = "^style", group = "<!-- 6 -->🎨 格式化" },
-    { message = "^(delete|删除|移除)", group = "<!-- 4 -->❌ 删除功能" },
-    { message = "^test", group = "<!-- 7 -->🧪 测试" },
+    { message = "^(feat|add|新增|添加)", group = "<!-- 00 -->🚀 新增功能" },
+    { message = "^(fix|修复)", group = "<!-- 01 -->🐛 修复" },
+    { message = "^doc", group = "<!-- 05 -->📚 文档更改" },
+    { message = "^(improve|改进|优化)", group = "<!-- 03 -->⚡ 体验优化" },
+    { message = "^refactor", group = "<!-- 02 -->🚜 重构" },
+    { message = "^style", group = "<!-- 06 -->🎨 格式化" },
+    { message = "^(delete|删除|移除)", group = "<!-- 04 -->❌ 删除功能" },
+    { message = "^test", group = "<!-- 07 -->🧪 测试" },
     { message = "^chore\\(release\\): prepare for", skip = true },
     { message = "^chore\\(deps.*\\)", skip = true },
     { message = "^chore\\(pr\\)", skip = true },
     { message = "^chore\\(pull\\)", skip = true },
-    { message = "^chore|^ci", group = "<!-- 8 -->⚙️ 杂项" },
-    { body = ".*security", group = "<!-- 9 -->🛡️ 安全" },
-    { message = "^revert", group = "<!-- 10 -->◀️ 回退" },
-    { message = "(版本|version|更新版本号)", group = "<!-- 11 -->🎉 版本号更新" },
-    { message = ".*", group = "<!-- 12 -->💼 其他更改" },
+    { message = "^Merge branch", skip = true },
+    { message = "^chore|^ci", group = "<!-- 08 -->⚙️ 杂项" },
+    { body = ".*security", group = "<!-- 09 -->🛡️ 安全" },
+    { message = "^Revert", group = "<!-- 10 -->◀️ 回退" },
+    { message = "^Merge pull request", group = "<!-- 11 -->🔀 合并请求" },
+    { message = "^(版本|version|更新版本号)", group = "<!-- 12 -->🎉 版本号更新" },
+    { message = ".*", group = "<!-- 13 -->💼 其他更改" },
 ]
 # Exclude commits that are not matched by any commit parser.
 filter_commits = false

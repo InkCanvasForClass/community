@@ -1,7 +1,6 @@
 using System;
 using System.Windows;
 using System.Windows.Controls;
-using Ink_Canvas.Windows.SettingsViews;
 using System.Windows.Media;
 
 namespace Ink_Canvas.Windows.SettingsViews
@@ -185,7 +184,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 IsTopBarNeedNoShadowEffect?.Invoke(this, new RoutedEventArgs());
             }
         }
-        
+
         /// <summary>
         /// 应用主题
         /// </summary>

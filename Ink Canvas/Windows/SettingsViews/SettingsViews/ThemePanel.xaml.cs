@@ -1,13 +1,10 @@
-using Ink_Canvas;
+using Hardcodet.Wpf.TaskbarNotification;
 using iNKORE.UI.WPF.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using Hardcodet.Wpf.TaskbarNotification;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
@@ -104,7 +101,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     // 更新自定义图标列表（如果需要）
                     // UpdateCustomIconsInComboBox();
-                    
+
                     int selectedIndex = Math.Min(appearance.FloatingBarImg, ComboBoxFloatingBarImg.Items.Count - 1);
                     ComboBoxFloatingBarImg.SelectedIndex = selectedIndex;
                 }
@@ -228,8 +225,8 @@ namespace Ink_Canvas.Windows.SettingsViews
         private void SetToggleSwitchState(Border toggleSwitch, bool isOn)
         {
             if (toggleSwitch == null) return;
-            toggleSwitch.Background = isOn 
-                ? new SolidColorBrush(Color.FromRgb(53, 132, 228)) 
+            toggleSwitch.Background = isOn
+                ? new SolidColorBrush(Color.FromRgb(53, 132, 228))
                 : (ThemeHelper.IsDarkTheme ? ThemeHelper.GetButtonBackgroundBrush() : new SolidColorBrush(Color.FromRgb(225, 225, 225)));
             var innerBorder = toggleSwitch.Child as Border;
             if (innerBorder != null)
@@ -624,7 +621,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                                         themeIndex = 2;
                                         break;
                                 }
-                                
+
                                 if (comboBox.Items.Count > themeIndex)
                                 {
                                     var selectedItem = comboBox.Items[themeIndex];
@@ -638,7 +635,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                                         appearance.Theme = themeIndex;
                                     }, "ComboBoxTheme_SelectionChanged", "ComboBoxTheme");
                                     MainWindowSettingsHelper.NotifyThemeUpdateIfNeeded("ComboBoxTheme");
-                                    
+
                                     // 触发主题变化事件，通知设置窗口更新主题
                                     ThemeChanged?.Invoke(this, new RoutedEventArgs());
                                 }
@@ -667,7 +664,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                                     appearance.Theme = themeIndex;
                                 }, "ComboBoxTheme_SelectionChanged", "ComboBoxTheme");
                                 MainWindowSettingsHelper.NotifyThemeUpdateIfNeeded("ComboBoxTheme");
-                                
+
                                 // 触发主题变化事件，通知设置窗口更新主题
                                 ThemeChanged?.Invoke(this, new RoutedEventArgs());
                             }
@@ -833,7 +830,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                     break;
             }
         }
-        
+
         /// <summary>
         /// 应用主题
         /// </summary>

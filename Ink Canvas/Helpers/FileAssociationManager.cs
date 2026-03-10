@@ -519,7 +519,7 @@ namespace Ink_Canvas.Helpers
                                 File.Delete(ipcFile);
                             }
                         }
-                        catch { }
+                        catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                     }
                 }
 
@@ -570,7 +570,7 @@ namespace Ink_Canvas.Helpers
                                 File.Delete(ipcFile);
                             }
                         }
-                        catch { }
+                        catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                     }
                 }
 
@@ -625,7 +625,7 @@ namespace Ink_Canvas.Helpers
                                 File.Delete(ipcFile);
                             }
                         }
-                        catch { }
+                        catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                     }
                 }
 
@@ -675,7 +675,7 @@ namespace Ink_Canvas.Helpers
                                 File.Delete(ipcFile);
                             }
                         }
-                        catch { }
+                        catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                     }
                 }
             }

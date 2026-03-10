@@ -1,7 +1,7 @@
+using Microsoft.International.Converters.PinYinConverter;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -9,7 +9,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using Microsoft.International.Converters.PinYinConverter;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
@@ -106,7 +105,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 var titleLower = setting.Title.ToLower();
                 var categoryLower = setting.Category.ToLower();
-                
+
                 // 精准匹配
                 if (titleLower.Contains(searchLower) || categoryLower.Contains(searchLower))
                 {
@@ -198,13 +197,13 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 // 将搜索词转换为小写
                 var searchLower = search.ToLower();
-                
+
                 // 获取文本的拼音首字母和全拼
                 var pinyinInitials = GetPinyinInitials(text);
                 var pinyinFull = GetPinyinFull(text);
-                
+
                 // 检查搜索词是否匹配拼音首字母或全拼
-                if (pinyinInitials.ToLower().Contains(searchLower) || 
+                if (pinyinInitials.ToLower().Contains(searchLower) ||
                     pinyinFull.ToLower().Contains(searchLower))
                 {
                     return true;
@@ -215,7 +214,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 // 如果拼音转换失败，返回false
                 return false;
             }
-            
+
             return false;
         }
 
@@ -380,7 +379,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             SearchTextBox.Text = text;
             PerformSearch(text);
         }
-        
+
         /// <summary>
         /// 应用主题
         /// </summary>
@@ -454,7 +453,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         {
             try
             {
-                Color iconColor = isDarkTheme 
+                Color iconColor = isDarkTheme
                     ? Color.FromRgb(243, 243, 243) // 深色主题使用浅色图标 #F3F3F3
                     : Color.FromRgb(34, 34, 34);   // 浅色主题使用深色图标 #222222
 
@@ -494,8 +493,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     var clonedGeometry = geometryDrawing.Geometry?.Clone();
                     var clonedBrush = CloneBrush(geometryDrawing.Brush, newColor);
-                    var clonedPen = geometryDrawing.Pen != null 
-                        ? ClonePen(geometryDrawing.Pen, newColor) 
+                    var clonedPen = geometryDrawing.Pen != null
+                        ? ClonePen(geometryDrawing.Pen, newColor)
                         : null;
 
                     cloned.Children.Add(new GeometryDrawing(clonedBrush, clonedPen, clonedGeometry));
@@ -525,7 +524,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     return new SolidColorBrush(newColor) { Opacity = solidBrush.Opacity };
                 }
-                else if (originalColor.A > 0 && originalColor != Colors.Transparent && 
+                else if (originalColor.A > 0 && originalColor != Colors.Transparent &&
                          originalColor.R < 50 && originalColor.G < 50 && originalColor.B < 50) // 深色
                 {
                     return new SolidColorBrush(newColor) { Opacity = solidBrush.Opacity };

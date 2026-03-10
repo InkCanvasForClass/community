@@ -20,6 +20,18 @@ namespace Ink_Canvas
     {
         #region Floating Bar Control
 
+        /// <summary>
+        /// 处理形状绘制按钮的鼠标抬起事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当形状绘制按钮被点击时：
+        /// 1. 重置之前按下的面板背景
+        /// 2. 检查是否是浮动栏按钮且不是当前按下的对象
+        /// 3. 如果形状绘制面板可见，则隐藏它
+        /// 4. 如果形状绘制面板不可见，则显示它
+        /// </remarks>
         private void ImageDrawShape_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
@@ -43,11 +55,57 @@ namespace Ink_Canvas
 
         #endregion Floating Bar Control
 
+        /// <summary>
+        /// 形状绘制模式
+        /// </summary>
+        /// <remarks>
+        /// 不同的值表示不同的形状绘制模式：
+        /// 1: 直线
+        /// 2: 箭头
+        /// 3: 矩形
+        /// 4: 椭圆
+        /// 5: 圆形
+        /// 6: 圆柱
+        /// 7: 圆锥
+        /// 8: 虚线
+        /// 9: 长方体
+        /// 10: 虚线圆形
+        /// 11: 坐标系1
+        /// 12: 坐标系2
+        /// 13: 坐标系3
+        /// 14: 坐标系4
+        /// 15: 平行线
+        /// 16: 中心椭圆
+        /// 17: 坐标系5
+        /// 18: 点线
+        /// 19: 中心矩形
+        /// 20: 抛物线1
+        /// 21: 抛物线2
+        /// 22: 带焦点的抛物线
+        /// 23: 带焦点的中心椭圆
+        /// 24: 双曲线
+        /// 25: 带焦点的双曲线
+        /// </remarks>
         private int drawingShapeMode;
-        private bool isLongPressSelected; // 用于存是否是"选中"状态，便于后期抬笔后不做切换到笔的处理
+
+        /// <summary>
+        /// 用于存储是否是"选中"状态，便于后期抬笔后不做切换到笔的处理
+        /// </summary>
+        private bool isLongPressSelected;
 
         #region Buttons
 
+        /// <summary>
+        /// 处理形状绘制面板固定按钮的鼠标抬起事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当形状绘制面板固定按钮被点击时：
+        /// 1. 检查是否是当前按下的对象
+        /// 2. 切换自动隐藏开关的状态
+        /// 3. 根据开关状态更新图标为固定或未固定状态
+        /// </remarks>
         private void SymbolIconPinBorderDrawShape_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
@@ -60,9 +118,33 @@ namespace Ink_Canvas
                 ((SymbolIcon)sender).Symbol = Symbol.UnPin;
         }
 
+        /// <summary>
+        /// 上一次鼠标按下的发送者
+        /// </summary>
         private object lastMouseDownSender;
+
+        /// <summary>
+        /// 上一次鼠标按下的时间
+        /// </summary>
         private DateTime lastMouseDownTime = DateTime.MinValue;
 
+        /// <summary>
+        /// 处理形状绘制按钮的鼠标按下事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当形状绘制按钮被长按（500毫秒）时：
+        /// 1. 记录当前按下的对象和时间
+        /// 2. 等待500毫秒检查是否仍然是同一个对象
+        /// 3. 如果是同一个对象，设置透明度动画
+        /// 4. 禁用橡皮擦覆盖
+        /// 5. 设置强制橡皮擦模式
+        /// 6. 根据不同的按钮设置不同的形状绘制模式
+        /// 7. 更新工具模式缓存
+        /// 8. 设置长按选中标志
+        /// 9. 如果是单指拖拽模式，取消该模式
+        /// </remarks>
         private async void Image_MouseDown(object sender, MouseButtonEventArgs e)
         {
             lastMouseDownSender = sender;
@@ -100,6 +182,20 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理画笔按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 当画笔按钮被点击时：
+        /// 1. 禁用强制橡皮擦模式
+        /// 2. 重置形状绘制模式
+        /// 3. 设置墨水画布编辑模式为墨迹
+        /// 4. 启用墨水画布的操作功能
+        /// 5. 取消单指拖拽模式
+        /// 6. 重置长按选中标志
+        /// </remarks>
         private void BtnPen_Click(object sender, RoutedEventArgs e)
         {
             forceEraser = false;
@@ -110,6 +206,17 @@ namespace Ink_Canvas
             isLongPressSelected = false;
         }
 
+        /// <summary>
+        /// 检查是否在多点触控模式下绘制形状
+        /// </summary>
+        /// <returns>返回一个表示操作成功的Task<bool></returns>
+        /// <remarks>
+        /// 检查多点触控模式并在需要时禁用：
+        /// 1. 如果当前在多点触控模式下
+        /// 2. 禁用多点触控模式
+        /// 3. 记录之前的多点触控模式状态
+        /// 4. 返回成功的任务
+        /// </remarks>
         private Task<bool> CheckIsDrawingShapesInMultiTouchMode()
         {
             if (isInMultiTouchMode)
@@ -121,6 +228,19 @@ namespace Ink_Canvas
             return Task.FromResult(true);
         }
 
+        /// <summary>
+        /// 处理绘制直线按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制直线按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 如果是长按操作，设置绘制模式为直线
+        /// 3. 重置鼠标按下发送者
+        /// 4. 如果是长按选中状态，处理相关逻辑
+        /// 5. 提示切换到画笔模式
+        /// </remarks>
         public async void BtnDrawLine_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -150,6 +270,19 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制虚线按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制虚线按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 如果是长按操作，设置绘制模式为虚线
+        /// 3. 重置鼠标按下发送者
+        /// 4. 如果是长按选中状态，处理相关逻辑
+        /// 5. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawDashedLine_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -179,6 +312,19 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制点线按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制点线按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 如果是长按操作，设置绘制模式为点线
+        /// 3. 重置鼠标按下发送者
+        /// 4. 如果是长按选中状态，处理相关逻辑
+        /// 5. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawDotLine_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -208,6 +354,19 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制箭头按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制箭头按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 如果是长按操作，设置绘制模式为箭头
+        /// 3. 重置鼠标按下发送者
+        /// 4. 如果是长按选中状态，处理相关逻辑
+        /// 5. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawArrow_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -237,6 +396,19 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制平行线按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制平行线按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 如果是长按操作，设置绘制模式为平行线
+        /// 3. 重置鼠标按下发送者
+        /// 4. 如果是长按选中状态，处理相关逻辑
+        /// 5. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawParallelLine_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -266,6 +438,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制坐标系1按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制坐标系1按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为坐标系1
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCoordinate1_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -280,6 +469,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制坐标系2按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制坐标系2按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为坐标系2
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCoordinate2_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -294,6 +500,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制坐标系3按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制坐标系3按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为坐标系3
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCoordinate3_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -308,6 +531,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制坐标系4按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制坐标系4按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为坐标系4
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCoordinate4_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -322,6 +562,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制坐标系5按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制坐标系5按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为坐标系5
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCoordinate5_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -336,6 +593,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制矩形按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制矩形按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为矩形
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawRectangle_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -350,6 +624,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制中心矩形按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制中心矩形按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为中心矩形
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawRectangleCenter_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -364,6 +655,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制椭圆按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制椭圆按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为椭圆
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawEllipse_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -378,6 +686,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制圆形按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制圆形按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为圆形
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCircle_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -392,6 +717,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制中心椭圆按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制中心椭圆按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为中心椭圆
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCenterEllipse_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -406,6 +748,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制带焦点的中心椭圆按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制带焦点的中心椭圆按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为带焦点的中心椭圆
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCenterEllipseWithFocalPoint_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -420,6 +779,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制虚线圆形按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制虚线圆形按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为虚线圆形
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawDashedCircle_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -434,6 +810,24 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制双曲线按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制双曲线按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为双曲线
+        /// 6. 重置多步形状绘制当前步骤
+        /// 7. 设置墨水画布编辑模式为无
+        /// 8. 启用墨水画布的操作功能
+        /// 9. 取消单指拖拽模式
+        /// 10. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawHyperbola_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -449,6 +843,24 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制带焦点的双曲线按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制带焦点的双曲线按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为带焦点的双曲线
+        /// 6. 重置多步形状绘制当前步骤
+        /// 7. 设置墨水画布编辑模式为无
+        /// 8. 启用墨水画布的操作功能
+        /// 9. 取消单指拖拽模式
+        /// 10. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawHyperbolaWithFocalPoint_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -464,6 +876,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制抛物线1按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制抛物线1按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为抛物线1
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawParabola1_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -478,6 +907,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制带焦点的抛物线按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制带焦点的抛物线按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为带焦点的抛物线
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawParabolaWithFocalPoint_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -492,6 +938,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制抛物线2按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制抛物线2按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为抛物线2
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawParabola2_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -506,6 +969,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制圆柱按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制圆柱按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为圆柱
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCylinder_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -520,6 +1000,23 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制圆锥按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制圆锥按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为圆锥
+        /// 6. 设置墨水画布编辑模式为无
+        /// 7. 启用墨水画布的操作功能
+        /// 8. 取消单指拖拽模式
+        /// 9. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCone_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -534,6 +1031,25 @@ namespace Ink_Canvas
             DrawShapePromptToPen();
         }
 
+        /// <summary>
+        /// 处理绘制长方体按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当绘制长方体按钮被点击时：
+        /// 1. 检查是否在多点触控模式下
+        /// 2. 禁用点橡皮擦模式
+        /// 3. 禁用橡皮擦覆盖
+        /// 4. 设置强制橡皮擦模式
+        /// 5. 设置绘制模式为长方体
+        /// 6. 重置长方体绘制的首次触摸标志
+        /// 7. 初始化长方体前方面矩形的起始点和结束点
+        /// 8. 设置墨水画布编辑模式为无
+        /// 9. 启用墨水画布的操作功能
+        /// 10. 取消单指拖拽模式
+        /// 11. 提示切换到画笔模式
+        /// </remarks>
         private async void BtnDrawCuboid_Click(object sender, MouseButtonEventArgs e)
         {
             await CheckIsDrawingShapesInMultiTouchMode();
@@ -553,6 +1069,20 @@ namespace Ink_Canvas
 
         #endregion
 
+        /// <summary>
+        /// 处理墨水画布的触摸移动事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">触摸事件参数</param>
+        /// <remarks>
+        /// 当在墨水画布上发生触摸移动时：
+        /// 1. 如果是单指拖拽模式，直接返回
+        /// 2. 如果是形状绘制模式：
+        ///    - 如果等待下一次触摸按下，直接返回
+        ///    - 如果触摸点数量大于1，设置等待标志并清理临时笔画
+        ///    - 确保墨水画布编辑模式为无
+        /// 3. 调用MouseTouchMove方法处理触摸点位置
+        /// </remarks>
         private void inkCanvas_TouchMove(object sender, TouchEventArgs e)
         {
             if (isSingleFingerDragMode) return;
@@ -584,16 +1114,57 @@ namespace Ink_Canvas
             MouseTouchMove(e.GetTouchPoint(inkCanvas).Position);
         }
 
-        private int drawMultiStepShapeCurrentStep; //多笔完成的图形 当前所处在的笔画
+        /// <summary>
+        /// 多笔完成的图形 当前所处在的笔画步骤
+        /// </summary>
+        private int drawMultiStepShapeCurrentStep;
 
-        private StrokeCollection drawMultiStepShapeSpecialStrokeCollection = new StrokeCollection(); //多笔完成的图形 当前所处在的笔画
+        /// <summary>
+        /// 多笔完成的图形 当前所处在的笔画集合
+        /// </summary>
+        private StrokeCollection drawMultiStepShapeSpecialStrokeCollection = new StrokeCollection();
 
         //double drawMultiStepShapeSpecialParameter1 = 0.0; //多笔完成的图形 特殊参数 通常用于表示a
         //double drawMultiStepShapeSpecialParameter2 = 0.0; //多笔完成的图形 特殊参数 通常用于表示b
-        private double drawMultiStepShapeSpecialParameter3; //多笔完成的图形 特殊参数 通常用于表示k
+
+        /// <summary>
+        /// 多笔完成的图形 特殊参数 通常用于表示k
+        /// </summary>
+        private double drawMultiStepShapeSpecialParameter3;
 
         #region 形状绘制主函数
 
+        /// <summary>
+        /// 处理鼠标或触摸移动事件，用于形状绘制
+        /// </summary>
+        /// <param name="endP">结束点坐标</param>
+        /// <remarks>
+        /// 当鼠标或触摸在画布上移动时：
+        /// 1. 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
+        /// 2. 在绘制过程中禁用浮动栏交互，避免干扰绘制
+        /// 3. 根据当前的绘制模式，生成不同的形状：
+        ///    - 直线
+        ///    - 虚线
+        ///    - 点线
+        ///    - 箭头
+        ///    - 平行线
+        ///    - 各种坐标系
+        ///    - 矩形
+        ///    - 中心矩形
+        ///    - 椭圆
+        ///    - 圆形
+        ///    - 中心椭圆
+        ///    - 带焦点的中心椭圆
+        ///    - 虚线圆形
+        ///    - 双曲线
+        ///    - 带焦点的双曲线
+        ///    - 抛物线
+        ///    - 带焦点的抛物线
+        ///    - 圆柱
+        ///    - 圆锥
+        ///    - 长方体
+        /// 4. 移除之前的临时笔画，添加新生成的笔画
+        /// </remarks>
         private void MouseTouchMove(Point endP)
         {
             // 禁用原有的FitToCurve，使用新的高级贝塞尔曲线平滑
@@ -623,7 +1194,7 @@ namespace Ink_Canvas
                     {
                         inkCanvas.Strokes.Remove(lastTempStroke);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     lastTempStroke = stroke;
                     inkCanvas.Strokes.Add(stroke);
@@ -681,7 +1252,7 @@ namespace Ink_Canvas
                     {
                         inkCanvas.Strokes.Remove(lastTempStroke);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     lastTempStroke = stroke;
                     inkCanvas.Strokes.Add(stroke);
@@ -870,7 +1441,7 @@ namespace Ink_Canvas
                     {
                         inkCanvas.Strokes.Remove(lastTempStroke);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     lastTempStroke = stroke;
                     inkCanvas.Strokes.Add(stroke);
@@ -895,7 +1466,7 @@ namespace Ink_Canvas
                     {
                         inkCanvas.Strokes.Remove(lastTempStroke);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     lastTempStroke = stroke;
                     inkCanvas.Strokes.Add(stroke);
@@ -912,7 +1483,7 @@ namespace Ink_Canvas
                     {
                         inkCanvas.Strokes.Remove(lastTempStroke);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     lastTempStroke = stroke;
                     inkCanvas.Strokes.Add(stroke);
@@ -931,7 +1502,7 @@ namespace Ink_Canvas
                     {
                         inkCanvas.Strokes.Remove(lastTempStroke);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     lastTempStroke = stroke;
                     inkCanvas.Strokes.Add(stroke);
@@ -957,7 +1528,7 @@ namespace Ink_Canvas
                     {
                         inkCanvas.Strokes.Remove(lastTempStroke);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     lastTempStroke = stroke;
                     inkCanvas.Strokes.Add(stroke);
@@ -1019,7 +1590,7 @@ namespace Ink_Canvas
                     {
                         inkCanvas.Strokes.Remove(lastTempStrokeCollection);
                     }
-                    catch { }
+                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                     lastTempStrokeCollection = strokes;
                     inkCanvas.Strokes.Add(strokes);
@@ -1504,18 +2075,61 @@ namespace Ink_Canvas
 
         #endregion
 
+        /// <summary>
+        /// 长方体绘制的首次触摸标志
+        /// </summary>
+        /// <remarks>
+        /// 用于标识是否是长方体绘制的第一次触摸，第一次触摸绘制正面矩形，第二次触摸绘制深度
+        /// </remarks>
         private bool isFirstTouchCuboid = true;
+
+        /// <summary>
+        /// 长方体正面矩形的起始点
+        /// </summary>
         private Point CuboidFrontRectIniP;
+
+        /// <summary>
+        /// 长方体正面矩形的结束点
+        /// </summary>
         private Point CuboidFrontRectEndP;
 
+        /// <summary>
+        /// 上一次的临时笔画
+        /// </summary>
+        /// <remarks>
+        /// 用于存储当前正在绘制的临时笔画，在绘制过程中实时更新
+        /// </remarks>
         private Stroke lastTempStroke;
+
+        /// <summary>
+        /// 上一次的临时笔画集合
+        /// </summary>
+        /// <remarks>
+        /// 用于存储当前正在绘制的临时笔画集合，在绘制复杂形状时使用
+        /// </remarks>
         private StrokeCollection lastTempStrokeCollection = new StrokeCollection();
 
+        /// <summary>
+        /// 是否等待下一次触摸按下
+        /// </summary>
+        /// <remarks>
+        /// 当触摸点数量大于1时，设置此标志并清理临时笔画
+        /// </remarks>
         private bool isWaitUntilNextTouchDown;
 
         // 添加节流机制，减少更新频率
+        /// <summary>
+        /// 上一次更新时间
+        /// </summary>
         private DateTime lastUpdateTime = DateTime.MinValue;
-        private const int UpdateThrottleMs = 16; // 约60fps的更新频率
+
+        /// <summary>
+        /// 更新节流时间（毫秒）
+        /// </summary>
+        /// <remarks>
+        /// 约60fps的更新频率，用于限制UI更新频率，提高性能
+        /// </remarks>
+        private const int UpdateThrottleMs = 16;
 
         /// <summary>
         /// 安全地更新临时笔画，减少预览闪烁
@@ -1554,10 +2168,10 @@ namespace Ink_Canvas
                         // 如果更新失败，确保清理状态
                         if (lastTempStroke != null && inkCanvas.Strokes.Contains(lastTempStroke))
                         {
-                            try { inkCanvas.Strokes.Remove(lastTempStroke); } catch { }
+                            try { inkCanvas.Strokes.Remove(lastTempStroke); } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                         }
                         lastTempStroke = newStroke;
-                        try { inkCanvas.Strokes.Add(newStroke); } catch { }
+                        try { inkCanvas.Strokes.Add(newStroke); } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                     }
                 }), DispatcherPriority.Render);
             }
@@ -1612,11 +2226,11 @@ namespace Ink_Canvas
                         {
                             foreach (var stroke in lastTempStrokeCollection)
                             {
-                                try { inkCanvas.Strokes.Remove(stroke); } catch { }
+                                try { inkCanvas.Strokes.Remove(stroke); } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                             }
                         }
                         lastTempStrokeCollection = newStrokeCollection;
-                        try { inkCanvas.Strokes.Add(newStrokeCollection); } catch { }
+                        try { inkCanvas.Strokes.Add(newStrokeCollection); } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
                     }
                 }), DispatcherPriority.Render);
             }
@@ -1626,6 +2240,20 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 生成椭圆几何图形的点列表
+        /// </summary>
+        /// <param name="st">起始点坐标</param>
+        /// <param name="ed">结束点坐标</param>
+        /// <param name="isDrawTop">是否绘制上半部分</param>
+        /// <param name="isDrawBottom">是否绘制下半部分</param>
+        /// <returns>返回椭圆的点列表</returns>
+        /// <remarks>
+        /// 根据给定的起始点和结束点，生成椭圆的点列表：
+        /// 1. 计算椭圆的半长轴和半短轴
+        /// 2. 根据参数决定是否绘制上半部分和下半部分
+        /// 3. 使用参数方程生成椭圆上的点
+        /// </remarks>
         private List<Point> GenerateEllipseGeometry(Point st, Point ed, bool isDrawTop = true,
             bool isDrawBottom = true)
         {
@@ -1653,6 +2281,21 @@ namespace Ink_Canvas
             return pointList;
         }
 
+        /// <summary>
+        /// 生成虚线椭圆的笔画集合
+        /// </summary>
+        /// <param name="st">起始点坐标</param>
+        /// <param name="ed">结束点坐标</param>
+        /// <param name="isDrawTop">是否绘制上半部分</param>
+        /// <param name="isDrawBottom">是否绘制下半部分</param>
+        /// <returns>返回虚线椭圆的笔画集合</returns>
+        /// <remarks>
+        /// 根据给定的起始点和结束点，生成虚线椭圆的笔画集合：
+        /// 1. 计算椭圆的半长轴和半短轴
+        /// 2. 根据参数决定是否绘制上半部分和下半部分
+        /// 3. 使用参数方程生成椭圆上的点，并将其分割为虚线段
+        /// 4. 为每个虚线段创建一个笔画
+        /// </remarks>
         private StrokeCollection GenerateDashedLineEllipseStrokeCollection(Point st, Point ed, bool isDrawTop = true,
             bool isDrawBottom = true)
         {
@@ -1696,6 +2339,18 @@ namespace Ink_Canvas
             return strokes;
         }
 
+        /// <summary>
+        /// 生成直线笔画
+        /// </summary>
+        /// <param name="st">起始点坐标</param>
+        /// <param name="ed">结束点坐标</param>
+        /// <returns>返回直线笔画</returns>
+        /// <remarks>
+        /// 根据给定的起始点和结束点，生成直线笔画：
+        /// 1. 创建包含起始点和结束点的点列表
+        /// 2. 将点列表转换为StylusPointCollection
+        /// 3. 创建并返回带有默认绘图属性的笔画
+        /// </remarks>
         private Stroke GenerateLineStroke(Point st, Point ed)
         {
             var pointList = new List<Point>();
@@ -1713,6 +2368,19 @@ namespace Ink_Canvas
             return stroke;
         }
 
+        /// <summary>
+        /// 生成带箭头的直线笔画
+        /// </summary>
+        /// <param name="st">起始点坐标</param>
+        /// <param name="ed">结束点坐标</param>
+        /// <returns>返回带箭头的直线笔画</returns>
+        /// <remarks>
+        /// 根据给定的起始点和结束点，生成带箭头的直线笔画：
+        /// 1. 计算箭头的角度和方向
+        /// 2. 创建包含起始点、结束点和箭头尖端的点列表
+        /// 3. 将点列表转换为StylusPointCollection
+        /// 4. 创建并返回带有默认绘图属性的笔画
+        /// </remarks>
         private Stroke GenerateArrowLineStroke(Point st, Point ed)
         {
             var pointList = new List<Point>();
@@ -1740,6 +2408,19 @@ namespace Ink_Canvas
         }
 
 
+        /// <summary>
+        /// 生成虚线笔画集合
+        /// </summary>
+        /// <param name="st">起始点坐标</param>
+        /// <param name="ed">结束点坐标</param>
+        /// <returns>返回虚线笔画集合</returns>
+        /// <remarks>
+        /// 根据给定的起始点和结束点，生成虚线笔画集合：
+        /// 1. 计算两点之间的距离和方向
+        /// 2. 按照指定的步长将直线分割为虚线段
+        /// 3. 为每个虚线段创建一个笔画
+        /// 4. 返回包含所有虚线段笔画的集合
+        /// </remarks>
         private StrokeCollection GenerateDashedLineStrokeCollection(Point st, Point ed)
         {
             double step = 5;
@@ -1767,6 +2448,19 @@ namespace Ink_Canvas
             return strokes;
         }
 
+        /// <summary>
+        /// 生成点线笔画集合
+        /// </summary>
+        /// <param name="st">起始点坐标</param>
+        /// <param name="ed">结束点坐标</param>
+        /// <returns>返回点线笔画集合</returns>
+        /// <remarks>
+        /// 根据给定的起始点和结束点，生成点线笔画集合：
+        /// 1. 计算两点之间的距离和方向
+        /// 2. 按照指定的步长在直线上生成点
+        /// 3. 为每个点创建一个笔画
+        /// 4. 返回包含所有点笔画的集合
+        /// </remarks>
         private StrokeCollection GenerateDotLineStrokeCollection(Point st, Point ed)
         {
             double step = 3;
@@ -1792,9 +2486,34 @@ namespace Ink_Canvas
             return strokes;
         }
 
+        /// <summary>
+        /// 鼠标按下状态标志
+        /// </summary>
+        /// <remarks>
+        /// 用于标识鼠标是否处于按下状态，在绘制过程中使用
+        /// </remarks>
         private bool isMouseDown;
+
+        /// <summary>
+        /// 触摸按下状态标志
+        /// </summary>
+        /// <remarks>
+        /// 用于标识触摸是否处于按下状态，在绘制过程中使用
+        /// </remarks>
         private bool isTouchDown;
 
+        /// <summary>
+        /// 处理墨水画布的鼠标按下事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当在墨水画布上按下鼠标时：
+        /// 1. 捕获鼠标输入
+        /// 2. 禁用浮动栏和黑板UI的命中测试，避免干扰绘制
+        /// 3. 设置鼠标按下状态标志
+        /// 4. 如果需要更新起始点，则更新起始点为当前鼠标位置
+        /// </remarks>
         private void inkCanvas_MouseDown(object sender, MouseButtonEventArgs e)
         {
             inkCanvas.CaptureMouse();
@@ -1805,18 +2524,47 @@ namespace Ink_Canvas
             if (NeedUpdateIniP()) iniP = e.GetPosition(inkCanvas);
         }
 
+        /// <summary>
+        /// 处理墨水画布的鼠标移动事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标事件参数</param>
+        /// <remarks>
+        /// 当在墨水画布上移动鼠标时：
+        /// 1. 如果鼠标处于按下状态，调用MouseTouchMove方法处理移动
+        /// 2. 如果启用了光标显示，根据编辑模式设置光标
+        /// </remarks>
         private void inkCanvas_MouseMove(object sender, MouseEventArgs e)
         {
             if (isMouseDown) MouseTouchMove(e.GetPosition(inkCanvas));
-            
+
             if (Settings.Canvas.IsShowCursor)
             {
                 SetCursorBasedOnEditingMode(inkCanvas);
             }
         }
 
+        /// <summary>
+        /// 处理墨水画布的鼠标抬起事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标按钮事件参数</param>
+        /// <remarks>
+        /// 当在墨水画布上抬起鼠标时：
+        /// 1. 释放鼠标捕获
+        /// 2. 启用浮动栏和黑板UI的命中测试
+        /// 3. 根据不同的绘制模式进行处理：
+        ///    - 圆形模式：创建圆形对象并添加到圆形集合
+        ///    - 长方体模式：处理长方体绘制的两个步骤
+        ///    - 双曲线模式：处理多步绘制的步骤切换
+        /// 4. 还原到笔模式（除特殊情况外）
+        /// 5. 提交笔画历史记录
+        /// 6. 清理临时笔画和状态
+        /// 7. 恢复FitToCurve设置
+        /// </remarks>
         private void inkCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            HandleEraserOperationEnded(); // 橡皮擦自动切换回批注模式：松手后启动/重置计时
             inkCanvas.ReleaseMouseCapture();
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
@@ -1988,6 +2736,15 @@ namespace Ink_Canvas
             if (Settings.Canvas.FitToCurve == true) drawingAttributes.FitToCurve = true;
         }
 
+        /// <summary>
+        /// 检查是否需要更新起始点
+        /// </summary>
+        /// <returns>返回是否需要更新起始点</returns>
+        /// <remarks>
+        /// 检查当前绘制模式和步骤，判断是否需要更新起始点：
+        /// 1. 对于双曲线模式（24和25），如果是第二笔（步骤1），则不更新起点
+        /// 2. 其他情况都需要更新起点
+        /// </remarks>
         private bool NeedUpdateIniP()
         {
             if (drawingShapeMode == 24 || drawingShapeMode == 25)
@@ -2037,6 +2794,18 @@ namespace Ink_Canvas
                 Debug.WriteLine($"绘制圆心标记失败: {ex.Message}");
             }
         }
+        /// <summary>
+        /// 处理主窗口的鼠标移动事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">鼠标事件参数</param>
+        /// <remarks>
+        /// 当在主窗口上移动鼠标时：
+        /// 1. 如果启用了光标显示，则显示光标并根据编辑模式设置光标
+        /// 2. 如果禁用了光标显示：
+        ///    - 如果没有触笔设备，则显示光标
+        ///    - 如果有触笔设备，则隐藏光标
+        /// </remarks>
         private void MainWindow_OnMouseMove(object sender, MouseEventArgs e)
         {
             if (Settings.Canvas.IsShowCursor)

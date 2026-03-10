@@ -57,3 +57,10 @@ body:
       description: 其他相关信息（如日志文件、崩溃日志文件、配置文件、特殊环境等）| Any other context, logs, crash logs, configs, special environment, etc.
     validations:
       required: false
+  - type: upload
+    id: files
+    attributes:
+      label: 上传有关文件 | Upload relevant files
+      description: "你可以在此处上传相关文件 | You can upload relevant files here."
+    validations:
+      required: false

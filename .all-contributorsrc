@@ -109,7 +109,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/98651603?v=4",
       "profile": "https://github.com/doudou0720",
       "contributions": [
-        "code"
+        "code",
+        "blog"
       ]
     },
     {
@@ -119,6 +120,25 @@
       "profile": "https://github.com/PANDAJSR",
       "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "LiuYan-xwx",
+      "name": "流焰xwx",
+      "avatar_url": "https://avatars.githubusercontent.com/u/66517348?v=4",
+      "profile": "http://lyxwx.top",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Super-Yyt",
+      "name": "Super-Yyt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/206630707?v=4",
+      "profile": "https://github.com/Super-Yyt",
+      "contributions": [
+        "infra",
+        "blog"
       ]
     }
   ]

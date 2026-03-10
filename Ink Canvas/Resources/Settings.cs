@@ -31,6 +31,30 @@ namespace Ink_Canvas
         public CameraSettings Camera { get; set; } = new CameraSettings();
         [JsonProperty("dlass")]
         public DlassSettings Dlass { get; set; } = new DlassSettings();
+
+        [JsonProperty("upload")]
+        public UploadSettings Upload { get; set; } = new UploadSettings();
+
+        [JsonProperty("security")]
+        public Security Security { get; set; } = new Security();
+    }
+
+    public class Security
+    {
+        [JsonProperty("passwordEnabled")]
+        public bool PasswordEnabled { get; set; } = false;
+        [JsonProperty("passwordSalt")]
+        public string PasswordSalt { get; set; } = "";
+        [JsonProperty("passwordHash")]
+        public string PasswordHash { get; set; } = "";
+        [JsonProperty("requirePasswordOnExit")]
+        public bool RequirePasswordOnExit { get; set; } = false;
+        [JsonProperty("requirePasswordOnEnterSettings")]
+        public bool RequirePasswordOnEnterSettings { get; set; } = false;
+        [JsonProperty("requirePasswordOnResetConfig")]
+        public bool RequirePasswordOnResetConfig { get; set; } = false;
+        [JsonProperty("enableProcessProtection")]
+        public bool EnableProcessProtection { get; set; } = true;
     }
 
     public class Canvas
@@ -81,13 +105,10 @@ namespace Ink_Canvas
         public bool LineEndpointSnapping { get; set; } = true; // 是否启用直线端点吸附
         [JsonProperty("lineEndpointSnappingThreshold")]
         public int LineEndpointSnappingThreshold { get; set; } = 15; // 直线端点吸附的距离阈值（像素）
-
         [JsonProperty("usingWhiteboard")]
         public bool UsingWhiteboard { get; set; }
-
         [JsonProperty("customBackgroundColor")]
         public string CustomBackgroundColor { get; set; } = "#162924";
-
         [JsonProperty("hyperbolaAsymptoteOption")]
         public OptionalOperation HyperbolaAsymptoteOption { get; set; } = OptionalOperation.Ask;
         [JsonProperty("isCompressPicturesUploaded")]
@@ -100,8 +121,6 @@ namespace Ink_Canvas
         public bool ClearCanvasAlsoClearImages { get; set; } = true;
         [JsonProperty("showCircleCenter")]
         public bool ShowCircleCenter { get; set; }
-
-        // 墨迹渐隐功能设置
         [JsonProperty("enableInkFade")]
         public bool EnableInkFade { get; set; } = false;
         [JsonProperty("inkFadeTime")]
@@ -117,9 +136,13 @@ namespace Ink_Canvas
         [JsonProperty("brushAutoRestoreColor")]
         public string BrushAutoRestoreColor { get; set; } = "#FFFF0000";
         [JsonProperty("brushAutoRestoreWidth")]
-        public double BrushAutoRestoreWidth { get; set; } =5;
+        public double BrushAutoRestoreWidth { get; set; } = 5;
         [JsonProperty("brushAutoRestoreAlpha")]
         public int BrushAutoRestoreAlpha { get; set; } = 255;
+        [JsonProperty("enableEraserAutoSwitchBack")]
+        public bool EnableEraserAutoSwitchBack { get; set; } = false;
+        [JsonProperty("eraserAutoSwitchBackDelaySeconds")]
+        public int EraserAutoSwitchBackDelaySeconds { get; set; } = 10; // 默认10秒
 
     }
 
@@ -203,6 +226,8 @@ namespace Ink_Canvas
         public TelemetryUploadLevel TelemetryUploadLevel { get; set; } = TelemetryUploadLevel.None;
         [JsonProperty("hasAcceptedTelemetryPrivacy")]
         public bool HasAcceptedTelemetryPrivacy { get; set; } = false;
+        [JsonProperty("hasShownOobe")]
+        public bool HasShownOobe { get; set; } = false;
     }
 
     public class Appearance
@@ -251,6 +276,8 @@ namespace Ink_Canvas
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
         public int ChickenSoupSource { get; set; } = 1;
+        [JsonProperty("hitokotoCategories")]
+        public List<string> HitokotoCategories { get; set; } = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" }; // 默认全选所有分类
         [JsonProperty("isShowModeFingerToggleSwitch")]
         public bool IsShowModeFingerToggleSwitch { get; set; } = true;
         [JsonProperty("theme")]
@@ -283,6 +310,8 @@ namespace Ink_Canvas
         public int QuickColorPaletteDisplayMode { get; set; } = 1;
         [JsonProperty("enableHotkeysInMouseMode")]
         public bool EnableHotkeysInMouseMode { get; set; } = false;
+        [JsonProperty("language")]
+        public string Language { get; set; } = "";
 
     }
 
@@ -374,9 +403,11 @@ namespace Ink_Canvas
         [JsonProperty("enablePPTTimeCapsule")]
         public bool EnablePPTTimeCapsule { get; set; } = true;
         [JsonProperty("pptTimeCapsulePosition")]
-        public int PPTTimeCapsulePosition { get; set; } = 1; 
+        public int PPTTimeCapsulePosition { get; set; } = 1;
         [JsonProperty("useRotPptLink")]
         public bool UseRotPptLink { get; set; } = false;
+        [JsonProperty("showPPTSidebarByDefault")]
+        public bool ShowPPTSidebarByDefault { get; set; } = false;
     }
 
     public class Automation
@@ -417,6 +448,7 @@ namespace Ink_Canvas
 
         [JsonProperty("isAutoFoldInEasiNote3")]
         public bool IsAutoFoldInEasiNote3 { get; set; }
+
         [JsonProperty("isAutoFoldInEasiNote3C")]
         public bool IsAutoFoldInEasiNote3C { get; set; }
 
@@ -499,6 +531,9 @@ namespace Ink_Canvas
 
         [JsonProperty("isAutoSaveStrokesAtClear")]
         public bool IsAutoSaveStrokesAtClear { get; set; }
+
+        [JsonProperty("isEnablePhotoCorrection")]
+        public bool IsEnablePhotoCorrection { get; set; } = false;
 
         [JsonProperty("isAutoClearWhenExitingWritingMode")]
         public bool IsAutoClearWhenExitingWritingMode { get; set; }
@@ -818,7 +853,45 @@ namespace Ink_Canvas
         [JsonProperty("isAutoUploadNotes")]
         public bool IsAutoUploadNotes { get; set; } = false;
 
+        private int _autoUploadDelayMinutes = 0;
         [JsonProperty("autoUploadDelayMinutes")]
-        public int AutoUploadDelayMinutes { get; set; } = 0;
+        public int AutoUploadDelayMinutes
+        {
+            get { return _autoUploadDelayMinutes; }
+            set { _autoUploadDelayMinutes = Math.Max(0, value); }
+        }
+
+        [JsonProperty("webDavUrl")]
+        public string WebDavUrl { get; set; } = string.Empty;
+
+        [JsonProperty("webDavUsername")]
+        public string WebDavUsername { get; set; } = string.Empty;
+
+        [JsonProperty("webDavPassword")]
+        public string WebDavPassword { get; set; } = string.Empty;
+
+        [JsonProperty("webDavRootDirectory")]
+        public string WebDavRootDirectory { get; set; } = string.Empty;
     }
+
+    public class UploadSettings
+    {
+        [JsonProperty("uploadDelayMinutes")]
+        public int UploadDelayMinutes
+        {
+            get { return _uploadDelayMinutes; }
+            set { _uploadDelayMinutes = Math.Max(0, Math.Min(60, value)); }
+        }
+        private int _uploadDelayMinutes = 0;
+
+        [JsonProperty("enabledProviders")]
+        public List<string> EnabledProviders
+        {
+            get { return _enabledProviders; }
+            set { _enabledProviders = value ?? new List<string>(); }
+        }
+        private List<string> _enabledProviders = new List<string>();
+    }
+
+
 }

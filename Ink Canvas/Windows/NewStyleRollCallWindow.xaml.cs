@@ -180,6 +180,9 @@ namespace Ink_Canvas
         private const double PROBABILITY_RECOVERY_RATE = 0.2;
         private const double FREQUENCY_BOOST_FACTOR = 2.0;
 
+        private const int MaxGapThreshold = 3;
+        private const int MinCandidatePoolSize = 2;
+
         // 单次抽相关
         private bool isSingleDrawMode = false;
         private Random singleDrawRandom = new Random();
@@ -630,46 +633,52 @@ namespace Ink_Canvas
             if (validCandidates.Count == 0) return null;
             if (validCandidates.Count == 1) return validCandidates[0];
 
-            // 检查极差：当极差达到3时，从被抽选次数最少的人中抽选
-            if (historyData.NameFrequency != null && historyData.NameFrequency.Count > 0)
+            // 获取所有候选人员的被抽选次数（用于极差保护与平均值过滤）
+            var candidateFrequencies = new Dictionary<string, int>();
+            foreach (string name in validCandidates)
             {
-                // 获取所有候选人员的被抽选次数
-                var candidateFrequencies = new Dictionary<string, int>();
-                foreach (string name in validCandidates)
-                {
-                    int count = historyData.NameFrequency.ContainsKey(name) ? historyData.NameFrequency[name] : 0;
-                    candidateFrequencies[name] = count;
-                }
+                int freq = (historyData?.NameFrequency != null && historyData.NameFrequency.ContainsKey(name))
+                    ? historyData.NameFrequency[name] : 0;
+                candidateFrequencies[name] = freq;
+            }
 
-                // 计算极差（最大值 - 最小值）
-                if (candidateFrequencies.Count > 0)
-                {
-                    int maxCount = candidateFrequencies.Values.Max();
-                    int minCount = candidateFrequencies.Values.Min();
-                    int range = maxCount - minCount;
+            if (candidateFrequencies.Count > 0)
+            {
+                int maxCount = candidateFrequencies.Values.Max();
+                int minCount = candidateFrequencies.Values.Min();
+                int range = maxCount - minCount;
 
-                    // 当极差达到3时，只从被抽选次数最少的人中抽选
-                    if (range >= 3)
+                if (range >= MaxGapThreshold)
+                {
+                    var leastSelectedNames = candidateFrequencies
+                        .Where(kvp => kvp.Value == minCount)
+                        .Select(kvp => kvp.Key)
+                        .ToList();
+
+                    if (leastSelectedNames.Count > 0)
                     {
-                        var leastSelectedNames = candidateFrequencies
-                            .Where(kvp => kvp.Value == minCount)
-                            .Select(kvp => kvp.Key)
-                            .ToList();
-
-                        if (leastSelectedNames.Count > 0)
-                        {
-                            // 只从被抽选次数最少的人中不放回随机选择
-                            int randomIndex = random.Next(0, leastSelectedNames.Count);
-                            return leastSelectedNames[randomIndex];
-                        }
+                        int randomIndex = random.Next(0, leastSelectedNames.Count);
+                        return leastSelectedNames[randomIndex];
                     }
                 }
             }
 
-            // 获取每个候选人员的概率
+            List<string> poolForSelection = validCandidates;
+            if (candidateFrequencies.Count > 0)
+            {
+                double avgCount = candidateFrequencies.Values.Average();
+                var averageFiltered = candidateFrequencies
+                    .Where(kvp => kvp.Value <= avgCount)
+                    .Select(kvp => kvp.Key)
+                    .ToList();
+                if (averageFiltered.Count >= MinCandidatePoolSize)
+                    poolForSelection = averageFiltered;
+            }
+
+            // 获取每个候选人员的概率（在过滤后的候选池上计算，实现冷启动与频率平衡）
             var nameProbabilities = new Dictionary<string, double>();
 
-            foreach (string name in validCandidates)
+            foreach (string name in poolForSelection)
             {
                 // 获取基础概率
                 double baseProbability = GetNameProbability(name);

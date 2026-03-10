@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace Ink_Canvas.Helpers
@@ -18,7 +19,7 @@ namespace Ink_Canvas.Helpers
                         return count;
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             return 0;
         }
 
@@ -31,7 +32,7 @@ namespace Ink_Canvas.Helpers
                 {
                     File.WriteAllText(CountFilePath, count.ToString());
                 }
-                catch { }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }
         }
 
@@ -44,7 +45,7 @@ namespace Ink_Canvas.Helpers
                     if (File.Exists(CountFilePath))
                         File.Delete(CountFilePath);
                 }
-                catch { }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }
         }
     }

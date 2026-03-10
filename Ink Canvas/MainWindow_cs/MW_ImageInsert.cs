@@ -29,19 +29,33 @@ namespace Ink_Canvas
         public List<Point> Path;
         public Bitmap CameraImage;
         public BitmapSource CameraBitmapSource;
+        public bool AddToWhiteboard;
 
-        public ScreenshotResult(Rectangle area, List<Point> path = null, Bitmap cameraImage = null, BitmapSource cameraBitmapSource = null)
+        public ScreenshotResult(Rectangle area, List<Point> path = null, Bitmap cameraImage = null,
+            BitmapSource cameraBitmapSource = null, bool addToWhiteboard = false)
         {
             Area = area;
             Path = path;
             CameraImage = cameraImage;
             CameraBitmapSource = cameraBitmapSource;
+            AddToWhiteboard = addToWhiteboard;
         }
     }
 
     public partial class MainWindow : Window
     {
-        // 截图并插入到画布
+        /// <summary>
+        /// 截图并插入到画布
+        /// </summary>
+        /// <returns>异步任务</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 隐藏主窗口以避免截图包含窗口本身
+        /// 2. 启动区域选择截图
+        /// 3. 恢复窗口显示
+        /// 4. 处理截图结果并插入到画布
+        /// 5. 支持摄像头截图和区域截图
+        /// </remarks>
         private async Task CaptureScreenshotAndInsert()
         {
             try
@@ -61,11 +75,17 @@ namespace Ink_Canvas
 
                 if (screenshotResult.HasValue)
                 {
+                    if (screenshotResult.Value.AddToWhiteboard)
+                    {
+                        await AddScreenshotToNewWhiteboardPage(screenshotResult.Value);
+                        return;
+                    }
+
                     // 检查是否是摄像头截图
                     if (screenshotResult.Value.CameraBitmapSource != null)
                     {
                         // 摄像头截图（使用BitmapSource）
-                        await InsertBitmapSourceToCanvas(screenshotResult.Value.CameraBitmapSource);
+                        await InsertBitmapSourceToCanvas(screenshotResult.Value.CameraBitmapSource, "摄像头截图已插入到画布", "插入摄像头截图失败");
                     }
                     else if (screenshotResult.Value.CameraImage != null)
                     {
@@ -118,7 +138,18 @@ namespace Ink_Canvas
             }
         }
 
-        // 直接全屏截图并插入到画布
+        /// <summary>
+        /// 直接全屏截图并插入到画布
+        /// </summary>
+        /// <returns>异步任务</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 隐藏主窗口以避免截图包含窗口本身
+        /// 2. 获取虚拟屏幕边界
+        /// 3. 截取全屏
+        /// 4. 将截图转换为WPF Image并插入到画布
+        /// 5. 恢复窗口显示
+        /// </remarks>
         private async Task CaptureFullScreenAndInsert()
         {
             try
@@ -158,7 +189,16 @@ namespace Ink_Canvas
             }
         }
 
-        // 显示截图区域选择器
+        /// <summary>
+        /// 显示截图区域选择器
+        /// </summary>
+        /// <returns>截图结果，包含区域、路径和摄像头截图信息</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 显示截图选择器窗口
+        /// 2. 获取用户选择的区域或摄像头截图
+        /// 3. 返回截图结果
+        /// </remarks>
         private async Task<ScreenshotResult?> ShowScreenshotSelector()
         {
             ScreenshotResult? result = null;
@@ -177,7 +217,8 @@ namespace Ink_Canvas
                                 Rectangle.Empty, // 摄像头截图不需要区域
                                 null, // 摄像头截图不需要路径
                                 null, // 不再使用Bitmap
-                                selectorWindow.CameraBitmapSource // 摄像头BitmapSource
+                                selectorWindow.CameraBitmapSource, // 摄像头BitmapSource
+                                selectorWindow.ShouldAddToWhiteboard
                             );
                         }
                         else if (selectorWindow.CameraImage != null)
@@ -185,14 +226,19 @@ namespace Ink_Canvas
                             result = new ScreenshotResult(
                                 Rectangle.Empty, // 摄像头截图不需要区域
                                 null, // 摄像头截图不需要路径
-                                selectorWindow.CameraImage // 摄像头图像
+                                selectorWindow.CameraImage, // 摄像头图像
+                                null,
+                                selectorWindow.ShouldAddToWhiteboard
                             );
                         }
                         else
                         {
                             result = new ScreenshotResult(
                                 selectorWindow.SelectedArea.Value,
-                                selectorWindow.SelectedPath
+                                selectorWindow.SelectedPath,
+                                null,
+                                null,
+                                selectorWindow.ShouldAddToWhiteboard
                             );
                         }
                     }
@@ -206,7 +252,19 @@ namespace Ink_Canvas
             return result;
         }
 
-        // 截取指定屏幕区域
+        /// <summary>
+        /// 截取指定屏幕区域
+        /// </summary>
+        /// <param name="area">要截取的屏幕区域</param>
+        /// <returns>截取的位图</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 确保区域在有效范围内
+        /// 2. 调整区域边界，确保不超出屏幕范围
+        /// 3. 创建支持透明度的位图
+        /// 4. 设置高质量渲染
+        /// 5. 截取屏幕区域
+        /// </remarks>
         private Bitmap CaptureScreenArea(Rectangle area)
         {
             try
@@ -246,7 +304,25 @@ namespace Ink_Canvas
             }
         }
 
-        // 将截图插入到画布
+        /// <summary>
+        /// 将截图插入到画布
+        /// </summary>
+        /// <param name="bitmap">要插入的位图</param>
+        /// <returns>异步任务</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 验证位图有效性
+        /// 2. 将Bitmap转换为WPF BitmapSource
+        /// 3. 创建WPF Image控件
+        /// 4. 生成唯一名称
+        /// 5. 初始化TransformGroup
+        /// 6. 设置截图属性，避免被InkCanvas选择系统处理
+        /// 7. 初始化InkCanvas选择设置
+        /// 8. 等待图片加载完成后进行居中处理
+        /// 9. 添加到画布
+        /// 10. 提交历史记录
+        /// 11. 插入图片后切换到选择模式并刷新浮动栏高光显示
+        /// </remarks>
         private async Task InsertScreenshotToCanvas(Bitmap bitmap)
         {
             try
@@ -325,8 +401,24 @@ namespace Ink_Canvas
             }
         }
 
-        // 将BitmapSource插入到画布（用于摄像头截图）
-        private async Task InsertBitmapSourceToCanvas(BitmapSource bitmapSource)
+        /// <summary>
+        /// 将BitmapSource插入到画布（用于摄像头截图）
+        /// </summary>
+        /// <param name="bitmapSource">要插入的BitmapSource</param>
+        /// <returns>异步任务</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 创建WPF Image控件
+        /// 2. 生成唯一名称
+        /// 3. 初始化TransformGroup
+        /// 4. 设置截图属性，避免被InkCanvas选择系统处理
+        /// 5. 初始化InkCanvas选择设置
+        /// 6. 等待图片加载完成后进行居中处理
+        /// 7. 添加到画布
+        /// 8. 提交历史记录
+        /// 9. 插入图片后切换到选择模式并刷新浮动栏高光显示
+        /// </remarks>
+        private async Task InsertBitmapSourceToCanvas(BitmapSource bitmapSource, string successMessage = "截图已插入到画布", string failureMessagePrefix = "插入截图失败")
         {
             try
             {
@@ -375,16 +467,22 @@ namespace Ink_Canvas
                 UpdateCurrentToolMode("select");
                 HideSubPanels("select");
 
-                ShowNotification("摄像头截图已插入到画布");
+                ShowNotification(successMessage);
             }
             catch (Exception ex)
             {
-                ShowNotification($"插入摄像头截图失败: {ex.Message}");
+                ShowNotification($"{failureMessagePrefix}: {ex.Message}");
                 LogHelper.WriteLogToFile($"插入摄像头截图失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
-        // 初始化截图的TransformGroup
+        /// <summary>
+        /// 初始化截图的TransformGroup
+        /// </summary>
+        /// <param name="image">要初始化的Image控件</param>
+        /// <remarks>
+        /// 该方法会为截图创建一个包含缩放、平移和旋转变换的TransformGroup。
+        /// </remarks>
         private void InitializeScreenshotTransform(Image image)
         {
             var transformGroup = new TransformGroup();
@@ -394,7 +492,17 @@ namespace Ink_Canvas
             image.RenderTransform = transformGroup;
         }
 
-        // 绑定截图事件处理器
+        /// <summary>
+        /// 绑定截图事件处理器
+        /// </summary>
+        /// <param name="image">要绑定事件的Image控件</param>
+        /// <remarks>
+        /// 该方法会为截图绑定以下事件：
+        /// 1. 鼠标事件（按下、释放、移动、滚轮）
+        /// 2. 触摸事件（按下、释放、操作）
+        /// 3. 设置光标为手形
+        /// 4. 禁用InkCanvas对截图的选择处理
+        /// </remarks>
         private void BindScreenshotEvents(Image image)
         {
             // 鼠标事件
@@ -418,7 +526,27 @@ namespace Ink_Canvas
             image.Focusable = false;
         }
 
-        // 专门为截图优化的居中缩放方法
+        /// <summary>
+        /// 专门为截图优化的居中缩放方法
+        /// </summary>
+        /// <param name="image">要居中缩放的Image控件</param>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 确保图片已加载
+        /// 2. 获取画布的实际尺寸
+        /// 3. 如果画布尺寸为0，使用窗口尺寸作为备选
+        /// 4. 如果仍然为0，使用屏幕尺寸
+        /// 5. 计算最大允许尺寸（画布的80%）
+        /// 6. 获取图片的原始尺寸
+        /// 7. 计算缩放比例
+        /// 8. 如果图片本身比最大尺寸小，不进行缩放
+        /// 9. 计算新的尺寸
+        /// 10. 设置图片尺寸
+        /// 11. 计算居中位置
+        /// 12. 确保位置不为负数
+        /// 13. 设置位置
+        /// 14. 保持滚轮缩放和拖动功能
+        /// </remarks>
         private void CenterAndScaleScreenshot(Image image)
         {
             try
@@ -502,7 +630,27 @@ namespace Ink_Canvas
             }
         }
 
-        // 应用形状遮罩到截图
+        /// <summary>
+        /// 应用形状遮罩到截图
+        /// </summary>
+        /// <param name="bitmap">要应用遮罩的位图</param>
+        /// <param name="path">遮罩路径</param>
+        /// <param name="area">截图区域</param>
+        /// <returns>应用遮罩后的位图</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 验证路径参数
+        /// 2. 获取DPI缩放比例
+        /// 3. 创建结果位图，确保支持透明度
+        /// 4. 首先将整个位图设置为透明
+        /// 5. 创建路径
+        /// 6. 转换WPF坐标到GDI+坐标，考虑DPI缩放和屏幕偏移
+        /// 7. 添加路径
+        /// 8. 验证路径是否有效
+        /// 9. 设置裁剪区域为路径内部
+        /// 10. 在裁剪区域内绘制原始图像
+        /// 11. 重置裁剪区域，确保后续操作不受影响
+        /// </remarks>
         private Bitmap ApplyShapeMask(Bitmap bitmap, List<Point> path, Rectangle area)
         {
             try
@@ -588,7 +736,21 @@ namespace Ink_Canvas
             }
         }
 
-        // 将System.Drawing.Bitmap转换为WPF BitmapSource
+        /// <summary>
+        /// 将System.Drawing.Bitmap转换为WPF BitmapSource
+        /// </summary>
+        /// <param name="bitmap">要转换的位图</param>
+        /// <returns>转换后的BitmapSource</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 验证位图有效性
+        /// 2. 验证位图尺寸
+        /// 3. 使用更安全的方法转换位图
+        /// 4. 根据像素格式选择合适的WPF像素格式
+        /// 5. 创建BitmapSource
+        /// 6. 冻结BitmapSource以提高性能
+        /// 7. 如果转换失败，尝试使用备用方法
+        /// </remarks>
         private BitmapSource ConvertBitmapToBitmapSource(Bitmap bitmap)
         {
             try
@@ -673,7 +835,19 @@ namespace Ink_Canvas
             }
         }
 
-        // 备用的位图转换方法（使用内存流）
+        /// <summary>
+        /// 备用的位图转换方法（使用内存流）
+        /// </summary>
+        /// <param name="bitmap">要转换的位图</param>
+        /// <returns>转换后的BitmapSource</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 验证位图有效性
+        /// 2. 创建一个新的位图，确保格式正确
+        /// 3. 在内存流中保存为PNG格式
+        /// 4. 创建BitmapImage并加载内存流中的数据
+        /// 5. 冻结BitmapImage以提高性能
+        /// </remarks>
         private BitmapSource ConvertBitmapToBitmapSourceFallback(Bitmap bitmap)
         {
             try
@@ -682,11 +856,12 @@ namespace Ink_Canvas
                 if (bitmap == null || bitmap.Width <= 0 || bitmap.Height <= 0)
                     return null;
 
-                // 创建一个新的位图，确保格式正确
-                using (var convertedBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format24bppRgb))
+                // 创建一个新的位图，确保保留Alpha通道
+                using (var convertedBitmap = new Bitmap(bitmap.Width, bitmap.Height, PixelFormat.Format32bppArgb))
                 {
                     using (var graphics = Graphics.FromImage(convertedBitmap))
                     {
+                        graphics.CompositingMode = CompositingMode.SourceCopy;
                         graphics.DrawImage(bitmap, 0, 0);
                     }
 
@@ -713,7 +888,21 @@ namespace Ink_Canvas
             }
         }
 
-        // 最简单的位图转换方法
+        /// <summary>
+        /// 最简单的位图转换方法
+        /// </summary>
+        /// <param name="bitmap">要转换的位图</param>
+        /// <returns>转换后的BitmapSource</returns>
+        /// <remarks>
+        /// 该方法会：
+        /// 1. 验证位图有效性
+        /// 2. 使用最基础的方法：直接保存为PNG然后加载
+        /// 3. 创建临时文件
+        /// 4. 将位图保存为PNG格式到临时文件
+        /// 5. 创建BitmapImage并加载临时文件
+        /// 6. 冻结BitmapImage以提高性能
+        /// 7. 清理临时文件
+        /// </remarks>
         private BitmapSource ConvertBitmapToBitmapSourceSimple(Bitmap bitmap)
         {
             try
@@ -760,7 +949,14 @@ namespace Ink_Canvas
             }
         }
 
-        // 获取DPI缩放比例
+        /// <summary>
+        /// 获取DPI缩放比例
+        /// </summary>
+        /// <returns>DPI缩放比例</returns>
+        /// <remarks>
+        /// 该方法会从当前窗口的PresentationSource获取DPI缩放比例。
+        /// 如果无法获取，则返回默认值1.0。
+        /// </remarks>
         private double GetDpiScale()
         {
             var source = PresentationSource.FromVisual(this);

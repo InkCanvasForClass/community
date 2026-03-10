@@ -12,6 +12,19 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 处理背景颜色按钮点击事件，显示或隐藏背景颜色选项面板
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查应用是否已加载
+        /// - 创建背景选项面板（如果不存在）
+        /// - 显示或隐藏背景选项面板
+        /// - 隐藏其他可能显示的面板
+        /// - 处理白板/黑板模式切换
+        /// - 更新背景颜色和墨迹颜色
+        /// </remarks>
         private void BoardChangeBackgroundColorBtn_MouseUp(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -124,7 +137,18 @@ namespace Ink_Canvas
             CheckColorTheme(true);
         }
 
-        // 创建背景选项面板
+        /// <summary>
+        /// 创建背景颜色选项面板
+        /// </summary>
+        /// <remarks>
+        /// - 加载自定义背景色
+        /// - 创建背景选项面板UI
+        /// - 添加标题栏和关闭按钮
+        /// - 添加白板/黑板模式选择按钮
+        /// - 添加RGB颜色选择器
+        /// - 添加颜色预览和应用按钮
+        /// - 将面板添加到主网格
+        /// </remarks>
         private void CreateBackgroundPalette()
         {
             // 确保加载自定义背景色
@@ -543,7 +567,13 @@ namespace Ink_Canvas
             }
         }
 
-        // 更新背景按钮状态
+        /// <summary>
+        /// 更新背景颜色选项面板中的按钮状态
+        /// </summary>
+        /// <remarks>
+        /// - 更新白板和黑板按钮的背景和前景色
+        /// - 根据当前使用的模式设置按钮状态
+        /// </remarks>
         private void UpdateBackgroundButtonsState()
         {
             if (BackgroundPalette != null && BackgroundPalette.Child is StackPanel stackPanel)
@@ -582,10 +612,14 @@ namespace Ink_Canvas
             }
         }
 
-        // 添加成员变量保存背景面板引用
+        /// <summary>
+        /// 背景颜色选项面板
+        /// </summary>
         private Border BackgroundPalette { get; set; }
 
-        // 添加成员变量保存当前自定义背景色
+        /// <summary>
+        /// 当前自定义背景色
+        /// </summary>
         private Color? CustomBackgroundColor { get; set; }
 
         /// <summary>
@@ -702,6 +736,17 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理套索工具图标点击事件，切换到选择模式
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 禁用橡皮擦模式
+        /// - 禁用形状绘制模式
+        /// - 设置当前工具模式为选择模式
+        /// - 根据编辑模式设置光标
+        /// </remarks>
         private void BoardLassoIcon_Click(object sender, RoutedEventArgs e)
         {
             forceEraser = false;
@@ -712,6 +757,22 @@ namespace Ink_Canvas
             SetCursorBasedOnEditingMode(inkCanvas);
         }
 
+        /// <summary>
+        /// 处理橡皮擦图标点击事件，切换到按笔画擦除模式
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 禁用高级橡皮擦系统
+        /// - 启用橡皮擦模式
+        /// - 设置橡皮擦形状为圆形
+        /// - 设置当前工具模式为按笔画擦除
+        /// - 禁用形状绘制模式
+        /// - 重置钢笔类型和属性
+        /// - 触发编辑模式变更事件
+        /// - 取消单指拖动模式
+        /// - 隐藏子面板
+        /// </remarks>
         private void BoardEraserIconByStrokes_Click(object sender, RoutedEventArgs e)
         {
             //if (BoardEraserByStrokes.Background.ToString() == "#FF679CF4") {
@@ -740,6 +801,18 @@ namespace Ink_Canvas
             //}
         }
 
+        /// <summary>
+        /// 处理删除图标点击事件，清空画布内容
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 调用钢笔图标点击事件
+        /// - 调用符号删除鼠标抬起事件
+        /// - 根据设置决定是否清空图片
+        /// - 如果设置为清空图片，则清空所有子元素
+        /// - 否则，保存非笔画元素并在清空后恢复
+        /// </remarks>
         private void BoardSymbolIconDelete_MouseUp(object sender, RoutedEventArgs e)
         {
             PenIcon_Click(null, null);
@@ -764,6 +837,19 @@ namespace Ink_Canvas
                 Debug.WriteLine($"BoardSymbolIconDelete: inkCanvas.Children.Count after restore: {inkCanvas.Children.Count}");
             }
         }
+        /// <summary>
+        /// 处理删除墨迹和历史记录图标点击事件，清空画布内容和时间机器历史
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 调用钢笔图标点击事件
+        /// - 调用符号删除鼠标抬起事件
+        /// - 根据设置决定是否清空时间机器历史
+        /// - 根据设置决定是否清空图片
+        /// - 如果设置为清空图片，则清空所有子元素
+        /// - 否则，保存非笔画元素并在清空后恢复
+        /// </remarks>
         private void BoardSymbolIconDeleteInkAndHistories_MouseUp(object sender, RoutedEventArgs e)
         {
             PenIcon_Click(null, null);
@@ -790,12 +876,31 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 处理启动希沃视频展台图标点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 调用图片黑板鼠标抬起事件
+        /// - 启动希沃视频展台软件
+        /// </remarks>
         private void BoardLaunchEasiCamera_MouseUp(object sender, MouseButtonEventArgs e)
         {
             ImageBlackboard_MouseUp(null, null);
             SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
         }
 
+        /// <summary>
+        /// 处理启动Desmos计算器图标点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 立即隐藏所有子面板
+        /// - 调用图片黑板鼠标抬起事件
+        /// - 打开Desmos计算器网页
+        /// </remarks>
         private void BoardLaunchDesmos_MouseUp(object sender, MouseButtonEventArgs e)
         {
             HideSubPanelsImmediately();

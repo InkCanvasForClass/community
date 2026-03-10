@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
@@ -19,12 +19,40 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
-        // 当前选中的可操作元素
+        /// <summary>
+        /// 当前选中的可操作元素
+        /// </summary>
         private FrameworkElement currentSelectedElement;
+
+        /// <summary>
+        /// 是否正在拖动
+        /// </summary>
         private bool isDragging;
+
+        /// <summary>
+        /// 拖动起始点
+        /// </summary>
         private Point dragStartPoint;
 
         #region Image
+        /// <summary>
+        /// 处理图片插入按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 打开文件选择对话框，选择图片文件
+        /// - 创建并压缩图片
+        /// - 设置图片属性，避免被InkCanvas选择系统处理
+        /// - 初始化InkCanvas选择设置
+        /// - 添加图片到画布
+        /// - 等待图片加载完成后进行后续处理
+        /// - 初始化TransformGroup
+        /// - 居中缩放图片
+        /// - 绑定事件处理器
+        /// - 提交到时间机器历史记录
+        /// - 插入图片后切换到选择模式并刷新浮动栏高光显示
+        /// </remarks>
         private async void BtnImageInsert_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -79,7 +107,15 @@ namespace Ink_Canvas
             }
         }
 
-        // 初始化元素的TransformGroup
+        /// <summary>
+        /// 初始化元素的TransformGroup
+        /// </summary>
+        /// <param name="element">要初始化的元素</param>
+        /// <remarks>
+        /// - 创建TransformGroup
+        /// - 添加ScaleTransform、TranslateTransform和RotateTransform
+        /// - 设置元素的RenderTransform
+        /// </remarks>
         private void InitializeElementTransform(FrameworkElement element)
         {
             var transformGroup = new TransformGroup();
@@ -89,7 +125,17 @@ namespace Ink_Canvas
             element.RenderTransform = transformGroup;
         }
 
-        // 绑定元素事件处理器
+        /// <summary>
+        /// 绑定元素事件处理器
+        /// </summary>
+        /// <param name="element">要绑定事件的元素</param>
+        /// <remarks>
+        /// - 绑定鼠标事件（MouseLeftButtonDown、MouseLeftButtonUp、MouseMove、MouseWheel）
+        /// - 启用触摸操作
+        /// - 绑定触摸事件（ManipulationDelta、ManipulationCompleted）
+        /// - 设置光标为手形
+        /// - 禁用InkCanvas对图片的选择处理
+        /// </remarks>
         private void BindElementEvents(FrameworkElement element)
         {
             // 鼠标事件
@@ -111,7 +157,19 @@ namespace Ink_Canvas
             element.Focusable = false;
         }
 
-        // 鼠标左键按下事件
+        /// <summary>
+        /// 处理元素鼠标左键按下事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查编辑模式是否为选择模式
+        /// - 取消之前选中的元素
+        /// - 选中当前元素
+        /// - 开始拖动
+        /// - 捕获鼠标
+        /// - 设置光标为全尺寸光标
+        /// </remarks>
         private void Element_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is FrameworkElement element)
@@ -145,7 +203,16 @@ namespace Ink_Canvas
             }
         }
 
-        // 鼠标左键释放事件
+        /// <summary>
+        /// 处理元素鼠标左键释放事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 停止拖动
+        /// - 释放鼠标捕获
+        /// - 恢复光标为手形
+        /// </remarks>
         private void Element_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if (sender is FrameworkElement element)
@@ -158,7 +225,16 @@ namespace Ink_Canvas
             }
         }
 
-        // 触摸释放事件
+        /// <summary>
+        /// 处理元素触摸释放事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 停止拖动
+        /// - 释放触摸捕获
+        /// - 恢复光标为手形
+        /// </remarks>
         private void Element_TouchUp(object sender, TouchEventArgs e)
         {
             if (sender is FrameworkElement element)
@@ -171,7 +247,19 @@ namespace Ink_Canvas
             }
         }
 
-        // 鼠标移动事件
+        /// <summary>
+        /// 处理元素鼠标移动事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查是否正在拖动且鼠标已捕获
+        /// - 获取当前鼠标位置
+        /// - 应用鼠标拖动变换
+        /// - 如果是图片元素，更新工具栏位置
+        /// - 如果是图片元素，更新选择点位置
+        /// - 更新拖动起始点
+        /// </remarks>
         private void Element_MouseMove(object sender, MouseEventArgs e)
         {
             if (sender is FrameworkElement element && isDragging && element.IsMouseCaptured)
@@ -198,7 +286,16 @@ namespace Ink_Canvas
             }
         }
 
-        // 鼠标滚轮事件 - 缩放
+        /// <summary>
+        /// 处理元素鼠标滚轮事件 - 缩放
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 应用滚轮缩放变换
+        /// - 如果是图片元素，更新工具栏位置
+        /// - 如果是图片元素，更新选择点位置
+        /// </remarks>
         private void Element_MouseWheel(object sender, MouseWheelEventArgs e)
         {
             if (sender is FrameworkElement element)
@@ -224,7 +321,19 @@ namespace Ink_Canvas
             }
         }
 
-        // 触摸按下事件
+        /// <summary>
+        /// 处理元素触摸按下事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查编辑模式是否为选择模式
+        /// - 取消之前选中的元素
+        /// - 选中当前元素
+        /// - 开始拖动
+        /// - 捕获触摸
+        /// - 设置光标为全尺寸光标
+        /// </remarks>
         private void Element_TouchDown(object sender, TouchEventArgs e)
         {
             if (sender is FrameworkElement element)
@@ -258,7 +367,18 @@ namespace Ink_Canvas
             }
         }
 
-        // 触摸操作事件
+        /// <summary>
+        /// 处理元素触摸操作事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查是否是双指手势
+        /// - 双指手势时，让画布级别的手势处理
+        /// - 单指手势时，应用触摸拖动变换
+        /// - 如果是图片元素，更新工具栏位置
+        /// - 如果是图片元素，更新选择点位置
+        /// </remarks>
         private void Element_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
             if (sender is FrameworkElement element)
@@ -291,13 +411,30 @@ namespace Ink_Canvas
             }
         }
 
-        // 触摸操作完成事件
+        /// <summary>
+        /// 处理元素触摸操作完成事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 可以在这里添加操作完成后的处理逻辑
+        /// </remarks>
         private void Element_ManipulationCompleted(object sender, ManipulationCompletedEventArgs e)
         {
             // 可以在这里添加操作完成后的处理逻辑
         }
 
-        // 应用平移变换
+        /// <summary>
+        /// 应用平移变换到元素
+        /// </summary>
+        /// <param name="element">要变换的元素</param>
+        /// <param name="deltaX">X轴偏移量</param>
+        /// <param name="deltaY">Y轴偏移量</param>
+        /// <remarks>
+        /// - 获取元素的TransformGroup
+        /// - 查找TranslateTransform
+        /// - 应用平移变换
+        /// </remarks>
         private void ApplyTranslateTransform(FrameworkElement element, double deltaX, double deltaY)
         {
             if (element.RenderTransform is TransformGroup transformGroup)
@@ -311,7 +448,19 @@ namespace Ink_Canvas
             }
         }
 
-        // 应用缩放变换
+        /// <summary>
+        /// 应用缩放变换到元素
+        /// </summary>
+        /// <param name="element">要变换的元素</param>
+        /// <param name="scaleFactor">缩放因子</param>
+        /// <param name="center">缩放中心</param>
+        /// <remarks>
+        /// - 获取元素的TransformGroup
+        /// - 查找ScaleTransform
+        /// - 设置缩放中心
+        /// - 应用缩放
+        /// - 限制缩放范围（0.1到5.0）
+        /// </remarks>
         private void ApplyScaleTransform(FrameworkElement element, double scaleFactor, Point center)
         {
             if (element.RenderTransform is TransformGroup transformGroup)
@@ -334,7 +483,16 @@ namespace Ink_Canvas
             }
         }
 
-        // 应用旋转变换
+        /// <summary>
+        /// 应用旋转变换到元素
+        /// </summary>
+        /// <param name="element">要变换的元素</param>
+        /// <param name="angle">旋转角度</param>
+        /// <remarks>
+        /// - 获取元素的TransformGroup
+        /// - 查找RotateTransform
+        /// - 应用旋转变换
+        /// </remarks>
         private void ApplyRotateTransform(FrameworkElement element, double angle)
         {
             if (element.RenderTransform is TransformGroup transformGroup)
@@ -347,7 +505,19 @@ namespace Ink_Canvas
             }
         }
 
-        // 选中元素
+        /// <summary>
+        /// 选中元素
+        /// </summary>
+        /// <param name="element">要选中的元素</param>
+        /// <remarks>
+        /// - 设置当前选中元素
+        /// - 根据元素类型显示不同的选择工具栏
+        /// - 如果是图片元素，显示图片选择工具栏和缩放选择点
+        /// - 如果不是图片元素，隐藏图片选择工具栏和缩放选择点
+        /// - 确保选择框不显示，避免蓝色边框
+        /// - 禁用InkCanvas的选择功能，去除控制点
+        /// - 保持选择模式，这样用户可以直接点击墨迹来选择
+        /// </remarks>
         private void SelectElement(FrameworkElement element)
         {
             currentSelectedElement = element;
@@ -400,7 +570,16 @@ namespace Ink_Canvas
             }
         }
 
-        // 取消选中元素
+        /// <summary>
+        /// 取消选中元素
+        /// </summary>
+        /// <param name="element">要取消选中的元素</param>
+        /// <remarks>
+        /// - 隐藏图片选择工具栏
+        /// - 隐藏图片缩放选择点
+        /// - 确保选择框隐藏
+        /// - 确保InkCanvas处于选择模式，这样用户可以直接点击墨迹来选择
+        /// </remarks>
         private void UnselectElement(FrameworkElement element)
         {
             // 去除选中效果
@@ -430,7 +609,16 @@ namespace Ink_Canvas
             }
         }
 
-        // 应用矩阵变换到元素
+        /// <summary>
+        /// 应用矩阵变换到元素
+        /// </summary>
+        /// <param name="element">要变换的元素</param>
+        /// <param name="matrix">变换矩阵</param>
+        /// <remarks>
+        /// - 获取元素的RenderTransform，如果不存在则创建新的TransformGroup
+        /// - 创建MatrixTransform
+        /// - 将MatrixTransform添加到TransformGroup
+        /// </remarks>
         private void ApplyElementMatrixTransform(FrameworkElement element, Matrix matrix)
         {
             if (element.RenderTransform is TransformGroup transformGroup)
@@ -443,7 +631,19 @@ namespace Ink_Canvas
             }
         }
 
-        // 滚轮缩放的核心机制
+        /// <summary>
+        /// 处理滚轮缩放的核心机制
+        /// </summary>
+        /// <param name="element">要缩放的元素</param>
+        /// <param name="e">鼠标滚轮事件参数</param>
+        /// <remarks>
+        /// - 根据滚轮方向确定缩放比例（向上1.1倍，向下0.9倍）
+        /// - 计算选中元素的中心点作为缩放中心
+        /// - 创建 Matrix 对象并应用 ScaleAt 变换
+        /// - 对选中的图片元素应用矩阵变换
+        /// - 对选中的笔画应用 Transform 方法
+        /// - 包含异常处理
+        /// </remarks>
         private void ApplyWheelScaleTransform(FrameworkElement element, MouseWheelEventArgs e)
         {
             try
@@ -476,7 +676,20 @@ namespace Ink_Canvas
             }
         }
 
-        // 矩阵变换的完整实现
+        /// <summary>
+        /// 矩阵变换的完整实现
+        /// </summary>
+        /// <param name="element">要变换的元素</param>
+        /// <param name="matrix">变换矩阵</param>
+        /// <param name="saveHistory">是否保存历史记录</param>
+        /// <remarks>
+        /// - 获取元素的 RenderTransform，如果不存在则创建新的 TransformGroup
+        /// - 保存初始变换状态用于历史记录
+        /// - 创建新的 TransformGroup 并添加 MatrixTransform
+        /// - 将新的变换组添加到现有的变换组中
+        /// - 如果启用了历史记录，提交变换历史
+        /// - 包含异常处理
+        /// </remarks>
         private void ApplyMatrixTransformToElement(FrameworkElement element, Matrix matrix, bool saveHistory = true)
         {
             try
@@ -513,7 +726,20 @@ namespace Ink_Canvas
             }
         }
 
-        // 鼠标拖动的完整实现机制
+        /// <summary>
+        /// 鼠标拖动的完整实现机制
+        /// </summary>
+        /// <param name="element">要拖动的元素</param>
+        /// <param name="currentPoint">当前鼠标位置</param>
+        /// <param name="startPoint">起始鼠标位置</param>
+        /// <remarks>
+        /// - 计算鼠标移动的位移向量
+        /// - 创建 Matrix 对象并应用 Translate 变换
+        /// - 对选中的图片元素应用矩阵变换
+        /// - 对选中的笔画应用变换
+        /// - 更新选择框的位置（如果有选择框）
+        /// - 包含异常处理
+        /// </remarks>
         private void ApplyMouseDragTransform(FrameworkElement element, Point currentPoint, Point startPoint)
         {
             try
@@ -546,7 +772,15 @@ namespace Ink_Canvas
             }
         }
 
-        // 更新选择框位置
+        /// <summary>
+        /// 更新选择框位置
+        /// </summary>
+        /// <param name="delta">位移向量</param>
+        /// <remarks>
+        /// - 更新选择框位置的逻辑
+        /// - 更新 BorderStrokeSelectionControl 的位置
+        /// - 包含异常处理
+        /// </remarks>
         private void UpdateSelectionBorderPosition(Vector delta)
         {
             try
@@ -570,7 +804,17 @@ namespace Ink_Canvas
             }
         }
 
-        // 提交变换历史
+        /// <summary>
+        /// 提交变换历史
+        /// </summary>
+        /// <param name="element">变换的元素</param>
+        /// <param name="initialTransform">初始变换</param>
+        /// <param name="finalTransform">最终变换</param>
+        /// <remarks>
+        /// - 提交变换历史到时间机器的逻辑
+        /// - 记录变换前后的状态
+        /// - 包含异常处理
+        /// </remarks>
         private void CommitTransformHistory(FrameworkElement element, TransformGroup initialTransform, TransformGroup finalTransform)
         {
             try
@@ -585,7 +829,21 @@ namespace Ink_Canvas
             }
         }
 
-        // 触摸拖动的完整实现
+        /// <summary>
+        /// 触摸拖动的完整实现
+        /// </summary>
+        /// <param name="element">要操作的元素</param>
+        /// <param name="e">操作事件参数</param>
+        /// <remarks>
+        /// - 支持单指拖动和多指手势
+        /// - 可以同时进行平移、旋转和缩放
+        /// - 通过 ManipulationDelta 获取手势变化信息
+        /// - 应用平移
+        /// - 支持两指缩放和旋转操作
+        /// - 应用变换到元素
+        /// - 应用变换到选中的笔画
+        /// - 包含异常处理
+        /// </remarks>
         private void ApplyTouchManipulationTransform(FrameworkElement element, ManipulationDeltaEventArgs e)
         {
             try
@@ -643,6 +901,19 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 创建并压缩图片
+        /// </summary>
+        /// <param name="filePath">图片文件路径</param>
+        /// <returns>创建的Image对象</returns>
+        /// <remarks>
+        /// - 创建文件依赖目录
+        /// - 复制文件到依赖目录
+        /// - 创建BitmapImage
+        /// - 如果图片尺寸大于1920x1080且设置了压缩图片，则压缩图片
+        /// - 否则使用原始尺寸
+        /// - 返回创建的Image对象
+        /// </remarks>
         private async Task<Image> CreateAndCompressImageAsync(string filePath)
         {
             string savePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
@@ -697,6 +968,21 @@ namespace Ink_Canvas
         #endregion
 
         #region Media
+        /// <summary>
+        /// 处理媒体插入按钮点击事件
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 打开文件选择对话框，选择媒体文件
+        /// - 读取媒体文件字节
+        /// - 创建MediaElement
+        /// - 居中缩放MediaElement
+        /// - 设置位置并添加到画布
+        /// - 设置LoadedBehavior和UnloadedBehavior为Manual
+        /// - 媒体加载完成后播放并立即暂停
+        /// - 提交到时间机器历史记录
+        /// </remarks>
         private async void BtnMediaInsert_Click(object sender, RoutedEventArgs e)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog();
@@ -732,6 +1018,20 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 创建MediaElement
+        /// </summary>
+        /// <param name="filePath">媒体文件路径</param>
+        /// <returns>创建的MediaElement对象</returns>
+        /// <remarks>
+        /// - 创建文件依赖目录
+        /// - 创建MediaElement
+        /// - 设置Source、名称、LoadedBehavior和UnloadedBehavior
+        /// - 设置宽度和高度
+        /// - 复制文件到依赖目录
+        /// - 更新Source为新文件路径
+        /// - 返回创建的MediaElement对象
+        /// </remarks>
         private async Task<MediaElement> CreateMediaElementAsync(string filePath)
         {
             string savePath = Path.Combine(Settings.Automation.AutoSavedStrokesLocation, "File Dependency");
@@ -988,6 +1288,29 @@ namespace Ink_Canvas
 
         #endregion
 
+        /// <summary>
+        /// 居中并缩放元素
+        /// </summary>
+        /// <param name="element">要居中缩放的元素</param>
+        /// <remarks>
+        /// - 确保元素已加载且有有效尺寸
+        /// - 如果元素尺寸无效，等待加载完成后再处理
+        /// - 获取画布的实际尺寸
+        /// - 如果画布尺寸为0，使用窗口尺寸作为备选
+        /// - 如果仍然为0，使用屏幕尺寸
+        /// - 计算最大允许尺寸（画布的70%）
+        /// - 获取元素的当前尺寸
+        /// - 计算缩放比例
+        /// - 如果元素本身比最大尺寸小，不进行缩放
+        /// - 计算新的尺寸
+        /// - 设置元素尺寸
+        /// - 计算居中位置
+        /// - 确保位置不为负数
+        /// - 设置位置
+        /// - 保持TransformGroup，不清除RenderTransform
+        /// - 只有在没有TransformGroup时才创建
+        /// - 包含异常处理
+        /// </remarks>
         private void CenterAndScaleElement(FrameworkElement element)
         {
             try
@@ -1079,7 +1402,13 @@ namespace Ink_Canvas
             }
         }
 
-        // 初始化InkCanvas选择设置
+        /// <summary>
+        /// 初始化InkCanvas选择设置
+        /// </summary>
+        /// <remarks>
+        /// - 清除当前选择，避免显示控制点
+        /// - 设置编辑模式为非选择模式
+        /// </remarks>
         private void InitializeInkCanvasSelectionSettings()
         {
             if (inkCanvas != null)
@@ -1091,7 +1420,17 @@ namespace Ink_Canvas
             }
         }
 
-        // 更新图片选择工具栏位置
+        /// <summary>
+        /// 更新图片选择工具栏位置
+        /// </summary>
+        /// <param name="element">图片元素</param>
+        /// <remarks>
+        /// - 获取元素的实际边界（考虑变换）
+        /// - 计算工具栏位置（显示在图片下方）
+        /// - 确保工具栏不超出画布边界
+        /// - 设置工具栏位置
+        /// - 包含异常处理
+        /// </remarks>
         private void UpdateImageSelectionToolbarPosition(FrameworkElement element)
         {
             try
@@ -1121,7 +1460,22 @@ namespace Ink_Canvas
             }
         }
 
-        // 获取元素的实际边界（考虑变换）
+        /// <summary>
+        /// 获取元素的实际边界（考虑变换）
+        /// </summary>
+        /// <param name="element">要获取边界的元素</param>
+        /// <returns>元素的实际边界</returns>
+        /// <remarks>
+        /// - 获取元素的Left和Top位置
+        /// - 如果值为NaN，设为0
+        /// - 获取元素的宽度和高度
+        /// - 检查是否有RenderTransform
+        /// - 如果有变换，使用变换后的边界
+        /// - 变换失败时回退到简单计算
+        /// - 没有变换时直接使用位置和大小
+        /// - 包含异常处理
+        /// - 回退到基本计算
+        /// </remarks>
         private Rect GetElementActualBounds(FrameworkElement element)
         {
             try
@@ -1170,7 +1524,20 @@ namespace Ink_Canvas
 
         #region Image Selection Toolbar Event Handlers
 
-        // 图片克隆功能
+        /// <summary>
+        /// 处理图片克隆功能
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查当前选中元素是否为图片
+        /// - 创建克隆图片
+        /// - 添加到画布
+        /// - 初始化变换
+        /// - 绑定事件
+        /// - 记录历史
+        /// - 包含异常处理
+        /// </remarks>
         private void BorderImageClone_MouseUp(object sender, MouseButtonEventArgs e)
         {
             try
@@ -1201,7 +1568,22 @@ namespace Ink_Canvas
             }
         }
 
-        // 图片克隆到新页面
+        /// <summary>
+        /// 处理图片克隆到新页面功能
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查当前选中元素是否为图片
+        /// - 创建新页面
+        /// - 创建克隆图片
+        /// - 设置图片属性，避免被InkCanvas选择系统处理
+        /// - 初始化变换
+        /// - 绑定事件
+        /// - 添加到新页面的画布
+        /// - 记录历史
+        /// - 包含异常处理
+        /// </remarks>
         private void BorderImageCloneToNewBoard_MouseUp(object sender, MouseButtonEventArgs e)
         {
             try
@@ -1242,7 +1624,17 @@ namespace Ink_Canvas
             }
         }
 
-        // 图片左旋转
+        /// <summary>
+        /// 处理图片左旋转功能
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查当前是否有选中元素
+        /// - 应用旋转变换（向左旋转45度）
+        /// - 如果是图片元素，更新工具栏位置
+        /// - 包含异常处理
+        /// </remarks>
         private void BorderImageRotateLeft_MouseUp(object sender, MouseButtonEventArgs e)
         {
             try
@@ -1266,7 +1658,17 @@ namespace Ink_Canvas
             }
         }
 
-        // 图片右旋转
+        /// <summary>
+        /// 处理图片右旋转功能
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查当前是否有选中元素
+        /// - 应用旋转变换（向右旋转45度）
+        /// - 如果是图片元素，更新工具栏位置
+        /// - 包含异常处理
+        /// </remarks>
         private void BorderImageRotateRight_MouseUp(object sender, MouseButtonEventArgs e)
         {
             try
@@ -1290,7 +1692,18 @@ namespace Ink_Canvas
             }
         }
 
-        // 图片缩放减小
+        /// <summary>
+        /// 处理图片缩放减小功能
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查当前是否有选中元素
+        /// - 计算元素中心点
+        /// - 应用缩放变换（缩小到0.9倍）
+        /// - 如果是图片元素，更新工具栏位置
+        /// - 包含异常处理
+        /// </remarks>
         private void GridImageScaleDecrease_MouseUp(object sender, MouseButtonEventArgs e)
         {
             try
@@ -1315,7 +1728,18 @@ namespace Ink_Canvas
             }
         }
 
-        // 图片缩放增大
+        /// <summary>
+        /// 处理图片缩放增大功能
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查当前是否有选中元素
+        /// - 计算元素中心点
+        /// - 应用缩放变换（放大到1.1倍）
+        /// - 如果是图片元素，更新工具栏位置
+        /// - 包含异常处理
+        /// </remarks>
         private void GridImageScaleIncrease_MouseUp(object sender, MouseButtonEventArgs e)
         {
             try
@@ -1340,7 +1764,19 @@ namespace Ink_Canvas
             }
         }
 
-        // 图片删除
+        /// <summary>
+        /// 处理图片删除功能
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// - 检查当前是否有选中元素
+        /// - 保存删除前的编辑模式
+        /// - 记录删除历史
+        /// - 从画布中移除
+        /// - 清除选中状态
+        /// - 包含异常处理
+        /// </remarks>
         private void BorderImageDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
             try

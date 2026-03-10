@@ -144,7 +144,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 IconSource = FindResource("PenIcon") as DrawingImage,
             });
         }
-        
+
         /// <summary>
         /// 应用主题
         /// </summary>

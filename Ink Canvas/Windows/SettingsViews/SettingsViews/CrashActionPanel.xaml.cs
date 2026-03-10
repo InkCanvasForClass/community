@@ -29,7 +29,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 IsTopBarNeedNoShadowEffect?.Invoke(this, new RoutedEventArgs());
             }
         }
-        
+
         /// <summary>
         /// 应用主题
         /// </summary>

@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main, beta ]
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened ]
     branches: [ main, beta ]
     paths-ignore:
       - '**/*.md'
@@ -33,7 +33,6 @@ jobs:
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: '10.x'
           cache: true
           cache-dependency-path: '**/packages.lock.json'
       
@@ -41,7 +40,9 @@ jobs:
         run: dotnet restore "Ink Canvas.sln" --locked-mode
       
       - name: Build the Solution
-        run: msbuild /p:platform="AnyCPU" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal
+        env:
+          DLASS_SENTRY_DSN: ${{ secrets.DLASS_SENTRY_DSN }}
+        run: msbuild /p:platform="AnyCPU" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
       - name: Check if exe file is generated
         id: check-exe
@@ -71,7 +72,7 @@ jobs:
       
       - name: Upload Artifact (if build succeeded)
         if: steps.check-exe.outputs.build_success == 'true'
-        uses: actions/upload-artifact@v4.5.0
+        uses: actions/upload-artifact@v7
         with:
           name: InkCanvasForClass.CE.debug
           path: "Ink Canvas/bin/Debug/net472/*"

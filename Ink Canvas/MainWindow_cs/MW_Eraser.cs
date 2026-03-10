@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
@@ -174,6 +174,9 @@ namespace Ink_Canvas
                 AddedStroke = null;
                 ReplacedStroke = null;
             }
+
+            // 橡皮擦自动切换回批注
+            HandleEraserOperationEnded();
         }
 
         /// <summary>

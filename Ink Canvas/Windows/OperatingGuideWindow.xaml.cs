@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
 using System;
 using System.Windows;
@@ -89,7 +89,7 @@ namespace Ink_Canvas
                 if (themeKey != null) keyValue = (int)themeKey.GetValue("SystemUsesLightTheme");
                 if (keyValue == 1) light = true;
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
             return light;
         }

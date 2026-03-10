@@ -207,7 +207,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
                     {
                         Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            try { Close(); } catch { }
+                            try { Close(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                             // 启动应用程序任务
                             launchTask.Start();
@@ -224,7 +224,7 @@ namespace Ink_Canvas.Helpers.Plugins.BuiltIn.SuperLauncher
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"应用按钮点击事件出错: {ex.Message}", LogHelper.LogType.Error);
-                try { IsClosing = true; Close(); } catch { }
+                try { IsClosing = true; Close(); } catch (Exception innerEx) { System.Diagnostics.Debug.WriteLine(innerEx); }
             }
         }
 

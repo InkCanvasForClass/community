@@ -1,13 +1,10 @@
-using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
-using System.Threading;
 
 namespace Ink_Canvas.Helpers
 {
@@ -71,12 +68,10 @@ namespace Ink_Canvas.Helpers
                     {
                         Type appType = typeof(Microsoft.Office.Interop.PowerPoint.Application);
                         Microsoft.Office.Interop.PowerPoint.Application pptApp = null;
-                        
                         if (appType.IsInstanceOfType(bestApp))
                         {
                             pptApp = (Microsoft.Office.Interop.PowerPoint.Application)bestApp;
                         }
-                        
                         if (pptApp != null)
                         {
                             try
@@ -87,9 +82,8 @@ namespace Ink_Canvas.Helpers
                             }
                             catch (Exception ex)
                             {
-                                LogHelper.WriteLogToFile($"ROT 连接验证失败: {ex.Message}", LogHelper.LogType.Warning);
-                                SafeReleaseComObject(bestApp);
-                                return null;
+                                LogHelper.WriteLogToFile($"ROT 连接验证 Name 不可用（将依赖 SlideShowWindows）: {ex.Message}", LogHelper.LogType.Warning);
+                                return pptApp;
                             }
                         }
                         else
@@ -108,6 +102,45 @@ namespace Ink_Canvas.Helpers
                     SafeReleaseComObject(bestApp);
                 }
 
+                try
+                {
+                    var pptApp = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                    if (pptApp != null && Marshal.IsComObject(pptApp))
+                    {
+                        try
+                        {
+                            var _ = pptApp.Name;
+                        }
+                        catch (COMException)
+                        {
+                        }
+                        return pptApp;
+                    }
+                }
+                catch (COMException) { }
+                catch (InvalidCastException) { }
+
+                if (isSupportWPS)
+                {
+                    try
+                    {
+                        var wpsApp = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("kwpp.Application");
+                        if (wpsApp != null && Marshal.IsComObject(wpsApp))
+                        {
+                            try
+                            {
+                                var _ = wpsApp.Name;
+                            }
+                            catch (COMException)
+                            {
+                            }
+                            return wpsApp;
+                        }
+                    }
+                    catch (COMException) { }
+                    catch (InvalidCastException) { }
+                }
+
                 return null;
             }
             catch (Exception ex)
@@ -119,6 +152,13 @@ namespace Ink_Canvas.Helpers
         #endregion
 
         #region Public Methods
+        /// <summary>
+        /// 在系统的运行对象表（ROT）中查找并返回最合适的正在运行的 PowerPoint 应用实例。
+        /// </summary>
+        /// <param name="targetApp">可选的目标 PowerPoint COM 对象，用于优先比较；传入 null 表示不指定目标。</param>
+        /// <param name="bestPriority">输出参数：返回找到的最佳实例的优先级（0 表示未找到或无活动演示）。</param>
+        /// <param name="targetPriority">输出参数：返回与 <paramref name="targetApp"/> 对应实例的优先级（如果未提供或未命中则为 0）。</param>
+        /// <returns>最合适的 PowerPoint 应用对象（通常为 COM Application 实例），若未找到则返回 null。</returns>
         public static object GetAnyActivePowerPoint(object targetApp, out int bestPriority, out int targetPriority)
         {
             IRunningObjectTable rot = null;
@@ -175,7 +215,7 @@ namespace Ink_Canvas.Helpers
                                     object appObj = comObject.GetType().InvokeMember("Application", BindingFlags.GetProperty, null, comObject, null);
                                     candidateApp = appObj;
                                 }
-                                catch { }
+                                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                             }
                         }
                         bool isDuplicate = false;
@@ -213,7 +253,7 @@ namespace Ink_Canvas.Helpers
                                 {
                                     activePres = candidateApp.ActivePresentation;
                                 }
-                                catch { }
+                                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                                 if (activePres != null)
                                 {
@@ -223,7 +263,7 @@ namespace Ink_Canvas.Helpers
                                     {
                                         ssWindow = activePres.SlideShowWindow;
                                     }
-                                    catch { }
+                                    catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                                     if (ssWindow != null)
                                     {
@@ -238,7 +278,7 @@ namespace Ink_Canvas.Helpers
                                                 if (val is int && (int)val == -1) isActive = true;
                                                 else if (val is bool && (bool)val == true) isActive = true;
                                             }
-                                            catch { }
+                                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                                             if (isActive)
                                             {
@@ -252,7 +292,7 @@ namespace Ink_Canvas.Helpers
                                                 }
                                             }
                                         }
-                                        catch { }
+                                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                                     }
                                 }
                             }
@@ -383,21 +423,21 @@ namespace Ink_Canvas.Helpers
 
                 if (fgPid == sswPid) return true;
 
-                    try
+                try
+                {
+                    using (Process fgProc = Process.GetProcessById((int)fgPid))
+                    using (Process appProc = Process.GetProcessById((int)sswPid))
                     {
-                        using (Process fgProc = Process.GetProcessById((int)fgPid))
-                        using (Process appProc = Process.GetProcessById((int)sswPid))
-                        {
-                            string fgName = fgProc.ProcessName.ToLower();
-                            string appName = appProc.ProcessName.ToLower();
+                        string fgName = fgProc.ProcessName.ToLower();
+                        string appName = appProc.ProcessName.ToLower();
 
-                            if (fgName.StartsWith("wps") && appName.StartsWith("wpp"))
-                            {
-                                return true;
-                            }
+                        if (fgName.StartsWith("wps") && appName.StartsWith("wpp"))
+                        {
+                            return true;
                         }
                     }
-                    catch { }
+                }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
                 return false;
             }
@@ -420,7 +460,7 @@ namespace Ink_Canvas.Helpers
 
                 hwnd = new IntPtr(hwndVal);
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
 
             return hwnd;
         }
@@ -435,7 +475,7 @@ namespace Ink_Canvas.Helpers
                 {
                     Marshal.ReleaseComObject(comObj);
                 }
-                catch { }
+                catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }
         }
 
@@ -480,4 +520,3 @@ namespace Ink_Canvas.Helpers
         #endregion
     }
 }
-

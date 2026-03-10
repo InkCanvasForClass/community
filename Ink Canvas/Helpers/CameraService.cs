@@ -40,13 +40,13 @@ namespace Ink_Canvas.Helpers
         public int ResolutionWidth
         {
             get => _resolutionWidth;
-            set => _resolutionWidth = Math.Max(320, Math.Min(1920, value));
+            set => _resolutionWidth = Math.Max(320, Math.Min(3840, value));
         }
 
         public int ResolutionHeight
         {
             get => _resolutionHeight;
-            set => _resolutionHeight = Math.Max(240, Math.Min(1080, value));
+            set => _resolutionHeight = Math.Max(240, Math.Min(2160, value));
         }
 
         public CameraService()

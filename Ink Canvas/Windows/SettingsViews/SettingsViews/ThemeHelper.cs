@@ -1,5 +1,4 @@
 using System.Windows.Media;
-using Ink_Canvas;
 
 namespace Ink_Canvas.Windows.SettingsViews
 {
@@ -184,7 +183,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         else if (color.R == 225 && color.G == 225 && color.B == 225) // #e1e1e1 - 按钮背景/分隔线
                         {
                             // 检查是否是按钮（有内边距或特定尺寸）
-                            if (border.Padding.Left > 0 || border.Padding.Top > 0 || 
+                            if (border.Padding.Left > 0 || border.Padding.Top > 0 ||
                                 (border.Width > 0 && border.Height > 0 && border.Width < 200 && border.Height < 100))
                             {
                                 border.Background = GetButtonBackgroundBrush();
@@ -198,12 +197,12 @@ namespace Ink_Canvas.Windows.SettingsViews
                         else if (color.R == 255 && color.G == 255 && color.B == 255) // White - 白色背景
                         {
                             // 检查是否是搜索结果项（有圆角和内边距）
-                            if (border.CornerRadius.TopLeft == 6 && border.CornerRadius.TopRight == 6 && 
+                            if (border.CornerRadius.TopLeft == 6 && border.CornerRadius.TopRight == 6 &&
                                 border.CornerRadius.BottomLeft == 6 && border.CornerRadius.BottomRight == 6 &&
                                 border.Padding.Left > 0 && border.Padding.Top > 0)
                             {
                                 // 搜索结果项背景
-                                border.Background = IsDarkTheme 
+                                border.Background = IsDarkTheme
                                     ? new SolidColorBrush(Color.FromRgb(43, 43, 43)) // 深色主题搜索结果项背景
                                     : new SolidColorBrush(Colors.White);
                             }
@@ -222,7 +221,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                             border.Background = GetBackgroundPrimaryBrush();
                         }
                     }
-                    
+
                     var borderBrush = border.BorderBrush as SolidColorBrush;
                     if (borderBrush != null)
                     {
@@ -332,7 +331,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         if (color.R == 37 && color.G == 99 && color.B == 235) // #2563eb - 蓝色按钮（保持原色）
                         {
                             // 蓝色按钮保持原色，但更新文字颜色
-                            if (button.Foreground is SolidColorBrush fgBrush && 
+                            if (button.Foreground is SolidColorBrush fgBrush &&
                                 fgBrush.Color.R == 255 && fgBrush.Color.G == 255 && fgBrush.Color.B == 255)
                             {
                                 button.Foreground = new SolidColorBrush(Colors.White); // 保持白色文字
@@ -371,10 +370,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     if (drawingImage.Drawing is DrawingGroup drawingGroup)
                     {
-                        Color iconColor = IsDarkTheme 
+                        Color iconColor = IsDarkTheme
                             ? Color.FromRgb(243, 243, 243) // 深色主题使用浅色图标 #F3F3F3
                             : Color.FromRgb(34, 34, 34);   // 浅色主题使用深色图标 #222222
-                        
+
                         // 检查图标是否使用了深色（需要更新的颜色）
                         bool needsUpdate = false;
                         foreach (var drawing in drawingGroup.Children)
@@ -401,7 +400,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                                 }
                             }
                         }
-                        
+
                         if (needsUpdate)
                         {
                             // 克隆并更新图标颜色
@@ -430,8 +429,8 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     var clonedGeometry = geometryDrawing.Geometry?.Clone();
                     var clonedBrush = CloneBrushForTheme(geometryDrawing.Brush, newColor);
-                    var clonedPen = geometryDrawing.Pen != null 
-                        ? ClonePenForTheme(geometryDrawing.Pen, newColor) 
+                    var clonedPen = geometryDrawing.Pen != null
+                        ? ClonePenForTheme(geometryDrawing.Pen, newColor)
                         : null;
 
                     cloned.Children.Add(new GeometryDrawing(clonedBrush, clonedPen, clonedGeometry));
@@ -461,7 +460,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     return new SolidColorBrush(newColor) { Opacity = solidBrush.Opacity };
                 }
-                else if (originalColor.A > 0 && originalColor != Colors.Transparent && 
+                else if (originalColor.A > 0 && originalColor != Colors.Transparent &&
                          originalColor.R < 50 && originalColor.G < 50 && originalColor.B < 50) // 深色
                 {
                     return new SolidColorBrush(newColor) { Opacity = solidBrush.Opacity };

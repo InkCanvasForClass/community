@@ -16,11 +16,23 @@ using System.Windows.Threading;
 
 namespace Ink_Canvas
 {
+    /// <summary>
+    /// 时间视图模型类，用于绑定显示时间和日期
+    /// </summary>
     public class TimeViewModel : INotifyPropertyChanged
     {
+        /// <summary>
+        /// 当前时间字符串
+        /// </summary>
         private string _nowTime;
+        /// <summary>
+        /// 当前日期字符串
+        /// </summary>
         private string _nowDate;
 
+        /// <summary>
+        /// 当前时间属性
+        /// </summary>
         public string nowTime
         {
             get => _nowTime;
@@ -34,6 +46,9 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 当前日期属性
+        /// </summary>
         public string nowDate
         {
             get => _nowDate;
@@ -47,8 +62,15 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 属性变化事件
+        /// </summary>
         public event PropertyChangedEventHandler PropertyChanged;
 
+        /// <summary>
+        /// 触发属性变化事件
+        /// </summary>
+        /// <param name="propertyName">属性名称</param>
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -57,27 +79,93 @@ namespace Ink_Canvas
 
     public partial class MainWindow : Window
     {
+        /// <summary>
+        /// 进程终止定时器
+        /// </summary>
         private Timer timerKillProcess = new Timer();
+        /// <summary>
+        /// 统一的主窗口定时器
+        /// </summary>
         private Timer _unifiedMainWindowTimer;
+        /// <summary>
+        /// 可用的最新版本号
+        /// </summary>
         private string AvailableLatestVersion;
+        /// <summary>
+        /// 静默更新检查定时器
+        /// </summary>
         private Timer timerCheckAutoUpdateWithSilence = new Timer();
+        /// <summary>
+        /// 更新检查重试定时器
+        /// </summary>
         private Timer timerCheckAutoUpdateRetry = new Timer();
-        private bool isHidingSubPanelsWhenInking; // 避免书写时触发二次关闭二级菜单导致动画不连续
+        /// <summary>
+        /// 避免书写时触发二次关闭二级菜单导致动画不连续
+        /// </summary>
+        private bool isHidingSubPanelsWhenInking;
+        /// <summary>
+        /// 更新检查重试计数
+        /// </summary>
         private int updateCheckRetryCount = 0;
+        /// <summary>
+        /// 最大更新检查重试次数
+        /// </summary>
         private const int MAX_UPDATE_CHECK_RETRIES = 6;
+        /// <summary>
+        /// 时间显示定时器
+        /// </summary>
         private Timer timerDisplayTime = new Timer();
+        /// <summary>
+        /// 日期显示定时器
+        /// </summary>
         private Timer timerDisplayDate = new Timer();
+        /// <summary>
+        /// NTP时间同步定时器
+        /// </summary>
         private Timer timerNtpSync = new Timer();
-
+        /// <summary>
+        /// 时间视图模型实例
+        /// </summary>
         private TimeViewModel nowTimeVM = new TimeViewModel();
+        /// <summary>
+        /// 缓存的网络时间
+        /// </summary>
         private DateTime cachedNetworkTime = DateTime.Now;
+        /// <summary>
+        /// 上次NTP同步时间
+        /// </summary>
         private DateTime lastNtpSyncTime = DateTime.MinValue;
+        /// <summary>
+        /// 上次显示的时间字符串
+        /// </summary>
         private string lastDisplayedTime = "";
+        /// <summary>
+        /// 是否使用网络时间
+        /// </summary>
         private bool useNetworkTime = false;
+        /// <summary>
+        /// 网络时间与本地时间的偏移量
+        /// </summary>
         private TimeSpan networkTimeOffset = TimeSpan.Zero;
-        private DateTime lastLocalTime = DateTime.Now; // 记录上次的本地时间，用于检测时间跳跃
-        private bool isNtpSyncing = false; // 防止重复NTP同步的标志 
-
+        /// <summary>
+        /// 记录上次的本地时间，用于检测时间跳跃
+        /// </summary>
+        private DateTime lastLocalTime = DateTime.Now;
+        /// <summary>
+        /// 防止重复NTP同步的标志
+        /// </summary>
+        private bool isNtpSyncing = false;
+        /// <summary>
+        /// 橡皮擦自动切换回批注模式的计时器
+        /// </summary>
+        private DispatcherTimer _eraserAutoSwitchBackTimer;
+        /// <summary>
+        /// 异步获取网络时间
+        /// </summary>
+        /// <returns>返回网络时间，如果获取失败则返回本地时间</returns>
+        /// <remarks>
+        /// 使用NTP协议从国家授时中心服务器获取网络时间
+        /// </remarks>
         private async Task<DateTime> GetNetworkTimeAsync()
         {
             try
@@ -107,7 +195,20 @@ namespace Ink_Canvas
             }
         }
 
-        // 修改InitTimers方法中的初始时间和日期格式
+        /// <summary>
+        /// 初始化所有定时器
+        /// </summary>
+        /// <remarks>
+        /// 初始化以下定时器：
+        /// 1. timerKillProcess: 进程终止定时器，每2秒执行一次
+        /// 2. _unifiedMainWindowTimer: 统一的主窗口定时器，每500毫秒执行一次
+        /// 3. timerCheckAutoUpdateWithSilence: 静默更新检查定时器，每10分钟执行一次
+        /// 4. timerCheckAutoUpdateRetry: 更新检查重试定时器，每10分钟执行一次
+        /// 5. timerDisplayTime: 时间显示定时器，每秒执行一次
+        /// 6. timerDisplayDate: 日期显示定时器，每小时执行一次
+        /// 7. timerNtpSync: NTP时间同步定时器，每2小时执行一次
+        /// 同时初始化定时保存墨迹定时器
+        /// </remarks>
         private void InitTimers()
         {
             timerKillProcess.Elapsed += TimerKillProcess_Elapsed;
@@ -149,14 +250,31 @@ namespace Ink_Canvas
 
             // 初始化定时保存墨迹定时器
             InitAutoSaveStrokesTimer();
+
+            // 初始化橡皮擦自动切换回批注模式计时器
+            InitEraserAutoSwitchBackTimer();
         }
 
+        /// <summary>
+        /// 统一主窗口定时器事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// 调用timerCheckAutoFold_Elapsed方法处理自动收纳逻辑
+        /// </remarks>
         private void OnUnifiedMainWindowTimerElapsed(object sender, ElapsedEventArgs e)
         {
             timerCheckAutoFold_Elapsed(sender, e);
         }
 
-        // 初始化定时保存墨迹定时器
+        /// <summary>
+        /// 初始化定时保存墨迹定时器
+        /// </summary>
+        /// <remarks>
+        /// 初始化DispatcherTimer实例并绑定AutoSaveStrokesTimer_Tick事件处理方法
+        /// 然后调用UpdateAutoSaveStrokesTimer方法根据设置更新定时器状态
+        /// </remarks>
         private void InitAutoSaveStrokesTimer()
         {
             if (autoSaveStrokesTimer == null)
@@ -169,7 +287,14 @@ namespace Ink_Canvas
             UpdateAutoSaveStrokesTimer();
         }
 
-        // 更新定时保存墨迹定时器状态
+        /// <summary>
+        /// 更新定时保存墨迹定时器状态
+        /// </summary>
+        /// <remarks>
+        /// 根据Settings.Automation.IsEnableAutoSaveStrokes设置决定是否启用定时器
+        /// 如果启用，则根据Settings.Automation.AutoSaveStrokesIntervalMinutes设置定时器间隔
+        /// 最小间隔为1分钟
+        /// </remarks>
         private void UpdateAutoSaveStrokesTimer()
         {
             if (autoSaveStrokesTimer == null) return;
@@ -185,7 +310,15 @@ namespace Ink_Canvas
             }
         }
 
-        // 定时保存墨迹定时器事件处理
+        /// <summary>
+        /// 定时保存墨迹定时器事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// 当定时器触发时，检查画布是否可见且有墨迹
+        /// 如果满足条件，则调用SaveInkCanvasStrokes方法进行静默保存
+        /// </remarks>
         private void AutoSaveStrokesTimer_Tick(object sender, EventArgs e)
         {
             try
@@ -202,7 +335,19 @@ namespace Ink_Canvas
             }
         }
 
-        // NTP同步定时器事件处理
+        /// <summary>
+        /// NTP同步定时器事件处理方法
+        /// </summary>
+        /// <returns>异步任务</returns>
+        /// <remarks>
+        /// 异步执行NTP时间同步，包括以下步骤：
+        /// 1. 防止重复同步（使用isNtpSyncing标志）
+        /// 2. 添加10秒超时机制
+        /// 3. 调用GetNetworkTimeAsync获取网络时间
+        /// 4. 计算网络时间与本地时间的偏移量
+        /// 5. 如果时间差超过3分钟，则使用网络时间
+        /// 6. 处理异常情况，确保即使同步失败也能恢复到使用本地时间
+        /// </remarks>
         private async Task TimerNtpSync_ElapsedAsync()
         {
             // 防止重复同步
@@ -256,7 +401,20 @@ namespace Ink_Canvas
             }
         }
 
-        // 优化后的时间显示方法，仅在NTP同步时计算网络时间偏移
+        /// <summary>
+        /// 优化后的时间显示方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// 处理时间显示逻辑，包括以下步骤：
+        /// 1. 获取当前本地时间
+        /// 2. 检测系统时间是否发生重大跳跃（超过3分钟），如果是则触发NTP同步
+        /// 3. 如果启用网络时间且偏移量已计算，则应用偏移量
+        /// 4. 格式化时间字符串
+        /// 5. 只有当时间字符串发生变化时才更新UI，避免不必要的UI刷新
+        /// 6. 使用BeginInvoke异步更新UI，避免阻塞
+        /// </remarks>
         private void TimerDisplayTime_Elapsed(object sender, ElapsedEventArgs e)
         {
             DateTime localTime = DateTime.Now;
@@ -307,12 +465,34 @@ namespace Ink_Canvas
             }
         }
 
-        // 修改TimerDisplayDate_Elapsed方法中的日期格式
+        /// <summary>
+        /// 日期显示定时器事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// 更新nowTimeVM的nowDate属性，设置为当前日期的格式化字符串
+        /// 格式为：yyyy年MM月dd日 星期几
+        /// </remarks>
         private void TimerDisplayDate_Elapsed(object sender, ElapsedEventArgs e)
         {
-            nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
+            // 使用BeginInvoke异步更新UI，避免阻塞
+            Dispatcher.BeginInvoke(new Action(() =>
+            {
+                nowTimeVM.nowDate = DateTime.Now.ToString("yyyy'年'MM'月'dd'日' dddd");
+            }));
         }
 
+        /// <summary>
+        /// 进程终止定时器事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// 根据设置终止指定的进程，包括PPTService、EasiNote、HiteAnnotation等
+        /// 对于每个终止的进程，会显示相应的通知
+        /// 对于HiteAnnotation进程，还会根据设置决定是否自动进入批注状态
+        /// </remarks>
         private void TimerKillProcess_Elapsed(object sender, ElapsedEventArgs e)
         {
             try
@@ -376,10 +556,12 @@ namespace Ink_Canvas
 
                 if (arg != "/F")
                 {
-                    var p = new Process();
-                    p.StartInfo = new ProcessStartInfo("taskkill", arg);
-                    p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                    p.Start();
+                    using (var p = new Process())
+                    {
+                        p.StartInfo = new ProcessStartInfo("taskkill", arg);
+                        p.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                        p.Start();
+                    }
 
                     if (arg.Contains("EasiNote"))
                     {
@@ -453,7 +635,7 @@ namespace Ink_Canvas
                     }
                 }
             }
-            catch { }
+            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }
 
 
@@ -550,7 +732,7 @@ namespace Ink_Canvas
                                     return true;
                                 }
                             }
-                            catch { }
+                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                         }
                     }
                     else if (Settings.Automation.IsAutoFoldInEasiCamera && windowProcessName == "EasiCamera")
@@ -561,7 +743,7 @@ namespace Ink_Canvas
                     {
                         return true;
                     }
-                    else if (Settings.Automation.IsAutoFoldInSeewoPincoTeacher && 
+                    else if (Settings.Automation.IsAutoFoldInSeewoPincoTeacher &&
                              (windowProcessName == "BoardService" || windowProcessName == "seewoPincoTeacher"))
                     {
                         return true;
@@ -578,7 +760,7 @@ namespace Ink_Canvas
                     {
                         return true;
                     }
-                    else if (Settings.Automation.IsAutoFoldInMSWhiteboard && 
+                    else if (Settings.Automation.IsAutoFoldInMSWhiteboard &&
                              (windowProcessName == "MicrosoftWhiteboard" || windowProcessName == "msedgewebview2"))
                     {
                         return true;
@@ -617,7 +799,7 @@ namespace Ink_Canvas
                                     return true;
                                 }
                             }
-                            catch { }
+                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                         }
                     }
                 }
@@ -699,7 +881,7 @@ namespace Ink_Canvas
                                 return true;
                             }
                         }
-                        catch { }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     }
                 }
                 // 检查EasiCamera
@@ -717,7 +899,7 @@ namespace Ink_Canvas
                     return true;
                 }
                 // 检查SeewoPinco
-                else if (Settings.Automation.IsAutoFoldInSeewoPincoTeacher && 
+                else if (Settings.Automation.IsAutoFoldInSeewoPincoTeacher &&
                          (windowProcessName == "BoardService" || windowProcessName == "seewoPincoTeacher"))
                 {
                     return true;
@@ -744,7 +926,7 @@ namespace Ink_Canvas
                     return true;
                 }
                 // 检查MSWhiteboard
-                else if (Settings.Automation.IsAutoFoldInMSWhiteboard && 
+                else if (Settings.Automation.IsAutoFoldInMSWhiteboard &&
                          (windowProcessName == "MicrosoftWhiteboard" || windowProcessName == "msedgewebview2"))
                 {
                     return true;
@@ -809,7 +991,7 @@ namespace Ink_Canvas
                                 return true;
                             }
                         }
-                        catch { }
+                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                     }
                 }
             }
@@ -821,6 +1003,19 @@ namespace Ink_Canvas
             return false;
         }
 
+        /// <summary>
+        /// 自动收纳定时器事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// 检查是否需要自动收纳浮动栏，包括以下逻辑：
+        /// 1. 检查是否有全屏窗口需要收纳
+        /// 2. 检查是否有应用程序需要自动收纳
+        /// 3. 对于EasiNote应用，根据版本和窗口类型决定是否收纳
+        /// 4. 对于其他应用程序，根据设置决定是否收纳
+        /// 5. 当没有需要收纳的应用程序时，根据设置决定是否展开浮动栏
+        /// </remarks>
         private void timerCheckAutoFold_Elapsed(object sender, ElapsedEventArgs e)
         {
             if (isFloatingBarChangingHideMode) return;
@@ -832,19 +1027,20 @@ namespace Ink_Canvas
                 var windowTitle = ForegroundWindowInfo.WindowTitle();
 
                 Thickness currentMargin = new Thickness();
-                Dispatcher.Invoke(() => {
+                Dispatcher.Invoke(() =>
+                {
                     currentMargin = ViewboxFloatingBar.Margin;
                 });
-                
+
                 if (hasFullScreen)
                 {
-                    if (!isFloatingBarFolded) 
+                    if (!isFloatingBarFolded)
                     {
                         FoldFloatingBar_MouseUp(null, null);
                     }
                     else if (currentMargin.Left > -50 && !isFloatingBarChangingHideMode)
                     {
-                        FoldFloatingBar_MouseUp(null, null); 
+                        FoldFloatingBar_MouseUp(null, null);
                     }
                     return;
                 }
@@ -857,20 +1053,20 @@ namespace Ink_Canvas
                         {
                             var versionInfo = FileVersionInfo.GetVersionInfo(ForegroundWindowInfo.ProcessPath());
                             string version = versionInfo.FileVersion;
-                            
+
                             if (version.StartsWith("5.") && Settings.Automation.IsAutoFoldInEasiNote)
                             {
                                 bool isAnnotationWindow = windowTitle.Length == 0 && ForegroundWindowInfo.WindowRect().Height < 500;
                                 if (Settings.Automation.IsAutoFoldInEasiNoteIgnoreDesktopAnno && isAnnotationWindow)
                                 {
-                                    if (!isFloatingBarFolded) 
+                                    if (!isFloatingBarFolded)
                                     {
                                         FoldFloatingBar_MouseUp(null, null);
                                     }
                                 }
                                 else if (!isAnnotationWindow)
                                 {
-                                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded) 
+                                    if (!unfoldFloatingBarByUser && !isFloatingBarFolded)
                                     {
                                         FoldFloatingBar_MouseUp(null, null);
                                     }
@@ -911,6 +1107,24 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 静默更新检查定时器事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// 处理静默更新的检查和安装逻辑，包括以下步骤：
+        /// 1. 停止计时器，避免重复触发
+        /// 2. 检查是否有可用的更新版本
+        /// 3. 检查是否启用了静默更新
+        /// 4. 检查更新文件是否已下载
+        /// 5. 如果未下载，尝试使用多线路组下载更新文件
+        /// 6. 检查是否在静默更新时间段内
+        /// 7. 检查应用程序状态，确保可以安全更新
+        /// 8. 如果可以安全更新，执行更新安装并关闭应用程序
+        /// 9. 如果不能安全更新，重新启动计时器，稍后再检查
+        /// 10. 处理异常情况，确保计时器能够重新启动
+        /// </remarks>
         private void timerCheckAutoUpdateWithSilence_Elapsed(object sender, ElapsedEventArgs e)
         {
             // 停止计时器，避免重复触发
@@ -1064,7 +1278,23 @@ namespace Ink_Canvas
             }
         }
 
-        // 检查更新失败重试定时器事件处理
+        /// <summary>
+        /// 检查更新失败重试定时器事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">事件参数</param>
+        /// <remarks>
+        /// 异步处理更新检查失败后的重试逻辑，包括以下步骤：
+        /// 1. 停止计时器，避免重复触发
+        /// 2. 检查是否启用了自动更新
+        /// 3. 增加重试计数
+        /// 4. 检查是否超过最大重试次数
+        /// 5. 清除之前的更新状态
+        /// 6. 使用当前选择的更新通道检查更新
+        /// 7. 如果检查成功，重置重试计数并停止重试定时器
+        /// 8. 如果检查失败，重新启动定时器，10分钟后再次尝试
+        /// 9. 处理异常情况，确保定时器能够重新启动
+        /// </remarks>
         private async void timerCheckAutoUpdateRetry_Elapsed(object sender, ElapsedEventArgs e)
         {
             // 停止定时器，避免重复触发
@@ -1132,7 +1362,16 @@ namespace Ink_Canvas
             }
         }
 
-        // 重置更新检查重试状态
+        /// <summary>
+        /// 重置更新检查重试状态方法
+        /// </summary>
+        /// <remarks>
+        /// 重置更新检查的重试状态，包括以下步骤：
+        /// 1. 停止重试定时器
+        /// 2. 重置重试计数为0
+        /// 3. 记录日志
+        /// 4. 处理异常情况
+        /// </remarks>
         public void ResetUpdateCheckRetry()
         {
             try
@@ -1148,6 +1387,102 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"AutoUpdate | Error resetting retry state: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 初始化橡皮擦自动切换回批注模式计时器
+        /// </summary>
+        private void InitEraserAutoSwitchBackTimer()
+        {
+            if (_eraserAutoSwitchBackTimer == null)
+            {
+                _eraserAutoSwitchBackTimer = new DispatcherTimer();
+                _eraserAutoSwitchBackTimer.Tick += EraserAutoSwitchBackTimer_Tick;
+            }
+        }
+
+        /// <summary>
+        /// 启动橡皮擦自动切换回批注模式计时器
+        /// </summary>
+        public void StartEraserAutoSwitchBackTimer()
+        {
+            try
+            {
+                if (!Settings.Canvas.EnableEraserAutoSwitchBack) return;
+                if (_eraserAutoSwitchBackTimer == null) InitEraserAutoSwitchBackTimer();
+
+                // 停止之前的计时器
+                _eraserAutoSwitchBackTimer.Stop();
+
+                // 设置计时器间隔
+                int delaySeconds = Settings.Canvas.EraserAutoSwitchBackDelaySeconds;
+                if (delaySeconds < 1) delaySeconds = 10; // 最小1秒
+                _eraserAutoSwitchBackTimer.Interval = TimeSpan.FromSeconds(delaySeconds);
+
+                // 启动计时器
+                _eraserAutoSwitchBackTimer.Start();
+
+                LogHelper.WriteLogToFile($"橡皮擦自动切换计时器已启动，延迟 {delaySeconds} 秒", LogHelper.LogType.Trace);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动橡皮擦自动切换计时器失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 停止橡皮擦自动切换回批注模式计时器
+        /// </summary>
+        public void StopEraserAutoSwitchBackTimer()
+        {
+            try
+            {
+                if (_eraserAutoSwitchBackTimer != null)
+                {
+                    _eraserAutoSwitchBackTimer.Stop();
+                    LogHelper.WriteLogToFile("橡皮擦自动切换计时器已停止", LogHelper.LogType.Trace);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"停止橡皮擦自动切换计时器失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        /// <summary>
+        /// 橡皮擦自动切换回批注模式计时器事件处理
+        /// </summary>
+        private void EraserAutoSwitchBackTimer_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                // 检查是否仍然在橡皮擦模式
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint &&
+                    inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                {
+                    StopEraserAutoSwitchBackTimer();
+                    return;
+                }
+
+                // 检查设置是否仍然启用
+                if (!Settings.Canvas.EnableEraserAutoSwitchBack)
+                {
+                    StopEraserAutoSwitchBackTimer();
+                    return;
+                }
+
+                // 切换到批注模式
+                Dispatcher.Invoke(() =>
+                {
+                    PenIcon_Click(null, null);
+                    StopEraserAutoSwitchBackTimer();
+                    LogHelper.WriteLogToFile("橡皮擦自动切换回批注模式", LogHelper.LogType.Event);
+                });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"橡皮擦自动切换计时器事件处理失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
     }

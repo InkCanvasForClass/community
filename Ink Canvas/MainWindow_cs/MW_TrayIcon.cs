@@ -1,4 +1,4 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
+using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
@@ -16,15 +16,26 @@ namespace Ink_Canvas
     public partial class App : Application
     {
 
+        /// <summary>
+        /// 系统托盘菜单打开时的事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理系统托盘菜单打开时的逻辑，包括以下步骤：
+        /// 1. 获取系统托盘菜单及其相关菜单项和图标
+        /// 2. 获取主窗口实例
+        /// 3. 如果主窗口已加载：
+        ///    - 在无焦点模式下，暂时取消主窗口置顶，让系统菜单能够正常显示
+        ///    - 根据浮动栏是否处于收纳模式，更新菜单项图标和文本
+        ///    - 根据浮动栏状态和主窗口是否隐藏，更新重置浮动栏位置菜单项的启用状态
+        /// </remarks>
         private void SysTrayMenu_Opened(object sender, RoutedEventArgs e)
         {
             var s = (ContextMenu)sender;
-            var FoldFloatingBarTrayIconMenuItemIconEyeOff =
-                (Image)((Grid)((MenuItem)s.Items[s.Items.Count - 5]).Icon).Children[0];
-            var FoldFloatingBarTrayIconMenuItemIconEyeOn =
-                (Image)((Grid)((MenuItem)s.Items[s.Items.Count - 5]).Icon).Children[1];
-            var FoldFloatingBarTrayIconMenuItemHeaderText =
-                (TextBlock)((SimpleStackPanel)((MenuItem)s.Items[s.Items.Count - 5]).Header).Children[0];
+            var FoldFloatingBarTrayIconMenuItemIconEyeOff = (Image)((Grid)((MenuItem)s.Items[s.Items.Count - 5]).Icon).Children[0];
+            var FoldFloatingBarTrayIconMenuItemIconEyeOn = (Image)((Grid)((MenuItem)s.Items[s.Items.Count - 5]).Icon).Children[1];
+            var FoldFloatingBarTrayIconMenuItemHeaderText = (TextBlock)((SimpleStackPanel)((MenuItem)s.Items[s.Items.Count - 5]).Header).Children[0];
             var ResetFloatingBarPositionTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 4];
             var HideICCMainWindowTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 9];
             var mainWin = (MainWindow)Current.MainWindow;
@@ -63,6 +74,16 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 系统托盘菜单关闭时的事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理系统托盘菜单关闭时的逻辑，包括以下步骤：
+        /// 1. 获取主窗口实例
+        /// 2. 如果主窗口已加载，且在无焦点模式下启用了始终置顶，则恢复主窗口的置顶状态
+        /// </remarks>
         private void SysTrayMenu_Closed(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
@@ -76,17 +97,42 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 关闭应用程序托盘菜单项点击事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理关闭应用程序托盘菜单项的点击事件，包括以下步骤：
+        /// 1. 获取主窗口实例
+        /// 2. 如果主窗口已加载：
+        ///    - 设置IsAppExitByUser为true，表示用户主动退出
+        ///    - 关闭应用程序
+        /// </remarks>
         private void CloseAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded)
             {
                 IsAppExitByUser = true;
-                Current.Shutdown();
-                // mainWin.BtnExit_Click(null,null);
+                mainWin.BtnExit_Click(null, null);
             }
         }
 
+        /// <summary>
+        /// 重启应用程序托盘菜单项点击事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理重启应用程序托盘菜单项的点击事件，包括以下步骤：
+        /// 1. 获取主窗口实例
+        /// 2. 如果主窗口已加载：
+        ///    - 设置IsAppExitByUser为true，表示用户主动退出
+        ///    - 尝试启动应用程序的新实例，带延迟参数
+        ///    - 捕获并记录启动新实例时可能出现的异常
+        ///    - 关闭当前应用程序实例
+        /// </remarks>
         private void RestartAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
@@ -115,6 +161,18 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 强制全屏化托盘菜单项点击事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理强制全屏化托盘菜单项的点击事件，包括以下步骤：
+        /// 1. 获取主窗口实例
+        /// 2. 如果主窗口已加载：
+        ///    - 调用MoveWindow方法将主窗口移动到屏幕左上角并设置为全屏大小
+        ///    - 显示强制全屏化的消息，包含屏幕分辨率和缩放比例信息
+        /// </remarks>
         private void ForceFullScreenTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
@@ -126,6 +184,18 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 切换浮动栏收纳模式托盘菜单项点击事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理切换浮动栏收纳模式托盘菜单项的点击事件，包括以下步骤：
+        /// 1. 获取主窗口实例
+        /// 2. 如果主窗口已加载：
+        ///    - 如果浮动栏当前处于收纳模式，则调用UnFoldFloatingBar_MouseUp方法退出收纳模式
+        ///    - 否则，调用FoldFloatingBar_MouseUp方法进入收纳模式
+        /// </remarks>
         private void FoldFloatingBarTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
@@ -134,6 +204,20 @@ namespace Ink_Canvas
                 else mainWin.FoldFloatingBar_MouseUp(new object(), null);
         }
 
+        /// <summary>
+        /// 重置浮动栏位置托盘菜单项点击事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理重置浮动栏位置托盘菜单项的点击事件，包括以下步骤：
+        /// 1. 获取主窗口实例
+        /// 2. 如果主窗口已加载：
+        ///    - 检查是否处于PPT演示模式
+        ///    - 如果浮动栏当前未处于收纳模式：
+        ///       - 如果不处于PPT演示模式，调用PureViewboxFloatingBarMarginAnimationInDesktopMode方法重置浮动栏位置
+        ///       - 否则，调用PureViewboxFloatingBarMarginAnimationInPPTMode方法重置浮动栏位置
+        /// </remarks>
         private void ResetFloatingBarPositionTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
@@ -152,6 +236,23 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 隐藏主窗口托盘菜单项选中事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理隐藏主窗口托盘菜单项的选中事件，包括以下步骤：
+        /// 1. 获取菜单项和主窗口实例
+        /// 2. 如果主窗口已加载：
+        ///    - 隐藏主窗口
+        ///    - 获取系统托盘菜单
+        ///    - 禁用并设置半透明效果给以下菜单项：
+        ///       - 重置浮动栏位置
+        ///       - 切换浮动栏收纳模式
+        ///       - 强制全屏化
+        /// 3. 否则，取消菜单项的选中状态
+        /// </remarks>
         private void HideICCMainWindowTrayIconMenuItem_Checked(object sender, RoutedEventArgs e)
         {
             var mi = (MenuItem)sender;
@@ -177,6 +278,23 @@ namespace Ink_Canvas
 
         }
 
+        /// <summary>
+        /// 显示主窗口托盘菜单项取消选中事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理显示主窗口托盘菜单项的取消选中事件，包括以下步骤：
+        /// 1. 获取菜单项和主窗口实例
+        /// 2. 如果主窗口已加载：
+        ///    - 显示主窗口
+        ///    - 获取系统托盘菜单
+        ///    - 启用并设置正常透明度给以下菜单项：
+        ///       - 重置浮动栏位置
+        ///       - 切换浮动栏收纳模式
+        ///       - 强制全屏化
+        /// 3. 否则，取消菜单项的选中状态
+        /// </remarks>
         private void HideICCMainWindowTrayIconMenuItem_UnChecked(object sender, RoutedEventArgs e)
         {
             var mi = (MenuItem)sender;
@@ -201,6 +319,24 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 禁用/启用所有快捷键托盘菜单项点击事件处理方法
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 处理禁用/启用所有快捷键托盘菜单项的点击事件，包括以下步骤：
+        /// 1. 获取主窗口实例
+        /// 2. 如果主窗口已加载，尝试：
+        ///    - 通过反射获取全局快捷键管理器
+        ///    - 如果获取成功：
+        ///       - 禁用快捷键注册
+        ///       - 更新菜单项文本和状态：
+        ///          - 如果当前文本是"禁用所有快捷键"，则更改为"启用所有快捷键"并记录日志
+        ///          - 否则，更改为"禁用所有快捷键"，重新启用快捷键注册并记录日志
+        ///    - 如果获取失败，记录错误日志
+        /// 3. 捕获并记录可能出现的异常
+        /// </remarks>
         private void DisableAllHotkeysMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
@@ -209,8 +345,7 @@ namespace Ink_Canvas
                 try
                 {
                     // 获取全局快捷键管理器
-                    var hotkeyManagerField = typeof(MainWindow).GetField("_globalHotkeyManager",
-                        System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+                    var hotkeyManagerField = typeof(MainWindow).GetField("_globalHotkeyManager", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                     var hotkeyManager = hotkeyManagerField?.GetValue(mainWin) as GlobalHotkeyManager;
 
                     if (hotkeyManager != null)
