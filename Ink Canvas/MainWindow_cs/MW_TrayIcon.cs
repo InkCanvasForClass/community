@@ -3,6 +3,8 @@ using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
@@ -37,7 +39,9 @@ namespace Ink_Canvas
             var FoldFloatingBarTrayIconMenuItemIconEyeOn = (Image)((Grid)((MenuItem)s.Items[s.Items.Count - 5]).Icon).Children[1];
             var FoldFloatingBarTrayIconMenuItemHeaderText = (TextBlock)((SimpleStackPanel)((MenuItem)s.Items[s.Items.Count - 5]).Header).Children[0];
             var ResetFloatingBarPositionTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 4];
-            var HideICCMainWindowTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 9];
+            var HideICCMainWindowTrayIconMenuItem = s.Items.OfType<MenuItem>()
+                .FirstOrDefault(mi => mi.Name == "HideICCMainWindowTrayIconMenuItem");
+            if (HideICCMainWindowTrayIconMenuItem == null) return;
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin.IsLoaded)
             {
@@ -84,6 +88,92 @@ namespace Ink_Canvas
         /// 1. 获取主窗口实例
         /// 2. 如果主窗口已加载，且在无焦点模式下启用了始终置顶，则恢复主窗口的置顶状态
         /// </remarks>
+        private bool EnsureMainWindowReadyForSettings(MainWindow mainWin)
+        {
+            if (mainWin?.IsLoaded != true)
+            {
+                return false;
+            }
+
+            var trayMenu = ((TaskbarIcon)Current.Resources["TaskbarTrayIcon"]).ContextMenu;
+            var hideMainWindowMenuItem = trayMenu?.Items.OfType<MenuItem>()
+                .FirstOrDefault(mi => mi.Name == "HideICCMainWindowTrayIconMenuItem");
+
+            if (hideMainWindowMenuItem != null && hideMainWindowMenuItem.IsChecked)
+            {
+                hideMainWindowMenuItem.IsChecked = false;
+            }
+            else if (!mainWin.IsVisible)
+            {
+                mainWin.Show();
+            }
+
+            if (mainWin.WindowState == WindowState.Minimized)
+            {
+                mainWin.WindowState = WindowState.Normal;
+            }
+
+            mainWin.Activate();
+            return true;
+        }
+
+        private bool IsLegacySettingsVisible(MainWindow mainWin)
+        {
+            try
+            {
+                var borderSettingsField = typeof(MainWindow).GetField("BorderSettings", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                var borderSettings = borderSettingsField?.GetValue(mainWin) as FrameworkElement;
+                return borderSettings?.Visibility == Visibility.Visible;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void OpenNewSettingsTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
+        {
+            var mainWin = Current.MainWindow as MainWindow;
+            if (!EnsureMainWindowReadyForSettings(mainWin))
+            {
+                return;
+            }
+
+            try
+            {
+                var method = typeof(MainWindow).GetMethod("BtnOpenNewSettings_Click", BindingFlags.NonPublic | BindingFlags.Instance);
+                method?.Invoke(mainWin, new object[] { null, null });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Open new settings from tray failed: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
+        private void OpenOldSettingsTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
+        {
+            var mainWin = Current.MainWindow as MainWindow;
+            if (!EnsureMainWindowReadyForSettings(mainWin))
+            {
+                return;
+            }
+
+            if (IsLegacySettingsVisible(mainWin))
+            {
+                return;
+            }
+
+            try
+            {
+                var method = typeof(MainWindow).GetMethod("BtnSettings_Click", BindingFlags.NonPublic | BindingFlags.Instance);
+                method?.Invoke(mainWin, new object[] { null, null });
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Open old settings from tray failed: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         private void SysTrayMenu_Closed(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
