@@ -159,11 +159,21 @@ namespace Ink_Canvas
 
         internal async Task SaveAreaScreenShotToDesktop()
         {
+            var originalInkCanvasVisibility = inkCanvas.Visibility;
+            var originalInkCanvasHitTestVisible = inkCanvas.IsHitTestVisible;
             try
             {
-                // 选区截图时保留当前墨迹显示，避免“截图前清屏”的观感。
-                // 这里不再隐藏主窗口，仅等待 UI 完成一次刷新。
-                await Task.Delay(60);
+                // 选区截图时确保墨迹保持在屏幕上，避免从浮动栏触发时出现“先隐藏再截图”。
+                if (inkCanvas.Visibility != Visibility.Visible)
+                {
+                    inkCanvas.Visibility = Visibility.Visible;
+                }
+
+                // 截图仅用于显示，不改变当前工具交互语义。
+                inkCanvas.IsHitTestVisible = originalInkCanvasHitTestVisible;
+
+                // 等待一次 UI 刷新，确保可见性状态已生效。
+                await Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Render);
 
                 var screenshotResult = await ShowScreenshotSelector();
 
@@ -235,7 +245,8 @@ namespace Ink_Canvas
             }
             finally
             {
-                // no-op: 选区截图不再更改窗口可见性
+                inkCanvas.Visibility = originalInkCanvasVisibility;
+                inkCanvas.IsHitTestVisible = originalInkCanvasHitTestVisible;
             }
         }
 
