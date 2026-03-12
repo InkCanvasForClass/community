@@ -157,19 +157,70 @@ namespace Ink_Canvas
                 SaveInkCanvasStrokes(false);
         }
 
+        private struct AnnotationSuspendState
+        {
+            public bool WasInAnnotationMode;
+            public int OriginalMode;
+            public System.Windows.Media.Brush OriginalFakeBackground;
+            public double OriginalFakeBackgroundOpacity;
+            public Visibility OriginalBackgroundCoverHolderVisibility;
+            public Visibility OriginalCanvasControlsVisibility;
+            public object OriginalHideInkCanvasContent;
+        }
+
+        private AnnotationSuspendState SuspendAnnotationForAreaScreenshotIfNeeded()
+        {
+            var state = new AnnotationSuspendState
+            {
+                WasInAnnotationMode = GridTransparencyFakeBackground.Background != System.Windows.Media.Brushes.Transparent,
+                OriginalMode = currentMode,
+                OriginalFakeBackground = GridTransparencyFakeBackground.Background,
+                OriginalFakeBackgroundOpacity = GridTransparencyFakeBackground.Opacity,
+                OriginalBackgroundCoverHolderVisibility = GridBackgroundCoverHolder.Visibility,
+                OriginalCanvasControlsVisibility = StackPanelCanvasControls.Visibility,
+                OriginalHideInkCanvasContent = BtnHideInkCanvas.Content
+            };
+
+            if (!state.WasInAnnotationMode)
+            {
+                return state;
+            }
+
+            // 仅暂停批注视觉态，避免调用 BtnHideInkCanvas_Click 触发自动截图/上传及白板状态读写。
+            GridTransparencyFakeBackground.Opacity = 0;
+            GridTransparencyFakeBackground.Background = System.Windows.Media.Brushes.Transparent;
+            GridBackgroundCoverHolder.Visibility = Visibility.Collapsed;
+            StackPanelCanvasControls.Visibility = Visibility.Collapsed;
+            CheckEnableTwoFingerGestureBtnVisibility(false);
+            HideSubPanels("cursor");
+            BtnHideInkCanvas.Content = "显示\n画板";
+
+            return state;
+        }
+
+        private void RestoreAnnotationAfterAreaScreenshot(AnnotationSuspendState state)
+        {
+            if (!state.WasInAnnotationMode || currentMode != state.OriginalMode)
+            {
+                return;
+            }
+
+            GridTransparencyFakeBackground.Opacity = state.OriginalFakeBackgroundOpacity;
+            GridTransparencyFakeBackground.Background = state.OriginalFakeBackground;
+            GridBackgroundCoverHolder.Visibility = state.OriginalBackgroundCoverHolderVisibility;
+            StackPanelCanvasControls.Visibility = state.OriginalCanvasControlsVisibility;
+            CheckEnableTwoFingerGestureBtnVisibility(state.OriginalCanvasControlsVisibility == Visibility.Visible);
+            BtnHideInkCanvas.Content = state.OriginalHideInkCanvasContent;
+        }
+
         internal async Task SaveAreaScreenShotToDesktop()
         {
-            bool shouldRestoreAnnotationAfterScreenshot = false;
-            int originalMode = currentMode;
+            var annotationState = SuspendAnnotationForAreaScreenshotIfNeeded();
             try
             {
-                // 若当前处于批注状态，先退出批注再进入截图，避免状态冲突导致无法截图/无法退出。
-                if (GridTransparencyFakeBackground.Background != System.Windows.Media.Brushes.Transparent)
+                if (annotationState.WasInAnnotationMode)
                 {
-                    BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
-                    shouldRestoreAnnotationAfterScreenshot = true;
-
-                    // 等待一次 UI 刷新，确保批注状态切换已完成。
+                    // 等待一次 UI 刷新，确保批注暂停状态已完成。
                     await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Render);
                 }
 
@@ -252,13 +303,7 @@ namespace Ink_Canvas
             }
             finally
             {
-                // 截图结束后回到此前的批注状态（仅在页面模式未发生变化时恢复，避免干扰其他流程）。
-                if (shouldRestoreAnnotationAfterScreenshot &&
-                    currentMode == originalMode &&
-                    GridTransparencyFakeBackground.Background == System.Windows.Media.Brushes.Transparent)
-                {
-                    BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
-                }
+                RestoreAnnotationAfterAreaScreenshot(annotationState);
             }
         }
 
