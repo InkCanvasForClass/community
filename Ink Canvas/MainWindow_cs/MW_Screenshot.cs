@@ -159,9 +159,21 @@ namespace Ink_Canvas
 
         internal async Task SaveAreaScreenShotToDesktop()
         {
+            bool shouldRestoreAnnotationAfterScreenshot = false;
+            int originalMode = currentMode;
             try
             {
-                // 选区截图时确保墨迹保持在屏幕上，避免从浮动栏触发时出现“先隐藏再截图”。
+                // 若当前处于批注状态，先退出批注再进入截图，避免状态冲突导致无法截图/无法退出。
+                if (GridTransparencyFakeBackground.Background != System.Windows.Media.Brushes.Transparent)
+                {
+                    BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                    shouldRestoreAnnotationAfterScreenshot = true;
+
+                    // 等待一次 UI 刷新，确保批注状态切换已完成。
+                    await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Render);
+                }
+
+                // 选区截图时确保墨迹层可见，避免从浮动栏触发时出现“先隐藏再截图”。
                 if (inkCanvas.Visibility != Visibility.Visible)
                 {
                     inkCanvas.Visibility = Visibility.Visible;
@@ -237,6 +249,16 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 ShowNotification($"截图失败: {ex.Message}");
+            }
+            finally
+            {
+                // 截图结束后回到此前的批注状态（仅在页面模式未发生变化时恢复，避免干扰其他流程）。
+                if (shouldRestoreAnnotationAfterScreenshot &&
+                    currentMode == originalMode &&
+                    GridTransparencyFakeBackground.Background == System.Windows.Media.Brushes.Transparent)
+                {
+                    BtnHideInkCanvas_Click(BtnHideInkCanvas, null);
+                }
             }
         }
 
