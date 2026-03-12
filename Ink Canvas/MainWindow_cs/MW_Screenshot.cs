@@ -159,11 +159,11 @@ namespace Ink_Canvas
 
         internal async Task SaveAreaScreenShotToDesktop()
         {
-            var originalVisibility = Visibility;
             try
             {
-                Visibility = Visibility.Hidden;
-                await Task.Delay(200);
+                // 选区截图时保留当前墨迹显示，避免“截图前清屏”的观感。
+                // 这里不再隐藏主窗口，仅等待 UI 完成一次刷新。
+                await Task.Delay(60);
 
                 var screenshotResult = await ShowScreenshotSelector();
 
@@ -235,7 +235,7 @@ namespace Ink_Canvas
             }
             finally
             {
-                Visibility = originalVisibility;
+                // no-op: 选区截图不再更改窗口可见性
             }
         }
 
