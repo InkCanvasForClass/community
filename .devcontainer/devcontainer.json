@@ -1,13 +1,10 @@
 {
-  "image": "mcr.microsoft.com/devcontainers/universal:2",
-  "features": {
-    "ghcr.io/devcontainers-extra/features/cosign:1": {},
-    "ghcr.io/devcontainers/features/dotnet:2": {}
-  },
+  "image": "mcr.microsoft.com/devcontainers/dotnet",
   "postCreateCommand": "dotnet restore",
   "customizations": {
     "vscode": {
       "extensions": [
+        "ms-dotnettools.csdevkit",
         "ms-dotnettools.csharp"
       ]
     }
