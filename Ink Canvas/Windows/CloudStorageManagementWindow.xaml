@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         xmlns:controls="clr-namespace:Ink_Canvas.Windows.Controls"
         mc:Ignorable="d"
         WindowStyle="None"
@@ -192,14 +193,14 @@
                         <!-- 通用设置标签页 -->
                         <TabItem Header="通用设置" Margin="0,0,0,0">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                <ui:SimpleStackPanel Spacing="16">
+                                <ikw:SimpleStackPanel Spacing="16">
                                     <!-- 内容区域 -->
                                     <Border BorderThickness="1" 
                                             BorderBrush="{StaticResource BorderBrush}" 
                                             CornerRadius="8" 
                                             Padding="20"
                                             Background="#27272a">
-                                        <ui:SimpleStackPanel Spacing="16">
+                                        <ikw:SimpleStackPanel Spacing="16">
                                             <TextBlock Text="通用设置" 
                                                        FontSize="18" 
                                                        FontWeight="SemiBold" 
@@ -223,8 +224,8 @@
                                                        Foreground="{StaticResource TextForeground}"
                                                        Margin="0,0,0,1"/>
                                             
-                                            <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
-                                                <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                                            <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4">
+                                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                                                     <TextBlock Text="上传延迟时间：" 
                                                                FontSize="14" 
                                                                Foreground="{StaticResource TextForeground}" 
@@ -267,14 +268,14 @@
                                                                Foreground="{StaticResource TextSecondary}" 
                                                                VerticalAlignment="Center"
                                                                Margin="0,0,0,0"/>
-                                                </ui:SimpleStackPanel>
+                                                </ikw:SimpleStackPanel>
                                                 
                                                 <TextBlock Text="设置上传延迟时间（0-60分钟），所有上传提供者都将遵循此设置。" 
                                                            FontSize="12" 
                                                            Foreground="{StaticResource TextSecondary}"
                                                            TextWrapping="Wrap"
                                                            Margin="0,2,0,0"/>
-                                            </ui:SimpleStackPanel>
+                                            </ikw:SimpleStackPanel>
                                             
                                             <Border Height="1" 
                                                     Background="{StaticResource BorderBrush}" 
@@ -303,7 +304,7 @@
                                                              Padding="0">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
-                                                        <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="8,4">
+                                                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="8,4">
                                                             <TextBlock Text="{Binding Name}" 
                                                                        FontSize="14" 
                                                                        Foreground="{StaticResource TextForeground}" 
@@ -315,7 +316,7 @@
                                                                          OnContent="启用"
                                                                          OffContent="关闭"
                                                                          Toggled="ToggleProviderEnabled_Toggled"/>
-                                                        </ui:SimpleStackPanel>
+                                                        </ikw:SimpleStackPanel>
                                                     </DataTemplate>
                                                 </ItemsControl.ItemTemplate>
                                                 </ItemsControl>
@@ -327,7 +328,7 @@
                                                     Margin="0,2,0,1"/>
                                             
                                             <!-- 操作按钮 -->
-                                            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
                                                 <Button Content="保存" 
                                                         Padding="16,8" 
                                                         FontSize="14"
@@ -350,24 +351,24 @@
                                                         Click="BtnCancel_Click"
                                                         Style="{StaticResource SecondaryButtonStyle}">
                                                 </Button>
-                                            </ui:SimpleStackPanel>
-                                        </ui:SimpleStackPanel>
+                                            </ikw:SimpleStackPanel>
+                                        </ikw:SimpleStackPanel>
                                     </Border>
-                                </ui:SimpleStackPanel>
+                                </ikw:SimpleStackPanel>
                             </ScrollViewer>
                         </TabItem>
                         
                         <!-- Dlass 设置标签页 -->
                         <TabItem Header="Dlass" Tag="DlassTab" Margin="0,0,0,0">
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                <ui:SimpleStackPanel Spacing="16">
+                                <ikw:SimpleStackPanel Spacing="16">
                                     <!-- 内容区域 -->
                                     <Border BorderThickness="1" 
                                             BorderBrush="{StaticResource BorderBrush}" 
                                             CornerRadius="8" 
                                             Padding="20"
                                             Background="#27272a">
-                                        <ui:SimpleStackPanel Spacing="16">
+                                        <ikw:SimpleStackPanel Spacing="16">
                                             <TextBlock Text="云储存管理" 
                                                        FontSize="18" 
                                                        FontWeight="SemiBold" 
@@ -397,7 +398,7 @@
                                                        TextWrapping="Wrap"
                                                        Margin="0,0,0,2"/>
                                             
-                                            <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
+                                            <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4">
                                                 <ComboBox x:Name="CmbSavedTokens"
                                                           FontSize="14"
                                                           Padding="12,8"
@@ -442,7 +443,7 @@
                                                     </TextBox.Style>
                                                 </TextBox>
                                                 
-                                                <ui:SimpleStackPanel Orientation="Horizontal" Spacing="8">
+                                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="8">
                                                     <Button x:Name="BtnSaveToken" 
                                                             Content="保存Token" 
                                                             Padding="12,6" 
@@ -547,17 +548,17 @@
                                                             </Style>
                                                         </Button.Style>
                                                     </Button>
-                                                </ui:SimpleStackPanel>
+                                                </ikw:SimpleStackPanel>
                                                 
                                                 <TextBlock x:Name="TxtTokenStatus" 
                                                            Text="" 
                                                            FontSize="12" 
                                                            Foreground="{StaticResource TextSecondary}"
                                                            Margin="0,4,0,0"/>
-                                            </ui:SimpleStackPanel>
+                                            </ikw:SimpleStackPanel>
                                             
                                             <!-- 连接状态 -->
-                                            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
+                                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,4,0,0">
                                                 <TextBlock Text="连接状态：" 
                                                            FontSize="14" 
                                                            Foreground="{StaticResource TextForeground}" 
@@ -568,7 +569,7 @@
                                                            FontSize="14" 
                                                            Foreground="{StaticResource TextSecondary}"
                                                            VerticalAlignment="Center"/>
-                                            </ui:SimpleStackPanel>
+                                            </ikw:SimpleStackPanel>
                                             
                                             <Border Height="1" 
                                                     Background="{StaticResource BorderBrush}" 
@@ -613,7 +614,7 @@
                                                        Foreground="{StaticResource TextForeground}"
                                                        Margin="0,0,0,1"/>
                                             
-                                            <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
+                                            <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4">
                                                 <ui:ToggleSwitch x:Name="ToggleSwitchAutoUploadNotes"
                                                                  FontSize="14"
                                                                  Foreground="{StaticResource TextForeground}"
@@ -635,7 +636,7 @@
                                                            Foreground="{StaticResource TextSecondary}"
                                                            TextWrapping="Wrap"
                                                            Margin="0,2,0,0"/>
-                                            </ui:SimpleStackPanel>
+                                            </ikw:SimpleStackPanel>
                                             
                                             <Border Height="1" 
                                                     Background="{StaticResource BorderBrush}" 
@@ -643,7 +644,7 @@
                                                     Margin="0,2,0,1"/>
                                             
                                             <!-- 操作按钮 -->
-                                            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
                                                 <Button Content="保存" 
                                                         Padding="16,8" 
                                                         FontSize="14"
@@ -666,10 +667,10 @@
                                                         Click="BtnCancel_Click"
                                                         Style="{StaticResource SecondaryButtonStyle}">
                                                 </Button>
-                                            </ui:SimpleStackPanel>
-                                        </ui:SimpleStackPanel>
+                                            </ikw:SimpleStackPanel>
+                                        </ikw:SimpleStackPanel>
                                     </Border>
-                                </ui:SimpleStackPanel>
+                                </ikw:SimpleStackPanel>
                             </ScrollViewer>
                         </TabItem>
                         
@@ -684,14 +685,14 @@
                                 </StackPanel>
                             </TabItem.Header>
                             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                <ui:SimpleStackPanel Spacing="16">
+                                <ikw:SimpleStackPanel Spacing="16">
                                     <!-- 内容区域 -->
                                     <Border BorderThickness="1" 
                                             BorderBrush="{StaticResource BorderBrush}" 
                                             CornerRadius="8" 
                                             Padding="20"
                                             Background="#27272a">
-                                        <ui:SimpleStackPanel Spacing="16">
+                                        <ikw:SimpleStackPanel Spacing="16">
                                             <TextBlock Text="WebDav设置" 
                                                        FontSize="18" 
                                                        FontWeight="SemiBold" 
@@ -878,7 +879,7 @@
                                             </TextBox>
                                             
                                             <!-- 操作按钮 -->
-                                            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
+                                            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,8,0,0">
                                                 <Button Content="保存" 
                                                         Padding="16,8" 
                                                         FontSize="14"
@@ -901,10 +902,10 @@
                                                         Click="BtnCancelWebDav_Click"
                                                         Style="{StaticResource SecondaryButtonStyle}">
                                                 </Button>
-                                            </ui:SimpleStackPanel>
-                                        </ui:SimpleStackPanel>
+                                            </ikw:SimpleStackPanel>
+                                        </ikw:SimpleStackPanel>
                                     </Border>
-                                </ui:SimpleStackPanel>
+                                </ikw:SimpleStackPanel>
                             </ScrollViewer>
                         </TabItem>
                     </TabControl>

@@ -54,13 +54,20 @@
         "resolved": "2.0.1",
         "contentHash": "dtxmeZXzV2GzSm91aZ3hqzgoeVoARSkDPVCYfhVUNyyKBWYxMgNC0EcLiSYxD4Uc4alq/2qb3SmV8DgAENLRLQ=="
       },
+      "iNKORE.UI.WPF": {
+        "type": "Direct",
+        "requested": "[1.2.8, )",
+        "resolved": "1.2.8",
+        "contentHash": "7b+z25JFdhGAfyJqlVIF0vLbmgsRvqDZMvhGPTz20gzQigDPMqVUOoCCKB5824GtYsjFCYNilmaowb+4yWATkQ=="
+      },
       "iNKORE.UI.WPF.Modern": {
         "type": "Direct",
-        "requested": "[0.9.27, )",
-        "resolved": "0.9.27",
-        "contentHash": "Mt7KEDjYMdq7hOdPQ0accBN/X6Eb1bkgvyqs+qTGpfx9GKTVhtShbBslWplrqtKvvLsC9/6uU+bTa6rKBcO+kA==",
+        "requested": "[0.10.2.1, )",
+        "resolved": "0.10.2.1",
+        "contentHash": "nGwuuVul+TcLCTgPmaAZCc0fYFqUpCNZ8PiulVT3gZnsWt/AvxMZ0DSPpuyI/iRPc/NhFIg9lSIR7uaHWV0I/Q==",
         "dependencies": {
-          "System.ValueTuple": "4.5.0"
+          "System.ValueTuple": "4.5.0",
+          "iNKORE.UI.WPF": "1.2.8"
         }
       },
       "MdXaml": {
@@ -78,6 +85,15 @@
         "requested": "[1.0.0, )",
         "resolved": "1.0.0",
         "contentHash": "hEs/VPwGFeVNLf2Wc6k2bMYF71zE6x+lW4MfebRAjkVbAbaa4DbEmdFRfSBymvGLtdsCUvXo2aa/yFKYSCYmEQ=="
+      },
+      "Microsoft.NETFramework.ReferenceAssemblies": {
+        "type": "Direct",
+        "requested": "[1.0.3, )",
+        "resolved": "1.0.3",
+        "contentHash": "vUc9Npcs14QsyOD01tnv/m8sQUnGTGOw1BCmKcv77LBJY7OxhJ+zJF7UD/sCL3lYNFuqmQEVlkfS4Quif6FyYg==",
+        "dependencies": {
+          "Microsoft.NETFramework.ReferenceAssemblies.net472": "1.0.3"
+        }
       },
       "Microsoft.Office.Interop.PowerPoint": {
         "type": "Direct",
@@ -171,18 +187,10 @@
           "System.Threading.Tasks.Extensions": "4.5.4"
         }
       },
-      "Microsoft.NETFramework.ReferenceAssemblies": {
-        "type": "Transitive",
-        "resolved": "1.0.0",
-        "contentHash": "7D2TMufjGiowmt0E941kVoTIS+GTNzaPopuzM1/1LSaJAdJdBrVP0SkZW7AgDd0a2U1DjsIeaKG1wxGVBNLDMw==",
-        "dependencies": {
-          "Microsoft.NETFramework.ReferenceAssemblies.net472": "1.0.0"
-        }
-      },
       "Microsoft.NETFramework.ReferenceAssemblies.net472": {
         "type": "Transitive",
-        "resolved": "1.0.0",
-        "contentHash": "VI0f22cH/xOlXLUVY7t6vr2Gi7cg0vzwpspNGz5isRusyspZblF7jJMw49E8mF1m071JyeVmZVkIK9c5kbiyFA=="
+        "resolved": "1.0.3",
+        "contentHash": "0E7evZXHXaDYYiLRfpyXvCh+yzM2rNTyuZDI+ZO7UUqSc6GfjePiXTdqJGtgIKUwdI81tzQKmaWprnUiPj9hAw=="
       },
       "Microsoft.Win32.Registry": {
         "type": "Transitive",

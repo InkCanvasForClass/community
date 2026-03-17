@@ -1,6 +1,6 @@
 using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
+using iNKORE.UI.WPF.Controls;
 using System;
 using System.Diagnostics;
 using System.Windows;

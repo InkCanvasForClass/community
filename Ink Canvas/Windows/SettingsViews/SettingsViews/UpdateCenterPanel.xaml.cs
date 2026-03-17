@@ -626,7 +626,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         SecondaryButtonText = "取消"
                     };
 
-                    var panel = new iNKORE.UI.WPF.Modern.Controls.SimpleStackPanel
+                    var panel = new iNKORE.UI.WPF.Controls.SimpleStackPanel
                     {
                         Spacing = 16,
                         Margin = new Thickness(0, 10, 0, 0)

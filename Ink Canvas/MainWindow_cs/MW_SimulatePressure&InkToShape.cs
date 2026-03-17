@@ -144,8 +144,15 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
         {
+            var strokeDrawingAttributes = e.Stroke?.DrawingAttributes;
+            bool isBoardBrushStroke = strokeDrawingAttributes != null
+                                      && !strokeDrawingAttributes.IsHighlighter
+                                      && strokeDrawingAttributes.StylusTip == StylusTip.Rectangle
+                                      && Math.Abs(strokeDrawingAttributes.Width - BoardBrushInkWidth) < 0.01
+                                      && Math.Abs(strokeDrawingAttributes.Height - BoardBrushInkHeight) < 0.01;
+
             // 检查是否启用墨迹渐隐功能
-            if (Settings.Canvas.EnableInkFade)
+            if (Settings.Canvas.EnableInkFade && !isBoardBrushStroke)
             {
                 // 获取墨迹的起点和终点
                 var startPoint = e.Stroke.StylusPoints.Count > 0 ? e.Stroke.StylusPoints[0].ToPoint() : new Point();

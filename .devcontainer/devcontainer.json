@@ -1,0 +1,12 @@
+{
+  "image": "mcr.microsoft.com/devcontainers/dotnet",
+  "postCreateCommand": "dotnet restore",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.csharp"
+      ]
+    }
+  }
+}

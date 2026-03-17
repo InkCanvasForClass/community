@@ -1252,27 +1252,41 @@ namespace Ink_Canvas
                         return;
                     }
                 }
-                
-                if (isStartupComplete && (DateTime.Now - lastHeartbeat).TotalSeconds > 10)
+
+                if (isStartupComplete)
                 {
-                    LogHelper.NewLog("检测到主线程无响应，自动重启。");
-                    SyncCrashActionFromSettings();
-                    if (CrashAction == CrashActionType.SilentRestart)
+                    var now = DateTime.Now;
+                    var sinceHeartbeat = now - lastHeartbeat;
+                    var sinceStartupComplete = startupCompleteHeartbeat == DateTime.MinValue
+                        ? TimeSpan.Zero
+                        : now - startupCompleteHeartbeat;
+
+                    if (sinceStartupComplete.TotalSeconds < 30)
                     {
-                        StartupCount.Increment();
-                        if (StartupCount.GetCount() >= 5)
+                        return;
+                    }
+
+                    if (sinceHeartbeat.TotalSeconds > 10)
+                    {
+                        LogHelper.NewLog("检测到主线程无响应，自动重启。");
+                        SyncCrashActionFromSettings();
+                        if (CrashAction == CrashActionType.SilentRestart)
                         {
-                            MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
-                            StartupCount.Reset();
+                            StartupCount.Increment();
+                            if (StartupCount.GetCount() >= 5)
+                            {
+                                MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                                StartupCount.Reset();
+                                Environment.Exit(1);
+                            }
+                            try
+                            {
+                                string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                                Process.Start(exePath);
+                            }
+                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                             Environment.Exit(1);
                         }
-                        try
-                        {
-                            string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                            Process.Start(exePath);
-                        }
-                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                        Environment.Exit(1);
                     }
                 }
             }, null, 0, 3000);

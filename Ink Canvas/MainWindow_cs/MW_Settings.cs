@@ -4352,7 +4352,7 @@ namespace Ink_Canvas
                 Text = "方案名称",
                 Margin = new Thickness(0, 0, 0, 8)
             };
-            var content = new iNKORE.UI.WPF.Modern.Controls.SimpleStackPanel { Spacing = 6 };
+            var content = new iNKORE.UI.WPF.Controls.SimpleStackPanel { Spacing = 6 };
             content.Children.Add(label);
             content.Children.Add(input);
             var dialog = new iNKORE.UI.WPF.Modern.Controls.ContentDialog

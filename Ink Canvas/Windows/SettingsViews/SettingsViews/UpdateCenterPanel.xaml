@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
              mc:Ignorable="d" 
              d:DesignHeight="950" d:DesignWidth="640">
@@ -70,7 +71,7 @@
                                     <StackPanel>
                                         <TextBlock Foreground="#2e3436" FontSize="16" FontWeight="SemiBold" Text="可用更新" Margin="0,0,0,8"/>
                                         <TextBlock Name="LatestVersionText" Foreground="#878787" FontSize="14" Text="" TextWrapping="Wrap" Margin="0,0,0,16"/>
-                                        <ui:SimpleStackPanel Orientation="Vertical" Spacing="12">
+                                        <ikw:SimpleStackPanel Orientation="Vertical" Spacing="12">
                                             <Button Name="UpdateNowButton" Content="立即下载并安装" HorizontalAlignment="Left" Padding="20,10" FontSize="14" FontWeight="SemiBold" Cursor="Hand" Click="UpdateNowButton_Click" Background="#2563eb" Foreground="White" BorderThickness="0" Height="40" MinWidth="200">
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
@@ -142,7 +143,7 @@
                                                     </ControlTemplate>
                                                 </Button.Template>
                                             </Button>
-                                        </ui:SimpleStackPanel>
+                                        </ikw:SimpleStackPanel>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>

@@ -66,7 +66,10 @@ namespace Ink_Canvas.Helpers
         private volatile bool _cachedIsInSlideShow;
         private readonly object _lockObject = new object();
         private bool _disposed;
-        private static bool IsPptBusyHResult(uint hr) => hr == 0x80010001 || hr == 0x8001010A; 
+        private static bool IsPptBusyHResult(uint hr) => hr == 0x80010001 || hr == 0x8001010A;
+        private const int ConnectionCheckIntervalTicks = 3;
+        private const int SlideShowCheckIntervalTicks = 2;
+        private const int WpsCheckIntervalTicks = 6;
         #endregion
 
         #region Constructor & Initialization
@@ -77,7 +80,7 @@ namespace Ink_Canvas.Helpers
 
         private void InitializeConnectionTimer()
         {
-            _unifiedPptTimer = new Timer(500);
+            _unifiedPptTimer = new Timer(2000);
             _unifiedPptTimer.Elapsed += OnUnifiedPptTimerElapsed;
             _unifiedPptTimer.AutoReset = true;
         }
@@ -114,14 +117,20 @@ namespace Ink_Canvas.Helpers
             {
                 var tick = Interlocked.Increment(ref _monitorTickCount);
 
-                CheckAndConnectToPPT();
+                // 降低连接检查频率：默认每 3 个 tick（约 3 秒）才检查一次
+                if (tick % ConnectionCheckIntervalTicks == 0)
+                {
+                    CheckAndConnectToPPT();
+                }
 
                 if (IsConnected)
                 {
-                    if (tick % 2 == 0)
+                    // 放映状态检查频率降为每 2 个 tick（约 2 秒）
+                    if (tick % SlideShowCheckIntervalTicks == 0)
                         CheckSlideShowState();
 
-                    if (_isWpsMonitoringEnabled && tick % 4 == 0)
+                    // WPS 进程检查频率降为每 6 个 tick（约 6 秒）
+                    if (_isWpsMonitoringEnabled && tick % WpsCheckIntervalTicks == 0)
                         CheckWpsProcess();
                 }
 
@@ -655,7 +664,7 @@ namespace Ink_Canvas.Helpers
                     catch (COMException comEx)
                     {
                         var hr = (uint)comEx.HResult;
-                        if (hr == 0x8001010E || hr == 0x80004005)
+                        if (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706B5 || hr == 0x80048240)
                         {
                             CurrentPresentation = null;
                             CurrentSlides = null;
@@ -1085,7 +1094,7 @@ namespace Ink_Canvas.Helpers
                 var hr = (uint)comEx.HResult;
                 if (!IsPptBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
                     DisconnectFromPPT();
-                if (!IsPptBusyHResult(hr))
+                if (!IsPptBusyHResult(hr) && hr != 0x80048240)
                     LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {comEx.Message}", LogHelper.LogType.Warning);
                 return CurrentPresentation;
             }

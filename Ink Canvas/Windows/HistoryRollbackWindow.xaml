@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
         mc:Ignorable="d"
         ui:WindowHelper.UseModernWindowStyle="False"
@@ -132,20 +133,20 @@
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Background="Transparent">
             <!-- 主内容区域 -->
-            <ui:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0" Margin="20">
+            <ikw:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0" Margin="20">
             <!-- 标题区域 -->
-            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
+            <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,16">
                 <Border Background="{DynamicResource PrimaryBrush}" CornerRadius="16" Padding="12" Margin="0,0,0,0">
                     <ui:SymbolIcon Symbol="Undo" FontSize="20" Foreground="White" 
                                   VerticalAlignment="Center"/>
                 </Border>
-                <ui:SimpleStackPanel VerticalAlignment="Center" Spacing="4">
+                <ikw:SimpleStackPanel VerticalAlignment="Center" Spacing="4">
                     <TextBlock Text="历史版本回滚" FontSize="22" FontWeight="Bold" 
                              Foreground="{DynamicResource TextPrimaryBrush}"/>
                     <TextBlock Text="选择要回滚到的历史版本" FontSize="14" 
                              Foreground="{DynamicResource TextSecondaryBrush}"/>
-                </ui:SimpleStackPanel>
-            </ui:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
+            </ikw:SimpleStackPanel>
             
             <!-- 版本选择卡片 -->
             <Border Background="{DynamicResource SettingsPageBackground}" 
@@ -157,14 +158,14 @@
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="0" Opacity="0.05"/>
                 </Border.Effect>
-                <ui:SimpleStackPanel Spacing="16">
+                <ikw:SimpleStackPanel Spacing="16">
                     <TextBlock Text="选择版本" FontSize="16" FontWeight="SemiBold" 
                              Foreground="{DynamicResource TextPrimaryBrush}"/>
                     <ComboBox x:Name="VersionComboBox" 
                                 Width="300" Height="40" 
                                 DisplayMemberPath="Version" 
                                 SelectionChanged="VersionComboBox_SelectionChanged"/>
-                </ui:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
             </Border>
             
             <!-- 发布说明卡片 -->
@@ -177,7 +178,7 @@
                 <Border.Effect>
                     <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="0" Opacity="0.05"/>
                 </Border.Effect>
-                <ui:SimpleStackPanel Spacing="16">
+                <ikw:SimpleStackPanel Spacing="16">
                     <TextBlock Text="版本更新说明" FontSize="16" FontWeight="SemiBold" 
                              Foreground="{DynamicResource TextPrimaryBrush}"/>
                     <Border Background="{DynamicResource SettingsPageBackground}" 
@@ -196,11 +197,11 @@
                                                       MarkdownStyleName="GithubLike"/>
                         </ScrollViewer>
                     </Border>
-                </ui:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
             </Border>
             
             <!-- 操作按钮区域 -->
-            <ui:SimpleStackPanel Spacing="16" Margin="0,0,0,16">
+            <ikw:SimpleStackPanel Spacing="16" Margin="0,0,0,16">
                 <Button x:Name="RollbackButton" 
                       Content="回滚到此版本" 
                       HorizontalAlignment="Center"
@@ -221,7 +222,7 @@
                     <Border.Effect>
                         <DropShadowEffect Color="#000000" BlurRadius="8" ShadowDepth="0" Opacity="0.05"/>
                     </Border.Effect>
-                    <ui:SimpleStackPanel Spacing="12">
+                    <ikw:SimpleStackPanel Spacing="12">
                         <ProgressBar x:Name="DownloadProgressBar" 
                                    Width="300" Height="8" 
                                    Minimum="0" Maximum="100" Value="0"/>
@@ -230,10 +231,10 @@
                                  FontSize="14" 
                                  Foreground="{DynamicResource TextPrimaryBrush}" 
                                  HorizontalAlignment="Center"/>
-                    </ui:SimpleStackPanel>
+                    </ikw:SimpleStackPanel>
                 </Border>
-            </ui:SimpleStackPanel>
-        </ui:SimpleStackPanel>
+            </ikw:SimpleStackPanel>
+        </ikw:SimpleStackPanel>
         </Grid>
     </ScrollViewer>
 </Window>

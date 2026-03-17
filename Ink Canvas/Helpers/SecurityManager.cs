@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Controls;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Security.Cryptography;

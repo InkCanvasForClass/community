@@ -8,7 +8,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
-using ui = iNKORE.UI.WPF.Modern.Controls;
+using ui = iNKORE.UI.WPF.Controls;
 
 namespace Ink_Canvas
 {

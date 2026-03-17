@@ -466,6 +466,15 @@ jobs:
           # 读取git-cliff生成的changelog内容
           originalChangelog="${{ needs.prepare.outputs.changelog }}"
           
+          # 检查是否为预发布版本，如果是则添加警告提示
+          if [ "${{ needs.prepare.outputs.is_prerelease }}" = "true" ]; then
+            warningText=$'\n> [!CAUTION]\n'
+            warningText+=$'> **注意：此版本为预览或测试版**\n'
+            warningText+=$'> \n'
+            warningText+=$'> 请注意，这是一个预览/测试版本，使用时可能出现BUG，常规用户建议使用预览版或正式版\n\n'
+            originalChangelog="${warningText}${originalChangelog}"
+          fi
+          
           # 构建文件信息表格
           fileTable=$'\n## 文件信息 (File Information)\n'
           fileTable+=$'| 文件名 | 大小 |\n'

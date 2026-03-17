@@ -150,7 +150,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
-    <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.9.27" />
+    <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
+    <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
     <PackageReference Include="Microsoft.Office.Interop.PowerPoint" Version="15.0.4420.1018" />
     <PackageReference Include="MicrosoftOfficeCore" Version="15.0.0" />
@@ -159,6 +160,7 @@
     <PackageReference Include="Sentry" Version="6.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="NHotkey.Wpf" Version="4.0.0" />
     <PackageReference Include="OSVersionExt" Version="4.1.0" />
@@ -168,7 +170,7 @@
     <PackageReference Include="AForge.Math" Version="2.2.5" />
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
     <COMReference Include="IWshRuntimeLibrary">
       <Guid>{F935DC20-1CF0-11D0-ADB9-00C04FD58A0B}</Guid>
       <VersionMajor>1</VersionMajor>
@@ -187,15 +189,18 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
-    <COMReference Include="VBIDE">
-      <Guid>{0002E157-0000-0000-C000-000000000046}</Guid>
-      <VersionMajor>5</VersionMajor>
-      <VersionMinor>3</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>primary</WrapperTool>
-      <Isolated>False</Isolated>
+  </ItemGroup>
+  <ItemGroup Condition="'$(MSBuildRuntimeType)' != 'Full'">
+    <Reference Include="Interop.IWshRuntimeLibrary">
+      <HintPath>libs\Interop.IWshRuntimeLibrary.dll</HintPath>
+      <Private>False</Private>
       <EmbedInteropTypes>True</EmbedInteropTypes>
-    </COMReference>
+    </Reference>
+    <Reference Include="Interop.stdole">
+      <HintPath>libs\Interop.stdole.dll</HintPath>
+      <Private>False</Private>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\TimerDownNotice.wav" />
@@ -572,8 +577,11 @@
     <Compile Remove="AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Strings.en-US.resx">
-      <LogicalName>Ink_Canvas.Properties.Strings.en-US.resources</LogicalName>
+    <EmbeddedResource Remove="Properties\Strings.en-US.resx" />
+    <EmbeddedResource Remove="**\Strings.en-US.resx" />
+    <None Include="Properties\Strings.en-US.resx" />
+    <EmbeddedResource Include="Properties\Strings.enUS.xml">
+      <LogicalName>Ink_Canvas.Properties.Strings.enUS.xml</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
