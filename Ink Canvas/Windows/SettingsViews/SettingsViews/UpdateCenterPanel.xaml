@@ -27,7 +27,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="UpdateCenterScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+        <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="UpdateCenterScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2" PanningMode="VerticalOnly">
             <StackPanel Margin="60,12,60,24">
                 <TextBlock Foreground="#2e3436" FontSize="28" FontWeight="Bold" Text="更新中心" Margin="0,0,0,24"/>
                 

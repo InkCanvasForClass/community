@@ -192,7 +192,7 @@
                         
                         <!-- 通用设置标签页 -->
                         <TabItem Header="通用设置" Margin="0,0,0,0">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsManipulationEnabled="True" PanningMode="VerticalOnly">
                                 <ikw:SimpleStackPanel Spacing="16">
                                     <!-- 内容区域 -->
                                     <Border BorderThickness="1" 
@@ -360,7 +360,7 @@
                         
                         <!-- Dlass 设置标签页 -->
                         <TabItem Header="Dlass" Tag="DlassTab" Margin="0,0,0,0">
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsManipulationEnabled="True" PanningMode="VerticalOnly">
                                 <ikw:SimpleStackPanel Spacing="16">
                                     <!-- 内容区域 -->
                                     <Border BorderThickness="1" 
@@ -684,7 +684,7 @@
                                     </Border>
                                 </StackPanel>
                             </TabItem.Header>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsManipulationEnabled="True" PanningMode="VerticalOnly">
                                 <ikw:SimpleStackPanel Spacing="16">
                                     <!-- 内容区域 -->
                                     <Border BorderThickness="1" 

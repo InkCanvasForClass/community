@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Ink_Canvas.Windows.SettingsViews.AboutPanel"
+<UserControl x:Class="Ink_Canvas.Windows.SettingsViews.AboutPanel"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -64,7 +64,7 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="AboutScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+        <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="AboutScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2" PanningMode="VerticalOnly">
             <StackPanel Margin="0,12,0,24" HorizontalAlignment="Center" Width="524">
                 <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
                     <Image Name="CopyrightBannerImage"/>
