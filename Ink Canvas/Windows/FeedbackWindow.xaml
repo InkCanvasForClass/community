@@ -1,0 +1,64 @@
+<Window x:Class="Ink_Canvas.FeedbackWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Ink_Canvas"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        mc:Ignorable="d" Topmost="True" WindowStartupLocation="CenterScreen" ui:WindowHelper.UseModernWindowStyle="True"
+        ResizeMode="NoResize" ui:ThemeManager.RequestedTheme="Light"
+        Title="反馈问题 - Ink Canvas For Class CE" Height="500" Width="600" FontFamily="Microsoft YaHei UI">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Text="选择要包含的信息"/>
+                
+                <Border BorderBrush="#e0e0e0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,15" Padding="15">
+                    <StackPanel>
+                        <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Text="软件信息"/>
+                        <CheckBox x:Name="CheckBoxAppVersion" IsChecked="True" Margin="0,5,0,5" Content="软件版本" FontSize="13"/>
+                        <CheckBox x:Name="CheckBoxUpdateChannel" IsChecked="True" Margin="0,5,0,5" Content="更新通道" FontSize="13"/>
+                        <TextBlock x:Name="TextAppVersionInfo" Text="v1.7.18.4 (Release)" Margin="30,0,0,5" FontSize="12" Foreground="#666666" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border BorderBrush="#e0e0e0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,15" Padding="15">
+                    <StackPanel>
+                        <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Text="系统信息"/>
+                        <CheckBox x:Name="CheckBoxOSVersion" IsChecked="True" Margin="0,5,0,5" Content="操作系统版本" FontSize="13"/>
+                        <CheckBox x:Name="CheckBoxNetVersion" IsChecked="True" Margin="0,5,0,5" Content=".NET 版本" FontSize="13"/>
+                        <CheckBox x:Name="CheckBoxTouchSupport" IsChecked="True" Margin="0,5,0,5" Content="触控支持" FontSize="13"/>
+                        <TextBlock x:Name="TextSystemInfo" Text="Windows 10 专业版 19045.3758 | .NET 8.0.0 | 触控:支持(2个设备)" Margin="30,0,0,5" FontSize="12" Foreground="#666666" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+
+                <Border BorderBrush="#e0e0e0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,15" Padding="15">
+                    <StackPanel>
+                        <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Text="设备信息"/>
+                        <CheckBox x:Name="CheckBoxDeviceId" IsChecked="False" Margin="0,5,0,5" Content="设备 ID" FontSize="13"/>
+                        <TextBlock x:Name="TextDeviceInfo" Text="设备ID: xxxxxxxxxxxxxx" Margin="30,0,0,5" FontSize="12" Foreground="#666666" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <Grid Grid.Row="1" VerticalAlignment="Bottom">
+            <ikw:SimpleStackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
+                <Button Content="取消" Width="100" Height="35" FontFamily="Microsoft YaHei UI" FontSize="14" Click="ButtonCancel_Click" Foreground="#555555"/>
+                <Button Content="提交反馈" Width="120" Height="35" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="Bold" Click="ButtonSubmit_Click" Foreground="White">
+                    <Button.Resources>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#3b82f6"/>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#2563eb"/>
+                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#1d4ed8"/>
+                    </Button.Resources>
+                </Button>
+            </ikw:SimpleStackPanel>
+        </Grid>
+    </Grid>
+</Window>
