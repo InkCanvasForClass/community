@@ -460,6 +460,103 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
         }
 
+        private void BtnReportIssue_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string version = "";
+                string updateChannel = "";
+                string osInfo = "";
+                string netVersion = "";
+                string touchSupport = "";
+
+                try
+                {
+                    var assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version;
+                    version = $"v{assemblyVersion}";
+                }
+                catch (Exception ex)
+                {
+                    version = "未知";
+                    System.Diagnostics.Debug.WriteLine($"获取软件版本失败: {ex.Message}");
+                }
+
+                try
+                {
+                    if (MainWindow.Settings?.Startup != null)
+                    {
+                        updateChannel = MainWindow.Settings.Startup.UpdateChannel.ToString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    updateChannel = "未知";
+                    System.Diagnostics.Debug.WriteLine($"获取更新通道失败: {ex.Message}");
+                }
+
+                try
+                {
+                    osInfo = $"{OSVersion.GetOperatingSystem()} {OSVersion.GetOSVersion().Version}";
+                }
+                catch (Exception ex)
+                {
+                    osInfo = "未知";
+                    System.Diagnostics.Debug.WriteLine($"获取系统版本失败: {ex.Message}");
+                }
+
+                try
+                {
+                    netVersion = RuntimeInformation.FrameworkDescription;
+                }
+                catch (Exception ex)
+                {
+                    netVersion = "未知";
+                    System.Diagnostics.Debug.WriteLine($"获取.NET版本失败: {ex.Message}");
+                }
+
+                try
+                {
+                    var support = TouchTabletDetectHelper.IsTouchEnabled();
+                    var touchcount = TouchTabletDetectHelper.GetTouchTabletDevices().Count;
+                    if (support)
+                    {
+                        if (touchcount > 0)
+                        {
+                            touchSupport = $"支持({touchcount}个设备)";
+                        }
+                        else
+                        {
+                            touchSupport = "支持";
+                        }
+                    }
+                    else
+                    {
+                        touchSupport = "不支持";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    touchSupport = "未知";
+                    System.Diagnostics.Debug.WriteLine($"获取触控支持失败: {ex.Message}");
+                }
+
+                string versionInfo = $"{version} ({updateChannel})";
+                string systemInfo = $"{osInfo} | {netVersion} | 触控:{touchSupport}";
+
+                string url = $"https://github.com/InkCanvasForClass/community/issues/new?template=01-bug_report.yml&version={Uri.EscapeDataString(versionInfo)}&os={Uri.EscapeDataString(systemInfo)}";
+
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"打开反馈链接失败: {ex.Message}");
+            }
+        }
+
         /// <summary>
         /// 应用主题
         /// </summary>
