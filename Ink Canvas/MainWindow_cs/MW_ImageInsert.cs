@@ -30,15 +30,17 @@ namespace Ink_Canvas
         public Bitmap CameraImage;
         public BitmapSource CameraBitmapSource;
         public bool AddToWhiteboard;
+        public bool IncludeInk;
 
         public ScreenshotResult(Rectangle area, List<Point> path = null, Bitmap cameraImage = null,
-            BitmapSource cameraBitmapSource = null, bool addToWhiteboard = false)
+            BitmapSource cameraBitmapSource = null, bool addToWhiteboard = false, bool includeInk = true)
         {
             Area = area;
             Path = path;
             CameraImage = cameraImage;
             CameraBitmapSource = cameraBitmapSource;
             AddToWhiteboard = addToWhiteboard;
+            IncludeInk = includeInk;
         }
     }
 
@@ -95,7 +97,7 @@ namespace Ink_Canvas
                     else if (screenshotResult.Value.Area.Width > 0 && screenshotResult.Value.Area.Height > 0)
                     {
                         // 屏幕截图
-                        using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
+                        using (var originalBitmap = CaptureScreenAreaWithOptionalInk(screenshotResult.Value.Area, screenshotResult.Value.IncludeInk))
                         {
                             if (originalBitmap != null)
                             {
@@ -218,7 +220,8 @@ namespace Ink_Canvas
                                 null, // 摄像头截图不需要路径
                                 null, // 不再使用Bitmap
                                 selectorWindow.CameraBitmapSource, // 摄像头BitmapSource
-                                selectorWindow.ShouldAddToWhiteboard
+                                selectorWindow.ShouldAddToWhiteboard,
+                                selectorWindow.ShouldIncludeInk
                             );
                         }
                         else if (selectorWindow.CameraImage != null)
@@ -228,7 +231,8 @@ namespace Ink_Canvas
                                 null, // 摄像头截图不需要路径
                                 selectorWindow.CameraImage, // 摄像头图像
                                 null,
-                                selectorWindow.ShouldAddToWhiteboard
+                                selectorWindow.ShouldAddToWhiteboard,
+                                selectorWindow.ShouldIncludeInk
                             );
                         }
                         else
@@ -238,7 +242,8 @@ namespace Ink_Canvas
                                 selectorWindow.SelectedPath,
                                 null,
                                 null,
-                                selectorWindow.ShouldAddToWhiteboard
+                                selectorWindow.ShouldAddToWhiteboard,
+                                selectorWindow.ShouldIncludeInk
                             );
                         }
                     }
@@ -301,6 +306,66 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"截取屏幕区域失败: {ex.Message}", LogHelper.LogType.Error);
                 return null;
+            }
+        }
+
+        private Bitmap CaptureScreenAreaWithOptionalInk(Rectangle area, bool includeInk)
+        {
+            var bitmap = CaptureScreenArea(area);
+            if (bitmap == null || !includeInk || inkCanvas == null || inkCanvas.Strokes.Count == 0)
+            {
+                return bitmap;
+            }
+
+            try
+            {
+                OverlayInkStrokesOnBitmap(bitmap, area);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"叠加墨迹到截图失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            return bitmap;
+        }
+
+        private void OverlayInkStrokesOnBitmap(Bitmap bitmap, Rectangle area)
+        {
+            var source = PresentationSource.FromVisual(inkCanvas);
+            if (source?.CompositionTarget == null)
+            {
+                return;
+            }
+
+            var dpiTransform = source.CompositionTarget.TransformToDevice;
+            var inkTopLeft = inkCanvas.PointToScreen(new Point(0, 0));
+            var offsetX = inkTopLeft.X * dpiTransform.M11 - area.X;
+            var offsetY = inkTopLeft.Y * dpiTransform.M22 - area.Y;
+
+            var drawingVisual = new DrawingVisual();
+            using (var drawingContext = drawingVisual.RenderOpen())
+            {
+                drawingContext.PushTransform(new TranslateTransform(offsetX, offsetY));
+                inkCanvas.Strokes.Draw(drawingContext);
+                drawingContext.Pop();
+            }
+
+            var renderBitmap = new RenderTargetBitmap(bitmap.Width, bitmap.Height, 96, 96, PixelFormats.Pbgra32);
+            renderBitmap.Render(drawingVisual);
+
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+
+            using (var memoryStream = new MemoryStream())
+            {
+                encoder.Save(memoryStream);
+                memoryStream.Position = 0;
+                using (var overlayBitmap = new Bitmap(memoryStream))
+                using (var graphics = Graphics.FromImage(bitmap))
+                {
+                    graphics.CompositingMode = CompositingMode.SourceOver;
+                    graphics.DrawImage(overlayBitmap, 0, 0, bitmap.Width, bitmap.Height);
+                }
             }
         }
 

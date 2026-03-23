@@ -55,6 +55,7 @@ namespace Ink_Canvas
         public Bitmap CameraImage { get; private set; }
         public System.Windows.Media.Imaging.BitmapSource CameraBitmapSource { get; private set; }
         public bool ShouldAddToWhiteboard { get; private set; }
+        public bool ShouldIncludeInk { get; private set; } = true;
 
         public ScreenshotSelectorWindow()
         {
@@ -527,6 +528,16 @@ namespace Ink_Canvas
             }
 
             ConfirmSelection();
+        }
+
+        private void IncludeInkCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            ShouldIncludeInk = true;
+        }
+
+        private void IncludeInkCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ShouldIncludeInk = false;
         }
 
         private void ConfirmCameraCapture()
