@@ -1344,10 +1344,22 @@ namespace Ink_Canvas.Helpers
             catch { }
         }
 
+        private static bool IsObjectNull(object comObject)
+        {
+            return ReferenceEquals(comObject, null);
+        }
+
         private void DisconnectFromPPT()
         {
-            if (PPTApplication == null && _pptActivePresentation == null && _pptSlideShowWindow == null &&
-                CurrentPresentation == null && CurrentSlides == null && CurrentSlide == null)
+            object pptApplication = PPTApplication;
+            object activePresentation = _pptActivePresentation;
+            object slideShowWindow = _pptSlideShowWindow;
+            object currentPresentation = CurrentPresentation;
+            object currentSlides = CurrentSlides;
+            object currentSlide = CurrentSlide;
+
+            if (IsObjectNull(pptApplication) && IsObjectNull(activePresentation) && IsObjectNull(slideShowWindow) &&
+                IsObjectNull(currentPresentation) && IsObjectNull(currentSlides) && IsObjectNull(currentSlide))
             {
                 return;
             }
