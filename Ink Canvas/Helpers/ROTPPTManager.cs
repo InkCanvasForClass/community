@@ -1410,11 +1410,23 @@ namespace Ink_Canvas.Helpers
                             {
                                 LogHelper.WriteLogToFile("PPTApplication COM对象已失效，跳过释放", LogHelper.LogType.Trace);
                             }
+                            catch (COMException comEx) when (IsIgnorableDisconnectComException(comEx))
+                            {
+                                LogHelper.WriteLogToFile(
+                                    $"PPTApplication COM对象在断开连接时已不可用，跳过释放 (HR: 0x{(uint)comEx.HResult:X8})",
+                                    LogHelper.LogType.Trace);
+                            }
                         }
                     }
                     catch (InvalidComObjectException)
                     {
                         LogHelper.WriteLogToFile("PPTApplication COM对象已失效，跳过释放", LogHelper.LogType.Trace);
+                    }
+                    catch (COMException comEx) when (IsIgnorableDisconnectComException(comEx))
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"释放PPTApplication时检测到COM对象已不可用，跳过释放 (HR: 0x{(uint)comEx.HResult:X8})",
+                            LogHelper.LogType.Trace);
                     }
                     catch (Exception ex)
                     {
@@ -1500,6 +1512,13 @@ namespace Ink_Canvas.Helpers
                         LogHelper.WriteLogToFile($"COM对象 {objectName} 已失效，跳过释放", LogHelper.LogType.Trace);
                         return;
                     }
+                    catch (COMException comEx) when (IsIgnorableDisconnectComException(comEx))
+                    {
+                        LogHelper.WriteLogToFile(
+                            $"COM对象 {objectName} 在释放前已不可用，跳过释放 (HR: 0x{(uint)comEx.HResult:X8})",
+                            LogHelper.LogType.Trace);
+                        return;
+                    }
 
                     int refCount = Marshal.ReleaseComObject(comObject);
                     LogHelper.WriteLogToFile($"已释放COM对象 {objectName}，引用计数: {refCount}", LogHelper.LogType.Trace);
@@ -1513,12 +1532,22 @@ namespace Ink_Canvas.Helpers
             catch (COMException comEx)
             {
                 var hr = (uint)comEx.HResult;
-                LogHelper.WriteLogToFile($"释放COM对象 {objectName} 时COM异常: {comEx.Message} (HR: 0x{hr:X8})", LogHelper.LogType.Warning);
+                var logType = IsIgnorableDisconnectComException(comEx) ? LogHelper.LogType.Trace : LogHelper.LogType.Warning;
+                LogHelper.WriteLogToFile($"释放COM对象 {objectName} 时COM异常: {comEx.Message} (HR: 0x{hr:X8})", logType);
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"释放COM对象 {objectName} 时发生异常: {ex}", LogHelper.LogType.Warning);
             }
+        }
+
+        private static bool IsIgnorableDisconnectComException(COMException comEx)
+        {
+            var hr = (uint)comEx.HResult;
+            return hr == 0x800706BA || // RPC server unavailable
+                   hr == 0x80010108 || // object disconnected from clients
+                   hr == 0x8001010D || // server died
+                   hr == 0x800706BE;   // remote procedure call failed
         }
 
         private void UpdateCurrentPresentationInfo()
@@ -3514,6 +3543,5 @@ namespace Ink_Canvas.Helpers
         #endregion
     }
 }
-
 
 
