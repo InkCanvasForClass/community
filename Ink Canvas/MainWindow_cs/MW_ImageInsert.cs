@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
+using System.Windows.Ink;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -30,15 +31,17 @@ namespace Ink_Canvas
         public Bitmap CameraImage;
         public BitmapSource CameraBitmapSource;
         public bool AddToWhiteboard;
+        public bool IncludeInk;
 
         public ScreenshotResult(Rectangle area, List<Point> path = null, Bitmap cameraImage = null,
-            BitmapSource cameraBitmapSource = null, bool addToWhiteboard = false)
+            BitmapSource cameraBitmapSource = null, bool addToWhiteboard = false, bool includeInk = true)
         {
             Area = area;
             Path = path;
             CameraImage = cameraImage;
             CameraBitmapSource = cameraBitmapSource;
             AddToWhiteboard = addToWhiteboard;
+            IncludeInk = includeInk;
         }
     }
 
@@ -95,7 +98,7 @@ namespace Ink_Canvas
                     else if (screenshotResult.Value.Area.Width > 0 && screenshotResult.Value.Area.Height > 0)
                     {
                         // 屏幕截图
-                        using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
+                        using (var originalBitmap = CaptureScreenAreaWithOptionalInk(screenshotResult.Value.Area, screenshotResult.Value.IncludeInk))
                         {
                             if (originalBitmap != null)
                             {
@@ -218,7 +221,8 @@ namespace Ink_Canvas
                                 null, // 摄像头截图不需要路径
                                 null, // 不再使用Bitmap
                                 selectorWindow.CameraBitmapSource, // 摄像头BitmapSource
-                                selectorWindow.ShouldAddToWhiteboard
+                                selectorWindow.ShouldAddToWhiteboard,
+                                selectorWindow.ShouldIncludeInk
                             );
                         }
                         else if (selectorWindow.CameraImage != null)
@@ -228,7 +232,8 @@ namespace Ink_Canvas
                                 null, // 摄像头截图不需要路径
                                 selectorWindow.CameraImage, // 摄像头图像
                                 null,
-                                selectorWindow.ShouldAddToWhiteboard
+                                selectorWindow.ShouldAddToWhiteboard,
+                                selectorWindow.ShouldIncludeInk
                             );
                         }
                         else
@@ -238,7 +243,8 @@ namespace Ink_Canvas
                                 selectorWindow.SelectedPath,
                                 null,
                                 null,
-                                selectorWindow.ShouldAddToWhiteboard
+                                selectorWindow.ShouldAddToWhiteboard,
+                                selectorWindow.ShouldIncludeInk
                             );
                         }
                     }
@@ -301,6 +307,108 @@ namespace Ink_Canvas
             {
                 LogHelper.WriteLogToFile($"截取屏幕区域失败: {ex.Message}", LogHelper.LogType.Error);
                 return null;
+            }
+        }
+
+        private Bitmap CaptureScreenAreaWithOptionalInk(Rectangle area, bool includeInk)
+        {
+            Bitmap bitmap = null;
+            StrokeCollection strokesForOverlay = null;
+            Point? inkCanvasTopLeftOnScreen = null;
+            System.Windows.Media.Matrix? dpiTransform = null;
+            var originalWindowVisibility = Visibility;
+
+            try
+            {
+                if (includeInk && inkCanvas != null && inkCanvas.Strokes.Count > 0)
+                {
+                    strokesForOverlay = inkCanvas.Strokes.Clone();
+
+                    var source = PresentationSource.FromVisual(inkCanvas);
+                    if (source?.CompositionTarget != null)
+                    {
+                        dpiTransform = source.CompositionTarget.TransformToDevice;
+                    }
+
+                    inkCanvasTopLeftOnScreen = inkCanvas.PointToScreen(new Point(0, 0));
+                }
+
+                // 先隐藏主窗口再截取屏幕，确保基础截图不包含主线程 UI（含墨迹层）。
+                Visibility = Visibility.Hidden;
+                Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+
+                bitmap = CaptureScreenArea(area);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"准备截图时处理墨迹失败: {ex.Message}", LogHelper.LogType.Error);
+                bitmap?.Dispose();
+                return null;
+            }
+            finally
+            {
+                Visibility = originalWindowVisibility;
+                Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+            }
+
+            if (bitmap == null || !includeInk || strokesForOverlay == null || strokesForOverlay.Count == 0)
+            {
+                return bitmap;
+            }
+
+            try
+            {
+                OverlayInkStrokesOnBitmap(bitmap, area, strokesForOverlay, inkCanvasTopLeftOnScreen, dpiTransform);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"叠加墨迹到截图失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            return bitmap;
+        }
+
+        private void OverlayInkStrokesOnBitmap(
+            Bitmap bitmap,
+            Rectangle area,
+            StrokeCollection strokes,
+            Point? inkCanvasTopLeftOnScreen = null,
+            System.Windows.Media.Matrix? dpiTransform = null)
+        {
+            if (bitmap == null || strokes == null || strokes.Count == 0)
+            {
+                return;
+            }
+
+            var transform = dpiTransform ?? new System.Windows.Media.Matrix(1, 0, 0, 1, 0, 0);
+            var topLeft = inkCanvasTopLeftOnScreen ?? new Point(area.X, area.Y);
+            var offsetX = topLeft.X * transform.M11 - area.X;
+            var offsetY = topLeft.Y * transform.M22 - area.Y;
+
+            var drawingVisual = new DrawingVisual();
+            using (var drawingContext = drawingVisual.RenderOpen())
+            {
+                drawingContext.PushTransform(new TranslateTransform(offsetX, offsetY));
+                strokes.Draw(drawingContext);
+                drawingContext.Pop();
+            }
+
+            var renderBitmap = new RenderTargetBitmap(bitmap.Width, bitmap.Height, 96, 96, PixelFormats.Pbgra32);
+            renderBitmap.Render(drawingVisual);
+
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(renderBitmap));
+
+            using (var memoryStream = new MemoryStream())
+            {
+                encoder.Save(memoryStream);
+                memoryStream.Position = 0;
+                using (var overlayBitmap = new Bitmap(memoryStream))
+                using (var graphics = Graphics.FromImage(bitmap))
+                {
+                    graphics.CompositingMode = CompositingMode.SourceOver;
+                    graphics.DrawImage(overlayBitmap, 0, 0, bitmap.Width, bitmap.Height);
+                }
             }
         }
 

@@ -257,7 +257,7 @@ namespace Ink_Canvas
                     Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory),
                     $"{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.png");
 
-                using (var originalBitmap = CaptureScreenArea(screenshotResult.Value.Area))
+                using (var originalBitmap = CaptureScreenAreaWithOptionalInk(screenshotResult.Value.Area, screenshotResult.Value.IncludeInk))
                 {
                     if (originalBitmap == null)
                     {
@@ -330,7 +330,7 @@ namespace Ink_Canvas
                     return;
                 }
 
-                using (var originalBitmap = CaptureScreenArea(screenshotResult.Area))
+                using (var originalBitmap = CaptureScreenAreaWithOptionalInk(screenshotResult.Area, screenshotResult.IncludeInk))
                 {
                     if (originalBitmap == null)
                     {
