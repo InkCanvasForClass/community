@@ -312,25 +312,29 @@ namespace Ink_Canvas
 
         private Bitmap CaptureScreenAreaWithOptionalInk(Rectangle area, bool includeInk)
         {
-            if (inkCanvas == null)
-            {
-                return CaptureScreenArea(area);
-            }
-
             Bitmap bitmap = null;
-            var originalInkCanvasVisibility = inkCanvas.Visibility;
             StrokeCollection strokesForOverlay = null;
+            Point? inkCanvasTopLeftOnScreen = null;
+            System.Windows.Media.Matrix? dpiTransform = null;
+            var originalWindowVisibility = Visibility;
 
             try
             {
-                if (includeInk && inkCanvas.Strokes.Count > 0)
+                if (includeInk && inkCanvas != null && inkCanvas.Strokes.Count > 0)
                 {
                     strokesForOverlay = inkCanvas.Strokes.Clone();
+
+                    var source = PresentationSource.FromVisual(inkCanvas);
+                    if (source?.CompositionTarget != null)
+                    {
+                        dpiTransform = source.CompositionTarget.TransformToDevice;
+                    }
+
+                    inkCanvasTopLeftOnScreen = inkCanvas.PointToScreen(new Point(0, 0));
                 }
 
-                // 基础截图始终在隐藏墨迹后进行，避免“包含墨迹”关闭时仍然截到墨迹，
-                // 也避免“包含墨迹”开启时屏幕墨迹 + 叠加墨迹的双重渲染。
-                inkCanvas.Visibility = Visibility.Hidden;
+                // 先隐藏主窗口再截取屏幕，确保基础截图不包含主线程 UI（含墨迹层）。
+                Visibility = Visibility.Hidden;
                 Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
 
                 bitmap = CaptureScreenArea(area);
@@ -343,7 +347,7 @@ namespace Ink_Canvas
             }
             finally
             {
-                inkCanvas.Visibility = originalInkCanvasVisibility;
+                Visibility = originalWindowVisibility;
                 Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
             }
 
@@ -354,7 +358,7 @@ namespace Ink_Canvas
 
             try
             {
-                OverlayInkStrokesOnBitmap(bitmap, area, strokesForOverlay);
+                OverlayInkStrokesOnBitmap(bitmap, area, strokesForOverlay, inkCanvasTopLeftOnScreen, dpiTransform);
             }
             catch (Exception ex)
             {
@@ -364,18 +368,22 @@ namespace Ink_Canvas
             return bitmap;
         }
 
-        private void OverlayInkStrokesOnBitmap(Bitmap bitmap, Rectangle area, StrokeCollection strokes)
+        private void OverlayInkStrokesOnBitmap(
+            Bitmap bitmap,
+            Rectangle area,
+            StrokeCollection strokes,
+            Point? inkCanvasTopLeftOnScreen = null,
+            System.Windows.Media.Matrix? dpiTransform = null)
         {
-            var source = PresentationSource.FromVisual(inkCanvas);
-            if (source?.CompositionTarget == null)
+            if (bitmap == null || strokes == null || strokes.Count == 0)
             {
                 return;
             }
 
-            var dpiTransform = source.CompositionTarget.TransformToDevice;
-            var inkTopLeft = inkCanvas.PointToScreen(new Point(0, 0));
-            var offsetX = inkTopLeft.X * dpiTransform.M11 - area.X;
-            var offsetY = inkTopLeft.Y * dpiTransform.M22 - area.Y;
+            var transform = dpiTransform ?? new System.Windows.Media.Matrix(1, 0, 0, 1, 0, 0);
+            var topLeft = inkCanvasTopLeftOnScreen ?? new Point(area.X, area.Y);
+            var offsetX = topLeft.X * transform.M11 - area.X;
+            var offsetY = topLeft.Y * transform.M22 - area.Y;
 
             var drawingVisual = new DrawingVisual();
             using (var drawingContext = drawingVisual.RenderOpen())
