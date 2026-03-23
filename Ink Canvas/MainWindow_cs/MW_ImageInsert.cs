@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
+using System.Windows.Ink;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
@@ -311,15 +312,49 @@ namespace Ink_Canvas
 
         private Bitmap CaptureScreenAreaWithOptionalInk(Rectangle area, bool includeInk)
         {
-            var bitmap = CaptureScreenArea(area);
-            if (bitmap == null || !includeInk || inkCanvas == null || inkCanvas.Strokes.Count == 0)
+            if (inkCanvas == null)
+            {
+                return CaptureScreenArea(area);
+            }
+
+            Bitmap bitmap = null;
+            var originalInkCanvasVisibility = inkCanvas.Visibility;
+            StrokeCollection strokesForOverlay = null;
+
+            try
+            {
+                if (includeInk && inkCanvas.Strokes.Count > 0)
+                {
+                    strokesForOverlay = inkCanvas.Strokes.Clone();
+                }
+
+                // 基础截图始终在隐藏墨迹后进行，避免“包含墨迹”关闭时仍然截到墨迹，
+                // 也避免“包含墨迹”开启时屏幕墨迹 + 叠加墨迹的双重渲染。
+                inkCanvas.Visibility = Visibility.Hidden;
+                Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+
+                bitmap = CaptureScreenArea(area);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"准备截图时处理墨迹失败: {ex.Message}", LogHelper.LogType.Error);
+                bitmap?.Dispose();
+                return null;
+            }
+            finally
+            {
+                inkCanvas.Visibility = originalInkCanvasVisibility;
+                Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+            }
+
+            if (bitmap == null || !includeInk || strokesForOverlay == null || strokesForOverlay.Count == 0)
             {
                 return bitmap;
             }
 
             try
             {
-                OverlayInkStrokesOnBitmap(bitmap, area);
+                OverlayInkStrokesOnBitmap(bitmap, area, strokesForOverlay);
             }
             catch (Exception ex)
             {
@@ -329,7 +364,7 @@ namespace Ink_Canvas
             return bitmap;
         }
 
-        private void OverlayInkStrokesOnBitmap(Bitmap bitmap, Rectangle area)
+        private void OverlayInkStrokesOnBitmap(Bitmap bitmap, Rectangle area, StrokeCollection strokes)
         {
             var source = PresentationSource.FromVisual(inkCanvas);
             if (source?.CompositionTarget == null)
@@ -346,7 +381,7 @@ namespace Ink_Canvas
             using (var drawingContext = drawingVisual.RenderOpen())
             {
                 drawingContext.PushTransform(new TranslateTransform(offsetX, offsetY));
-                inkCanvas.Strokes.Draw(drawingContext);
+                strokes.Draw(drawingContext);
                 drawingContext.Pop();
             }
 
