@@ -216,11 +216,19 @@ namespace Ink_Canvas
         internal async Task SaveAreaScreenShotToDesktop()
         {
             var annotationState = SuspendAnnotationForAreaScreenshotIfNeeded();
+            var originalFloatingBarVisibility = ViewboxFloatingBar.Visibility;
             try
             {
                 if (annotationState.WasInAnnotationMode)
                 {
                     // 等待一次 UI 刷新，确保批注暂停状态已完成。
+                    await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Render);
+                }
+
+                // 从浮动栏触发选区截图时，临时隐藏浮动栏，避免遮挡选区与误入截图。
+                if (originalFloatingBarVisibility == Visibility.Visible)
+                {
+                    ViewboxFloatingBar.Visibility = Visibility.Collapsed;
                     await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Render);
                 }
 
@@ -303,6 +311,7 @@ namespace Ink_Canvas
             }
             finally
             {
+                ViewboxFloatingBar.Visibility = originalFloatingBarVisibility;
                 RestoreAnnotationAfterAreaScreenshot(annotationState);
             }
         }
