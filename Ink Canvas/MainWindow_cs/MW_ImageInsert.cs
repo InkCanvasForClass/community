@@ -210,7 +210,16 @@ namespace Ink_Canvas
             {
                 await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    var selectorWindow = new ScreenshotSelectorWindow();
+                    var selectorWindow = new ScreenshotSelectorWindow(shouldIncludeInk =>
+                    {
+                        if (inkCanvas == null)
+                        {
+                            return;
+                        }
+
+                        inkCanvas.Visibility = shouldIncludeInk ? Visibility.Visible : Visibility.Collapsed;
+                        Dispatcher.Invoke(() => { }, DispatcherPriority.Render);
+                    });
                     if (selectorWindow.ShowDialog() == true)
                     {
                         // 检查是否是摄像头截图
