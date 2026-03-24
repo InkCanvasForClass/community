@@ -14,6 +14,8 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        private bool _isAreaScreenshotInProgress;
+
         /// <summary>
         /// 在切页/加页场景下使用：先捕获当前画面到内存并克隆墨迹，然后立即返回；截图与墨迹保存在后台异步执行，不阻塞切页。
         /// 调用方应在调用本方法后立即执行 SaveStrokes、ClearStrokes、切页、RestoreStrokes 等逻辑。
@@ -215,6 +217,14 @@ namespace Ink_Canvas
 
         internal async Task SaveAreaScreenShotToDesktop()
         {
+            if (_isAreaScreenshotInProgress)
+            {
+                ShowNotification("截图进行中，请先完成当前截图");
+                return;
+            }
+
+            _isAreaScreenshotInProgress = true;
+
             var annotationState = SuspendAnnotationForAreaScreenshotIfNeeded();
             var originalFloatingBarVisibility = ViewboxFloatingBar.Visibility;
             var shouldRestoreFloatingBarVisibility = true;
@@ -314,6 +324,7 @@ namespace Ink_Canvas
             }
             finally
             {
+                _isAreaScreenshotInProgress = false;
                 if (shouldRestoreFloatingBarVisibility)
                 {
                     ViewboxFloatingBar.Visibility = originalFloatingBarVisibility;
