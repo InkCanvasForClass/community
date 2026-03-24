@@ -217,6 +217,7 @@ namespace Ink_Canvas
         {
             var annotationState = SuspendAnnotationForAreaScreenshotIfNeeded();
             var originalFloatingBarVisibility = ViewboxFloatingBar.Visibility;
+            var shouldRestoreFloatingBarVisibility = true;
             try
             {
                 if (annotationState.WasInAnnotationMode)
@@ -251,6 +252,8 @@ namespace Ink_Canvas
 
                 if (screenshotResult.Value.AddToWhiteboard)
                 {
+                    // 已切换到白板流程，后续由模式切换逻辑接管浮动栏显示状态。
+                    shouldRestoreFloatingBarVisibility = false;
                     await AddScreenshotToNewWhiteboardPage(screenshotResult.Value);
                     return;
                 }
@@ -311,7 +314,10 @@ namespace Ink_Canvas
             }
             finally
             {
-                ViewboxFloatingBar.Visibility = originalFloatingBarVisibility;
+                if (shouldRestoreFloatingBarVisibility)
+                {
+                    ViewboxFloatingBar.Visibility = originalFloatingBarVisibility;
+                }
                 RestoreAnnotationAfterAreaScreenshot(annotationState);
             }
         }
