@@ -551,12 +551,6 @@ namespace Ink_Canvas
             ApplyIncludeInkPreviewState(ShouldIncludeInk);
         }
 
-        protected override void OnClosed(EventArgs e)
-        {
-            ApplyIncludeInkPreviewState(true);
-            base.OnClosed(e);
-        }
-
         private void ApplyIncludeInkPreviewState(bool shouldIncludeInk)
         {
             try
@@ -1520,6 +1514,9 @@ namespace Ink_Canvas
         {
             try
             {
+                // 关闭窗口时恢复墨迹预览状态
+                ApplyIncludeInkPreviewState(true);
+
                 // 清理摄像头资源
                 if (_cameraService != null)
                 {
