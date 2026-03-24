@@ -37,6 +37,7 @@ namespace Ink_Canvas
         private Bitmap _capturedCameraImage = null;
         private DateTime _lastBlankClickTime = DateTime.MinValue;
         private WpfPoint _lastBlankClickPosition;
+        private readonly Action<bool> _includeInkPreviewChanged;
 
         private const int DoubleClickTimeThresholdMs = 300; // 双击判定时间阈值（常见范围 200~500ms）
         private const double DoubleClickDistanceThresholdPx = 12; // 双击判定位置阈值（像素）
@@ -58,8 +59,14 @@ namespace Ink_Canvas
         public bool ShouldIncludeInk { get; private set; } = true;
 
         public ScreenshotSelectorWindow()
+            : this(null)
+        {
+        }
+
+        public ScreenshotSelectorWindow(Action<bool> includeInkPreviewChanged)
         {
             InitializeComponent();
+            _includeInkPreviewChanged = includeInkPreviewChanged;
 
             // 设置窗口覆盖所有屏幕
             SetupFullScreenOverlay();
@@ -85,6 +92,8 @@ namespace Ink_Canvas
                 timer.Stop();
             };
             timer.Start();
+
+            ApplyIncludeInkPreviewState(ShouldIncludeInk);
         }
 
         private void InitializeFreehandMode()
@@ -533,11 +542,31 @@ namespace Ink_Canvas
         private void IncludeInkCheckBox_Checked(object sender, RoutedEventArgs e)
         {
             ShouldIncludeInk = true;
+            ApplyIncludeInkPreviewState(ShouldIncludeInk);
         }
 
         private void IncludeInkCheckBox_Unchecked(object sender, RoutedEventArgs e)
         {
             ShouldIncludeInk = false;
+            ApplyIncludeInkPreviewState(ShouldIncludeInk);
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            ApplyIncludeInkPreviewState(true);
+            base.OnClosed(e);
+        }
+
+        private void ApplyIncludeInkPreviewState(bool shouldIncludeInk)
+        {
+            try
+            {
+                _includeInkPreviewChanged?.Invoke(shouldIncludeInk);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"更新“包含墨迹”实时预览失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
         }
 
         private void ConfirmCameraCapture()
