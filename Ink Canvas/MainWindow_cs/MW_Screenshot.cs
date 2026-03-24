@@ -14,6 +14,8 @@ namespace Ink_Canvas
 {
     public partial class MainWindow : Window
     {
+        private bool _isAreaScreenshotInProgress;
+
         /// <summary>
         /// 在切页/加页场景下使用：先捕获当前画面到内存并克隆墨迹，然后立即返回；截图与墨迹保存在后台异步执行，不阻塞切页。
         /// 调用方应在调用本方法后立即执行 SaveStrokes、ClearStrokes、切页、RestoreStrokes 等逻辑。
@@ -215,12 +217,29 @@ namespace Ink_Canvas
 
         internal async Task SaveAreaScreenShotToDesktop()
         {
+            if (_isAreaScreenshotInProgress)
+            {
+                ShowNotification("截图进行中，请先完成当前截图");
+                return;
+            }
+
+            _isAreaScreenshotInProgress = true;
+
             var annotationState = SuspendAnnotationForAreaScreenshotIfNeeded();
+            var originalFloatingBarVisibility = ViewboxFloatingBar.Visibility;
+            var shouldRestoreFloatingBarVisibility = true;
             try
             {
                 if (annotationState.WasInAnnotationMode)
                 {
                     // 等待一次 UI 刷新，确保批注暂停状态已完成。
+                    await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Render);
+                }
+
+                // 从浮动栏触发选区截图时，临时隐藏浮动栏，避免遮挡选区与误入截图。
+                if (originalFloatingBarVisibility == Visibility.Visible)
+                {
+                    ViewboxFloatingBar.Visibility = Visibility.Collapsed;
                     await System.Windows.Threading.Dispatcher.Yield(System.Windows.Threading.DispatcherPriority.Render);
                 }
 
@@ -243,7 +262,12 @@ namespace Ink_Canvas
 
                 if (screenshotResult.Value.AddToWhiteboard)
                 {
-                    await AddScreenshotToNewWhiteboardPage(screenshotResult.Value);
+                    // 仅在白板接管流程已确认完成时，才跳过本方法对浮动栏可见性的恢复。
+                    var whiteboardHandoffCompleted = await AddScreenshotToNewWhiteboardPage(screenshotResult.Value);
+                    if (whiteboardHandoffCompleted)
+                    {
+                        shouldRestoreFloatingBarVisibility = false;
+                    }
                     return;
                 }
 
@@ -303,11 +327,16 @@ namespace Ink_Canvas
             }
             finally
             {
+                _isAreaScreenshotInProgress = false;
+                if (shouldRestoreFloatingBarVisibility)
+                {
+                    ViewboxFloatingBar.Visibility = originalFloatingBarVisibility;
+                }
                 RestoreAnnotationAfterAreaScreenshot(annotationState);
             }
         }
 
-        private async Task AddScreenshotToNewWhiteboardPage(ScreenshotResult screenshotResult)
+        private async Task<bool> AddScreenshotToNewWhiteboardPage(ScreenshotResult screenshotResult)
         {
             // 先在当前场景准备截图数据，再进白板，避免误截到白板页面
             BitmapSource bitmapSourceForClipboard = null;
@@ -327,7 +356,7 @@ namespace Ink_Canvas
                 if (screenshotResult.Area.Width <= 0 || screenshotResult.Area.Height <= 0)
                 {
                     ShowNotification("未选择有效截图区域");
-                    return;
+                    return false;
                 }
 
                 using (var originalBitmap = CaptureScreenAreaWithOptionalInk(screenshotResult.Area, screenshotResult.IncludeInk))
@@ -335,7 +364,7 @@ namespace Ink_Canvas
                     if (originalBitmap == null)
                     {
                         ShowNotification("截图失败");
-                        return;
+                        return false;
                     }
 
                     Bitmap finalBitmap = originalBitmap;
@@ -364,7 +393,7 @@ namespace Ink_Canvas
             if (bitmapSourceForClipboard == null)
             {
                 ShowNotification("截图转换失败");
-                return;
+                return false;
             }
 
             // 图像已拷贝到内存后再进入白板
@@ -379,6 +408,7 @@ namespace Ink_Canvas
             BtnWhiteBoardAdd_Click(null, EventArgs.Empty);
 
             await InsertBitmapSourceToCanvas(bitmapSourceForClipboard);
+            return true;
         }
 
         /// <summary>
