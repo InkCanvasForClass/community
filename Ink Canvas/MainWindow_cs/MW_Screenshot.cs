@@ -262,9 +262,12 @@ namespace Ink_Canvas
 
                 if (screenshotResult.Value.AddToWhiteboard)
                 {
-                    // 已切换到白板流程，后续由模式切换逻辑接管浮动栏显示状态。
-                    shouldRestoreFloatingBarVisibility = false;
-                    await AddScreenshotToNewWhiteboardPage(screenshotResult.Value);
+                    // 仅在白板接管流程已确认完成时，才跳过本方法对浮动栏可见性的恢复。
+                    var whiteboardHandoffCompleted = await AddScreenshotToNewWhiteboardPage(screenshotResult.Value);
+                    if (whiteboardHandoffCompleted)
+                    {
+                        shouldRestoreFloatingBarVisibility = false;
+                    }
                     return;
                 }
 
@@ -333,7 +336,7 @@ namespace Ink_Canvas
             }
         }
 
-        private async Task AddScreenshotToNewWhiteboardPage(ScreenshotResult screenshotResult)
+        private async Task<bool> AddScreenshotToNewWhiteboardPage(ScreenshotResult screenshotResult)
         {
             // 先在当前场景准备截图数据，再进白板，避免误截到白板页面
             BitmapSource bitmapSourceForClipboard = null;
@@ -353,7 +356,7 @@ namespace Ink_Canvas
                 if (screenshotResult.Area.Width <= 0 || screenshotResult.Area.Height <= 0)
                 {
                     ShowNotification("未选择有效截图区域");
-                    return;
+                    return false;
                 }
 
                 using (var originalBitmap = CaptureScreenAreaWithOptionalInk(screenshotResult.Area, screenshotResult.IncludeInk))
@@ -361,7 +364,7 @@ namespace Ink_Canvas
                     if (originalBitmap == null)
                     {
                         ShowNotification("截图失败");
-                        return;
+                        return false;
                     }
 
                     Bitmap finalBitmap = originalBitmap;
@@ -390,7 +393,7 @@ namespace Ink_Canvas
             if (bitmapSourceForClipboard == null)
             {
                 ShowNotification("截图转换失败");
-                return;
+                return false;
             }
 
             // 图像已拷贝到内存后再进入白板
@@ -405,6 +408,7 @@ namespace Ink_Canvas
             BtnWhiteBoardAdd_Click(null, EventArgs.Empty);
 
             await InsertBitmapSourceToCanvas(bitmapSourceForClipboard);
+            return true;
         }
 
         /// <summary>
