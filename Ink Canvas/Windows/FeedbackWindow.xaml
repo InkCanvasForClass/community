@@ -8,55 +8,178 @@
         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         mc:Ignorable="d" Topmost="True" WindowStartupLocation="CenterScreen" ui:WindowHelper.UseModernWindowStyle="True"
         ResizeMode="NoResize" ui:ThemeManager.RequestedTheme="Light"
-        Title="反馈问题 - Ink Canvas For Class CE" Height="500" Width="600" FontFamily="Microsoft YaHei UI">
-    <Grid Margin="20">
+        Title="反馈问题 - Ink Canvas For Class CE" Height="550" Width="650" FontFamily="Microsoft YaHei UI">
+    <Grid Margin="30">
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-            <StackPanel>
-                <TextBlock FontSize="18" FontWeight="Bold" Margin="0,0,0,15" Text="选择要包含的信息"/>
-                
-                <Border BorderBrush="#e0e0e0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,15" Padding="15">
-                    <StackPanel>
-                        <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Text="软件信息"/>
-                        <CheckBox x:Name="CheckBoxAppVersion" IsChecked="True" Margin="0,5,0,5" Content="软件版本" FontSize="13"/>
-                        <CheckBox x:Name="CheckBoxUpdateChannel" IsChecked="True" Margin="0,5,0,5" Content="更新通道" FontSize="13"/>
-                        <TextBlock x:Name="TextAppVersionInfo" Text="v1.7.18.4 (Release)" Margin="30,0,0,5" FontSize="12" Foreground="#666666" TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Border>
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto" x:Name="Page1">
+            <ikw:SimpleStackPanel Spacing="12">
+                <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="选择要包含的信息"/>
 
-                <Border BorderBrush="#e0e0e0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,15" Padding="15">
-                    <StackPanel>
-                        <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Text="系统信息"/>
-                        <CheckBox x:Name="CheckBoxOSVersion" IsChecked="True" Margin="0,5,0,5" Content="操作系统版本" FontSize="13"/>
-                        <CheckBox x:Name="CheckBoxNetVersion" IsChecked="True" Margin="0,5,0,5" Content=".NET 版本" FontSize="13"/>
-                        <CheckBox x:Name="CheckBoxTouchSupport" IsChecked="True" Margin="0,5,0,5" Content="触控支持" FontSize="13"/>
-                        <TextBlock x:Name="TextSystemInfo" Text="Windows 10 专业版 19045.3758 | .NET 8.0.0 | 触控:支持(2个设备)" Margin="30,0,0,5" FontSize="12" Foreground="#666666" TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Border>
+                <ui:SettingsExpander x:Name="ExpanderSoftware" Header="软件信息"
+                                 Description="选择要包含在反馈中的软件版本信息">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AppIconDefault}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard ContentAlignment="Left">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="软件版本" VerticalAlignment="Center" FontSize="14"/>
+                                <CheckBox Grid.Column="1" x:Name="CheckAppVersion" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </Grid>
+                        </ui:SettingsCard>
+                        <ui:SettingsCard ContentAlignment="Left">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="更新通道" VerticalAlignment="Center" FontSize="14"/>
+                                <CheckBox Grid.Column="1" x:Name="CheckUpdateChannel" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </Grid>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
 
-                <Border BorderBrush="#e0e0e0" BorderThickness="1" CornerRadius="8" Margin="0,0,0,15" Padding="15">
-                    <StackPanel>
-                        <TextBlock FontSize="14" FontWeight="Bold" Margin="0,0,0,10" Text="设备信息"/>
-                        <CheckBox x:Name="CheckBoxDeviceId" IsChecked="False" Margin="0,5,0,5" Content="设备 ID" FontSize="13"/>
-                        <TextBlock x:Name="TextDeviceInfo" Text="设备ID: xxxxxxxxxxxxxx" Margin="30,0,0,5" FontSize="12" Foreground="#666666" TextWrapping="Wrap"/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
+                <ui:SettingsExpander x:Name="ExpanderSystem" Header="系统信息"
+                                 Description="选择要包含在反馈中的系统环境信息">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PC1}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard ContentAlignment="Left">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="操作系统版本" VerticalAlignment="Center" FontSize="14"/>
+                                <CheckBox Grid.Column="1" x:Name="CheckOSVersion" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </Grid>
+                        </ui:SettingsCard>
+                        <ui:SettingsCard ContentAlignment="Left">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text=".NET 版本" VerticalAlignment="Center" FontSize="14"/>
+                                <CheckBox Grid.Column="1" x:Name="CheckNetVersion" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </Grid>
+                        </ui:SettingsCard>
+                        <ui:SettingsCard ContentAlignment="Left">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="触控支持" VerticalAlignment="Center" FontSize="14"/>
+                                <CheckBox Grid.Column="1" x:Name="CheckTouchSupport" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </Grid>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <ui:SettingsExpander x:Name="ExpanderDevice" Header="设备信息"
+                                 Description="选择要包含在反馈中的设备标识信息">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard ContentAlignment="Left">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="设备 ID" VerticalAlignment="Center" FontSize="14"/>
+                                <CheckBox Grid.Column="1" x:Name="CheckDeviceId" IsChecked="False" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </Grid>
+                        </ui:SettingsCard>
+                        <ui:SettingsCard x:Name="CardFanceId" ContentAlignment="Left">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="遥测 ID" VerticalAlignment="Center" FontSize="14"/>
+                                <CheckBox Grid.Column="1" x:Name="CheckFanceId" IsChecked="False" VerticalAlignment="Center" Margin="8,0,0,0"/>
+                            </Grid>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+            </ikw:SimpleStackPanel>
         </ScrollViewer>
 
-        <Grid Grid.Row="1" VerticalAlignment="Bottom">
-            <ikw:SimpleStackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="10">
-                <Button Content="取消" Width="100" Height="35" FontFamily="Microsoft YaHei UI" FontSize="14" Click="ButtonCancel_Click" Foreground="#555555"/>
-                <Button Content="提交反馈" Width="120" Height="35" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="Bold" Click="ButtonSubmit_Click" Foreground="White">
-                    <Button.Resources>
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#3b82f6"/>
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#2563eb"/>
-                        <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#1d4ed8"/>
-                    </Button.Resources>
+        <Grid Grid.Row="0" x:Name="Page2" Visibility="Collapsed">
+            <ikw:SimpleStackPanel Spacing="12">
+                <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="确认要发送的信息"/>
+
+                <ui:SettingsCard Header="软件信息"
+                                 Description="将要包含在反馈中的软件版本信息">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AppIconDefault}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Spacing="8">
+                        <TextBlock x:Name="TextAppVersionInfo" Text="v1.7.18.4 (Release)" FontSize="14" TextWrapping="Wrap"/>
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="系统信息"
+                                 Description="将要包含在反馈中的系统环境信息">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PC1}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Spacing="8">
+                        <TextBlock x:Name="TextSystemInfo" Text="Windows 10 专业版 19045.3758 | .NET 8.0.0 | 触控:支持(2个设备)" FontSize="14" TextWrapping="Wrap"/>
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard Header="设备信息"
+                                 Description="将要包含在反馈中的设备标识信息">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                    <ikw:SimpleStackPanel Spacing="8">
+                        <TextBlock x:Name="TextDeviceInfo" Text="设备ID: xxxxxxxxxxxxxx" FontSize="14" TextWrapping="Wrap"/>
+                        <TextBlock x:Name="TextTelemetryInfo" Text="遥测ID: xxxxxxxxxxxxxx" FontSize="14" TextWrapping="Wrap" Visibility="Collapsed"/>
+                    </ikw:SimpleStackPanel>
+                </ui:SettingsCard>
+            </ikw:SimpleStackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,20,0,0">
+            <ikw:SimpleStackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
+                <Button x:Name="ButtonCancel" Content="取消" Width="100" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" Click="ButtonCancel_Click">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"/>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button x:Name="ButtonNext" Content="下一步" Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold" Click="ButtonNext_Click">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                    </Button.Style>
+                </Button>
+                <Button x:Name="ButtonBack" Content="上一页" Width="100" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" Click="ButtonBack_Click" Visibility="Collapsed">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}">
+                            <Setter Property="Foreground" Value="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorPrimaryBrushKey}}"/>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button x:Name="ButtonSubmit" Content="提交反馈" Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold" Click="ButtonSubmit_Click" Visibility="Collapsed">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                    </Button.Style>
                 </Button>
             </ikw:SimpleStackPanel>
         </Grid>
