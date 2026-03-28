@@ -139,17 +139,6 @@
                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" 
                           Margin="8,0" 
                           Background="#404040" />
-
-                <!-- 选项开关 -->
-                <CheckBox Name="IncludeInkCheckBox"
-                          Content="包含墨迹"
-                          IsChecked="True"
-                          Margin="8,0"
-                          VerticalAlignment="Center"
-                          Foreground="White"
-                          FontWeight="Medium"
-                          Checked="IncludeInkCheckBox_Checked"
-                          Unchecked="IncludeInkCheckBox_Unchecked" />
                 
                 <!-- 操作按钮 -->
                 <Button Name="ConfirmButton"
