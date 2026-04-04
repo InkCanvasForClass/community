@@ -1,0 +1,57 @@
+<UserControl
+    x:Class="Ink_Canvas.Windows.FeedbackPages.FeedbackPage2"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    mc:Ignorable="d"
+    d:DesignHeight="450" d:DesignWidth="600">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ikw:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
+            <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="确认要发送的信息"/>
+
+            <ui:SettingsCard Header="软件信息"
+                             Description="将要包含在反馈中的软件版本信息">
+                <ui:SettingsCard.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AppIconDefault}"/>
+                </ui:SettingsCard.HeaderIcon>
+                <ikw:SimpleStackPanel Spacing="8">
+                    <TextBlock x:Name="TextAppVersionInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                </ikw:SimpleStackPanel>
+            </ui:SettingsCard>
+
+            <ui:SettingsCard Header="系统信息"
+                             Description="将要包含在反馈中的系统环境信息">
+                <ui:SettingsCard.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PC1}"/>
+                </ui:SettingsCard.HeaderIcon>
+                <ikw:SimpleStackPanel Spacing="8">
+                    <TextBlock x:Name="TextSystemInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                </ikw:SimpleStackPanel>
+            </ui:SettingsCard>
+
+            <ui:SettingsCard Header="设备信息"
+                             Description="将要包含在反馈中的设备标识信息">
+                <ui:SettingsCard.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}"/>
+                </ui:SettingsCard.HeaderIcon>
+                <ikw:SimpleStackPanel Spacing="8">
+                    <TextBlock x:Name="TextDeviceInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                    <TextBlock x:Name="TextTelemetryInfo" Text="" FontSize="14" TextWrapping="Wrap" Visibility="Collapsed"/>
+                </ikw:SimpleStackPanel>
+            </ui:SettingsCard>
+
+            <ui:SettingsCard x:Name="CardConfiguration" Header="软件配置"
+                             Description="将要包含在反馈中的软件配置信息">
+                <ui:SettingsCard.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                </ui:SettingsCard.HeaderIcon>
+                <ikw:SimpleStackPanel Spacing="8">
+                    <TextBlock x:Name="TextConfigurationInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                </ikw:SimpleStackPanel>
+            </ui:SettingsCard>
+        </ikw:SimpleStackPanel>
+    </ScrollViewer>
+</UserControl>

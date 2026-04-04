@@ -1,0 +1,85 @@
+<UserControl
+    x:Class="Ink_Canvas.Windows.FeedbackPages.FeedbackPage1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    mc:Ignorable="d"
+    d:DesignHeight="450" d:DesignWidth="600">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ikw:SimpleStackPanel Spacing="12">
+            <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="选择要包含的信息"/>
+
+            <ui:SettingsExpander x:Name="ExpanderSoftware" Header="软件信息"
+                             Description="选择要包含在反馈中的软件版本信息">
+                <ui:SettingsExpander.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AppIconDefault}"/>
+                </ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsExpander.Items>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <CheckBox x:Name="CheckAppVersion" IsChecked="True" Content="软件版本"/>
+                    </ui:SettingsCard>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <CheckBox x:Name="CheckUpdateChannel" IsChecked="True" Content="更新通道"/>
+                    </ui:SettingsCard>
+                </ui:SettingsExpander.Items>
+            </ui:SettingsExpander>
+
+            <ui:SettingsExpander x:Name="ExpanderSystem" Header="系统信息"
+                             Description="选择要包含在反馈中的系统环境信息">
+                <ui:SettingsExpander.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PC1}"/>
+                </ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsExpander.Items>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <CheckBox x:Name="CheckOSVersion" IsChecked="True" Content="操作系统版本"/>
+                    </ui:SettingsCard>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <CheckBox x:Name="CheckNetVersion" IsChecked="True" Content=".NET Framework 版本"/>
+                    </ui:SettingsCard>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <CheckBox x:Name="CheckTouchSupport" IsChecked="True" Content="触控支持"/>
+                    </ui:SettingsCard>
+                </ui:SettingsExpander.Items>
+            </ui:SettingsExpander>
+
+            <ui:SettingsExpander x:Name="ExpanderDevice" Header="设备信息"
+                             Description="选择要包含在反馈中的设备标识信息">
+                <ui:SettingsExpander.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}"/>
+                </ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsExpander.Items>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <CheckBox x:Name="CheckDeviceId" IsChecked="False" Content="设备 ID"/>
+                    </ui:SettingsCard>
+                    <ui:SettingsCard x:Name="CardFanceId" ContentAlignment="Left">
+                        <CheckBox x:Name="CheckFanceId" IsChecked="False" Content="遥测 ID" ToolTipService.ShowOnDisabled="True">
+                            <CheckBox.ToolTip>
+                                <ToolTip>
+                                    <TextBlock>暂无遥测 ID</TextBlock>
+                                </ToolTip>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                    </ui:SettingsCard>
+                </ui:SettingsExpander.Items>
+            </ui:SettingsExpander>
+
+            <ui:SettingsExpander x:Name="ExpanderConfiguration" Header="软件配置"
+                             Description="选择要包含在反馈中的软件配置信息">
+                <ui:SettingsExpander.HeaderIcon>
+                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                </ui:SettingsExpander.HeaderIcon>
+                <ui:SettingsExpander.Items>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <CheckBox x:Name="CheckPPTLinkage" IsChecked="True" Content="PPT 联动设置"/>
+                    </ui:SettingsCard>
+                    <ui:SettingsCard ContentAlignment="Left">
+                        <CheckBox x:Name="CheckInkRecognition" IsChecked="True" Content="墨迹识别设置"/>
+                    </ui:SettingsCard>
+                </ui:SettingsExpander.Items>
+            </ui:SettingsExpander>
+        </ikw:SimpleStackPanel>
+    </ScrollViewer>
+</UserControl>

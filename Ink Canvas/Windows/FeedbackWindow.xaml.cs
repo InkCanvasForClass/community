@@ -1,4 +1,6 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Windows.FeedbackPages;
+using iNKORE.UI.WPF.Modern.Media.Animation;
 using OSVersionExtension;
 using System;
 using System.Diagnostics;
@@ -21,20 +23,32 @@ namespace Ink_Canvas
         private string _inkRecognitionSettings = "";
         private string _inkRecognitionEngine = "";
 
+        private FeedbackPage1 _page1;
+        private FeedbackPage2 _page2;
+        private FeedbackPage3 _page3;
+
+        private NavigationTransitionInfo _transitionInfo = new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight };
+
         public FeedbackWindow()
         {
             InitializeComponent();
+            _page1 = new FeedbackPage1();
+            _page2 = new FeedbackPage2();
+            _page3 = new FeedbackPage3();
+
+            _page3.BtnOpenGitHubIssueClick += BtnOpenGitHubIssue_Click;
+            _page3.CardCopyIssueUrlClick += CardCopyIssueUrl_Click;
+            _page3.BtnCopyMarkdownClick += BtnCopyMarkdown_Click;
+
+            ContentFrame.Navigated += ContentFrame_Navigated;
             LoadInformation();
-            UpdateTextBlocks();
             CheckTelemetryIdAvailability();
+            ContentFrame.Navigate(_page1);
         }
 
-        private void UpdateTextBlocks()
+        private void ContentFrame_Navigated(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
-            TextAppVersionInfo.Text = _appVersion;
-            TextSystemInfo.Text = $"{_osVersion} | {_netVersion} | 触控:{_touchSupport}";
-            TextDeviceInfo.Text = $"设备ID: {_deviceId}";
-            TextTelemetryInfo.Text = $"遥测ID: {_telemetryId}";
+            UpdateButtonVisibility();
         }
 
         private void LoadInformation()
@@ -213,17 +227,15 @@ namespace Ink_Canvas
                 bool hasTelemetryId = CheckTelemetryIdExists();
                 if (!hasTelemetryId)
                 {
-                    CardFanceId.Visibility = Visibility.Visible;
-                    CheckFanceId.IsChecked = false;
-                    CheckFanceId.IsEnabled = false;
+                    _page1.CheckFanceId.IsChecked = false;
+                    _page1.CheckFanceId.IsEnabled = false;
                 }
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"检查遥测ID可用性失败: {ex.Message}");
-                CardFanceId.Visibility = Visibility.Visible;
-                CheckFanceId.IsChecked = false;
-                CheckFanceId.IsEnabled = false;
+                _page1.CheckFanceId.IsChecked = false;
+                _page1.CheckFanceId.IsEnabled = false;
             }
         }
 
@@ -247,42 +259,66 @@ namespace Ink_Canvas
 
         private void ButtonBack_Click(object sender, RoutedEventArgs e)
         {
-            if (Page3.Visibility == Visibility.Visible)
+            if (ContentFrame.BackStackDepth > 0)
             {
-                Page3.Visibility = Visibility.Collapsed;
-                Page2.Visibility = Visibility.Visible;
-                ButtonCancel.Visibility = Visibility.Collapsed;
-                ButtonNext.Visibility = Visibility.Collapsed;
-                ButtonBack.Visibility = Visibility.Visible;
-                ButtonConfirm.Visibility = Visibility.Visible;
-                CardCopyIssueUrl.Header = "复制反馈链接";
-                BtnCopyMarkdown.Content = "复制模板";
+                ContentFrame.GoBack();
+                UpdateButtonVisibility();
             }
-            else if (Page2.Visibility == Visibility.Visible)
+        }
+
+        private void ButtonNext_Click(object sender, RoutedEventArgs e)
+        {
+            UpdatePage2Info();
+            ContentFrame.Navigate(_page2, null, _transitionInfo);
+            UpdateButtonVisibility();
+        }
+
+        private void ButtonConfirm_Click(object sender, RoutedEventArgs e)
+        {
+            GenerateMarkdownTemplate();
+            ContentFrame.Navigate(_page3, null, _transitionInfo);
+            UpdateButtonVisibility();
+        }
+
+        private void UpdateButtonVisibility()
+        {
+            if (ContentFrame.Content == _page1)
             {
-                Page2.Visibility = Visibility.Collapsed;
-                Page1.Visibility = Visibility.Visible;
                 ButtonCancel.Visibility = Visibility.Visible;
                 ButtonNext.Visibility = Visibility.Visible;
                 ButtonBack.Visibility = Visibility.Collapsed;
                 ButtonConfirm.Visibility = Visibility.Collapsed;
             }
+            else if (ContentFrame.Content == _page2)
+            {
+                ButtonCancel.Visibility = Visibility.Collapsed;
+                ButtonNext.Visibility = Visibility.Collapsed;
+                ButtonBack.Visibility = Visibility.Visible;
+                ButtonConfirm.Visibility = Visibility.Visible;
+            }
+            else if (ContentFrame.Content == _page3)
+            {
+                ButtonCancel.Visibility = Visibility.Collapsed;
+                ButtonNext.Visibility = Visibility.Collapsed;
+                ButtonBack.Visibility = Visibility.Visible;
+                ButtonConfirm.Visibility = Visibility.Collapsed;
+            }
         }
 
-        private void ButtonNext_Click(object sender, RoutedEventArgs e)
+        private void UpdatePage2Info()
         {
             try
             {
                 string versionInfo = "";
                 string systemInfo = "";
 
-                if (CheckAppVersion.IsChecked == true || CheckUpdateChannel.IsChecked == true)
+                if (_page1.CheckAppVersion.IsChecked == true || _page1.CheckUpdateChannel.IsChecked == true)
                 {
-                    if (CheckAppVersion.IsChecked == true)
+                    if (_page1.CheckAppVersion.IsChecked == true)
                     {
                         versionInfo += _appVersion;
                     }
-                    if (CheckUpdateChannel.IsChecked == true)
+                    if (_page1.CheckUpdateChannel.IsChecked == true)
                     {
                         if (!string.IsNullOrEmpty(versionInfo))
                         {
@@ -292,13 +328,13 @@ namespace Ink_Canvas
                     }
                 }
 
-                if (CheckOSVersion.IsChecked == true || CheckNetVersion.IsChecked == true || CheckTouchSupport.IsChecked == true)
+                if (_page1.CheckOSVersion.IsChecked == true || _page1.CheckNetVersion.IsChecked == true || _page1.CheckTouchSupport.IsChecked == true)
                 {
-                    if (CheckOSVersion.IsChecked == true)
+                    if (_page1.CheckOSVersion.IsChecked == true)
                     {
                         systemInfo += _osVersion;
                     }
-                    if (CheckNetVersion.IsChecked == true)
+                    if (_page1.CheckNetVersion.IsChecked == true)
                     {
                         if (!string.IsNullOrEmpty(systemInfo))
                         {
@@ -306,7 +342,7 @@ namespace Ink_Canvas
                         }
                         systemInfo += _netVersion;
                     }
-                    if (CheckTouchSupport.IsChecked == true)
+                    if (_page1.CheckTouchSupport.IsChecked == true)
                     {
                         if (!string.IsNullOrEmpty(systemInfo))
                         {
@@ -316,139 +352,120 @@ namespace Ink_Canvas
                     }
                 }
 
-                TextAppVersionInfo.Text = versionInfo;
-                TextSystemInfo.Text = systemInfo;
+                _page2.TextAppVersionInfo.Text = versionInfo;
+                _page2.TextSystemInfo.Text = systemInfo;
 
-                if (CheckDeviceId.IsChecked == true)
+                if (_page1.CheckDeviceId.IsChecked == true)
                 {
-                    TextDeviceInfo.Text = $"设备ID: {_deviceId}";
+                    _page2.TextDeviceInfo.Text = $"设备ID: {_deviceId}";
                 }
                 else
                 {
-                    TextDeviceInfo.Text = "设备ID: (不包含)";
+                    _page2.TextDeviceInfo.Text = "设备ID: (不包含)";
                 }
 
-                if (CheckFanceId.IsChecked == true)
+                if (_page1.CheckFanceId.IsChecked == true)
                 {
-                    TextTelemetryInfo.Text = $"遥测ID: {_telemetryId}";
-                    TextTelemetryInfo.Visibility = Visibility.Visible;
+                    _page2.TextTelemetryInfo.Text = $"遥测ID: {_telemetryId}";
+                    _page2.TextTelemetryInfo.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    TextTelemetryInfo.Text = "遥测ID: (不包含)";
-                    TextTelemetryInfo.Visibility = Visibility.Visible;
+                    _page2.TextTelemetryInfo.Text = "遥测ID: (不包含)";
+                    _page2.TextTelemetryInfo.Visibility = Visibility.Visible;
                 }
 
-                // Display software configuration settings in the dedicated card
-                if (CheckPPTLinkage.IsChecked == true || CheckInkRecognition.IsChecked == true)
+                if (_page1.CheckPPTLinkage.IsChecked == true || _page1.CheckInkRecognition.IsChecked == true)
                 {
-                    CardConfiguration.Visibility = Visibility.Visible;
-                    TextConfigurationInfo.Text = "";
-                    if (CheckPPTLinkage.IsChecked == true)
+                    _page2.CardConfiguration.Visibility = Visibility.Visible;
+                    _page2.TextConfigurationInfo.Text = "";
+                    if (_page1.CheckPPTLinkage.IsChecked == true)
                     {
-                        TextConfigurationInfo.Text += $"PPT联动设置:\n{_pptLinkageSettings}\n";
+                        _page2.TextConfigurationInfo.Text += $"PPT联动设置:\n{_pptLinkageSettings}\n";
                     }
-                    if (CheckInkRecognition.IsChecked == true)
+                    if (_page1.CheckInkRecognition.IsChecked == true)
                     {
-                        TextConfigurationInfo.Text += $"墨迹识别设置:\n{_inkRecognitionSettings}\n";
+                        _page2.TextConfigurationInfo.Text += $"墨迹识别设置:\n{_inkRecognitionSettings}\n";
                     }
                 }
                 else
                 {
-                    CardConfiguration.Visibility = Visibility.Collapsed;
+                    _page2.CardConfiguration.Visibility = Visibility.Collapsed;
                 }
-
-                Page1.Visibility = Visibility.Collapsed;
-                Page2.Visibility = Visibility.Visible;
-                ButtonCancel.Visibility = Visibility.Collapsed;
-                ButtonNext.Visibility = Visibility.Collapsed;
-                ButtonBack.Visibility = Visibility.Visible;
-                ButtonConfirm.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"切换到第二页失败: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"更新第二页信息失败: {ex.Message}");
             }
-        }
-
-        private void ButtonConfirm_Click(object sender, RoutedEventArgs e)
-        {
-            GenerateMarkdownTemplate();
-            Page2.Visibility = Visibility.Collapsed;
-            Page3.Visibility = Visibility.Visible;
-            ButtonCancel.Visibility = Visibility.Collapsed;
-            ButtonNext.Visibility = Visibility.Collapsed;
-            ButtonBack.Visibility = Visibility.Visible;
-            ButtonConfirm.Visibility = Visibility.Collapsed;
         }
 
         private void GenerateMarkdownTemplate()
         {
             string template = "## 环境信息\n";
-            
-            if (CheckAppVersion.IsChecked == true)
+
+            if (_page1.CheckAppVersion.IsChecked == true)
             {
                 template += $"- 软件版本: {_appVersion}\n";
             }
-            if (CheckUpdateChannel.IsChecked == true)
+            if (_page1.CheckUpdateChannel.IsChecked == true)
             {
                 template += $"- 更新通道: {_updateChannel}\n";
             }
-            if (CheckOSVersion.IsChecked == true)
+            if (_page1.CheckOSVersion.IsChecked == true)
             {
                 template += $"- 操作系统: {_osVersion}\n";
             }
-            if (CheckNetVersion.IsChecked == true)
+            if (_page1.CheckNetVersion.IsChecked == true)
             {
                 template += $"- .NET 版本: {_netVersion}\n";
             }
-            if (CheckTouchSupport.IsChecked == true)
+            if (_page1.CheckTouchSupport.IsChecked == true)
             {
                 template += $"- 触控支持: {_touchSupport}\n";
             }
-            
+
             template += "\n## 设备信息\n";
-            if (CheckDeviceId.IsChecked == true)
+            if (_page1.CheckDeviceId.IsChecked == true)
             {
                 template += $"- 设备ID: {_deviceId}\n";
             }
-            if (CheckFanceId.IsChecked == true && !string.IsNullOrEmpty(_telemetryId))
+            if (_page1.CheckFanceId.IsChecked == true && !string.IsNullOrEmpty(_telemetryId))
             {
                 template += $"- 遥测ID: {_telemetryId}\n";
             }
-            
-            if (CheckPPTLinkage.IsChecked == true || CheckInkRecognition.IsChecked == true)
+
+            if (_page1.CheckPPTLinkage.IsChecked == true || _page1.CheckInkRecognition.IsChecked == true)
             {
                 template += "\n## 软件配置\n";
-                if (CheckPPTLinkage.IsChecked == true)
+                if (_page1.CheckPPTLinkage.IsChecked == true)
                 {
                     template += "### PPT联动设置\n";
                     template += _pptLinkageSettings + "\n";
                 }
-                if (CheckInkRecognition.IsChecked == true)
+                if (_page1.CheckInkRecognition.IsChecked == true)
                 {
                     template += "### 墨迹识别设置\n";
                     template += _inkRecognitionSettings + "\n";
                 }
             }
-            
-            TextBoxMarkdownTemplate.Text = template;
+
+            _page3.TextBoxMarkdownTemplate.Text = template;
         }
 
-        private void BtnOpenGitHubIssue_Click(object sender, RoutedEventArgs e)
+        public void BtnOpenGitHubIssue_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 string versionInfo = "";
                 string systemInfo = "";
 
-                if (CheckAppVersion.IsChecked == true || CheckUpdateChannel.IsChecked == true)
+                if (_page1.CheckAppVersion.IsChecked == true || _page1.CheckUpdateChannel.IsChecked == true)
                 {
-                    if (CheckAppVersion.IsChecked == true)
+                    if (_page1.CheckAppVersion.IsChecked == true)
                     {
                         versionInfo += _appVersion;
                     }
-                    if (CheckUpdateChannel.IsChecked == true)
+                    if (_page1.CheckUpdateChannel.IsChecked == true)
                     {
                         if (!string.IsNullOrEmpty(versionInfo))
                         {
@@ -458,13 +475,13 @@ namespace Ink_Canvas
                     }
                 }
 
-                if (CheckOSVersion.IsChecked == true || CheckNetVersion.IsChecked == true || CheckTouchSupport.IsChecked == true)
+                if (_page1.CheckOSVersion.IsChecked == true || _page1.CheckNetVersion.IsChecked == true || _page1.CheckTouchSupport.IsChecked == true)
                 {
-                    if (CheckOSVersion.IsChecked == true)
+                    if (_page1.CheckOSVersion.IsChecked == true)
                     {
                         systemInfo += _osVersion;
                     }
-                    if (CheckNetVersion.IsChecked == true)
+                    if (_page1.CheckNetVersion.IsChecked == true)
                     {
                         if (!string.IsNullOrEmpty(systemInfo))
                         {
@@ -472,7 +489,7 @@ namespace Ink_Canvas
                         }
                         systemInfo += _netVersion;
                     }
-                    if (CheckTouchSupport.IsChecked == true)
+                    if (_page1.CheckTouchSupport.IsChecked == true)
                     {
                         if (!string.IsNullOrEmpty(systemInfo))
                         {
@@ -495,23 +512,23 @@ namespace Ink_Canvas
                 }
 
                 string extraInfo = "";
-                if (CheckDeviceId.IsChecked == true)
+                if (_page1.CheckDeviceId.IsChecked == true)
                 {
                     extraInfo += $"设备ID: {_deviceId}\n";
                 }
 
-                if (CheckFanceId.IsChecked == true)
+                if (_page1.CheckFanceId.IsChecked == true)
                 {
                     extraInfo += $"遥测ID: {_telemetryId}\n";
                 }
 
-                if (CheckPPTLinkage.IsChecked == true)
+                if (_page1.CheckPPTLinkage.IsChecked == true)
                 {
                     extraInfo += "\nPPT联动设置:\n";
                     extraInfo += _pptLinkageSettings;
                 }
 
-                if (CheckInkRecognition.IsChecked == true)
+                if (_page1.CheckInkRecognition.IsChecked == true)
                 {
                     extraInfo += "\n墨迹识别设置:\n";
                     extraInfo += _inkRecognitionSettings;
@@ -536,20 +553,20 @@ namespace Ink_Canvas
             }
         }
 
-        private void CardCopyIssueUrl_Click(object sender, RoutedEventArgs e)
+        public void CardCopyIssueUrl_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 string versionInfo = "";
                 string systemInfo = "";
 
-                if (CheckAppVersion.IsChecked == true || CheckUpdateChannel.IsChecked == true)
+                if (_page1.CheckAppVersion.IsChecked == true || _page1.CheckUpdateChannel.IsChecked == true)
                 {
-                    if (CheckAppVersion.IsChecked == true)
+                    if (_page1.CheckAppVersion.IsChecked == true)
                     {
                         versionInfo += _appVersion;
                     }
-                    if (CheckUpdateChannel.IsChecked == true)
+                    if (_page1.CheckUpdateChannel.IsChecked == true)
                     {
                         if (!string.IsNullOrEmpty(versionInfo))
                         {
@@ -559,13 +576,13 @@ namespace Ink_Canvas
                     }
                 }
 
-                if (CheckOSVersion.IsChecked == true || CheckNetVersion.IsChecked == true || CheckTouchSupport.IsChecked == true)
+                if (_page1.CheckOSVersion.IsChecked == true || _page1.CheckNetVersion.IsChecked == true || _page1.CheckTouchSupport.IsChecked == true)
                 {
-                    if (CheckOSVersion.IsChecked == true)
+                    if (_page1.CheckOSVersion.IsChecked == true)
                     {
                         systemInfo += _osVersion;
                     }
-                    if (CheckNetVersion.IsChecked == true)
+                    if (_page1.CheckNetVersion.IsChecked == true)
                     {
                         if (!string.IsNullOrEmpty(systemInfo))
                         {
@@ -573,7 +590,7 @@ namespace Ink_Canvas
                         }
                         systemInfo += _netVersion;
                     }
-                    if (CheckTouchSupport.IsChecked == true)
+                    if (_page1.CheckTouchSupport.IsChecked == true)
                     {
                         if (!string.IsNullOrEmpty(systemInfo))
                         {
@@ -596,23 +613,23 @@ namespace Ink_Canvas
                 }
 
                 string extraInfo = "";
-                if (CheckDeviceId.IsChecked == true)
+                if (_page1.CheckDeviceId.IsChecked == true)
                 {
                     extraInfo += $"设备ID: {_deviceId}\n";
                 }
 
-                if (CheckFanceId.IsChecked == true)
+                if (_page1.CheckFanceId.IsChecked == true)
                 {
                     extraInfo += $"遥测ID: {_telemetryId}\n";
                 }
 
-                if (CheckPPTLinkage.IsChecked == true)
+                if (_page1.CheckPPTLinkage.IsChecked == true)
                 {
                     extraInfo += "\nPPT联动设置:\n";
                     extraInfo += _pptLinkageSettings;
                 }
 
-                if (CheckInkRecognition.IsChecked == true)
+                if (_page1.CheckInkRecognition.IsChecked == true)
                 {
                     extraInfo += "\n墨迹识别设置:\n";
                     extraInfo += _inkRecognitionSettings;
@@ -624,7 +641,7 @@ namespace Ink_Canvas
                 }
 
                 Clipboard.SetText(url);
-                CardCopyIssueUrl.Header = "已复制 ✓";
+                _page3.CardCopyIssueUrl.Header = "已复制 ✓";
             }
             catch (Exception ex)
             {
@@ -632,12 +649,12 @@ namespace Ink_Canvas
             }
         }
 
-        private void BtnCopyMarkdown_Click(object sender, RoutedEventArgs e)
+        public void BtnCopyMarkdown_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                Clipboard.SetText(TextBoxMarkdownTemplate.Text);
-                BtnCopyMarkdown.Content = "已复制 ✓";
+                Clipboard.SetText(_page3.TextBoxMarkdownTemplate.Text);
+                _page3.BtnCopyMarkdown.Content = "已复制 ✓";
             }
             catch (Exception ex)
             {
