@@ -255,6 +255,8 @@ namespace Ink_Canvas
                 ButtonNext.Visibility = Visibility.Collapsed;
                 ButtonBack.Visibility = Visibility.Visible;
                 ButtonConfirm.Visibility = Visibility.Visible;
+                CardCopyIssueUrl.Header = "复制反馈链接";
+                BtnCopyMarkdown.Content = "复制模板";
             }
             else if (Page2.Visibility == Visibility.Visible)
             {
@@ -374,7 +376,7 @@ namespace Ink_Canvas
             GenerateMarkdownTemplate();
             Page2.Visibility = Visibility.Collapsed;
             Page3.Visibility = Visibility.Visible;
-            ButtonCancel.Visibility = Visibility.Visible;
+            ButtonCancel.Visibility = Visibility.Collapsed;
             ButtonNext.Visibility = Visibility.Collapsed;
             ButtonBack.Visibility = Visibility.Visible;
             ButtonConfirm.Visibility = Visibility.Collapsed;
@@ -622,6 +624,7 @@ namespace Ink_Canvas
                 }
 
                 Clipboard.SetText(url);
+                CardCopyIssueUrl.Header = "已复制 ✓";
             }
             catch (Exception ex)
             {
@@ -634,6 +637,7 @@ namespace Ink_Canvas
             try
             {
                 Clipboard.SetText(TextBoxMarkdownTemplate.Text);
+                BtnCopyMarkdown.Content = "已复制 ✓";
             }
             catch (Exception ex)
             {

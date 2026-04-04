@@ -155,23 +155,7 @@
                             </Button.Style>
                         </Button>
                         <ui:SettingsExpander.Items>
-                            <ui:SettingsCard Header="复制反馈链接" IsClickEnabled="True" Click="CardCopyIssueUrl_Click">
-                                <TextBox x:Name="TextBoxIssueUrl"
-                                         MaxWidth="400"
-                                         Text="https://github.com/InkCanvasForClass/community/issues/new?template=01-bug_report.yml"
-                                         IsReadOnly="True"
-                                         BorderThickness="0"
-                                         Background="Transparent"
-                                         FontFamily="Consolas"
-                                         FontSize="12"
-                                         TextWrapping="Wrap"
-                                         AcceptsReturn="True"
-                                         HorizontalScrollBarVisibility="Auto"
-                                         VerticalScrollBarVisibility="Auto"
-                                         IsReadOnlyCaretVisible="False"
-                                         Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}"
-                                         TextAlignment="Left"
-                                         VerticalAlignment="Center"/>
+                            <ui:SettingsCard x:Name="CardCopyIssueUrl" Header="复制反馈链接" IsClickEnabled="True" Click="CardCopyIssueUrl_Click">
                                 <ui:SettingsCard.ActionIcon>
                                     <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}"/>
                                 </ui:SettingsCard.ActionIcon>
