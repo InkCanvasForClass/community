@@ -19,6 +19,7 @@ namespace Ink_Canvas
         private string _telemetryId = "";
         private string _pptLinkageSettings = "";
         private string _inkRecognitionSettings = "";
+        private string _inkRecognitionEngine = "";
 
         public FeedbackWindow()
         {
@@ -153,11 +154,6 @@ namespace Ink_Canvas
                 if (MainWindow.Settings?.InkToShape != null)
                 {
                     _inkRecognitionSettings = $"启用墨迹识别: {MainWindow.Settings.InkToShape.IsInkToShapeEnabled}\n";
-                    _inkRecognitionSettings += $"形状识别: {MainWindow.Settings.InkToShape.IsInkToShapeRectangle}\n";
-                    _inkRecognitionSettings += $"三角形识别: {MainWindow.Settings.InkToShape.IsInkToShapeTriangle}\n";
-                    _inkRecognitionSettings += $"圆角矩形识别: {MainWindow.Settings.InkToShape.IsInkToShapeRounded}\n";
-                    _inkRecognitionSettings += $"线条矫正灵敏度: {MainWindow.Settings.InkToShape.LineStraightenSensitivity}\n";
-                    _inkRecognitionSettings += $"线条标准化阈值: {MainWindow.Settings.InkToShape.LineNormalizationThreshold}\n";
                 }
                 else
                 {
@@ -168,6 +164,28 @@ namespace Ink_Canvas
             {
                 _inkRecognitionSettings = "获取墨迹识别设置失败";
                 System.Diagnostics.Debug.WriteLine($"获取墨迹识别设置失败: {ex.Message}");
+            }
+
+            try
+            {
+                if (MainWindow.Settings?.InkToShape != null)
+                {
+                    var engineMode = Helpers.ShapeRecognitionRouter.FromSettingsInt(MainWindow.Settings.InkToShape.ShapeRecognitionEngine);
+                    bool useWinRT = Helpers.ShapeRecognitionRouter.ResolveUseWinRt(engineMode);
+                    _inkRecognitionEngine = useWinRT ? "WinRT" : "IACore";
+                    _inkRecognitionSettings += $"识别引擎: {_inkRecognitionEngine}\n";
+                }
+                else
+                {
+                    _inkRecognitionEngine = "未配置";
+                    _inkRecognitionSettings += $"识别引擎: {_inkRecognitionEngine}\n";
+                }
+            }
+            catch (Exception ex)
+            {
+                _inkRecognitionEngine = "获取失败";
+                _inkRecognitionSettings += $"识别引擎: {_inkRecognitionEngine}\n";
+                System.Diagnostics.Debug.WriteLine($"获取墨迹识别引擎失败: {ex.Message}");
             }
         }
 
