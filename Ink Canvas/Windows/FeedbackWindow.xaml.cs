@@ -247,12 +247,24 @@ namespace Ink_Canvas
 
         private void ButtonBack_Click(object sender, RoutedEventArgs e)
         {
-            Page1.Visibility = Visibility.Visible;
-            Page2.Visibility = Visibility.Collapsed;
-            ButtonCancel.Visibility = Visibility.Visible;
-            ButtonNext.Visibility = Visibility.Visible;
-            ButtonBack.Visibility = Visibility.Collapsed;
-            ButtonSubmit.Visibility = Visibility.Collapsed;
+            if (Page3.Visibility == Visibility.Visible)
+            {
+                Page3.Visibility = Visibility.Collapsed;
+                Page2.Visibility = Visibility.Visible;
+                ButtonCancel.Visibility = Visibility.Collapsed;
+                ButtonNext.Visibility = Visibility.Collapsed;
+                ButtonBack.Visibility = Visibility.Visible;
+                ButtonConfirm.Visibility = Visibility.Visible;
+            }
+            else if (Page2.Visibility == Visibility.Visible)
+            {
+                Page2.Visibility = Visibility.Collapsed;
+                Page1.Visibility = Visibility.Visible;
+                ButtonCancel.Visibility = Visibility.Visible;
+                ButtonNext.Visibility = Visibility.Visible;
+                ButtonBack.Visibility = Visibility.Collapsed;
+                ButtonConfirm.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void ButtonNext_Click(object sender, RoutedEventArgs e)
@@ -349,7 +361,7 @@ namespace Ink_Canvas
                 ButtonCancel.Visibility = Visibility.Collapsed;
                 ButtonNext.Visibility = Visibility.Collapsed;
                 ButtonBack.Visibility = Visibility.Visible;
-                ButtonSubmit.Visibility = Visibility.Visible;
+                ButtonConfirm.Visibility = Visibility.Visible;
             }
             catch (Exception ex)
             {
@@ -357,7 +369,71 @@ namespace Ink_Canvas
             }
         }
 
-        private void ButtonSubmit_Click(object sender, RoutedEventArgs e)
+        private void ButtonConfirm_Click(object sender, RoutedEventArgs e)
+        {
+            GenerateMarkdownTemplate();
+            Page2.Visibility = Visibility.Collapsed;
+            Page3.Visibility = Visibility.Visible;
+            ButtonCancel.Visibility = Visibility.Visible;
+            ButtonNext.Visibility = Visibility.Collapsed;
+            ButtonBack.Visibility = Visibility.Visible;
+            ButtonConfirm.Visibility = Visibility.Collapsed;
+        }
+
+        private void GenerateMarkdownTemplate()
+        {
+            string template = "## 环境信息\n";
+            
+            if (CheckAppVersion.IsChecked == true)
+            {
+                template += $"- 软件版本: {_appVersion}\n";
+            }
+            if (CheckUpdateChannel.IsChecked == true)
+            {
+                template += $"- 更新通道: {_updateChannel}\n";
+            }
+            if (CheckOSVersion.IsChecked == true)
+            {
+                template += $"- 操作系统: {_osVersion}\n";
+            }
+            if (CheckNetVersion.IsChecked == true)
+            {
+                template += $"- .NET 版本: {_netVersion}\n";
+            }
+            if (CheckTouchSupport.IsChecked == true)
+            {
+                template += $"- 触控支持: {_touchSupport}\n";
+            }
+            
+            template += "\n## 设备信息\n";
+            if (CheckDeviceId.IsChecked == true)
+            {
+                template += $"- 设备ID: {_deviceId}\n";
+            }
+            if (CheckFanceId.IsChecked == true && !string.IsNullOrEmpty(_telemetryId))
+            {
+                template += $"- 遥测ID: {_telemetryId}\n";
+            }
+            
+            if (CheckPPTLinkage.IsChecked == true || CheckInkRecognition.IsChecked == true)
+            {
+                template += "\n## 软件配置\n";
+                if (CheckPPTLinkage.IsChecked == true)
+                {
+                    template += "### PPT联动设置\n";
+                    template += _pptLinkageSettings + "\n";
+                }
+                if (CheckInkRecognition.IsChecked == true)
+                {
+                    template += "### 墨迹识别设置\n";
+                    template += _inkRecognitionSettings + "\n";
+                }
+            }
+            
+            TextBoxMarkdownTemplate.Text = template;
+        }
+
+        private void BtnOpenGitHubIssue_Click(object sender, RoutedEventArgs e)
         {
             try
             {
@@ -455,6 +531,113 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"打开反馈链接失败: {ex.Message}");
+            }
+        }
+
+        private void CardCopyIssueUrl_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string versionInfo = "";
+                string systemInfo = "";
+
+                if (CheckAppVersion.IsChecked == true || CheckUpdateChannel.IsChecked == true)
+                {
+                    if (CheckAppVersion.IsChecked == true)
+                    {
+                        versionInfo += _appVersion;
+                    }
+                    if (CheckUpdateChannel.IsChecked == true)
+                    {
+                        if (!string.IsNullOrEmpty(versionInfo))
+                        {
+                            versionInfo += " ";
+                        }
+                        versionInfo += $"({_updateChannel})";
+                    }
+                }
+
+                if (CheckOSVersion.IsChecked == true || CheckNetVersion.IsChecked == true || CheckTouchSupport.IsChecked == true)
+                {
+                    if (CheckOSVersion.IsChecked == true)
+                    {
+                        systemInfo += _osVersion;
+                    }
+                    if (CheckNetVersion.IsChecked == true)
+                    {
+                        if (!string.IsNullOrEmpty(systemInfo))
+                        {
+                            systemInfo += " | ";
+                        }
+                        systemInfo += _netVersion;
+                    }
+                    if (CheckTouchSupport.IsChecked == true)
+                    {
+                        if (!string.IsNullOrEmpty(systemInfo))
+                        {
+                            systemInfo += " | ";
+                        }
+                        systemInfo += $"触控:{_touchSupport}";
+                    }
+                }
+
+                string url = "https://github.com/InkCanvasForClass/community/issues/new?template=01-bug_report.yml";
+
+                if (!string.IsNullOrEmpty(versionInfo))
+                {
+                    url += $"&version={Uri.EscapeDataString(versionInfo)}";
+                }
+
+                if (!string.IsNullOrEmpty(systemInfo))
+                {
+                    url += $"&os={Uri.EscapeDataString(systemInfo)}";
+                }
+
+                string extraInfo = "";
+                if (CheckDeviceId.IsChecked == true)
+                {
+                    extraInfo += $"设备ID: {_deviceId}\n";
+                }
+
+                if (CheckFanceId.IsChecked == true)
+                {
+                    extraInfo += $"遥测ID: {_telemetryId}\n";
+                }
+
+                if (CheckPPTLinkage.IsChecked == true)
+                {
+                    extraInfo += "\nPPT联动设置:\n";
+                    extraInfo += _pptLinkageSettings;
+                }
+
+                if (CheckInkRecognition.IsChecked == true)
+                {
+                    extraInfo += "\n墨迹识别设置:\n";
+                    extraInfo += _inkRecognitionSettings;
+                }
+
+                if (!string.IsNullOrEmpty(extraInfo))
+                {
+                    url += $"&extra={Uri.EscapeDataString(extraInfo)}";
+                }
+
+                Clipboard.SetText(url);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"复制反馈链接失败: {ex.Message}");
+            }
+        }
+
+        private void BtnCopyMarkdown_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Clipboard.SetText(TextBoxMarkdownTemplate.Text);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"复制Markdown模板失败: {ex.Message}");
             }
         }
     }

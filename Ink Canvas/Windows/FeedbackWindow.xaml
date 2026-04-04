@@ -139,6 +139,76 @@
             </ScrollViewer>
         </Grid>
 
+        <Grid Grid.Row="0" x:Name="Page3" Visibility="Collapsed">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ikw:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
+                    <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="选择反馈方式"/>
+
+                    <ui:SettingsExpander x:Name="ExpanderGitHubFeedback" Header="GitHub 问题反馈"
+                                     Description="在 GitHub 上提交问题反馈">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Mail}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <Button x:Name="BtnOpenGitHubIssue" Content="跳转到 GitHub 反馈" Click="BtnOpenGitHubIssue_Click">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
+                            </Button.Style>
+                        </Button>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="复制反馈链接" IsClickEnabled="True" Click="CardCopyIssueUrl_Click">
+                                <TextBox x:Name="TextBoxIssueUrl"
+                                         MaxWidth="400"
+                                         Text="https://github.com/InkCanvasForClass/community/issues/new?template=01-bug_report.yml"
+                                         IsReadOnly="True"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         FontFamily="Consolas"
+                                         FontSize="12"
+                                         TextWrapping="Wrap"
+                                         AcceptsReturn="True"
+                                         HorizontalScrollBarVisibility="Auto"
+                                         VerticalScrollBarVisibility="Auto"
+                                         IsReadOnlyCaretVisible="False"
+                                         Foreground="{DynamicResource {x:Static ui:ThemeKeys.TextFillColorSecondaryBrushKey}}"
+                                         TextAlignment="Left"
+                                         VerticalAlignment="Center"/>
+                                <ui:SettingsCard.ActionIcon>
+                                    <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Copy}"/>
+                                </ui:SettingsCard.ActionIcon>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+
+                    <ui:SettingsExpander x:Name="ExpanderMarkdownTemplate" Header="反馈模板 (Markdown)"
+                                     Description="复制以下 Markdown 模板进行反馈">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Code}"/>
+                        </ui:SettingsExpander.HeaderIcon>
+                        <Button x:Name="BtnCopyMarkdown" Content="复制模板" Click="BtnCopyMarkdown_Click">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.DefaultButtonStyleKey}}"/>
+                            </Button.Style>
+                        </Button>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard ContentAlignment="Left">
+                                <TextBox x:Name="TextBoxMarkdownTemplate"
+                                         MinHeight="200"
+                                         IsReadOnly="True"
+                                         BorderThickness="0"
+                                         Background="Transparent"
+                                         FontFamily="Consolas"
+                                         FontSize="12"
+                                         TextWrapping="Wrap"
+                                         AcceptsReturn="True"
+                                         VerticalScrollBarVisibility="Auto"
+                                         Text="# 问题描述&#x0a;请描述您遇到的问题...&#x0a;&#x0a;# 重现步骤&#x0a;1. &#x0a;2. &#x0a;3. &#x0a;&#x0a;# 预期行为&#x0a;请描述您期望的行为...&#x0a;&#x0a;# 实际行为&#x0a;请描述实际发生的...&#x0a;&#x0a;# 环境信息&#x0a;- 版本: &#x0a;- 系统: &#x0a;"/>
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
+                </ikw:SimpleStackPanel>
+            </ScrollViewer>
+        </Grid>
+
         <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,20,0,0">
             <ikw:SimpleStackPanel HorizontalAlignment="Right" VerticalAlignment="Center" Orientation="Horizontal" Spacing="12">
                 <Button x:Name="ButtonCancel" Content="取消" Width="100" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" Click="ButtonCancel_Click">
@@ -160,7 +230,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <Button x:Name="ButtonSubmit" Content="提交反馈" Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold" Click="ButtonSubmit_Click" Visibility="Collapsed">
+                <Button x:Name="ButtonConfirm" Content="下一步" Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold" Click="ButtonConfirm_Click" Visibility="Collapsed">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
                     </Button.Style>
