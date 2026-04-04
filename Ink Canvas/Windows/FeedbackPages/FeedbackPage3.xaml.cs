@@ -10,6 +10,8 @@ namespace Ink_Canvas.Windows.FeedbackPages
         public event EventHandler<RoutedEventArgs> CardCopyIssueUrlClick;
         public event EventHandler<RoutedEventArgs> BtnCopyMarkdownClick;
 
+        public string MarkdownTemplate => TextBoxMarkdownTemplate.Text;
+
         public FeedbackPage3()
         {
             InitializeComponent();

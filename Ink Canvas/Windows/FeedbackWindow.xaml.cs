@@ -452,92 +452,106 @@ namespace Ink_Canvas
             _page3.TextBoxMarkdownTemplate.Text = template;
         }
 
+        private (string versionInfo, string systemInfo, string extraInfo) BuildFeedbackInfo()
+        {
+            string versionInfo = "";
+            string systemInfo = "";
+            string extraInfo = "";
+
+            if (_page1.CheckAppVersion.IsChecked == true || _page1.CheckUpdateChannel.IsChecked == true)
+            {
+                if (_page1.CheckAppVersion.IsChecked == true)
+                {
+                    versionInfo += _appVersion;
+                }
+                if (_page1.CheckUpdateChannel.IsChecked == true)
+                {
+                    if (!string.IsNullOrEmpty(versionInfo))
+                    {
+                        versionInfo += " ";
+                    }
+                    versionInfo += $"({_updateChannel})";
+                }
+            }
+
+            if (_page1.CheckOSVersion.IsChecked == true || _page1.CheckNetVersion.IsChecked == true || _page1.CheckTouchSupport.IsChecked == true)
+            {
+                if (_page1.CheckOSVersion.IsChecked == true)
+                {
+                    systemInfo += _osVersion;
+                }
+                if (_page1.CheckNetVersion.IsChecked == true)
+                {
+                    if (!string.IsNullOrEmpty(systemInfo))
+                    {
+                        systemInfo += " | ";
+                    }
+                    systemInfo += _netVersion;
+                }
+                if (_page1.CheckTouchSupport.IsChecked == true)
+                {
+                    if (!string.IsNullOrEmpty(systemInfo))
+                    {
+                        systemInfo += " | ";
+                    }
+                    systemInfo += $"触控:{_touchSupport}";
+                }
+            }
+
+            if (_page1.CheckDeviceId.IsChecked == true)
+            {
+                extraInfo += $"设备ID: {_deviceId}\n";
+            }
+
+            if (_page1.CheckFanceId.IsChecked == true)
+            {
+                extraInfo += $"遥测ID: {_telemetryId}\n";
+            }
+
+            if (_page1.CheckPPTLinkage.IsChecked == true)
+            {
+                extraInfo += "\nPPT联动设置:\n";
+                extraInfo += _pptLinkageSettings;
+            }
+
+            if (_page1.CheckInkRecognition.IsChecked == true)
+            {
+                extraInfo += "\n墨迹识别设置:\n";
+                extraInfo += _inkRecognitionSettings;
+            }
+
+            return (versionInfo, systemInfo, extraInfo);
+        }
+
+        private string BuildGitHubIssueUrl()
+        {
+            var (versionInfo, systemInfo, extraInfo) = BuildFeedbackInfo();
+
+            string url = "https://github.com/InkCanvasForClass/community/issues/new?template=01-bug_report.yml";
+
+            if (!string.IsNullOrEmpty(versionInfo))
+            {
+                url += $"&version={Uri.EscapeDataString(versionInfo)}";
+            }
+
+            if (!string.IsNullOrEmpty(systemInfo))
+            {
+                url += $"&os={Uri.EscapeDataString(systemInfo)}";
+            }
+
+            if (!string.IsNullOrEmpty(extraInfo))
+            {
+                url += $"&extra={Uri.EscapeDataString(extraInfo)}";
+            }
+
+            return url;
+        }
+
         public void BtnOpenGitHubIssue_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                string versionInfo = "";
-                string systemInfo = "";
-
-                if (_page1.CheckAppVersion.IsChecked == true || _page1.CheckUpdateChannel.IsChecked == true)
-                {
-                    if (_page1.CheckAppVersion.IsChecked == true)
-                    {
-                        versionInfo += _appVersion;
-                    }
-                    if (_page1.CheckUpdateChannel.IsChecked == true)
-                    {
-                        if (!string.IsNullOrEmpty(versionInfo))
-                        {
-                            versionInfo += " ";
-                        }
-                        versionInfo += $"({_updateChannel})";
-                    }
-                }
-
-                if (_page1.CheckOSVersion.IsChecked == true || _page1.CheckNetVersion.IsChecked == true || _page1.CheckTouchSupport.IsChecked == true)
-                {
-                    if (_page1.CheckOSVersion.IsChecked == true)
-                    {
-                        systemInfo += _osVersion;
-                    }
-                    if (_page1.CheckNetVersion.IsChecked == true)
-                    {
-                        if (!string.IsNullOrEmpty(systemInfo))
-                        {
-                            systemInfo += " | ";
-                        }
-                        systemInfo += _netVersion;
-                    }
-                    if (_page1.CheckTouchSupport.IsChecked == true)
-                    {
-                        if (!string.IsNullOrEmpty(systemInfo))
-                        {
-                            systemInfo += " | ";
-                        }
-                        systemInfo += $"触控:{_touchSupport}";
-                    }
-                }
-
-                string url = "https://github.com/InkCanvasForClass/community/issues/new?template=01-bug_report.yml";
-
-                if (!string.IsNullOrEmpty(versionInfo))
-                {
-                    url += $"&version={Uri.EscapeDataString(versionInfo)}";
-                }
-
-                if (!string.IsNullOrEmpty(systemInfo))
-                {
-                    url += $"&os={Uri.EscapeDataString(systemInfo)}";
-                }
-
-                string extraInfo = "";
-                if (_page1.CheckDeviceId.IsChecked == true)
-                {
-                    extraInfo += $"设备ID: {_deviceId}\n";
-                }
-
-                if (_page1.CheckFanceId.IsChecked == true)
-                {
-                    extraInfo += $"遥测ID: {_telemetryId}\n";
-                }
-
-                if (_page1.CheckPPTLinkage.IsChecked == true)
-                {
-                    extraInfo += "\nPPT联动设置:\n";
-                    extraInfo += _pptLinkageSettings;
-                }
-
-                if (_page1.CheckInkRecognition.IsChecked == true)
-                {
-                    extraInfo += "\n墨迹识别设置:\n";
-                    extraInfo += _inkRecognitionSettings;
-                }
-
-                if (!string.IsNullOrEmpty(extraInfo))
-                {
-                    url += $"&extra={Uri.EscapeDataString(extraInfo)}";
-                }
+                string url = BuildGitHubIssueUrl();
 
                 Process.Start(new ProcessStartInfo
                 {
@@ -557,88 +571,7 @@ namespace Ink_Canvas
         {
             try
             {
-                string versionInfo = "";
-                string systemInfo = "";
-
-                if (_page1.CheckAppVersion.IsChecked == true || _page1.CheckUpdateChannel.IsChecked == true)
-                {
-                    if (_page1.CheckAppVersion.IsChecked == true)
-                    {
-                        versionInfo += _appVersion;
-                    }
-                    if (_page1.CheckUpdateChannel.IsChecked == true)
-                    {
-                        if (!string.IsNullOrEmpty(versionInfo))
-                        {
-                            versionInfo += " ";
-                        }
-                        versionInfo += $"({_updateChannel})";
-                    }
-                }
-
-                if (_page1.CheckOSVersion.IsChecked == true || _page1.CheckNetVersion.IsChecked == true || _page1.CheckTouchSupport.IsChecked == true)
-                {
-                    if (_page1.CheckOSVersion.IsChecked == true)
-                    {
-                        systemInfo += _osVersion;
-                    }
-                    if (_page1.CheckNetVersion.IsChecked == true)
-                    {
-                        if (!string.IsNullOrEmpty(systemInfo))
-                        {
-                            systemInfo += " | ";
-                        }
-                        systemInfo += _netVersion;
-                    }
-                    if (_page1.CheckTouchSupport.IsChecked == true)
-                    {
-                        if (!string.IsNullOrEmpty(systemInfo))
-                        {
-                            systemInfo += " | ";
-                        }
-                        systemInfo += $"触控:{_touchSupport}";
-                    }
-                }
-
-                string url = "https://github.com/InkCanvasForClass/community/issues/new?template=01-bug_report.yml";
-
-                if (!string.IsNullOrEmpty(versionInfo))
-                {
-                    url += $"&version={Uri.EscapeDataString(versionInfo)}";
-                }
-
-                if (!string.IsNullOrEmpty(systemInfo))
-                {
-                    url += $"&os={Uri.EscapeDataString(systemInfo)}";
-                }
-
-                string extraInfo = "";
-                if (_page1.CheckDeviceId.IsChecked == true)
-                {
-                    extraInfo += $"设备ID: {_deviceId}\n";
-                }
-
-                if (_page1.CheckFanceId.IsChecked == true)
-                {
-                    extraInfo += $"遥测ID: {_telemetryId}\n";
-                }
-
-                if (_page1.CheckPPTLinkage.IsChecked == true)
-                {
-                    extraInfo += "\nPPT联动设置:\n";
-                    extraInfo += _pptLinkageSettings;
-                }
-
-                if (_page1.CheckInkRecognition.IsChecked == true)
-                {
-                    extraInfo += "\n墨迹识别设置:\n";
-                    extraInfo += _inkRecognitionSettings;
-                }
-
-                if (!string.IsNullOrEmpty(extraInfo))
-                {
-                    url += $"&extra={Uri.EscapeDataString(extraInfo)}";
-                }
+                string url = BuildGitHubIssueUrl();
 
                 Clipboard.SetText(url);
                 _page3.CardCopyIssueUrl.Header = "已复制 ✓";
@@ -653,7 +586,7 @@ namespace Ink_Canvas
         {
             try
             {
-                Clipboard.SetText(_page3.TextBoxMarkdownTemplate.Text);
+                Clipboard.SetText(_page3.MarkdownTemplate);
                 _page3.BtnCopyMarkdown.Content = "已复制 ✓";
             }
             catch (Exception ex)

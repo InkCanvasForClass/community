@@ -56,11 +56,6 @@
                     </ui:SettingsCard>
                     <ui:SettingsCard x:Name="CardFanceId" ContentAlignment="Left">
                         <CheckBox x:Name="CheckFanceId" IsChecked="False" Content="遥测 ID" ToolTipService.ShowOnDisabled="True">
-                            <CheckBox.ToolTip>
-                                <ToolTip>
-                                    <TextBlock>暂无遥测 ID</TextBlock>
-                                </ToolTip>
-                            </CheckBox.ToolTip>
                         </CheckBox>
                     </ui:SettingsCard>
                 </ui:SettingsExpander.Items>

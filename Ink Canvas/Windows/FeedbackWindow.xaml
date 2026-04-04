@@ -22,9 +22,6 @@
                     <ui:NavigationThemeTransition />
                 </ui:TransitionCollection>
             </ui:Frame.ContentTransitions>
-            <ui:Frame.Content>
-                <feedbackPages:FeedbackPage1 x:Name="Page1"/>
-            </ui:Frame.Content>
         </ui:Frame>
 
         <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,20,0,0">
@@ -48,7 +45,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
-                <Button x:Name="ButtonConfirm" Content="下一步" Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold" Click="ButtonConfirm_Click" Visibility="Collapsed">
+                <Button x:Name="ButtonConfirm" Content="确认" Width="120" Height="36" FontFamily="Microsoft YaHei UI" FontSize="14" FontWeight="SemiBold" Click="ButtonConfirm_Click" Visibility="Collapsed">
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource {x:Static ui:ThemeKeys.AccentButtonStyleKey}}"/>
                     </Button.Style>
