@@ -26,24 +26,10 @@
                     </ui:SettingsExpander.HeaderIcon>
                     <ui:SettingsExpander.Items>
                         <ui:SettingsCard ContentAlignment="Left">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="软件版本" VerticalAlignment="Center" FontSize="14"/>
-                                <CheckBox Grid.Column="1" x:Name="CheckAppVersion" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                            </Grid>
+                            <CheckBox x:Name="CheckAppVersion" IsChecked="True" Content="软件版本"/>
                         </ui:SettingsCard>
                         <ui:SettingsCard ContentAlignment="Left">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="更新通道" VerticalAlignment="Center" FontSize="14"/>
-                                <CheckBox Grid.Column="1" x:Name="CheckUpdateChannel" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                            </Grid>
+                            <CheckBox x:Name="CheckUpdateChannel" IsChecked="True" Content="更新通道"/>
                         </ui:SettingsCard>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
@@ -55,34 +41,13 @@
                     </ui:SettingsExpander.HeaderIcon>
                     <ui:SettingsExpander.Items>
                         <ui:SettingsCard ContentAlignment="Left">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="操作系统版本" VerticalAlignment="Center" FontSize="14"/>
-                                <CheckBox Grid.Column="1" x:Name="CheckOSVersion" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                            </Grid>
+                            <CheckBox x:Name="CheckOSVersion" IsChecked="True" Content="操作系统版本"/>
                         </ui:SettingsCard>
                         <ui:SettingsCard ContentAlignment="Left">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text=".NET 版本" VerticalAlignment="Center" FontSize="14"/>
-                                <CheckBox Grid.Column="1" x:Name="CheckNetVersion" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                            </Grid>
+                            <CheckBox x:Name="CheckNetVersion" IsChecked="True" Content=".NET Framework 版本"/>
                         </ui:SettingsCard>
                         <ui:SettingsCard ContentAlignment="Left">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="触控支持" VerticalAlignment="Center" FontSize="14"/>
-                                <CheckBox Grid.Column="1" x:Name="CheckTouchSupport" IsChecked="True" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                            </Grid>
+                            <CheckBox x:Name="CheckTouchSupport" IsChecked="True" Content="触控支持"/>
                         </ui:SettingsCard>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
@@ -94,24 +59,31 @@
                     </ui:SettingsExpander.HeaderIcon>
                     <ui:SettingsExpander.Items>
                         <ui:SettingsCard ContentAlignment="Left">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="设备 ID" VerticalAlignment="Center" FontSize="14"/>
-                                <CheckBox Grid.Column="1" x:Name="CheckDeviceId" IsChecked="False" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                            </Grid>
+                            <CheckBox x:Name="CheckDeviceId" IsChecked="False" Content="设备 ID"/>
                         </ui:SettingsCard>
                         <ui:SettingsCard x:Name="CardFanceId" ContentAlignment="Left">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="Auto"/>
-                                </Grid.ColumnDefinitions>
-                                <TextBlock Grid.Column="0" Text="遥测 ID" VerticalAlignment="Center" FontSize="14"/>
-                                <CheckBox Grid.Column="1" x:Name="CheckFanceId" IsChecked="False" VerticalAlignment="Center" Margin="8,0,0,0"/>
-                            </Grid>
+                            <CheckBox x:Name="CheckFanceId" IsChecked="False" Content="遥测 ID" ToolTipService.ShowOnDisabled="True">
+                                <CheckBox.ToolTip>
+                                    <ToolTip>
+                                        <TextBlock>暂无遥测 ID</TextBlock>
+                                    </ToolTip>
+                                </CheckBox.ToolTip>
+                            </CheckBox>
+                        </ui:SettingsCard>
+                    </ui:SettingsExpander.Items>
+                </ui:SettingsExpander>
+
+                <ui:SettingsExpander x:Name="ExpanderConfiguration" Header="软件配置"
+                                 Description="选择要包含在反馈中的软件配置信息">
+                    <ui:SettingsExpander.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                    </ui:SettingsExpander.HeaderIcon>
+                    <ui:SettingsExpander.Items>
+                        <ui:SettingsCard ContentAlignment="Left">
+                            <CheckBox x:Name="CheckPPTLinkage" IsChecked="True" Content="PPT 联动设置"/>
+                        </ui:SettingsCard>
+                        <ui:SettingsCard ContentAlignment="Left">
+                            <CheckBox x:Name="CheckInkRecognition" IsChecked="True" Content="墨迹识别设置"/>
                         </ui:SettingsCard>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
@@ -119,40 +91,52 @@
         </ScrollViewer>
 
         <Grid Grid.Row="0" x:Name="Page2" Visibility="Collapsed">
-            <ikw:SimpleStackPanel Spacing="12">
-                <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="确认要发送的信息"/>
+            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                <ikw:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
+                    <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="确认要发送的信息"/>
 
-                <ui:SettingsCard Header="软件信息"
-                                 Description="将要包含在反馈中的软件版本信息">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AppIconDefault}"/>
-                    </ui:SettingsCard.HeaderIcon>
-                    <ikw:SimpleStackPanel Spacing="8">
-                        <TextBlock x:Name="TextAppVersionInfo" Text="v1.7.18.4 (Release)" FontSize="14" TextWrapping="Wrap"/>
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
+                    <ui:SettingsCard Header="软件信息"
+                                     Description="将要包含在反馈中的软件版本信息">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.AppIconDefault}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Spacing="8">
+                            <TextBlock x:Name="TextAppVersionInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
 
-                <ui:SettingsCard Header="系统信息"
-                                 Description="将要包含在反馈中的系统环境信息">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PC1}"/>
-                    </ui:SettingsCard.HeaderIcon>
-                    <ikw:SimpleStackPanel Spacing="8">
-                        <TextBlock x:Name="TextSystemInfo" Text="Windows 10 专业版 19045.3758 | .NET 8.0.0 | 触控:支持(2个设备)" FontSize="14" TextWrapping="Wrap"/>
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
+                    <ui:SettingsCard Header="系统信息"
+                                     Description="将要包含在反馈中的系统环境信息">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.PC1}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Spacing="8">
+                            <TextBlock x:Name="TextSystemInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
 
-                <ui:SettingsCard Header="设备信息"
-                                 Description="将要包含在反馈中的设备标识信息">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}"/>
-                    </ui:SettingsCard.HeaderIcon>
-                    <ikw:SimpleStackPanel Spacing="8">
-                        <TextBlock x:Name="TextDeviceInfo" Text="设备ID: xxxxxxxxxxxxxx" FontSize="14" TextWrapping="Wrap"/>
-                        <TextBlock x:Name="TextTelemetryInfo" Text="遥测ID: xxxxxxxxxxxxxx" FontSize="14" TextWrapping="Wrap" Visibility="Collapsed"/>
-                    </ikw:SimpleStackPanel>
-                </ui:SettingsCard>
-            </ikw:SimpleStackPanel>
+                    <ui:SettingsCard Header="设备信息"
+                                     Description="将要包含在反馈中的设备标识信息">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Devices2}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Spacing="8">
+                            <TextBlock x:Name="TextDeviceInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="TextTelemetryInfo" Text="" FontSize="14" TextWrapping="Wrap" Visibility="Collapsed"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+
+                    <ui:SettingsCard x:Name="CardConfiguration" Header="软件配置"
+                                     Description="将要包含在反馈中的软件配置信息">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ikw:SimpleStackPanel Spacing="8">
+                            <TextBlock x:Name="TextConfigurationInfo" Text="" FontSize="14" TextWrapping="Wrap"/>
+                        </ikw:SimpleStackPanel>
+                    </ui:SettingsCard>
+                </ikw:SimpleStackPanel>
+            </ScrollViewer>
         </Grid>
 
         <Grid Grid.Row="1" VerticalAlignment="Bottom" Margin="0,20,0,0">

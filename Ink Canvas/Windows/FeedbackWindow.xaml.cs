@@ -17,12 +17,23 @@ namespace Ink_Canvas
         private string _touchSupport = "";
         private string _deviceId = "";
         private string _telemetryId = "";
+        private string _pptLinkageSettings = "";
+        private string _inkRecognitionSettings = "";
 
         public FeedbackWindow()
         {
             InitializeComponent();
             LoadInformation();
+            UpdateTextBlocks();
             CheckTelemetryIdAvailability();
+        }
+
+        private void UpdateTextBlocks()
+        {
+            TextAppVersionInfo.Text = _appVersion;
+            TextSystemInfo.Text = $"{_osVersion} | {_netVersion} | 触控:{_touchSupport}";
+            TextDeviceInfo.Text = $"设备ID: {_deviceId}";
+            TextTelemetryInfo.Text = $"遥测ID: {_telemetryId}";
         }
 
         private void LoadInformation()
@@ -116,6 +127,48 @@ namespace Ink_Canvas
                 _telemetryId = "获取失败";
                 System.Diagnostics.Debug.WriteLine($"获取遥测ID失败: {ex.Message}");
             }
+
+            try
+            {
+                if (MainWindow.Settings?.PowerPointSettings != null)
+                {
+                    _pptLinkageSettings = $"启用PPT联动: {MainWindow.Settings.PowerPointSettings.PowerPointSupport}\n";
+                    _pptLinkageSettings += $"WPS支持: {MainWindow.Settings.PowerPointSettings.IsSupportWPS}\n";
+                    _pptLinkageSettings += $"MSO支持: {MainWindow.Settings.PowerPointSettings.PowerPointSupport}\n";
+                    _pptLinkageSettings += $"Rot联动: {MainWindow.Settings.PowerPointSettings.UseRotPptLink}\n";
+                }
+                else
+                {
+                    _pptLinkageSettings = "未配置PPT联动设置";
+                }
+            }
+            catch (Exception ex)
+            {
+                _pptLinkageSettings = "获取PPT联动设置失败";
+                System.Diagnostics.Debug.WriteLine($"获取PPT联动设置失败: {ex.Message}");
+            }
+
+            try
+            {
+                if (MainWindow.Settings?.InkToShape != null)
+                {
+                    _inkRecognitionSettings = $"启用墨迹识别: {MainWindow.Settings.InkToShape.IsInkToShapeEnabled}\n";
+                    _inkRecognitionSettings += $"形状识别: {MainWindow.Settings.InkToShape.IsInkToShapeRectangle}\n";
+                    _inkRecognitionSettings += $"三角形识别: {MainWindow.Settings.InkToShape.IsInkToShapeTriangle}\n";
+                    _inkRecognitionSettings += $"圆角矩形识别: {MainWindow.Settings.InkToShape.IsInkToShapeRounded}\n";
+                    _inkRecognitionSettings += $"线条矫正灵敏度: {MainWindow.Settings.InkToShape.LineStraightenSensitivity}\n";
+                    _inkRecognitionSettings += $"线条标准化阈值: {MainWindow.Settings.InkToShape.LineNormalizationThreshold}\n";
+                }
+                else
+                {
+                    _inkRecognitionSettings = "未配置墨迹识别设置";
+                }
+            }
+            catch (Exception ex)
+            {
+                _inkRecognitionSettings = "获取墨迹识别设置失败";
+                System.Diagnostics.Debug.WriteLine($"获取墨迹识别设置失败: {ex.Message}");
+            }
         }
 
         private string GetTelemetryId()
@@ -142,7 +195,7 @@ namespace Ink_Canvas
                 bool hasTelemetryId = CheckTelemetryIdExists();
                 if (!hasTelemetryId)
                 {
-                    CardFanceId.Visibility = Visibility.Collapsed;
+                    CardFanceId.Visibility = Visibility.Visible;
                     CheckFanceId.IsChecked = false;
                     CheckFanceId.IsEnabled = false;
                 }
@@ -150,7 +203,7 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"检查遥测ID可用性失败: {ex.Message}");
-                CardFanceId.Visibility = Visibility.Collapsed;
+                CardFanceId.Visibility = Visibility.Visible;
                 CheckFanceId.IsChecked = false;
                 CheckFanceId.IsEnabled = false;
             }
@@ -254,6 +307,25 @@ namespace Ink_Canvas
                     TextTelemetryInfo.Visibility = Visibility.Visible;
                 }
 
+                // Display software configuration settings in the dedicated card
+                if (CheckPPTLinkage.IsChecked == true || CheckInkRecognition.IsChecked == true)
+                {
+                    CardConfiguration.Visibility = Visibility.Visible;
+                    TextConfigurationInfo.Text = "";
+                    if (CheckPPTLinkage.IsChecked == true)
+                    {
+                        TextConfigurationInfo.Text += $"PPT联动设置:\n{_pptLinkageSettings}\n";
+                    }
+                    if (CheckInkRecognition.IsChecked == true)
+                    {
+                        TextConfigurationInfo.Text += $"墨迹识别设置:\n{_inkRecognitionSettings}\n";
+                    }
+                }
+                else
+                {
+                    CardConfiguration.Visibility = Visibility.Collapsed;
+                }
+
                 Page1.Visibility = Visibility.Collapsed;
                 Page2.Visibility = Visibility.Visible;
                 ButtonCancel.Visibility = Visibility.Collapsed;
@@ -326,14 +398,32 @@ namespace Ink_Canvas
                     url += $"&os={Uri.EscapeDataString(systemInfo)}";
                 }
 
+                string extraInfo = "";
                 if (CheckDeviceId.IsChecked == true)
                 {
-                    url += $"&device={Uri.EscapeDataString(_deviceId)}";
+                    extraInfo += $"设备ID: {_deviceId}\n";
                 }
 
                 if (CheckFanceId.IsChecked == true)
                 {
-                    url += $"&telemetry={Uri.EscapeDataString(_telemetryId)}";
+                    extraInfo += $"遥测ID: {_telemetryId}\n";
+                }
+
+                if (CheckPPTLinkage.IsChecked == true)
+                {
+                    extraInfo += "\nPPT联动设置:\n";
+                    extraInfo += _pptLinkageSettings;
+                }
+
+                if (CheckInkRecognition.IsChecked == true)
+                {
+                    extraInfo += "\n墨迹识别设置:\n";
+                    extraInfo += _inkRecognitionSettings;
+                }
+
+                if (!string.IsNullOrEmpty(extraInfo))
+                {
+                    url += $"&extra={Uri.EscapeDataString(extraInfo)}";
                 }
 
                 Process.Start(new ProcessStartInfo
