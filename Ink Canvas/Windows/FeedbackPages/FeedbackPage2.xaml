@@ -8,7 +8,7 @@
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
     mc:Ignorable="d"
     d:DesignHeight="450" d:DesignWidth="600">
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" IsManipulationEnabled="True" PanningMode="VerticalOnly">
         <ikw:SimpleStackPanel Spacing="12" Margin="0,0,0,20">
             <TextBlock FontSize="20" FontWeight="SemiBold" Margin="0,0,0,10" Text="确认要发送的信息"/>
 
