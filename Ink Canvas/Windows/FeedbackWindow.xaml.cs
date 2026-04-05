@@ -474,11 +474,12 @@ namespace Ink_Canvas
                     _page2.TextConfigurationInfo.Text = "";
                     if (_page1.CheckPPTLinkage.IsChecked == true)
                     {
-                        _page2.TextConfigurationInfo.Text += $"PPT联动设置:\n{_pptLinkageSettings}\n";
+                        _page2.TextConfigurationInfo.Text += $"PPT联动设置:\n{_pptLinkageSettings.TrimEnd('\n', '\r')}";
                     }
                     if (_page1.CheckInkRecognition.IsChecked == true)
                     {
-                        _page2.TextConfigurationInfo.Text += $"墨迹识别设置:\n{_inkRecognitionSettings}\n";
+                        if (_page1.CheckPPTLinkage.IsChecked == true) _page2.TextConfigurationInfo.Text += "\n";
+                        _page2.TextConfigurationInfo.Text += $"墨迹识别设置:\n{_inkRecognitionSettings.TrimEnd('\n', '\r')}";
                     }
                 }
                 else
@@ -542,12 +543,13 @@ namespace Ink_Canvas
                 if (_page1.CheckPPTLinkage.IsChecked == true)
                 {
                     template += "### PPT联动设置\n";
-                    template += _pptLinkageSettings + "\n";
+                    template += _pptLinkageSettings.TrimEnd('\n', '\r');
                 }
                 if (_page1.CheckInkRecognition.IsChecked == true)
                 {
+                    if (_page1.CheckPPTLinkage.IsChecked == true) template += "\n";
                     template += "### 墨迹识别设置\n";
-                    template += _inkRecognitionSettings + "\n";
+                    template += _inkRecognitionSettings.TrimEnd('\n', '\r');
                 }
             }
 
@@ -623,13 +625,13 @@ namespace Ink_Canvas
             if (_page1.CheckPPTLinkage.IsChecked == true)
             {
                 extraInfo += "\nPPT联动设置:\n";
-                extraInfo += _pptLinkageSettings;
+                extraInfo += _pptLinkageSettings.TrimEnd('\n', '\r');
             }
 
             if (_page1.CheckInkRecognition.IsChecked == true)
             {
                 extraInfo += "\n墨迹识别设置:\n";
-                extraInfo += _inkRecognitionSettings;
+                extraInfo += _inkRecognitionSettings.TrimEnd('\n', '\r');
             }
 
             return (versionInfo, systemInfo, extraInfo);
