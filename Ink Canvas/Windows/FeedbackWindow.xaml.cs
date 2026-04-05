@@ -10,6 +10,16 @@ using System.Windows;
 
 namespace Ink_Canvas
 {
+    /// <summary>
+    /// 反馈窗口，提供用户反馈和问题报告功能。
+    /// 收集系统环境信息并生成GitHub Issue的Markdown模板。
+    /// </summary>
+    /// <remarks>
+    /// 窗口包含三个页面：
+    /// - FeedbackPage1: 选择要包含的环境信息
+    /// - FeedbackPage2: 预览收集的环境信息
+    /// - FeedbackPage3: 生成并复制Markdown模板或打开GitHub Issue
+    /// </remarks>
     public partial class FeedbackWindow : Window
     {
         private string _appVersion = "";
@@ -29,6 +39,18 @@ namespace Ink_Canvas
 
         private NavigationTransitionInfo _transitionInfo = new SlideNavigationTransitionInfo() { Effect = SlideNavigationTransitionEffect.FromRight };
 
+        /// <summary>
+        /// 构造函数，初始化反馈窗口并加载系统信息。
+        /// </summary>
+        /// <remarks>
+        /// 初始化操作包括：
+        /// 1. 初始化UI组件
+        /// 2. 创建三个反馈页面实例
+        /// 3. 绑定页面3的事件处理器
+        /// 4. 加载系统环境信息（版本、系统、触控等）
+        /// 5. 检查遥测ID可用性
+        /// 6. 导航到第一页
+        /// </remarks>
         public FeedbackWindow()
         {
             InitializeComponent();
@@ -46,11 +68,29 @@ namespace Ink_Canvas
             ContentFrame.Navigate(_page1);
         }
 
+        /// <summary>
+        /// 内容框架导航事件处理器，用于更新按钮可见性。
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">导航事件参数</param>
         private void ContentFrame_Navigated(object sender, System.Windows.Navigation.NavigationEventArgs e)
         {
             UpdateButtonVisibility();
         }
 
+        /// <summary>
+        /// 加载系统环境信息，包括软件版本、系统信息、设备信息等。
+        /// </summary>
+        /// <remarks>
+        /// 收集的信息包括：
+        /// - 软件版本和更新通道
+        /// - 操作系统版本和.NET版本
+        /// - 触控支持情况和触摸设备数量
+        /// - 设备ID
+        /// - 遥测ID
+        /// - PPT联动设置
+        /// - 墨迹识别设置和识别引擎
+        /// </remarks>
         private void LoadInformation()
         {
             try
@@ -203,6 +243,10 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 获取存储在文件中的遥测ID。
+        /// </summary>
+        /// <returns>遥测ID字符串，如果不存在则返回空字符串</returns>
         private string GetTelemetryId()
         {
             try
@@ -220,6 +264,12 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 检查遥测ID是否可用，如果不可用则禁用相关复选框。
+        /// </summary>
+        /// <remarks>
+        /// 检查telemetry_id.dat文件是否存在，如果不存在则禁用"包含遥测ID"选项
+        /// </remarks>
         private void CheckTelemetryIdAvailability()
         {
             try
@@ -239,6 +289,10 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 检查遥测ID文件是否存在。
+        /// </summary>
+        /// <returns>如果遥测ID文件存在返回true，否则返回false</returns>
         private bool CheckTelemetryIdExists()
         {
             try
@@ -252,11 +306,21 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 取消按钮点击事件处理器，关闭反馈窗口。
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void ButtonCancel_Click(object sender, RoutedEventArgs e)
         {
             Close();
         }
 
+        /// <summary>
+        /// 返回按钮点击事件处理器，返回上一页面。
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void ButtonBack_Click(object sender, RoutedEventArgs e)
         {
             if (ContentFrame.BackStackDepth > 0)
@@ -266,6 +330,11 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 下一步按钮点击事件处理器，导航到第二页并更新页面信息。
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void ButtonNext_Click(object sender, RoutedEventArgs e)
         {
             UpdatePage2Info();
@@ -273,6 +342,11 @@ namespace Ink_Canvas
             UpdateButtonVisibility();
         }
 
+        /// <summary>
+        /// 确认按钮点击事件处理器，生成Markdown模板并导航到第三页。
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
         private void ButtonConfirm_Click(object sender, RoutedEventArgs e)
         {
             GenerateMarkdownTemplate();
@@ -280,6 +354,14 @@ namespace Ink_Canvas
             UpdateButtonVisibility();
         }
 
+        /// <summary>
+        /// 根据当前页面更新按钮的可见性。
+        /// </summary>
+        /// <remarks>
+        /// - 第一页：显示"取消"和"下一步"按钮
+        /// - 第二页：显示"返回"和"确认"按钮
+        /// - 第三页：显示"返回"按钮
+        /// </remarks>
         private void UpdateButtonVisibility()
         {
             if (ContentFrame.Content == _page1)
@@ -305,6 +387,17 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 更新第二页的显示信息，将用户选择的环境信息展示在页面上。
+        /// </summary>
+        /// <remarks>
+        /// 根据第一页用户的复选框选择情况，更新以下信息：
+        /// - 软件版本信息
+        /// - 系统信息（操作系统、.NET版本、触控支持）
+        /// - 设备ID
+        /// - 遥测ID
+        /// - 软件配置信息（PPT联动设置、墨迹识别设置）
+        /// </remarks>
         private void UpdatePage2Info()
         {
             try
@@ -399,6 +492,15 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 生成Markdown格式的反馈信息模板，并填充到第三页的文本框中。
+        /// </summary>
+        /// <remarks>
+        /// 生成的模板包含以下部分：
+        /// - 环境信息（软件版本、操作系统、.NET版本、触控支持）
+        /// - 设备信息（设备ID、遥测ID）
+        /// - 软件配置（PPT联动设置、墨迹识别设置）
+        /// </remarks>
         private void GenerateMarkdownTemplate()
         {
             string template = "## 环境信息\n";
@@ -452,6 +554,16 @@ namespace Ink_Canvas
             _page3.TextBoxMarkdownTemplate.Text = template;
         }
 
+        /// <summary>
+        /// 构建反馈信息元组，包含版本信息、系统信息和额外信息。
+        /// </summary>
+        /// <returns>包含版本信息、系统信息和额外信息的元组</returns>
+        /// <remarks>
+        /// 根据第一页用户的复选框选择情况，收集以下信息：
+        /// - versionInfo: 软件版本和更新通道
+        /// - systemInfo: 操作系统、.NET版本和触控支持
+        /// - extraInfo: 设备ID、遥测ID、PPT联动设置和墨迹识别设置
+        /// </remarks>
         private (string versionInfo, string systemInfo, string extraInfo) BuildFeedbackInfo()
         {
             string versionInfo = "";
@@ -523,6 +635,16 @@ namespace Ink_Canvas
             return (versionInfo, systemInfo, extraInfo);
         }
 
+        /// <summary>
+        /// 构建GitHub Issue创建页面的URL，包含预填的环境信息参数。
+        /// </summary>
+        /// <returns>完整的GitHub Issue URL字符串</returns>
+        /// <remarks>
+        /// URL基于模板01-bug_report.yml，并根据用户选择的信息添加以下查询参数：
+        /// - version: 版本信息
+        /// - os: 系统信息
+        /// - extra: 额外信息（设备ID、遥测ID、配置信息）
+        /// </remarks>
         private string BuildGitHubIssueUrl()
         {
             var (versionInfo, systemInfo, extraInfo) = BuildFeedbackInfo();
@@ -547,6 +669,16 @@ namespace Ink_Canvas
             return url;
         }
 
+        /// <summary>
+        /// 打开GitHub Issue页面按钮点击事件处理器。
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 1. 构建包含环境信息的GitHub Issue URL
+        /// 2. 使用系统默认浏览器打开该URL
+        /// 3. 关闭反馈窗口
+        /// </remarks>
         public void BtnOpenGitHubIssue_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -567,6 +699,16 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 复制Issue链接按钮点击事件处理器，将GitHub Issue URL复制到剪贴板。
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 1. 构建包含环境信息的GitHub Issue URL
+        /// 2. 将URL复制到系统剪贴板
+        /// 3. 更新按钮显示为"已复制 ✓"
+        /// </remarks>
         public void CardCopyIssueUrl_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -582,6 +724,16 @@ namespace Ink_Canvas
             }
         }
 
+        /// <summary>
+        /// 复制Markdown模板按钮点击事件处理器，将Markdown模板复制到剪贴板。
+        /// </summary>
+        /// <param name="sender">事件发送者</param>
+        /// <param name="e">路由事件参数</param>
+        /// <remarks>
+        /// 1. 从第三页获取Markdown模板内容
+        /// 2. 将模板复制到系统剪贴板
+        /// 3. 更新按钮显示为"已复制 ✓"
+        /// </remarks>
         public void BtnCopyMarkdown_Click(object sender, RoutedEventArgs e)
         {
             try
