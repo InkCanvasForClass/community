@@ -11,6 +11,7 @@ using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 using MessageBox = System.Windows.MessageBox;
 using Screen = System.Windows.Forms.Screen;
+using System.Composition;
 
 namespace Ink_Canvas.Windows.SettingsViews2
 {
@@ -29,7 +30,7 @@ namespace Ink_Canvas.Windows.SettingsViews2
         private readonly Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
         
-        [ImportMany(typeof(IPluginSettingsPage))]
+        [System.ComponentModel.Composition.ImportMany(typeof(IPluginSettingsPage))]
         private IEnumerable<IPluginSettingsPage> _pluginPages; // 自动导入所有插件页面
         
         // 保存窗口原始位置和大小
