@@ -226,6 +226,7 @@ namespace Ink_Canvas
                 if (TimeMachineHistories[targetIndex] == null)
                 {
                     timeMachine.ClearStrokeHistory();
+                    SyncPdfPageSidebarWithCanvas();
                     return;
                 }
 
@@ -282,7 +283,11 @@ namespace Ink_Canvas
         /// </summary>
         private void ProcessElementsAfterRestore(List<UIElement> elements)
         {
-            if (elements == null || elements.Count == 0) return;
+            if (elements == null || elements.Count == 0)
+            {
+                SyncPdfPageSidebarWithCanvas();
+                return;
+            }
 
             // 使用低优先级异步处理，让 UI 先响应，图片位置和事件绑定稍后完成
             Dispatcher.BeginInvoke(DispatcherPriority.Loaded, new Action(() =>
@@ -322,6 +327,8 @@ namespace Ink_Canvas
                         BindElementEvents(pdf);
                     }
                 }
+
+                SyncPdfPageSidebarWithCanvas();
             }));
         }
 
