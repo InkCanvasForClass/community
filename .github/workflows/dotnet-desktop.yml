@@ -2,7 +2,7 @@ name: .NET Build & Package
 
 on:
   push:
-    branches: [ main, beta ]
+    branches: [ net6 ]
   workflow_dispatch:
 
 concurrency:
