@@ -2,7 +2,7 @@ name: .NET Build & Package
 
 on:
   push:
-    branches: [ main, beta ]
+    branches: [ net6 ]
   workflow_dispatch:
 
 concurrency:
@@ -46,7 +46,7 @@ jobs:
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          $exePath = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net472\InkCanvasForClass.exe"
+          $exePath = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net6.0-windows10.0.19041.0\InkCanvasForClass.exe"
           
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
@@ -74,7 +74,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: InkCanvasForClass.CE.debug.${{ matrix.architecture }}
-          path: "Ink Canvas/bin/Debug/${{ matrix.architecture }}/net472/*"
+          path: "Ink Canvas/bin/Debug/${{ matrix.architecture }}/net6.0-windows10.0.19041.0/*"
 
       - name: Create Summary
         if: always()
