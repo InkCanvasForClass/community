@@ -29,8 +29,9 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <Configurations>Debug;Release</Configurations>
-    <Platforms>AnyCPU;x86;x64;ARM64</Platforms>
+    <Platforms>AnyCPU;x86;x64</Platforms>
     <LangVersion>10</LangVersion>
+    <NoWarn>CA1416</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugType>embedded</DebugType>
