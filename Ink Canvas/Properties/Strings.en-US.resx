@@ -1258,7 +1258,7 @@
     <value>Exit slide show</value>
   </data>
   <data name="QuickPanel_Show" xml:space="preserve">
-    <value>Show</value>
+    <value>Annotation bar</value>
   </data>
   <data name="QuickPanel_Exit" xml:space="preserve">
     <value>Exit</value>

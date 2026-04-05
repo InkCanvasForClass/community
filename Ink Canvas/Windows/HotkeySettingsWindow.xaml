@@ -177,6 +177,11 @@
                                               Description="保存屏幕截图到桌面"
                                               DefaultKey="C" 
                                               DefaultModifiers="Alt"/>
+                            <local:HotkeyItem x:Name="QuickDrawHotkey" 
+                                              Title="快抽" 
+                                              Description="打开快抽窗口（与悬浮快抽按钮相同）"
+                                              DefaultKey="K" 
+                                              DefaultModifiers="Alt"/>
                             <local:HotkeyItem x:Name="HideHotkey" 
                                               Title="隐藏" 
                                               Description="隐藏应用程序"

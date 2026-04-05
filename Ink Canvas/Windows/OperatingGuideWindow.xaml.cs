@@ -1,6 +1,5 @@
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Modern;
-using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -15,31 +14,8 @@ namespace Ink_Canvas
         public OperatingGuideWindow()
         {
             InitializeComponent();
+            RefreshTheme();
             AnimationsHelper.ShowWithSlideFromBottomAndFade(this, 0.25);
-        }
-
-        private void BtnClose_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            Close();
-        }
-
-        private void WindowDragMove(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed) DragMove();
-        }
-
-        private void BtnFullscreen_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            if (WindowState == WindowState.Normal)
-            {
-                WindowState = WindowState.Maximized;
-                FontIconFullscreen.Icon = SegoeFluentIcons.BackToWindow;
-            }
-            else
-            {
-                WindowState = WindowState.Normal;
-                FontIconFullscreen.Icon = SegoeFluentIcons.FullScreen;
-            }
         }
 
         private void SCManipulationBoundaryFeedback(object sender, ManipulationBoundaryFeedbackEventArgs e)

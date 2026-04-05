@@ -4711,6 +4711,22 @@ namespace Ink_Canvas
             }
         }
 
+        internal void OpenQuickDrawFromHotkey()
+        {
+            try
+            {
+                if (Settings?.RandSettings?.EnableQuickDraw != true)
+                    return;
+
+                var quickDrawWindow = new QuickDrawWindow();
+                quickDrawWindow.ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"打开快抽窗口失败: {ex.Message}", LogHelper.LogType.Error);
+            }
+        }
+
         /// <summary>
         /// 显示快抽悬浮按钮
         /// </summary>

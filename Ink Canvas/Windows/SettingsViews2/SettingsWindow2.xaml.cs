@@ -6,32 +6,16 @@ using System.Windows;
 using System.Windows.Navigation;
 using System.Windows.Interop;
 using System.Windows.Input;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
 using System.Linq;
 using MessageBox = System.Windows.MessageBox;
 using Screen = System.Windows.Forms.Screen;
-using System.Composition;
 
 namespace Ink_Canvas.Windows.SettingsViews2
 {
-    // 插件设置页面契约接口，所有插件必须实现此接口即可自动接入
-    public interface IPluginSettingsPage
-    {
-        string PageTag { get; }          // 页面唯一标识，不可与内置页面重复
-        string PageTitle { get; }        // 导航菜单显示的标题
-        string PageIconCode { get; }     // Segoe MDL2 Assets 图标字符，例："\xE713"（设置图标）
-        Type PageType { get; }           // 插件设置页面的类型（继承自Page）
-        bool IsFooterItem { get; }       // 是否放在导航底部菜单
-    }
-
     public partial class SettingsWindow2 : Window
     {
         private readonly Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
-        
-        [System.ComponentModel.Composition.ImportMany(typeof(IPluginSettingsPage))]
-        private IEnumerable<IPluginSettingsPage> _pluginPages; // 自动导入所有插件页面
         
         // 保存窗口原始位置和大小
         private double _originalLeft;
@@ -63,11 +47,6 @@ namespace Ink_Canvas.Windows.SettingsViews2
                 { "AboutPage", typeof(AboutPage) },
                 { "Settings", typeof(SettingsPage) }
             };
-
-            // 加载插件页面
-            LoadPluginSettingsPages();
-            // 初始化导航菜单（内置+插件）
-            InitializeNavigationMenu();
 
             // 默认选中首页
             if (NavigationViewControl.MenuItems.Count > 0)
@@ -176,56 +155,6 @@ namespace Ink_Canvas.Windows.SettingsViews2
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern int ShowCursor(bool bShow);
-        #endregion
-
-        #region 插件化动态设置页面核心逻辑
-        private void LoadPluginSettingsPages()
-        {
-            try
-            {
-                // 扫描程序目录下Plugins文件夹中的插件dll
-                var pluginCatalog = new DirectoryCatalog("./Plugins", "*.dll");
-                var container = new CompositionContainer(pluginCatalog);
-                container.ComposeParts(this);
-
-                // 将插件页面注册到页面映射字典
-                foreach (var pluginPage in _pluginPages)
-                {
-                    if (!_pageTypes.ContainsKey(pluginPage.PageTag))
-                    {
-                        _pageTypes.Add(pluginPage.PageTag, pluginPage.PageType);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // 插件加载失败不影响主程序运行，仅输出调试日志
-                System.Diagnostics.Debug.WriteLine($"插件加载失败: {ex.Message}");
-            }
-        }
-
-        private void InitializeNavigationMenu()
-        {
-            // 自动将插件页面添加到导航菜单
-            foreach (var pluginPage in _pluginPages)
-            {
-                var navItem = new NavigationViewItem
-                {
-                    Tag = pluginPage.PageTag,
-                    Content = pluginPage.PageTitle,
-                    Icon = new FontIcon { Glyph = pluginPage.PageIconCode }
-                };
-
-                if (pluginPage.IsFooterItem)
-                {
-                    NavigationViewControl.FooterMenuItems.Add(navItem);
-                }
-                else
-                {
-                    NavigationViewControl.MenuItems.Add(navItem);
-                }
-            }
-        }
         #endregion
 
         #region 高DPI/多屏自适应窗口控制
@@ -502,7 +431,7 @@ namespace Ink_Canvas.Windows.SettingsViews2
             sender.ItemsSource = suggestions;
         }
 
-        // 统一获取所有导航项（主菜单+子菜单+底部菜单+插件页面）
+        // 统一获取所有导航项（主菜单+子菜单+底部菜单）
         private List<NavigationViewItem> GetAllNavigationItems()
         {
             var items = new List<NavigationViewItem>();

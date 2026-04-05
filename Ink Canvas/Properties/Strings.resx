@@ -1301,7 +1301,7 @@
     <value>退出放映</value>
   </data>
   <data name="QuickPanel_Show" xml:space="preserve">
-    <value>显示</value>
+    <value>批注栏</value>
   </data>
   <data name="QuickPanel_Exit" xml:space="preserve">
     <value>退出</value>
