@@ -4,6 +4,7 @@ using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -167,6 +168,18 @@ namespace Ink_Canvas
         /// 断开连接后退出PPT模式的延迟时间（毫秒），即连接断开后多长时间才退出PPT模式。
         /// </summary>
         private const int ExitPPTModeAfterDisconnectDelayMs = 1200;
+
+        /// <summary>
+        /// 仅PPT模式下周期性探测放映界面（COM 失效时依赖 Win32），间隔不宜过小以免多余开销。
+        /// </summary>
+        private DispatcherTimer _pptOnlyVisibilityProbeTimer;
+
+        private const int PptOnlyVisibilityProbeIntervalMs = 800;
+
+        /// <summary>
+        /// PowerPoint 全屏放映顶层窗口类名（与编辑态 PPTFrameClass 区分）。
+        /// </summary>
+        private const string PowerPointSlideShowWindowClassName = "screenClass";
         #endregion
 
         #region PPT Managers
@@ -638,6 +651,8 @@ namespace Ink_Canvas
                 ClosePowerPointApplication();
                 ClearStaticInteropState();
 
+                StopPptOnlyVisibilityProbeTimer();
+
                 LogHelper.WriteLogToFile("PPT管理器已释放", LogHelper.LogType.Event);
             }
             catch (Exception ex)
@@ -700,6 +715,104 @@ namespace Ink_Canvas
         }
         #endregion
 
+        #region 仅PPT模式可见性（COM + Win32 兜底）
+
+        /// <summary>
+        /// 在启用「仅PPT模式」时启动轻量探测，COM 事件延迟或失效时仍可根据全屏放映窗口显示主窗口。
+        /// </summary>
+        internal void EnsurePptOnlyVisibilityProbeTimer()
+        {
+            try
+            {
+                if (!Settings.ModeSettings.IsPPTOnlyMode)
+                {
+                    StopPptOnlyVisibilityProbeTimer();
+                    return;
+                }
+
+                if (_pptOnlyVisibilityProbeTimer == null)
+                {
+                    _pptOnlyVisibilityProbeTimer = new DispatcherTimer
+                    {
+                        Interval = TimeSpan.FromMilliseconds(PptOnlyVisibilityProbeIntervalMs)
+                    };
+                    _pptOnlyVisibilityProbeTimer.Tick += (_, __) => CheckMainWindowVisibility();
+                }
+
+                if (!_pptOnlyVisibilityProbeTimer.IsEnabled)
+                    _pptOnlyVisibilityProbeTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"仅PPT可见性探测计时器启动失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+        }
+
+        internal void StopPptOnlyVisibilityProbeTimer()
+        {
+            try
+            {
+                _pptOnlyVisibilityProbeTimer?.Stop();
+            }
+            catch
+            {
+            }
+        }
+
+        /// <summary>
+        /// 检测是否存在 PowerPoint 全屏放映顶层窗口（类名 screenClass，进程 powerpnt），用于 COM 不可用时的兜底。
+        /// </summary>
+        internal bool IsPowerPointSlideshowSurfacePresentWin32()
+        {
+            if (!Settings.ModeSettings.IsPPTOnlyMode)
+                return false;
+
+            try
+            {
+                bool found = false;
+                EnumWindows((hWnd, _) =>
+                {
+                    if (!IsWindow(hWnd) || !IsWindowVisible(hWnd))
+                        return true;
+
+                    var cls = new StringBuilder(256);
+                    if (GetClassName(hWnd, cls, cls.Capacity) == 0)
+                        return true;
+
+                    if (!string.Equals(cls.ToString(), PowerPointSlideShowWindowClassName, StringComparison.OrdinalIgnoreCase))
+                        return true;
+
+                    try
+                    {
+                        GetWindowThreadProcessId(hWnd, out uint pid);
+                        using (var proc = Process.GetProcessById((int)pid))
+                        {
+                            var name = proc.ProcessName;
+                            if (string.Equals(name, "POWERPNT", StringComparison.OrdinalIgnoreCase))
+                            {
+                                found = true;
+                                return false;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                    }
+
+                    return true;
+                }, IntPtr.Zero);
+
+                return found;
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Win32 检测 PPT 放映窗口失败: {ex.Message}", LogHelper.LogType.Trace);
+                return false;
+            }
+        }
+
+        #endregion
+
         #region New PPT Event Handlers
         /// <summary>
         /// 处理 PowerPoint 连接状态的变更：更新界面连接/放映状态，并在断开时启动一个短延迟以安全退出 PPT 模式。
@@ -731,6 +844,8 @@ namespace Ink_Canvas
                         _ = HandleManualSlideShowEnd();
                         if (Settings.PowerPointSettings.UseRotPptLink)
                             _pptManager?.ReloadConnection();
+
+                        CheckMainWindowVisibility();
                     }
                 });
             }
@@ -1114,6 +1229,9 @@ namespace Ink_Canvas
 
                     // 加载当前页墨迹
                     LoadCurrentSlideInk(currentSlide);
+
+                    // 仅PPT模式：放映开始立即同步主窗口可见性（勿仅依赖 SlideShowStateChanged 定时器）
+                    CheckMainWindowVisibility();
                 });
 
                 if (!isFloatingBarFolded)
@@ -1399,6 +1517,8 @@ namespace Ink_Canvas
                             currentMode = 0;
                         }
 
+                        SyncPdfPageSidebarWithCanvas();
+
                         ClearStrokes(true);
                         // 清空备份历史记录，防止退出白板时恢复已结束PPT的墨迹
                         // 注意：这里只清空索引0的备份，不影响白板页面的墨迹（索引1及以上）
@@ -1435,6 +1555,8 @@ namespace Ink_Canvas
 
                         UpdateCurrentToolMode("cursor");
                         SetFloatingBarHighlightPosition("cursor");
+
+                        CheckMainWindowVisibility();
                     }
                     catch (Exception ex)
                     {
@@ -2291,6 +2413,7 @@ namespace Ink_Canvas
                         _pptUIManager?.UpdateSlideShowStatus(false);
                         _pptUIManager?.UpdateSidebarExitButtons(false);
                         LogHelper.WriteLogToFile("手动更新放映结束UI状态", LogHelper.LogType.Trace);
+                        CheckMainWindowVisibility();
                     });
 
                     // 手动处理自动收纳，因为OnPPTSlideShowEnd事件可能未触发
@@ -2323,6 +2446,7 @@ namespace Ink_Canvas
                 {
                     _pptUIManager?.UpdateSlideShowStatus(false);
                     _pptUIManager?.UpdateSidebarExitButtons(false);
+                    CheckMainWindowVisibility();
                 });
 
                 // 异常情况下也手动处理自动收纳

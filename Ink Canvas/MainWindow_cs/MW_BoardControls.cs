@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using System;
 using System.Collections.Generic;
@@ -81,7 +82,7 @@ namespace Ink_Canvas
             var missingElements = 0;
             foreach (UIElement child in inkCanvas.Children)
             {
-                if (child is Image || child is MediaElement)
+                if (child is Image || child is MediaElement || child is PdfEmbeddedView)
                 {
                     if (child is Image img && img.Tag is string tag && tag == VideoPresenterLiveFrameTag)
                     {
@@ -309,6 +310,16 @@ namespace Ink_Canvas
                             CenterAndScaleElement(media);
                         }
                         BindElementEvents(media);
+                    }
+                    else if (element is PdfEmbeddedView pdf)
+                    {
+                        double left = InkCanvas.GetLeft(pdf);
+                        double top = InkCanvas.GetTop(pdf);
+                        if (double.IsNaN(left) || double.IsNaN(top))
+                        {
+                            CenterAndScaleElement(pdf);
+                        }
+                        BindElementEvents(pdf);
                     }
                 }
             }));

@@ -117,7 +117,7 @@
     <PackageReference Include="Costura.Fody" Version="6.0.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
+    <PackageReference Include="H.NotifyIcon.Wpf" Version="2.0.131" />
     <PackageReference Include="iNKORE.UI.WPF.Modern" Version="0.10.2.1" />
     <PackageReference Include="iNKORE.UI.WPF" Version="1.2.8" />
     <PackageReference Include="MdXaml" Version="1.27.0" />
@@ -546,14 +546,7 @@
   <ItemGroup>
     <Compile Remove="AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Remove="Properties\Strings.en-US.resx" />
-    <EmbeddedResource Remove="**\Strings.en-US.resx" />
-    <None Include="Properties\Strings.en-US.resx" />
-    <EmbeddedResource Include="Properties\Strings.enUS.xml">
-      <LogicalName>Ink_Canvas.Properties.Strings.enUS.xml</LogicalName>
-    </EmbeddedResource>
-  </ItemGroup>
+
   <ItemGroup>
     <None Remove="MainWindow.xaml~RF6c3144.TMP" />
     <None Remove="Resources\Cursors\Cursor.cur" />

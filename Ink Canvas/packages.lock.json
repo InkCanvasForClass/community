@@ -48,11 +48,15 @@
           "Fody": "6.8.2"
         }
       },
-      "Hardcodet.NotifyIcon.Wpf": {
+      "H.NotifyIcon.Wpf": {
         "type": "Direct",
-        "requested": "[2.0.1, )",
-        "resolved": "2.0.1",
-        "contentHash": "dtxmeZXzV2GzSm91aZ3hqzgoeVoARSkDPVCYfhVUNyyKBWYxMgNC0EcLiSYxD4Uc4alq/2qb3SmV8DgAENLRLQ=="
+        "requested": "[2.0.131, )",
+        "resolved": "2.0.131",
+        "contentHash": "f71kXNl6PjCqipJ7DQytg1QUBMQ+7j8rF1UyL8UPegymG1G57EYsskdIcf/VmF6JDuts6Dk6F8Hd4ziiz4/3Dw==",
+        "dependencies": {
+          "H.NotifyIcon": "2.0.131",
+          "System.ValueTuple": "4.5.0"
+        }
       },
       "iNKORE.UI.WPF": {
         "type": "Direct",
@@ -184,6 +188,19 @@
         "type": "Transitive",
         "resolved": "6.8.2",
         "contentHash": "sjGHrtGS1+kcrv99WXCvujOFBTQp4zCH3ZC9wo2LAtVaJkuLpHghQx3y4k1Q8ZKuDAbEw+HE6ZjPUJQK3ejepQ=="
+      },
+      "H.GeneratedIcons.System.Drawing": {
+        "type": "Transitive",
+        "resolved": "2.0.131",
+        "contentHash": "QoNGQrhxzG+dQufa4xRjSqihMy5aVVVZqQUt0fLJbwhs7rcM4hpN1qVkZpZEkHsRgrHfFBC/Ursjh8STY/sg7A=="
+      },
+      "H.NotifyIcon": {
+        "type": "Transitive",
+        "resolved": "2.0.131",
+        "contentHash": "mdznQAfcJFehblFoDUvtmdm1Y9+u1eMN1ffORbdYv5EwreMxkCwvdj8qQn3qnUo9EIJ6h5Xdgqey9Nj4us8w7w==",
+        "dependencies": {
+          "H.GeneratedIcons.System.Drawing": "2.0.131"
+        }
       },
       "MdXaml.Plugins": {
         "type": "Transitive",

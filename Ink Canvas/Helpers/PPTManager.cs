@@ -390,11 +390,15 @@ namespace Ink_Canvas.Helpers
                             {
                                 try
                                 {
-                                    PPTApplication.PresentationOpen -= OnPresentationOpen;
-                                    PPTApplication.PresentationClose -= OnPresentationClose;
-                                    PPTApplication.SlideShowBegin -= OnSlideShowBegin;
-                                    PPTApplication.SlideShowNextSlide -= OnSlideShowNextSlide;
-                                    PPTApplication.SlideShowEnd -= OnSlideShowEnd;
+                                    // 再次检查PPTApplication是否为null，因为可能在异步操作期间被修改
+                                    if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
+                                    {
+                                        PPTApplication.PresentationOpen -= OnPresentationOpen;
+                                        PPTApplication.PresentationClose -= OnPresentationClose;
+                                        PPTApplication.SlideShowBegin -= OnSlideShowBegin;
+                                        PPTApplication.SlideShowNextSlide -= OnSlideShowNextSlide;
+                                        PPTApplication.SlideShowEnd -= OnSlideShowEnd;
+                                    }
                                 }
                                 catch (COMException comEx)
                                 {

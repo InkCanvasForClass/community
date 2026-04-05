@@ -247,21 +247,6 @@
                             <!-- 主要导航按钮 -->
                             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                                 <StackPanel>
-                                    <!-- Plugins -->
-                                    <Button Width="40" Height="40" Margin="0,5,0,0" Style="{StaticResource NavButton}"
-                                            Click="NavPlugins_Click" Tag="plugins" ToolTip="{x:Static props:Strings.Nav_Plugins}">
-                                        <Image Width="20" Height="20">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <GeometryDrawing Brush="White"
-                                                                         Geometry="M342.826667 213.333333a149.333333 149.333333 0 0 1 295.68 0H682.666667a128 128 0 0 1 128 128v44.16a149.333333 149.333333 0 0 1 0 295.68V725.333333a128 128 0 0 1-128 128h-128v-21.333333a64 64 0 0 0-128 0v21.333333H298.666667a128 128 0 0 1-128-128v-128h21.333333a64 64 0 0 0 0-128H170.666667V341.333333a128 128 0 0 1 128-128h44.16zM426.666667 234.666667V298.666667H298.666667q-17.664 0-30.165334 12.501333T256 341.333333v56.576q22.528 10.752 41.6 29.866667Q341.333333 471.466667 341.333333 533.333333q0 61.866667-43.733333 105.6-19.072 19.072-41.6 29.824V725.333333q0 17.664 12.501333 30.165334T298.666667 768h56.576q10.752-22.528 29.866666-41.6Q428.8 682.666667 490.666667 682.666667q61.866667 0 105.6 43.733333 19.072 19.072 29.824 41.6H682.666667q17.664 0 30.165333-12.501333T725.333333 725.333333v-128h64a64 64 0 0 0 0-128H725.333333V341.333333q0-17.664-12.501333-30.165333T682.666667 298.666667h-128V234.666667a64 64 0 1 0-128 0z"/>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                    </Button>
-
                                     <!-- Startup -->
                                     <Button Width="40" Height="40" Margin="0,10,0,0" Style="{StaticResource NavButton}" 
                                             Click="NavStartup_Click" Tag="startup" ToolTip="{x:Static props:Strings.Nav_Startup}">
@@ -658,28 +643,15 @@
                                 </ikw:SimpleStackPanel>
                             </GroupBox>
                             
-                            <GroupBox Name="GroupBoxNewSettings">
+                            <GroupBox Name="GroupBoxSettings">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Settings_NewWindow}" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
                                 </GroupBox.Header>
                                 <ikw:SimpleStackPanel Spacing="6" Margin="0,10,0,0">
                                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" Foreground="#fafafa" Text="{i18n:I18n Key=Settings_NewWindowDesc}"/>
-                                    <Button x:Name="BtnOpenNewSettings" Content="{i18n:I18n Key=Btn_OpenNewSettings}" 
-                                            HorizontalAlignment="Left" Click="BtnOpenNewSettings_Click" 
-                                            Padding="15,5" Margin="0,10,0,0"/>
-                                </ikw:SimpleStackPanel>
-                            </GroupBox>
-                            
-                            <GroupBox Name="GroupBoxPlugins">
-                                <GroupBox.Header>
-                                    <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Settings_Plugins}" FontWeight="Bold" Foreground="#fafafa"
-                                               FontSize="26" />
-                                </GroupBox.Header>
-                                <ikw:SimpleStackPanel Spacing="6" Margin="0,10,0,0">
-                                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" Foreground="#fafafa" Text="{i18n:I18n Key=Settings_PluginsDesc}"/>
-                                    <Button x:Name="BtnOpenPluginManager" Content="{i18n:I18n Key=Btn_OpenPluginManager}" 
-                                            HorizontalAlignment="Left" Click="BtnOpenPluginManager_Click" 
+                                    <Button x:Name="BtnOpenSettings" Content="{i18n:I18n Key=Btn_OpenNewSettings}" 
+                                            HorizontalAlignment="Left" Click="BtnOpenNewNewSettings_Click" 
                                             Padding="15,5" Margin="0,10,0,0"/>
                                 </ikw:SimpleStackPanel>
                             </GroupBox>
@@ -4974,6 +4946,107 @@
                         </Border>
                     </ikw:SimpleStackPanel>
                 </Viewbox>
+            </Border>
+
+            <Border Name="BorderPdfPageSidebar"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    Margin="0,0,0,0"
+                    Width="64"
+                    CornerRadius="8"
+                    Background="{DynamicResource FloatBarBackground}"
+                    BorderBrush="#33FFFFFF"
+                    BorderThickness="1"
+                    SnapsToDevicePixels="True"
+                    Visibility="Collapsed"
+                    Panel.ZIndex="1001"
+                    ui:ThemeManager.RequestedTheme="Dark">
+                <Border.Effect>
+                    <DropShadowEffect BlurRadius="24"
+                                      ShadowDepth="3"
+                                      Direction="270"
+                                      Opacity="0.45"
+                                      Color="#000000" />
+                </Border.Effect>
+                <Border.Resources>
+                    <Style x:Key="PdfSidebarNavButtonStyle" TargetType="Border">
+                        <Setter Property="Width" Value="40" />
+                        <Setter Property="Height" Value="36" />
+                        <Setter Property="CornerRadius" Value="4" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Cursor" Value="Hand" />
+                        <Setter Property="SnapsToDevicePixels" Value="True" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="#FFFFFF" Opacity="0.08" />
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Resources>
+                <Grid>
+                    <ikw:SimpleStackPanel VerticalAlignment="Center"
+                                         HorizontalAlignment="Center"
+                                         Spacing="8"
+                                         Margin="0,10,0,10">
+                        <TextBlock Text="PDF"
+                                   FontSize="10"
+                                   FontWeight="SemiBold"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource FloatBarForeground}"
+                                   Opacity="0.78" />
+                        <Border CornerRadius="4"
+                                Padding="8,6"
+                                BorderThickness="0"
+                                SnapsToDevicePixels="True"
+                                Background="#14FFFFFF">
+                            <TextBlock Name="TextBlockPdfSidebarPageLabel"
+                                       Text="— / —"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       VerticalAlignment="Center"
+                                       HorizontalAlignment="Center"
+                                       TextAlignment="Center"
+                                       Foreground="{DynamicResource FloatBarForeground}"
+                                       Opacity="0.55" />
+                        </Border>
+                        <Border Name="BorderPdfSidebarPagePrev"
+                                Style="{StaticResource PdfSidebarNavButtonStyle}"
+                                Opacity="0.35"
+                                IsHitTestVisible="False"
+                                ToolTip="上一页"
+                                MouseDown="Border_MouseDown"
+                                MouseUp="BorderPdfSidebarPagePrev_MouseUp">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}"
+                                         FontSize="14"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"
+                                         Foreground="{DynamicResource FloatBarForeground}" />
+                        </Border>
+                        <Border Name="BorderPdfSidebarPageNext"
+                                Style="{StaticResource PdfSidebarNavButtonStyle}"
+                                Opacity="0.35"
+                                IsHitTestVisible="False"
+                                ToolTip="下一页"
+                                MouseDown="Border_MouseDown"
+                                MouseUp="BorderPdfSidebarPageNext_MouseUp">
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronRight}"
+                                         FontSize="14"
+                                         HorizontalAlignment="Center"
+                                         VerticalAlignment="Center"
+                                         Foreground="{DynamicResource FloatBarForeground}" />
+                        </Border>
+                        <TextBlock Text="翻页"
+                                   FontSize="9"
+                                   HorizontalAlignment="Center"
+                                   Foreground="{DynamicResource FloatBarForeground}"
+                                   Opacity="0.55" />
+                    </ikw:SimpleStackPanel>
+                </Grid>
             </Border>
 
             <!-- 图片缩放选择点 -->

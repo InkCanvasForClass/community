@@ -1,0 +1,38 @@
+<Page x:Class="Ink_Canvas.Windows.SettingsViews2.Pages.DesignPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews2.Pages"
+      xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="设计">
+
+    <Grid Margin="24">
+        <StackPanel>
+            <TextBlock Text="设计设置" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
+            
+            <ui:SettingsCard
+                Header="图标"
+                Description="点击跳转到图标设置页面"
+                IsClickEnabled="True"
+                Click="SettingsCard_Click">
+                <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
+                    </ui:SettingsCard.HeaderIcon>
+            </ui:SettingsCard>
+            
+            <ui:SettingsCard
+                Header="排版"
+                Description="点击跳转到排版设置页面"
+                IsClickEnabled="True"
+                Click="SettingsCard_Click_1"
+                Margin="0,8,0,0">
+                <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Font}"/>
+                    </ui:SettingsCard.HeaderIcon>
+            </ui:SettingsCard>
+        </StackPanel>
+    </Grid>
+</Page>

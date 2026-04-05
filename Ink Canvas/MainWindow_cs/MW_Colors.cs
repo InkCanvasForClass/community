@@ -52,6 +52,7 @@ namespace Ink_Canvas
                     AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
                     AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
                     EnableTwoFingerGestureBorder.Visibility = Visibility.Collapsed;
+                    SyncPdfPageSidebarWithCanvas();
                 }
 
                 BtnHideInkCanvas_Click(BtnHideInkCanvas, null);

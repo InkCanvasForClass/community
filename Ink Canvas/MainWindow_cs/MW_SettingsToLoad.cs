@@ -1,4 +1,4 @@
-using Hardcodet.Wpf.TaskbarNotification;
+using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -1502,7 +1502,7 @@ namespace Ink_Canvas
                 Settings defaultSettings = new Settings();
 
                 // 将默认配置和用户配置都序列化为JObject
-                JObject defaultConfigObj = JObject.FromObject(defaultSettings);               EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(defaultConfigObj);
+                JObject defaultConfigObj = JObject.FromObject(defaultSettings); EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(defaultConfigObj);
                 JObject userConfigObj = JObject.Parse(userConfigJson);
 
                 // 记录是否有清理操作

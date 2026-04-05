@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Controls;
 using System;
@@ -610,7 +611,7 @@ namespace Ink_Canvas
 
             // 检查是否有图片元素被选中（通过InkCanvas的选中元素）
             var selectedElements = inkCanvas.GetSelectedElements();
-            bool hasImageElement = selectedElements.Any(element => element is Image);
+            bool hasImageElement = selectedElements.Any(element => element is Image || element is PdfEmbeddedView);
 
             // 如果有图片元素被选中，不显示选择框
             if (hasImageElement)
@@ -621,7 +622,7 @@ namespace Ink_Canvas
             }
 
             // 检查是否有图片元素被选中（通过currentSelectedElement）
-            if (currentSelectedElement != null && currentSelectedElement is Image)
+            if (currentSelectedElement != null && (currentSelectedElement is Image || currentSelectedElement is PdfEmbeddedView))
             {
                 GridInkCanvasSelectionCover.Visibility = Visibility.Collapsed;
                 HideSelectionDisplay();

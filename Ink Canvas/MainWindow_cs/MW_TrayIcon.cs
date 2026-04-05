@@ -1,4 +1,4 @@
-using Hardcodet.Wpf.TaskbarNotification;
+using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using iNKORE.UI.WPF.Controls;
 using System;
@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Interop;
+using System.Windows.Threading;
 using Application = System.Windows.Application;
 using ContextMenu = System.Windows.Controls.ContextMenu;
 using MenuItem = System.Windows.Controls.MenuItem;
@@ -17,6 +18,11 @@ namespace Ink_Canvas
 {
     public partial class App : Application
     {
+        private const int TrayTemporaryShowMinutes = 2;
+
+        private DispatcherTimer _trayTemporaryShowTimer;
+
+        private bool _trayTemporaryShowRestoreHideChecked;
 
         /// <summary>
         /// 系统托盘菜单打开时的事件处理方法
@@ -128,6 +134,85 @@ namespace Ink_Canvas
             catch
             {
                 return false;
+            }
+        }
+
+        private void TempShowMainWindowTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
+        {
+            var mainWin = Current.MainWindow as MainWindow;
+            if (mainWin?.IsLoaded != true)
+                return;
+
+            MenuItem hideItem = null;
+            try
+            {
+                var trayMenu = ((TaskbarIcon)Current.Resources["TaskbarTrayIcon"]).ContextMenu;
+                hideItem = trayMenu?.Items.OfType<MenuItem>()
+                    .FirstOrDefault(mi => mi.Name == "HideICCMainWindowTrayIconMenuItem");
+            }
+            catch
+            {
+            }
+
+            _trayTemporaryShowRestoreHideChecked = hideItem?.IsChecked == true;
+
+            EnsureMainWindowReadyForSettings(mainWin);
+
+            global::Ink_Canvas.MainWindow.TrayTemporaryShowUntilUtc = DateTime.UtcNow.AddMinutes(TrayTemporaryShowMinutes);
+
+            _trayTemporaryShowTimer?.Stop();
+            if (_trayTemporaryShowTimer == null)
+            {
+                _trayTemporaryShowTimer = new DispatcherTimer
+                {
+                    Interval = TimeSpan.FromMinutes(TrayTemporaryShowMinutes)
+                };
+                _trayTemporaryShowTimer.Tick += TrayTemporaryShowTimer_OnTick;
+            }
+            else
+            {
+                _trayTemporaryShowTimer.Interval = TimeSpan.FromMinutes(TrayTemporaryShowMinutes);
+            }
+
+            _trayTemporaryShowTimer.Start();
+        }
+
+        private void TrayTemporaryShowTimer_OnTick(object sender, EventArgs e)
+        {
+            _trayTemporaryShowTimer?.Stop();
+            global::Ink_Canvas.MainWindow.TrayTemporaryShowUntilUtc = null;
+
+            var mainWin = Current.MainWindow as MainWindow;
+            if (mainWin?.IsLoaded != true)
+            {
+                _trayTemporaryShowRestoreHideChecked = false;
+                return;
+            }
+
+            try
+            {
+                if (_trayTemporaryShowRestoreHideChecked)
+                {
+                    var trayMenu = ((TaskbarIcon)Current.Resources["TaskbarTrayIcon"]).ContextMenu;
+                    var hideItem = trayMenu?.Items.OfType<MenuItem>()
+                        .FirstOrDefault(mi => mi.Name == "HideICCMainWindowTrayIconMenuItem");
+                    if (hideItem != null)
+                        hideItem.IsChecked = true;
+                    else
+                        mainWin.Hide();
+                }
+                else
+                {
+                    mainWin.CheckMainWindowVisibility();
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"托盘临时显示计时结束处理失败: {ex.Message}", LogHelper.LogType.Warning);
+            }
+            finally
+            {
+                _trayTemporaryShowRestoreHideChecked = false;
             }
         }
 
@@ -326,6 +411,10 @@ namespace Ink_Canvas
         /// </remarks>
         private void HideICCMainWindowTrayIconMenuItem_Checked(object sender, RoutedEventArgs e)
         {
+            _trayTemporaryShowTimer?.Stop();
+            global::Ink_Canvas.MainWindow.TrayTemporaryShowUntilUtc = null;
+            _trayTemporaryShowRestoreHideChecked = false;
+
             var mi = (MenuItem)sender;
             var mainWin = (MainWindow)Current.MainWindow;
             if (mainWin != null && mainWin.IsLoaded)

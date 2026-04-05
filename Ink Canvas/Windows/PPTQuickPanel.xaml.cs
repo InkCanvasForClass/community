@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -101,7 +102,7 @@ namespace Ink_Canvas.Windows
         private double _collapsedOffset = 200; // 折叠时的偏移量（隐藏内容区域）
         private MainWindow _mainWindow;
 
-        private Dictionary<System.Windows.Controls.Image, int> _pptImages = new Dictionary<System.Windows.Controls.Image, int>();
+        private Dictionary<FrameworkElement, int> _pptImages = new Dictionary<FrameworkElement, int>();
 
         private Dictionary<int, List<string>> _pptImagePaths = new Dictionary<int, List<string>>();
 
@@ -183,9 +184,9 @@ namespace Ink_Canvas.Windows
                 {
                     foreach (var item in e.OldItems)
                     {
-                        if (item is System.Windows.Controls.Image image)
+                        if (item is FrameworkElement fe && _pptImages.ContainsKey(fe))
                         {
-                            RemoveImageFromPPT(image);
+                            RemoveImageFromPPT(fe);
                         }
                     }
                 }
@@ -196,20 +197,20 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        private void RemoveImageFromPPT(System.Windows.Controls.Image image)
+        private void RemoveImageFromPPT(FrameworkElement element)
         {
             try
             {
-                if (image == null) return;
+                if (element == null) return;
 
-                if (_pptImages.ContainsKey(image))
+                if (_pptImages.ContainsKey(element))
                 {
-                    int slideNumber = _pptImages[image];
-                    _pptImages.Remove(image);
+                    int slideNumber = _pptImages[element];
+                    _pptImages.Remove(element);
 
                     if (_pptImagePaths.ContainsKey(slideNumber))
                     {
-                        string imagePath = image.Tag as string;
+                        string imagePath = element.Tag as string;
                         if (!string.IsNullOrEmpty(imagePath) && _pptImagePaths[slideNumber].Contains(imagePath))
                         {
                             _pptImagePaths[slideNumber].Remove(imagePath);
@@ -929,7 +930,7 @@ namespace Ink_Canvas.Windows
             {
                 var dialog = new OpenFileDialog
                 {
-                    Filter = "图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif"
+                    Filter = "图片与 PDF|*.jpg;*.jpeg;*.png;*.bmp;*.gif;*.pdf|图片文件|*.jpg;*.jpeg;*.png;*.bmp;*.gif|PDF|*.pdf"
                 };
 
                 if (dialog.ShowDialog() == true)
@@ -941,14 +942,14 @@ namespace Ink_Canvas.Windows
 
                     if (createImageMethod != null)
                     {
-                        var imageTask = createImageMethod.Invoke(_mainWindow, new object[] { filePath }) as System.Threading.Tasks.Task<System.Windows.Controls.Image>;
+                        var imageTask = createImageMethod.Invoke(_mainWindow, new object[] { filePath }) as System.Threading.Tasks.Task<FrameworkElement>;
                         if (imageTask != null)
                         {
-                            var image = await imageTask;
-                            if (image != null)
+                            var inserted = await imageTask;
+                            if (inserted != null)
                             {
-                                image.Tag = filePath;
-                                await InsertImageToMainWindow(image, filePath);
+                                inserted.Tag = filePath;
+                                await InsertImageToMainWindow(inserted, filePath);
                             }
                         }
                     }
@@ -1185,9 +1186,9 @@ namespace Ink_Canvas.Windows
             }, DispatcherPriority.Normal);
         }
 
-        private async System.Threading.Tasks.Task InsertImageToMainWindow(System.Windows.Controls.Image image, string originalFilePath = null, bool saveToJson = true)
+        private async System.Threading.Tasks.Task InsertImageToMainWindow(FrameworkElement element, string originalFilePath = null, bool saveToJson = true)
         {
-            if (_mainWindow == null || image == null) return;
+            if (_mainWindow == null || element == null) return;
 
             // 确保在UI线程上执行
             await Application.Current.Dispatcher.InvokeAsync(() =>
@@ -1196,11 +1197,11 @@ namespace Ink_Canvas.Windows
                 {
                     // 生成唯一名称
                     string timestamp = "img_" + DateTime.Now.ToString("yyyyMMdd_HH_mm_ss_fff");
-                    image.Name = timestamp;
+                    element.Name = timestamp;
 
                     // 设置图片属性
-                    image.IsHitTestVisible = true;
-                    image.Focusable = false;
+                    element.IsHitTestVisible = true;
+                    element.Focusable = false;
 
                     System.Windows.Controls.InkCanvas inkCanvas = null;
                     var inkCanvasField = _mainWindow.GetType().GetField("inkCanvas",
@@ -1274,7 +1275,7 @@ namespace Ink_Canvas.Windows
                     // 如果在PPT模式下，记录图片和页面编号的关联，并保存图片路径
                     if (currentSlideNumber > 0 && !string.IsNullOrEmpty(originalFilePath) && saveToJson)
                     {
-                        _pptImages[image] = currentSlideNumber;
+                        _pptImages[element] = currentSlideNumber;
 
                         // 添加到页面图片路径列表
                         if (!_pptImagePaths.ContainsKey(currentSlideNumber))
@@ -1289,14 +1290,14 @@ namespace Ink_Canvas.Windows
                     else if (currentSlideNumber > 0)
                     {
                         // 即使不保存到JSON，也要记录图片和页面编号的关联（用于翻页显示/隐藏）
-                        _pptImages[image] = currentSlideNumber;
+                        _pptImages[element] = currentSlideNumber;
                     }
 
                     // 先添加到画布（与MainWindow的实现保持一致）
-                    inkCanvas.Children.Add(image);
+                    inkCanvas.Children.Add(element);
 
                     // 等待图片加载完成后再进行后续处理
-                    image.Loaded += (s, args) =>
+                    element.Loaded += (s, args) =>
                     {
                         Application.Current.Dispatcher.BeginInvoke(new Action(() =>
                         {
@@ -1305,19 +1306,19 @@ namespace Ink_Canvas.Windows
                                 // 初始化TransformGroup
                                 var initializeTransformMethod = _mainWindow.GetType().GetMethod("InitializeElementTransform",
                                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                                initializeTransformMethod?.Invoke(_mainWindow, new object[] { image });
+                                initializeTransformMethod?.Invoke(_mainWindow, new object[] { element });
 
                                 // 居中缩放
                                 var centerMethod = _mainWindow.GetType().GetMethod("CenterAndScaleElement",
                                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                                centerMethod?.Invoke(_mainWindow, new object[] { image });
+                                centerMethod?.Invoke(_mainWindow, new object[] { element });
 
                                 // 绑定事件处理器
                                 var bindEventsMethod = _mainWindow.GetType().GetMethod("BindElementEvents",
                                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-                                bindEventsMethod?.Invoke(_mainWindow, new object[] { image });
+                                bindEventsMethod?.Invoke(_mainWindow, new object[] { element });
 
-                                LogHelper.WriteLogToFile($"图片插入完成: {image.Name}, PPT页面: {currentSlideNumber}");
+                                LogHelper.WriteLogToFile($"图片插入完成: {element.Name}, PPT页面: {currentSlideNumber}");
                             }
                             catch (Exception ex)
                             {
@@ -1333,7 +1334,7 @@ namespace Ink_Canvas.Windows
                     if (timeMachine != null)
                     {
                         var commitMethod = timeMachine.GetType().GetMethod("CommitElementInsertHistory");
-                        commitMethod?.Invoke(timeMachine, new object[] { image });
+                        commitMethod?.Invoke(timeMachine, new object[] { element });
                     }
 
                     // 切换到选择模式
@@ -1699,12 +1700,16 @@ namespace Ink_Canvas.Windows
 
                 // 检查已存在的图片路径（通过Tag）
                 var existingImagePaths = new HashSet<string>();
-                foreach (System.Windows.Controls.Image existingImage in inkCanvas.Children.OfType<System.Windows.Controls.Image>())
+                foreach (var existingImage in inkCanvas.Children.OfType<System.Windows.Controls.Image>())
                 {
                     if (existingImage.Tag is string tagPath && !string.IsNullOrEmpty(tagPath))
-                    {
                         existingImagePaths.Add(tagPath);
-                    }
+                }
+
+                foreach (var existingPdf in inkCanvas.Children.OfType<PdfEmbeddedView>())
+                {
+                    if (existingPdf.Tag is string tagPath && !string.IsNullOrEmpty(tagPath))
+                        existingImagePaths.Add(tagPath);
                 }
 
                 // 使用反射调用MainWindow的CreateAndCompressImageAsync方法
@@ -1733,17 +1738,17 @@ namespace Ink_Canvas.Windows
                             continue;
                         }
 
-                        var imageTask = createImageMethod.Invoke(_mainWindow, new object[] { imagePath }) as System.Threading.Tasks.Task<System.Windows.Controls.Image>;
+                        var imageTask = createImageMethod.Invoke(_mainWindow, new object[] { imagePath }) as System.Threading.Tasks.Task<FrameworkElement>;
                         if (imageTask != null)
                         {
-                            var image = await imageTask;
-                            if (image != null)
+                            var inserted = await imageTask;
+                            if (inserted != null)
                             {
                                 // 保存原始文件路径到Tag
-                                image.Tag = imagePath;
+                                inserted.Tag = imagePath;
 
                                 // 插入图片（不保存路径，因为已经存在）
-                                await InsertImageToMainWindow(image, imagePath, false);
+                                await InsertImageToMainWindow(inserted, imagePath, false);
                             }
                         }
                     }

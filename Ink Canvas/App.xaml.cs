@@ -1,4 +1,4 @@
-using Hardcodet.Wpf.TaskbarNotification;
+using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -1061,6 +1061,7 @@ namespace Ink_Canvas
             }
 
             _taskbar = (TaskbarIcon)FindResource("TaskbarTrayIcon");
+            _taskbar.ForceCreate();
 
             StartArgs = e.Args;
 

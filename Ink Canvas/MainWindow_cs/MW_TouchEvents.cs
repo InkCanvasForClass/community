@@ -543,10 +543,12 @@ namespace Ink_Canvas
                 foreach (var stylusPoint in stylusPointCollection)
                     strokeVisual.Add(new StylusPoint(stylusPoint.X, stylusPoint.Y, stylusPoint.PressureFactor));
 
-                // 实时笔锋：在绘制过程中更新压感并整笔重绘预览；否则预览层固定线宽，收笔后改点集也看不到笔锋变化。
+                // 实时笔锋：混合度 > 0 时在绘制过程中更新压感并整笔重绘预览；混合为 0 时与普通过程一致用增量 Redraw，避免每点 ForceRedraw 整笔清空（长笔画卡顿）。
                 var committedStroke = strokeVisual.Stroke;
                 if (committedStroke != null
                     && Settings.Canvas.InkStyle == 3
+                    && Settings.Canvas.VelocityBrushTipMix > 0
+                    && !Settings.Canvas.DisablePressure
                     && penType == 0
                     && committedStroke.DrawingAttributes != null
                     && !committedStroke.DrawingAttributes.IsHighlighter

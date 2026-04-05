@@ -1,8 +1,9 @@
-﻿<Application x:Class="Ink_Canvas.App"
+<Application x:Class="Ink_Canvas.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Ink_Canvas"
-             xmlns:tb="http://www.hardcodet.net/taskbar"
+             xmlns:props="clr-namespace:Ink_Canvas.Properties"
+             xmlns:tb="clr-namespace:H.NotifyIcon;assembly=H.NotifyIcon.Wpf"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
 >
@@ -32,10 +33,30 @@
                         </Image>
                     </MenuItem.Icon>
                 </MenuItem>
+                <MenuItem Name="TempShowMainWindowTrayIconMenuItem" Click="TempShowMainWindowTrayIconMenuItem_Clicked">
+                    <MenuItem.Header>
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="{x:Static props:Strings.Tray_TempShowMainWindow}" />
+                        </ikw:SimpleStackPanel>
+                    </MenuItem.Header>
+                    <MenuItem.Icon>
+                        <Image Width="28" Height="28" Margin="-2">
+                            <Image.Source>
+                                <DrawingImage>
+                                    <DrawingImage.Drawing>
+                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                            <GeometryDrawing Brush="#27272a" Geometry="F0 M24,24z M0,0z M5,6C4.73478,6 4.48043,6.10536 4.29289,6.29289 4.10536,6.48043 4,6.73478 4,7L4,17C4,17.2652 4.10536,17.5196 4.29289,17.7071 4.48043,17.8946 4.73478,18 5,18L19,18C19.2652,18 19.5196,17.8946 19.7071,17.7071 19.8946,17.5196 20,17.2652 20,17L20,7C20,6.73478 19.8946,6.48043 19.7071,6.29289 19.5196,6.10536 19.2652,6 19,6L5,6z M2.87868,4.87868C3.44129,4.31607,4.20435,4,5,4L19,4C19.7957,4 20.5587,4.31607 21.1213,4.87868 21.6839,5.44129 22,6.20435 22,7L22,17C22,17.7957 21.6839,18.5587 21.1213,19.1213 20.5587,19.6839 19.7957,20 19,20L5,20C4.20435,20 3.44129,19.6839 2.87868,19.1213 2.31607,18.5587 2,17.7956 2,17L2,7C2,6.20435,2.31607,5.44129,2.87868,4.87868z M5,8C5,7.44772,5.44772,7,6,7L6.01,7C6.56228,7 7.01,7.44772 7.01,8 7.01,8.55228 6.56228,9 6.01,9L6,9C5.44772,9,5,8.55228,5,8z M9,7C8.44772,7 8,7.44772 8,8 8,8.55228 8.44772,9 9,9L9.01,9C9.56228,9 10.01,8.55228 10.01,8 10.01,7.44772 9.56228,7 9.01,7L9,7z" />
+                                        </DrawingGroup>
+                                    </DrawingImage.Drawing>
+                                </DrawingImage>
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Name="OpenSettingsTrayIconMenuItem" Click="OpenSettingsTrayIconMenuItem_Clicked">
                     <MenuItem.Header>
                         <ikw:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="打开设置" />
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="{x:Static props:Strings.Tray_OpenSettings}" />
                         </ikw:SimpleStackPanel>
                     </MenuItem.Header>
                     <MenuItem.Icon>
@@ -242,7 +263,7 @@
                             ToolTipText="InkCanvasForClass"
                             ContextMenu="{StaticResource SysTrayMenu}"
                             IconSource="/Resources/icc.ico"/>
-                <ResourceDictionary.MergedDictionaries>
+            <ResourceDictionary.MergedDictionaries>
                 <ui:ThemeResources/>
                 <ui:XamlControlsResources />
                 <ResourceDictionary Source="Resources/SeewoImageDictionary.xaml"/>

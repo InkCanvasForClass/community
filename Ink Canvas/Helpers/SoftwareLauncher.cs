@@ -49,16 +49,13 @@ namespace Ink_Canvas.Helpers
             if (string.IsNullOrWhiteSpace(softwareName))
                 return null;
 
-            // 64 位进程默认只枚举 64 位注册表视图；32 位希沃常写在 WOW6432Node 下，需一并扫描。
-            string[] uninstallRoots =
+            // 须用 OpenBaseKey + RegistryView 显式指定视图：Registry.LocalMachine.OpenSubKey 跟随进程位数，
+            // 32 位进程下无法靠拼接 WOW6432Node 路径进入 64 位视图，会找不到 64 位安装的展台。
+            const string uninstallSubKey = @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall";
+            foreach (RegistryView view in new[] { RegistryView.Registry64, RegistryView.Registry32 })
             {
-                @"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
-                @"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall",
-            };
-
-            foreach (string root in uninstallRoots)
-            {
-                using (RegistryKey key = Registry.LocalMachine.OpenSubKey(root))
+                using (RegistryKey baseKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, view))
+                using (RegistryKey key = baseKey.OpenSubKey(uninstallSubKey))
                 {
                     if (key == null) continue;
                     string found = FindInUninstallKey(key, softwareName);
