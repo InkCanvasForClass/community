@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
@@ -113,9 +114,9 @@ namespace Ink_Canvas
             ToggleSwitchDrawShapeBorderAutoHide.IsOn = !ToggleSwitchDrawShapeBorderAutoHide.IsOn;
 
             if (ToggleSwitchDrawShapeBorderAutoHide.IsOn)
-                ((SymbolIcon)sender).Symbol = Symbol.Pin;
+                ((FontIcon)sender).Icon = SegoeFluentIcons.Pin;
             else
-                ((SymbolIcon)sender).Symbol = Symbol.UnPin;
+                ((FontIcon)sender).Icon = SegoeFluentIcons.Unpin;
         }
 
         /// <summary>
@@ -2564,7 +2565,7 @@ namespace Ink_Canvas
         /// </remarks>
         private void inkCanvas_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            HandleEraserOperationEnded(); // 橡皮擦自动切换回批注模式：松手后启动/重置计时
+            HandleEraserOperationEnded();
             inkCanvas.ReleaseMouseCapture();
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;

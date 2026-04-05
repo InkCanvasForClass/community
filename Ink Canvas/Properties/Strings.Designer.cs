@@ -6,6 +6,8 @@
 //------------------------------------------------------------------------------
 
 using System.Globalization;
+using System.Collections;
+using System.Collections.Generic;
 using System.Resources;
 using System.Runtime.CompilerServices;
 
@@ -17,6 +19,9 @@ namespace Ink_Canvas.Properties
     [CompilerGenerated]
     public static class Strings
     {
+        private const string EmbeddedEnUsResxName = "Ink_Canvas.Properties.Strings.enUS.xml";
+        private static readonly object EnUsLock = new object();
+        private static Dictionary<string, string> _embeddedEnUs;
         private static ResourceManager _resourceMan;
         private static CultureInfo _resourceCulture;
 
@@ -52,23 +57,67 @@ namespace Ink_Canvas.Properties
         public static string GetString(string key)
         {
             var culture = _resourceCulture ?? CultureInfo.CurrentUICulture;
+            if (IsEnglishCulture(culture))
+            {
+                var enUsMap = GetEmbeddedEnUsMap();
+                if (enUsMap.TryGetValue(key, out var enValue))
+                {
+                    return enValue;
+                }
+            }
             return ResourceManager.GetString(key, culture);
         }
 
-        public static string Nav_Plugins => ResourceManager.GetString(nameof(Nav_Plugins), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "插件";
-        public static string Nav_Startup => ResourceManager.GetString(nameof(Nav_Startup), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "启动设置";
-        public static string Nav_Canvas => ResourceManager.GetString(nameof(Nav_Canvas), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "画布设置";
-        public static string Nav_CrashAction => ResourceManager.GetString(nameof(Nav_CrashAction), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "崩溃处理";
-        public static string Nav_Gesture => ResourceManager.GetString(nameof(Nav_Gesture), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "手势";
-        public static string Nav_InkRecognition => ResourceManager.GetString(nameof(Nav_InkRecognition), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "墨迹识别";
-        public static string Nav_PPT => ResourceManager.GetString(nameof(Nav_PPT), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "PPT";
-        public static string Nav_Advanced => ResourceManager.GetString(nameof(Nav_Advanced), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "高级";
-        public static string Nav_Automation => ResourceManager.GetString(nameof(Nav_Automation), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "自动化";
-        public static string Nav_RandomWindow => ResourceManager.GetString(nameof(Nav_RandomWindow), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "随机选人";
-        public static string Nav_Theme => ResourceManager.GetString(nameof(Nav_Theme), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "主题";
-        public static string Nav_Shortcuts => ResourceManager.GetString(nameof(Nav_Shortcuts), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "快捷键";
-        public static string Nav_About => ResourceManager.GetString(nameof(Nav_About), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "关于";
-        public static string App_Title => ResourceManager.GetString(nameof(App_Title), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "InkCanvasforClass";
-        public static string Booth_Resolution_Tooltip => ResourceManager.GetString(nameof(Booth_Resolution_Tooltip), _resourceCulture ?? CultureInfo.CurrentUICulture) ?? "展台/截图分辨率";
+        private static bool IsEnglishCulture(CultureInfo culture)
+        {
+            if (culture == null) return false;
+            if (culture.Name.StartsWith("en", System.StringComparison.OrdinalIgnoreCase)) return true;
+            return culture.TwoLetterISOLanguageName.Equals("en", System.StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static Dictionary<string, string> GetEmbeddedEnUsMap()
+        {
+            if (_embeddedEnUs != null) return _embeddedEnUs;
+            lock (EnUsLock)
+            {
+                if (_embeddedEnUs != null) return _embeddedEnUs;
+                var map = new Dictionary<string, string>(System.StringComparer.Ordinal);
+                var asm = typeof(Strings).Assembly;
+                using (var stream = asm.GetManifestResourceStream(EmbeddedEnUsResxName))
+                {
+                    if (stream != null)
+                    {
+                        using (var reader = new ResXResourceReader(stream))
+                        {
+                            foreach (DictionaryEntry entry in reader)
+                            {
+                                if (entry.Key is string k && entry.Value is string v)
+                                {
+                                    map[k] = v;
+                                }
+                            }
+                        }
+                    }
+                }
+                _embeddedEnUs = map;
+                return _embeddedEnUs;
+            }
+        }
+
+        public static string Nav_Plugins => GetString(nameof(Nav_Plugins)) ?? "插件";
+        public static string Nav_Startup => GetString(nameof(Nav_Startup)) ?? "启动设置";
+        public static string Nav_Canvas => GetString(nameof(Nav_Canvas)) ?? "画布设置";
+        public static string Nav_CrashAction => GetString(nameof(Nav_CrashAction)) ?? "崩溃处理";
+        public static string Nav_Gesture => GetString(nameof(Nav_Gesture)) ?? "手势";
+        public static string Nav_InkRecognition => GetString(nameof(Nav_InkRecognition)) ?? "墨迹识别";
+        public static string Nav_PPT => GetString(nameof(Nav_PPT)) ?? "PPT";
+        public static string Nav_Advanced => GetString(nameof(Nav_Advanced)) ?? "高级";
+        public static string Nav_Automation => GetString(nameof(Nav_Automation)) ?? "自动化";
+        public static string Nav_RandomWindow => GetString(nameof(Nav_RandomWindow)) ?? "随机选人";
+        public static string Nav_Theme => GetString(nameof(Nav_Theme)) ?? "主题";
+        public static string Nav_Shortcuts => GetString(nameof(Nav_Shortcuts)) ?? "快捷键";
+        public static string Nav_About => GetString(nameof(Nav_About)) ?? "关于";
+        public static string App_Title => GetString(nameof(App_Title)) ?? "InkCanvasforClass";
+        public static string Booth_Resolution_Tooltip => GetString(nameof(Booth_Resolution_Tooltip)) ?? "展台/截图分辨率";
     }
 }

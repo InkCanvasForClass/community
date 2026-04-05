@@ -366,17 +366,21 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         /// <param name="root">要开始扫描的根目录路径。</param>
         /// <remarks>
-        /// 仅处理扩展名为 `.exe`, `.dll`, `.config`, `.manifest`, `.dat`, `.enc` 的文件；会跳过被 IsExcludedPath 判定为排除的路径。遇到任何 I/O 或访问错误时会静默忽略，不会抛出异常。</remarks>
+        /// 仅处理扩展名为 `.exe`, `.dll`, `.config`, `.manifest`, `.dat`, `.enc` 的文件，以及应用根目录下的点名名单 `Names.txt`；
+        /// 会跳过被 IsExcludedPath 判定为排除的路径。遇到任何 I/O 或访问错误时会静默忽略，不会抛出异常。</remarks>
         private static void LockFilesRecursive(string root)
         {
             try
             {
+                var rollCallNamesPath = NormalizePath(Path.Combine(root, "Names.txt"));
                 foreach (var file in Directory.GetFiles(root, "*", SearchOption.AllDirectories))
                 {
                     if (!IsExcludedPath(file))
                     {
                         var ext = Path.GetExtension(file);
-                        if (string.Equals(ext, ".exe", StringComparison.OrdinalIgnoreCase) ||
+                        var normFile = NormalizePath(file);
+                        if (string.Equals(normFile, rollCallNamesPath, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(ext, ".exe", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(ext, ".dll", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(ext, ".config", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(ext, ".manifest", StringComparison.OrdinalIgnoreCase) ||

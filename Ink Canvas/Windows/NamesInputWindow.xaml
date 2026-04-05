@@ -4,11 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ink_Canvas"
-        mc:Ignorable="d" FontFamily="Microsoft YaHei UI" ui:WindowHelper.UseModernWindowStyle="True"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        mc:Ignorable="d" FontFamily="Microsoft YaHei UI"
         WindowStartupLocation="CenterScreen"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern" Topmost="True"
+        Topmost="True"
         Title="Ink Canvas 抽奖 - 名单导入" Height="500" Width="400"
-        Loaded="Window_Loaded" Closing="Window_Closing">
+        Loaded="Window_Loaded" Closing="Window_Closing"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Height="48">
     <Window.Resources>
         <!-- 主题资源 -->
         <SolidColorBrush x:Key="NamesInputWindowBackground" Color="White"/>
@@ -17,28 +24,60 @@
         <SolidColorBrush x:Key="NamesInputWindowButtonForeground" Color="Black"/>
         <SolidColorBrush x:Key="NamesInputWindowBorderBrush" Color="#E4E4E7"/>
     </Window.Resources>
-    <Grid Background="{DynamicResource NamesInputWindowBackground}">
-        <Label Content="请在下方输入名单，每行一人（建议直接粘贴表格姓名列）" 
-               Margin="10" 
-               Foreground="{DynamicResource NamesInputWindowForeground}"
-               FontFamily="Microsoft YaHei UI"/>
-        <TextBox Name="TextBoxNames" 
-                 FontFamily="Microsoft YaHei UI" 
-                 VerticalScrollBarVisibility="Auto" 
-                 AcceptsReturn="True" 
-                 Margin="10,40,10,50"
-                 Background="{DynamicResource NamesInputWindowBackground}"
-                 Foreground="{DynamicResource NamesInputWindowForeground}"
-                 BorderBrush="{DynamicResource NamesInputWindowBorderBrush}"/>
-        <Button Margin="10" 
-                VerticalAlignment="Bottom" 
-                HorizontalAlignment="Right"
-                Content="关闭" 
-                FontFamily="Microsoft YaHei UI"
-                Width="100" 
-                Click="Button_Click"
-                Background="{DynamicResource NamesInputWindowButtonBackground}"
-                Foreground="{DynamicResource NamesInputWindowButtonForeground}"
-                BorderBrush="{DynamicResource NamesInputWindowBorderBrush}"/>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 自定义标题栏 -->
+        <Border x:Name="Border_TitleBarRoot"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}" 
+                           VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold"/>
+
+                <!--Right Inset-->
+                <Rectangle Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}"
+                    Grid.Column="2"/>
+
+                <!--Right Buttons-->
+                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
+                    Orientation="Horizontal" Grid.Column="1" Spacing="5">
+                </ikw:SimpleStackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- 主内容区 -->
+        <Grid Grid.Row="1" Background="{DynamicResource NamesInputWindowBackground}" Margin="10,10,10,10">
+            <Label Content="请在下方输入名单，每行一人（建议直接粘贴表格姓名列）" 
+                   Margin="10" 
+                   Foreground="{DynamicResource NamesInputWindowForeground}"
+                   FontFamily="Microsoft YaHei UI"/>
+            <TextBox Name="TextBoxNames" 
+                     FontFamily="Microsoft YaHei UI" 
+                     VerticalScrollBarVisibility="Auto" 
+                     AcceptsReturn="True" 
+                     Margin="10,40,10,50"
+                     Background="{DynamicResource NamesInputWindowBackground}"
+                     Foreground="{DynamicResource NamesInputWindowForeground}"
+                     BorderBrush="{DynamicResource NamesInputWindowBorderBrush}"/>
+            <Button Margin="10" 
+                    VerticalAlignment="Bottom" 
+                    HorizontalAlignment="Right"
+                    Content="关闭" 
+                    FontFamily="Microsoft YaHei UI"
+                    Width="100" 
+                    Click="Button_Click"
+                    Background="{DynamicResource NamesInputWindowButtonBackground}"
+                    Foreground="{DynamicResource NamesInputWindowButtonForeground}"
+                    BorderBrush="{DynamicResource NamesInputWindowBorderBrush}"/>
+        </Grid>
     </Grid>
 </Window>

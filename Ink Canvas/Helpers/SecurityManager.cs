@@ -1,3 +1,4 @@
+using iNKORE.UI.WPF.Controls;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Security.Cryptography;
@@ -55,6 +56,16 @@ namespace Ink_Canvas.Helpers
         /// <returns>`true` 如果已启用密码功能、已有配置的密码且设置要求在重置配置时进行密码验证；`false` 否则。</returns>
         public static bool IsPasswordRequiredForResetConfig(Settings settings)
             => IsPasswordFeatureEnabled(settings) && HasPasswordConfigured(settings) && settings.Security.RequirePasswordOnResetConfig;
+
+        /// <summary>
+        /// 指示在修改或清空点名名单前是否需要输入安全密码。
+        /// </summary>
+        /// <param name="settings">应用设置对象。</param>
+        /// <returns>当已启用密码功能、已配置密码且开启了对应开关时返回 true；否则返回 false。</returns>
+        public static bool IsPasswordRequiredForModifyOrClearNameList(Settings settings)
+            => IsPasswordFeatureEnabled(settings)
+               && HasPasswordConfigured(settings)
+               && settings.Security.RequirePasswordOnModifyOrClearNameList;
 
         /// <summary>
         /// 将提供的明文密码与 Settings 中存储的密码散列进行比对以验证密码是否正确。

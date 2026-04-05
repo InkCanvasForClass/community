@@ -4,10 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ink_Canvas"
-        mc:Ignorable="d" FontFamily="Microsoft YaHei UI" ui:WindowHelper.UseModernWindowStyle="True"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        mc:Ignorable="d"
+        FontFamily="Microsoft YaHei UI"
         WindowStartupLocation="CenterScreen"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern" Topmost="True"
+        Topmost="True"
         Title="隐私说明 - Ink Canvas" Height="600" Width="600"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Height="48"
         Loaded="Window_Loaded" Closing="Window_Closing">
     <Window.Resources>
         <SolidColorBrush x:Key="PrivacyAgreementWindowBackground" Color="White"/>
@@ -18,82 +26,107 @@
         <SolidColorBrush x:Key="PrivacyAgreementWindowButtonAcceptBackground" Color="#3584e4"/>
         <SolidColorBrush x:Key="PrivacyAgreementWindowButtonAcceptForeground" Color="White"/>
     </Window.Resources>
-    <Grid Background="{DynamicResource PrivacyAgreementWindowBackground}">
-        <Label Content="隐私说明" 
-               Margin="10,10,10,0" 
-               VerticalAlignment="Top"
-               Foreground="{DynamicResource PrivacyAgreementWindowForeground}"
-               FontFamily="Microsoft YaHei UI"
-               FontSize="18"
-               FontWeight="Bold"/>
-        <ScrollViewer Margin="10,45,10,60"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
-            <TextBox Name="TextBoxPrivacyContent" 
-                     FontFamily="Microsoft YaHei UI" 
-                     VerticalScrollBarVisibility="Auto" 
-                     AcceptsReturn="True" 
-                     IsReadOnly="True"
-                     TextWrapping="Wrap"
-                     Background="{DynamicResource PrivacyAgreementWindowBackground}"
-                     Foreground="{DynamicResource PrivacyAgreementWindowForeground}"
-                     BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
-                     Padding="10"/>
-        </ScrollViewer>
-        <StackPanel Orientation="Horizontal" 
-                    HorizontalAlignment="Right" 
-                    VerticalAlignment="Bottom"
-                    Margin="10">
-            <Button Name="ButtonCancel"
-                    Margin="0,0,10,0" 
-                    Content="取消" 
-                    FontFamily="Microsoft YaHei UI"
-                    Width="100" 
-                    Height="35"
-                    Click="ButtonCancel_Click"
-                    Background="{DynamicResource PrivacyAgreementWindowButtonBackground}"
-                    Foreground="{DynamicResource PrivacyAgreementWindowButtonForeground}"
-                    BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
-                    OverridesDefaultStyle="True">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"
-                                              RecognizesAccessKey="True"/>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-            <Button Name="ButtonAccept"
-                    Content="同意" 
-                    FontFamily="Microsoft YaHei UI"
-                    Width="100" 
-                    Height="35"
-                    Click="ButtonAccept_Click"
-                    Background="{DynamicResource PrivacyAgreementWindowButtonAcceptBackground}"
-                    Foreground="{DynamicResource PrivacyAgreementWindowButtonAcceptForeground}"
-                    BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
-                    OverridesDefaultStyle="True">
-                <Button.Template>
-                    <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
-                                BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="4">
-                            <ContentPresenter HorizontalAlignment="Center"
-                                              VerticalAlignment="Center"
-                                              Margin="{TemplateBinding Padding}"
-                                              RecognizesAccessKey="True"/>
-                        </Border>
-                    </ControlTemplate>
-                </Button.Template>
-            </Button>
-        </StackPanel>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 自定义标题栏 -->
+        <Border x:Name="Border_TitleBarRoot"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}" 
+                           VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold"/>
+
+                <!--Right Inset-->
+                <Rectangle Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}"
+                    Grid.Column="2"/>
+
+                <!--Right Buttons-->
+                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
+                    Orientation="Horizontal" Grid.Column="1" Spacing="5">
+                </ikw:SimpleStackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- 主内容区 -->
+        <Grid Grid.Row="1" Background="{DynamicResource PrivacyAgreementWindowBackground}">
+            <ScrollViewer Margin="10,10,10,70"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled">
+                <TextBox Name="TextBoxPrivacyContent" 
+                         FontFamily="Microsoft YaHei UI" 
+                         VerticalScrollBarVisibility="Auto" 
+                         AcceptsReturn="True" 
+                         IsReadOnly="True"
+                         TextWrapping="Wrap"
+                         Background="{DynamicResource PrivacyAgreementWindowBackground}"
+                         Foreground="{DynamicResource PrivacyAgreementWindowForeground}"
+                         BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
+                         Padding="10"/>
+            </ScrollViewer>
+            <StackPanel Orientation="Horizontal" 
+                        HorizontalAlignment="Right" 
+                        VerticalAlignment="Bottom"
+                        Margin="10">
+                <Button Name="ButtonCancel"
+                        Margin="0,0,10,0" 
+                        Content="取消" 
+                        FontFamily="Microsoft YaHei UI"
+                        Width="100" 
+                        Height="35"
+                        Click="ButtonCancel_Click"
+                        Background="{DynamicResource PrivacyAgreementWindowButtonBackground}"
+                        Foreground="{DynamicResource PrivacyAgreementWindowButtonForeground}"
+                        BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
+                        OverridesDefaultStyle="True">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  RecognizesAccessKey="True"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+                <Button Name="ButtonAccept"
+                        Content="同意" 
+                        FontFamily="Microsoft YaHei UI"
+                        Width="100" 
+                        Height="35"
+                        Click="ButtonAccept_Click"
+                        Background="{DynamicResource PrivacyAgreementWindowButtonAcceptBackground}"
+                        Foreground="{DynamicResource PrivacyAgreementWindowButtonAcceptForeground}"
+                        BorderBrush="{DynamicResource PrivacyAgreementWindowBorderBrush}"
+                        OverridesDefaultStyle="True">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center"
+                                                  Margin="{TemplateBinding Padding}"
+                                                  RecognizesAccessKey="True"/>
+                            </Border>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </StackPanel>
+        </Grid>
     </Grid>
 </Window>
 

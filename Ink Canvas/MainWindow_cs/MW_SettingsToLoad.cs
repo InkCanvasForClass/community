@@ -37,6 +37,9 @@ namespace Ink_Canvas
         /// <param name="skipAutoUpdateCheck">指示是否跳过自动更新检查；为 true 时不会在加载设置后执行自动更新检测。</param>
         private void LoadSettings(bool isStartup = false, bool skipAutoUpdateCheck = false)
         {
+            BeginDeferredSettingsSaveDuringLoad();
+            try
+            {
             AppVersionTextBlock.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             try
             {
@@ -301,6 +304,29 @@ namespace Ink_Canvas
                     }
                 }
 
+                // 初始化更新包架构
+                if (UpdatePackageArchitectureSelector != null)
+                {
+                    _isChangingUpdatePackageArchInternally = true;
+                    try
+                    {
+                        string wantTag = Settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64 ? "X64" : "X86";
+                        foreach (var item in UpdatePackageArchitectureSelector.Items)
+                        {
+                            if (item is RadioButton rb && rb.Tag != null &&
+                                string.Equals(rb.Tag.ToString(), wantTag, StringComparison.OrdinalIgnoreCase))
+                            {
+                                rb.IsChecked = true;
+                                break;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        _isChangingUpdatePackageArchInternally = false;
+                    }
+                }
+
                 AutoUpdateTimePeriodBlock.Visibility = Settings.Startup.IsAutoUpdateWithSilence
                     ? Visibility.Visible
                     : Visibility.Collapsed;
@@ -425,12 +451,6 @@ namespace Ink_Canvas
                     BtnHitokotoCustomize.Visibility = Settings.Appearance.ChickenSoupSource == 3
                         ? Visibility.Visible
                         : Visibility.Collapsed;
-                }
-
-                // 初始化HitokotoCategories，如果为空则默认全选
-                if (Settings.Appearance.HitokotoCategories == null || Settings.Appearance.HitokotoCategories.Count == 0)
-                {
-                    Settings.Appearance.HitokotoCategories = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" };
                 }
 
                 ToggleSwitchEnableQuickPanel.IsOn = Settings.Appearance.IsShowQuickPanel;
@@ -824,8 +844,18 @@ namespace Ink_Canvas
                 ToggleSwitchDisablePressure.IsOn = Settings.Canvas.DisablePressure;
                 inkCanvas.DefaultDrawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
 
-                ComboBoxPenStyle.SelectedIndex = Settings.Canvas.InkStyle;
-                BoardComboBoxPenStyle.SelectedIndex = Settings.Canvas.InkStyle;
+                if (Settings.Canvas.EnableVelocityBrushTip)
+                {
+                    Settings.Canvas.InkStyle = 3;
+                    Settings.Canvas.EnableVelocityBrushTip = false;
+                }
+
+                if (Settings.Canvas.InkStyle < 0 || Settings.Canvas.InkStyle > 3)
+                    Settings.Canvas.InkStyle = 0;
+
+                int penStyleUi = PenStyleUiIndexFromInkStyle(Settings.Canvas.InkStyle);
+                ComboBoxPenStyle.SelectedIndex = penStyleUi;
+                BoardComboBoxPenStyle.SelectedIndex = penStyleUi;
 
                 ComboBoxEraserSize.SelectedIndex = Settings.Canvas.EraserSize;
                 ComboBoxEraserSizeFloatingBar.SelectedIndex = Settings.Canvas.EraserSize;
@@ -1019,6 +1049,17 @@ namespace Ink_Canvas
             if (Settings.InkToShape != null)
             {
                 ToggleSwitchEnableInkToShape.IsOn = Settings.InkToShape.IsInkToShapeEnabled;
+
+                if (ComboBoxShapeRecognitionEngine != null)
+                {
+                    int eng = Settings.InkToShape.ShapeRecognitionEngine;
+                    if (eng < 0 || eng > 2) eng = 0;
+                    ComboBoxShapeRecognitionEngine.SelectedIndex = eng;
+                }
+
+                if (ToggleSwitchEnableWinRtHandwritingStrokeBeautify != null)
+                    ToggleSwitchEnableWinRtHandwritingStrokeBeautify.IsOn =
+                        Settings.InkToShape.EnableWinRtHandwritingStrokeBeautify;
 
                 ToggleSwitchEnableInkToShapeNoFakePressureRectangle.IsOn =
                     Settings.InkToShape.IsInkToShapeNoFakePressureRectangle;
@@ -1278,6 +1319,11 @@ namespace Ink_Canvas
 
             // 刷新配置文件列表
             try { RefreshConfigProfileList(); } catch (Exception ex) { LogHelper.WriteLogToFile($"刷新配置文件列表失败: {ex.Message}", LogHelper.LogType.Warning); }
+            }
+            finally
+            {
+                EndDeferredSettingsSaveDuringLoad();
+            }
         }
 
         /// <summary>

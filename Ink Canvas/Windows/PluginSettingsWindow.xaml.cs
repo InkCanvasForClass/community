@@ -520,6 +520,24 @@ namespace Ink_Canvas.Windows
         }
 
         /// <summary>
+        /// 刷新插件列表按钮点击事件
+        /// </summary>
+        private void Button_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // 刷新插件列表
+                RefreshPluginList();
+                LogHelper.WriteLogToFile("用户点击刷新按钮，刷新插件列表");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"刷新插件列表时出错: {ex.Message}", LogHelper.LogType.Error);
+                MessageBox.Show($"刷新插件列表时出错: {ex.Message}", "错误", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
         /// 保存插件状态按钮点击事件
         /// </summary>
         private void BtnSaveConfig_Click(object sender, RoutedEventArgs e)
@@ -616,38 +634,7 @@ namespace Ink_Canvas.Windows
             }
         }
 
-        /// <summary>
-        /// 关闭按钮点击事件
-        /// </summary>
-        private void BtnClose_Click(object sender, RoutedEventArgs e)
-        {
-            // 直接关闭窗口，窗口关闭事件会处理配置保存
-            Close();
-        }
 
-        /// <summary>
-        /// 标题栏拖拽事件
-        /// </summary>
-        private void TitleBar_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            if (e.ClickCount == 2)
-            {
-                // 双击标题栏切换最大化状态
-                if (WindowState == WindowState.Maximized)
-                {
-                    WindowState = WindowState.Normal;
-                }
-                else
-                {
-                    WindowState = WindowState.Maximized;
-                }
-            }
-            else
-            {
-                // 拖拽窗口
-                DragMove();
-            }
-        }
     }
 
     /// <summary>

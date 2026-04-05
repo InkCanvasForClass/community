@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Timers;
@@ -1147,8 +1146,7 @@ namespace Ink_Canvas
                 }
 
                 // 检查更新文件是否已下载
-                string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
-                string statusFilePath = Path.Combine(updatesFolderPath, $"DownloadV{AvailableLatestVersion}Status.txt");
+                string statusFilePath = AutoUpdateHelper.GetUpdateDownloadStatusFilePath(AvailableLatestVersion);
 
                 if (!File.Exists(statusFilePath) || File.ReadAllText(statusFilePath).Trim().ToLower() != "true")
                 {
@@ -1441,7 +1439,6 @@ namespace Ink_Canvas
                 if (_eraserAutoSwitchBackTimer != null)
                 {
                     _eraserAutoSwitchBackTimer.Stop();
-                    LogHelper.WriteLogToFile("橡皮擦自动切换计时器已停止", LogHelper.LogType.Trace);
                 }
             }
             catch (Exception ex)

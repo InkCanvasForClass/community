@@ -142,6 +142,36 @@ namespace Ink_Canvas
             }
         }
 
+        private void CloseVideoPresenterSidebarAndReleaseResources()
+        {
+            if (VideoPresenterSidebar != null)
+            {
+                VideoPresenterSidebar.Visibility = Visibility.Collapsed;
+            }
+
+            StopVideoPresenterPreviewAndFrameCache(clearPreviewImage: true);
+        }
+
+        private void StopVideoPresenterPreviewAndFrameCache(bool clearPreviewImage)
+        {
+            if (BtnCapturePhoto != null)
+            {
+                BtnCapturePhoto.IsEnabled = false;
+            }
+
+            if (clearPreviewImage && VideoPresenterPreviewImage != null)
+            {
+                VideoPresenterPreviewImage.Source = null;
+            }
+
+            try { _cameraService?.StopPreview(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            lock (_videoPresenterFrameLock)
+            {
+                _lastFrame?.Dispose();
+                _lastFrame = null;
+            }
+        }
+
         /// <summary>
         /// 延迟初始化摄像头服务并订阅其帧和错误事件；如果服务已存在则不做任何操作。
         /// </summary>
@@ -442,6 +472,7 @@ namespace Ink_Canvas
             ApplyBoothButtonHighlight(BtnToggleVideoPresenterLiveOnCanvas, true);
             int page = GetCurrentPageIndex();
             _liveEnabledPages.Add(page);
+            StartVideoPresenterPreviewForCurrentPageIfNeeded();
 
             var img = EnsureLiveFrameElementForPage(page);
             ApplyLiveFrameLayoutForPage(page, img);
@@ -488,6 +519,44 @@ namespace Ink_Canvas
                     }
                 }
                 catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
+            }
+
+            if (_liveEnabledPages.Count == 0)
+            {
+                StopVideoPresenterPreviewAndFrameCache(clearPreviewImage: false);
+            }
+        }
+
+        private void StartVideoPresenterPreviewForCurrentPageIfNeeded()
+        {
+            try
+            {
+                EnsureCameraService();
+                if (_cameraService == null || _cameraService.IsCapturing) return;
+
+                int page = GetCurrentPageIndex();
+                int idx = 0;
+                if (_cameraIndexByPage.TryGetValue(page, out int savedIdx))
+                {
+                    idx = savedIdx;
+                }
+
+                if (_cameraService.AvailableCameras == null || _cameraService.AvailableCameras.Count == 0)
+                {
+                    _cameraService.RefreshCameraList();
+                }
+
+                if (_cameraService.AvailableCameras == null || _cameraService.AvailableCameras.Count == 0)
+                {
+                    return;
+                }
+
+                idx = Math.Max(0, Math.Min(idx, _cameraService.AvailableCameras.Count - 1));
+                _cameraService.StartPreview(idx);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"启动视频展台预览失败: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
@@ -548,8 +617,9 @@ namespace Ink_Canvas
                     }
                 }
 
-                // 按页摄像头索引：切页后自动切回该页的摄像头
-                if (_cameraIndexByPage.TryGetValue(page, out int idx))
+                // 按页摄像头索引：仅在展台侧栏可见时，切页后自动切回该页的摄像头
+                if (VideoPresenterSidebar?.Visibility == Visibility.Visible
+                    && _cameraIndexByPage.TryGetValue(page, out int idx))
                 {
                     EnsureCameraService();
                     _cameraService?.StartPreview(idx);
@@ -768,11 +838,7 @@ namespace Ink_Canvas
         {
             try
             {
-                // 收起侧栏
-                if (VideoPresenterSidebar != null)
-                {
-                    VideoPresenterSidebar.Visibility = Visibility.Collapsed;
-                }
+                CloseVideoPresenterSidebarAndReleaseResources();
 
                 if (BtnToggleVideoPresenterLiveOnCanvas != null)
                 {
@@ -797,7 +863,6 @@ namespace Ink_Canvas
                     }
                 }
 
-                try { _cameraService?.StopPreview(); } catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }

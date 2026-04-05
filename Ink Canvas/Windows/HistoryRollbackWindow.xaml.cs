@@ -35,19 +35,37 @@ namespace Ink_Canvas
             InitializeComponent();
             this.channel = channel;
 
+            // 设置窗口置顶
+            this.Topmost = true;
+
             // 应用当前主题
             ApplyCurrentTheme();
 
-            LoadVersions();
+            // 隐藏主窗口
+            HideMainWindow();
 
-            // 添加窗口拖动功能
-            MouseDown += (sender, e) =>
+            LoadVersions();
+        }
+
+        /// <summary>
+        /// 隐藏主窗口
+        /// </summary>
+        private void HideMainWindow()
+        {
+            try
             {
-                if (e.ChangedButton == MouseButton.Left)
+                // 获取主窗口实例
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow != null)
                 {
-                    DragMove();
+                    // 隐藏主窗口
+                    mainWindow.Visibility = Visibility.Hidden;
                 }
-            };
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"隐藏主窗口时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
         }
 
         /// <summary>
@@ -210,7 +228,7 @@ namespace Ink_Canvas
                 SecondaryButtonText = "取消"
             };
 
-            var panel = new iNKORE.UI.WPF.Modern.Controls.SimpleStackPanel
+            var panel = new iNKORE.UI.WPF.Controls.SimpleStackPanel
             {
                 Spacing = 16,
                 Margin = new Thickness(0, 10, 0, 0)
@@ -223,16 +241,16 @@ namespace Ink_Canvas
                 Foreground = (Brush)Resources["TextPrimaryBrush"]
             };
 
-            var daysComboBox = new ComboBox
+            var daysComboBox = new System.Windows.Controls.ComboBox
             {
                 Width = 200,
                 Height = 36,
-                HorizontalAlignment = HorizontalAlignment.Left
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Left
             };
 
             for (int i = 0; i <= 7; i++)
             {
-                daysComboBox.Items.Add(new ComboBoxItem
+                daysComboBox.Items.Add(new System.Windows.Controls.ComboBoxItem
                 {
                     Content = $"{i} 天",
                     Tag = i
@@ -250,7 +268,7 @@ namespace Ink_Canvas
             if (dialogResult == ContentDialogResult.Primary)
             {
                 int days = 1;
-                if (daysComboBox.SelectedItem is ComboBoxItem selectedItemCombo &&
+                if (daysComboBox.SelectedItem is System.Windows.Controls.ComboBoxItem selectedItemCombo &&
                     selectedItemCombo.Tag != null &&
                     int.TryParse(selectedItemCombo.Tag.ToString(), out int selectedDays))
                 {
@@ -323,20 +341,30 @@ namespace Ink_Canvas
             }
         }
 
-        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
-        {
-            WindowState = WindowState.Minimized;
-        }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
 
         protected override void OnClosing(CancelEventArgs e)
         {
             downloadCts?.Cancel();
+
+            try
+            {
+                // 获取主窗口实例
+                var mainWindow = Application.Current.MainWindow as MainWindow;
+                if (mainWindow != null)
+                {
+                    // 重新显示主窗口
+                    mainWindow.Visibility = Visibility.Visible;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"显示主窗口时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
             base.OnClosing(e);
         }
+
+
     }
 }

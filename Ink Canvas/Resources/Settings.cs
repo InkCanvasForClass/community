@@ -53,6 +53,8 @@ namespace Ink_Canvas
         public bool RequirePasswordOnEnterSettings { get; set; } = false;
         [JsonProperty("requirePasswordOnResetConfig")]
         public bool RequirePasswordOnResetConfig { get; set; } = false;
+        [JsonProperty("requirePasswordOnModifyOrClearNameList")]
+        public bool RequirePasswordOnModifyOrClearNameList { get; set; } = false;
         [JsonProperty("enableProcessProtection")]
         public bool EnableProcessProtection { get; set; } = true;
     }
@@ -67,6 +69,7 @@ namespace Ink_Canvas
         public double InkAlpha { get; set; } = 255;
         [JsonProperty("isShowCursor")]
         public bool IsShowCursor { get; set; }
+        /// <summary>笔锋存储值：0 基于点集，1 基于速率，2 关闭，3 实时笔锋（速度与压感混合）。界面下拉顺序为实时笔锋、点集、速率、关闭。</summary>
         [JsonProperty("inkStyle")]
         public int InkStyle { get; set; }
         [JsonProperty("eraserSize")]
@@ -143,6 +146,10 @@ namespace Ink_Canvas
         public bool EnableEraserAutoSwitchBack { get; set; } = false;
         [JsonProperty("eraserAutoSwitchBackDelaySeconds")]
         public int EraserAutoSwitchBackDelaySeconds { get; set; } = 10; // 默认10秒
+        [JsonProperty("velocityBrushTipMix")]
+        public double VelocityBrushTipMix { get; set; } = 0.45;
+        [JsonProperty("enableVelocityBrushTip")]
+        public bool EnableVelocityBrushTip { get; set; }
 
     }
 
@@ -181,6 +188,15 @@ namespace Ink_Canvas
         Beta
     }
 
+    /// <summary>自动更新要下载的安装包架构（与当前运行进程的位数无关）。默认 32 位包；64 位包对应发布物 ZIP 文件名在 .zip 前增加 -x64。</summary>
+    public enum UpdatePackageArchitecture
+    {
+        /// <summary>32 位包，例如 InkCanvasForClass.CE.1.7.0.0.zip</summary>
+        X86 = 0,
+        /// <summary>64 位包，例如 InkCanvasForClass.CE.1.7.0.0-x64.zip</summary>
+        X64 = 1
+    }
+
     /// <summary>
     /// 遥测上传等级
     /// </summary>
@@ -212,6 +228,8 @@ namespace Ink_Canvas
         public string AutoUpdateWithSilenceEndTime { get; set; } = "22:00";
         [JsonProperty("updateChannel")]
         public UpdateChannel UpdateChannel { get; set; } = UpdateChannel.Release;
+        [JsonProperty("updatePackageArchitecture")]
+        public UpdatePackageArchitecture UpdatePackageArchitecture { get; set; } = UpdatePackageArchitecture.X86;
         [JsonProperty("skippedVersion")]
         public string SkippedVersion { get; set; } = "";
         [JsonProperty("autoUpdatePauseUntilDate")]
@@ -729,6 +747,12 @@ namespace Ink_Canvas
         public double LineStraightenSensitivity { get; set; } = 0.20;
         [JsonProperty("lineNormalizationThreshold")]
         public double LineNormalizationThreshold { get; set; } = 0.5;
+        [JsonProperty("shapeRecognitionEngine")]
+        public int ShapeRecognitionEngine { get; set; }
+        [JsonProperty("enableWinRtHandwritingStrokeBeautify")]
+        public bool EnableWinRtHandwritingStrokeBeautify { get; set; }
+        [JsonProperty("handwritingCorrectionFontFamily")]
+        public string HandwritingCorrectionFontFamily { get; set; } = "Ink Free,KaiTi,Segoe Script";
     }
 
     public class RandSettings

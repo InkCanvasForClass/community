@@ -1,0 +1,104 @@
+name: PR Check
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches: [ main, beta ]
+    paths-ignore:
+      - '**/*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}-${{ github.head_ref || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-package:
+    name: Build & Package
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [AnyCPU, x86]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 1
+      
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+      
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+      
+      - name: Restore Package 
+        run: dotnet restore "Ink Canvas.sln" --locked-mode
+      
+      - name: Build the Solution
+        run: msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Debug" /p:GitFlow="$GITFLOW" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+
+      - name: Check if exe file is generated
+        id: check-exe
+        run: |
+          $exePath = "Ink Canvas\bin\Debug\${{ matrix.architecture }}\net472\InkCanvasForClass.exe"
+          
+          if (Test-Path $exePath) {
+            echo "build_success=true" >> $env:GITHUB_OUTPUT
+          } else {
+            echo "build_success=false" >> $env:GITHUB_OUTPUT
+            
+            if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+              exit 1
+            }
+          }
+
+      - name: Create Package (if build succeeded)
+        id: create-archive
+        if: steps.check-exe.outputs.build_success == 'true'
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          $shortSha = $env:GITHUB_SHA.Substring(0, 7)
+          $version = "debug-$shortSha-$env:GITHUB_RUN_NUMBER"
+          echo "archive_name=$version" >> $env:GITHUB_OUTPUT
+      
+      - name: Upload Artifact (if build succeeded)
+        if: steps.check-exe.outputs.build_success == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: InkCanvasForClass.CE.debug.${{ matrix.architecture }}
+          path: "Ink Canvas/bin/Debug/${{ matrix.architecture }}/net472/*"
+        
+
+      - name: Create Summary
+        if: always()
+        shell: bash
+        run: |
+          echo "# Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check-exe.outputs.build_success }}" = "true" ]; then
+            echo "## ✅ Build Successful" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Version:** ${{ steps.create-archive.outputs.archive_name }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "[Download Artifact](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "[Nightly.link Download](https://nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/InkCanvasForClass.CE.debug.${{ matrix.architecture }}.zip) \([GhProxy Fastly Mirror](https://cdn.gh-proxy.com/nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/InkCanvasForClass.CE.debug.${{ matrix.architecture }}.zip) / [GhProxy Mirror](https://gh-proxy.com/nightly.link/${{ github.repository }}/actions/runs/${{ github.run_id }}/InkCanvasForClass.CE.debug.${{ matrix.architecture }}.zip)\)" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## ❌ Build Failed" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Event:** ${{ github.event_name }} (${{ github.event.action || 'N/A' }})" >> $GITHUB_STEP_SUMMARY
+            echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Check build logs for details." >> $GITHUB_STEP_SUMMARY
+          fi

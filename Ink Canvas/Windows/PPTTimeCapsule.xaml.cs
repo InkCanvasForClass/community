@@ -28,6 +28,7 @@ namespace Ink_Canvas.Windows
         private double originalCapsuleWidth = 0;
         private string lastCountdownText = ""; // 上次的倒计时文本，用于检测文本变化
         private Storyboard currentWidthAnimation; // 当前正在运行的宽度动画
+        private volatile bool isDisposed = false;
 
         public PPTTimeCapsule()
         {
@@ -72,10 +73,43 @@ namespace Ink_Canvas.Windows
         /// </summary>
         public void Dispose()
         {
-            StopTimeUpdate();
-            SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
-            timeUpdateTimer?.Dispose();
-            countdownUpdateTimer?.Dispose();
+            if (isDisposed) return;
+            isDisposed = true;
+
+            // 先取消系统事件订阅，防止在释放过程中再次触发
+            try
+            {
+                SystemEvents.UserPreferenceChanged -= SystemEvents_UserPreferenceChanged;
+            }
+            catch { }
+
+            // 停止并释放定时器，确保不再触发回调
+            try
+            {
+                if (timeUpdateTimer != null)
+                {
+                    timeUpdateTimer.Elapsed -= TimeUpdateTimer_Elapsed;
+                    try { timeUpdateTimer.Stop(); } catch { }
+                    try { timeUpdateTimer.Dispose(); } catch { }
+                    timeUpdateTimer = null;
+                }
+            }
+            catch { }
+
+            try
+            {
+                if (countdownUpdateTimer != null)
+                {
+                    countdownUpdateTimer.Elapsed -= CountdownUpdateTimer_Elapsed;
+                    try { countdownUpdateTimer.Stop(); } catch { }
+                    try { countdownUpdateTimer.Dispose(); } catch { }
+                    countdownUpdateTimer = null;
+                }
+            }
+            catch { }
+
+            // 停止动画
+            try { StopColonBlinkAnimation(); } catch { }
         }
 
         private void InitializeTimers()
@@ -91,23 +125,39 @@ namespace Ink_Canvas.Windows
 
         private void TimeUpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            if (isDisposed) return;
+
+            var dispatcher = this.Dispatcher;
+            if (dispatcher == null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished) return;
+
+            try
             {
-                UpdateTimeDisplay();
-            }), DispatcherPriority.Normal);
+                dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (isDisposed) return;
+                    UpdateTimeDisplay();
+                }), DispatcherPriority.Normal);
+            }
+            catch { }
         }
 
         private void CountdownUpdateTimer_Elapsed(object sender, ElapsedEventArgs e)
         {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-            {
-                if (this.Visibility != Visibility.Visible)
-                {
-                    return;
-                }
+            if (isDisposed) return;
 
-                UpdateCountdownDisplay();
-            }), DispatcherPriority.Normal);
+            var dispatcher = this.Dispatcher;
+            if (dispatcher == null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished) return;
+
+            try
+            {
+                dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (isDisposed) return;
+                    if (this.Visibility != Visibility.Visible) return;
+                    UpdateCountdownDisplay();
+                }), DispatcherPriority.Normal);
+            }
+            catch { }
         }
 
         private void StartTimeUpdate()
@@ -724,10 +774,20 @@ namespace Ink_Canvas.Windows
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
-            Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+            if (isDisposed) return;
+
+            var dispatcher = this.Dispatcher;
+            if (dispatcher == null || dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished) return;
+
+            try
             {
-                ApplyTheme();
-            }), DispatcherPriority.Normal);
+                dispatcher.BeginInvoke(new Action(() =>
+                {
+                    if (isDisposed) return;
+                    ApplyTheme();
+                }), DispatcherPriority.Normal);
+            }
+            catch { }
         }
 
         private void ApplyTheme()

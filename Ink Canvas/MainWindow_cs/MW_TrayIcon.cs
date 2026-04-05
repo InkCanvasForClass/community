@@ -1,6 +1,6 @@
 using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
+using iNKORE.UI.WPF.Controls;
 using System;
 using System.Diagnostics;
 using System.Windows;
@@ -87,7 +87,7 @@ namespace Ink_Canvas
         private void SysTrayMenu_Closed(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
-            if (mainWin.IsLoaded)
+            if (mainWin != null && mainWin.IsLoaded)
             {
                 // 菜单关闭后，恢复主窗口的置顶状态
                 if (Ink_Canvas.MainWindow.Settings.Advanced.IsAlwaysOnTop && Ink_Canvas.MainWindow.Settings.Advanced.IsNoFocusMode)
@@ -112,7 +112,7 @@ namespace Ink_Canvas
         private void CloseAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
-            if (mainWin.IsLoaded)
+            if (mainWin != null && mainWin.IsLoaded)
             {
                 IsAppExitByUser = true;
                 mainWin.BtnExit_Click(null, null);
@@ -136,7 +136,7 @@ namespace Ink_Canvas
         private void RestartAppTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
-            if (mainWin.IsLoaded)
+            if (mainWin != null && mainWin.IsLoaded)
             {
                 IsAppExitByUser = true;
 
@@ -176,7 +176,7 @@ namespace Ink_Canvas
         private void ForceFullScreenTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
-            if (mainWin.IsLoaded)
+            if (mainWin != null && mainWin.IsLoaded)
             {
                 Ink_Canvas.MainWindow.MoveWindow(new WindowInteropHelper(mainWin).Handle, 0, 0,
                     Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height, true);
@@ -199,7 +199,7 @@ namespace Ink_Canvas
         private void FoldFloatingBarTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
-            if (mainWin.IsLoaded)
+            if (mainWin != null && mainWin.IsLoaded)
                 if (mainWin.isFloatingBarFolded) mainWin.UnFoldFloatingBar_MouseUp(new object(), null);
                 else mainWin.FoldFloatingBar_MouseUp(new object(), null);
         }
@@ -221,7 +221,7 @@ namespace Ink_Canvas
         private void ResetFloatingBarPositionTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
-            if (mainWin.IsLoaded)
+            if (mainWin != null && mainWin.IsLoaded)
             {
                 var isInPPTPresentationMode = false;
                 Dispatcher.Invoke(() =>
@@ -257,19 +257,22 @@ namespace Ink_Canvas
         {
             var mi = (MenuItem)sender;
             var mainWin = (MainWindow)Current.MainWindow;
-            if (mainWin.IsLoaded)
+            if (mainWin != null && mainWin.IsLoaded)
             {
                 mainWin.Hide();
                 var s = ((TaskbarIcon)Current.Resources["TaskbarTrayIcon"]).ContextMenu;
-                var ResetFloatingBarPositionTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 4];
-                var FoldFloatingBarTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 5];
-                var ForceFullScreenTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 6];
-                ResetFloatingBarPositionTrayIconMenuItem.IsEnabled = false;
-                FoldFloatingBarTrayIconMenuItem.IsEnabled = false;
-                ForceFullScreenTrayIconMenuItem.IsEnabled = false;
-                ResetFloatingBarPositionTrayIconMenuItem.Opacity = 0.5;
-                FoldFloatingBarTrayIconMenuItem.Opacity = 0.5;
-                ForceFullScreenTrayIconMenuItem.Opacity = 0.5;
+                if (s != null)
+                {
+                    var ResetFloatingBarPositionTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 4];
+                    var FoldFloatingBarTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 5];
+                    var ForceFullScreenTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 6];
+                    ResetFloatingBarPositionTrayIconMenuItem.IsEnabled = false;
+                    FoldFloatingBarTrayIconMenuItem.IsEnabled = false;
+                    ForceFullScreenTrayIconMenuItem.IsEnabled = false;
+                    ResetFloatingBarPositionTrayIconMenuItem.Opacity = 0.5;
+                    FoldFloatingBarTrayIconMenuItem.Opacity = 0.5;
+                    ForceFullScreenTrayIconMenuItem.Opacity = 0.5;
+                }
             }
             else
             {
@@ -299,19 +302,22 @@ namespace Ink_Canvas
         {
             var mi = (MenuItem)sender;
             var mainWin = (MainWindow)Current.MainWindow;
-            if (mainWin.IsLoaded)
+            if (mainWin != null && mainWin.IsLoaded)
             {
                 mainWin.Show();
                 var s = ((TaskbarIcon)Current.Resources["TaskbarTrayIcon"]).ContextMenu;
-                var ResetFloatingBarPositionTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 4];
-                var FoldFloatingBarTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 5];
-                var ForceFullScreenTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 6];
-                ResetFloatingBarPositionTrayIconMenuItem.IsEnabled = true;
-                FoldFloatingBarTrayIconMenuItem.IsEnabled = true;
-                ForceFullScreenTrayIconMenuItem.IsEnabled = true;
-                ResetFloatingBarPositionTrayIconMenuItem.Opacity = 1;
-                FoldFloatingBarTrayIconMenuItem.Opacity = 1;
-                ForceFullScreenTrayIconMenuItem.Opacity = 1;
+                if (s != null)
+                {
+                    var ResetFloatingBarPositionTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 4];
+                    var FoldFloatingBarTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 5];
+                    var ForceFullScreenTrayIconMenuItem = (MenuItem)s.Items[s.Items.Count - 6];
+                    ResetFloatingBarPositionTrayIconMenuItem.IsEnabled = true;
+                    FoldFloatingBarTrayIconMenuItem.IsEnabled = true;
+                    ForceFullScreenTrayIconMenuItem.IsEnabled = true;
+                    ResetFloatingBarPositionTrayIconMenuItem.Opacity = 1;
+                    FoldFloatingBarTrayIconMenuItem.Opacity = 1;
+                    ForceFullScreenTrayIconMenuItem.Opacity = 1;
+                }
             }
             else
             {
@@ -340,7 +346,7 @@ namespace Ink_Canvas
         private void DisableAllHotkeysMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = (MainWindow)Current.MainWindow;
-            if (mainWin.IsLoaded)
+            if (mainWin != null && mainWin.IsLoaded)
             {
                 try
                 {

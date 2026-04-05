@@ -200,6 +200,10 @@ jobs:
     needs: prepare
     if: success()
     runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        architecture: [AnyCPU, x86]
     outputs:
       archive_name: ${{ steps.create_archive.outputs.archive_name }}
       zip_size: ${{ steps.calculate_size.outputs.zip_size }}
@@ -212,7 +216,7 @@ jobs:
           fetch-depth: 1
       
       - name: Setup MSBuild
-        uses: microsoft/setup-msbuild@v2
+        uses: microsoft/setup-msbuild@v3
       
       - name: Setup dotnet
         uses: actions/setup-dotnet@v5
@@ -227,12 +231,12 @@ jobs:
         env:
           DLASS_SENTRY_DSN: ${{ secrets.DLASS_SENTRY_DSN }}
         run: |
-          msbuild /p:platform="AnyCPU" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
+          msbuild /p:platform="${{ matrix.architecture }}" /p:configuration="Release" /p:GitFlow="Github Action" "Ink Canvas/InkCanvasForClass.csproj" /m /p:UseMultiToolTask=true /p:EnforceProcessCountAcrossBuilds=true /verbosity:minimal -maxcpucount /p:RunAnalyzers=false
 
       - name: Check if exe file is generated
         id: check-exe
         run: |
-          $exePath = "Ink Canvas/bin/Release/net472/InkCanvasForClass.exe"
+          $exePath = "Ink Canvas\bin\Release\${{ matrix.architecture }}\net472\InkCanvasForClass.exe"
           
           if (Test-Path $exePath) {
             echo "build_success=true" >> $env:GITHUB_OUTPUT
@@ -265,13 +269,22 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
-          $archiveName = "InkCanvasForClass.CE.$version.zip"
+          $architecture = "${{ matrix.architecture }}"
+          
+          # 根据架构生成文件名后缀
+          if ($architecture -eq "AnyCPU") {
+            $suffix = "-x64"
+          } else {
+            $suffix = ""
+          }
+          
+          $archiveName = "InkCanvasForClass.CE.$version$suffix.zip"
           
           # 创建发布目录
           New-Item -ItemType Directory -Path "release" -Force
           
-          # 复制发布文件
-          Copy-Item "Ink Canvas/bin/Release/net472/*" "release/" -Recurse -Force
+          # 复制发布文件（使用架构特定的路径）
+          Copy-Item "Ink Canvas\bin\Release\$architecture\net472\*" "release/" -Recurse -Force
           
           # 创建压缩包
           Compress-Archive -Path "release/*" -DestinationPath $archiveName -Force
@@ -282,6 +295,7 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
+          $architecture = "${{ matrix.architecture }}"
           
           # 更新 ISS 文件中的版本信息
           $issPath = "build/InkCanvasForClass CE.iss"
@@ -317,8 +331,17 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
+          $architecture = "${{ matrix.architecture }}"
+          
+          # 根据架构生成文件名后缀
+          if ($architecture -eq "AnyCPU") {
+            $suffix = "-x64"
+          } else {
+            $suffix = ""
+          }
+          
           $setupFile = "InkCanvasForClass CE Setup.exe"
-          $newSetupName = "InkCanvasForClass.CE.$version.Setup.exe"
+          $newSetupName = "InkCanvasForClass.CE.$version$suffix.Setup.exe"
           
           if (Test-Path $setupFile) {
             Rename-Item -Path $setupFile -NewName $newSetupName
@@ -331,7 +354,16 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
-          $archiveName = "InkCanvasForClass.CE.$version.zip"
+          $architecture = "${{ matrix.architecture }}"
+          
+          # 根据架构生成文件名后缀
+          if ($architecture -eq "AnyCPU") {
+            $suffix = "-x64"
+          } else {
+            $suffix = ""
+          }
+          
+          $archiveName = "InkCanvasForClass.CE.$version$suffix.zip"
           
           # 获取文件大小（字节）
           $fileSize = (Get-Item $archiveName).Length
@@ -343,7 +375,16 @@ jobs:
         if: steps.check-exe.outputs.build_success == 'true'
         run: |
           $version = "${{ needs.prepare.outputs.version }}"
-          $installerName = "InkCanvasForClass.CE.$version.Setup.exe"
+          $architecture = "${{ matrix.architecture }}"
+          
+          # 根据架构生成文件名后缀
+          if ($architecture -eq "AnyCPU") {
+            $suffix = "-x64"
+          } else {
+            $suffix = ""
+          }
+          
+          $installerName = "InkCanvasForClass.CE.$version$suffix.Setup.exe"
           
           if (Test-Path $installerName) {
             # 获取文件大小（字节）
@@ -356,12 +397,32 @@ jobs:
           
       - name: Upload Build Artifacts
         if: steps.check-exe.outputs.build_success == 'true'
+        run: |
+          $version = "${{ needs.prepare.outputs.version }}"
+          $architecture = "${{ matrix.architecture }}"
+          
+          # 根据架构生成文件名后缀
+          if ($architecture -eq "AnyCPU") {
+            $suffix = "-x64"
+          } else {
+            $suffix = ""
+          }
+          
+          $zipFile = "InkCanvasForClass.CE.$version$suffix.zip"
+          $setupFile = "InkCanvasForClass.CE.$version$suffix.Setup.exe"
+          
+          echo "zip_file=$zipFile" >> $env:GITHUB_OUTPUT
+          echo "setup_file=$setupFile" >> $env:GITHUB_OUTPUT
+        id: get_file_names
+
+      - name: Upload Build Artifacts
+        if: steps.check-exe.outputs.build_success == 'true'
         uses: actions/upload-artifact@v7
         with:
-          name: build-files-${{ needs.prepare.outputs.version }}
+          name: build-files-${{ needs.prepare.outputs.version }}-${{ matrix.architecture }}
           path: |
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe
+            ${{ steps.get_file_names.outputs.zip_file }}
+            ${{ steps.get_file_names.outputs.setup_file }}
 
       - name: Create Build Summary
         if: always()
@@ -376,6 +437,7 @@ jobs:
             echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
             echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
             echo "**Release Type:** ${{ needs.prepare.outputs.is_prerelease == 'true' && 'Pre-release' || 'Release' }}" >> $GITHUB_STEP_SUMMARY
+            echo "**Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
             echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
             echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
@@ -393,6 +455,7 @@ jobs:
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Version:** ${{ needs.prepare.outputs.version }}" >> $GITHUB_STEP_SUMMARY
             echo "**Tag:** \`${{ needs.prepare.outputs.tag_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "**Architecture:** ${{ matrix.architecture }}" >> $GITHUB_STEP_SUMMARY
             echo "**Event:** ${{ github.event_name }} (${{ github.event.action || 'N/A' }})" >> $GITHUB_STEP_SUMMARY
             echo "**Commit:** \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
             echo "**Run:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
@@ -411,7 +474,8 @@ jobs:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v8
         with:
-          name: build-files-${{ needs.prepare.outputs.version }}
+          pattern: build-files-${{ needs.prepare.outputs.version }}-*
+          merge-multiple: false
           
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -419,11 +483,13 @@ jobs:
           python-version: '3.14'
           
       - name: Sign release artifacts with sigstore-python
-        uses: sigstore/gh-action-sigstore-python@v3.2.0
+        uses: sigstore/gh-action-sigstore-python@v3.3.0
         with:
           inputs: |
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe
+            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/*.zip
+            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/*.exe
+            build-files-${{ needs.prepare.outputs.version }}-x86/*.zip
+            build-files-${{ needs.prepare.outputs.version }}-x86/*.exe
           release-signing-artifacts: true
           upload-signing-artifacts: true
         env:
@@ -434,8 +500,8 @@ jobs:
         with:
           name: signed-files-${{ needs.prepare.outputs.version }}
           path: |
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip.sigstore.json
-            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-AnyCPU/*.sigstore.json
+            build-files-${{ needs.prepare.outputs.version }}-x86/*.sigstore.json
 
   release:
     needs: [prepare, build, sign]
@@ -450,7 +516,8 @@ jobs:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v8
         with:
-          name: build-files-${{ needs.prepare.outputs.version }}
+          pattern: build-files-${{ needs.prepare.outputs.version }}-*
+          merge-multiple: true
           
       - name: Download Signed Artifacts (if exists)
         uses: actions/download-artifact@v8
@@ -461,35 +528,64 @@ jobs:
       - name: Create enhanced changelog with file table
         id: enhanced_changelog
         run: |
-          version="${{ needs.prepare.outputs.version }}"
+          version='${{ needs.prepare.outputs.version }}'
           
           # 读取git-cliff生成的changelog内容
-          originalChangelog="${{ needs.prepare.outputs.changelog }}"
+          originalChangelog='${{ needs.prepare.outputs.changelog }}'
+          
+          # 检查是否为预发布版本，如果是则添加警告提示
+          if [ '${{ needs.prepare.outputs.is_prerelease }}' = "true" ]; then
+            warningText=$'\n> [!CAUTION]\n'
+            warningText+=$'> **注意：此版本为预览或测试版**\n'
+            warningText+=$'> \n'
+            warningText+=$'> 请注意，这是一个预览/测试版本，使用时可能出现BUG，常规用户建议使用预览版或正式版\n\n'
+            originalChangelog="${warningText}${originalChangelog}"
+          fi
           
           # 构建文件信息表格
           fileTable=$'\n## 文件信息 (File Information)\n'
           fileTable+=$'| 文件名 | 大小 |\n'
           fileTable+=$'|--------|------|\n'
           
-          # ZIP 文件信息
-          fileTable+=$'| InkCanvasForClass.CE.'"$version"
-          fileTable+=$'.zip | ${{ needs.build.outputs.zip_size }} bytes |\n'
+          # AnyCPU (x64) 架构文件
+          if [ -f "InkCanvasForClass.CE.$version-x64.zip" ]; then
+            zipSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.zip")
+            fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.zip | '"$zipSize"' bytes |\n'
+          fi
           
-          # 安装包文件信息
-          installerSize="${{ needs.build.outputs.installer_size }}"
-          if [ -n "$installerSize" ]; then
+          if [ -f "InkCanvasForClass.CE.$version-x64.Setup.exe" ]; then
+            installerSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.Setup.exe")
+            fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.Setup.exe | '"$installerSize"' bytes |\n'
+          fi
+          
+          if [ -f "InkCanvasForClass.CE.$version-x64.zip.sigstore.json" ]; then
+            sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.zip.sigstore.json")
+            fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.zip.sigstore.json | '"$sigstoreSize"' bytes |\n'
+          fi
+          
+          if [ -f "InkCanvasForClass.CE.$version-x64.Setup.exe.sigstore.json" ]; then
+            sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version-x64.Setup.exe.sigstore.json")
+            fileTable+=$'| InkCanvasForClass.CE.'"$version"'-x64.Setup.exe.sigstore.json | '"$sigstoreSize"' bytes |\n'
+          fi
+          
+          # x86 架构文件
+          if [ -f "InkCanvasForClass.CE.$version.zip" ]; then
+            zipSize=$(wc -c < "InkCanvasForClass.CE.$version.zip")
+            fileTable+=$'| InkCanvasForClass.CE.'"$version"'.zip | '"$zipSize"' bytes |\n'
+          fi
+          
+          if [ -f "InkCanvasForClass.CE.$version.Setup.exe" ]; then
+            installerSize=$(wc -c < "InkCanvasForClass.CE.$version.Setup.exe")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe | '"$installerSize"' bytes |\n'
           fi
           
-          # 检查是否有签名文件
           if [ -f "InkCanvasForClass.CE.$version.zip.sigstore.json" ]; then
-            sigstoreSize=$(stat -c%s "InkCanvasForClass.CE.$version.zip.sigstore.json")
+            sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version.zip.sigstore.json")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'.zip.sigstore.json | '"$sigstoreSize"' bytes |\n'
           fi
           
-          # 检查安装程序签名文件
           if [ -f "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json" ]; then
-            sigstoreSize=$(stat -c%s "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json")
+            sigstoreSize=$(wc -c < "InkCanvasForClass.CE.$version.Setup.exe.sigstore.json")
             fileTable+=$'| InkCanvasForClass.CE.'"$version"'.Setup.exe.sigstore.json | '"$sigstoreSize"' bytes |\n'
           fi
           
@@ -522,6 +618,10 @@ jobs:
           draft: ${{ github.event.inputs.draft || false }}
           prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
           files: |
+            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip
+            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.Setup.exe
+            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip.sigstore.json
+            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.Setup.exe.sigstore.json
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.Setup.exe
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip.sigstore.json
@@ -532,7 +632,7 @@ jobs:
   
   post_release:
     needs: [prepare, release]
-    if: success()
+    if: success() && github.event.inputs.draft != 'true'
     runs-on: ubuntu-slim
     permissions:
       id-token: write
@@ -541,7 +641,8 @@ jobs:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v8
         with:
-          name: build-files-${{ needs.prepare.outputs.version }}
+          pattern: build-files-${{ needs.prepare.outputs.version }}-*
+          merge-multiple: true
 
       - name: Get beta token
         uses: octo-sts/action@main
@@ -571,18 +672,32 @@ jobs:
           cd $REPO_DIR
           IS_PRERELEASE="${{ needs.prepare.outputs.is_prerelease }}"
           VERSION="${{ needs.prepare.outputs.version }}"
-          ZIP_FILE="$GITHUB_WORKSPACE/InkCanvasForClass.CE.$VERSION.zip"
+          X64_ZIP_FILE="$GITHUB_WORKSPACE/InkCanvasForClass.CE.$VERSION-x64.zip"
+          X86_ZIP_FILE="$GITHUB_WORKSPACE/InkCanvasForClass.CE.$VERSION.zip"
           
           if [ "$IS_PRERELEASE" == "true" ]; then
             mkdir -p Beta
-            cp "$ZIP_FILE" Beta/
-            git add Beta/InkCanvasForClass.CE.$VERSION.zip
+            if [ -f "$X64_ZIP_FILE" ]; then
+              cp "$X64_ZIP_FILE" Beta/
+              git add Beta/InkCanvasForClass.CE.$VERSION-x64.zip
+            fi
+            if [ -f "$X86_ZIP_FILE" ]; then
+              cp "$X86_ZIP_FILE" Beta/
+              git add Beta/InkCanvasForClass.CE.$VERSION.zip
+            fi
             git commit -m "Add $VERSION PreRelease"
           else
             mkdir -p Release Beta
-            cp "$ZIP_FILE" Release/
-            cp "$ZIP_FILE" Beta/
-            git add Release/InkCanvasForClass.CE.$VERSION.zip Beta/InkCanvasForClass.CE.$VERSION.zip
+            if [ -f "$X64_ZIP_FILE" ]; then
+              cp "$X64_ZIP_FILE" Release/
+              cp "$X64_ZIP_FILE" Beta/
+              git add Release/InkCanvasForClass.CE.$VERSION-x64.zip Beta/InkCanvasForClass.CE.$VERSION-x64.zip
+            fi
+            if [ -f "$X86_ZIP_FILE" ]; then
+              cp "$X86_ZIP_FILE" Release/
+              cp "$X86_ZIP_FILE" Beta/
+              git add Release/InkCanvasForClass.CE.$VERSION.zip Beta/InkCanvasForClass.CE.$VERSION.zip
+            fi
             git commit -m "Add $VERSION Release"
           fi
           git push origin main
@@ -613,9 +728,11 @@ jobs:
           draft: false
           prerelease: ${{ needs.prepare.outputs.is_prerelease == 'true' }}
           files: |
+            InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}-x64.zip
             InkCanvasForClass.CE.${{ needs.prepare.outputs.version }}.zip
           fail_on_unmatched_files: false
           repository: "InkCanvasForClass/community-beta"
+          token: ${{ steps.octo-sts-beta.outputs.token }}
         env:
           GITHUB_TOKEN: ${{ steps.octo-sts-beta.outputs.token }}
 

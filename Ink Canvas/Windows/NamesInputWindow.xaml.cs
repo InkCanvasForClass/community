@@ -1,4 +1,4 @@
-﻿using Ink_Canvas.Helpers;
+using Ink_Canvas.Helpers;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -38,7 +38,11 @@ namespace Ink_Canvas
                 var result = MessageBox.Show("是否保存？", "名单导入", MessageBoxButton.YesNo);
                 if (result == MessageBoxResult.Yes)
                 {
-                    File.WriteAllText(App.RootPath + "Names.txt", TextBoxNames.Text);
+                    var path = App.RootPath + "Names.txt";
+                    ProcessProtectionManager.WithWriteAccess(path, () =>
+                    {
+                        File.WriteAllText(path, TextBoxNames.Text);
+                    });
                 }
             }
         }

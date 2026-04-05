@@ -111,6 +111,14 @@ namespace Ink_Canvas.Helpers
         /// <summary>
         /// 绘制点段到新的DrawingVisual
         /// </summary>
+        private static double PressureToVisualScale(float pressureFactor, bool ignorePressure)
+        {
+            if (ignorePressure)
+                return 1.0;
+            // 与 WPF 墨迹观感接近：0.5 为标称，压低变细、抬高变粗（预览此前固定 Pen 宽，等同忽略压感）
+            return Math.Max(0.22, Math.Min(2.1, 0.42 + 1.16 * pressureFactor));
+        }
+
         private void DrawSegmentToNewVisual(int startIndex, int endIndex)
         {
             if (Stroke == null || Stroke.StylusPoints.Count == 0 || _visualCanvas == null) return;
@@ -118,6 +126,7 @@ namespace Ink_Canvas.Helpers
 
             var points = Stroke.StylusPoints;
             var drawingAttributes = Stroke.DrawingAttributes;
+            var ignorePressure = drawingAttributes.IgnorePressure;
 
             // 创建新的DrawingVisual用于绘制这个点段
             var segmentVisual = new DrawingVisual();
@@ -128,11 +137,6 @@ namespace Ink_Canvas.Helpers
 
             using (var dc = segmentVisual.RenderOpen())
             {
-                var pen = new Pen(new SolidColorBrush(drawingAttributes.Color), drawingAttributes.Width);
-                pen.StartLineCap = PenLineCap.Round;
-                pen.EndLineCap = PenLineCap.Round;
-                pen.LineJoin = PenLineJoin.Round;
-
                 // 绘制指定范围内的点段
                 if (endIndex - startIndex >= 2)
                 {
@@ -141,6 +145,15 @@ namespace Ink_Canvas.Helpers
                     {
                         var startPoint = new Point(points[i].X, points[i].Y);
                         var endPoint = new Point(points[i + 1].X, points[i + 1].Y);
+                        var s0 = PressureToVisualScale(points[i].PressureFactor, ignorePressure);
+                        var s1 = PressureToVisualScale(points[i + 1].PressureFactor, ignorePressure);
+                        var thickness = Math.Max(0.35, (drawingAttributes.Width * s0 + drawingAttributes.Width * s1) / 2.0);
+                        var pen = new Pen(new SolidColorBrush(drawingAttributes.Color), thickness)
+                        {
+                            StartLineCap = PenLineCap.Round,
+                            EndLineCap = PenLineCap.Round,
+                            LineJoin = PenLineJoin.Round
+                        };
                         dc.DrawLine(pen, startPoint, endPoint);
                     }
                 }
@@ -149,8 +162,9 @@ namespace Ink_Canvas.Helpers
                     // 只有一个点，绘制圆点
                     var brush = new SolidColorBrush(drawingAttributes.Color);
                     var point = points[startIndex];
+                    var s = PressureToVisualScale(point.PressureFactor, ignorePressure);
                     dc.DrawEllipse(brush, null, new Point(point.X, point.Y),
-                        drawingAttributes.Width / 2, drawingAttributes.Height / 2);
+                        drawingAttributes.Width * s / 2, drawingAttributes.Height * s / 2);
                 }
             }
 

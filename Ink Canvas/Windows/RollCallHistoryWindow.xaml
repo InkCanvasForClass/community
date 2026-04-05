@@ -4,11 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ink_Canvas"
-        mc:Ignorable="d" FontFamily="Microsoft YaHei UI" ui:WindowHelper.UseModernWindowStyle="True"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+        mc:Ignorable="d" FontFamily="Microsoft YaHei UI"
         WindowStartupLocation="CenterScreen"
-        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern" Topmost="True"
+        Topmost="True"
         Title="Ink Canvas 抽奖 - 点名历史记录" Height="500" Width="400"
-        Loaded="Window_Loaded">
+        Loaded="Window_Loaded"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Height="48">
     <Window.Resources>
         <!-- 主题资源 -->
         <SolidColorBrush x:Key="RollCallHistoryWindowBackground" Color="White"/>
@@ -17,30 +24,62 @@
         <SolidColorBrush x:Key="RollCallHistoryWindowButtonForeground" Color="Black"/>
         <SolidColorBrush x:Key="RollCallHistoryWindowBorderBrush" Color="#E4E4E7"/>
     </Window.Resources>
-    <Grid Background="{DynamicResource RollCallHistoryWindowBackground}">
-        <Label Content="点名历史记录" 
-               Margin="10" 
-               Foreground="{DynamicResource RollCallHistoryWindowForeground}"
-               FontFamily="Microsoft YaHei UI"/>
-        <TextBox Name="TextBoxHistory" 
-                 FontFamily="Microsoft YaHei UI" 
-                 VerticalScrollBarVisibility="Auto" 
-                 AcceptsReturn="True" 
-                 IsReadOnly="True"
-                 Margin="10,40,10,50"
-                 Background="{DynamicResource RollCallHistoryWindowBackground}"
-                 Foreground="{DynamicResource RollCallHistoryWindowForeground}"
-                 BorderBrush="{DynamicResource RollCallHistoryWindowBorderBrush}"/>
-        <Button Margin="10" 
-                VerticalAlignment="Bottom" 
-                HorizontalAlignment="Right"
-                Content="关闭" 
-                FontFamily="Microsoft YaHei UI"
-                Width="100" 
-                Click="Button_Click"
-                Background="{DynamicResource RollCallHistoryWindowButtonBackground}"
-                Foreground="{DynamicResource RollCallHistoryWindowButtonForeground}"
-                BorderBrush="{DynamicResource RollCallHistoryWindowBorderBrush}"/>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- 自定义标题栏 -->
+        <Border x:Name="Border_TitleBarRoot"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}" 
+                           VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold"/>
+
+                <!--Right Inset-->
+                <Rectangle Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}"
+                    Grid.Column="2"/>
+
+                <!--Right Buttons-->
+                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
+                    Orientation="Horizontal" Grid.Column="1" Spacing="5">
+                </ikw:SimpleStackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- 主内容区 -->
+        <Grid Grid.Row="1" Background="{DynamicResource RollCallHistoryWindowBackground}" Margin="10,10,10,10">
+            <Label Content="点名历史记录" 
+                   Margin="10" 
+                   Foreground="{DynamicResource RollCallHistoryWindowForeground}"
+                   FontFamily="Microsoft YaHei UI"/>
+            <TextBox Name="TextBoxHistory" 
+                     FontFamily="Microsoft YaHei UI" 
+                     VerticalScrollBarVisibility="Auto" 
+                     AcceptsReturn="True" 
+                     IsReadOnly="True"
+                     Margin="10,40,10,50"
+                     Background="{DynamicResource RollCallHistoryWindowBackground}"
+                     Foreground="{DynamicResource RollCallHistoryWindowForeground}"
+                     BorderBrush="{DynamicResource RollCallHistoryWindowBorderBrush}"/>
+            <Button Margin="10" 
+                    VerticalAlignment="Bottom" 
+                    HorizontalAlignment="Right"
+                    Content="关闭" 
+                    FontFamily="Microsoft YaHei UI"
+                    Width="100" 
+                    Click="Button_Click"
+                    Background="{DynamicResource RollCallHistoryWindowButtonBackground}"
+                    Foreground="{DynamicResource RollCallHistoryWindowButtonForeground}"
+                    BorderBrush="{DynamicResource RollCallHistoryWindowBorderBrush}"/>
+        </Grid>
     </Grid>
 </Window>
 

@@ -1,4 +1,5 @@
 ﻿using Ink_Canvas.Helpers;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using System;
 using System.Media;
 using System.Timers;
@@ -75,7 +76,7 @@ namespace Ink_Canvas
                         TextBlockSecond.Text = "00";
                         timer.Stop();
                         isTimerRunning = false;
-                        SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
+                        FontIconStart.Icon = SegoeFluentIcons.Play;
                         BtnStartCover.Visibility = Visibility.Visible;
                         var textForeground = Application.Current.FindResource("TimerWindowTextForeground") as SolidColorBrush;
                         if (textForeground != null)
@@ -264,12 +265,12 @@ namespace Ink_Canvas
             if (WindowState == WindowState.Normal)
             {
                 WindowState = WindowState.Maximized;
-                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.BackToWindow;
+                FontIconFullscreen.Icon = SegoeFluentIcons.BackToWindow;
             }
             else
             {
                 WindowState = WindowState.Normal;
-                SymbolIconFullscreen.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.FullScreen;
+                FontIconFullscreen.Icon = SegoeFluentIcons.FullScreen;
             }
         }
 
@@ -305,7 +306,7 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = textForeground3;
                 else
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
+                FontIconStart.Icon = SegoeFluentIcons.Play;
                 isTimerRunning = false;
                 timer.Stop();
                 isPaused = false;
@@ -362,7 +363,7 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = textForeground1;
                 else
                     TextBlockHour.Foreground = Brushes.Black;
-                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
+                FontIconStart.Icon = SegoeFluentIcons.Pause;
                 isPaused = false;
                 timer.Start();
                 UpdateStopTime();
@@ -378,7 +379,7 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = textForeground3;
                 else
                     TextBlockHour.Foreground = new SolidColorBrush(StringToColor("#FF5B5D5F"));
-                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Play;
+                FontIconStart.Icon = SegoeFluentIcons.Play;
                 BorderStopTime.Visibility = Visibility.Collapsed;
                 isPaused = true;
                 timer.Stop();
@@ -394,7 +395,7 @@ namespace Ink_Canvas
                     TextBlockHour.Foreground = textForeground2;
                 else
                     TextBlockHour.Foreground = Brushes.Black;
-                SymbolIconStart.Symbol = iNKORE.UI.WPF.Modern.Controls.Symbol.Pause;
+                FontIconStart.Icon = SegoeFluentIcons.Pause;
                 BtnResetCover.Visibility = Visibility.Collapsed;
 
                 if (totalSeconds <= 10)

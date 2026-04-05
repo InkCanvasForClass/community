@@ -1319,11 +1319,13 @@ namespace Ink_Canvas
             BtnWhiteBoardSwitchPrevious.IsEnabled = CurrentWhiteboardIndex != 1;
             BorderInkReplayToolBox.Visibility = Visibility.Collapsed;
 
-            // 提前加载IA库，优化第一笔等待时间
-            if (Settings.InkToShape.IsInkToShapeEnabled && !Environment.Is64BitProcess)
+            // 提前加载识别后端，优化第一笔等待时间
+            if (ShapeRecognitionRouter.ShouldRunShapeRecognition(
+                    Settings.InkToShape.IsInkToShapeEnabled,
+                    ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine)))
             {
-                var strokeEmpty = new StrokeCollection();
-                InkRecognizeHelper.RecognizeShape(strokeEmpty);
+                InkRecognizeHelper.WarmupShapeRecognition(
+                    ShapeRecognitionRouter.FromSettingsInt(Settings.InkToShape.ShapeRecognitionEngine));
             }
 
             SystemEvents.DisplaySettingsChanged += SystemEventsOnDisplaySettingsChanged;
@@ -1331,6 +1333,7 @@ namespace Ink_Canvas
             if (Settings.Startup.IsFoldAtStartup && !App.StartWithBoardMode && !App.StartWithShowMode)
             {
                 FoldFloatingBar_MouseUp(new object(), null);
+                ScheduleStartupFoldAbsenceVerification();
             }
 
             // 恢复崩溃后操作设置
@@ -1860,8 +1863,7 @@ namespace Ink_Canvas
                 if (AvailableLatestVersion != null && Settings.Startup.IsAutoUpdate)
                 {
                     // 检查更新文件是否已下载
-                    string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
-                    string statusFilePath = Path.Combine(updatesFolderPath, $"DownloadV{AvailableLatestVersion}Status.txt");
+                    string statusFilePath = AutoUpdateHelper.GetUpdateDownloadStatusFilePath(AvailableLatestVersion);
 
                     if (File.Exists(statusFilePath) && File.ReadAllText(statusFilePath).Trim().ToLower() == "true")
                     {
@@ -2263,6 +2265,7 @@ namespace Ink_Canvas
                     SetFloatingBarHighlightPosition("select");
                 }
             }
+
         }
 
         // 手写笔输入
@@ -3535,7 +3538,6 @@ namespace Ink_Canvas
                     ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
                 }
 
-                LogHelper.WriteLogToFile($"墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -3587,7 +3589,6 @@ namespace Ink_Canvas
                     ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
                 }
 
-                LogHelper.WriteLogToFile($"批注子面板中墨迹渐隐功能已{(Settings.Canvas.EnableInkFade ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {

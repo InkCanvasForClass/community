@@ -239,6 +239,13 @@
   <data name="Gesture_PalmHint" xml:space="preserve"><value># 低敏感度：需要更大的触摸面积和更多触摸点，减少误判；高敏感度：更容易触发手掌擦，但可能误判手指。</value></data>
   <data name="InkRecog_Title" xml:space="preserve"><value>墨迹纠正</value></data>
   <data name="InkRecog_EnableInkRecognition" xml:space="preserve"><value>启用墨迹识别</value></data>
+  <data name="InkRecog_ShapeEngine" xml:space="preserve"><value>识别引擎</value></data>
+  <data name="InkRecog_ShapeEngineHint" xml:space="preserve"><value> 自动：64 位进程使用 WinRT（Windows 10+），32 位使用 IACore。可强制指定 IACore 或 WinRT。</value></data>
+  <data name="InkRecog_ShapeEngineAuto" xml:space="preserve"><value>自动</value></data>
+  <data name="InkRecog_ShapeEngineIACore" xml:space="preserve"><value>IACore</value></data>
+  <data name="InkRecog_ShapeEngineWinRT" xml:space="preserve"><value>WinRT</value></data>
+  <data name="InkRecog_HandwritingBeautify" xml:space="preserve"><value>WinRT 识别转手写体字形</value></data>
+  <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve"><value># 开启后，调用墨迹纠正 API 时：先 WinRT 识别手写词，再将识别成功的文字用手写风格字体（默认 Ink Free / 楷体 等，可在设置 JSON 的 handwritingCorrectionFontFamily 调整）转成字形轮廓墨迹替换原笔画。需 64 位与 WinRT。</value></data>
   <data name="InkRecog_BlockRectFakePressure" xml:space="preserve"><value>阻止矫正后的矩形带有模拟压感值</value></data>
   <data name="InkRecog_BlockTriFakePressure" xml:space="preserve"><value>阻止矫正后的三角形带有模拟压感值</value></data>
   <data name="InkRecog_FixTriangle" xml:space="preserve"><value>矫正手绘三角形</value></data>
@@ -369,6 +376,10 @@
   <data name="Update_Release" xml:space="preserve"><value>稳定版 (Release)</value></data>
   <data name="Update_Preview" xml:space="preserve"><value>预览版 (Preview)</value></data>
   <data name="Update_Beta" xml:space="preserve"><value>测试版 (Beta)</value></data>
+  <data name="Startup_UpdatePackageArchitecture" xml:space="preserve"><value>软件架构</value></data>
+  <data name="Update_PackageArch_X86" xml:space="preserve"><value>32 位 (x86)</value></data>
+  <data name="Update_PackageArch_X64" xml:space="preserve"><value>64 位 (x64)</value></data>
+  <data name="Startup_UpdatePackageArchitectureHint" xml:space="preserve"><value># 选择要下载架构</value></data>
   <data name="Startup_UpdateChannelHint" xml:space="preserve"><value># 稳定版提供可靠更新，预览版提供新功能体验同时拥有相较Beta版更强的稳定性，测试版提供新功能抢先体验</value></data>
   <data name="Btn_ManualUpdate" xml:space="preserve"><value>手动更新</value></data>
   <data name="Startup_ManualUpdateHint" xml:space="preserve"><value># 点击后立即检查并下载最新版本</value></data>

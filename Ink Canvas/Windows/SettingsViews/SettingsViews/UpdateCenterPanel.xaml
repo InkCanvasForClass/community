@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews"
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
              mc:Ignorable="d" 
              d:DesignHeight="950" d:DesignWidth="640">
@@ -26,7 +27,7 @@
         </ResourceDictionary>
     </UserControl.Resources>
     <Grid>
-        <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="UpdateCenterScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2">
+        <ScrollViewer ScrollChanged="ScrollViewerEx_ScrollChanged" IsManipulationEnabled="True" Name="UpdateCenterScrollViewerEx" IsDeferredScrollingEnabled="True" VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" IsTabStop="False" TabIndex="-1" Margin="0,0,2,2" PanningMode="VerticalOnly">
             <StackPanel Margin="60,12,60,24">
                 <TextBlock Foreground="#2e3436" FontSize="28" FontWeight="Bold" Text="更新中心" Margin="0,0,0,24"/>
                 
@@ -70,7 +71,7 @@
                                     <StackPanel>
                                         <TextBlock Foreground="#2e3436" FontSize="16" FontWeight="SemiBold" Text="可用更新" Margin="0,0,0,8"/>
                                         <TextBlock Name="LatestVersionText" Foreground="#878787" FontSize="14" Text="" TextWrapping="Wrap" Margin="0,0,0,16"/>
-                                        <ui:SimpleStackPanel Orientation="Vertical" Spacing="12">
+                                        <ikw:SimpleStackPanel Orientation="Vertical" Spacing="12">
                                             <Button Name="UpdateNowButton" Content="立即下载并安装" HorizontalAlignment="Left" Padding="20,10" FontSize="14" FontWeight="SemiBold" Cursor="Hand" Click="UpdateNowButton_Click" Background="#2563eb" Foreground="White" BorderThickness="0" Height="40" MinWidth="200">
                                                 <Button.Template>
                                                     <ControlTemplate TargetType="Button">
@@ -142,7 +143,7 @@
                                                     </ControlTemplate>
                                                 </Button.Template>
                                             </Button>
-                                        </ui:SimpleStackPanel>
+                                        </ikw:SimpleStackPanel>
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -155,6 +156,25 @@
                                     </ScrollViewer>
                                 </StackPanel>
                             </Border>
+                            
+                            <Grid Height="54" Margin="0,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Orientation="Vertical" Margin="0,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Grid.Column="0" MaxWidth="350">
+                                    <TextBlock Foreground="#2e3436" FontSize="14.5" Text="软件架构" HorizontalAlignment="Left"/>
+                                    <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="选择更新架构" HorizontalAlignment="Left" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <WrapPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,15,0" Grid.Column="1">
+                                    <Border x:Name="UpdateArchX86Border" Padding="13,7" CornerRadius="8" Background="#e1e1e1" Cursor="Hand" Tag="UpdateArch_X86" Margin="0,0,8,8" MouseLeftButtonDown="OptionButton_Click">
+                                        <TextBlock Foreground="#2e3436" FontSize="14" FontWeight="Bold" Text="32 位 (x86)"/>
+                                    </Border>
+                                    <Border x:Name="UpdateArchX64Border" Padding="13,7" CornerRadius="8" Cursor="Hand" Tag="UpdateArch_X64" Margin="0,0,8,8" MouseLeftButtonDown="OptionButton_Click">
+                                        <TextBlock Foreground="#2e3436" FontSize="14" Text="64 位 (x64)"/>
+                                    </Border>
+                                </WrapPanel>
+                            </Grid>
                             
                             <Grid Height="54">
                                 <Grid.ColumnDefinitions>

@@ -27,6 +27,87 @@ namespace Ink_Canvas.Helpers
         private static readonly string updatesFolderPath = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "AutoUpdate");
         private static string statusFilePath;
 
+        public static bool IsX64UpdatePackageSelected()
+        {
+            try
+            {
+                return MainWindow.Settings?.Startup?.UpdatePackageArchitecture == UpdatePackageArchitecture.X64;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static string NormalizeVersionForUpdate(string version)
+        {
+            if (string.IsNullOrWhiteSpace(version)) return version;
+            return version.Trim().TrimStart('v', 'V');
+        }
+
+        public static string AppendX64SuffixBeforeZipExtension(string url)
+        {
+            if (string.IsNullOrEmpty(url) || !IsX64UpdatePackageSelected()) return url;
+            int query = url.IndexOf('?');
+            string pathPart = query >= 0 ? url.Substring(0, query) : url;
+            string qs = query >= 0 ? url.Substring(query) : "";
+            const string ext = ".zip";
+            int idx = pathPart.LastIndexOf(ext, StringComparison.OrdinalIgnoreCase);
+            if (idx < 0) return url;
+            var basePart = pathPart.Substring(0, idx);
+            if (basePart.EndsWith("-x64", StringComparison.OrdinalIgnoreCase)) return url;
+            return basePart + "-x64" + ext + qs;
+        }
+
+        public static string GetUpdateZipFileName(string version)
+        {
+            var v = NormalizeVersionForUpdate(version);
+            return IsX64UpdatePackageSelected()
+                ? $"InkCanvasForClass.CE.{v}-x64.zip"
+                : $"InkCanvasForClass.CE.{v}.zip";
+        }
+
+        public static string GetUpdateDownloadStatusFilePath(string version)
+        {
+            var v = NormalizeVersionForUpdate(version);
+            string name = IsX64UpdatePackageSelected()
+                ? $"DownloadV{v}_x64Status.txt"
+                : $"DownloadV{v}Status.txt";
+            return Path.Combine(updatesFolderPath, name);
+        }
+
+        public static string GetLocalUpdateZipFilePath(string version)
+        {
+            return Path.Combine(updatesFolderPath, GetUpdateZipFileName(version));
+        }
+
+        private static string PickBrowserDownloadUrlFromAssets(JToken assets)
+        {
+            if (assets == null || !assets.Any()) return null;
+            bool wantX64 = IsX64UpdatePackageSelected();
+            string anyZip = null;
+            string x64Zip = null;
+            string nonX64Zip = null;
+            foreach (JToken a in assets)
+            {
+                string name = a["name"]?.ToString();
+                string url = a["browser_download_url"]?.ToString();
+                if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(url)) continue;
+                if (!name.EndsWith(".zip", StringComparison.OrdinalIgnoreCase)) continue;
+                if (anyZip == null) anyZip = url;
+                if (name.EndsWith("-x64.zip", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (x64Zip == null) x64Zip = url;
+                }
+                else
+                {
+                    if (nonX64Zip == null) nonX64Zip = url;
+                }
+            }
+            if (wantX64)
+                return x64Zip ?? anyZip;
+            return nonX64Zip ?? anyZip;
+        }
 
         // 线路组结构体（包含版本、下载、日志地址）
         public class UpdateLineGroup
@@ -317,6 +398,7 @@ namespace Ink_Canvas.Helpers
                         if (!string.IsNullOrEmpty(group.DownloadUrlFormat))
                         {
                             testUrl = group.DownloadUrlFormat.Replace("{0}", "test");
+                            testUrl = AppendX64SuffixBeforeZipExtension(testUrl);
                         }
                     }
                     catch
@@ -608,7 +690,7 @@ namespace Ink_Canvas.Helpers
                         if (version == targetVersion || version == $"v{targetVersion}" || version == $"V{targetVersion}")
                         {
                             string releaseNotes = release["body"]?.ToString();
-                            string downloadUrl = release["assets"]?.First?["browser_download_url"]?.ToString();
+                            string downloadUrl = PickBrowserDownloadUrlFromAssets(release["assets"]);
 
                             // 解析发布时间
                             DateTime? releaseTime = null;
@@ -649,7 +731,7 @@ namespace Ink_Canvas.Helpers
                             var latestRelease = releases[0];
                             string version = latestRelease["tag_name"]?.ToString();
                             string releaseNotes = latestRelease["body"]?.ToString();
-                            string downloadUrl = latestRelease["assets"]?.First?["browser_download_url"]?.ToString();
+                            string downloadUrl = PickBrowserDownloadUrlFromAssets(latestRelease["assets"]);
 
                             DateTime? releaseTime = null;
                             if (latestRelease["published_at"] != null && DateTime.TryParse(latestRelease["published_at"].ToString(), out DateTime parsedTime))
@@ -675,7 +757,7 @@ namespace Ink_Canvas.Helpers
                         var json = JObject.Parse(response);
                         string version = json["tag_name"]?.ToString();
                         string releaseNotes = json["body"]?.ToString();
-                        string downloadUrl = json["assets"]?.First?["browser_download_url"]?.ToString();
+                        string downloadUrl = PickBrowserDownloadUrlFromAssets(json["assets"]);
 
                         DateTime? releaseTime = null;
                         if (json["published_at"] != null && DateTime.TryParse(json["published_at"].ToString(), out DateTime parsedTime))
@@ -865,7 +947,8 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                statusFilePath = Path.Combine(updatesFolderPath, $"DownloadV{version}Status.txt");
+                version = NormalizeVersionForUpdate(version);
+                statusFilePath = GetUpdateDownloadStatusFilePath(version);
 
                 if (File.Exists(statusFilePath) && File.ReadAllText(statusFilePath).Trim().ToLower() == "true")
                 {
@@ -881,7 +964,7 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"AutoUpdate | 创建更新目录: {updatesFolderPath}");
                 }
 
-                string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
+                string zipFilePath = GetLocalUpdateZipFilePath(version);
                 LogHelper.WriteLogToFile($"AutoUpdate | 目标文件路径: {zipFilePath}");
 
                 SaveDownloadStatus(false);
@@ -899,6 +982,7 @@ namespace Ink_Canvas.Helpers
                 foreach (var group in groups)
                 {
                     string url = string.Format(group.DownloadUrlFormat, version);
+                    url = AppendX64SuffixBeforeZipExtension(url);
                     // 智教联盟需要先获取真实下载地址
                     if (group.GroupName == "智教联盟")
                     {
@@ -1352,7 +1436,7 @@ namespace Ink_Canvas.Helpers
         /// </summary>
         /// <remarks>
         /// 该方法会临时将 App.IsUpdateInstalling 置为 true、尝试关闭进程保护（并在结束时还原）、在必要时备份当前设置、解压更新 ZIP、启动解压后的新可执行文件（以更新模式传递旧进程 ID、解压路径和目标路径等参数），并在新进程启动后关闭当前进程。方法会记录日志并在遇到错误时安全退出相应步骤，但不会抛出异常给调用方以外的上下文。</remarks>
-        /// <param name="version">要安装的版本号，用于定位更新包文件名（例如 InkCanvasForClass.CE.{version}.zip）。</param>
+        /// <param name="version">要安装的版本号，用于定位更新包文件名（与 <see cref="GetLocalUpdateZipFilePath"/> 一致；选择 x64 包时为 InkCanvasForClass.CE.{version}-x64.zip）。</param>
         /// <param name="isInSilence">指示是否以静默模式启动新版本（影响传递给新进程的参数和可能的用户提示）。</param>
         public static void InstallNewVersionApp(string version, bool isInSilence)
         {
@@ -1403,7 +1487,7 @@ namespace Ink_Canvas.Helpers
                     LogHelper.WriteLogToFile($"更新前自动备份设置时出错: {ex.Message}", LogHelper.LogType.Error);
                 }
 
-                string zipFilePath = Path.Combine(updatesFolderPath, $"InkCanvasForClass.CE.{version}.zip");
+                string zipFilePath = GetLocalUpdateZipFilePath(version);
                 LogHelper.WriteLogToFile($"AutoUpdate | 检查ZIP文件: {zipFilePath}");
 
                 if (!File.Exists(zipFilePath))
@@ -2170,7 +2254,7 @@ namespace Ink_Canvas.Helpers
                     {
                         string version = item["tag_name"]?.ToString();
                         string releaseNotes = item["body"]?.ToString();
-                        string downloadUrl = item["assets"]?.First?["browser_download_url"]?.ToString();
+                        string downloadUrl = PickBrowserDownloadUrlFromAssets(item["assets"]);
                         if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(downloadUrl))
                             result.Add((version, downloadUrl, releaseNotes));
                     }

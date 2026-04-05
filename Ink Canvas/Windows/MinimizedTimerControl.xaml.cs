@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace Ink_Canvas.Windows
 {
@@ -17,10 +18,15 @@ namespace Ink_Canvas.Windows
     {
         private TimerControl parentControl;
         private System.Timers.Timer updateTimer;
+        private readonly Dispatcher uiDispatcher;
 
         public MinimizedTimerControl()
         {
             InitializeComponent();
+
+            // capture the UI dispatcher early so timer callbacks can use it even when
+            // Application.Current may become null during shutdown
+            uiDispatcher = this.Dispatcher;
 
             updateTimer = new System.Timers.Timer(100);
             updateTimer.Elapsed += UpdateTimer_Elapsed;
@@ -46,18 +52,35 @@ namespace Ink_Canvas.Windows
 
             if (updateTimer != null)
             {
-                updateTimer.Stop();
-                updateTimer.Dispose();
+                // 先取消事件订阅，防止在停止/释放后仍有回调被触发
+                updateTimer.Elapsed -= UpdateTimer_Elapsed;
+                try
+                {
+                    updateTimer.Stop();
+                }
+                catch { }
+                try
+                {
+                    updateTimer.Dispose();
+                }
+                catch { }
+                updateTimer = null;
             }
         }
 
         private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
             // 当主题变化时，重新应用主题
-            Application.Current.Dispatcher.Invoke(() =>
+            var dispatcher = uiDispatcher ?? Application.Current?.Dispatcher;
+            if (dispatcher == null) return;
+            if (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished) return;
+
+            // 使用异步调用，避免在关闭过程中同步等待导致异常
+            try
             {
-                RefreshTheme();
-            });
+                dispatcher.InvokeAsync(() => RefreshTheme(), DispatcherPriority.Normal);
+            }
+            catch { }
         }
 
         /// <summary>
@@ -99,26 +122,35 @@ namespace Ink_Canvas.Windows
         {
             if (parentControl != null)
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                var dispatcher = uiDispatcher ?? Application.Current?.Dispatcher;
+                if (dispatcher == null) return;
+                if (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished) return;
+
+                // 使用异步派发，避免在 Dispatcher 关闭时同步等待导致 TaskCanceledException
+                try
                 {
-                    if (this.Visibility != Visibility.Visible)
+                    dispatcher.InvokeAsync(() =>
                     {
-                        return;
-                    }
-
-                    if (ShouldHide())
-                    {
-                        this.Visibility = Visibility.Collapsed;
-                        var parent = this.Parent as FrameworkElement;
-                        if (parent != null)
+                        if (this.Visibility != Visibility.Visible)
                         {
-                            parent.Visibility = Visibility.Collapsed;
+                            return;
                         }
-                        return;
-                    }
 
-                    UpdateTimeDisplay();
-                });
+                        if (ShouldHide())
+                        {
+                            this.Visibility = Visibility.Collapsed;
+                            var parent = this.Parent as FrameworkElement;
+                            if (parent != null)
+                            {
+                                parent.Visibility = Visibility.Collapsed;
+                            }
+                            return;
+                        }
+
+                        UpdateTimeDisplay();
+                    }, DispatcherPriority.Normal);
+                }
+                catch { }
             }
         }
 
@@ -214,10 +246,15 @@ namespace Ink_Canvas.Windows
 
         private void ParentControl_TimerCompleted(object sender, EventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            var dispatcher = uiDispatcher ?? Application.Current?.Dispatcher;
+            if (dispatcher == null) return;
+            if (dispatcher.HasShutdownStarted || dispatcher.HasShutdownFinished) return;
+
+            try
             {
-                Visibility = Visibility.Collapsed;
-            });
+                dispatcher.InvokeAsync(() => { Visibility = Visibility.Collapsed; }, DispatcherPriority.Normal);
+            }
+            catch { }
         }
 
         private void SetDigitDisplay(string pathName, int digit, bool isRed = false)
@@ -391,7 +428,7 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                var mainWindow = Application.Current.MainWindow as MainWindow;
+                var mainWindow = Application.Current?.MainWindow as MainWindow;
                 if (mainWindow != null)
                 {
                     var currentModeField = mainWindow.GetType().GetField("currentMode",
