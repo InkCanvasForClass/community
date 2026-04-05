@@ -271,7 +271,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var pptApp = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("PowerPoint.Application");
+                var pptApp = (Microsoft.Office.Interop.PowerPoint.Application)OleActiveObject.GetActiveObject("PowerPoint.Application");
 
                 if (pptApp != null && Marshal.IsComObject(pptApp))
                 {
@@ -298,7 +298,7 @@ namespace Ink_Canvas.Helpers
         {
             try
             {
-                var wpsApp = (Microsoft.Office.Interop.PowerPoint.Application)Marshal.GetActiveObject("kwpp.Application");
+                var wpsApp = (Microsoft.Office.Interop.PowerPoint.Application)OleActiveObject.GetActiveObject("kwpp.Application");
 
                 if (wpsApp != null && Marshal.IsComObject(wpsApp))
                 {
