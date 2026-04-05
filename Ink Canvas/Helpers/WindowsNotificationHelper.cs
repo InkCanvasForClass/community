@@ -1,4 +1,4 @@
-using Hardcodet.Wpf.TaskbarNotification;
+using H.NotifyIcon;
 using Microsoft.Toolkit.Uwp.Notifications;
 using System;
 using System.Windows;
@@ -40,10 +40,9 @@ namespace Ink_Canvas.Helpers
 
                     taskbar.Visibility = Visibility.Visible;
 
-                    taskbar.ShowBalloonTip(
+                    taskbar.ShowNotification(
                         "InkCanvasForClass CE",
-                        $"发现新版本！：{version}",
-                        BalloonIcon.Info);
+                        $"发现新版本！：{version}");
                 }
                 catch
                 {

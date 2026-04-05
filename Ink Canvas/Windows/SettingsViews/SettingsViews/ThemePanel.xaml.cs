@@ -1,4 +1,4 @@
-using Hardcodet.Wpf.TaskbarNotification;
+using H.NotifyIcon;
 using iNKORE.UI.WPF.Helpers;
 using System;
 using System.Collections.Generic;
