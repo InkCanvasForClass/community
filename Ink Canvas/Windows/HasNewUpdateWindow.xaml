@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Ink_Canvas"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         xmlns:mdxam="clr-namespace:MdXaml;assembly=MdXaml"
         mc:Ignorable="d"
         ui:WindowHelper.UseModernWindowStyle="False"
@@ -163,26 +164,26 @@
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Margin="0,0,0,0" Background="Transparent">
-            <ui:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0">
+            <ikw:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0">
             <!-- 统一的主容器 -->
             <Border Background="{DynamicResource SettingsPageBackground}" CornerRadius="8" Margin="0,0,0,0" 
                     BorderThickness="1" BorderBrush="{DynamicResource SettingsPageBorderBrush}" Padding="0">
                 
-                <ui:SimpleStackPanel Spacing="0">
+                <ikw:SimpleStackPanel Spacing="0">
                     <!-- 现代化标题栏 -->
                     <Border Background="{StaticResource HeaderGradient}" CornerRadius="8,8,0,0" Margin="0,0,0,0"
                             MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                         <Grid>
                             <!-- 标题栏内容 -->
-                            <ui:SimpleStackPanel Orientation="Horizontal" Margin="32,24,80,24" Spacing="16">
+                            <ikw:SimpleStackPanel Orientation="Horizontal" Margin="32,24,80,24" Spacing="16">
                                 <Border Background="White" CornerRadius="16" Padding="16" Margin="0,0,0,0">
                                     <Image Source="/Resources/Icons-fluent/party.png" Width="24" Height="24"/>
                                 </Border>
-                                <ui:SimpleStackPanel Orientation="Vertical" Spacing="4">
+                                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4">
                                     <TextBlock Text="新版本发布" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource UpdateWindowTextPrimaryBrush}" TextAlignment="Left"/>
                                     <TextBlock Text="InkCanvasForClass CE 为您带来全新体验" FontSize="14" TextAlignment="Left" Foreground="{DynamicResource UpdateWindowTextSecondaryBrush}"/>
-                        </ui:SimpleStackPanel>
-                    </ui:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
+                    </ikw:SimpleStackPanel>
 
                             <!-- 自定义关闭按钮 -->
                             <Button x:Name="CloseButton" 
@@ -231,16 +232,16 @@
 
                     <!-- 内容标题 -->
                     <Border Background="{DynamicResource UpdateWindowCardBackgroundBrush}" Padding="24,20,24,16">
-                        <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12">
+                        <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12">
                             <Border Background="{DynamicResource UpdateWindowPrimaryBrush}" CornerRadius="8" Padding="8">
                                 <TextBlock Text="📝" FontSize="16" Foreground="White" 
                                            HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
-                            <ui:SimpleStackPanel Orientation="Vertical" Spacing="2">
+                            <ikw:SimpleStackPanel Orientation="Vertical" Spacing="2">
                                 <TextBlock Text="更新内容" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource UpdateWindowTextPrimaryBrush}"/>
                                 <TextBlock Text="查看本次更新的详细内容" FontSize="14" Foreground="{DynamicResource UpdateWindowTextSecondaryBrush}"/>
-                            </ui:SimpleStackPanel>
-                        </ui:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </ikw:SimpleStackPanel>
                     </Border>
                     
                     <!-- 内容区域 -->
@@ -262,37 +263,37 @@
                         8. 带来了基于FitToCurve的笔迹平滑，基于贝塞尔曲线平滑，让墨迹线条更加优美好看。
                     </mdxam:MarkdownScrollViewer>
                 </ui:ScrollViewerEx>
-                </ui:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
             </Border>
             
                     <!-- 现代化版本信息 -->
                     <Border Background="{DynamicResource UpdateWindowCardBackgroundBrush}" Margin="0,0,0,0" Padding="24,20">
-                <ui:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24">
-                    <ui:SimpleStackPanel Orientation="Vertical" Spacing="4" HorizontalAlignment="Center">
+                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="24">
+                    <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4" HorizontalAlignment="Center">
                         <TextBlock Text="版本信息" FontSize="14" FontWeight="Medium" Foreground="{DynamicResource UpdateWindowTextSecondaryBrush}"/>
                         <TextBlock x:Name="updateVersionInfo" Text="本次更新： 4.9.1 -> 5.9.1" 
                                    FontWeight="SemiBold" FontSize="16" Foreground="{DynamicResource UpdateWindowTextPrimaryBrush}" TextAlignment="Center"/>
-                    </ui:SimpleStackPanel>
+                    </ikw:SimpleStackPanel>
                     <Border Width="1" Background="{DynamicResource SettingsPageBorderBrush}" Margin="0,8,0,8"/>
-                    <ui:SimpleStackPanel Orientation="Vertical" Spacing="4" HorizontalAlignment="Center">
+                    <ikw:SimpleStackPanel Orientation="Vertical" Spacing="4" HorizontalAlignment="Center">
                         <TextBlock Text="发布日期" FontSize="14" FontWeight="Medium" Foreground="{DynamicResource UpdateWindowTextSecondaryBrush}"/>
                         <TextBlock x:Name="updateDateInfo" Text="2024年8月4日发布更新" 
                                    FontSize="16" Foreground="{DynamicResource UpdateWindowTextPrimaryBrush}" TextAlignment="Center"/>
-                    </ui:SimpleStackPanel>
-                </ui:SimpleStackPanel>
+                    </ikw:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
             </Border>
             
                     <!-- 现代化按钮区域 -->
                     <Border Background="{DynamicResource UpdateWindowCardBackgroundBrush}" Margin="0,0,0,0" Padding="32,24" CornerRadius="0,0,8,8">
-                <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="16">
-                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                <ikw:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="16">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
                         <Border Background="{DynamicResource UpdateWindowPrimaryBrush}" CornerRadius="8" Padding="8">
                             <TextBlock Text="⚡" FontSize="16" Foreground="White" 
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="选择更新方式" FontWeight="SemiBold" FontSize="18" 
                                    Foreground="{DynamicResource UpdateWindowTextPrimaryBrush}" VerticalAlignment="Center"/>
-            </ui:SimpleStackPanel>
+            </ikw:SimpleStackPanel>
                         
                         <!-- 立即更新按钮 -->
                     <Button x:Name="UpdateNowButton" Content="立即下载并安装" 
@@ -312,21 +313,21 @@
                             Style="{StaticResource ModernTertiaryButton}"
                             Click="SkipVersionButton_Click"
                             ToolTip="跳过此版本更新" Visibility="Visible" IsEnabled="True"/>
-                    </ui:SimpleStackPanel>
+                    </ikw:SimpleStackPanel>
                                 </Border>
 
                     <!-- 现代化下载进度指示器 -->
                     <Border x:Name="DownloadProgressPanel" Background="{DynamicResource UpdateWindowCardBackgroundBrush}" 
                             Margin="0,0,0,0" Padding="32,24" Visibility="Collapsed">
-                <ui:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="16">
-                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
+                <ikw:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Center" Spacing="16">
+                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="12" HorizontalAlignment="Center">
                         <Border Background="#10b981" CornerRadius="8" Padding="8">
                             <TextBlock Text="📥" FontSize="16" Foreground="White" 
                                        HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <TextBlock Text="正在下载更新" FontWeight="SemiBold" FontSize="18" 
                                    Foreground="{DynamicResource UpdateWindowTextPrimaryBrush}" VerticalAlignment="Center"/>
-                    </ui:SimpleStackPanel>
+                    </ikw:SimpleStackPanel>
                     
                     <!-- 现代化进度条 -->
                     <Border Background="{DynamicResource SettingsPageBackground}" CornerRadius="6" Height="6" Width="400">
@@ -337,9 +338,9 @@
                     
                     <TextBlock x:Name="DownloadProgressText" Text="正在准备下载..." 
                                FontSize="14" Foreground="{DynamicResource UpdateWindowTextSecondaryBrush}" HorizontalAlignment="Center"/>
-                </ui:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
             </Border>
-            </ui:SimpleStackPanel>
+            </ikw:SimpleStackPanel>
         </Grid>
     </ScrollViewer>
 </Window>

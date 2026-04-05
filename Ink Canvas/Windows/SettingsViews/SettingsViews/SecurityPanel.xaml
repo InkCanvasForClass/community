@@ -29,7 +29,8 @@
                   HorizontalScrollBarVisibility="Disabled"
                   IsTabStop="False"
                   TabIndex="-1"
-                  Margin="0,0,2,2">
+                  Margin="0,0,2,2"
+                  PanningMode="VerticalOnly">
         <StackPanel Margin="60,12,60,24">
             <Border BorderBrush="#e6e6e6" BorderThickness="1.25,1.25,1.25,4" CornerRadius="8">
                 <StackPanel Orientation="Vertical" Margin="18,18,18,18">
@@ -116,6 +117,20 @@
                             </Border>
                         </Border>
                     </Grid>
+                    <Border Height="1" Background="#ebebeb" Margin="0,8,0,8"/>
+                    <Grid Height="54">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Center" HorizontalAlignment="Left">
+                            <TextBlock Foreground="#2e3436" FontSize="14.5" Text="修改/清空点名名单需要密码" HorizontalAlignment="Left"/>
+                            <TextBlock Foreground="#9a9996" FontSize="11" Margin="0,3.5,0,0" Text="在修改名单或清空名单前进行密码验证" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                        <Border x:Name="ToggleSwitchRequirePasswordOnModifyOrClearNameList" Style="{StaticResource ToggleSwitchStyle}" Background="#e1e1e1" Tag="RequirePasswordOnModifyOrClearNameList" MouseLeftButtonDown="ToggleSwitch_Click">
+                            <Border Width="19" Height="19" Background="White" CornerRadius="10" HorizontalAlignment="Left" VerticalAlignment="Center">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="4" Direction="-45" Color="Black" Opacity="0.3" ShadowDepth="0"/>
+                                </Border.Effect>
+                            </Border>
+                        </Border>
+                    </Grid>
                 </StackPanel>
             </Border>
 
@@ -144,4 +159,3 @@
         </StackPanel>
     </ScrollViewer>
 </local:SettingsPanelBase>
-

@@ -4,14 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         xmlns:local="clr-namespace:Ink_Canvas.Windows"
         mc:Ignorable="d"
-        WindowStyle="None"
         Title="插件管理" Height="550" Width="800"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
-        AllowsTransparency="True"
-        Background="#F9F9F9">
+        Topmost="True"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Height="48">
     
     <Window.Resources>
         <!-- 定义必要的资源 -->
@@ -28,22 +32,40 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         
-        <!-- 标题栏 -->
-        <Border Grid.Row="0" Background="{DynamicResource SystemAccentColorLight1}" Height="60" 
-                MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+        <!-- 自定义标题栏 -->
+        <Border x:Name="Border_TitleBarRoot"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}">
             <Grid>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
-                    <TextBlock Text="插件管理" FontSize="22" FontWeight="SemiBold" Foreground="White" VerticalAlignment="Center"/>
-                </StackPanel>
-                <Button x:Name="BtnClose" Content="&#xE8BB;" FontFamily="Segoe MDL2 Assets" 
-                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0"
-                        Background="Transparent" BorderThickness="0" FontSize="16" Foreground="White"
-                        Click="BtnClose_Click"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}" 
+                           VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold"/>
+
+                <!--Right Inset-->
+                <Rectangle Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}"
+                    Grid.Column="2"/>
+
+                <!--Right Buttons-->
+                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
+                    Orientation="Horizontal" Grid.Column="1" Spacing="5">
+
+
+                </ikw:SimpleStackPanel>
             </Grid>
         </Border>
         
+        <!-- 内容区域背景 -->
+        <Border Grid.Row="1" Grid.RowSpan="2"
+                Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"/>
+        
         <!-- 主内容区 -->
-        <Grid Grid.Row="1" Margin="20">
+        <Grid Grid.Row="1" Margin="20,20,20,20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="250"/>
                 <ColumnDefinition Width="*"/>
@@ -140,7 +162,7 @@
         </Grid>
         
         <!-- 底部操作栏 -->
-        <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundChromeMediumBrush}" Height="60">
+        <Border Grid.Row="2" Background="{DynamicResource SystemControlBackgroundAltHighBrush}" Height="60">
             <Grid>
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="20,0,0,0">
                     <Button x:Name="BtnLoadPlugin" Content="加载本地插件" Click="BtnLoadPlugin_Click"

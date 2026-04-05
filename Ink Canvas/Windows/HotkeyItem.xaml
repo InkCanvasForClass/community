@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              mc:Ignorable="d" 
              d:DesignHeight="60" d:DesignWidth="600">
     
@@ -20,7 +21,7 @@
             </Grid.ColumnDefinitions>
 
             <!-- 左侧信息 -->
-            <ui:SimpleStackPanel Grid.Column="0" VerticalAlignment="Center">
+            <ikw:SimpleStackPanel Grid.Column="0" VerticalAlignment="Center">
                 <TextBlock x:Name="TitleTextBlock" 
                            Text="快捷键标题" 
                            FontSize="14" 
@@ -31,7 +32,7 @@
                            FontSize="12" 
                            Foreground="#666666" 
                            Margin="0,2,0,0"/>
-            </ui:SimpleStackPanel>
+            </ikw:SimpleStackPanel>
 
             <!-- 当前快捷键显示 -->
             <Border Grid.Column="1" 

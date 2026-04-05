@@ -264,7 +264,6 @@ namespace Ink_Canvas.Helpers
         public void Enable()
         {
             IsEnabled = true;
-            LogHelper.WriteLogToFile("墨迹渐隐功能已启用");
         }
 
         /// <summary>
@@ -273,7 +272,6 @@ namespace Ink_Canvas.Helpers
         public void Disable()
         {
             IsEnabled = false;
-            LogHelper.WriteLogToFile("墨迹渐隐功能已禁用");
         }
         #endregion
 

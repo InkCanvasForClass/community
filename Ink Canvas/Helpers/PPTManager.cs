@@ -66,7 +66,11 @@ namespace Ink_Canvas.Helpers
         private volatile bool _cachedIsInSlideShow;
         private readonly object _lockObject = new object();
         private bool _disposed;
-        private static bool IsPptBusyHResult(uint hr) => hr == 0x80010001 || hr == 0x8001010A; 
+        private static bool IsPptBusyHResult(uint hr) => hr == 0x80010001 || hr == 0x8001010A;
+        private static bool IsNoActivePresentationHResult(uint hr) => hr == 0x80048240;
+        private const int ConnectionCheckIntervalTicks = 3;
+        private const int SlideShowCheckIntervalTicks = 2;
+        private const int WpsCheckIntervalTicks = 6;
         #endregion
 
         #region Constructor & Initialization
@@ -77,7 +81,7 @@ namespace Ink_Canvas.Helpers
 
         private void InitializeConnectionTimer()
         {
-            _unifiedPptTimer = new Timer(500);
+            _unifiedPptTimer = new Timer(2000);
             _unifiedPptTimer.Elapsed += OnUnifiedPptTimerElapsed;
             _unifiedPptTimer.AutoReset = true;
         }
@@ -114,14 +118,20 @@ namespace Ink_Canvas.Helpers
             {
                 var tick = Interlocked.Increment(ref _monitorTickCount);
 
-                CheckAndConnectToPPT();
+                // 降低连接检查频率：默认每 3 个 tick（约 3 秒）才检查一次
+                if (tick % ConnectionCheckIntervalTicks == 0)
+                {
+                    CheckAndConnectToPPT();
+                }
 
                 if (IsConnected)
                 {
-                    if (tick % 2 == 0)
+                    // 放映状态检查频率降为每 2 个 tick（约 2 秒）
+                    if (tick % SlideShowCheckIntervalTicks == 0)
                         CheckSlideShowState();
 
-                    if (_isWpsMonitoringEnabled && tick % 4 == 0)
+                    // WPS 进程检查频率降为每 6 个 tick（约 6 秒）
+                    if (_isWpsMonitoringEnabled && tick % WpsCheckIntervalTicks == 0)
                         CheckWpsProcess();
                 }
 
@@ -141,13 +151,13 @@ namespace Ink_Canvas.Helpers
         private void CheckAndConnectToPPT()
         {
             if (_isModuleUnloading) return;
-            
+
             lock (_lockObject)
             {
                 try
                 {
                     if (_isModuleUnloading) return;
-                    
+
                     // 尝试连接到PowerPoint
                     var pptApp = TryConnectToPowerPoint();
                     if (pptApp == null && IsSupportWPS)
@@ -319,7 +329,7 @@ namespace Ink_Canvas.Helpers
                 _cachedIsConnected = true;
 
                 // 在主线程中注册事件，确保COM对象在正确的线程中
-                Application.Current?.Dispatcher?.Invoke(() =>
+                Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
                 {
                     try
                     {
@@ -334,9 +344,8 @@ namespace Ink_Canvas.Helpers
                     catch (Exception ex)
                     {
                         LogHelper.WriteLogToFile($"PPT事件注册失败: {ex}", LogHelper.LogType.Error);
-                        throw; // 重新抛出异常，让外层处理
                     }
-                }, DispatcherPriority.Normal, CancellationToken.None, TimeSpan.FromSeconds(2));
+                }), DispatcherPriority.Normal);
 
                 // 获取当前演示文稿信息
                 UpdateCurrentPresentationInfo();
@@ -377,7 +386,7 @@ namespace Ink_Canvas.Helpers
                         if (Marshal.IsComObject(PPTApplication))
                         {
                             // 尝试在主线程中取消事件注册
-                            Application.Current?.Dispatcher?.Invoke(() =>
+                            Application.Current?.Dispatcher?.BeginInvoke(new Action(() =>
                             {
                                 try
                                 {
@@ -401,7 +410,7 @@ namespace Ink_Canvas.Helpers
                                 {
                                     LogHelper.WriteLogToFile($"取消PPT事件注册时发生异常: {ex}", LogHelper.LogType.Warning);
                                 }
-                            }, DispatcherPriority.Normal, CancellationToken.None, TimeSpan.FromSeconds(1));
+                            }), DispatcherPriority.Normal);
                         }
                     }
                     catch (Exception ex)
@@ -412,7 +421,7 @@ namespace Ink_Canvas.Helpers
                     SafeReleaseComObject(CurrentSlide, "CurrentSlide");
                     SafeReleaseComObject(CurrentSlides, "CurrentSlides");
                     SafeReleaseComObject(CurrentPresentation, "CurrentPresentation");
-                    
+
                     if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
                     {
                         try
@@ -465,13 +474,13 @@ namespace Ink_Canvas.Helpers
                             _isModuleUnloading = false;
                             return;
                         }
-                        
+
                         GC.Collect();
                         GC.WaitForPendingFinalizers();
                         GC.Collect();
-                        
+
                         Thread.Sleep(1000);
-                        
+
                         _isModuleUnloading = false;
 
                         try
@@ -485,7 +494,7 @@ namespace Ink_Canvas.Helpers
                         {
                             LogHelper.WriteLogToFile("PPT联动模块重载时计时器已释放，跳过重启", LogHelper.LogType.Trace);
                         }
-                        
+
                         LogHelper.WriteLogToFile("PPT联动模块已重新加载", LogHelper.LogType.Trace);
                     }
                     catch (Exception ex)
@@ -546,7 +555,7 @@ namespace Ink_Canvas.Helpers
             object view = null;
             object selection = null;
             object slideRange = null;
-            
+
             try
             {
                 if (PPTApplication != null && Marshal.IsComObject(PPTApplication))
@@ -596,7 +605,7 @@ namespace Ink_Canvas.Helpers
                                             if (view != null)
                                             {
                                                 dynamic viewObj = view;
-                                            CurrentSlide = viewObj.Slide as Slide;
+                                                CurrentSlide = viewObj.Slide as Slide;
                                             }
                                         }
                                     }
@@ -623,7 +632,7 @@ namespace Ink_Canvas.Helpers
                                             }
                                         }
                                     }
-                                    
+
                                     if (CurrentSlide == null && SlidesCount > 0)
                                     {
                                         CurrentSlide = CurrentSlides[1];
@@ -633,7 +642,7 @@ namespace Ink_Canvas.Helpers
                             catch (COMException comEx)
                             {
                                 var hr = (uint)comEx.HResult;
-                                if (hr != 0x8001010E && hr != 0x80004005)
+                                if (hr != 0x8001010E && hr != 0x80004005 && !IsNoActivePresentationHResult(hr))
                                 {
                                     LogHelper.WriteLogToFile($"获取当前幻灯片失败: {comEx.Message}", LogHelper.LogType.Warning);
                                 }
@@ -655,7 +664,7 @@ namespace Ink_Canvas.Helpers
                     catch (COMException comEx)
                     {
                         var hr = (uint)comEx.HResult;
-                        if (hr == 0x8001010E || hr == 0x80004005)
+                        if (hr == 0x8001010E || hr == 0x80004005 || hr == 0x800706B5 || IsNoActivePresentationHResult(hr))
                         {
                             CurrentPresentation = null;
                             CurrentSlides = null;
@@ -1067,7 +1076,7 @@ namespace Ink_Canvas.Helpers
                     catch (COMException comEx)
                     {
                         var hr = (uint)comEx.HResult;
-                        if (hr == 0x80048240 || IsPptBusyHResult(hr))
+                        if (IsNoActivePresentationHResult(hr) || IsPptBusyHResult(hr))
                             return null;
                         throw;
                     }
@@ -1085,7 +1094,7 @@ namespace Ink_Canvas.Helpers
                 var hr = (uint)comEx.HResult;
                 if (!IsPptBusyHResult(hr) && (hr == 0x8001010E || hr == 0x80004005))
                     DisconnectFromPPT();
-                if (!IsPptBusyHResult(hr))
+                if (!IsPptBusyHResult(hr) && !IsNoActivePresentationHResult(hr))
                     LogHelper.WriteLogToFile($"获取当前活跃演示文稿失败: {comEx.Message}", LogHelper.LogType.Warning);
                 return CurrentPresentation;
             }

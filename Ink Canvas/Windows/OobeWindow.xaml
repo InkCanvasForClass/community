@@ -3,19 +3,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+        xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         mc:Ignorable="d"
         Title="欢迎使用 InkCanvasForClass"
-        Height="460"
-        Width="780"
+        Height="480"
+        Width="800"
+        MinHeight="300"
+        MinWidth="400"
         WindowStartupLocation="CenterScreen"
-        ResizeMode="NoResize"
-        ShowInTaskbar="False"
+        ResizeMode="CanResize"
+        Topmost="True"
         Background="{DynamicResource SettingsPageBackground}"
-        Loaded="OobeWindow_OnLoaded">
+        Loaded="OobeWindow_OnLoaded"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Height="48">
 
     <Window.Resources>
         <Style x:Key="OobeSecondaryButtonStyle" TargetType="Button">
-            <Setter Property="Background" Value="{DynamicResource SettingsPageBackground}" />
+            <Setter Property="Background" Value="#f8f8f8" />
             <Setter Property="Foreground" Value="{DynamicResource SettingsPageForeground}" />
             <Setter Property="BorderBrush" Value="{DynamicResource SettingsPageBorderBrush}" />
             <Setter Property="BorderThickness" Value="1" />
@@ -23,530 +32,597 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
                                 CornerRadius="4">
                             <ContentPresenter HorizontalAlignment="Center"
                                               VerticalAlignment="Center" />
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#d8d8d8" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#e8e8e8" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
 
         <Style x:Key="OobePrimaryButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource OobeSecondaryButtonStyle}">
-            <Setter Property="Background" Value="{DynamicResource HistoryWindowPrimaryBrush}" />
-            <Setter Property="BorderBrush" Value="{DynamicResource HistoryWindowPrimaryBrush}" />
+               TargetType="Button">
+            <Setter Property="Background" Value="#3b82f6" />
+            <Setter Property="BorderBrush" Value="#3b82f6" />
             <Setter Property="Foreground" Value="White" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="6,0" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#1d4ed8" />
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="#2563eb" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Window.Resources>
 
-    <Grid Margin="24">
+    <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        
+        <!-- 自定义标题栏 -->
+        <Border x:Name="Border_TitleBarRoot"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
 
-        <!-- Header -->
-        <StackPanel Orientation="Horizontal">
-            <StackPanel>
-                <TextBlock Text="欢迎使用 InkCanvasForClass"
-                           FontSize="22"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource SettingsPageForeground}" />
-                <TextBlock Text="先完成一次简单设置，让课堂体验更稳定、更安全。"
-                           Margin="0,6,0,0"
-                           FontSize="13"
-                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                           TextWrapping="Wrap" />
+                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}" 
+                           VerticalAlignment="Center" Margin="12,0,0,0" FontSize="12" FontWeight="SemiBold"/>
+
+                <!--Right Inset-->
+                <Rectangle Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}"
+                    Grid.Column="2"/>
+
+                <!--Right Buttons-->
+                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
+                    Orientation="Horizontal" Grid.Column="1" Spacing="5">
+                </ikw:SimpleStackPanel>
+            </Grid>
+        </Border>
+        
+        <!-- 主内容区 -->
+        <Grid Grid.Row="1" Margin="24,24,24,24" Background="{DynamicResource SettingsPageBackground}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Header -->
+            <StackPanel Orientation="Horizontal">
+                <StackPanel>
+                    <TextBlock Text="欢迎使用 InkCanvasForClass"
+                               FontSize="22"
+                               FontWeight="SemiBold"
+                               Foreground="{DynamicResource SettingsPageForeground}" />
+                    <TextBlock Text="先完成一次简单设置，让课堂体验更稳定、更安全。"
+                               Margin="0,6,0,0"
+                               FontSize="13"
+                               Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                               TextWrapping="Wrap" />
+                </StackPanel>
             </StackPanel>
-        </StackPanel>
 
-        <!-- Content -->
-        <ScrollViewer Grid.Row="1"
-                      Margin="0,24,0,24"
-                      VerticalScrollBarVisibility="Auto"
-                      HorizontalScrollBarVisibility="Disabled">
-            <Border Padding="18"
-                    Background="{DynamicResource SettingsPageBackground}"
-                    CornerRadius="10">
-            <StackPanel>
-                <!-- 步骤标题与说明 -->
-                <TextBlock x:Name="StepIndicatorText"
+            <!-- Content -->
+            <ScrollViewer Grid.Row="1"
+                          Margin="0,24,0,24"
+                          VerticalScrollBarVisibility="Auto"
+                          HorizontalScrollBarVisibility="Disabled"
+                          PanningMode="VerticalOnly"
+                          PanningRatio="1.0"
+                          IsManipulationEnabled="True">
+                <Border Padding="18"
+                        Background="{DynamicResource SettingsPageBackground}"
+                        CornerRadius="10">
+                    <StackPanel>
+                        <!-- 步骤标题与说明 -->
+                        <TextBlock x:Name="StepIndicatorText"
+                                   FontSize="12"
+                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                   Text="步骤 1 / 3" />
+                        <TextBlock x:Name="StepTitleText"
+                                   Margin="0,4,0,0"
+                                   FontSize="18"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                        <TextBlock x:Name="StepSubtitleText"
+                                   Margin="0,4,0,0"
+                                   FontSize="13"
+                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                   TextWrapping="Wrap" />
+
+                        <!-- 步骤内容容器 -->
+                        <Grid Margin="0,16,0,0">
+                            <!-- 步骤 1：启动（对应设置 → 启动、高级 → 遥测） -->
+                            <StackPanel x:Name="StepTelemetryPanel">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：启动、高级 → 遥测" />
+                                <TextBlock Text="匿名使用数据与隐私"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,16"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    <Run Text="InkCanvasForClass 可以选择上传" />
+                                    <Run Text="完全匿名" FontWeight="SemiBold" />
+                                    <Run Text="的使用统计，用于改进软件稳定性与性能。无论选择哪一项，课堂核心功能均可正常使用。" />
+                                </TextBlock>
+
+                                <StackPanel Margin="0,8,0,0">
+                                    <RadioButton x:Name="RadioTelemetryNone"
+                                                 Content="不上传任何匿名使用数据"
+                                                 FontSize="13"
+                                                 Foreground="{DynamicResource SettingsPageForeground}"
+                                                 IsChecked="True"
+                                                 Margin="0,0,0,6" />
+                                    <RadioButton x:Name="RadioTelemetryBasic"
+                                                 Content="仅上传基础匿名使用数据（崩溃信息、版本与系统信息等）"
+                                                 FontSize="13"
+                                                 Foreground="{DynamicResource SettingsPageForeground}"
+                                                 Margin="0,0,0,6" />
+                                    <RadioButton x:Name="RadioTelemetryExtended"
+                                                 Content="上传更多匿名使用数据（功能使用频率等，用于持续改进体验）"
+                                                 FontSize="13"
+                                                 Foreground="{DynamicResource SettingsPageForeground}" />
+                                </StackPanel>
+
+                                <TextBlock Margin="0,16,0,0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    隐私说明：本软件不会收集课堂内容、学生个人信息或可识别您的原始墨迹内容，详情可查看安装目录中的 privacy.txt。
+                                </TextBlock>
+
+                                <TextBlock Margin="0,12,0,0"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}">
+                                    启动与更新选项（对应 设置 → 启动）
+                                </TextBlock>
+                                <CheckBox x:Name="CheckBoxFoldAtStartup"
+                                          Margin="0,6,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启动时自动将浮动工具栏收纳到屏幕边缘" />
+                                <CheckBox x:Name="CheckBoxAutoUpdate"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="允许自动检查更新并在后台下载新版本" />
+                            </StackPanel>
+
+                            <!-- 步骤 2：画板和墨迹（对应设置 → 画板和墨迹） -->
+                            <StackPanel x:Name="StepCanvasPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：画板和墨迹" />
+                                <TextBlock Text="画板与墨迹"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    画笔光标、压感、墨迹显示等可在 设置 → 画板和墨迹 中修改。
+                                </TextBlock>
+                                <CheckBox x:Name="CheckBoxShowCursor"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="显示画笔光标（绘制时显示光标位置）" />
+                                <CheckBox x:Name="CheckBoxDisablePressure"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="屏蔽压感（所有笔画统一粗细）" />
+                                <CheckBox x:Name="CheckBoxHideStrokeWhenSelecting"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="退出画板模式时隐藏墨迹（进入 PPT 非批注模式不显示墨迹）" />
+                            </StackPanel>
+
+                            <!-- 步骤 3：手势操作（对应设置 → 手势操作） -->
+                            <StackPanel x:Name="StepGesturesPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：手势操作" />
+                                <TextBlock Text="手势操作"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    双指缩放、平移、旋转及手掌擦等可在 设置 → 手势操作 中修改。
+                                </TextBlock>
+                                <CheckBox x:Name="CheckBoxTwoFingerZoom"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用双指缩放" />
+                                <CheckBox x:Name="CheckBoxTwoFingerTranslate"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用双指平移" />
+                                <CheckBox x:Name="CheckBoxAutoSwitchTwoFingerGesture"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="进退白板模式时自动开关双指移动" />
+                                <CheckBox x:Name="CheckBoxEnablePalmEraser"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用手掌擦（多触点且触摸面积大时临时切换为橡皮）" />
+                            </StackPanel>
+
+                            <!-- 步骤 4：墨迹纠正（对应设置 → 墨迹纠正） -->
+                            <StackPanel x:Name="StepInkRecognitionPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：墨迹纠正" />
+                                <TextBlock Text="墨迹纠正"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    手绘图形识别为标准形状等可在 设置 → 墨迹纠正 中修改。
+                                </TextBlock>
+                                <CheckBox x:Name="CheckBoxInkToShapeEnabled"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用墨迹识别（手绘图形自动转为标准形状）" />
+                            </StackPanel>
+
+                            <!-- 步骤 5：个性化设置（对应设置 → 个性化设置） -->
+                            <StackPanel x:Name="StepAppearancePanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：外观" />
+                                <TextBlock Text="外观与界面"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    主题、启动动画、托盘图标等均可在 设置 → 外观 中修改。
+                                </TextBlock>
+
+                                <!-- 主题 -->
+                                <StackPanel Margin="0,4,0,0">
+                                    <TextBlock Text="应用主题"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource SettingsPageForeground}" />
+                                    <StackPanel Orientation="Horizontal"
+                                                Margin="0,4,0,0">
+                                        <RadioButton x:Name="RadioThemeFollowSystem"
+                                                     Content="跟随系统"
+                                                     FontSize="13"
+                                                     Foreground="{DynamicResource SettingsPageForeground}"
+                                                     Margin="0,0,12,0" />
+                                        <RadioButton x:Name="RadioThemeLight"
+                                                     Content="浅色"
+                                                     FontSize="13"
+                                                     Foreground="{DynamicResource SettingsPageForeground}"
+                                                     Margin="0,0,12,0" />
+                                        <RadioButton x:Name="RadioThemeDark"
+                                                     Content="深色"
+                                                     FontSize="13"
+                                                     Foreground="{DynamicResource SettingsPageForeground}" />
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <CheckBox x:Name="CheckBoxEnableSplashScreen"
+                                          Margin="0,10,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用启动动画（全屏欢迎页）" />
+
+                                <!-- 托盘与快速面板 -->
+                                <CheckBox x:Name="CheckBoxEnableTrayIcon"
+                                          Margin="0,10,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="在系统托盘显示 InkCanvasForClass 图标，方便后台快速唤出" />
+
+                                <CheckBox x:Name="CheckBoxShowQuickPanel"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用快速面板（计时器、点名等）" />
+                            </StackPanel>
+
+                            <!-- 步骤 6：快捷键设置（对应设置 → 快捷键设置） -->
+                            <StackPanel x:Name="StepShortcutsPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：快捷键设置" />
+                                <TextBlock Text="快捷键设置"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    具体快捷键可在 设置 → 快捷键设置 中配置。
+                                </TextBlock>
+                                <CheckBox x:Name="CheckBoxEnableHotkeysInMouseMode"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="鼠标模式下启用全局快捷键" />
+                            </StackPanel>
+
+                            <!-- 步骤 7：崩溃处理（对应设置 → 崩溃处理） -->
+                            <StackPanel x:Name="StepCrashActionPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：崩溃处理" />
+                                <TextBlock Text="崩溃处理"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    发生未处理异常时的行为可在 设置 → 崩溃处理 中修改。
+                                </TextBlock>
+                                <StackPanel Margin="0,4,0,0">
+                                    <RadioButton x:Name="RadioCrashSilentRestart"
+                                                 Content="静默重启软件（推荐）"
+                                                 FontSize="13"
+                                                 Foreground="{DynamicResource SettingsPageForeground}"
+                                                 IsChecked="True"
+                                                 Margin="0,0,0,6" />
+                                    <RadioButton x:Name="RadioCrashNoAction"
+                                                 Content="无操作（仅记录日志）"
+                                                 FontSize="13"
+                                                 Foreground="{DynamicResource SettingsPageForeground}" />
+                                </StackPanel>
+                            </StackPanel>
+
+                            <!-- 步骤 8：课件与放映（对应设置 → PPT） -->
+                            <StackPanel x:Name="StepPptPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：PPT（课件与放映）" />
+                                <TextBlock Text="课件与 PPT 联动"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    以下选项均可在 设置 → PPT 中修改，用于与 PowerPoint/WPS 放映联动。
+                                </TextBlock>
+
+                                <CheckBox x:Name="CheckBoxPptSupport"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用与 PowerPoint/WPS 的联动支持（在幻灯片中一键呼出画板）" />
+
+                                <CheckBox x:Name="CheckBoxPptAutoSaveStrokes"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="在 PPT 放映中自动保存所有墨迹（避免误关丢失板书）" />
+
+                                <CheckBox x:Name="CheckBoxPptAutoSaveScreenshots"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="在 PPT 放映中自动保存截屏（用于事后回看课堂内容）" />
+
+                                <CheckBox x:Name="CheckBoxPptTimeCapsule"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用 PPT 时间胶囊（放映时显示时间提醒）" />
+                            </StackPanel>
+
+                            <!-- 步骤 9：自动化行为（对应设置 → 自动化行为） -->
+                            <StackPanel x:Name="StepAutomationPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：自动化行为" />
+                                <TextBlock Text="自动化行为"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    进入/退出特定软件时自动收纳、墨迹自动保存、悬浮窗拦截等可在 设置 → 自动化行为 中修改。
+                                </TextBlock>
+                                <CheckBox x:Name="CheckBoxAutoFoldInPPTSlideShow"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="进入 PPT 放映时自动收纳到侧边" />
+                                <CheckBox x:Name="CheckBoxEnableAutoSaveStrokes"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用墨迹自动保存（定时保存到本地）" />
+                                <CheckBox x:Name="CheckBoxFloatingWindowInterceptorEnabled"
+                                          Margin="0,8,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用悬浮窗拦截（拦截希沃、鸿合等课堂软件的悬浮窗，避免遮挡画板）" />
+                            </StackPanel>
+
+                            <!-- 步骤 10：随机点名（对应设置 → 随机点名） -->
+                            <StackPanel x:Name="StepLuckyRandomPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：随机点名" />
+                                <TextBlock Text="随机点名"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    点名窗口样式与行为可在 设置 → 随机点名 中修改。
+                                </TextBlock>
+                                <CheckBox x:Name="CheckBoxShowRandomAndSingleDraw"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="显示随机抽和单次抽按钮" />
+                            </StackPanel>
+
+                            <!-- 步骤 11：高级选项（对应设置 → 高级选项） -->
+                            <StackPanel x:Name="StepAdvancedPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：高级选项" />
+                                <TextBlock Text="高级选项"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    日志、特殊屏幕、窗口模式等可在 设置 → 高级选项 中修改。
+                                </TextBlock>
+                                <CheckBox x:Name="CheckBoxIsLogEnabled"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="启用日志（便于问题排查）" />
+                            </StackPanel>
+
+                            <!-- 步骤 12：截图和屏幕捕捉（对应设置 → 截图和屏幕捕捉） -->
+                            <StackPanel x:Name="StepSnapshotPanel" Visibility="Collapsed">
+                                <TextBlock FontSize="12"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           Text="对应设置：截图和屏幕捕捉" />
+                                <TextBlock Text="截图和屏幕捕捉"
+                                           Margin="0,6,0,0"
+                                           FontSize="16"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource SettingsPageForeground}" />
+                                <TextBlock Margin="0,8,0,12"
+                                           FontSize="13"
+                                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
+                                           TextWrapping="Wrap">
+                                    清屏截图、按日期保存等可在 设置 → 截图和屏幕捕捉 中修改。
+                                </TextBlock>
+                                <CheckBox x:Name="CheckBoxAutoSaveStrokesAtClear"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="清屏时自动保存截图" />
+                                <CheckBox x:Name="CheckBoxSaveScreenshotsInDateFolders"
+                                          Margin="0,4,0,0"
+                                          FontSize="13"
+                                          Foreground="{DynamicResource SettingsPageForeground}"
+                                          Content="截图按日期分文件夹保存" />
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
+
+            <!-- Footer -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           VerticalAlignment="Center"
                            FontSize="12"
                            Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                           Text="步骤 1 / 3" />
-                <TextBlock x:Name="StepTitleText"
-                           Margin="0,4,0,0"
-                           FontSize="18"
-                           FontWeight="SemiBold"
-                           Foreground="{DynamicResource SettingsPageForeground}" />
-                <TextBlock x:Name="StepSubtitleText"
-                           Margin="0,4,0,0"
-                           FontSize="13"
-                           Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                           TextWrapping="Wrap" />
+                           TextWrapping="Wrap">
+                    此向导仅在首次启动时出现；之后可在 设置 中按侧边栏分区修改对应选项。
+                </TextBlock>
 
-                <!-- 步骤内容容器 -->
-                <Grid Margin="0,16,0,0">
-                    <!-- 步骤 1：启动（对应设置 → 启动、高级 → 遥测） -->
-                    <StackPanel x:Name="StepTelemetryPanel">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：启动、高级 → 遥测" />
-                        <TextBlock Text="匿名使用数据与隐私"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,16"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            <Run Text="InkCanvasForClass 可以选择上传" />
-                            <Run Text="完全匿名" FontWeight="SemiBold" />
-                            <Run Text="的使用统计，用于改进软件稳定性与性能。无论选择哪一项，课堂核心功能均可正常使用。" />
-                        </TextBlock>
+                <Button x:Name="BtnPreviousStep"
+                        Grid.Column="1"
+                        Width="100"
+                        Height="32"
+                        Margin="0,0,8,0"
+                        Content="上一步"
+                        Style="{StaticResource OobeSecondaryButtonStyle}"
+                        Click="BtnPreviousStep_Click" />
 
-                        <StackPanel Margin="0,8,0,0">
-                            <RadioButton x:Name="RadioTelemetryNone"
-                                         Content="不上传任何匿名使用数据"
-                                         FontSize="13"
-                                         Foreground="{DynamicResource SettingsPageForeground}"
-                                         IsChecked="True"
-                                         Margin="0,0,0,6" />
-                            <RadioButton x:Name="RadioTelemetryBasic"
-                                         Content="仅上传基础匿名使用数据（崩溃信息、版本与系统信息等）"
-                                         FontSize="13"
-                                         Foreground="{DynamicResource SettingsPageForeground}"
-                                         Margin="0,0,0,6" />
-                            <RadioButton x:Name="RadioTelemetryExtended"
-                                         Content="上传更多匿名使用数据（功能使用频率等，用于持续改进体验）"
-                                         FontSize="13"
-                                         Foreground="{DynamicResource SettingsPageForeground}" />
-                        </StackPanel>
-
-                        <TextBlock Margin="0,16,0,0"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            隐私说明：本软件不会收集课堂内容、学生个人信息或可识别您的原始墨迹内容，详情可查看安装目录中的 privacy.txt。
-                        </TextBlock>
-
-                        <TextBlock Margin="0,12,0,0"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}">
-                            启动与更新选项（对应 设置 → 启动）
-                        </TextBlock>
-                        <CheckBox x:Name="CheckBoxFoldAtStartup"
-                                  Margin="0,6,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启动时自动将浮动工具栏收纳到屏幕边缘" />
-                        <CheckBox x:Name="CheckBoxAutoUpdate"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="允许自动检查更新并在后台下载新版本" />
-                    </StackPanel>
-
-                    <!-- 步骤 2：画板和墨迹（对应设置 → 画板和墨迹） -->
-                    <StackPanel x:Name="StepCanvasPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：画板和墨迹" />
-                        <TextBlock Text="画板与墨迹"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            画笔光标、压感、墨迹显示等可在 设置 → 画板和墨迹 中修改。
-                        </TextBlock>
-                        <CheckBox x:Name="CheckBoxShowCursor"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="显示画笔光标（绘制时显示光标位置）" />
-                        <CheckBox x:Name="CheckBoxDisablePressure"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="屏蔽压感（所有笔画统一粗细）" />
-                        <CheckBox x:Name="CheckBoxHideStrokeWhenSelecting"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="退出画板模式时隐藏墨迹（进入 PPT 非批注模式不显示墨迹）" />
-                    </StackPanel>
-
-                    <!-- 步骤 3：手势操作（对应设置 → 手势操作） -->
-                    <StackPanel x:Name="StepGesturesPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：手势操作" />
-                        <TextBlock Text="手势操作"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            双指缩放、平移、旋转及手掌擦等可在 设置 → 手势操作 中修改。
-                        </TextBlock>
-                        <CheckBox x:Name="CheckBoxTwoFingerZoom"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用双指缩放" />
-                        <CheckBox x:Name="CheckBoxTwoFingerTranslate"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用双指平移" />
-                        <CheckBox x:Name="CheckBoxAutoSwitchTwoFingerGesture"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="进退白板模式时自动开关双指移动" />
-                        <CheckBox x:Name="CheckBoxEnablePalmEraser"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用手掌擦（多触点且触摸面积大时临时切换为橡皮）" />
-                    </StackPanel>
-
-                    <!-- 步骤 4：墨迹纠正（对应设置 → 墨迹纠正） -->
-                    <StackPanel x:Name="StepInkRecognitionPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：墨迹纠正" />
-                        <TextBlock Text="墨迹纠正"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            手绘图形识别为标准形状等可在 设置 → 墨迹纠正 中修改。
-                        </TextBlock>
-                        <CheckBox x:Name="CheckBoxInkToShapeEnabled"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用墨迹识别（手绘图形自动转为标准形状）" />
-                    </StackPanel>
-
-                    <!-- 步骤 5：个性化设置（对应设置 → 个性化设置） -->
-                    <StackPanel x:Name="StepAppearancePanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：外观" />
-                        <TextBlock Text="外观与界面"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            主题、启动动画、托盘图标等均可在 设置 → 外观 中修改。
-                        </TextBlock>
-
-                        <!-- 主题 -->
-                        <StackPanel Margin="0,4,0,0">
-                            <TextBlock Text="应用主题"
-                                       FontSize="13"
-                                       Foreground="{DynamicResource SettingsPageForeground}" />
-                            <StackPanel Orientation="Horizontal"
-                                        Margin="0,4,0,0">
-                                <RadioButton x:Name="RadioThemeFollowSystem"
-                                             Content="跟随系统"
-                                             FontSize="13"
-                                             Foreground="{DynamicResource SettingsPageForeground}"
-                                             Margin="0,0,12,0" />
-                                <RadioButton x:Name="RadioThemeLight"
-                                             Content="浅色"
-                                             FontSize="13"
-                                             Foreground="{DynamicResource SettingsPageForeground}"
-                                             Margin="0,0,12,0" />
-                                <RadioButton x:Name="RadioThemeDark"
-                                             Content="深色"
-                                             FontSize="13"
-                                             Foreground="{DynamicResource SettingsPageForeground}" />
-                            </StackPanel>
-                        </StackPanel>
-
-                        <CheckBox x:Name="CheckBoxEnableSplashScreen"
-                                  Margin="0,10,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用启动动画（全屏欢迎页）" />
-
-                        <!-- 托盘与快速面板 -->
-                        <CheckBox x:Name="CheckBoxEnableTrayIcon"
-                                  Margin="0,10,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="在系统托盘显示 InkCanvasForClass 图标，方便后台快速唤出" />
-
-                        <CheckBox x:Name="CheckBoxShowQuickPanel"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用快速面板（计时器、点名等）" />
-                    </StackPanel>
-
-                    <!-- 步骤 6：快捷键设置（对应设置 → 快捷键设置） -->
-                    <StackPanel x:Name="StepShortcutsPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：快捷键设置" />
-                        <TextBlock Text="快捷键设置"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            具体快捷键可在 设置 → 快捷键设置 中配置。
-                        </TextBlock>
-                        <CheckBox x:Name="CheckBoxEnableHotkeysInMouseMode"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="鼠标模式下启用全局快捷键" />
-                    </StackPanel>
-
-                    <!-- 步骤 7：崩溃处理（对应设置 → 崩溃处理） -->
-                    <StackPanel x:Name="StepCrashActionPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：崩溃处理" />
-                        <TextBlock Text="崩溃处理"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            发生未处理异常时的行为可在 设置 → 崩溃处理 中修改。
-                        </TextBlock>
-                        <StackPanel Margin="0,4,0,0">
-                            <RadioButton x:Name="RadioCrashSilentRestart"
-                                         Content="静默重启软件（推荐）"
-                                         FontSize="13"
-                                         Foreground="{DynamicResource SettingsPageForeground}"
-                                         IsChecked="True"
-                                         Margin="0,0,0,6" />
-                            <RadioButton x:Name="RadioCrashNoAction"
-                                         Content="无操作（仅记录日志）"
-                                         FontSize="13"
-                                         Foreground="{DynamicResource SettingsPageForeground}" />
-                        </StackPanel>
-                    </StackPanel>
-
-                    <!-- 步骤 8：课件与放映（对应设置 → PPT） -->
-                    <StackPanel x:Name="StepPptPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：PPT（课件与放映）" />
-                        <TextBlock Text="课件与 PPT 联动"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            以下选项均可在 设置 → PPT 中修改，用于与 PowerPoint/WPS 放映联动。
-                        </TextBlock>
-
-                        <CheckBox x:Name="CheckBoxPptSupport"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用与 PowerPoint/WPS 的联动支持（在幻灯片中一键呼出画板）" />
-
-                        <CheckBox x:Name="CheckBoxPptAutoSaveStrokes"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="在 PPT 放映中自动保存所有墨迹（避免误关丢失板书）" />
-
-                        <CheckBox x:Name="CheckBoxPptAutoSaveScreenshots"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="在 PPT 放映中自动保存截屏（用于事后回看课堂内容）" />
-
-                        <CheckBox x:Name="CheckBoxPptTimeCapsule"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用 PPT 时间胶囊（放映时显示时间提醒）" />
-                    </StackPanel>
-
-                    <!-- 步骤 9：自动化行为（对应设置 → 自动化行为） -->
-                    <StackPanel x:Name="StepAutomationPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：自动化行为" />
-                        <TextBlock Text="自动化行为"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            进入/退出特定软件时自动收纳、墨迹自动保存、悬浮窗拦截等可在 设置 → 自动化行为 中修改。
-                        </TextBlock>
-                        <CheckBox x:Name="CheckBoxAutoFoldInPPTSlideShow"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="进入 PPT 放映时自动收纳到侧边" />
-                        <CheckBox x:Name="CheckBoxEnableAutoSaveStrokes"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用墨迹自动保存（定时保存到本地）" />
-                        <CheckBox x:Name="CheckBoxFloatingWindowInterceptorEnabled"
-                                  Margin="0,8,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用悬浮窗拦截（拦截希沃、鸿合等课堂软件的悬浮窗，避免遮挡画板）" />
-                    </StackPanel>
-
-                    <!-- 步骤 10：随机点名（对应设置 → 随机点名） -->
-                    <StackPanel x:Name="StepLuckyRandomPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：随机点名" />
-                        <TextBlock Text="随机点名"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            点名窗口样式与行为可在 设置 → 随机点名 中修改。
-                        </TextBlock>
-                        <CheckBox x:Name="CheckBoxShowRandomAndSingleDraw"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="显示随机抽和单次抽按钮" />
-                    </StackPanel>
-
-                    <!-- 步骤 11：高级选项（对应设置 → 高级选项） -->
-                    <StackPanel x:Name="StepAdvancedPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：高级选项" />
-                        <TextBlock Text="高级选项"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            日志、特殊屏幕、窗口模式等可在 设置 → 高级选项 中修改。
-                        </TextBlock>
-                        <CheckBox x:Name="CheckBoxIsLogEnabled"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="启用日志（便于问题排查）" />
-                    </StackPanel>
-
-                    <!-- 步骤 12：截图和屏幕捕捉（对应设置 → 截图和屏幕捕捉） -->
-                    <StackPanel x:Name="StepSnapshotPanel" Visibility="Collapsed">
-                        <TextBlock FontSize="12"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   Text="对应设置：截图和屏幕捕捉" />
-                        <TextBlock Text="截图和屏幕捕捉"
-                                   Margin="0,6,0,0"
-                                   FontSize="16"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource SettingsPageForeground}" />
-                        <TextBlock Margin="0,8,0,12"
-                                   FontSize="13"
-                                   Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                                   TextWrapping="Wrap">
-                            清屏截图、按日期保存等可在 设置 → 截图和屏幕捕捉 中修改。
-                        </TextBlock>
-                        <CheckBox x:Name="CheckBoxAutoSaveStrokesAtClear"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="清屏时自动保存截图" />
-                        <CheckBox x:Name="CheckBoxSaveScreenshotsInDateFolders"
-                                  Margin="0,4,0,0"
-                                  FontSize="13"
-                                  Foreground="{DynamicResource SettingsPageForeground}"
-                                  Content="截图按日期分文件夹保存" />
-                    </StackPanel>
-                </Grid>
-            </StackPanel>
-            </Border>
-        </ScrollViewer>
-
-        <!-- Footer -->
-        <Grid Grid.Row="2">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Column="0"
-                       VerticalAlignment="Center"
-                       FontSize="12"
-                       Foreground="{DynamicResource SettingsPageAnnotationForeground}"
-                       TextWrapping="Wrap">
-                此向导仅在首次启动时出现；之后可在 设置 中按侧边栏分区修改对应选项。
-            </TextBlock>
-
-            <Button x:Name="BtnPreviousStep"
-                    Grid.Column="1"
-                    Width="100"
-                    Height="32"
-                    Margin="0,0,8,0"
-                    Content="上一步"
-                    Style="{StaticResource OobeSecondaryButtonStyle}"
-                    Click="BtnPreviousStep_Click" />
-
-            <Button x:Name="BtnConfirm"
-                    Grid.Column="2"
-                    Width="140"
-                    Height="32"
-                    Content="保存并开始使用"
-                    Style="{StaticResource OobePrimaryButtonStyle}"
-                    Click="BtnConfirm_Click" />
+                <Button x:Name="BtnConfirm"
+                        Grid.Column="2"
+                        Width="140"
+                        Height="32"
+                        Content="保存并开始使用"
+                        Style="{StaticResource OobePrimaryButtonStyle}"
+                        Click="BtnConfirm_Click" />
+            </Grid>
         </Grid>
     </Grid>
 </Window>

@@ -1,9 +1,8 @@
 using Ink_Canvas.Helpers;
-using iNKORE.UI.WPF.Modern.Controls;
+using iNKORE.UI.WPF.Modern.Common.IconKeys;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -185,7 +184,7 @@ namespace Ink_Canvas
             if (RandMaxPeopleOneTime != -1 && TotalCount >= RandMaxPeopleOneTime) return;
             TotalCount++;
             LabelNumberCount.Text = TotalCount.ToString();
-            SymbolIconStart.Symbol = Symbol.People;
+            FontIconStart.Icon = SegoeFluentIcons.People;
             BorderBtnAdd.Opacity = 1;
             BorderBtnMinus.Opacity = 1;
         }
@@ -197,7 +196,7 @@ namespace Ink_Canvas
             LabelNumberCount.Text = TotalCount.ToString();
             if (TotalCount == 1)
             {
-                SymbolIconStart.Symbol = Symbol.Contact;
+                FontIconStart.Icon = SegoeFluentIcons.Contact;
             }
         }
 
@@ -390,8 +389,18 @@ namespace Ink_Canvas
             }
         }
 
-        private void BorderBtnHelp_MouseUp(object sender, MouseButtonEventArgs e)
+        private async void BorderBtnHelp_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (SecurityManager.IsPasswordRequiredForModifyOrClearNameList(MainWindow.Settings))
+            {
+                bool ok = await SecurityManager.PromptAndVerifyAsync(
+                    MainWindow.Settings,
+                    this,
+                    "名单修改验证",
+                    "请输入安全密码以修改点名名单。");
+                if (!ok) return;
+            }
+
             new NamesInputWindow().ShowDialog();
             Window_Loaded(this, null);
         }
@@ -418,28 +427,27 @@ namespace Ink_Canvas
 
             try
             {
-                string protocol = "";
+                string[] protocols;
                 switch (ComboBoxCallerType.SelectedIndex)
                 {
                     case 0: // ClassIsland点名
-                        protocol = "classisland://plugins/IslandCaller/Simple/1";
+                        protocols = ExternalCallerLauncher.GetProtocolsByType(0);
                         break;
                     case 1: // SecRandom点名
-                        protocol = "secrandom://direct_extraction";
+                        protocols = ExternalCallerLauncher.GetProtocolsByType(1);
                         break;
                     case 2: // NamePicker点名
-                        protocol = "namepicker://";
+                        protocols = ExternalCallerLauncher.GetProtocolsByType(2);
                         break;
                     default:
-                        protocol = "classisland://plugins/IslandCaller/Simple/1";
+                        protocols = ExternalCallerLauncher.GetProtocolsByType(0);
                         break;
                 }
 
-                Process.Start(new ProcessStartInfo
+                if (!ExternalCallerLauncher.TryLaunch(protocols, out Exception lastException))
                 {
-                    FileName = protocol,
-                    UseShellExecute = true
-                });
+                    throw lastException ?? new InvalidOperationException("external caller protocols are unavailable");
+                }
             }
             catch (Exception ex)
             {

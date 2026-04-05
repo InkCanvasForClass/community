@@ -1,21 +1,47 @@
-using Sentry;
+﻿using Sentry;
 using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Ink_Canvas.Helpers
 {
-    /// <summary>
-    /// 遥测上传：根据用户设置，通过 Sentry 上传 usage_stats 和 Crashes 目录的摘要信息。
-    /// </summary>
     internal static class TelemetryUploader
     {
-        /// <summary>
-        /// 根据当前设置决定是否上传遥测数据。
-        /// 在主窗口加载完成后调用一次即可。
-        /// </summary>
+        private static readonly Regex EmailRegex = new Regex(
+            @"(?i)\b[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}\b",
+            RegexOptions.Compiled);
+
+        private static readonly Regex PhoneRegex = new Regex(
+            @"\b1[3-9]\d{9}\b",
+            RegexOptions.Compiled);
+
+        private static readonly Regex IPv4Regex = new Regex(
+            @"\b(?:\d{1,3}\.){3}\d{1,3}\b",
+            RegexOptions.Compiled);
+
+        private static readonly Regex WindowsPathRegex = new Regex(
+            @"\b[A-Za-z]:\\[^\s<>|]+\b",
+            RegexOptions.Compiled);
+
+        private static readonly Regex UncPathRegex = new Regex(
+            @"\\\\[^\s]+",
+            RegexOptions.Compiled);
+
+        private static readonly Regex KeyValueSecretRegex = new Regex(
+            @"(?i)(\b(?:access[_-]?token|refresh[_-]?token|token|password|passwd|pwd|secret|authorization)\b\s*[:=]\s*)([^\s,;]+)",
+            RegexOptions.Compiled);
+
+        private static readonly Regex JsonSecretRegex = new Regex(
+            "(?i)(\"(?:access_token|refresh_token|token|password|passwd|pwd|secret|authorization)\"\\s*:\\s*\")([^\"]*)(\")",
+            RegexOptions.Compiled);
+
+        private static readonly Regex UrlSecretRegex = new Regex(
+            @"(?i)([?&](?:access_token|token|password|pwd|secret)=)[^&\s]+",
+            RegexOptions.Compiled);
+
         public static Task UploadTelemetryIfNeededAsync()
         {
             return Task.Run(() =>
@@ -31,10 +57,9 @@ namespace Ink_Canvas.Helpers
                     var level = settings.Startup.TelemetryUploadLevel;
                     if (level == TelemetryUploadLevel.None)
                     {
-                        return; // 用户未开启
+                        return;
                     }
 
-                    // 获取并校验设备ID
                     string deviceId = DeviceIdentifier.GetDeviceId();
                     if (string.IsNullOrWhiteSpace(deviceId) || deviceId.Length < 5)
                     {
@@ -42,65 +67,20 @@ namespace Ink_Canvas.Helpers
                         return;
                     }
 
-                    // 可选：Crashes 目录下的崩溃日志
-                    List<object> crashFiles = null;
+                    // Basic 和 Extended 均上传崩溃日志（脱敏）
+                    object crashFile = TryGetLatestSanitizedFile(
+                        Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Crashes"),
+                        "Crash_*.txt",
+                        "崩溃日志");
+
+                    // Extended 额外上传运行日志（脱敏）
+                    object runtimeLogFile = null;
                     if (level == TelemetryUploadLevel.Extended)
                     {
-                        try
-                        {
-                            string crashDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Crashes");
-                            if (Directory.Exists(crashDir))
-                            {
-                                crashFiles = new List<object>();
-                                var files = Directory.GetFiles(crashDir);
-
-                                FileInfo latestInfo = null;
-                                string latestContent = null;
-
-                                foreach (var file in files)
-                                {
-                                    try
-                                    {
-                                        var info = new FileInfo(file);
-
-                                        // 避免一次上传过大，单文件限制为 8192KB
-                                        if (info.Length > 8192 * 1024)
-                                        {
-                                            continue;
-                                        }
-
-                                        string content = File.ReadAllText(file);
-
-                                        if (latestInfo == null || info.LastWriteTime > latestInfo.LastWriteTime)
-                                        {
-                                            latestInfo = info;
-                                            latestContent = content;
-                                        }
-                                    }
-                                    catch (Exception exFile)
-                                    {
-                                        LogHelper.WriteLogToFile(
-                                            $"TelemetryUploader | 读取崩溃日志失败: {exFile.Message}",
-                                            LogHelper.LogType.Warning);
-                                    }
-                                }
-
-                                if (latestInfo != null && latestContent != null)
-                                {
-                                    crashFiles.Add(new
-                                    {
-                                        file_name = latestInfo.Name,
-                                        content = latestContent
-                                    });
-                                }
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.WriteLogToFile(
-                                $"TelemetryUploader | 收集崩溃日志失败: {ex.Message}",
-                                LogHelper.LogType.Warning);
-                        }
+                        runtimeLogFile = TryGetLatestSanitizedFile(
+                            Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Logs"),
+                            "Log_*.txt",
+                            "运行日志");
                     }
 
                     var telemetryData = new
@@ -110,7 +90,8 @@ namespace Ink_Canvas.Helpers
                         update_channel = settings.Startup.UpdateChannel.ToString(),
                         app_version = Assembly.GetExecutingAssembly().GetName().Version.ToString(),
                         os_version = Environment.OSVersion.VersionString,
-                        crash_files = crashFiles
+                        has_crash_log = crashFile != null,
+                        has_runtime_log = runtimeLogFile != null
                     };
 
                     // 通过 Sentry 上报一个包含遥测信息的事件
@@ -147,9 +128,14 @@ namespace Ink_Canvas.Helpers
                     evt.SetTag("os_version", Environment.OSVersion.VersionString);
                     evt.SetExtra("telemetry_data", telemetryData);
 
-                    if (crashFiles != null)
+                    if (crashFile != null)
                     {
-                        evt.SetExtra("crash_files", crashFiles);
+                        evt.SetExtra("crash_file", crashFile);
+                    }
+
+                    if (runtimeLogFile != null)
+                    {
+                        evt.SetExtra("runtime_log_file", runtimeLogFile);
                     }
 
                     SentrySdk.CaptureEvent(evt);
@@ -161,7 +147,63 @@ namespace Ink_Canvas.Helpers
                 }
             });
         }
+
+        private static object TryGetLatestSanitizedFile(string directory, string pattern, string fileType)
+        {
+            try
+            {
+                if (!Directory.Exists(directory))
+                {
+                    return null;
+                }
+
+                var latest = new DirectoryInfo(directory)
+                    .GetFiles(pattern)
+                    .OrderByDescending(file => file.LastWriteTime)
+                    .FirstOrDefault();
+
+                if (latest == null)
+                {
+                    return null;
+                }
+
+                string content = File.ReadAllText(latest.FullName);
+                string sanitizedContent = SanitizeLogContent(content);
+
+                return new
+                {
+                    file_type = fileType,
+                    file_name = latest.Name,
+                    last_write_time = latest.LastWriteTime.ToString("o"),
+                    content = sanitizedContent
+                };
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(
+                    $"TelemetryUploader | 收集{fileType}失败: {ex.Message}",
+                    LogHelper.LogType.Warning);
+                return null;
+            }
+        }
+
+        private static string SanitizeLogContent(string content)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                return content;
+            }
+
+            string sanitized = content;
+            sanitized = EmailRegex.Replace(sanitized, "[REDACTED_EMAIL]");
+            sanitized = PhoneRegex.Replace(sanitized, "[REDACTED_PHONE]");
+            sanitized = IPv4Regex.Replace(sanitized, "[REDACTED_IP]");
+            sanitized = WindowsPathRegex.Replace(sanitized, "[REDACTED_PATH]");
+            sanitized = UncPathRegex.Replace(sanitized, "[REDACTED_PATH]");
+            sanitized = UrlSecretRegex.Replace(sanitized, "$1[REDACTED]");
+            sanitized = KeyValueSecretRegex.Replace(sanitized, "$1[REDACTED]");
+            sanitized = JsonSecretRegex.Replace(sanitized, "$1[REDACTED]$3");
+            return sanitized;
+        }
     }
 }
-
-

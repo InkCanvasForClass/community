@@ -1,4 +1,4 @@
-using Ink_Canvas.Helpers;
+﻿using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -1200,10 +1200,19 @@ namespace Ink_Canvas
             UpdateCountDisplay();
         }
 
-        private void ImportList_Click(object sender, RoutedEventArgs e)
+        private async void ImportList_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                if (SecurityManager.IsPasswordRequiredForModifyOrClearNameList(MainWindow.Settings))
+                {
+                    bool ok = await SecurityManager.PromptAndVerifyAsync(
+                        MainWindow.Settings,
+                        this,
+                        "名单修改验证",
+                        "请输入安全密码以修改点名名单。");
+                    if (!ok) return;
+                }
                 // 打开名单导入窗口，与老点名UI保持一致
                 var namesInputWindow = new NamesInputWindow();
                 namesInputWindow.ShowDialog();
@@ -1260,10 +1269,19 @@ namespace Ink_Canvas
             }
         }
 
-        private void ClearList_Click(object sender, RoutedEventArgs e)
+        private async void ClearList_Click(object sender, RoutedEventArgs e)
         {
             try
             {
+                if (SecurityManager.IsPasswordRequiredForModifyOrClearNameList(MainWindow.Settings))
+                {
+                    bool ok = await SecurityManager.PromptAndVerifyAsync(
+                        MainWindow.Settings,
+                        this,
+                        "名单清空验证",
+                        "请输入安全密码以清空点名名单。");
+                    if (!ok) return;
+                }
                 // 清空名单
                 nameList.Clear();
                 UpdateListCountDisplay();
@@ -1505,28 +1523,27 @@ namespace Ink_Canvas
 
             try
             {
-                string protocol = "";
+                string[] protocols;
                 switch (selectedExternalCaller)
                 {
                     case "ClassIsland":
-                        protocol = "classisland://plugins/IslandCaller/Simple/1";
+                        protocols = ExternalCallerLauncher.GetProtocolsByName("ClassIsland");
                         break;
                     case "SecRandom":
-                        protocol = "secrandom://direct_extraction";
+                        protocols = ExternalCallerLauncher.GetProtocolsByName("SecRandom");
                         break;
                     case "NamePicker":
-                        protocol = "namepicker://";
+                        protocols = ExternalCallerLauncher.GetProtocolsByName("NamePicker");
                         break;
                     default:
-                        protocol = "classisland://plugins/IslandCaller/Simple/1";
+                        protocols = ExternalCallerLauncher.GetProtocolsByName("ClassIsland");
                         break;
                 }
 
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                if (!ExternalCallerLauncher.TryLaunch(protocols, out Exception lastException))
                 {
-                    FileName = protocol,
-                    UseShellExecute = true
-                });
+                    throw lastException ?? new InvalidOperationException("external caller protocols are unavailable");
+                }
 
                 UpdateStatusDisplay($"已启动外部点名: {selectedExternalCaller}");
             }

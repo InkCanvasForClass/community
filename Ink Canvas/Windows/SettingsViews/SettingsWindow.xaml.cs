@@ -1160,6 +1160,30 @@ namespace Ink_Canvas.Windows
             _sidebarItemMouseDownBorder = null;
         }
 
+        private void TopBarBorder_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left) return;
+            DragMove();
+        }
+
+        private void SidebarTopBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton != MouseButton.Left) return;
+
+            var source = e.OriginalSource as DependencyObject;
+            if (IsInsideElement(source, SearchButtonBorder) || IsInsideElement(source, MenuButtonBorder))
+                return;
+
+            DragMove();
+        }
+
+        private static bool IsInsideElement(DependencyObject source, DependencyObject target)
+        {
+            if (source == null || target == null) return false;
+            if (source == target) return true;
+            return IsInsideElement(VisualTreeHelper.GetParent(source), target);
+        }
+
         private void CloseButton_Click(object sender, MouseButtonEventArgs e)
         {
             Close();

@@ -1,8 +1,10 @@
 using Hardcodet.Wpf.TaskbarNotification;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;
 using Newtonsoft.Json;
+using Sentry;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -18,10 +20,8 @@ using System.Windows.Input;
 using System.Windows.Threading;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
-using Ink_Canvas.Properties;
 using SplashScreen = Ink_Canvas.Windows.SplashScreen;
 using Timer = System.Threading.Timer;
-using Sentry;
 
 namespace Ink_Canvas
 {
@@ -1088,7 +1088,7 @@ namespace Ink_Canvas
                     LogHelper.WriteLogToFile($"启动完成心跳已记录");
                 }
                 LogHelper.WriteLogToFile($"启动时长: {(startupCompleteHeartbeat - appStartupStartTime).TotalSeconds:F2}秒");
-                
+
                 if (_isSplashScreenShown)
                 {
                     SetSplashMessage("完成初始化...");
@@ -1223,8 +1223,8 @@ namespace Ink_Canvas
 
                 if (!isStartupComplete && appStartupStartTime != DateTime.MinValue)
                 {
-                    DateTime startTime = _isSplashScreenShown && splashScreenStartTime != DateTime.MinValue 
-                        ? splashScreenStartTime 
+                    DateTime startTime = _isSplashScreenShown && splashScreenStartTime != DateTime.MinValue
+                        ? splashScreenStartTime
                         : appStartupStartTime;
                     TimeSpan elapsedSinceStart = DateTime.Now - startTime;
                     if (elapsedSinceStart.TotalMinutes >= 2)
@@ -1252,27 +1252,41 @@ namespace Ink_Canvas
                         return;
                     }
                 }
-                
-                if (isStartupComplete && (DateTime.Now - lastHeartbeat).TotalSeconds > 10)
+
+                if (isStartupComplete)
                 {
-                    LogHelper.NewLog("检测到主线程无响应，自动重启。");
-                    SyncCrashActionFromSettings();
-                    if (CrashAction == CrashActionType.SilentRestart)
+                    var now = DateTime.Now;
+                    var sinceHeartbeat = now - lastHeartbeat;
+                    var sinceStartupComplete = startupCompleteHeartbeat == DateTime.MinValue
+                        ? TimeSpan.Zero
+                        : now - startupCompleteHeartbeat;
+
+                    if (sinceStartupComplete.TotalSeconds < 30)
                     {
-                        StartupCount.Increment();
-                        if (StartupCount.GetCount() >= 5)
+                        return;
+                    }
+
+                    if (sinceHeartbeat.TotalSeconds > 10)
+                    {
+                        LogHelper.NewLog("检测到主线程无响应，自动重启。");
+                        SyncCrashActionFromSettings();
+                        if (CrashAction == CrashActionType.SilentRestart)
                         {
-                            MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
-                            StartupCount.Reset();
+                            StartupCount.Increment();
+                            if (StartupCount.GetCount() >= 5)
+                            {
+                                MessageBox.Show(Strings.GetString("Msg_RestartLimit"), Strings.GetString("Msg_RestartLimitTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
+                                StartupCount.Reset();
+                                Environment.Exit(1);
+                            }
+                            try
+                            {
+                                string exePath = Process.GetCurrentProcess().MainModule.FileName;
+                                Process.Start(exePath);
+                            }
+                            catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
                             Environment.Exit(1);
                         }
-                        try
-                        {
-                            string exePath = Process.GetCurrentProcess().MainModule.FileName;
-                            Process.Start(exePath);
-                        }
-                        catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
-                        Environment.Exit(1);
                     }
                 }
             }, null, 0, 3000);
@@ -1391,7 +1405,7 @@ namespace Ink_Canvas
 
                 string assemblyLocation = Assembly.GetExecutingAssembly().Location;
                 string currentDir = Path.GetDirectoryName(assemblyLocation);
-                
+
                 for (int i = 0; i < 5; i++)
                 {
                     string dsnFilePath = Path.Combine(currentDir, "telemetry_dsn.txt");
@@ -1403,7 +1417,7 @@ namespace Ink_Canvas
                             return dsn;
                         }
                     }
-                    
+
                     DirectoryInfo parentDir = Directory.GetParent(currentDir);
                     if (parentDir == null)
                     {

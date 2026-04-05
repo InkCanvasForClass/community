@@ -48,7 +48,10 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 var version = Assembly.GetExecutingAssembly().GetName().Version;
                 var platform = Environment.Is64BitOperatingSystem ? "windows-x64" : "windows-x86";
-                CurrentVersionText.Text = $"当前版本: v{version} | {platform}";
+                var pkgArch = MainWindow.Settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64
+                    ? "更新包: 64位"
+                    : "更新包: 32位";
+                CurrentVersionText.Text = $"当前版本: v{version} | {platform} | {pkgArch}";
 
                 LoadLastCheckTime();
 
@@ -111,6 +114,11 @@ namespace Ink_Canvas.Windows.SettingsViews
                 {
                     UpdateUpdateChannelButtons(UpdateChannel.Beta);
                 }
+
+                if (MainWindow.Settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64)
+                    UpdateUpdateArchitectureButtons(UpdatePackageArchitecture.X64);
+                else
+                    UpdateUpdateArchitectureButtons(UpdatePackageArchitecture.X86);
             }
             catch (Exception ex)
             {
@@ -626,7 +634,7 @@ namespace Ink_Canvas.Windows.SettingsViews
                         SecondaryButtonText = "取消"
                     };
 
-                    var panel = new iNKORE.UI.WPF.Modern.Controls.SimpleStackPanel
+                    var panel = new iNKORE.UI.WPF.Controls.SimpleStackPanel
                     {
                         Spacing = 16,
                         Margin = new Thickness(0, 10, 0, 0)
@@ -806,6 +814,79 @@ namespace Ink_Canvas.Windows.SettingsViews
                     LoadHistoryVersions();
                     LoadUpdateLogWithPriority(UpdateChannel.Beta);
                     break;
+
+                case "UpdateArch_X86":
+                    MainWindowSettingsHelper.UpdateSettingDirectly(() =>
+                    {
+                        MainWindow.Settings.Startup.UpdatePackageArchitecture = UpdatePackageArchitecture.X86;
+                    }, "UpdatePackageArchitecture");
+                    UpdateUpdateArchitectureButtons(UpdatePackageArchitecture.X86);
+                    MainWindow.SaveSettingsToFile();
+                    RefreshVersionArchLabel();
+                    break;
+
+                case "UpdateArch_X64":
+                    MainWindowSettingsHelper.UpdateSettingDirectly(() =>
+                    {
+                        MainWindow.Settings.Startup.UpdatePackageArchitecture = UpdatePackageArchitecture.X64;
+                    }, "UpdatePackageArchitecture");
+                    UpdateUpdateArchitectureButtons(UpdatePackageArchitecture.X64);
+                    MainWindow.SaveSettingsToFile();
+                    RefreshVersionArchLabel();
+                    break;
+            }
+        }
+
+        private void RefreshVersionArchLabel()
+        {
+            try
+            {
+                if (MainWindow.Settings == null || CurrentVersionText == null) return;
+                var version = Assembly.GetExecutingAssembly().GetName().Version;
+                var platform = Environment.Is64BitOperatingSystem ? "windows-x64" : "windows-x86";
+                var pkgArch = MainWindow.Settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64
+                    ? "更新包: 64位"
+                    : "更新包: 32位";
+                CurrentVersionText.Text = $"当前版本: v{version} | {platform} | {pkgArch}";
+            }
+            catch { /* ignore */ }
+        }
+
+        private void UpdateUpdateArchitectureButtons(UpdatePackageArchitecture selected)
+        {
+            try
+            {
+                bool isDarkTheme = ThemeHelper.IsDarkTheme;
+                var selectedBrush = isDarkTheme ? new SolidColorBrush(Color.FromRgb(25, 25, 25)) : new SolidColorBrush(Color.FromRgb(225, 225, 225));
+                var unselectedBrush = new SolidColorBrush(Colors.Transparent);
+
+                if (UpdateArchX86Border != null)
+                {
+                    bool isSel = selected == UpdatePackageArchitecture.X86;
+                    UpdateArchX86Border.Background = isSel ? selectedBrush : unselectedBrush;
+                    var tb = UpdateArchX86Border.Child as TextBlock;
+                    if (tb != null)
+                    {
+                        tb.FontWeight = isSel ? FontWeights.Bold : FontWeights.Normal;
+                        tb.Foreground = ThemeHelper.GetTextPrimaryBrush();
+                    }
+                }
+
+                if (UpdateArchX64Border != null)
+                {
+                    bool isSel = selected == UpdatePackageArchitecture.X64;
+                    UpdateArchX64Border.Background = isSel ? selectedBrush : unselectedBrush;
+                    var tb = UpdateArchX64Border.Child as TextBlock;
+                    if (tb != null)
+                    {
+                        tb.FontWeight = isSel ? FontWeights.Bold : FontWeights.Normal;
+                        tb.Foreground = ThemeHelper.GetTextPrimaryBrush();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"更新软件架构按钮状态时出错: {ex.Message}");
             }
         }
 

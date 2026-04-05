@@ -542,7 +542,23 @@ namespace Ink_Canvas
                 var stylusPointCollection = e.GetStylusPoints(this);
                 foreach (var stylusPoint in stylusPointCollection)
                     strokeVisual.Add(new StylusPoint(stylusPoint.X, stylusPoint.Y, stylusPoint.PressureFactor));
-                strokeVisual.Redraw();
+
+                // 实时笔锋：在绘制过程中更新压感并整笔重绘预览；否则预览层固定线宽，收笔后改点集也看不到笔锋变化。
+                var committedStroke = strokeVisual.Stroke;
+                if (committedStroke != null
+                    && Settings.Canvas.InkStyle == 3
+                    && penType == 0
+                    && committedStroke.DrawingAttributes != null
+                    && !committedStroke.DrawingAttributes.IsHighlighter
+                    && committedStroke.StylusPoints.Count >= 3)
+                {
+                    ApplyVelocityBrushTipFromSpeed(committedStroke);
+                    strokeVisual.ForceRedraw();
+                }
+                else
+                {
+                    strokeVisual.Redraw();
+                }
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
         }

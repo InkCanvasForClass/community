@@ -1186,7 +1186,7 @@ namespace Ink_Canvas
 
                 int prev = _previousSlideID;
 
-                Application.Current.Dispatcher.Invoke(() =>
+                Application.Current.Dispatcher.InvokeAsync(() =>
                 {
                     var ms = new MemoryStream();
                     inkCanvas.Strokes.Save(ms);
@@ -1228,7 +1228,7 @@ namespace Ink_Canvas
                         }).ContinueWith(t =>
                         {
                             if (t.IsFaulted || t.Result == null) return;
-                            Application.Current.Dispatcher.Invoke(() =>
+                            Application.Current.Dispatcher.InvokeAsync(() =>
                             {
                                 if (_currentSlideShowPosition != loadingPage) return;
                                 inkCanvas.Strokes.Add(t.Result);

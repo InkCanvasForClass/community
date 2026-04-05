@@ -205,24 +205,14 @@ namespace Ink_Canvas.Windows
                     }
                     else if (leftTimeSpan.TotalSeconds <= 0)
                     {
-                        SetDigitDisplay("Digit1Display", 0);
-                        SetDigitDisplay("Digit2Display", 0);
-                        SetDigitDisplay("Digit3Display", 0);
-                        SetDigitDisplay("Digit4Display", 0);
-                        SetDigitDisplay("Digit5Display", 0);
-                        SetDigitDisplay("Digit6Display", 0);
-
-                        SetColonDisplay(false);
                         timer.Stop();
                         isTimerRunning = false;
-                        StartPauseIcon.Data = Geometry.Parse(PlayIconData);
-                        PlayTimerSound();
+                        isPaused = false;
+                        isOvertimeMode = false;
 
-                        // 禁用全屏按钮
-                        if (FullscreenBtn != null)
-                        {
-                            FullscreenBtn.IsEnabled = false;
-                        }
+                        ApplyResetStateAfterStop();
+
+                        PlayTimerSound();
 
                         TimerCompleted?.Invoke(this, EventArgs.Empty);
                         HandleTimerCompletion();
@@ -264,6 +254,9 @@ namespace Ink_Canvas.Windows
         int hour = 0;
         int minute = 5;
         int second = 0;
+        int cachedStartHour = 0;
+        int cachedStartMinute = 5;
+        int cachedStartSecond = 0;
 
         DateTime startTime = DateTime.Now;
         DateTime pauseTime = DateTime.Now;
@@ -857,6 +850,10 @@ namespace Ink_Canvas.Windows
                     UpdateDigitDisplays();
                 }
 
+                cachedStartHour = hour;
+                cachedStartMinute = minute;
+                cachedStartSecond = second;
+
                 startTime = DateTime.Now;
                 StartPauseIcon.Data = Geometry.Parse(PauseIconData);
                 isPaused = false;
@@ -879,6 +876,25 @@ namespace Ink_Canvas.Windows
             }
         }
 
+        private void ApplyResetStateAfterStop()
+        {
+            UpdateDigitDisplays();
+            SetColonDisplay(false);
+
+            if (StartPauseIcon != null)
+            {
+                StartPauseIcon.Data = Geometry.Parse(PlayIconData);
+            }
+
+            hasPlayedProgressiveReminder = false;
+
+            // 禁用全屏按钮
+            if (FullscreenBtn != null)
+            {
+                FullscreenBtn.IsEnabled = false;
+            }
+        }
+
         private void Reset_Click(object sender, RoutedEventArgs e)
         {
             UpdateActivityTime();
@@ -896,22 +912,9 @@ namespace Ink_Canvas.Windows
                 }
             }
 
-            UpdateDigitDisplays();
-            SetColonDisplay(false);
-
-            if (StartPauseIcon != null)
-            {
-                StartPauseIcon.Data = Geometry.Parse(PlayIconData);
-            }
-
             isOvertimeMode = false;
-            hasPlayedProgressiveReminder = false;
 
-            // 禁用全屏按钮
-            if (FullscreenBtn != null)
-            {
-                FullscreenBtn.IsEnabled = false;
-            }
+            ApplyResetStateAfterStop();
         }
 
         private void PlayTimerSound()
@@ -1593,9 +1596,9 @@ namespace Ink_Canvas.Windows
                 }
 
                 // 重置时间到默认值
-                hour = 0;
-                minute = 5;
-                second = 0;
+                hour = cachedStartHour;
+                minute = cachedStartMinute;
+                second = cachedStartSecond;
 
                 // 更新显示
                 UpdateDigitDisplays();

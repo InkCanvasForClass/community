@@ -90,6 +90,12 @@ namespace Ink_Canvas
         /// <param name="e">执行路由事件参数</param>
         internal void KeyExit(object sender, ExecutedRoutedEventArgs e)
         {
+            if (currentMode != 0)
+            {
+                ImageBlackboard_MouseUp(lastBorderMouseDownObject, null);
+                return;
+            }
+
             if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible) BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
         }
 
