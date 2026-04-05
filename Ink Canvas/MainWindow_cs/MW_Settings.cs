@@ -3597,6 +3597,11 @@ namespace Ink_Canvas
                     RestoreNonStrokeElements(preservedElements);
                     isInMultiTouchMode = true;
 
+                    palmEraserWasEnabledBeforeMultiTouch = Settings.Canvas.EnablePalmEraser;
+                    Settings.Canvas.EnablePalmEraser = false;
+                    if (ToggleSwitchEnablePalmEraser != null)
+                        ToggleSwitchEnablePalmEraser.IsOn = false;
+
                     // 恢复到之前的编辑状态
                     inkCanvas.EditingMode = currentEditingMode;
                     drawingShapeMode = currentDrawingShapeMode;
@@ -3626,6 +3631,13 @@ namespace Ink_Canvas
                     // 恢复非笔画元素
                     RestoreNonStrokeElements(preservedElements);
                     isInMultiTouchMode = false;
+
+                    if (palmEraserWasEnabledBeforeMultiTouch)
+                    {
+                        Settings.Canvas.EnablePalmEraser = true;
+                        if (ToggleSwitchEnablePalmEraser != null)
+                            ToggleSwitchEnablePalmEraser.IsOn = true;
+                    }
 
                     // 恢复到之前的编辑状态
                     inkCanvas.EditingMode = currentEditingMode;

@@ -44,6 +44,9 @@ namespace Ink_Canvas
         /// 多点触控延迟时间（毫秒）
         /// </summary>
         private const double MULTI_TOUCH_DELAY_MS = 100;
+        private bool isMultiTouchTimerActive;
+        private bool isPalmEraserActive;
+        private bool palmEraserWasEnabledBeforeMultiTouch;
 
         /// <summary>
         /// 保存画布上的非笔画元素（如图片、媒体元素等）
@@ -227,6 +230,12 @@ namespace Ink_Canvas
                 RestoreNonStrokeElements(preservedElements);
                 isInMultiTouchMode = false;
 
+                if (palmEraserWasEnabledBeforeMultiTouch)
+                {
+                    Settings.Canvas.EnablePalmEraser = true;
+                    if (ToggleSwitchEnablePalmEraser != null)
+                        ToggleSwitchEnablePalmEraser.IsOn = true;
+                }
             }
             else
             {
@@ -247,6 +256,11 @@ namespace Ink_Canvas
                 // 恢复非笔画元素
                 RestoreNonStrokeElements(preservedElements);
                 isInMultiTouchMode = true;
+
+                palmEraserWasEnabledBeforeMultiTouch = Settings.Canvas.EnablePalmEraser;
+                Settings.Canvas.EnablePalmEraser = false;
+                if (ToggleSwitchEnablePalmEraser != null)
+                    ToggleSwitchEnablePalmEraser.IsOn = false;
             }
         }
 
@@ -721,21 +735,13 @@ namespace Ink_Canvas
         /// <param name="e">触摸事件参数</param>
         /// <returns>返回触摸边界宽度</returns>
         /// <remarks>
-        /// 根据触摸事件参数计算触摸边界宽度，包括以下逻辑：
-        /// 1. 获取触摸点的边界
-        /// 2. 如果不是四边红外屏幕，使用边界宽度
-        /// 3. 如果是四边红外屏幕，使用边界宽度和高度的平方根
-        /// 4. 如果是特殊屏幕，乘以触摸倍数
-        /// 5. 返回计算得到的触摸边界宽度
+        /// 手掌擦阈值与特殊屏 <c>TouchMultiplier</c> 在激活逻辑中单独参与计算，此处仅返回几何接触尺寸。
         /// </remarks>
         public double GetTouchBoundWidth(TouchEventArgs e)
         {
             var args = e.GetTouchPoint(null).Bounds;
-            double value;
-            if (!Settings.Advanced.IsQuadIR) value = args.Width;
-            else value = Math.Sqrt(args.Width * args.Height); //四边红外
-            if (Settings.Advanced.IsSpecialScreen) value *= Settings.Advanced.TouchMultiplier;
-            return value;
+            if (!Settings.Advanced.IsQuadIR) return args.Width;
+            return Math.Sqrt(args.Width * args.Height);
         }
 
         /// <summary>
@@ -759,28 +765,146 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchDown(object sender, TouchEventArgs e)
         {
+            var touchPointForBar = e.GetTouchPoint(this);
+            var floatingBarBounds = ViewboxFloatingBar.TransformToAncestor(this).TransformBounds(
+                new Rect(0, 0, ViewboxFloatingBar.ActualWidth, ViewboxFloatingBar.ActualHeight));
+            if (floatingBarBounds.Contains(touchPointForBar.Position))
+                return;
+
+            if ((inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint
+                 || inkCanvas.EditingMode == InkCanvasEditingMode.EraseByStroke)
+                && !isPalmEraserActive)
+            {
+                return;
+            }
+
+            if (drawingShapeMode != 0)
+            {
+                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                SetCursorBasedOnEditingMode(inkCanvas);
+                inkCanvas.CaptureTouch(e.TouchDevice);
+                ViewboxFloatingBar.IsHitTestVisible = false;
+                BlackboardUIGridForInkReplay.IsHitTestVisible = false;
+
+                isTouchDown = true;
+
+                if (dec.Count == 0)
+                {
+                    var inkTouchPoint = e.GetTouchPoint(inkCanvas);
+                    if (drawingShapeMode == 24 || drawingShapeMode == 25)
+                    {
+                        if (drawMultiStepShapeCurrentStep == 0)
+                            iniP = inkTouchPoint.Position;
+                    }
+                    else
+                    {
+                        iniP = inkTouchPoint.Position;
+                    }
+                    lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
+                }
+                dec.Add(e.TouchDevice.Id);
+                return;
+            }
+
+            SetCursorBasedOnEditingMode(inkCanvas);
             inkCanvas.CaptureTouch(e.TouchDevice);
             ViewboxFloatingBar.IsHitTestVisible = false;
             BlackboardUIGridForInkReplay.IsHitTestVisible = false;
-
+            lastTouchDownTime = DateTime.Now;
             dec.Add(e.TouchDevice.Id);
-            //设备1个的时候，记录中心点
+
+            if (Settings.Canvas.EnablePalmEraser && !isPalmEraserActive && drawingShapeMode == 0)
+            {
+                var touchPoint = e.GetTouchPoint(inkCanvas);
+                double boundWidth = GetTouchBoundWidth(e);
+
+                if ((Settings.Advanced.TouchMultiplier != 0 || !Settings.Advanced.IsSpecialScreen)
+                    && (boundWidth > BoundsWidth))
+                {
+                    double thresholdMultiplier;
+                    switch (Settings.Canvas.PalmEraserSensitivity)
+                    {
+                        case 0:
+                            thresholdMultiplier = 3.0;
+                            break;
+                        case 1:
+                            thresholdMultiplier = 2.5;
+                            break;
+                        case 2:
+                        default:
+                            thresholdMultiplier = 2.0;
+                            break;
+                    }
+
+                    double EraserThresholdValue = Settings.Startup.IsEnableNibMode
+                        ? Settings.Advanced.NibModeBoundsWidthThresholdValue
+                        : Settings.Advanced.FingerModeBoundsWidthThresholdValue;
+
+                    if (boundWidth > BoundsWidth * EraserThresholdValue * thresholdMultiplier)
+                    {
+                        boundWidth *= Settings.Startup.IsEnableNibMode
+                            ? Settings.Advanced.NibModeBoundsWidthEraserSize
+                            : Settings.Advanced.FingerModeBoundsWidthEraserSize;
+
+                        if (Settings.Advanced.IsSpecialScreen)
+                            boundWidth *= Settings.Advanced.TouchMultiplier;
+                        inkCanvas.EditingMode = InkCanvasEditingMode.EraseByPoint;
+                        isPalmEraserActive = true;
+
+                        EnableEraserOverlay();
+                        eraserWidth = boundWidth;
+                        UpdateEraserStyle();
+                        touchPoint = e.GetTouchPoint(inkCanvas);
+                        EraserOverlay_PointerDown(sender);
+                        EraserOverlay_PointerMove(sender, touchPoint.Position);
+                        if (Settings.Canvas.IsShowCursor)
+                        {
+                            inkCanvas.ForceCursor = false;
+                            inkCanvas.UseCustomCursor = false;
+                        }
+                    }
+                }
+            }
+
             if (dec.Count == 1)
             {
                 var touchPoint = e.GetTouchPoint(inkCanvas);
                 centerPoint = touchPoint.Position;
-
-                //记录第一根手指点击时的 StrokeCollection
                 lastTouchDownStrokeCollection = inkCanvas.Strokes.Clone();
             }
-            //设备两个及两个以上，将画笔功能关闭
+
             if (dec.Count > 1 || isSingleFingerDragMode || !Settings.Gesture.IsEnableTwoFingerGesture)
             {
                 if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None ||
                     inkCanvas.EditingMode == InkCanvasEditingMode.Select) return;
+                var timeSinceLastTouch = (DateTime.Now - lastTouchDownTime).TotalMilliseconds;
+                if (timeSinceLastTouch < MULTI_TOUCH_DELAY_MS && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                {
+                    if (!isMultiTouchTimerActive)
+                    {
+                        isMultiTouchTimerActive = true;
+                        var remainingTime = MULTI_TOUCH_DELAY_MS - timeSinceLastTouch;
+                        Task.Delay((int)remainingTime).ContinueWith(_ =>
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                if (dec.Count > 1 && inkCanvas.EditingMode == InkCanvasEditingMode.Ink)
+                                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                                isMultiTouchTimerActive = false;
+                            });
+                        });
+                    }
+                    return;
+                }
+
                 lastInkCanvasEditingMode = inkCanvas.EditingMode;
-                inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
+                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
+                    && drawingShapeMode == 0)
+                {
+                    inkCanvas.EditingMode = InkCanvasEditingMode.None;
+                }
             }
         }
 
@@ -794,6 +918,11 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchMove(object sender, TouchEventArgs e)
         {
+            if (isPalmEraserActive)
+            {
+                var touchPoint = e.GetTouchPoint(inkCanvas);
+                EraserOverlay_PointerMove(sender, touchPoint.Position);
+            }
         }
 
         /// <summary>
@@ -820,32 +949,18 @@ namespace Ink_Canvas
         /// </remarks>
         private void InkCanvas_PreviewTouchUp(object sender, TouchEventArgs e)
         {
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint && !isPalmEraserActive)
+            {
+                return;
+            }
             inkCanvas.ReleaseAllTouchCaptures();
             ViewboxFloatingBar.IsHitTestVisible = true;
             BlackboardUIGridForInkReplay.IsHitTestVisible = true;
 
-            //手势完成后切回之前的状态
-            if (dec.Count > 1)
-                if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
-                    inkCanvas.EditingMode = lastInkCanvasEditingMode;
             dec.Remove(e.TouchDevice.Id);
 
-            if (dec.Count == 0)
-            {
-                isSingleFingerDragMode = false;
-                isWaitUntilNextTouchDown = false;
-                if (drawingShapeMode == 0
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.Select
-                    && inkCanvas.EditingMode != InkCanvasEditingMode.None)
-                {
-                    if (lastInkCanvasEditingMode != InkCanvasEditingMode.None)
-                    {
-                        inkCanvas.EditingMode = lastInkCanvasEditingMode;
-                    }
-                }
-            }
+            if (dec.Count <= 1)
+                isMultiTouchTimerActive = false;
 
             if (drawingShapeMode != 0)
             {
@@ -857,12 +972,10 @@ namespace Ink_Canvas
                 {
                     if (drawMultiStepShapeCurrentStep == 0)
                     {
-                        // 第一笔完成，进入第二笔
                         drawMultiStepShapeCurrentStep = 1;
                     }
                     else
                     {
-                        // 第二笔完成，完成绘制
                         var mouseArgs = new MouseButtonEventArgs(Mouse.PrimaryDevice, 0, MouseButton.Left)
                         {
                             RoutedEvent = MouseLeftButtonUpEvent,
@@ -879,6 +992,36 @@ namespace Ink_Canvas
                         Source = inkCanvas
                     };
                     inkCanvas_MouseUp(inkCanvas, mouseArgs);
+                }
+            }
+
+            if (drawingShapeMode == 0)
+            {
+                if (dec.Count > 1)
+                {
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
+                    {
+                        if (lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint)
+                            inkCanvas.EditingMode = lastInkCanvasEditingMode;
+                    }
+                }
+                else if (dec.Count == 0)
+                {
+                    isSingleFingerDragMode = false;
+                    isWaitUntilNextTouchDown = false;
+
+                    if (inkCanvas.EditingMode == InkCanvasEditingMode.None &&
+                        lastInkCanvasEditingMode != InkCanvasEditingMode.None &&
+                        lastInkCanvasEditingMode != InkCanvasEditingMode.EraseByPoint)
+                    {
+                        inkCanvas.EditingMode = lastInkCanvasEditingMode;
+                    }
+
+                    if (isPalmEraserActive)
+                    {
+                        isPalmEraserActive = false;
+                        DisableEraserOverlay();
+                    }
                 }
             }
 
@@ -979,6 +1122,9 @@ namespace Ink_Canvas
         /// </remarks>
         private void Main_Grid_ManipulationDelta(object sender, ManipulationDeltaEventArgs e)
         {
+            if (inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint)
+                return;
+
             if (isInMultiTouchMode || !Settings.Gesture.IsEnableTwoFingerGesture) return;
 
             bool hasMultipleManipulators = e.Manipulators.Count() >= 2;

@@ -3298,6 +3298,9 @@ namespace Ink_Canvas
                 // 清空触摸点计数器
                 dec.Clear();
 
+                if (isPalmEraserActive)
+                    isPalmEraserActive = false;
+
                 // 确保触摸事件能正常响应
                 inkCanvas.IsHitTestVisible = true;
                 inkCanvas.IsManipulationEnabled = true;
