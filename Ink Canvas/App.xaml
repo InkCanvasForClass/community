@@ -31,20 +31,10 @@
                         </Image>
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Name="OpenNewSettingsTrayIconMenuItem" Click="OpenNewSettingsTrayIconMenuItem_Clicked">
+                <MenuItem Name="OpenSettingsTrayIconMenuItem" Click="OpenSettingsTrayIconMenuItem_Clicked">
                     <MenuItem.Header>
                         <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="打开新设置" />
-                        </ui:SimpleStackPanel>
-                    </MenuItem.Header>
-                    <MenuItem.Icon>
-                        <Image Width="28" Height="28" Margin="-2" Source="/Resources/Icons-Fluent/ic_fluent_settings_24_regular.png" />
-                    </MenuItem.Icon>
-                </MenuItem>
-                <MenuItem Name="OpenOldSettingsTrayIconMenuItem" Click="OpenOldSettingsTrayIconMenuItem_Clicked">
-                    <MenuItem.Header>
-                        <ui:SimpleStackPanel Orientation="Horizontal" Margin="-4,0,0,0">
-                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="打开旧设置" />
+                            <TextBlock FontSize="14" VerticalAlignment="Center" Foreground="#18181b" Text="打开设置" />
                         </ui:SimpleStackPanel>
                     </MenuItem.Header>
                     <MenuItem.Icon>

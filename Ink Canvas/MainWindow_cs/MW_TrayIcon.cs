@@ -131,26 +131,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void OpenNewSettingsTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
-        {
-            var mainWin = Current.MainWindow as MainWindow;
-            if (!EnsureMainWindowReadyForSettings(mainWin))
-            {
-                return;
-            }
-
-            try
-            {
-                var method = typeof(MainWindow).GetMethod("BtnOpenNewSettings_Click", BindingFlags.NonPublic | BindingFlags.Instance);
-                method?.Invoke(mainWin, new object[] { null, null });
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"Open new settings from tray failed: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
-
-        private void OpenOldSettingsTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
+        private void OpenSettingsTrayIconMenuItem_Clicked(object sender, RoutedEventArgs e)
         {
             var mainWin = Current.MainWindow as MainWindow;
             if (!EnsureMainWindowReadyForSettings(mainWin))
@@ -170,7 +151,7 @@ namespace Ink_Canvas
             }
             catch (Exception ex)
             {
-                LogHelper.WriteLogToFile($"Open old settings from tray failed: {ex.Message}", LogHelper.LogType.Error);
+                LogHelper.WriteLogToFile($"Open settings from tray failed: {ex.Message}", LogHelper.LogType.Error);
             }
         }
 
