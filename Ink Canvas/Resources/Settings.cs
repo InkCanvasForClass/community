@@ -334,7 +334,13 @@ namespace Ink_Canvas
         public bool EnableHotkeysInMouseMode { get; set; } = false;
         [JsonProperty("language")]
         public string Language { get; set; } = "";
-
+        
+        [JsonProperty("isWatermarkPositionCustomized")]
+        public bool IsWatermarkPositionCustomized { get; set; } = false;
+        [JsonProperty("watermarkPositionX")]
+        public double WatermarkPositionX { get; set; } = 0;
+        [JsonProperty("watermarkPositionY")]
+        public double WatermarkPositionY { get; set; } = 0;
     }
 
     public class PowerPointSettings

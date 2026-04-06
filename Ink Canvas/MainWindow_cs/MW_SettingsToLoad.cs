@@ -536,6 +536,13 @@ namespace Ink_Canvas
 
                 ToggleSwitchEnableChickenSoupInWhiteboardMode.IsOn =
                     Settings.Appearance.EnableChickenSoupInWhiteboardMode;
+                
+                if (Settings.Appearance.IsWatermarkPositionCustomized)
+                {
+                    Canvas.SetLeft(BlackBoardWaterMark, Settings.Appearance.WatermarkPositionX);
+                    Canvas.SetTop(BlackBoardWaterMark, Settings.Appearance.WatermarkPositionY);
+                    Canvas.SetRight(BlackBoardWaterMark, double.NaN);
+                }
 
                 // 浮动栏按钮显示控制开关初始化
                 CheckBoxUseLegacyFloatingBarUI.IsChecked = Settings.Appearance.UseLegacyFloatingBarUI;

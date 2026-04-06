@@ -1280,6 +1280,163 @@ namespace Ink_Canvas
             await UpdateChickenSoupTextAsync();
         }
 
+        private bool _isAdjustingWatermarkPosition = false;
+        private Point _watermarkDragStartPoint;
+        private double _watermarkStartX;
+        private double _watermarkStartY;
+
+        private void BtnAdjustWatermarkPosition_Click(object sender, RoutedEventArgs e)
+        {
+            // 关闭设置面板
+            HideSubPanelsImmediately();
+
+            // 如果名言没有显示，临时显示出来以便调整
+            if (BlackBoardWaterMark.Visibility != Visibility.Visible)
+            {
+                BlackBoardWaterMark.Visibility = Visibility.Visible;
+            }
+
+            _isAdjustingWatermarkPosition = true;
+            WaterMarkCanvas.IsHitTestVisible = true;
+            BlackBoardWaterMark.IsHitTestVisible = true;
+            BlackBoardWaterMark.Cursor = Cursors.SizeAll;
+
+            // 添加视觉反馈
+            BlackBoardWaterMark.Background = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
+            
+            // 绑定事件
+            BlackBoardWaterMark.MouseDown -= BlackBoardWaterMark_MouseDown;
+            BlackBoardWaterMark.MouseMove -= BlackBoardWaterMark_MouseMove;
+            BlackBoardWaterMark.MouseUp -= BlackBoardWaterMark_MouseUp;
+
+            BlackBoardWaterMark.MouseDown += BlackBoardWaterMark_MouseDown;
+            BlackBoardWaterMark.MouseMove += BlackBoardWaterMark_MouseMove;
+            BlackBoardWaterMark.MouseUp += BlackBoardWaterMark_MouseUp;
+            
+            // 提示用户
+            ShowNotification("进入调整模式：请拖动名言调整位置，双击或点击其他区域完成调整。");
+            
+            // 绑定一个全局的点击事件来退出调整模式
+            inkCanvas.MouseDown += InkCanvas_EndWatermarkAdjustment;
+        }
+
+        private void InkCanvas_EndWatermarkAdjustment(object sender, MouseButtonEventArgs e)
+        {
+            EndWatermarkAdjustment();
+            inkCanvas.MouseDown -= InkCanvas_EndWatermarkAdjustment;
+        }
+
+        private void EndWatermarkAdjustment()
+        {
+            if (!_isAdjustingWatermarkPosition) return;
+            
+            _isAdjustingWatermarkPosition = false;
+            WaterMarkCanvas.IsHitTestVisible = false;
+            BlackBoardWaterMark.IsHitTestVisible = false;
+            BlackBoardWaterMark.Cursor = Cursors.Arrow;
+            BlackBoardWaterMark.Background = Brushes.Transparent;
+            
+            BlackBoardWaterMark.MouseDown -= BlackBoardWaterMark_MouseDown;
+            BlackBoardWaterMark.MouseMove -= BlackBoardWaterMark_MouseMove;
+            BlackBoardWaterMark.MouseUp -= BlackBoardWaterMark_MouseUp;
+            
+            // 如果原本是不应该显示的，则隐藏
+            if (!Settings.Appearance.EnableChickenSoupInWhiteboardMode || currentMode != 1)
+            {
+                BlackBoardWaterMark.Visibility = Visibility.Collapsed;
+            }
+            
+            ToastHelper_EndWatermarkAdjustment();
+            
+            // 移除可能存在的全局点击事件
+            inkCanvas.MouseDown -= InkCanvas_EndWatermarkAdjustment;
+        }
+
+        private void ToastHelper_EndWatermarkAdjustment()
+        {
+            ShowNotification("调整完成，名言位置已保存。");
+        }
+
+        private void BlackBoardWaterMark_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                EndWatermarkAdjustment();
+                return;
+            }
+
+            _watermarkDragStartPoint = e.GetPosition(WaterMarkCanvas);
+            
+            // 获取当前位置
+            _watermarkStartX = Canvas.GetLeft(BlackBoardWaterMark);
+            if (double.IsNaN(_watermarkStartX))
+            {
+                // 如果没有设置Left，可能是靠Right定位的
+                double right = Canvas.GetRight(BlackBoardWaterMark);
+                if (!double.IsNaN(right))
+                {
+                    _watermarkStartX = WaterMarkCanvas.ActualWidth - BlackBoardWaterMark.ActualWidth - right;
+                    // 转换为Left定位
+                    Canvas.SetRight(BlackBoardWaterMark, double.NaN);
+                }
+                else
+                {
+                    _watermarkStartX = 0;
+                }
+            }
+            
+            _watermarkStartY = Canvas.GetTop(BlackBoardWaterMark);
+            if (double.IsNaN(_watermarkStartY))
+            {
+                _watermarkStartY = 0;
+            }
+
+            BlackBoardWaterMark.CaptureMouse();
+            e.Handled = true;
+        }
+
+        private void BlackBoardWaterMark_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (BlackBoardWaterMark.IsMouseCaptured)
+            {
+                Point currentPoint = e.GetPosition(WaterMarkCanvas);
+                double offsetX = currentPoint.X - _watermarkDragStartPoint.X;
+                double offsetY = currentPoint.Y - _watermarkDragStartPoint.Y;
+
+                double newLeft = _watermarkStartX + offsetX;
+                double newTop = _watermarkStartY + offsetY;
+
+                // 边界限制
+                if (newLeft < 0) newLeft = 0;
+                if (newTop < 0) newTop = 0;
+                if (newLeft + BlackBoardWaterMark.ActualWidth > WaterMarkCanvas.ActualWidth)
+                    newLeft = WaterMarkCanvas.ActualWidth - BlackBoardWaterMark.ActualWidth;
+                if (newTop + BlackBoardWaterMark.ActualHeight > WaterMarkCanvas.ActualHeight)
+                    newTop = WaterMarkCanvas.ActualHeight - BlackBoardWaterMark.ActualHeight;
+
+                Canvas.SetLeft(BlackBoardWaterMark, newLeft);
+                Canvas.SetTop(BlackBoardWaterMark, newTop);
+                
+                // 保存位置到Settings
+                Settings.Appearance.WatermarkPositionX = newLeft;
+                Settings.Appearance.WatermarkPositionY = newTop;
+                Settings.Appearance.IsWatermarkPositionCustomized = true;
+                
+                // 延迟保存避免频繁写盘
+                RequestSaveSettings();
+            }
+        }
+
+        private void BlackBoardWaterMark_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (BlackBoardWaterMark.IsMouseCaptured)
+            {
+                BlackBoardWaterMark.ReleaseMouseCapture();
+                SaveSettingsToFile(); // 最终保存
+                e.Handled = true;
+            }
+        }
+
         private async void BtnHitokotoCustomize_Click(object sender, RoutedEventArgs e)
         {
             var categories = new Dictionary<string, string>
