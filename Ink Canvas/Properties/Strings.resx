@@ -2626,4 +2626,7 @@
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>开启后，点击白板工具栏「展台」将打开希沃视频展台（需已安装）；关闭则使用内置展台。</value>
   </data>
+  <data name="Theme_AdjustPosition" xml:space="preserve">
+    <value>调整位置</value>
+  </data>
 </root>

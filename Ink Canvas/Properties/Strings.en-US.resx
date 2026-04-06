@@ -2583,4 +2583,7 @@ Hide</value>
   <data name="Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint" xml:space="preserve">
     <value>When enabled, the whiteboard toolbar Booth button launches Seewo Video Showcase (must be installed). When disabled, the built-in booth is used.</value>
   </data>
+  <data name="Theme_AdjustPosition" xml:space="preserve">
+    <value>Adjust Position</value>
+  </data>
 </root>

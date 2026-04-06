@@ -1433,6 +1433,9 @@
                                                     FontSize="14" Padding="14,4" Margin="8,0,0,0" MinWidth="65" VerticalAlignment="Center"
                                                     Click="BtnHitokotoCustomize_Click"
                                                     Visibility="Collapsed" />
+                                            <Button Name="BtnAdjustWatermarkPosition" Content="{i18n:I18n Key=Theme_AdjustPosition}" FontFamily="Microsoft YaHei UI"
+                                                    FontSize="14" Padding="14,4" Margin="8,0,0,0" MinWidth="65" VerticalAlignment="Center"
+                                                    Click="BtnAdjustWatermarkPosition_Click" />
                                         </ikw:SimpleStackPanel>
                                     </ikw:SimpleStackPanel>
                                     <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
@@ -4664,7 +4667,7 @@
                     Panel.ZIndex="1001"/>
         </Grid>
 
-        <Canvas IsHitTestVisible="False">
+        <Canvas Name="WaterMarkCanvas" IsHitTestVisible="False">
             <ikw:SimpleStackPanel Canvas.Left="25" Canvas.Top="15" Orientation="Vertical">
                 <TextBlock Text="{Binding nowTime}" Name="WaterMarkTime" Visibility="Collapsed" FontSize="30"
                            FontWeight="Bold" Foreground="White" Opacity="0.6" />
