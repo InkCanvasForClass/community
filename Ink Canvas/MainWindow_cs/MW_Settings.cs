@@ -1299,7 +1299,7 @@ namespace Ink_Canvas
             _isAdjustingWatermarkPosition = true;
             WaterMarkCanvas.IsHitTestVisible = true;
             BlackBoardWaterMark.IsHitTestVisible = true;
-            BlackBoardWaterMark.Cursor = Cursors.SizeAll;
+            BlackBoardWaterMark.Cursor = System.Windows.Input.Cursors.SizeAll;
 
             // 添加视觉反馈
             BlackBoardWaterMark.Background = new SolidColorBrush(Color.FromArgb(50, 255, 255, 255));
@@ -1333,7 +1333,7 @@ namespace Ink_Canvas
             _isAdjustingWatermarkPosition = false;
             WaterMarkCanvas.IsHitTestVisible = false;
             BlackBoardWaterMark.IsHitTestVisible = false;
-            BlackBoardWaterMark.Cursor = Cursors.Arrow;
+            BlackBoardWaterMark.Cursor = System.Windows.Input.Cursors.Arrow;
             BlackBoardWaterMark.Background = Brushes.Transparent;
             
             BlackBoardWaterMark.MouseDown -= BlackBoardWaterMark_MouseDown;
@@ -1368,16 +1368,16 @@ namespace Ink_Canvas
             _watermarkDragStartPoint = e.GetPosition(WaterMarkCanvas);
             
             // 获取当前位置
-            _watermarkStartX = Canvas.GetLeft(BlackBoardWaterMark);
+            _watermarkStartX = System.Windows.Controls.Canvas.GetLeft(BlackBoardWaterMark);
             if (double.IsNaN(_watermarkStartX))
             {
                 // 如果没有设置Left，可能是靠Right定位的
-                double right = Canvas.GetRight(BlackBoardWaterMark);
+                double right = System.Windows.Controls.Canvas.GetRight(BlackBoardWaterMark);
                 if (!double.IsNaN(right))
                 {
                     _watermarkStartX = WaterMarkCanvas.ActualWidth - BlackBoardWaterMark.ActualWidth - right;
                     // 转换为Left定位
-                    Canvas.SetRight(BlackBoardWaterMark, double.NaN);
+                    System.Windows.Controls.Canvas.SetRight(BlackBoardWaterMark, double.NaN);
                 }
                 else
                 {
@@ -1385,7 +1385,7 @@ namespace Ink_Canvas
                 }
             }
             
-            _watermarkStartY = Canvas.GetTop(BlackBoardWaterMark);
+            _watermarkStartY = System.Windows.Controls.Canvas.GetTop(BlackBoardWaterMark);
             if (double.IsNaN(_watermarkStartY))
             {
                 _watermarkStartY = 0;
@@ -1414,8 +1414,8 @@ namespace Ink_Canvas
                 if (newTop + BlackBoardWaterMark.ActualHeight > WaterMarkCanvas.ActualHeight)
                     newTop = WaterMarkCanvas.ActualHeight - BlackBoardWaterMark.ActualHeight;
 
-                Canvas.SetLeft(BlackBoardWaterMark, newLeft);
-                Canvas.SetTop(BlackBoardWaterMark, newTop);
+                System.Windows.Controls.Canvas.SetLeft(BlackBoardWaterMark, newLeft);
+                System.Windows.Controls.Canvas.SetTop(BlackBoardWaterMark, newTop);
                 
                 // 保存位置到Settings
                 Settings.Appearance.WatermarkPositionX = newLeft;
@@ -1423,7 +1423,7 @@ namespace Ink_Canvas
                 Settings.Appearance.IsWatermarkPositionCustomized = true;
                 
                 // 延迟保存避免频繁写盘
-                RequestSaveSettings();
+                SaveSettingsToFile();
             }
         }
 

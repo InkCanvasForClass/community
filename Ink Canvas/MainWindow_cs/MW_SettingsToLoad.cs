@@ -539,9 +539,9 @@ namespace Ink_Canvas
                 
                 if (Settings.Appearance.IsWatermarkPositionCustomized)
                 {
-                    Canvas.SetLeft(BlackBoardWaterMark, Settings.Appearance.WatermarkPositionX);
-                    Canvas.SetTop(BlackBoardWaterMark, Settings.Appearance.WatermarkPositionY);
-                    Canvas.SetRight(BlackBoardWaterMark, double.NaN);
+                    System.Windows.Controls.Canvas.SetLeft(BlackBoardWaterMark, Settings.Appearance.WatermarkPositionX);
+                    System.Windows.Controls.Canvas.SetTop(BlackBoardWaterMark, Settings.Appearance.WatermarkPositionY);
+                    System.Windows.Controls.Canvas.SetRight(BlackBoardWaterMark, double.NaN);
                 }
 
                 // 浮动栏按钮显示控制开关初始化
