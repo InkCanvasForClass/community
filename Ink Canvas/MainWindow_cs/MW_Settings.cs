@@ -1395,7 +1395,7 @@ namespace Ink_Canvas
             e.Handled = true;
         }
 
-        private void BlackBoardWaterMark_MouseMove(object sender, MouseEventArgs e)
+        private void BlackBoardWaterMark_MouseMove(object sender, System.Windows.Input.MouseEventArgs e)
         {
             if (BlackBoardWaterMark.IsMouseCaptured)
             {
