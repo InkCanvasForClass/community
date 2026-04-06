@@ -2629,4 +2629,10 @@
   <data name="Theme_AdjustPosition" xml:space="preserve">
     <value>调整位置</value>
   </data>
+  <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
+    <value>手写体美化</value>
+  </data>
+  <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
+    <value>自动将手写字迹替换为美化字体</value>
+  </data>
 </root>

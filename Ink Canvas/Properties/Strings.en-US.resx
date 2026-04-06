@@ -2586,4 +2586,10 @@ Hide</value>
   <data name="Theme_AdjustPosition" xml:space="preserve">
     <value>Adjust Position</value>
   </data>
+  <data name="InkRecog_HandwritingBeautify" xml:space="preserve">
+    <value>Handwriting Beautify</value>
+  </data>
+  <data name="InkRecog_HandwritingBeautifyHint" xml:space="preserve">
+    <value>Automatically replace handwriting strokes with beautified font</value>
+  </data>
 </root>
