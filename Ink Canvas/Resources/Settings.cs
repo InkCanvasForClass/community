@@ -298,6 +298,10 @@ namespace Ink_Canvas
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
         public int ChickenSoupSource { get; set; } = 1;
+        [JsonProperty("chickenSoupPositionX")]
+        public double ChickenSoupPositionX { get; set; } = double.NaN;
+        [JsonProperty("chickenSoupPositionY")]
+        public double ChickenSoupPositionY { get; set; } = double.NaN;
         [JsonProperty("hitokotoCategories", NullValueHandling = NullValueHandling.Ignore)]
         public List<string> HitokotoCategories { get; set; }
         [JsonProperty("isShowModeFingerToggleSwitch")]

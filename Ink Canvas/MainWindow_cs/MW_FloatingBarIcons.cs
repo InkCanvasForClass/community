@@ -744,11 +744,11 @@ namespace Ink_Canvas
 
                 if (Settings.Appearance.EnableChickenSoupInWhiteboardMode)
                 {
-                    BlackBoardWaterMark.Visibility = Visibility.Visible;
+                    BlackBoardWaterMarkContainer.Visibility = Visibility.Visible;
                 }
                 else
                 {
-                    BlackBoardWaterMark.Visibility = Visibility.Collapsed;
+                    BlackBoardWaterMarkContainer.Visibility = Visibility.Collapsed;
                 }
 
                 _ = UpdateChickenSoupTextAsync().ContinueWith(t =>
@@ -784,7 +784,7 @@ namespace Ink_Canvas
                             }
                             catch
                             {
-                                BlackBoardWaterMark.Visibility = Visibility.Collapsed;
+                                BlackBoardWaterMarkContainer.Visibility = Visibility.Collapsed;
                             }
                         }
                         else if (Settings.Appearance.EnableChickenSoupInWhiteboardMode && Settings.Appearance.ChickenSoupSource == 3)
@@ -861,7 +861,7 @@ namespace Ink_Canvas
                 // if (!isInMultiTouchMode) ToggleSwitchEnableMultiTouchMode.IsOn = true;
                 WaterMarkTime.Visibility = Visibility.Collapsed;
                 WaterMarkDate.Visibility = Visibility.Collapsed;
-                BlackBoardWaterMark.Visibility = Visibility.Collapsed;
+                BlackBoardWaterMarkContainer.Visibility = Visibility.Collapsed;
                 ICCWaterMarkDark.Visibility = Visibility.Collapsed;
                 ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
 

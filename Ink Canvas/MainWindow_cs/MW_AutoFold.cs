@@ -47,7 +47,7 @@ namespace Ink_Canvas
                 ToggleSwitchEnableTwoFingerTranslate.IsOn = false;
             WaterMarkTime.Visibility = Visibility.Collapsed;
             WaterMarkDate.Visibility = Visibility.Collapsed;
-            BlackBoardWaterMark.Visibility = Visibility.Collapsed;
+            BlackBoardWaterMarkContainer.Visibility = Visibility.Collapsed;
             ICCWaterMarkDark.Visibility = Visibility.Collapsed;
             ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
             BtnSwitch_Click(BtnSwitch, null);

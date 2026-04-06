@@ -444,6 +444,7 @@ namespace Ink_Canvas
                 try
                 {
                     ComboBoxChickenSoupSource.SelectedIndex = Settings.Appearance.ChickenSoupSource;
+                UpdateChickenSoupPosition();
                 }
                 finally
                 {
