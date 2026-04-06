@@ -1,4 +1,5 @@
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Services;
 using Ink_Canvas.Windows;
 using iNKORE.UI.WPF.Modern;
 using iNKORE.UI.WPF.Modern.Controls;
@@ -329,11 +330,9 @@ namespace Ink_Canvas
                 BlackBoardRightSidePageListScrollViewer.ReleaseTouchCapture(e.TouchDevice);
                 e.Handled = true;
             };
-            // 初始化无焦点模式开关
-            ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
+            // 初始化无焦点模式
             ApplyNoFocusMode();
-            // 初始化窗口置顶开关
-            ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
+            // 初始化窗口置顶
             ApplyAlwaysOnTop();
 
             // 添加窗口激活事件处理，确保置顶状态在窗口重新激活时得到保持
@@ -1181,6 +1180,10 @@ namespace Ink_Canvas
             //加载设置
             LoadSettings(true);
             ApplyLanguageFromSettings();
+            
+            // 初始化设置服务
+            SettingsService.Instance.Initialize(Settings, this);
+            
             AutoBackupManager.Initialize(Settings);
             CheckUpdateChannelAndTelemetryConsistency();
 
@@ -1368,14 +1371,8 @@ namespace Ink_Canvas
             }
 
             // 确保开关和设置同步
-            ToggleSwitchNoFocusMode.IsOn = Settings.Advanced.IsNoFocusMode;
             ApplyNoFocusMode();
-            ToggleSwitchAlwaysOnTop.IsOn = Settings.Advanced.IsAlwaysOnTop;
             ApplyAlwaysOnTop();
-
-            // 初始化UIA置顶开关
-            ToggleSwitchUIAccessTopMost.IsOn = Settings.Advanced.EnableUIAccessTopMost;
-            UpdateUIAccessTopMostVisibility();
 
             App.IsUIAccessTopMostEnabled = Settings.Advanced.EnableUIAccessTopMost;
 
@@ -2541,9 +2538,6 @@ namespace Ink_Canvas
 
             switch (sectionTag.ToLower())
             {
-                case "startup":
-                    targetGroupBox = GroupBoxStartup;
-                    break;
                 case "canvas":
                     targetGroupBox = GroupBoxCanvas;
                     break;
@@ -2997,7 +2991,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void ApplyNoFocusMode()
+        internal void ApplyNoFocusMode()
         {
             var hwnd = new WindowInteropHelper(this).Handle;
             int exStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
@@ -3017,7 +3011,7 @@ namespace Ink_Canvas
             }
         }
 
-        private void ApplyAlwaysOnTop()
+        internal void ApplyAlwaysOnTop()
         {
             try
             {
@@ -3213,30 +3207,29 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             var toggle = sender as ToggleSwitch;
-            Settings.Advanced.IsNoFocusMode = toggle != null && toggle.IsOn;
-            SaveSettingsToFile();
+            bool enabled = toggle != null && toggle.IsOn;
 
             if (isTemporarilyDisablingNoFocusMode)
             {
                 isTemporarilyDisablingNoFocusMode = false;
             }
 
+            SettingsService.Instance.SetNoFocusMode(enabled);
             ApplyNoFocusMode();
 
-            // 如果启用了窗口置顶，需要重新应用置顶设置以处理无焦点模式的变化
             if (Settings.Advanced.IsAlwaysOnTop)
             {
                 ApplyAlwaysOnTop();
             }
-
         }
 
         private void ToggleSwitchAlwaysOnTop_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
             var toggle = sender as ToggleSwitch;
-            Settings.Advanced.IsAlwaysOnTop = toggle != null && toggle.IsOn;
-            SaveSettingsToFile();
+            bool enabled = toggle != null && toggle.IsOn;
+
+            SettingsService.Instance.SetAlwaysOnTop(enabled);
             ApplyAlwaysOnTop();
             UpdateUIAccessTopMostVisibility();
         }
@@ -3245,14 +3238,10 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             var toggle = sender as ToggleSwitch;
-            bool newValue = toggle != null && toggle.IsOn;
+            bool enabled = toggle != null && toggle.IsOn;
 
-            Settings.Advanced.EnableUIAccessTopMost = newValue;
-            SaveSettingsToFile();
+            SettingsService.Instance.SetUIAccessTopMost(enabled);
             ApplyUIAccessTopMost();
-
-            App.IsUIAccessTopMostEnabled = newValue;
-
         }
 
         private void Window_Activated(object sender, EventArgs e)
@@ -3439,19 +3428,18 @@ namespace Ink_Canvas
         {
             try
             {
-                Settings.Canvas.EnableInkFade = ToggleSwitchEnableInkFade.IsOn;
-                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                bool enabled = ToggleSwitchEnableInkFade.IsOn;
+                SettingsService.Instance.SetInkFadeEnabled(enabled);
+                _inkFadeManager.IsEnabled = enabled;
 
-                // 同步批注子面板中的开关状态
                 if (ToggleSwitchInkFadeInPanel != null)
                 {
-                    ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
+                    ToggleSwitchInkFadeInPanel.IsOn = enabled;
                 }
 
-                // 同步普通画笔面板中的开关状态
                 if (ToggleSwitchInkFadeInPanel2 != null)
                 {
-                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                    ToggleSwitchInkFadeInPanel2.IsOn = enabled;
                 }
 
             }
@@ -3468,12 +3456,12 @@ namespace Ink_Canvas
         {
             try
             {
-                Settings.Canvas.InkFadeTime = (int)e.NewValue;
+                int timeMs = (int)e.NewValue;
+                SettingsService.Instance.SetInkFadeTime(timeMs);
                 if (_inkFadeManager != null)
                 {
-                    _inkFadeManager.UpdateFadeTime(Settings.Canvas.InkFadeTime);
+                    _inkFadeManager.UpdateFadeTime(timeMs);
                 }
-                LogHelper.WriteLogToFile($"墨迹渐隐时间已更新为 {Settings.Canvas.InkFadeTime}ms", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -3490,19 +3478,18 @@ namespace Ink_Canvas
         {
             try
             {
-                Settings.Canvas.EnableInkFade = ToggleSwitchInkFadeInPanel.IsOn;
-                _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
+                bool enabled = ToggleSwitchInkFadeInPanel.IsOn;
+                SettingsService.Instance.SetInkFadeEnabled(enabled);
+                _inkFadeManager.IsEnabled = enabled;
 
-                // 同步设置面板中的开关状态
                 if (ToggleSwitchEnableInkFade != null)
                 {
-                    ToggleSwitchEnableInkFade.IsOn = Settings.Canvas.EnableInkFade;
+                    ToggleSwitchEnableInkFade.IsOn = enabled;
                 }
 
-                // 同步普通画笔面板中的开关状态
                 if (ToggleSwitchInkFadeInPanel2 != null)
                 {
-                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                    ToggleSwitchInkFadeInPanel2.IsOn = enabled;
                 }
 
             }
@@ -3526,14 +3513,11 @@ namespace Ink_Canvas
             {
                 if (isLoaded)
                 {
-                    Settings.Canvas.HideInkFadeControlInPenMenu = ToggleSwitchHideInkFadeControlInPenMenu.IsOn;
-                    SaveSettingsToFile();
+                    bool hidden = ToggleSwitchHideInkFadeControlInPenMenu.IsOn;
+                    SettingsService.Instance.SetHideInkFadeControlInPenMenu(hidden);
                 }
 
-                // 立即更新墨迹渐隐控制开关的可见性
                 UpdateInkFadeControlVisibility();
-
-                LogHelper.WriteLogToFile($"在笔工具菜单中隐藏墨迹渐隐控制开关已{(Settings.Canvas.HideInkFadeControlInPenMenu ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -3541,24 +3525,18 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 橡皮擦自动切换回批注模式开关切换事件处理
-        /// </summary>
         private void ToggleSwitchEnableEraserAutoSwitchBack_Toggled(object sender, RoutedEventArgs e)
         {
             try
             {
                 if (!isLoaded) return;
-                Settings.Canvas.EnableEraserAutoSwitchBack = ToggleSwitchEnableEraserAutoSwitchBack.IsOn;
-                SaveSettingsToFile();
+                bool enabled = ToggleSwitchEnableEraserAutoSwitchBack.IsOn;
+                SettingsService.Instance.SetEraserAutoSwitchBack(enabled);
 
-                // 如果禁用，停止计时器
-                if (!Settings.Canvas.EnableEraserAutoSwitchBack)
+                if (!enabled)
                 {
                     StopEraserAutoSwitchBackTimer();
                 }
-
-                LogHelper.WriteLogToFile($"橡皮擦自动切换回批注模式已{(Settings.Canvas.EnableEraserAutoSwitchBack ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -3566,24 +3544,18 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 橡皮擦自动切换延迟时间滑块值改变事件处理
-        /// </summary>
         private void EraserAutoSwitchBackDelaySlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             try
             {
                 if (!isLoaded) return;
-                Settings.Canvas.EraserAutoSwitchBackDelaySeconds = (int)e.NewValue;
-                SaveSettingsToFile();
+                int delaySeconds = (int)e.NewValue;
+                SettingsService.Instance.SetEraserAutoSwitchBackDelay(delaySeconds);
 
-                // 如果计时器正在运行，重新启动以应用新的延迟时间
                 if (_eraserAutoSwitchBackTimer != null && _eraserAutoSwitchBackTimer.IsEnabled)
                 {
                     StartEraserAutoSwitchBackTimer();
                 }
-
-                LogHelper.WriteLogToFile($"橡皮擦自动切换延迟时间已更新为 {Settings.Canvas.EraserAutoSwitchBackDelaySeconds} 秒", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -3591,18 +3563,15 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// 根据开关状态启用或禁用画笔自动恢复：更新设置并保存，启用时初始化并安排恢复定时器，禁用时停止计时器。
-        /// </summary>
         private void ToggleSwitchBrushAutoRestore_Toggled(object sender, RoutedEventArgs e)
         {
             try
             {
                 if (!isLoaded) return;
-                Settings.Canvas.EnableBrushAutoRestore = ToggleSwitchBrushAutoRestore.IsOn;
-                SaveSettingsToFile();
+                bool enabled = ToggleSwitchBrushAutoRestore.IsOn;
+                SettingsService.Instance.SetBrushAutoRestore(enabled);
 
-                if (Settings.Canvas.EnableBrushAutoRestore)
+                if (enabled)
                 {
                     InitBrushAutoRestoreTimer();
                     ScheduleBrushAutoRestore();
@@ -3634,8 +3603,8 @@ namespace Ink_Canvas
                 if (!isLoaded) return;
                 if (Settings?.Canvas == null) return;
 
-                Settings.Canvas.BrushAutoRestoreTimes = BrushAutoRestoreTimesTextBox.Text ?? string.Empty;
-                SaveSettingsToFile();
+                string times = BrushAutoRestoreTimesTextBox.Text ?? string.Empty;
+                SettingsService.Instance.SetBrushAutoRestoreTimes(times);
                 if (Settings.Canvas.EnableBrushAutoRestore)
                 {
                     ScheduleBrushAutoRestore();
@@ -3663,8 +3632,7 @@ namespace Ink_Canvas
                 if (ComboBoxBrushAutoRestoreColor.SelectedItem is ComboBoxItem item)
                 {
                     string hex = item.Tag as string ?? string.Empty;
-                    Settings.Canvas.BrushAutoRestoreColor = hex;
-                    SaveSettingsToFile();
+                    SettingsService.Instance.SetBrushAutoRestoreColor(hex);
                 }
             }
             catch (Exception ex)
@@ -3688,8 +3656,7 @@ namespace Ink_Canvas
                 if (!isLoaded) return;
                 if (Settings?.Canvas == null) return;
 
-                Settings.Canvas.BrushAutoRestoreWidth = e.NewValue;
-                SaveSettingsToFile();
+                SettingsService.Instance.SetBrushAutoRestoreWidth(e.NewValue);
             }
             catch (Exception ex)
             {
@@ -3708,8 +3675,7 @@ namespace Ink_Canvas
                 if (!isLoaded) return;
                 if (Settings?.Canvas == null) return;
 
-                Settings.Canvas.BrushAutoRestoreAlpha = (int)e.NewValue;
-                SaveSettingsToFile();
+                SettingsService.Instance.SetBrushAutoRestoreAlpha((int)e.NewValue);
             }
             catch (Exception ex)
             {
@@ -3744,25 +3710,19 @@ namespace Ink_Canvas
             }
         }
 
-        /// <summary>
-        /// PPT放映模式显示手势按钮开关切换事件处理
-        /// </summary>
         private void ToggleSwitchShowGestureButtonInSlideShow_Toggled(object sender, RoutedEventArgs e)
         {
             try
             {
                 if (!isLoaded) return;
                 var toggle = sender as ToggleSwitch;
-                Settings.PowerPointSettings.ShowGestureButtonInSlideShow = toggle != null && toggle.IsOn;
-                SaveSettingsToFile();
+                bool enabled = toggle != null && toggle.IsOn;
+                SettingsService.Instance.SetShowGestureButtonInSlideShow(enabled);
 
-                // 如果当前在PPT放映模式，需要立即更新手势按钮的显示状态
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                 {
                     UpdateGestureButtonVisibilityInPPTMode();
                 }
-
-                LogHelper.WriteLogToFile($"PPT放映模式显示手势按钮已{(Settings.PowerPointSettings.ShowGestureButtonInSlideShow ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -3776,17 +3736,14 @@ namespace Ink_Canvas
             {
                 if (!isLoaded) return;
                 var toggle = sender as ToggleSwitch;
-                Settings.PowerPointSettings.EnablePPTTimeCapsule = toggle != null && toggle.IsOn;
-                SaveSettingsToFile();
+                bool enabled = toggle != null && toggle.IsOn;
+                SettingsService.Instance.SetPPTTimeCapsuleEnabled(enabled);
 
-                // 如果当前在PPT放映模式，需要立即更新时间胶囊和快捷面板的显示状态
                 if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                 {
                     UpdatePPTTimeCapsuleVisibility();
                     UpdatePPTQuickPanelVisibility();
                 }
-
-                LogHelper.WriteLogToFile($"PPT时间显示胶囊已{(Settings.PowerPointSettings.EnablePPTTimeCapsule ? "启用" : "禁用")}", LogHelper.LogType.Event);
             }
             catch (Exception ex)
             {
@@ -3801,16 +3758,13 @@ namespace Ink_Canvas
                 if (!isLoaded) return;
                 if (ComboBoxPPTTimeCapsulePosition != null)
                 {
-                    Settings.PowerPointSettings.PPTTimeCapsulePosition = ComboBoxPPTTimeCapsulePosition.SelectedIndex;
-                    SaveSettingsToFile();
+                    int position = ComboBoxPPTTimeCapsulePosition.SelectedIndex;
+                    SettingsService.Instance.SetPPTTimeCapsulePosition(position);
 
-                    // 如果当前在PPT放映模式，需要立即更新时间胶囊的位置
                     if (BtnPPTSlideShowEnd.Visibility == Visibility.Visible)
                     {
                         UpdatePPTTimeCapsulePosition();
                     }
-
-                    LogHelper.WriteLogToFile($"PPT时间胶囊位置已更改为: {ComboBoxPPTTimeCapsulePosition.SelectedIndex}", LogHelper.LogType.Event);
                 }
             }
             catch (Exception ex)
@@ -4339,9 +4293,6 @@ namespace Ink_Canvas
 
         #region 模式切换相关
 
-        /// <summary>
-        /// 模式切换开关事件处理
-        /// </summary>
         private void ToggleSwitchMode_Toggled(object sender, RoutedEventArgs e)
         {
             try
@@ -4349,13 +4300,10 @@ namespace Ink_Canvas
                 var toggle = sender as ToggleSwitch;
                 if (toggle != null)
                 {
-                    Settings.ModeSettings.IsPPTOnlyMode = toggle.IsOn;
+                    bool enabled = toggle.IsOn;
+                    SettingsService.Instance.SetPPTOnlyMode(enabled);
 
-                    // 保存设置到文件
-                    SaveSettingsToFile();
-
-                    // 如果切换到仅PPT模式，立即隐藏主窗口
-                    if (Settings.ModeSettings.IsPPTOnlyMode)
+                    if (enabled)
                     {
                         Hide();
                         LogHelper.WriteLogToFile("已切换到仅PPT模式，主窗口已隐藏", LogHelper.LogType.Event);
@@ -4364,7 +4312,6 @@ namespace Ink_Canvas
                     else
                     {
                         StopPptOnlyVisibilityProbeTimer();
-                        // 如果切换到正常模式，显示主窗口
                         Show();
                         LogHelper.WriteLogToFile("已切换到正常模式，主窗口已显示", LogHelper.LogType.Event);
                     }
@@ -4446,9 +4393,6 @@ namespace Ink_Canvas
 
         #region Theme Toggle
 
-        /// <summary>
-        /// 主题下拉框选择变化事件
-        /// </summary>
         private void ComboBoxTheme_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
@@ -4458,33 +4402,10 @@ namespace Ink_Canvas
                 System.Windows.Controls.ComboBox comboBox = sender as System.Windows.Controls.ComboBox;
                 if (comboBox != null)
                 {
-                    Settings.Appearance.Theme = comboBox.SelectedIndex;
-
-                    // 应用新主题
-                    ApplyTheme(comboBox.SelectedIndex);
-
-                    // 保存设置
-                    SaveSettingsToFile();
-
-                    // 显示通知
-                    string themeName;
-                    switch (comboBox.SelectedIndex)
-                    {
-                        case 0:
-                            themeName = "浅色主题";
-                            break;
-                        case 1:
-                            themeName = "深色主题";
-                            break;
-                        case 2:
-                            themeName = "跟随系统";
-                            break;
-                        default:
-                            themeName = "未知主题";
-                            break;
-                    }
-
-                    ShowNotification($"已切换到{themeName}");
+                    int themeIndex = comboBox.SelectedIndex;
+                    SettingsService.Instance.SetTheme(themeIndex);
+                    ApplyTheme(themeIndex);
+                    ShowNotification($"已切换到{SettingsService.GetThemeName(themeIndex)}");
                 }
             }
             catch (Exception ex)
@@ -4506,25 +4427,9 @@ namespace Ink_Canvas
                 if (ComboBoxLanguage == null) return;
 
                 var index = ComboBoxLanguage.SelectedIndex;
-                string language;
+                string language = SettingsService.GetLanguageCode(index);
 
-                switch (index)
-                {
-                    case 1:
-                        language = "zh-CN";
-                        break;
-                    case 2:
-                        language = "en-US";
-                        break;
-                    case 0:
-                    default:
-                        language = string.Empty;
-                        break;
-                }
-
-                Settings.Appearance.Language = language;
-                SaveSettingsToFile();
-
+                SettingsService.Instance.SetLanguage(language);
                 LocalizationHelper.TrySetCulture(language);
 
                 _isReloadingForLanguageChange = true;
@@ -4630,21 +4535,11 @@ namespace Ink_Canvas
         /// <summary>
         /// 更新UIA置顶开关的可见性
         /// </summary>
-        private void UpdateUIAccessTopMostVisibility()
+        internal void UpdateUIAccessTopMostVisibility()
         {
             try
             {
-                var visibility = Settings.Advanced.IsAlwaysOnTop ? Visibility.Visible : Visibility.Collapsed;
-
-                if (UIAccessTopMostPanel != null)
-                {
-                    UIAccessTopMostPanel.Visibility = visibility;
-                }
-
-                if (UIAccessTopMostDescription != null)
-                {
-                    UIAccessTopMostDescription.Visibility = visibility;
-                }
+                // 移除了 UIAccessTopMostPanel 的可见性控制，因为 UI 已移至新设置窗口
             }
             catch (Exception ex)
             {
@@ -4655,7 +4550,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 应用UIA置顶功能
         /// </summary>
-        private void ApplyUIAccessTopMost()
+        internal void ApplyUIAccessTopMost()
         {
             try
             {

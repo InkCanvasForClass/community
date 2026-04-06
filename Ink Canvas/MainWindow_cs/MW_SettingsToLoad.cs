@@ -216,23 +216,8 @@ namespace Ink_Canvas
             {
             }
 
-            try
-            {
-                if (File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.Startup) +
-                                "\\Ink Canvas Annotation.lnk"))
-                {
-                    ToggleSwitchRunAtStartup.IsOn = true;
-                }
-                else
-                {
-                    ToggleSwitchRunAtStartup.IsOn = false;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile(ex.ToString(), LogHelper.LogType.Error);
-                ToggleSwitchRunAtStartup.IsOn = false;
-            }
+            // 检查开机自启动（不再设置 UI 控件，Settings 中没有 IsRunAtStartup 属性）
+            // var runAtStartup = SettingsService.Instance.CheckRunAtStartup();
 
             if (Settings.Startup != null)
             {
@@ -250,21 +235,15 @@ namespace Ink_Canvas
                     }
                 }
 
+                // 设置笔尖模式（不再设置 UI 控件）
                 if (Settings.Startup.IsEnableNibMode)
                 {
-                    ToggleSwitchEnableNibMode.IsOn = true;
-                    BoardToggleSwitchEnableNibMode.IsOn = true;
                     BoundsWidth = Settings.Advanced.NibModeBoundsWidth;
                 }
                 else
                 {
-                    ToggleSwitchEnableNibMode.IsOn = false;
-                    BoardToggleSwitchEnableNibMode.IsOn = false;
                     BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
                 }
-
-                // 设置自动更新相关选项
-                ToggleSwitchIsAutoUpdate.IsOn = Settings.Startup.IsAutoUpdate;
 
                 // 只有在启用了自动更新功能时才检查更新
                 if (Settings.Startup.IsAutoUpdate && !skipAutoUpdateCheck)
@@ -282,66 +261,13 @@ namespace Ink_Canvas
                     }
                 }
 
-                ToggleSwitchIsAutoUpdateWithSilence.Visibility = Settings.Startup.IsAutoUpdate ? Visibility.Visible : Visibility.Collapsed;
-                if (Settings.Startup.IsAutoUpdateWithSilence)
-                {
-                    ToggleSwitchIsAutoUpdateWithSilence.IsOn = true;
-                }
-
-                // 初始化更新通道选择
-                foreach (var radioButton in UpdateChannelSelector.Items)
-                {
-                    if (radioButton is RadioButton rb)
-                    {
-                        if (rb.Tag.ToString() == Settings.Startup.UpdateChannel.ToString())
-                        {
-                            rb.IsChecked = true;
-                            break;
-                        }
-                    }
-                }
-
-                // 初始化更新包架构
-                if (UpdatePackageArchitectureSelector != null)
-                {
-                    _isChangingUpdatePackageArchInternally = true;
-                    try
-                    {
-                        string wantTag = Settings.Startup.UpdatePackageArchitecture == UpdatePackageArchitecture.X64 ? "X64" : "X86";
-                        foreach (var item in UpdatePackageArchitectureSelector.Items)
-                        {
-                            if (item is RadioButton rb && rb.Tag != null &&
-                                string.Equals(rb.Tag.ToString(), wantTag, StringComparison.OrdinalIgnoreCase))
-                            {
-                                rb.IsChecked = true;
-                                break;
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        _isChangingUpdatePackageArchInternally = false;
-                    }
-                }
-
-                AutoUpdateTimePeriodBlock.Visibility = Settings.Startup.IsAutoUpdateWithSilence
-                    ? Visibility.Visible
-                    : Visibility.Collapsed;
-
-                AutoUpdateWithSilenceTimeComboBox.InitializeAutoUpdateWithSilenceTimeComboBoxOptions(
-                    AutoUpdateWithSilenceStartTimeComboBox, AutoUpdateWithSilenceEndTimeComboBox);
-                AutoUpdateWithSilenceStartTimeComboBox.SelectedItem = Settings.Startup.AutoUpdateWithSilenceStartTime;
-                AutoUpdateWithSilenceEndTimeComboBox.SelectedItem = Settings.Startup.AutoUpdateWithSilenceEndTime;
-
-                ToggleSwitchFoldAtStartup.IsOn = Settings.Startup.IsFoldAtStartup;
+                // 不再初始化 UI 控件，已移至 SettingsService
             }
             else
             {
                 Settings.Startup = new Startup();
-                Settings.Startup.IsEnableNibMode = false; // 默认关闭笔尖模式
-                ToggleSwitchEnableNibMode.IsOn = false; // 默认关闭笔尖模式
-                BoardToggleSwitchEnableNibMode.IsOn = false; // 默认关闭笔尖模式
-                BoundsWidth = Settings.Advanced.FingerModeBoundsWidth; // 使用手指模式边界宽度
+                Settings.Startup.IsEnableNibMode = false;
+                BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
             }
 
             // 恢复崩溃后操作设置
@@ -351,12 +277,10 @@ namespace Ink_Canvas
                 if (Settings.Startup.CrashAction == 0)
                 {
                     App.CrashAction = App.CrashActionType.SilentRestart;
-                    if (RadioCrashSilentRestart != null) RadioCrashSilentRestart.IsChecked = true;
                 }
                 else
                 {
                     App.CrashAction = App.CrashActionType.NoAction;
-                    if (RadioCrashNoAction != null) RadioCrashNoAction.IsChecked = true;
                 }
             }
 
