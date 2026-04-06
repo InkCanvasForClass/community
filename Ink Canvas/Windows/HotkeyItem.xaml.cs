@@ -11,6 +11,16 @@ namespace Ink_Canvas.Windows
     /// </summary>
     public partial class HotkeyItem : UserControl
     {
+        private static readonly SolidColorBrush HotkeyValueForeground = CreateFrozenBrush(0xFA, 0xFA, 0xFA);
+        private static readonly SolidColorBrush HotkeyPlaceholderForeground = CreateFrozenBrush(0xA1, 0xA1, 0xAA);
+
+        private static SolidColorBrush CreateFrozenBrush(byte r, byte g, byte b)
+        {
+            var brush = new SolidColorBrush(Color.FromRgb(r, g, b));
+            brush.Freeze();
+            return brush;
+        }
+
         #region Events
         /// <summary>
         /// 快捷键变更事件
@@ -80,13 +90,13 @@ namespace Ink_Canvas.Windows
             if (_currentKey == Key.None)
             {
                 CurrentHotkeyTextBlock.Text = "未设置";
-                CurrentHotkeyTextBlock.Foreground = Brushes.Gray;
+                CurrentHotkeyTextBlock.Foreground = HotkeyPlaceholderForeground;
             }
             else
             {
                 var modifiersText = _currentModifiers == ModifierKeys.None ? "" : $"{_currentModifiers}+";
                 CurrentHotkeyTextBlock.Text = $"{modifiersText}{_currentKey}";
-                CurrentHotkeyTextBlock.Foreground = Brushes.Black;
+                CurrentHotkeyTextBlock.Foreground = HotkeyValueForeground;
             }
         }
 
@@ -106,7 +116,7 @@ namespace Ink_Canvas.Windows
         private void StopHotkeyCapture()
         {
             BtnSetHotkey.Content = "设置";
-            BtnSetHotkey.Background = Brushes.DodgerBlue;
+            BtnSetHotkey.ClearValue(Button.BackgroundProperty);
 
             // 移除键盘事件处理器
             KeyDown -= HotkeyItem_KeyDown;

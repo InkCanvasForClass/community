@@ -1,4 +1,4 @@
-using Ink_Canvas.Windows.SettingsViews2.Pages;
+using Ink_Canvas.Windows.SettingsViews.Pages;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
@@ -10,9 +10,9 @@ using System.Linq;
 using MessageBox = System.Windows.MessageBox;
 using Screen = System.Windows.Forms.Screen;
 
-namespace Ink_Canvas.Windows.SettingsViews2
+namespace Ink_Canvas.Windows.SettingsViews
 {
-    public partial class SettingsWindow2 : Window
+    public partial class SettingsWindow : Window
     {
         private readonly Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
@@ -26,7 +26,7 @@ namespace Ink_Canvas.Windows.SettingsViews2
         // 标记窗口是否曾经最大化过
         private bool _wasMaximized = false;
 
-        public SettingsWindow2()
+        public SettingsWindow()
         {
             InitializeComponent();
 

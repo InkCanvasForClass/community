@@ -541,11 +541,6 @@ namespace Ink_Canvas.Windows
         #endregion
 
         #region Event Handlers
-        private void BtnClose_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
         /// <summary>
         /// 标题栏拖拽事件
         /// </summary>

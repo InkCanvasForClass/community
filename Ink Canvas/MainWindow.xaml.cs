@@ -2817,7 +2817,7 @@ namespace Ink_Canvas
             if (isOpeningOrHidingSettingsPane) return;
             HideSubPanels();
             {
-                var settingsWindow = new Windows.SettingsViews2.SettingsWindow2();
+                var settingsWindow = new Windows.SettingsViews.SettingsWindow();
                 settingsWindow.Owner = this;
                 settingsWindow.ShowDialog();
             }

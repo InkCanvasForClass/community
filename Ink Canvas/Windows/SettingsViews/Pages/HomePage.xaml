@@ -1,16 +1,16 @@
-<Page x:Class="Ink_Canvas.Windows.SettingsViews2.Pages.BasicPage"
+<Page x:Class="Ink_Canvas.Windows.SettingsViews.Pages.HomePage"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews2.Pages"
+      xmlns:local="clr-namespace:Ink_Canvas.Windows.SettingsViews.Pages"
       xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
       xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="基本">
+      Title="首页">
 
     <ScrollViewer Padding="59,0,59,0">
         <!--  These styles can be referenced to create a consistent SettingsPage layout  -->
@@ -31,15 +31,45 @@
                 HorizontalAlignment="Stretch"
                 Spacing="{StaticResource SettingsCardSpacing}">
                 <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="启动时行为" />
+                    Text="快速导航" />
 
                 <ui:SettingsCard
-                    Header="启动设置"
-                    Description="点击跳转到启动设置页面"
+                    Header="基本设置"
+                    Description="点击跳转到基本设置页面"
                     IsClickEnabled="True"
-                    Click="SettingsCard_Click">
+                    Click="SettingsCard_Basic_Click">
                     <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Play}"/>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Home}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard
+                    Header="页面 2"
+                    Description="点击跳转到页面 2"
+                    IsClickEnabled="True"
+                    Click="SettingsCard_Page2_Click">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:SymbolIcon Symbol="Document" />
+                    </ui:SettingsCard.HeaderIcon>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard
+                    Header="设计设置"
+                    Description="点击跳转到设计设置页面"
+                    IsClickEnabled="True"
+                    Click="SettingsCard_Design_Click">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Design}"/>
+                    </ui:SettingsCard.HeaderIcon>
+                </ui:SettingsCard>
+
+                <ui:SettingsCard
+                    Header="外观设置"
+                    Description="点击跳转到外观设置页面"
+                    IsClickEnabled="True"
+                    Click="SettingsCard_Appearance_Click">
+                    <ui:SettingsCard.HeaderIcon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Color}"/>
                     </ui:SettingsCard.HeaderIcon>
                 </ui:SettingsCard>
             </ikw:SimpleStackPanel>

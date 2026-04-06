@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Ink_Canvas.Windows.SettingsViews2.Pages
+namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
     /// <summary>
     /// Page2.xaml 的交互逻辑

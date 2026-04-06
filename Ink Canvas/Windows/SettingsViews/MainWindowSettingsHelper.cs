@@ -7,7 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using Media = System.Windows.Media;
 
-namespace Ink_Canvas.Windows.SettingsViews2
+namespace Ink_Canvas.Windows.SettingsViews
 {
     public static class MainWindowSettingsHelper
     {
@@ -331,7 +331,7 @@ namespace Ink_Canvas.Windows.SettingsViews2
                     // 查找所有打开的设置窗口
                     foreach (Window window in Application.Current.Windows)
                     {
-                        if (window.GetType().Name == "SettingsWindow2")
+                        if (window.GetType().Name == "SettingsWindow")
                         {
                             // 同步所有面板（保守策略）
                             SyncAllPanels(window);
@@ -456,8 +456,8 @@ namespace Ink_Canvas.Windows.SettingsViews2
                 // 查找所有打开的设置窗口
                 foreach (Window window in Application.Current.Windows)
                 {
-                    // 使用类型名称匹配，因为 SettingsWindow2 在不同的命名空间中
-                    if (window.GetType().Name == "SettingsWindow2")
+                    // 使用类型名称匹配，因为 SettingsWindow 在不同的命名空间中
+                    if (window.GetType().Name == "SettingsWindow")
                     {
                         // 同时调用 ApplyTheme 方法更新窗口本身
                         var applyThemeMethod = window.GetType().GetMethod("ApplyTheme",

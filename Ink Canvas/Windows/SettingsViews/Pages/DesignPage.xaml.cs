@@ -13,39 +13,30 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Ink_Canvas.Windows.SettingsViews2.Pages
+namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class AppearancePage : Page
+    public partial class DesignPage : Page
     {
-        public AppearancePage()
+        public DesignPage()
         {
             InitializeComponent();
         }
 
         private void SettingsCard_Click(object sender, RoutedEventArgs e)
         {
-            SettingsWindow2 settingsWindow = Window.GetWindow(this) as SettingsWindow2;
+            SettingsWindow settingsWindow = Window.GetWindow(this) as SettingsWindow;
             if (settingsWindow != null)
             {
-                settingsWindow.NavigateToPage("ThemePage");
+                settingsWindow.NavigateToPage("IconographyPage");
             }
         }
 
         private void SettingsCard_Click_1(object sender, RoutedEventArgs e)
         {
-            SettingsWindow2 settingsWindow = Window.GetWindow(this) as SettingsWindow2;
+            SettingsWindow settingsWindow = Window.GetWindow(this) as SettingsWindow;
             if (settingsWindow != null)
             {
-                settingsWindow.NavigateToPage("ColorsPage");
-            }
-        }
-
-        private void SettingsCard_Click_2(object sender, RoutedEventArgs e)
-        {
-            SettingsWindow2 settingsWindow = Window.GetWindow(this) as SettingsWindow2;
-            if (settingsWindow != null)
-            {
-                settingsWindow.NavigateToPage("FontsPage");
+                settingsWindow.NavigateToPage("TypographyPage");
             }
         }
     }

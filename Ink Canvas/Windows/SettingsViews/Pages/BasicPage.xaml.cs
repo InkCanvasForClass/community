@@ -13,30 +13,26 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Ink_Canvas.Windows.SettingsViews2.Pages
+namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
-    public partial class DesignPage : Page
+    /// <summary>
+    /// Basic.xaml 的交互逻辑
+    /// </summary>
+    public partial class BasicPage : Page
     {
-        public DesignPage()
+        public BasicPage()
         {
             InitializeComponent();
         }
 
         private void SettingsCard_Click(object sender, RoutedEventArgs e)
         {
-            SettingsWindow2 settingsWindow = Window.GetWindow(this) as SettingsWindow2;
+            // 找到SettingsWindow窗口
+            SettingsWindow settingsWindow = Window.GetWindow(this) as SettingsWindow;
             if (settingsWindow != null)
             {
-                settingsWindow.NavigateToPage("IconographyPage");
-            }
-        }
-
-        private void SettingsCard_Click_1(object sender, RoutedEventArgs e)
-        {
-            SettingsWindow2 settingsWindow = Window.GetWindow(this) as SettingsWindow2;
-            if (settingsWindow != null)
-            {
-                settingsWindow.NavigateToPage("TypographyPage");
+                // 调用NavigateToPage方法导航到启动页面
+                settingsWindow.NavigateToPage("StartupPage");
             }
         }
     }
