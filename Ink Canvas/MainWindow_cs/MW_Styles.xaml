@@ -43,6 +43,7 @@
     <Style x:Key="GroupBoxBase" TargetType="GroupBox">
         <Setter Property="Foreground" Value="#fafafa"/>
         <Setter Property="Margin" Value="0,0,0,8"/>
+        <Setter Property="BorderThickness" Value="0"/>
     </Style>
     <Style x:Key="GroupBoxPlugins" TargetType="GroupBox" BasedOn="{StaticResource GroupBoxBase}"/>
     <Style x:Key="GroupBoxStartup" TargetType="GroupBox" BasedOn="{StaticResource GroupBoxBase}"/>

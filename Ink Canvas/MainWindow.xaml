@@ -41,6 +41,8 @@
             <!-- 合并新橡皮擦资源 -->
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="MainWindow_cs/MW_Eraser.xaml"/>
+                <ResourceDictionary Source="MainWindow_cs/MW_Styles.xaml"/>
+                <ResourceDictionary Source="MainWindow_cs/MW_ToolbarIcons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <c:IsEnabledToOpacityConverter x:Key="IsEnabledToOpacityConverter" />
@@ -149,71 +151,6 @@
                 <Setter Property="helpers:AutoFontSizeHelper.MaxFontSize" Value="10" />
             </Style>
 
-            <!-- Navigation Button Style -->
-            <Style x:Key="NavButton" TargetType="Button">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="border" Background="{TemplateBinding Background}" 
-                                      BorderBrush="{TemplateBinding BorderBrush}" 
-                                      BorderThickness="{TemplateBinding BorderThickness}"
-                                      CornerRadius="4">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Background" Value="#27272a"/>
-                                </Trigger>
-                                <Trigger Property="IsPressed" Value="True">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </Trigger>
-                                <!-- 使用多个DataTrigger替代动态绑定 -->
-                                <DataTrigger Binding="{Binding Tag}" Value="startup">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="canvas">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="gesture">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="inkrecognition">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="crashaction">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="ppt">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="advanced">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="automation">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="randomwindow">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="theme">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="shortcuts">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="about">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                                <DataTrigger Binding="{Binding Tag}" Value="plugins">
-                                    <Setter Property="Background" Value="#3b82f6"/>
-                                </DataTrigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
         </ResourceDictionary>
     </Window.Resources>
 
@@ -520,7 +457,7 @@
                         </Grid>
                         
                         <!-- 内容区域 -->
-                        <ui:ScrollViewerEx Grid.Row="1" Margin="0,0,0,0" VerticalScrollBarVisibility="Auto"
+                        <ui:ScrollViewerEx Grid.Row="1" Margin="0,0,0,0" Style="{StaticResource SettingsPanelScrollViewer}"
                                            PanningMode="VerticalOnly" ui:ThemeManager.RequestedTheme="Dark"
                                            ManipulationBoundaryFeedback="SCManipulationBoundaryFeedback"
                                            Name="SettingsPanelScrollViewer">
@@ -624,7 +561,7 @@
                                     </ikw:SimpleStackPanel>
                                 </ikw:SimpleStackPanel>
                             </Border>
-                            <GroupBox Name="GroupBoxModeSettings">
+                            <GroupBox Name="GroupBoxModeSettings" Style="{StaticResource GroupBoxModeSettings}">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Settings_Mode}" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
@@ -643,7 +580,7 @@
                                 </ikw:SimpleStackPanel>
                             </GroupBox>
                             
-                            <GroupBox Name="GroupBoxSettings">
+                            <GroupBox Name="GroupBoxSettings" Style="{StaticResource GroupBoxNewSettings}">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Settings_NewWindow}" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
@@ -656,7 +593,7 @@
                                 </ikw:SimpleStackPanel>
                             </GroupBox>
                             
-                            <GroupBox Name="GroupBoxStartup">
+                            <GroupBox Name="GroupBoxStartup" Style="{StaticResource GroupBoxStartup}">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Startup_Start}" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
@@ -797,7 +734,7 @@
                 -->
                                 </ikw:SimpleStackPanel>
                             </GroupBox>
-                            <GroupBox Name="GroupBoxCanvas">
+                            <GroupBox Name="GroupBoxCanvas" Style="{StaticResource GroupBoxCanvas}">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Canvas_GroupTitle}" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
@@ -1024,7 +961,7 @@
                                 </ikw:SimpleStackPanel>
                             </GroupBox>
                             <!-- 崩溃后操作设置 -->
-                            <GroupBox Name="GroupBoxCrashAction">
+                            <GroupBox Name="GroupBoxCrashAction" Style="{StaticResource GroupBoxCrashAction}">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Crash_Title}" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
@@ -1042,7 +979,7 @@
                                     <TextBlock Text="{i18n:I18n Key=Crash_Hint}" Foreground="#a1a1aa" TextWrapping="Wrap" Width="420" />
                                 </ikw:SimpleStackPanel>
                             </GroupBox>
-                            <GroupBox Name="GroupBoxGesture">
+                            <GroupBox Name="GroupBoxGesture" Style="{StaticResource GroupBoxGesture}">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Gesture_Title}" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
@@ -1098,7 +1035,7 @@
                                                Visibility="{Binding ElementName=ToggleSwitchEnablePalmEraser, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}" />    
                                 </ikw:SimpleStackPanel>
                             </GroupBox>
-                            <GroupBox Name="GroupBoxInkRecognition">
+                            <GroupBox Name="GroupBoxInkRecognition" Style="{StaticResource GroupBoxInkRecognition}">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=InkRecog_Title}" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
@@ -1250,7 +1187,7 @@
                                     <TextBlock Text="{i18n:I18n Key=InkRecog_LineEndpointSnappingHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                 </ikw:SimpleStackPanel>
                             </GroupBox>
-                            <GroupBox Name="GroupBoxAppearanceNewUI">
+                            <GroupBox Name="GroupBoxAppearanceNewUI" Style="{StaticResource GroupBoxAppearanceNewUI}">
                                 <GroupBox.Header>
                                     <TextBlock Margin="0,12,0,0" Text="{i18n:I18n Key=Theme_GroupTitle}" FontWeight="Bold" Foreground="#fafafa"
                                                FontSize="26" />
@@ -5054,77 +4991,37 @@
                     Visibility="Collapsed" 
                     Panel.ZIndex="1000">
                 <!-- 四个角控制点 -->
-                <Ellipse Name="ImageTopLeftHandle" 
-                         Width="8" Height="8" 
-                         Fill="White" 
-                         Stroke="#0078D4" 
-                         StrokeThickness="1" 
-                         Cursor="SizeNWSE"
+                <Ellipse Name="ImageTopLeftHandle" Style="{StaticResource ImageResizeHandleNWSE}"
                          MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
                          MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
                          MouseMove="ImageResizeHandle_MouseMove" />
-                <Ellipse Name="ImageTopRightHandle" 
-                         Width="8" Height="8" 
-                         Fill="White" 
-                         Stroke="#0078D4" 
-                         StrokeThickness="1" 
-                         Cursor="SizeNESW"
+                <Ellipse Name="ImageTopRightHandle" Style="{StaticResource ImageResizeHandleNESW}"
                          MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
                          MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
                          MouseMove="ImageResizeHandle_MouseMove" />
-                <Ellipse Name="ImageBottomLeftHandle" 
-                         Width="8" Height="8" 
-                         Fill="White" 
-                         Stroke="#0078D4" 
-                         StrokeThickness="1" 
-                         Cursor="SizeNESW"
+                <Ellipse Name="ImageBottomLeftHandle" Style="{StaticResource ImageResizeHandleNESW}"
                          MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
                          MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
                          MouseMove="ImageResizeHandle_MouseMove" />
-                <Ellipse Name="ImageBottomRightHandle" 
-                         Width="8" Height="8" 
-                         Fill="White" 
-                         Stroke="#0078D4" 
-                         StrokeThickness="1" 
-                         Cursor="SizeNWSE"
+                <Ellipse Name="ImageBottomRightHandle" Style="{StaticResource ImageResizeHandleNWSE}"
                          MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
                          MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
                          MouseMove="ImageResizeHandle_MouseMove" />
                 
                 <!-- 四个边控制点 -->
-                <Ellipse Name="ImageTopHandle" 
-                         Width="8" Height="8" 
-                         Fill="White" 
-                         Stroke="#0078D4" 
-                         StrokeThickness="1" 
-                         Cursor="SizeNS"
+                <Ellipse Name="ImageTopHandle" Style="{StaticResource ImageResizeHandleNS}"
                          MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
                          MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
                          MouseMove="ImageResizeHandle_MouseMove" />
-                <Ellipse Name="ImageBottomHandle" 
-                         Width="8" Height="8" 
-                         Fill="White" 
-                         Stroke="#0078D4" 
-                         StrokeThickness="1" 
-                         Cursor="SizeNS"
+                <Ellipse Name="ImageBottomHandle" Style="{StaticResource ImageResizeHandleNS}"
                          MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
                          MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
                          MouseMove="ImageResizeHandle_MouseMove" />
-                <Ellipse Name="ImageLeftHandle" 
-                         Width="8" Height="8" 
-                         Fill="White" 
-                         Stroke="#0078D4" 
-                         StrokeThickness="1" 
-                         Cursor="SizeWE"
+                <Ellipse Name="ImageLeftHandle" Style="{StaticResource ImageResizeHandleWE}"
                          MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
                          MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
                          MouseMove="ImageResizeHandle_MouseMove" />
-                <Ellipse Name="ImageRightHandle" 
-                         Width="8" Height="8" 
-                         Fill="White" 
-                         Stroke="#0078D4" 
-                         StrokeThickness="1" 
-                         Cursor="SizeWE"
+                <Ellipse Name="ImageRightHandle" Style="{StaticResource ImageResizeHandleWE}"
                          MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
                          MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
                          MouseMove="ImageResizeHandle_MouseMove" />
@@ -5360,7 +5257,7 @@
                                                                     Geometry="F0 M24,24z M0,0z M7.82154,10.0753L7.82154,3.74613C7.82154,3.06603 8.08946,2.40655 8.57377,1.92224 9.05808,1.43793 9.70726,1.17001 10.3977,1.17001 11.0881,1.17001 11.7372,1.43793 12.2216,1.92224 12.7059,2.40655 12.9738,3.05573 12.9738,3.74613L12.9738,6.37308C13.1415,6.33947 13.3139,6.32225 13.489,6.32225 14.1794,6.32225 14.8286,6.59016 15.3129,7.07447 15.4484,7.21001 15.567,7.35845 15.6675,7.5171 15.9551,7.40916 16.2634,7.35269 16.5803,7.35269 17.2707,7.35269 17.9199,7.62061 18.4042,8.10492 18.5461,8.24683 18.6695,8.4029 18.7729,8.57001 19.6856,8.26338 20.7674,8.45871 21.4647,9.15599 21.949,9.6403 22.2169,10.2998 22.2169,10.9799L22.2169,15.6169C22.2169,17.5438 21.4647,19.3574 20.1045,20.7176 18.7443,22.0778 16.9307,22.83 15.0038,22.83L13.149,22.83 13.1799,22.8094 12.8398,22.8094C11.7682,22.7579 10.7068,22.4694 9.75878,21.9541 8.70773,21.3874 7.81124,20.563 7.15175,19.5738L6.94566,19.2647C6.60562,18.7494 5.49273,16.8019 3.52458,13.3087 3.19484,12.7213 3.1021,12.0412 3.27727,11.3818 3.45245,10.7326 3.86463,10.1761 4.44168,9.83608 5.00842,9.49604 5.66791,9.35177 6.31709,9.43421 6.86548,9.50385 7.39181,9.7279 7.82154,10.0753z M10.037,3.38547C10.1297,3.28243 10.2637,3.23091 10.3977,3.23091 10.5316,3.23091 10.6656,3.29273 10.7583,3.38547 10.8614,3.47821 10.9129,3.61217 10.9129,3.74613L10.9129,11.4745C10.9129,12.0412 11.3766,12.5049 11.9433,12.5049 12.5101,12.5049 12.9738,12.0412 12.9738,11.4745L12.9738,8.89836C12.9738,8.7644 13.0356,8.63045 13.1283,8.53771 13.2211,8.43466 13.355,8.38314 13.489,8.38314 13.623,8.38314 13.7569,8.44497 13.8497,8.53771 13.9527,8.63045 14.0042,8.7644 14.0042,8.89836L14.0042,11.4745C14.0042,12.0412 14.4679,12.5049 15.0347,12.5049 15.6014,12.5049 16.0651,12.0412 16.0651,11.4745L16.0651,9.92881C16.0651,9.79485 16.1269,9.66089 16.2197,9.56815 16.3124,9.46511 16.4464,9.41359 16.5803,9.41359 16.7143,9.41359 16.8483,9.47541 16.941,9.56815 17.044,9.66089 17.0956,9.79485 17.0956,9.92881L17.0956,10.5869C17.0752,10.7163 17.0646,10.8477 17.0646,10.9799 17.0646,11.0661 17.0754,11.1499 17.0956,11.2301L17.0956,11.4745C17.0956,12.0412 17.5593,12.5049 18.126,12.5049 18.6928,12.5049 19.1565,12.0412 19.1565,11.4745L19.1565,10.8128C19.1834,10.7399 19.2266,10.6727 19.2801,10.6192 19.4759,10.4234 19.8159,10.4234 20.0117,10.6192 20.1148,10.712 20.1663,10.8459 20.1663,10.9799L20.1663,15.6169C20.1663,16.9977 19.6408,18.296 18.6618,19.2647 17.6829,20.2333 16.3949,20.7691 15.0141,20.7691L13.1593,20.7691C12.3143,20.7691 11.4796,20.5527 10.7274,20.1509 9.98548,19.749 9.3363,19.1616 8.8726,18.4506L8.66651,18.1415C8.35737,17.6675 7.23419,15.7096 5.31756,12.2988 5.24543,12.1752 5.23512,12.0412 5.26604,11.9073 5.30725,11.7733 5.38969,11.6703 5.50304,11.5981 5.66791,11.4951 5.874,11.4539 6.06978,11.4745 6.26557,11.5054 6.45105,11.5878 6.59531,11.7321L8.11007,13.2469C8.49419,13.631 9.10425,13.648 9.50833,13.2978 9.73651,13.1084 9.88244,12.8229 9.88244,12.5049L9.88244,3.74613C9.88244,3.61217,9.94426,3.47821,10.037,3.38547z M2.99905,6.31195L1.78313,4.65293 2.61779,4.04497C3.46275,3.4267,4.37985,2.89087,5.33817,2.46838L6.27587,2.0459 7.12084,3.93162 6.18313,4.3541C5.35878,4.72506,4.56533,5.17846,3.83372,5.71429L2.99905,6.32225 2.99905,6.31195z M18.2806,5.20935L19.1565,5.75549 20.259,4.01404 19.3831,3.4679C18.1157,2.67446,16.7452,2.0768,15.3026,1.68523L14.303,1.41731 13.7672,3.40607 14.7667,3.67399C16.0033,4.00373,17.1883,4.51895,18.2806,5.20935z" />
                                                                 <GeometryDrawing x:Name="BoardGestureGeometry2"
                                                                     Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F0 M24,24z M0,0z " />
+                                                                    Geometry="{StaticResource BoardGestureGeometry2}" />
                                                             </DrawingGroup>
                                                         </DrawingImage.Drawing>
                                                     </DrawingImage>
@@ -5373,7 +5270,7 @@
                                     </Border>
                                     <Border>
                                         <Grid Width="0" Margin="0,0,0,5" RenderTransformOrigin="0,1">
-                                            <Border ClipToBounds="True" x:Name="BoardTwoFingerGestureBorder"
+                                            <Border ClipToBounds="True" x:Name="BoardTwoFingerGestureBorder" Style="{StaticResource BoardTwoFingerGestureBorder}"
                                                 Margin="-115,-161,-55,50"
                                                 CornerRadius="8"
                                                 Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="#2563eb"
@@ -5554,7 +5451,7 @@
 
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,5,0">
                                 <ikw:SimpleStackPanel Orientation="Horizontal">
-                                    <Border x:Name="BoardSelect" Width="60" Height="50" MouseDown="Border_MouseDown"
+                                    <Border x:Name="BoardSelect" Width="60" Height="50" MouseDown="Border_MouseDown" Style="{StaticResource BoardSelect}"
                                             BorderThickness="1,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                             MouseUp="SymbolIconSelect_MouseUp" CornerRadius="5,0,0,5"
                                             Background="{DynamicResource BoardFloatBarBackground}"
@@ -5568,7 +5465,7 @@
                                                             <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                                 <GeometryDrawing x:Name="BoardSelectGeometry"
                                                                     Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M22.7989,10.1653L1.14304,1.14304 10.1653,22.7989 12.8305,14.9518 19.6892,21.8105 21.8105,19.6892 14.9518,12.8305 22.7989,10.1653z" />
+                                                                    Geometry="{StaticResource BoardSelectGeometry}" />
                                                             </DrawingGroup>
                                                         </DrawingImage.Drawing>
                                                     </DrawingImage>
@@ -5579,7 +5476,7 @@
                                                        HorizontalAlignment="Center" FontSize="12" />
                                         </Grid>
                                     </Border>
-                                    <Border x:Name="BoardPen" Width="60" Height="50" MouseDown="Border_MouseDown"
+                                    <Border x:Name="BoardPen" Width="60" Height="50" MouseDown="Border_MouseDown" Style="{StaticResource BoardPen}"
                                             BorderThickness="0,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                             MouseUp="PenIcon_Click" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
                                         <Grid Margin="6,6,6,4">
@@ -5591,7 +5488,7 @@
                                                             <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                                 <GeometryDrawing x:Name="BoardPenGeometry"
                                                                     Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M20.4786,1.42438C19.9985,1.23743 19.4847,1.15194 18.9698,1.17319 18.4549,1.19444 17.9499,1.32197 17.4869,1.54789 17.0368,1.76752 16.6358,2.07554 16.3083,2.45361L3.85516,14.9067 9.08243,20.134 21.5311,7.68529C21.9113,7.36382 22.223,6.96912 22.447,6.52438 22.6786,6.06462 22.8113,5.56167 22.8365,5.04763 22.8616,4.5336 22.7787,4.02012 22.593,3.54002 22.4073,3.05994 22.1232,2.62403 21.759,2.25988 21.3949,1.89574 20.9587,1.61132 20.4786,1.42438z M7.28056,21.1605L2.8286,16.7086 1.15912,22.83 7.28056,21.1605z" />
+                                                                    Geometry="{StaticResource BoardPenGeometry}" />
                                                             </DrawingGroup>
                                                         </DrawingImage.Drawing>
                                                     </DrawingImage>
@@ -5629,7 +5526,7 @@
                                                                 <ikw:SimpleStackPanel Orientation="Horizontal"
                                                                     HorizontalAlignment="Stretch"
                                                                     Margin="8,0,0,0" Spacing="2">
-                                                                    <Border x:Name="BoardDefaultPenTabButton"
+                                                                    <Border x:Name="BoardDefaultPenTabButton" Style="{StaticResource BoardDefaultPenTabButton}"
                                                                             MouseDown="SwitchToDefaultPen"
                                                                             Background="#48dbeafe" Height="20"
                                                                             Width="36"
@@ -5667,7 +5564,7 @@
                                                                             </ikw:SimpleStackPanel>
                                                                         </Canvas>
                                                                     </Border>
-                                                                    <Border x:Name="BoardHighlightPenTabButton"
+                                                                    <Border x:Name="BoardHighlightPenTabButton" Style="{StaticResource BoardHighlightPenTabButton}"
                                                                             MouseDown="SwitchToHighlighterPen"
                                                                             Background="Transparent" Height="20"
                                                                             Width="52"
@@ -5877,7 +5774,7 @@
                                                                                     <Grid Margin="3">
                                                                                         <Image
                                                                                             x:Name="BoardColorThemeSwitchIcon"
-                                                                                            Source="/Resources/Icons-Fluent/ic_fluent_weather_sunny_24_regular.png"
+                                                                                            Source="{StaticResource BoardColorThemeSwitchIcon}"
                                                                                             RenderOptions.BitmapScalingMode="HighQuality"
                                                                                             VerticalAlignment="Top"
                                                                                             Width="23"
@@ -5893,7 +5790,7 @@
                                                                                     </Grid>
                                                                                 </Border>
                                                                                 <Border
-                                                                                    x:Name="BoardBorderPenColorBlack"
+                                                                                    x:Name="BoardBorderPenColorBlack" Style="{StaticResource BoardBorderPenColor}"
                                                                                     Background="Black"
                                                                                     BorderBrush="#D3D3D3"
                                                                                     BorderThickness="1.5"
@@ -5914,7 +5811,7 @@
                                                                                     </Viewbox>
                                                                                 </Border>
                                                                                 <Border
-                                                                                    x:Name="BoardBorderPenColorWhite"
+                                                                                    x:Name="BoardBorderPenColorWhite" Style="{StaticResource BoardBorderPenColor}"
                                                                                     Background="White"
                                                                                     BorderBrush="#71717a"
                                                                                     BorderThickness="1.5"
@@ -5934,7 +5831,7 @@
                                                                                             Margin="0,0,0,0" />
                                                                                     </Viewbox>
                                                                                 </Border>
-                                                                                <Border x:Name="BoardBorderPenColorRed"
+                                                                                <Border x:Name="BoardBorderPenColorRed" Style="{StaticResource BoardBorderPenColor}"
                                                                                     Background="#dc2626"
                                                                                     BorderBrush="#7f1d1d"
                                                                                     BorderThickness="1.5"
@@ -5955,7 +5852,7 @@
                                                                                     </Viewbox>
                                                                                 </Border>
                                                                                 <Border
-                                                                                    x:Name="BoardBorderPenColorYellow"
+                                                                                    x:Name="BoardBorderPenColorYellow" Style="{StaticResource BoardBorderPenColor}"
                                                                                     Background="#eab308"
                                                                                     BorderBrush="#713f12"
                                                                                     BorderThickness="1.5"
@@ -5984,7 +5881,7 @@
                                                                                 Margin="0">
 
                                                                                 <Border
-                                                                                    x:Name="BoardBorderPenColorGreen"
+                                                                                    x:Name="BoardBorderPenColorGreen" Style="{StaticResource BoardBorderPenColor}"
                                                                                     Background="#16a34a"
                                                                                     BorderBrush="#14532d"
                                                                                     BorderThickness="1.5"
@@ -6005,7 +5902,7 @@
                                                                                     </Viewbox>
                                                                                 </Border>
                                                                                 <Border
-                                                                                    x:Name="BoardBorderPenColorBlue"
+                                                                                    x:Name="BoardBorderPenColorBlue" Style="{StaticResource BoardBorderPenColor}"
                                                                                     Background="#2563eb"
                                                                                     BorderBrush="#1e3a8a"
                                                                                     BorderThickness="1.5"
@@ -6026,7 +5923,7 @@
                                                                                     </Viewbox>
                                                                                 </Border>
                                                                                 <Border
-                                                                                    x:Name="BoardBorderPenColorPink"
+                                                                                    x:Name="BoardBorderPenColorPink" Style="{StaticResource BoardBorderPenColor}"
                                                                                     Background="#db2777"
                                                                                     BorderBrush="#831843"
                                                                                     BorderThickness="1.5"
@@ -6047,7 +5944,7 @@
                                                                                     </Viewbox>
                                                                                 </Border>
                                                                                 <Border
-                                                                                    x:Name="BoardBorderPenColorTeal"
+                                                                                    x:Name="BoardBorderPenColorTeal" Style="{StaticResource BoardBorderPenColor}"
                                                                                     Background="#0d9488"
                                                                                     BorderBrush="#134e4a"
                                                                                     BorderThickness="1.5"
@@ -6068,7 +5965,7 @@
                                                                                     </Viewbox>
                                                                                 </Border>
                                                                                 <Border
-                                                                                    x:Name="BoardBorderPenColorOrange"
+                                                                                    x:Name="BoardBorderPenColorOrange" Style="{StaticResource BoardBorderPenColor}"
                                                                                     Background="#ea580c"
                                                                                     BorderBrush="#7c2d12"
                                                                                     BorderThickness="1.5"
@@ -6488,7 +6385,7 @@
 
                                         </Grid>
                                     </Border>
-                                    <Border x:Name="BoardEraser" Width="60" Height="50" MouseDown="Border_MouseDown"
+                                    <Border x:Name="BoardEraser" Width="60" Height="50" MouseDown="Border_MouseDown" Style="{StaticResource BoardEraser}"
                                             BorderThickness="0,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
                                             MouseUp="BoardEraserIcon_Click" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
                                         <Grid Margin="6,6,6,4">
@@ -6500,7 +6397,7 @@
                                                             <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                                 <GeometryDrawing x:Name="BoardEraserGeometry"
                                                                     Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M15.6314,20.7262L22.7921,13.5655C24.3494,12.141,24.2819,9.81776,22.8105,8.34633L16.7793,2.31508C15.3547,0.757753,13.0315,0.825236,11.5601,2.29666L4.38099,9.47574 15.6314,20.7262z M14.2172,22.1404L2.96677,10.89 1.20761,12.6491C-0.34971,14.0737,-0.281711,16.3974,1.18971,17.8688L6.15089,22.83 13.5276,22.83 14.2172,22.1404z" />
+                                                                    Geometry="{StaticResource BoardEraserGeometry}" />
                                                             </DrawingGroup>
                                                         </DrawingImage.Drawing>
                                                     </DrawingImage>
@@ -6522,7 +6419,7 @@
                                                 </TransformGroup>
                                             </Grid.RenderTransform>
                                             <Border Visibility="Visible" ClipToBounds="True"
-                                                    Name="BoardEraserSizePanel"
+                                                    Name="BoardEraserSizePanel" Style="{StaticResource BoardEraserSizePanel}"
                                                     CornerRadius="5" Background="{DynamicResource FloatBarBackground}"
                                                     Opacity="1"
                                                     BorderBrush="#2563eb" BorderThickness="1">
@@ -6576,7 +6473,7 @@
                                                     <ikw:SimpleStackPanel Orientation="Horizontal"
                                                                          HorizontalAlignment="Center"
                                                                          Margin="0,0,0,0" Spacing="4">
-                                                        <Border x:Name="BoardCircleEraserTabButton"
+                                                        <Border x:Name="BoardCircleEraserTabButton" Style="{StaticResource BoardCircleEraserTabButton}"
                                                                 MouseDown="SwitchToCircleEraser"
                                                                 Background="{DynamicResource BoardFloatBarButtonBackgroundPointerOverKey}" Height="20" Width="40"
                                                                 CornerRadius="3">
@@ -6603,7 +6500,7 @@
                                                                 </ikw:SimpleStackPanel>
                                                             </Canvas>
                                                         </Border>
-                                                        <Border x:Name="BoardRectangleEraserTabButton"
+                                                        <Border x:Name="BoardRectangleEraserTabButton" Style="{StaticResource BoardRectangleEraserTabButton}"
                                                                 MouseDown="SwitchToRectangleEraser"
                                                                 Background="{DynamicResource BoardFloatBarButtonBackgroundKey}"
                                                                 Height="20" Width="40" CornerRadius="3">
@@ -6745,7 +6642,7 @@
                                         </Grid>
                                     </Border>
                                     <Border Width="0">
-                                        <Border x:Name="BoardBorderDrawShape" Visibility="Visible"
+                                        <Border x:Name="BoardBorderDrawShape" Visibility="Visible" Style="{StaticResource BoardBorderDrawShape}"
                                                 Background="{DynamicResource FloatBarBackground}"
                                                 Opacity="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" BorderThickness="1" CornerRadius="5"
                                                 Margin="-147,-286,-89,55">
@@ -7072,7 +6969,7 @@
                                                     <TranslateTransform />
                                                 </TransformGroup>
                                             </Grid.RenderTransform>
-                                            <Border ClipToBounds="True" Name="BoardBorderTools"
+                                        <Border ClipToBounds="True" Name="BoardBorderTools" Style="{StaticResource BoardBorderTools}"
                                                     Margin="-80,-138.5,-39,33.5"
                                                     CornerRadius="5" Background="{DynamicResource SettingsPageBackground}" Opacity="1"
                                                     BorderThickness="1"
@@ -7575,7 +7472,7 @@
 
 
         <!-- 通知弹窗 -->
-        <Grid Name="GridNotifications" Margin="0,110" Visibility="Collapsed" HorizontalAlignment="Center"
+        <Grid Name="GridNotifications" Margin="0,110" Visibility="Collapsed" HorizontalAlignment="Center" Style="{StaticResource GridNotifications}"
               VerticalAlignment="Bottom">
             <Border CornerRadius="6" MaxHeight="200" Padding="20 10" Background="{DynamicResource SettingsPageBackground}" Opacity="0.95"
                     BorderBrush="#b91c1c" BorderThickness="1.5">
@@ -7714,13 +7611,13 @@
                     <Border BorderThickness="1" BorderBrush="#a1a1aa" Name="PPTBtnLBBorder"
                             Background="#f4f4f5" Opacity="1" CornerRadius="6">
                         <ikw:SimpleStackPanel Orientation="Horizontal">
-                            <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp"
+                            <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp" Style="{StaticResource PPTPreviousButtonBorderBase}"
                                     Name="PPTLBPreviousButtonBorder"
                                     MouseDown="GridPPTControlPrevious_MouseDown"
                                     MouseLeave="GridPPTControlPrevious_MouseLeave"
                                     CornerRadius="5 5 0 0" Background="Transparent">
                                 <Grid>
-                                    <Border Margin="3" CornerRadius="5" Name="PPTLBPreviousButtonFeedbackBorder"
+                                    <Border Margin="3" CornerRadius="5" Name="PPTLBPreviousButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                             Background="#18181b" Opacity="0" />
                                     <Image Height="28" Width="28">
                                         <Image.Source>
@@ -7729,7 +7626,7 @@
                                                     <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                         <GeometryDrawing Brush="#27272a"
                                                                          x:Name="PPTLBPreviousButtonGeometry"
-                                                                         Geometry="F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z" />
+                                                                         Geometry="{StaticResource PPTLBPreviousButtonGeometry}" />
                                                     </DrawingGroup>
                                                 </DrawingImage.Drawing>
                                             </DrawingImage>
@@ -7737,12 +7634,12 @@
                                     </Image>
                                 </Grid>
                             </Border>
-                            <Border Visibility="Visible" Name="PPTLBPageButton" TextBlock.Foreground="#171717"
+                            <Border Visibility="Visible" Name="PPTLBPageButton" TextBlock.Foreground="#171717" Style="{StaticResource PPTPageButtonBase}"
                                     MouseUp="PPTNavigationBtn_MouseUp" MouseDown="PPTNavigationBtn_MouseDown"
                                     MouseLeave="PPTNavigationBtn_MouseLeave" Width="auto" MinWidth="50" Height="50"
                                     Background="Transparent">
                                 <Grid>
-                                    <Border Margin="0,3" CornerRadius="5" Name="PPTLBPageButtonFeedbackBorder"
+                                    <Border Margin="0,3" CornerRadius="5" Name="PPTLBPageButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                             Background="#18181b" Opacity="0" />
                                     <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical"
                                                          Spacing="0.5" Margin="12,0">
@@ -7756,11 +7653,11 @@
 
                                 </Grid>
                             </Border>
-                            <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"
+                            <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp" Style="{StaticResource PPTNextButtonBorderBase}"
                                     MouseDown="GridPPTControlNext_MouseDown" MouseLeave="GridPPTControlNext_MouseLeave"
                                     CornerRadius="0 0 5 5" Background="Transparent" Name="PPTLBNextButtonBorder">
                                 <Grid>
-                                    <Border Margin="3" CornerRadius="5" Name="PPTLBNextButtonFeedbackBorder"
+                                    <Border Margin="3" CornerRadius="5" Name="PPTLBNextButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                             Background="#18181b" Opacity="0" />
                                     <Image VerticalAlignment="Center" HorizontalAlignment="Center" Height="28"
                                            Width="28">
@@ -7770,7 +7667,7 @@
                                                     <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                         <GeometryDrawing Brush="#27272a"
                                                                          x:Name="PPTLBNextButtonGeometry"
-                                                                         Geometry="F0 M24,24z M0,0z M20.6006,12.9642C21.1331,12.4317,21.1331,11.5683,20.6006,11.0358L14.0551,4.49031C13.5226,3.95777 12.6592,3.95777 12.1267,4.49031 11.5941,5.02284 11.5941,5.88625 12.1267,6.41878L16.3443,10.6364 4.36364,10.6364C3.61052,10.6364 3,11.2469 3,12 3,12.7531 3.61052,13.3636 4.36364,13.3636L16.3443,13.3636 12.1267,17.5812C11.5941,18.1137 11.5941,18.9772 12.1267,19.5097 12.6592,20.0422 13.5226,20.0422 14.0551,19.5097L20.6006,12.9642z" />
+                                                                         Geometry="{StaticResource PPTLBNextButtonGeometry}" />
                                                     </DrawingGroup>
                                                 </DrawingImage.Drawing>
                                             </DrawingImage>
@@ -7786,13 +7683,13 @@
                     <Border BorderThickness="1" BorderBrush="#a1a1aa" Name="PPTBtnRBBorder"
                             Background="#f4f4f5" Opacity="1" CornerRadius="6">
                         <ikw:SimpleStackPanel Orientation="Horizontal">
-                            <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp"
+                            <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp" Style="{StaticResource PPTPreviousButtonBorderBase}"
                                     Name="PPTRBPreviousButtonBorder"
                                     MouseDown="GridPPTControlPrevious_MouseDown"
                                     MouseLeave="GridPPTControlPrevious_MouseLeave"
                                     CornerRadius="5 5 0 0" Background="Transparent">
                                 <Grid>
-                                    <Border Margin="3" CornerRadius="5" Name="PPTRBPreviousButtonFeedbackBorder"
+                                    <Border Margin="3" CornerRadius="5" Name="PPTRBPreviousButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                             Background="#18181b" Opacity="0" />
                                     <Image Height="28" Width="28">
                                         <Image.Source>
@@ -7801,7 +7698,7 @@
                                                     <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                         <GeometryDrawing Brush="#27272a"
                                                                          x:Name="PPTRBPreviousButtonGeometry"
-                                                                         Geometry="F0 M24,24z M0,0z M3.3994,12.9642C2.86687,12.4317,2.86687,11.5683,3.3994,11.0358L9.94485,4.49031C10.4774,3.95777 11.3408,3.95777 11.8733,4.49031 12.4059,5.02284 12.4059,5.88625 11.8733,6.41878L7.65575,10.6364 19.6364,10.6364C20.3895,10.6364 21,11.2469 21,12 21,12.7531 20.3895,13.3636 19.6364,13.3636L7.65575,13.3636 11.8733,17.5812C12.4059,18.1137 12.4059,18.9772 11.8733,19.5097 11.3408,20.0422 10.4774,20.0422 9.94485,19.5097L3.3994,12.9642z" />
+                                                                         Geometry="{StaticResource PPTRBPreviousButtonGeometry}" />
                                                     </DrawingGroup>
                                                 </DrawingImage.Drawing>
                                             </DrawingImage>
@@ -7809,12 +7706,12 @@
                                     </Image>
                                 </Grid>
                             </Border>
-                            <Border Visibility="Visible" Name="PPTRBPageButton" TextBlock.Foreground="#171717"
+                            <Border Visibility="Visible" Name="PPTRBPageButton" TextBlock.Foreground="#171717" Style="{StaticResource PPTPageButtonBase}"
                                     MouseUp="PPTNavigationBtn_MouseUp" MouseDown="PPTNavigationBtn_MouseDown"
                                     MouseLeave="PPTNavigationBtn_MouseLeave" Width="auto" MinWidth="50" Height="50"
                                     Background="Transparent">
                                 <Grid>
-                                    <Border Margin="0,3" CornerRadius="5" Name="PPTRBPageButtonFeedbackBorder"
+                                    <Border Margin="0,3" CornerRadius="5" Name="PPTRBPageButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                             Background="#18181b" Opacity="0" />
                                     <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical"
                                                          Spacing="0.5" Margin="12,0">
@@ -7828,11 +7725,11 @@
 
                                 </Grid>
                             </Border>
-                            <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"
+                            <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp" Style="{StaticResource PPTNextButtonBorderBase}"
                                     MouseDown="GridPPTControlNext_MouseDown" MouseLeave="GridPPTControlNext_MouseLeave"
                                     CornerRadius="0 0 5 5" Background="Transparent" Name="PPTRBNextButtonBorder">
                                 <Grid>
-                                    <Border Margin="3" CornerRadius="5" Name="PPTRBNextButtonFeedbackBorder"
+                                    <Border Margin="3" CornerRadius="5" Name="PPTRBNextButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                             Background="#18181b" Opacity="0" />
                                     <Image VerticalAlignment="Center" HorizontalAlignment="Center" Height="28"
                                            Width="28">
@@ -7842,7 +7739,7 @@
                                                     <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                         <GeometryDrawing Brush="#27272a"
                                                                          x:Name="PPTRBNextButtonGeometry"
-                                                                         Geometry="F0 M24,24z M0,0z M20.6006,12.9642C21.1331,12.4317,21.1331,11.5683,20.6006,11.0358L14.0551,4.49031C13.5226,3.95777 12.6592,3.95777 12.1267,4.49031 11.5941,5.02284 11.5941,5.88625 12.1267,6.41878L16.3443,10.6364 4.36364,10.6364C3.61052,10.6364 3,11.2469 3,12 3,12.7531 3.61052,13.3636 4.36364,13.3636L16.3443,13.3636 12.1267,17.5812C11.5941,18.1137 11.5941,18.9772 12.1267,19.5097 12.6592,20.0422 13.5226,20.0422 14.0551,19.5097L20.6006,12.9642z" />
+                                                                         Geometry="{StaticResource PPTRBNextButtonGeometry}" />
                                                     </DrawingGroup>
                                                 </DrawingImage.Drawing>
                                             </DrawingImage>
@@ -7862,12 +7759,12 @@
             <Border BorderThickness="1" BorderBrush="#a1a1aa" Name="PPTBtnLSBorder"
                     Background="#f4f4f5" Opacity="1" CornerRadius="6" Margin="6,0,0,0">
                 <ikw:SimpleStackPanel Orientation="Vertical">
-                    <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp"
+                    <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp" Style="{StaticResource PPTPreviousButtonBorderBase}"
                             Name="PPTLSPreviousButtonBorder"
                             MouseDown="GridPPTControlPrevious_MouseDown" MouseLeave="GridPPTControlPrevious_MouseLeave"
                             CornerRadius="5 5 0 0" Background="Transparent">
                         <Grid>
-                            <Border Margin="3" CornerRadius="5" Name="PPTLSPreviousButtonFeedbackBorder"
+                            <Border Margin="3" CornerRadius="5" Name="PPTLSPreviousButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                     Background="#18181b" Opacity="0" />
                             <Image Height="28" Width="28">
                                 <Image.Source>
@@ -7875,7 +7772,7 @@
                                         <DrawingImage.Drawing>
                                             <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                 <GeometryDrawing Brush="#27272a" x:Name="PPTLSPreviousButtonGeometry"
-                                                                 Geometry="F0 M24,24z M0,0z M11.0357,3.3994C11.5682,2.86687,12.4316,2.86687,12.9641,3.3994L19.5096,9.94485C20.0421,10.4774 20.0421,11.3408 19.5096,11.8733 18.9771,12.4059 18.1137,12.4059 17.5811,11.8733L13.3635,7.65575 13.3635,19.6364C13.3635,20.3895 12.753,21 11.9999,21 11.2468,21 10.6363,20.3895 10.6363,19.6364L10.6363,7.65575 6.41869,11.8733C5.88616,12.4059 5.02275,12.4059 4.49022,11.8733 3.95769,11.3408 3.95769,10.4774 4.49022,9.94485L11.0357,3.3994z" />
+                                                                 Geometry="{StaticResource PPTLSPreviousButtonGeometry}" />
                                             </DrawingGroup>
                                         </DrawingImage.Drawing>
                                     </DrawingImage>
@@ -7883,12 +7780,12 @@
                             </Image>
                         </Grid>
                     </Border>
-                    <Border Visibility="Visible" Name="PPTLSPageButton" TextBlock.Foreground="#171717"
+                    <Border Visibility="Visible" Name="PPTLSPageButton" TextBlock.Foreground="#171717" Style="{StaticResource PPTPageButtonBase}"
                             MouseUp="PPTNavigationBtn_MouseUp" MouseDown="PPTNavigationBtn_MouseDown"
                             MouseLeave="PPTNavigationBtn_MouseLeave" Width="50" Height="50"
                             Background="Transparent">
                         <Grid>
-                            <Border Margin="3,0" CornerRadius="5" Name="PPTLSPageButtonFeedbackBorder"
+                            <Border Margin="3,0" CornerRadius="5" Name="PPTLSPageButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                     Background="#18181b" Opacity="0" />
                             <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical" Spacing="0.5">
                                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -7899,11 +7796,11 @@
                             </ikw:SimpleStackPanel>
                         </Grid>
                     </Border>
-                    <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"
+                    <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp" Style="{StaticResource PPTNextButtonBorderBase}"
                             MouseDown="GridPPTControlNext_MouseDown" MouseLeave="GridPPTControlNext_MouseLeave"
                             CornerRadius="0 0 5 5" Background="Transparent" Name="PPTLSNextButtonBorder">
                         <Grid>
-                            <Border Margin="3" CornerRadius="5" Name="PPTLSNextButtonFeedbackBorder"
+                            <Border Margin="3" CornerRadius="5" Name="PPTLSNextButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                     Background="#18181b" Opacity="0" />
                             <Image VerticalAlignment="Center" HorizontalAlignment="Center" Height="28" Width="28">
                                 <Image.Source>
@@ -7911,7 +7808,7 @@
                                         <DrawingImage.Drawing>
                                             <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                 <GeometryDrawing Brush="#27272a" x:Name="PPTLSNextButtonGeometry"
-                                                                 Geometry="F0 M24,24z M0,0z M11.0357,20.6006C11.5682,21.1331,12.4316,21.1331,12.9641,20.6006L19.5096,14.0551C20.0421,13.5226 20.0421,12.6592 19.5096,12.1267 18.9771,11.5941 18.1137,11.5941 17.5811,12.1267L13.3635,16.3443 13.3635,4.36364C13.3635,3.61052 12.753,3 11.9999,3 11.2468,3 10.6363,3.61052 10.6363,4.36364L10.6363,16.3443 6.41869,12.1267C5.88616,11.5941 5.02275,11.5941 4.49022,12.1267 3.95769,12.6592 3.95769,13.5226 4.49022,14.0551L11.0357,20.6006z" />
+                                                                 Geometry="{StaticResource PPTLSNextButtonGeometry}" />
                                             </DrawingGroup>
                                         </DrawingImage.Drawing>
                                     </DrawingImage>
@@ -7927,12 +7824,12 @@
             <Border BorderThickness="1" BorderBrush="#a1a1aa" Name="PPTBtnRSBorder"
                     Background="#f4f4f5" Opacity="1" CornerRadius="6"  Margin="0,0,6,0">
                 <ikw:SimpleStackPanel Orientation="Vertical">
-                    <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp"
+                    <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp" Style="{StaticResource PPTPreviousButtonBorderBase}"
                             Name="PPTRSPreviousButtonBorder"
                             MouseDown="GridPPTControlPrevious_MouseDown" MouseLeave="GridPPTControlPrevious_MouseLeave"
                             CornerRadius="5 5 0 0" Background="Transparent">
                         <Grid>
-                            <Border Margin="3" CornerRadius="5" Name="PPTRSPreviousButtonFeedbackBorder"
+                            <Border Margin="3" CornerRadius="5" Name="PPTRSPreviousButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                     Background="#18181b" Opacity="0" />
                             <Image Height="28" Width="28">
                                 <Image.Source>
@@ -7940,7 +7837,7 @@
                                         <DrawingImage.Drawing>
                                             <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                 <GeometryDrawing Brush="#27272a" x:Name="PPTRSPreviousButtonGeometry"
-                                                                 Geometry="F0 M24,24z M0,0z M11.0357,3.3994C11.5682,2.86687,12.4316,2.86687,12.9641,3.3994L19.5096,9.94485C20.0421,10.4774 20.0421,11.3408 19.5096,11.8733 18.9771,12.4059 18.1137,12.4059 17.5811,11.8733L13.3635,7.65575 13.3635,19.6364C13.3635,20.3895 12.753,21 11.9999,21 11.2468,21 10.6363,20.3895 10.6363,19.6364L10.6363,7.65575 6.41869,11.8733C5.88616,12.4059 5.02275,12.4059 4.49022,11.8733 3.95769,11.3408 3.95769,10.4774 4.49022,9.94485L11.0357,3.3994z" />
+                                                                 Geometry="{StaticResource PPTRSPreviousButtonGeometry}" />
                                             </DrawingGroup>
                                         </DrawingImage.Drawing>
                                     </DrawingImage>
@@ -7948,12 +7845,12 @@
                             </Image>
                         </Grid>
                     </Border>
-                    <Border Visibility="Visible" Name="PPTRSPageButton"
+                    <Border Visibility="Visible" Name="PPTRSPageButton" Style="{StaticResource PPTPageButtonBase}"
                             MouseUp="PPTNavigationBtn_MouseUp" MouseDown="PPTNavigationBtn_MouseDown"
                             MouseLeave="PPTNavigationBtn_MouseLeave" Width="50" Height="50"
                             Background="Transparent" TextBlock.Foreground="#171717">
                         <Grid>
-                            <Border Margin="3,0" CornerRadius="5" Name="PPTRSPageButtonFeedbackBorder"
+                            <Border Margin="3,0" CornerRadius="5" Name="PPTRSPageButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                     Background="#18181b" Opacity="0" />
                             <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical" Spacing="0.5">
                                 <TextBlock HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -7965,11 +7862,11 @@
                             </ikw:SimpleStackPanel>
                         </Grid>
                     </Border>
-                    <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp"
+                    <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp" Style="{StaticResource PPTNextButtonBorderBase}"
                             MouseDown="GridPPTControlNext_MouseDown" MouseLeave="GridPPTControlNext_MouseLeave"
                             CornerRadius="0 0 5 5" Background="Transparent" Name="PPTRSNextButtonBorder">
                         <Grid>
-                            <Border Margin="3" CornerRadius="5" Name="PPTRSNextButtonFeedbackBorder"
+                            <Border Margin="3" CornerRadius="5" Name="PPTRSNextButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                     Background="#18181b" Opacity="0" />
                             <Image VerticalAlignment="Center" HorizontalAlignment="Center" Height="28" Width="28">
                                 <Image.Source>
@@ -7977,7 +7874,7 @@
                                         <DrawingImage.Drawing>
                                             <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                 <GeometryDrawing Brush="#27272a" x:Name="PPTRSNextButtonGeometry"
-                                                                 Geometry="F0 M24,24z M0,0z M11.0357,20.6006C11.5682,21.1331,12.4316,21.1331,12.9641,20.6006L19.5096,14.0551C20.0421,13.5226 20.0421,12.6592 19.5096,12.1267 18.9771,11.5941 18.1137,11.5941 17.5811,12.1267L13.3635,16.3443 13.3635,4.36364C13.3635,3.61052 12.753,3 11.9999,3 11.2468,3 10.6363,3.61052 10.6363,4.36364L10.6363,16.3443 6.41869,12.1267C5.88616,11.5941 5.02275,11.5941 4.49022,12.1267 3.95769,12.6592 3.95769,13.5226 4.49022,14.0551L11.0357,20.6006z" />
+                                                                 Geometry="{StaticResource PPTRSNextButtonGeometry}" />
                                             </DrawingGroup>
                                         </DrawingImage.Drawing>
                                     </DrawingImage>
@@ -9560,7 +9457,7 @@
                                                         <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                             <GeometryDrawing x:Name="ShapesIconGeometry"
                                                                              Brush="{DynamicResource IconForeground}"
-                                                                             Geometry="F1 M24,24z M0,0z M8.7269,2.9067C8.84872,2.70875 9.00852,2.57931 9.20647,2.5184 9.41966,2.44227 9.62541,2.43465 9.82337,2.49556 10.0365,2.55647 10.2039,2.67829 10.3257,2.86102L13.9118,8.13731C12.9068,8.47231 12.0084,8.99766 11.2165,9.71334 10.4247,10.4138 9.8157,11.2513 9.38933,12.2259 8.93251,13.2156 8.70413,14.2587 8.70413,15.3551L8.7269,15.9946 2.46851,15.9946C2.22487,15.9946 2.01158,15.9185 1.82885,15.7662 1.66135,15.614 1.55481,15.4236 1.50913,15.1952 1.47868,14.9668 1.5244,14.746 1.64622,14.5328L8.7269,2.9067z M16.3329,21.545C15.2061,21.545 14.1632,21.2633 13.2038,20.6999 12.275,20.1517 11.5288,19.4056 10.9654,18.4615 10.4172,17.5022 10.1431,16.4667 10.1431,15.3551 10.1431,14.2283 10.4172,13.1928 10.9654,12.2487 11.5288,11.3046 12.2825,10.5585 13.2266,10.0103 14.1707,9.44687 15.1986,9.16516 16.3102,9.16516 17.437,9.16516 18.4724,9.44687 19.4165,10.0103 20.3606,10.5585 21.1068,11.3046 21.6549,12.2487 22.2184,13.1928 22.5,14.2283 22.5,15.3551 22.5,16.4667 22.2184,17.5022 21.6549,18.4615 21.1068,19.4056 20.3683,20.1517 19.4395,20.6999 18.4801,21.2633 17.4445,21.545 16.3329,21.545z" />
+                                                                             Geometry="{StaticResource ShapesIconGeometry}" />
                                                         </DrawingGroup>
                                                     </DrawingImage.Drawing>
                                                 </DrawingImage>
@@ -9572,7 +9469,7 @@
                                     </ikw:SimpleStackPanel>
 
                                     <Grid Width="0">
-                                        <Border x:Name="BorderDrawShape" Background="{DynamicResource FloatBarBackground}" Opacity="1"
+                                        <Border x:Name="BorderDrawShape" Background="{DynamicResource FloatBarBackground}" Opacity="1" Style="{StaticResource BorderDrawShape}"
                                                 Visibility="Visible" BorderBrush="#2563eb"
                                                 BorderThickness="1"
                                                 CornerRadius="5" Margin="-170,-140,-147,37">
@@ -9834,7 +9731,7 @@
                                                     <DrawingImage.Drawing>
                                                         <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                             <GeometryDrawing x:Name="UndoIconGeometry" Brush="{DynamicResource IconForeground}"
-                                                                             Geometry="F1 M24,24z M0,0z M10.3344,5.02734L10.3605,8.62849C12.2431,8.87029 14.0305,9.44026 15.7232,10.3384 17.4676,11.2538 18.9187,12.4196 20.0759,13.8359 21.3367,15.3731 22.1398,17.0657 22.4852,18.9138 22.5197,19.1211 22.4938,19.3197 22.4075,19.5097 22.3211,19.6997 22.2003,19.8292 22.0448,19.8983 21.8894,19.9501 21.7423,19.9069 21.6042,19.7687 20.7579,18.8361 19.6268,17.9984 18.2105,17.2557 16.9324,16.5821 15.5591,16.0553 14.091,15.6754 12.7093,15.3126 11.4659,15.1313 10.3605,15.1313L10.3344,18.862C10.3344,19.2938 10.2395,19.6047 10.0495,19.7947 9.8941,19.9501 9.69547,20.0106 9.45367,19.976 9.21187,19.9242 8.99586,19.8119 8.80587,19.6392 8.14955,18.9829 6.90606,17.7739 5.07526,16.0121 3.46899,14.475 2.41544,13.4559 1.91456,12.9551 1.63821,12.6787 1.5,12.3678 1.5,12.0224 1.51727,11.6769 1.67272,11.3574 1.96634,11.0638 4.02168,9.00847 6.3103,6.73724 8.83197,4.25011 9.00468,4.07739 9.20331,3.99967 9.42784,4.01694 9.66965,4.01694 9.87683,4.11194 10.0495,4.30193 10.2395,4.47464 10.3344,4.71645 10.3344,5.02734z" />
+                                                                             Geometry="{StaticResource UndoIconGeometry}" />
                                                         </DrawingGroup>
                                                     </DrawingImage.Drawing>
                                                 </DrawingImage>
@@ -9863,7 +9760,7 @@
                                                     <DrawingImage.Drawing>
                                                         <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                                             <GeometryDrawing x:Name="RedoIconGeometry" Brush="{DynamicResource IconForeground}"
-                                                                             Geometry="F1 M24,24z M0,0z M13.6656,5.02734L13.6395,8.62849C11.7569,8.87029 9.96948,9.44026 8.27685,10.3384 6.5324,11.2538 5.08134,12.4196 3.92413,13.8359 2.6633,15.3731 1.86023,17.0657 1.5148,18.9138 1.48026,19.1211 1.50619,19.3197 1.59255,19.5097 1.6789,19.6997 1.79974,19.8292 1.95518,19.8983 2.11063,19.9501 2.25766,19.9069 2.39583,19.7687 3.24215,18.8361 4.37323,17.9984 5.78951,17.2557 7.06761,16.5821 8.44089,16.0553 9.90899,15.6754 11.2907,15.3126 12.5341,15.1313 13.6395,15.1313L13.6656,18.862C13.6656,19.2938 13.7605,19.6047 13.9505,19.7947 14.1059,19.9501 14.3045,20.0106 14.5463,19.976 14.7881,19.9242 15.0041,19.8119 15.1941,19.6392 15.8505,18.9829 17.0939,17.7739 18.9247,16.0121 20.531,14.475 21.5846,13.4559 22.0854,12.9551 22.3618,12.6787 22.5,12.3678 22.5,12.0224 22.4827,11.6769 22.3273,11.3574 22.0337,11.0638 19.9783,9.00847 17.6897,6.73724 15.168,4.25011 14.9953,4.07739 14.7967,3.99967 14.5722,4.01694 14.3304,4.01694 14.1232,4.11194 13.9505,4.30193 13.7605,4.47464 13.6656,4.71645 13.6656,5.02734z" />
+                                                                             Geometry="{StaticResource RedoIconGeometry}" />
                                                         </DrawingGroup>
                                                     </DrawingImage.Drawing>
                                                 </DrawingImage>
@@ -9904,7 +9801,7 @@
                                     <Grid x:Name="BackgroundPaletteGrid" Margin="-203,-128,83,37">
                                         <!-- 背景面板将在代码中动态添加 -->
                                     </Grid>
-                                    <Border Visibility="Visible" ClipToBounds="True" Name="EraserSizePanel"
+                                        <Border Visibility="Visible" ClipToBounds="True" Name="EraserSizePanel" Style="{StaticResource EraserSizePanel}"
                                             Margin="-203,-148,83,40" CornerRadius="5" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                                             BorderBrush="#2563eb" BorderThickness="1">
                                         <ikw:SimpleStackPanel Margin="0">
@@ -10114,7 +10011,7 @@
                                                    Style="{StaticResource AutoFitMainToolbarLabel8}" />
                                     </ikw:SimpleStackPanel>
                                     <Grid Width="0">
-                                        <Border ClipToBounds="True" Name="BorderTools" Margin="-103,-156,-16,37"
+                                        <Border ClipToBounds="True" Name="BorderTools" Margin="-103,-156,-16,37" Style="{StaticResource BorderTools}"
                                                 CornerRadius="5" Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderThickness="1"
                                                 BorderBrush="#2563eb">
                                             <ikw:SimpleStackPanel Margin="-1,0,0,0">
@@ -10339,7 +10236,7 @@
                     </Border>
 
 
-                    <Border Margin="2,0,0,0" x:Name="EnableTwoFingerGestureBorder" Visibility="Visible" Width="36"
+                    <Border Margin="2,0,0,0" x:Name="EnableTwoFingerGestureBorder" Visibility="Visible" Width="36" Style="{StaticResource EnableTwoFingerGestureBorder}"
                             Height="36" CornerRadius="5" Background="{DynamicResource FloatBarBackground}" BorderBrush="{DynamicResource FloatBarBorderBrush}"
                             BorderThickness="1">
                         <ikw:SimpleStackPanel
@@ -10355,7 +10252,7 @@
                         </ikw:SimpleStackPanel>
                     </Border>
                     <Grid Width="0">
-                        <Border ClipToBounds="True" Name="TwoFingerGestureBorder" Margin="-86,-111,-33,40"
+                        <Border ClipToBounds="True" Name="TwoFingerGestureBorder" Margin="-86,-111,-33,40" Style="{StaticResource TwoFingerGestureBorder}"
                                 CornerRadius="5"
                                 Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="#2563eb"
                                 BorderThickness="1">
@@ -11066,4 +10963,3 @@
         </Border>
     </Grid>
 </Window>
-
