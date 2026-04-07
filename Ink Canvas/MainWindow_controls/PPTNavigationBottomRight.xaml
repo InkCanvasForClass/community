@@ -3,18 +3,17 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              x:Name="Root">
-    <Viewbox Visibility="{Binding IsVisible, ElementName=Root, Mode=TwoWay}" Margin="0,0,6,6" Height="50"
-             HorizontalAlignment="Right" VerticalAlignment="Bottom">
-        <Border BorderThickness="1" BorderBrush="#a1a1aa" Name="PPTBtnRBBorder"
+    <Viewbox x:Name="ViewboxPPTNavigationBottomRight" Height="50">
+        <Border BorderThickness="1" BorderBrush="#a1a1aa" x:Name="PPTBtnRBBorderElement"
                 Background="#f4f4f5" Opacity="1" CornerRadius="6">
             <ikw:SimpleStackPanel Orientation="Horizontal">
                 <Border Width="50" Height="50" MouseUp="GridPPTControlPrevious_MouseUp" Style="{StaticResource PPTPreviousButtonBorderBase}"
-                        Name="PPTRBPreviousButtonBorder"
+                        x:Name="PPTRBPreviousButtonBorderElement"
                         MouseDown="GridPPTControlPrevious_MouseDown"
                         MouseLeave="GridPPTControlPrevious_MouseLeave"
                         CornerRadius="5 5 0 0" Background="Transparent">
                     <Grid>
-                        <Border Margin="3" CornerRadius="5" Name="PPTRBPreviousButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
+                        <Border Margin="3" CornerRadius="5" x:Name="PPTRBPreviousButtonFeedbackBorderElement" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                 Background="#18181b" Opacity="0" />
                         <Image Height="28" Width="28">
                             <Image.Source>
@@ -22,7 +21,7 @@
                                     <DrawingImage.Drawing>
                                         <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                             <GeometryDrawing Brush="#27272a"
-                                                             x:Name="PPTRBPreviousButtonGeometry"
+                                                             x:Name="PPTRBPreviousButtonGeometryElement"
                                                              Geometry="{StaticResource PPTRBPreviousButtonGeometry}" />
                                         </DrawingGroup>
                                     </DrawingImage.Drawing>
@@ -31,12 +30,12 @@
                         </Image>
                     </Grid>
                 </Border>
-                <Border Visibility="Visible" Name="PPTRBPageButton" TextBlock.Foreground="#171717" Style="{StaticResource PPTPageButtonBase}"
+                <Border Visibility="Visible" x:Name="PPTRBPageButtonElement" TextBlock.Foreground="#171717" Style="{StaticResource PPTPageButtonBase}"
                         MouseUp="PPTNavigationBtn_MouseUp" MouseDown="PPTNavigationBtn_MouseDown"
                         MouseLeave="PPTNavigationBtn_MouseLeave" Width="auto" MinWidth="50" Height="50"
                         Background="Transparent">
                     <Grid>
-                        <Border Margin="0,3" CornerRadius="5" Name="PPTRBPageButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
+                        <Border Margin="0,3" CornerRadius="5" x:Name="PPTRBPageButtonFeedbackBorderElement" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                 Background="#18181b" Opacity="0" />
                         <ikw:SimpleStackPanel VerticalAlignment="Center" Orientation="Vertical"
                                              Spacing="0.5" Margin="12,0">
@@ -51,9 +50,9 @@
                 </Border>
                 <Border Width="50" Height="50" MouseUp="GridPPTControlNext_MouseUp" Style="{StaticResource PPTNextButtonBorderBase}"
                         MouseDown="GridPPTControlNext_MouseDown" MouseLeave="GridPPTControlNext_MouseLeave"
-                        CornerRadius="0 0 5 5" Background="Transparent" Name="PPTRBNextButtonBorder">
+                        CornerRadius="0 0 5 5" Background="Transparent" x:Name="PPTRBNextButtonBorderElement">
                     <Grid>
-                        <Border Margin="3" CornerRadius="5" Name="PPTRBNextButtonFeedbackBorder" Style="{StaticResource PPTButtonFeedbackBorderBase}"
+                        <Border Margin="3" CornerRadius="5" x:Name="PPTRBNextButtonFeedbackBorderElement" Style="{StaticResource PPTButtonFeedbackBorderBase}"
                                 Background="#18181b" Opacity="0" />
                         <Image VerticalAlignment="Center" HorizontalAlignment="Center" Height="28"
                                Width="28">
@@ -62,7 +61,7 @@
                                     <DrawingImage.Drawing>
                                         <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                             <GeometryDrawing Brush="#27272a"
-                                                             x:Name="PPTRBNextButtonGeometry"
+                                                             x:Name="PPTRBNextButtonGeometryElement"
                                                              Geometry="{StaticResource PPTRBNextButtonGeometry}" />
                                         </DrawingGroup>
                                     </DrawingImage.Drawing>

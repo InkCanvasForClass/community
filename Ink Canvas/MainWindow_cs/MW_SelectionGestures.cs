@@ -603,7 +603,7 @@ namespace Ink_Canvas
 
                 // 显示墨迹选择栏和选择框
                 GridInkCanvasSelectionCover.Visibility = Visibility.Visible;
-                BorderStrokeSelectionClone.Background = Brushes.Transparent;
+                BorderStrokeSelectionControl.SetCloneButtonBackground(Brushes.Transparent);
                 updateBorderStrokeSelectionControlLocation();
                 UpdateSelectionDisplay();
                 return;
@@ -664,7 +664,7 @@ namespace Ink_Canvas
                 if (borderTop < 0) borderTop = 10; // 如果上方也没有空间，则显示在顶部
             }
 
-            BorderStrokeSelectionControl.Margin = new Thickness(borderLeft, borderTop, 0, 0);
+            BorderStrokeSelectionControl.ControlMargin = new Thickness(borderLeft, borderTop, 0, 0);
         }
 
         /// <summary>

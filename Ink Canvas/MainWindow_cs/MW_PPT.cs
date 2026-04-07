@@ -2217,22 +2217,6 @@ namespace Ink_Canvas
         {
             lastBorderMouseDownObject = sender;
             if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
-            if (sender == PPTLSPageButton)
-            {
-                PPTLSPageButtonFeedbackBorder.Opacity = 0.15;
-            }
-            else if (sender == PPTRSPageButton)
-            {
-                PPTRSPageButtonFeedbackBorder.Opacity = 0.15;
-            }
-            else if (sender == PPTLBPageButton)
-            {
-                PPTLBPageButtonFeedbackBorder.Opacity = 0.15;
-            }
-            else if (sender == PPTRBPageButton)
-            {
-                PPTRBPageButtonFeedbackBorder.Opacity = 0.15;
-            }
         }
 
         /// <summary>
@@ -2248,22 +2232,6 @@ namespace Ink_Canvas
         private void PPTNavigationBtn_MouseLeave(object sender, MouseEventArgs e)
         {
             lastBorderMouseDownObject = null;
-            if (sender == PPTLSPageButton)
-            {
-                PPTLSPageButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRSPageButton)
-            {
-                PPTRSPageButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTLBPageButton)
-            {
-                PPTLBPageButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRBPageButton)
-            {
-                PPTRBPageButtonFeedbackBorder.Opacity = 0;
-            }
         }
 
         /// <summary>
@@ -2286,24 +2254,11 @@ namespace Ink_Canvas
         private async void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
+            await HandlePptNavigationPageClickAsync();
+        }
 
-            if (sender == PPTLSPageButton)
-            {
-                PPTLSPageButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRSPageButton)
-            {
-                PPTRSPageButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTLBPageButton)
-            {
-                PPTLBPageButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRBPageButton)
-            {
-                PPTRBPageButtonFeedbackBorder.Opacity = 0;
-            }
-
+        private async Task HandlePptNavigationPageClickAsync()
+        {
             if (!Settings.PowerPointSettings.EnablePPTButtonPageClickable) return;
 
             // 使用新的PPT管理器检查连接状态
@@ -2500,23 +2455,6 @@ namespace Ink_Canvas
         private void GridPPTControlPrevious_MouseDown(object sender, MouseButtonEventArgs e)
         {
             lastBorderMouseDownObject = sender;
-            if (sender == PPTLSPreviousButtonBorder)
-            {
-                PPTLSPreviousButtonFeedbackBorder.Opacity = 0.15;
-            }
-            else if (sender == PPTRSPreviousButtonBorder)
-            {
-                PPTRSPreviousButtonFeedbackBorder.Opacity = 0.15;
-            }
-            else if (sender == PPTLBPreviousButtonBorder)
-            {
-                PPTLBPreviousButtonFeedbackBorder.Opacity = 0.15;
-            }
-            else if (sender == PPTRBPreviousButtonBorder)
-            {
-                PPTRBPreviousButtonFeedbackBorder.Opacity = 0.15;
-            }
-
             // 启动长按检测
             if (Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn)
             {
@@ -2537,23 +2475,6 @@ namespace Ink_Canvas
         private void GridPPTControlPrevious_MouseLeave(object sender, MouseEventArgs e)
         {
             lastBorderMouseDownObject = null;
-            if (sender == PPTLSPreviousButtonBorder)
-            {
-                PPTLSPreviousButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRSPreviousButtonBorder)
-            {
-                PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTLBPreviousButtonBorder)
-            {
-                PPTLBPreviousButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRBPreviousButtonBorder)
-            {
-                PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
-            }
-
             // 停止长按检测
             StopLongPressDetection();
         }
@@ -2572,23 +2493,6 @@ namespace Ink_Canvas
         private void GridPPTControlPrevious_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
-            if (sender == PPTLSPreviousButtonBorder)
-            {
-                PPTLSPreviousButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRSPreviousButtonBorder)
-            {
-                PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTLBPreviousButtonBorder)
-            {
-                PPTLBPreviousButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRBPreviousButtonBorder)
-            {
-                PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
-            }
-
             // 停止长按检测
             StopLongPressDetection();
 
@@ -2610,23 +2514,6 @@ namespace Ink_Canvas
         private void GridPPTControlNext_MouseDown(object sender, MouseButtonEventArgs e)
         {
             lastBorderMouseDownObject = sender;
-            if (sender == PPTLSNextButtonBorder)
-            {
-                PPTLSNextButtonFeedbackBorder.Opacity = 0.15;
-            }
-            else if (sender == PPTRSNextButtonBorder)
-            {
-                PPTRSNextButtonFeedbackBorder.Opacity = 0.15;
-            }
-            else if (sender == PPTLBNextButtonBorder)
-            {
-                PPTLBNextButtonFeedbackBorder.Opacity = 0.15;
-            }
-            else if (sender == PPTRBNextButtonBorder)
-            {
-                PPTRBNextButtonFeedbackBorder.Opacity = 0.15;
-            }
-
             // 启动长按检测
             if (Settings.PowerPointSettings.EnablePPTButtonLongPressPageTurn)
             {
@@ -2647,23 +2534,6 @@ namespace Ink_Canvas
         private void GridPPTControlNext_MouseLeave(object sender, MouseEventArgs e)
         {
             lastBorderMouseDownObject = null;
-            if (sender == PPTLSNextButtonBorder)
-            {
-                PPTLSNextButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRSNextButtonBorder)
-            {
-                PPTRSNextButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTLBNextButtonBorder)
-            {
-                PPTLBNextButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRBNextButtonBorder)
-            {
-                PPTRBNextButtonFeedbackBorder.Opacity = 0;
-            }
-
             // 停止长按检测
             StopLongPressDetection();
         }
@@ -2682,27 +2552,70 @@ namespace Ink_Canvas
         private void GridPPTControlNext_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
-            if (sender == PPTLSNextButtonBorder)
-            {
-                PPTLSNextButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRSNextButtonBorder)
-            {
-                PPTRSNextButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTLBNextButtonBorder)
-            {
-                PPTLBNextButtonFeedbackBorder.Opacity = 0;
-            }
-            else if (sender == PPTRBNextButtonBorder)
-            {
-                PPTRBNextButtonFeedbackBorder.Opacity = 0;
-            }
-
             // 停止长按检测
             StopLongPressDetection();
 
             BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+        }
+
+        private void PPTNavigationBottomLeft_PreviousClicked(object sender, RoutedEventArgs e)
+        {
+            BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+        }
+
+        private void PPTNavigationBottomRight_PreviousClicked(object sender, RoutedEventArgs e)
+        {
+            BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+        }
+
+        private void PPTNavigationSideLeft_PreviousClicked(object sender, RoutedEventArgs e)
+        {
+            BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+        }
+
+        private void PPTNavigationSideRight_PreviousClicked(object sender, RoutedEventArgs e)
+        {
+            BtnPPTSlidesUp_Click(BtnPPTSlidesUp, null);
+        }
+
+        private void PPTNavigationBottomLeft_NextClicked(object sender, RoutedEventArgs e)
+        {
+            BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+        }
+
+        private void PPTNavigationBottomRight_NextClicked(object sender, RoutedEventArgs e)
+        {
+            BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+        }
+
+        private void PPTNavigationSideLeft_NextClicked(object sender, RoutedEventArgs e)
+        {
+            BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+        }
+
+        private void PPTNavigationSideRight_NextClicked(object sender, RoutedEventArgs e)
+        {
+            BtnPPTSlidesDown_Click(BtnPPTSlidesDown, null);
+        }
+
+        private async void PPTNavigationBottomLeft_PageClicked(object sender, RoutedEventArgs e)
+        {
+            await HandlePptNavigationPageClickAsync();
+        }
+
+        private async void PPTNavigationBottomRight_PageClicked(object sender, RoutedEventArgs e)
+        {
+            await HandlePptNavigationPageClickAsync();
+        }
+
+        private async void PPTNavigationSideLeft_PageClicked(object sender, RoutedEventArgs e)
+        {
+            await HandlePptNavigationPageClickAsync();
+        }
+
+        private async void PPTNavigationSideRight_PageClicked(object sender, RoutedEventArgs e)
+        {
+            await HandlePptNavigationPageClickAsync();
         }
 
         /// <summary>

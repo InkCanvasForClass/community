@@ -4,7 +4,10 @@
              xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
              xmlns:Controls="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
              x:Name="Root">
-    <Grid>
+    <Border x:Name="BorderPenColorPaletteSelectionControl"
+            Background="Transparent"
+            BorderThickness="0">
+        <Grid>
         <!-- Board Version -->
         <Viewbox x:Name="BoardDefaultPenColorsPanel"
                 Visibility="{Binding IsBoardMode, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Collapsed}"
@@ -401,5 +404,6 @@
                 </Border>
             </ikw:SimpleStackPanel>
         </Viewbox>
-    </Grid>
+        </Grid>
+    </Border>
 </UserControl>

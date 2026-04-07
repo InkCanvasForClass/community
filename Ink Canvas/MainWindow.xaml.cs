@@ -747,10 +747,10 @@ namespace Ink_Canvas
                     Settings.Canvas.InkAlpha = (int)color.A;
                 }
 
-                if (InkWidthSlider != null) InkWidthSlider.Value = width * 2;
-                if (InkAlphaSlider != null) InkAlphaSlider.Value = color.A;
-                if (BoardInkWidthSlider != null) BoardInkWidthSlider.Value = width * 2;
-                if (BoardInkAlphaSlider != null) BoardInkAlphaSlider.Value = color.A;
+                if (BorderPenSettingsControl != null) BorderPenSettingsControl.PenWidth = width * 2;
+                if (BorderPenSettingsControl != null) BorderPenSettingsControl.PenAlpha = color.A;
+                if (BoardPenSettingsControl != null) BoardPenSettingsControl.PenWidth = width * 2;
+                if (BoardPenSettingsControl != null) BoardPenSettingsControl.PenAlpha = color.A;
 
                 if (penType != 1)
                 {
@@ -786,7 +786,7 @@ namespace Ink_Canvas
 
                 if (_isBoardBrushMode)
                 {
-                    _savedInkWidthBeforeBoardBrush = InkWidthSlider != null ? InkWidthSlider.Value / 2.0 : drawingAttributes.Width;
+                    _savedInkWidthBeforeBoardBrush = BorderPenSettingsControl != null ? BorderPenSettingsControl.PenWidth / 2.0 : drawingAttributes.Width;
                     if (_savedInkWidthBeforeBoardBrush < 0.5) _savedInkWidthBeforeBoardBrush = 2.5;
 
                     drawingAttributes.Width = BoardBrushInkWidth;
@@ -798,12 +798,11 @@ namespace Ink_Canvas
                     drawingAttributes.IgnorePressure = true;
                     inkCanvas.DefaultDrawingAttributes.IgnorePressure = true;
 
-                    if (BoardBrushModeButton != null)
-                        BoardBrushModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                    BorderPenSettingsControl?.SetBrushModeActive(true);
                 }
                 else
                 {
-                    double w = InkWidthSlider != null ? InkWidthSlider.Value / 2.0 : _savedInkWidthBeforeBoardBrush;
+                    double w = BorderPenSettingsControl != null ? BorderPenSettingsControl.PenWidth / 2.0 : _savedInkWidthBeforeBoardBrush;
                     if (w < 0.5) w = 2.5;
 
                     drawingAttributes.Width = w;
@@ -815,11 +814,10 @@ namespace Ink_Canvas
                     drawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
                     inkCanvas.DefaultDrawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
 
-                    if (BoardInkWidthSlider != null) BoardInkWidthSlider.Value = w * 2;
+                    if (BoardPenSettingsControl != null) BoardPenSettingsControl.PenWidth = w * 2;
                     if (Settings?.Canvas != null) Settings.Canvas.InkWidth = w;
 
-                    if (BoardBrushModeButton != null)
-                        BoardBrushModeButton.ClearValue(BackgroundProperty);
+                    BorderPenSettingsControl?.SetBrushModeActive(false);
                 }
             }
             catch (Exception ex)
@@ -840,8 +838,8 @@ namespace Ink_Canvas
         /// </remarks>
         private void BoardBrushModeButton_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            if (sender != BoardBrushModeButton) return;
-            if (lastBorderMouseDownObject != BoardBrushModeButton) return;
+            if (sender != BorderPenSettingsControl) return;
+            if (lastBorderMouseDownObject != BorderPenSettingsControl) return;
 
             _isBoardBrushMode = !_isBoardBrushMode;
 
@@ -854,7 +852,7 @@ namespace Ink_Canvas
 
                 if (_isBoardBrushMode)
                 {
-                    _savedInkWidthBeforeBoardBrush = InkWidthSlider != null ? InkWidthSlider.Value / 2.0 : drawingAttributes.Width;
+                    _savedInkWidthBeforeBoardBrush = BorderPenSettingsControl != null ? BorderPenSettingsControl.PenWidth / 2.0 : drawingAttributes.Width;
                     if (_savedInkWidthBeforeBoardBrush < 0.5) _savedInkWidthBeforeBoardBrush = 2.5;
 
                     drawingAttributes.Width = BoardBrushInkWidth;
@@ -866,12 +864,11 @@ namespace Ink_Canvas
                     drawingAttributes.IgnorePressure = true;
                     inkCanvas.DefaultDrawingAttributes.IgnorePressure = true;
 
-                    if (BoardBrushModeButton != null)
-                        BoardBrushModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                    BorderPenSettingsControl?.SetBrushModeActive(true);
                 }
                 else
                 {
-                    double w = InkWidthSlider != null ? InkWidthSlider.Value / 2.0 : _savedInkWidthBeforeBoardBrush;
+                    double w = BorderPenSettingsControl != null ? BorderPenSettingsControl.PenWidth / 2.0 : _savedInkWidthBeforeBoardBrush;
                     if (w < 0.5) w = 2.5;
 
                     drawingAttributes.Width = w;
@@ -883,11 +880,10 @@ namespace Ink_Canvas
                     drawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
                     inkCanvas.DefaultDrawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
 
-                    if (BoardInkWidthSlider != null) BoardInkWidthSlider.Value = w * 2;
+                    if (BoardPenSettingsControl != null) BoardPenSettingsControl.PenWidth = w * 2;
                     if (Settings?.Canvas != null) Settings.Canvas.InkWidth = w;
 
-                    if (BoardBrushModeButton != null)
-                        BoardBrushModeButton.ClearValue(BackgroundProperty);
+                    BorderPenSettingsControl?.SetBrushModeActive(false);
                 }
             }
             catch (Exception ex)
@@ -3443,15 +3439,20 @@ namespace Ink_Canvas
                 _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
 
                 // 同步批注子面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel != null)
+                if (BoardPenSettingsControl != null)
                 {
-                    ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
+                    BoardPenSettingsControl.IsInkFadeEnabled = Settings.Canvas.EnableInkFade;
                 }
 
                 // 同步普通画笔面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel2 != null)
+                if (BorderPenSettingsControl != null)
                 {
-                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                    BorderPenSettingsControl.IsInkFadeEnabled = Settings.Canvas.EnableInkFade;
+                }
+
+                if (BoardPenSettingsControl != null)
+                {
+                    BoardPenSettingsControl.IsInkFadeEnabled = Settings.Canvas.EnableInkFade;
                 }
 
             }
@@ -3490,7 +3491,11 @@ namespace Ink_Canvas
         {
             try
             {
-                Settings.Canvas.EnableInkFade = ToggleSwitchInkFadeInPanel.IsOn;
+                bool isInkFadeEnabled = sender == BorderPenSettingsControl
+                    ? BorderPenSettingsControl.IsInkFadeEnabled
+                    : BoardPenSettingsControl != null && BoardPenSettingsControl.IsInkFadeEnabled;
+
+                Settings.Canvas.EnableInkFade = isInkFadeEnabled;
                 _inkFadeManager.IsEnabled = Settings.Canvas.EnableInkFade;
 
                 // 同步设置面板中的开关状态
@@ -3499,10 +3504,15 @@ namespace Ink_Canvas
                     ToggleSwitchEnableInkFade.IsOn = Settings.Canvas.EnableInkFade;
                 }
 
-                // 同步普通画笔面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel2 != null)
+                if (BoardPenSettingsControl != null)
                 {
-                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                    BoardPenSettingsControl.IsInkFadeEnabled = Settings.Canvas.EnableInkFade;
+                }
+
+                // 同步普通画笔面板中的开关状态
+                if (BorderPenSettingsControl != null)
+                {
+                    BorderPenSettingsControl.IsInkFadeEnabled = Settings.Canvas.EnableInkFade;
                 }
 
             }
@@ -3726,22 +3736,132 @@ namespace Ink_Canvas
             {
                 bool isHidden = Settings.Canvas.HideInkFadeControlInPenMenu;
 
-                // 控制 InkFadeControlPanel1（批注子面板中）的可见性
-                if (InkFadeControlPanel1 != null)
+                if (BoardPenSettingsControl != null)
                 {
-                    InkFadeControlPanel1.Visibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
+                    BoardPenSettingsControl.InkFadePanelVisibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
                 }
 
-                // 控制 InkFadeControlPanel2（普通画笔面板中）的可见性
-                if (InkFadeControlPanel2 != null)
+                if (BorderPenSettingsControl != null)
                 {
-                    InkFadeControlPanel2.Visibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
+                    BorderPenSettingsControl.InkFadePanelVisibility = isHidden ? Visibility.Collapsed : Visibility.Visible;
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"更新墨迹渐隐控制面板可见性时出错: {ex.Message}", LogHelper.LogType.Error);
             }
+        }
+
+        private void BoardPenSettingsControl_PenTypeChanged(object sender, RoutedEventArgs e)
+        {
+            if (BoardPenSettingsControl == null) return;
+
+            if (BoardPenSettingsControl.SelectedPenType == 1)
+                SwitchToHighlighterPen(null, null);
+            else
+                SwitchToDefaultPen(null, null);
+        }
+
+        private void BoardPenSettingsControl_PenStyleChanged(object sender, RoutedEventArgs e)
+        {
+            ComboBoxPenStyle_SelectionChanged(BoardPenSettingsControl, null);
+        }
+
+        private void BoardPenSettingsControl_WidthChanged(object sender, RoutedEventArgs e)
+        {
+            if (BoardPenSettingsControl == null) return;
+
+            if (BoardPenSettingsControl.SelectedPenType == 1)
+                HighlighterWidthSlider_ValueChanged(BoardPenSettingsControl.HighlighterWidthSliderControl, null);
+            else
+                InkWidthSlider_ValueChanged(BoardPenSettingsControl.InkWidthSliderControl, null);
+        }
+
+        private void BoardPenSettingsControl_AlphaChanged(object sender, RoutedEventArgs e)
+        {
+            if (BoardPenSettingsControl == null) return;
+            InkAlphaSlider_ValueChanged(BoardPenSettingsControl.InkAlphaSliderControl, null);
+        }
+
+        private void BoardPenSettingsControl_NibModeChanged(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitchEnableNibMode_Toggled(BoardPenSettingsControl, e);
+        }
+
+        private void BoardPenSettingsControl_InkFadeChanged(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitchInkFadeInPanel_Toggled(BoardPenSettingsControl, e);
+        }
+
+        private void BoardPenSettingsControl_InkToShapeChanged(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitchEnableInkToShape_Toggled(BoardPenSettingsControl, e);
+        }
+
+        private void BoardPenSettingsControl_BrushModeClicked(object sender, RoutedEventArgs e)
+        {
+            BoardBrushModeButton_Click(BoardPenSettingsControl, e);
+        }
+
+        private void BoardPenSettingsControl_CloseRequested(object sender, RoutedEventArgs e)
+        {
+            HideSubPanels();
+        }
+
+        private void BorderPenSettingsControl_PenTypeChanged(object sender, RoutedEventArgs e)
+        {
+            if (BorderPenSettingsControl == null) return;
+
+            if (BorderPenSettingsControl.SelectedPenType == 1)
+                SwitchToHighlighterPen(null, null);
+            else
+                SwitchToDefaultPen(null, null);
+        }
+
+        private void BorderPenSettingsControl_PenStyleChanged(object sender, RoutedEventArgs e)
+        {
+            ComboBoxPenStyle_SelectionChanged(BorderPenSettingsControl, null);
+        }
+
+        private void BorderPenSettingsControl_WidthChanged(object sender, RoutedEventArgs e)
+        {
+            if (BorderPenSettingsControl == null) return;
+
+            if (BorderPenSettingsControl.SelectedPenType == 1)
+                HighlighterWidthSlider_ValueChanged(BorderPenSettingsControl.HighlighterWidthSliderControl, null);
+            else
+                InkWidthSlider_ValueChanged(BorderPenSettingsControl.InkWidthSliderControl, null);
+        }
+
+        private void BorderPenSettingsControl_AlphaChanged(object sender, RoutedEventArgs e)
+        {
+            if (BorderPenSettingsControl == null) return;
+            InkAlphaSlider_ValueChanged(BorderPenSettingsControl.InkAlphaSliderControl, null);
+        }
+
+        private void BorderPenSettingsControl_NibModeChanged(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitchEnableNibMode_Toggled(BorderPenSettingsControl, e);
+        }
+
+        private void BorderPenSettingsControl_InkFadeChanged(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitchInkFadeInPanel_Toggled(BorderPenSettingsControl, e);
+        }
+
+        private void BorderPenSettingsControl_InkToShapeChanged(object sender, RoutedEventArgs e)
+        {
+            ToggleSwitchEnableInkToShape_Toggled(BorderPenSettingsControl, e);
+        }
+
+        private void BorderPenSettingsControl_BrushModeClicked(object sender, RoutedEventArgs e)
+        {
+            BoardBrushModeButton_Click(BorderPenSettingsControl, e);
+        }
+
+        private void BorderPenSettingsControl_CloseRequested(object sender, RoutedEventArgs e)
+        {
+            HideSubPanels();
         }
 
         /// <summary>
@@ -4085,12 +4205,12 @@ namespace Ink_Canvas
                     RandWindowOnceMaxStudentsSlider,
                     TimerVolumeSlider,
                     ProgressiveReminderVolumeSlider,
-                    BoardInkWidthSlider,
-                    BoardInkAlphaSlider,
-                    BoardHighlighterWidthSlider,
-                    InkWidthSlider,
-                    InkAlphaSlider,
-                    HighlighterWidthSlider,
+                    BoardPenSettingsControl?.InkWidthSliderControl,
+                    BoardPenSettingsControl?.InkAlphaSliderControl,
+                    BoardPenSettingsControl?.HighlighterWidthSliderControl,
+                    BorderPenSettingsControl?.InkWidthSliderControl,
+                    BorderPenSettingsControl?.InkAlphaSliderControl,
+                    BorderPenSettingsControl?.HighlighterWidthSliderControl,
                     MLAvoidanceHistorySlider,
                     MLAvoidanceWeightSlider,
                     BrushAutoRestoreWidthSlider,

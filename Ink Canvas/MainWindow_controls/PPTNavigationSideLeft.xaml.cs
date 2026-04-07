@@ -2,6 +2,7 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Ink_Canvas.MainWindow_controls
 {
@@ -64,6 +65,53 @@ namespace Ink_Canvas.MainWindow_controls
         public PPTNavigationSideLeft()
         {
             InitializeComponent();
+        }
+
+        private Border ContainerBorderElement => (Border)FindName("PPTBtnLSBorder");
+        private Border PreviousButtonFeedbackBorderElement => (Border)FindName("PPTLSPreviousButtonFeedbackBorder");
+        private GeometryDrawing PreviousButtonGeometryElement => (GeometryDrawing)FindName("PPTLSPreviousButtonGeometry");
+        private Border PageButtonElement => (Border)FindName("PPTLSPageButton");
+        private Border PageButtonFeedbackBorderElement => (Border)FindName("PPTLSPageButtonFeedbackBorder");
+        private Border NextButtonFeedbackBorderElement => (Border)FindName("PPTLSNextButtonFeedbackBorder");
+        private GeometryDrawing NextButtonGeometryElement => (GeometryDrawing)FindName("PPTLSNextButtonGeometry");
+        private TextBlock CurrentPageTextElement => (TextBlock)FindName("PPTBtnPageNow");
+        private TextBlock TotalPagesTextElement => (TextBlock)FindName("PPTBtnPageTotal");
+
+        public Thickness ControlMargin
+        {
+            get => Margin;
+            set => Margin = value;
+        }
+
+        public void SetPageDisplay(string currentPage, string totalPages)
+        {
+            CurrentPageTextElement.Text = currentPage;
+            TotalPagesTextElement.Text = $"/ {totalPages}";
+        }
+
+        public void SetPageButtonVisibility(Visibility visibility)
+        {
+            PageButtonElement.Visibility = visibility;
+        }
+
+        public void SetContainerOpacity(double opacity)
+        {
+            ContainerBorderElement.Opacity = opacity;
+        }
+
+        public void ApplyTheme(Brush backgroundBrush, Brush borderBrush, Brush foregroundBrush, Brush feedbackBrush)
+        {
+            ContainerBorderElement.Background = backgroundBrush;
+            ContainerBorderElement.BorderBrush = borderBrush;
+
+            PreviousButtonGeometryElement.Brush = foregroundBrush;
+            NextButtonGeometryElement.Brush = foregroundBrush;
+
+            PreviousButtonFeedbackBorderElement.Background = feedbackBrush;
+            PageButtonFeedbackBorderElement.Background = feedbackBrush;
+            NextButtonFeedbackBorderElement.Background = feedbackBrush;
+
+            TextBlock.SetForeground(PageButtonElement, foregroundBrush);
         }
 
         private void GridPPTControlPrevious_MouseDown(object sender, MouseButtonEventArgs e)

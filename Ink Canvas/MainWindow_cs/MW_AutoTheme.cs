@@ -443,11 +443,9 @@ namespace Ink_Canvas
             {
                 if (BorderStrokeSelectionControl != null)
                 {
-                    // 强制刷新墨迹选中栏的视觉状态
-                    BorderStrokeSelectionControl.InvalidateVisual();
+                    BorderStrokeSelectionControl.InvalidateVisualOnControl();
 
-                    // 刷新墨迹选中栏内的所有图标
-                    var viewbox = BorderStrokeSelectionControl.Child as Viewbox;
+                    var viewbox = BorderStrokeSelectionControl.ControlChild as Viewbox;
                     if (viewbox?.Child is ui.SimpleStackPanel stackPanel)
                     {
                         RefreshStrokeSelectionIconsRecursive(stackPanel);
@@ -501,11 +499,9 @@ namespace Ink_Canvas
             {
                 if (BorderImageSelectionControl != null)
                 {
-                    // 强制刷新图片选中栏的视觉状态
-                    BorderImageSelectionControl.InvalidateVisual();
+                    BorderImageSelectionControl.InvalidateVisualOnControl();
 
-                    // 刷新图片选中栏内的所有图标
-                    var viewbox = BorderImageSelectionControl.Child as Viewbox;
+                    var viewbox = BorderImageSelectionControl.ControlChild as Viewbox;
                     if (viewbox?.Child is ui.SimpleStackPanel stackPanel)
                     {
                         RefreshImageSelectionIconsRecursive(stackPanel);

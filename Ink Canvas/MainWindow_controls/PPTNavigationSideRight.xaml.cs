@@ -2,16 +2,17 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Ink_Canvas.MainWindow_controls
 {
     public partial class PPTNavigationSideRight : UserControl
     {
         public static readonly DependencyProperty CurrentPageProperty = DependencyProperty.Register(
-            nameof(CurrentPage), typeof(int), typeof(PPTNavigationSideRight), new PropertyMetadata(1));
+            nameof(CurrentPage), typeof(string), typeof(PPTNavigationSideRight), new PropertyMetadata("1"));
 
         public static readonly DependencyProperty TotalPagesProperty = DependencyProperty.Register(
-            nameof(TotalPages), typeof(int), typeof(PPTNavigationSideRight), new PropertyMetadata(1));
+            nameof(TotalPages), typeof(string), typeof(PPTNavigationSideRight), new PropertyMetadata("1"));
 
         public static readonly DependencyProperty IsVisibleProperty = DependencyProperty.Register(
             nameof(IsVisible), typeof(bool), typeof(PPTNavigationSideRight), new PropertyMetadata(true));
@@ -25,15 +26,68 @@ namespace Ink_Canvas.MainWindow_controls
         public static readonly RoutedEvent PageClickedEvent = EventManager.RegisterRoutedEvent(
             nameof(PageClicked), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(PPTNavigationSideRight));
 
-        public int CurrentPage
+        private Border ContainerBorderElement => (Border)FindName("PPTBtnRSBorder");
+        private Border PreviousButtonFeedbackBorderElement => (Border)FindName("PPTRSPreviousButtonFeedbackBorder");
+        private GeometryDrawing PreviousButtonGeometryElement => (GeometryDrawing)FindName("PPTRSPreviousButtonGeometry");
+        private Border PageButtonElement => (Border)FindName("PPTRSPageButton");
+        private Border PageButtonFeedbackBorderElement => (Border)FindName("PPTRSPageButtonFeedbackBorder");
+        private Border NextButtonFeedbackBorderElement => (Border)FindName("PPTRSNextButtonFeedbackBorder");
+        private GeometryDrawing NextButtonGeometryElement => (GeometryDrawing)FindName("PPTRSNextButtonGeometry");
+
+        public Border ContainerBorder => ContainerBorderElement;
+        public Border PreviousButtonFeedbackBorder => PreviousButtonFeedbackBorderElement;
+        public GeometryDrawing PreviousButtonGeometry => PreviousButtonGeometryElement;
+        public Border PageButton => PageButtonElement;
+        public Border PageButtonFeedbackBorder => PageButtonFeedbackBorderElement;
+        public Border NextButtonFeedbackBorder => NextButtonFeedbackBorderElement;
+        public GeometryDrawing NextButtonGeometry => NextButtonGeometryElement;
+
+        public Thickness ControlMargin
         {
-            get => (int)GetValue(CurrentPageProperty);
+            get => Margin;
+            set => Margin = value;
+        }
+
+        public void SetPageDisplay(string currentPage, string totalPages)
+        {
+            CurrentPage = currentPage;
+            TotalPages = totalPages;
+        }
+
+        public void SetPageButtonVisibility(Visibility visibility)
+        {
+            PageButtonElement.Visibility = visibility;
+        }
+
+        public void SetContainerOpacity(double opacity)
+        {
+            ContainerBorderElement.Opacity = opacity;
+        }
+
+        public void ApplyTheme(Brush backgroundBrush, Brush borderBrush, Brush foregroundBrush, Brush feedbackBrush)
+        {
+            ContainerBorderElement.Background = backgroundBrush;
+            ContainerBorderElement.BorderBrush = borderBrush;
+
+            PreviousButtonGeometryElement.Brush = foregroundBrush;
+            NextButtonGeometryElement.Brush = foregroundBrush;
+
+            PreviousButtonFeedbackBorderElement.Background = feedbackBrush;
+            PageButtonFeedbackBorderElement.Background = feedbackBrush;
+            NextButtonFeedbackBorderElement.Background = feedbackBrush;
+
+            TextBlock.SetForeground(PageButtonElement, foregroundBrush);
+        }
+
+        public string CurrentPage
+        {
+            get => (string)GetValue(CurrentPageProperty);
             set => SetValue(CurrentPageProperty, value);
         }
 
-        public int TotalPages
+        public string TotalPages
         {
-            get => (int)GetValue(TotalPagesProperty);
+            get => (string)GetValue(TotalPagesProperty);
             set => SetValue(TotalPagesProperty, value);
         }
 

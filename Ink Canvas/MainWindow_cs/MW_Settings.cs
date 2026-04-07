@@ -868,11 +868,28 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableNibMode_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            if (sender == ToggleSwitchEnableNibMode)
-                BoardToggleSwitchEnableNibMode.IsOn = ToggleSwitchEnableNibMode.IsOn;
+
+            bool isNibModeEnabled;
+            if (sender == BoardPenSettingsControl)
+            {
+                isNibModeEnabled = BoardPenSettingsControl.IsNibModeEnabled;
+                if (BorderPenSettingsControl != null)
+                    BorderPenSettingsControl.IsNibModeEnabled = isNibModeEnabled;
+            }
+            else if (sender == BorderPenSettingsControl)
+            {
+                isNibModeEnabled = BorderPenSettingsControl != null && BorderPenSettingsControl.IsNibModeEnabled;
+                if (BoardPenSettingsControl != null)
+                    BoardPenSettingsControl.IsNibModeEnabled = isNibModeEnabled;
+            }
             else
-                ToggleSwitchEnableNibMode.IsOn = BoardToggleSwitchEnableNibMode.IsOn;
-            Settings.Startup.IsEnableNibMode = ToggleSwitchEnableNibMode.IsOn;
+            {
+                isNibModeEnabled = BorderPenSettingsControl != null && BorderPenSettingsControl.IsNibModeEnabled;
+                if (BoardPenSettingsControl != null)
+                    BoardPenSettingsControl.IsNibModeEnabled = isNibModeEnabled;
+            }
+
+            Settings.Startup.IsEnableNibMode = isNibModeEnabled;
 
             if (Settings.Startup.IsEnableNibMode)
                 BoundsWidth = Settings.Advanced.NibModeBoundsWidth;
@@ -902,13 +919,17 @@ namespace Ink_Canvas
             SaveSettingsToFile();
             if (!ToggleSwitchEnableDisPlayNibModeToggle.IsOn)
             {
-                NibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
-                BoardNibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
+                if (BorderPenSettingsControl != null)
+                    BorderPenSettingsControl.NibModePanelVisibility = Visibility.Collapsed;
+                if (BoardPenSettingsControl != null)
+                    BoardPenSettingsControl.NibModePanelVisibility = Visibility.Collapsed;
             }
             else
             {
-                NibModeSimpleStackPanel.Visibility = Visibility.Visible;
-                BoardNibModeSimpleStackPanel.Visibility = Visibility.Visible;
+                if (BorderPenSettingsControl != null)
+                    BorderPenSettingsControl.NibModePanelVisibility = Visibility.Visible;
+                if (BoardPenSettingsControl != null)
+                    BoardPenSettingsControl.NibModePanelVisibility = Visibility.Visible;
             }
         }
 
@@ -2804,16 +2825,23 @@ namespace Ink_Canvas
         private void ComboBoxPenStyle_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!isLoaded) return;
-            int uiIndex = sender == ComboBoxPenStyle
-                ? ComboBoxPenStyle.SelectedIndex
-                : BoardComboBoxPenStyle.SelectedIndex;
+
+            int uiIndex = sender == BoardPenSettingsControl
+                ? BoardPenSettingsControl?.PenStyleSelectedIndex ?? -1
+                : BorderPenSettingsControl?.PenStyleSelectedIndex ?? -1;
             if (uiIndex < 0) return;
 
             Settings.Canvas.InkStyle = InkStyleFromPenStyleUiIndex(uiIndex);
-            if (sender == ComboBoxPenStyle)
-                BoardComboBoxPenStyle.SelectedIndex = uiIndex;
+            if (sender == BoardPenSettingsControl)
+            {
+                if (BorderPenSettingsControl != null)
+                    BorderPenSettingsControl.PenStyleSelectedIndex = uiIndex;
+            }
             else
-                ComboBoxPenStyle.SelectedIndex = uiIndex;
+            {
+                if (BoardPenSettingsControl != null)
+                    BoardPenSettingsControl.PenStyleSelectedIndex = uiIndex;
+            }
 
             SaveSettingsToFile();
         }
@@ -2895,22 +2923,46 @@ namespace Ink_Canvas
         private void InkWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!isLoaded) return;
-            if (sender == BoardInkWidthSlider) InkWidthSlider.Value = ((Slider)sender).Value;
-            if (sender == InkWidthSlider) BoardInkWidthSlider.Value = ((Slider)sender).Value;
-            drawingAttributes.Height = ((Slider)sender).Value / 2;
-            drawingAttributes.Width = ((Slider)sender).Value / 2;
-            Settings.Canvas.InkWidth = ((Slider)sender).Value / 2;
+
+            if (!(sender is Slider slider)) return;
+
+            if (sender == BoardPenSettingsControl?.InkWidthSliderControl)
+            {
+                if (BorderPenSettingsControl != null && Math.Abs(BorderPenSettingsControl.PenWidth - slider.Value) > 0.001)
+                    BorderPenSettingsControl.PenWidth = slider.Value;
+            }
+            else if (sender == BorderPenSettingsControl?.InkWidthSliderControl)
+            {
+                if (BoardPenSettingsControl != null && Math.Abs(BoardPenSettingsControl.PenWidth - slider.Value) > 0.001)
+                    BoardPenSettingsControl.PenWidth = slider.Value;
+            }
+
+            drawingAttributes.Height = slider.Value / 2;
+            drawingAttributes.Width = slider.Value / 2;
+            Settings.Canvas.InkWidth = slider.Value / 2;
             SaveSettingsToFile();
         }
 
         private void HighlighterWidthSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!isLoaded) return;
-            // if (sender == BoardInkWidthSlider) InkWidthSlider.Value = ((Slider)sender).Value;
-            // if (sender == InkWidthSlider) BoardInkWidthSlider.Value = ((Slider)sender).Value;
-            drawingAttributes.Height = ((Slider)sender).Value;
-            drawingAttributes.Width = ((Slider)sender).Value / 2;
-            Settings.Canvas.HighlighterWidth = ((Slider)sender).Value;
+
+            if (!(sender is Slider slider)) return;
+
+            if (sender == BoardPenSettingsControl?.HighlighterWidthSliderControl)
+            {
+                if (BorderPenSettingsControl != null && Math.Abs(BorderPenSettingsControl.HighlighterWidth - slider.Value) > 0.001)
+                    BorderPenSettingsControl.HighlighterWidth = slider.Value;
+            }
+            else if (sender == BorderPenSettingsControl?.HighlighterWidthSliderControl)
+            {
+                if (BoardPenSettingsControl != null && Math.Abs(BoardPenSettingsControl.HighlighterWidth - slider.Value) > 0.001)
+                    BoardPenSettingsControl.HighlighterWidth = slider.Value;
+            }
+
+            drawingAttributes.Height = slider.Value;
+            drawingAttributes.Width = slider.Value / 2;
+            Settings.Canvas.HighlighterWidth = slider.Value;
             SaveSettingsToFile();
         }
 
@@ -2923,14 +2975,25 @@ namespace Ink_Canvas
         private void InkAlphaSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (!isLoaded) return;
-            // if (sender == BoardInkWidthSlider) InkWidthSlider.Value = ((Slider)sender).Value;
-            // if (sender == InkWidthSlider) BoardInkWidthSlider.Value = ((Slider)sender).Value;
+
+            if (!(sender is Slider slider)) return;
+
+            if (sender == BoardPenSettingsControl?.InkAlphaSliderControl)
+            {
+                if (BorderPenSettingsControl != null && Math.Abs(BorderPenSettingsControl.PenAlpha - slider.Value) > 0.001)
+                    BorderPenSettingsControl.PenAlpha = slider.Value;
+            }
+            else if (sender == BorderPenSettingsControl?.InkAlphaSliderControl)
+            {
+                if (BoardPenSettingsControl != null && Math.Abs(BoardPenSettingsControl.PenAlpha - slider.Value) > 0.001)
+                    BoardPenSettingsControl.PenAlpha = slider.Value;
+            }
+
             var NowR = drawingAttributes.Color.R;
             var NowG = drawingAttributes.Color.G;
             var NowB = drawingAttributes.Color.B;
-            // Trace.WriteLine(BitConverter.GetBytes(((Slider)sender).Value));
-            drawingAttributes.Color = Color.FromArgb((byte)((Slider)sender).Value, NowR, NowG, NowB);
-            Settings.Canvas.InkAlpha = ((Slider)sender).Value;
+            drawingAttributes.Color = Color.FromArgb((byte)slider.Value, NowR, NowG, NowB);
+            Settings.Canvas.InkAlpha = slider.Value;
             SaveSettingsToFile();
         }
 
@@ -3953,7 +4016,32 @@ namespace Ink_Canvas
         private void ToggleSwitchEnableInkToShape_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
-            Settings.InkToShape.IsInkToShapeEnabled = ToggleSwitchEnableInkToShape.IsOn;
+
+            bool isEnabled;
+            if (sender == BorderPenSettingsControl)
+            {
+                isEnabled = BorderPenSettingsControl.IsInkToShapeEnabled;
+                ToggleSwitchEnableInkToShape.IsOn = isEnabled;
+                if (BoardPenSettingsControl != null)
+                    BoardPenSettingsControl.IsInkToShapeEnabled = isEnabled;
+            }
+            else if (sender == BoardPenSettingsControl)
+            {
+                isEnabled = BoardPenSettingsControl.IsInkToShapeEnabled;
+                ToggleSwitchEnableInkToShape.IsOn = isEnabled;
+                if (BorderPenSettingsControl != null)
+                    BorderPenSettingsControl.IsInkToShapeEnabled = isEnabled;
+            }
+            else
+            {
+                isEnabled = ToggleSwitchEnableInkToShape.IsOn;
+                if (BorderPenSettingsControl != null)
+                    BorderPenSettingsControl.IsInkToShapeEnabled = isEnabled;
+                if (BoardPenSettingsControl != null)
+                    BoardPenSettingsControl.IsInkToShapeEnabled = isEnabled;
+            }
+
+            Settings.InkToShape.IsInkToShapeEnabled = isEnabled;
             SaveSettingsToFile();
         }
 

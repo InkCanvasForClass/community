@@ -1556,7 +1556,10 @@ namespace Ink_Canvas
                 toolbarTop = Math.Max(0, Math.Min(toolbarTop, maxTop));
 
                 // 设置工具栏位置
-                BorderImageSelectionControl.Margin = new Thickness(toolbarLeft, toolbarTop, 0, 0);
+                if ((object)BorderImageSelectionControl is MainWindow_controls.ImageSelectionToolbar imageSelectionToolbar)
+                {
+                    imageSelectionToolbar.ControlMargin = new Thickness(toolbarLeft, toolbarTop, 0, 0);
+                }
 
                 var pdfTarget = GetPdfSidebarTargetElement();
                 if (pdfTarget != null && BorderPdfPageSidebar != null && BorderPdfPageSidebar.Visibility == Visibility.Visible)
@@ -2431,33 +2434,10 @@ namespace Ink_Canvas
             {
                 if (ImageResizeHandlesCanvas == null) return;
 
-                ImageResizeHandlesCanvas.Margin = new Thickness(elementBounds.Left, elementBounds.Top, 0, 0);
-
-                // 四个角控制点
-                System.Windows.Controls.Canvas.SetLeft(ImageTopLeftHandle, -4);
-                System.Windows.Controls.Canvas.SetTop(ImageTopLeftHandle, -4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageTopRightHandle, elementBounds.Width - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageTopRightHandle, -4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageBottomLeftHandle, -4);
-                System.Windows.Controls.Canvas.SetTop(ImageBottomLeftHandle, elementBounds.Height - 4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageBottomRightHandle, elementBounds.Width - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageBottomRightHandle, elementBounds.Height - 4);
-
-                // 四个边控制点
-                System.Windows.Controls.Canvas.SetLeft(ImageTopHandle, elementBounds.Width / 2 - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageTopHandle, -4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageBottomHandle, elementBounds.Width / 2 - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageBottomHandle, elementBounds.Height - 4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageLeftHandle, -4);
-                System.Windows.Controls.Canvas.SetTop(ImageLeftHandle, elementBounds.Height / 2 - 4);
-
-                System.Windows.Controls.Canvas.SetLeft(ImageRightHandle, elementBounds.Width - 4);
-                System.Windows.Controls.Canvas.SetTop(ImageRightHandle, elementBounds.Height / 2 - 4);
+                if ((object)ImageResizeHandlesCanvas is MainWindow_controls.ImageResizeHandles resizeHandles)
+                {
+                    resizeHandles.UpdateHandlePositions(elementBounds);
+                }
             }
             catch (Exception ex)
             {
@@ -2470,7 +2450,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (IsBitmapLikeCanvasElement(currentSelectedElement) && sender is Ellipse ellipse)
+                if (IsBitmapLikeCanvasElement(currentSelectedElement) && e.OriginalSource is Ellipse ellipse)
                 {
                     isResizingImage = true;
                     imageResizeStartPoint = e.GetPosition(inkCanvas);
@@ -2494,7 +2474,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (isResizingImage && sender is Ellipse ellipse)
+                if (isResizingImage && e.OriginalSource is Ellipse ellipse)
                 {
                     isResizingImage = false;
                     ellipse.ReleaseMouseCapture();
@@ -2513,7 +2493,7 @@ namespace Ink_Canvas
         {
             try
             {
-                if (isResizingImage && IsBitmapLikeCanvasElement(currentSelectedElement) && sender is Ellipse ellipse)
+                if (isResizingImage && IsBitmapLikeCanvasElement(currentSelectedElement) && e.OriginalSource is Ellipse ellipse)
                 {
                     var currentPoint = e.GetPosition(inkCanvas);
                     ResizeImageByHandle(currentSelectedElement, imageResizeStartPoint, currentPoint, activeResizeHandle);

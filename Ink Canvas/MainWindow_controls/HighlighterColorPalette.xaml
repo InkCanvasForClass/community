@@ -5,161 +5,277 @@
              xmlns:Controls="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
              x:Name="Root">
     <Grid>
-        <!-- Board Version -->
-        <Viewbox x:Name="BoardHighlighterPenColorsPanel"
-                Visibility="{Binding IsBoardMode, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}"
-                Margin="0,8,0,0" Stretch="Fill">
+        <Viewbox Visibility="{Binding IsBoardMode, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}}"
+                 Margin="0,8,0,0"
+                 Stretch="Fill">
             <ikw:SimpleStackPanel Width="300" Margin="0,0,0,0">
                 <Border Width="300" Height="110" BorderBrush="Black"
                         BorderThickness="0" CornerRadius="5">
                     <Controls:UniformGrid Rows="2" Height="110">
-                        <ikw:SimpleStackPanel Height="45"
-                            Orientation="Horizontal" Width="270">
-                            <Controls:UniformGrid Columns="5"
-                                Width="270"
-                                Margin="0">
+                        <ikw:SimpleStackPanel Height="45" Orientation="Horizontal" Width="270">
+                            <Controls:UniformGrid Columns="5" Width="270" Margin="0">
                                 <Border x:Name="BoardHighlighterPenColorBlack"
-                                    BorderBrush="#e4e4e7"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorBlack_Click">
+                                        BorderBrush="#e4e4e7"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorBlack_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="Black" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorBlackContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-white.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                                 <Border x:Name="BoardHighlighterPenColorWhite"
-                                    Background="White"
-                                    BorderBrush="#dddddd"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100"
-                                    Width="45"
-                                    MouseUp="BtnHighlighterColorWhite_Click">
+                                        Background="White"
+                                        BorderBrush="#dddddd"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorWhite_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="White" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorWhiteContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-black.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                                 <Border x:Name="BoardHighlighterPenColorRed"
-                                    BorderBrush="#fecaca"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorRed_Click">
+                                        BorderBrush="#fecaca"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorRed_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="#ef4444" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorRedContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-white.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                                 <Border x:Name="BoardHighlighterPenColorYellow"
-                                    BorderBrush="#fef08a"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorYellow_Click">
+                                        BorderBrush="#fef08a"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorYellow_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="#eab308" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorYellowContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-black.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                                 <Border x:Name="BoardHighlighterPenColorGreen"
-                                    BorderBrush="#bbf7d0"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorGreen_Click">
+                                        BorderBrush="#bbf7d0"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorGreen_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="#22c55e" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorGreenContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-black.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                             </Controls:UniformGrid>
                         </ikw:SimpleStackPanel>
-                        <ikw:SimpleStackPanel Height="45"
-                            Orientation="Horizontal" Width="270">
+                        <ikw:SimpleStackPanel Height="45" Orientation="Horizontal" Width="270">
                             <Controls:UniformGrid Columns="5" Width="270" Margin="0">
-                                <Border x:Name="BoardHighlighterPenColorOrange"
-                                    BorderBrush="#fed7aa"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorOrange_Click">
+                                <Border x:Name="BoardHighlighterPenColorZinc"
+                                        BorderBrush="#e4e4e7"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorZinc_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
+                                            </Image.Clip>
+                                        </Image>
+                                        <Border Background="#71717a" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
+                                        <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorZincContent"
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-white.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
+                                        </Viewbox>
+                                    </Canvas>
+                                </Border>
+                                <Border x:Name="BoardHighlighterPenColorBlue"
+                                        BorderBrush="#bfdbfe"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorBlue_Click">
+                                    <Canvas>
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
+                                            </Image.Clip>
+                                        </Image>
+                                        <Border Background="#3b82f6" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
+                                        <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorBlueContent"
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-white.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
+                                        </Viewbox>
+                                    </Canvas>
+                                </Border>
+                                <Border x:Name="BoardHighlighterPenPenColorPurple"
+                                        BorderBrush="#e9d5ff"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorPurple_Click">
+                                    <Canvas>
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
+                                            </Image.Clip>
+                                        </Image>
+                                        <Border Background="#a855f7" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
+                                        <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorPurpleContent"
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-white.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
+                                        </Viewbox>
+                                    </Canvas>
+                                </Border>
+                                <Border x:Name="BoardHighlighterPenColorTeal"
+                                        BorderBrush="#99f6e4"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorTeal_Click">
+                                    <Canvas>
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
+                                            </Image.Clip>
+                                        </Image>
+                                        <Border Background="#14b8a6" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
+                                        <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorTealContent"
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-black.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
+                                        </Viewbox>
+                                    </Canvas>
+                                </Border>
+                                <Border x:Name="BoardHighlighterPenColorOrange"
+                                        BorderBrush="#fed7aa"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorOrange_Click">
+                                    <Canvas>
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="#f97316" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="BoardHighlighterPenViewboxBtnColorOrangeContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
-                                            <Image Source="/Resources/new-icons/checked-black.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-white.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
@@ -170,159 +286,277 @@
             </ikw:SimpleStackPanel>
         </Viewbox>
 
-        <!-- Non-Board Version -->
-        <Viewbox x:Name="HighlighterPenColorsPanel"
-                Visibility="{Binding IsBoardMode, ElementName=Root, Converter={StaticResource InverseBoolToVisibilityConverter}}"
-                Margin="0,8,0,0" Stretch="Fill">
+        <Viewbox Visibility="{Binding IsBoardMode, ElementName=Root, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                 Margin="0,8,0,0"
+                 Stretch="Fill">
             <ikw:SimpleStackPanel Width="300" Margin="0,0,0,0">
                 <Border Width="300" Height="110" BorderBrush="Black"
                         BorderThickness="0" CornerRadius="5">
                     <Controls:UniformGrid Rows="2" Height="110">
-                        <ikw:SimpleStackPanel Height="45"
-                            Orientation="Horizontal" Width="270">
+                        <ikw:SimpleStackPanel Height="45" Orientation="Horizontal" Width="270">
                             <Controls:UniformGrid Columns="5" Width="270" Margin="0">
                                 <Border x:Name="HighlighterPenColorBlack"
-                                    BorderBrush="#e4e4e7"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorBlack_Click">
+                                        BorderBrush="#e4e4e7"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorBlack_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="Black" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="HighlighterPenViewboxBtnColorBlackContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-white.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                                 <Border x:Name="HighlighterPenColorWhite"
-                                    Background="White"
-                                    BorderBrush="#dddddd"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100"
-                                    Width="45"
-                                    MouseUp="BtnHighlighterColorWhite_Click">
+                                        Background="White"
+                                        BorderBrush="#dddddd"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorWhite_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="White" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="HighlighterPenViewboxBtnColorWhiteContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-black.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                                 <Border x:Name="HighlighterPenColorRed"
-                                    BorderBrush="#fecaca"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorRed_Click">
+                                        BorderBrush="#fecaca"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorRed_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="#ef4444" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="HighlighterPenViewboxBtnColorRedContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-white.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                                 <Border x:Name="HighlighterPenColorYellow"
-                                    BorderBrush="#fef08a"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorYellow_Click">
+                                        BorderBrush="#fef08a"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorYellow_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="#eab308" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="HighlighterPenViewboxBtnColorYellowContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-black.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                                 <Border x:Name="HighlighterPenColorGreen"
-                                    BorderBrush="#bbf7d0"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorGreen_Click">
+                                        BorderBrush="#bbf7d0"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorGreen_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="#22c55e" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="HighlighterPenViewboxBtnColorGreenContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
                                             <Image Source="/Resources/new-icons/checked-black.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>
                             </Controls:UniformGrid>
                         </ikw:SimpleStackPanel>
-                        <ikw:SimpleStackPanel Height="45"
-                            Orientation="Horizontal" Width="270">
+                        <ikw:SimpleStackPanel Height="45" Orientation="Horizontal" Width="270">
                             <Controls:UniformGrid Columns="5" Width="270" Margin="0">
-                                <Border x:Name="HighlighterPenColorOrange"
-                                    BorderBrush="#fed7aa"
-                                    BorderThickness="1.5"
-                                    CornerRadius="100" Width="45"
-                                    MouseUp="BtnHighlighterColorOrange_Click">
+                                <Border x:Name="HighlighterPenColorZinc"
+                                        BorderBrush="#e4e4e7"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorZinc_Click">
                                     <Canvas>
-                                        <Image Source="/Resources/Icons-png/transparent-grid.png"
-                                            Width="42" Height="42">
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
+                                            </Image.Clip>
+                                        </Image>
+                                        <Border Background="#71717a" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
+                                        <Viewbox x:Name="HighlighterPenViewboxBtnColorZincContent"
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-white.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
+                                        </Viewbox>
+                                    </Canvas>
+                                </Border>
+                                <Border x:Name="HighlighterPenColorBlue"
+                                        BorderBrush="#bfdbfe"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorBlue_Click">
+                                    <Canvas>
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
+                                            </Image.Clip>
+                                        </Image>
+                                        <Border Background="#3b82f6" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
+                                        <Viewbox x:Name="HighlighterPenViewboxBtnColorBlueContent"
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-white.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
+                                        </Viewbox>
+                                    </Canvas>
+                                </Border>
+                                <Border x:Name="HighlighterPenPenColorPurple"
+                                        BorderBrush="#e9d5ff"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorPurple_Click">
+                                    <Canvas>
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
+                                            </Image.Clip>
+                                        </Image>
+                                        <Border Background="#a855f7" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
+                                        <Viewbox x:Name="HighlighterPenViewboxBtnColorPurpleContent"
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-white.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
+                                        </Viewbox>
+                                    </Canvas>
+                                </Border>
+                                <Border x:Name="HighlighterPenColorTeal"
+                                        BorderBrush="#99f6e4"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorTeal_Click">
+                                    <Canvas>
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
+                                            <Image.Clip>
+                                                <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
+                                            </Image.Clip>
+                                        </Image>
+                                        <Border Background="#14b8a6" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
+                                        <Viewbox x:Name="HighlighterPenViewboxBtnColorTealContent"
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-black.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
+                                        </Viewbox>
+                                    </Canvas>
+                                </Border>
+                                <Border x:Name="HighlighterPenColorOrange"
+                                        BorderBrush="#fed7aa"
+                                        BorderThickness="1.5"
+                                        CornerRadius="100"
+                                        Width="45"
+                                        MouseUp="BtnHighlighterColorOrange_Click">
+                                    <Canvas>
+                                        <Image Source="/Resources/Icons-png/transparent-grid.png" Width="42" Height="42">
                                             <Image.Clip>
                                                 <EllipseGeometry Center="21,21" RadiusX="21" RadiusY="21" />
                                             </Image.Clip>
                                         </Image>
                                         <Border Background="#f97316" Width="42" Height="42" CornerRadius="21" Opacity="0.75" />
                                         <Viewbox x:Name="HighlighterPenViewboxBtnColorOrangeContent"
-                                            Visibility="Visible"
-                                            Canvas.Top="9"
-                                            Canvas.Left="9">
-                                            <Image Source="/Resources/new-icons/checked-black.png"
-                                                RenderOptions.BitmapScalingMode="HighQuality"
-                                                VerticalAlignment="Top" Width="24" Height="24" Margin="0,0,0,0" />
+                                                 Visibility="Visible"
+                                                 Canvas.Top="9"
+                                                 Canvas.Left="9">
+                                            <Image Source="/Resources/new-icons/checked-white.png"
+                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                   VerticalAlignment="Top"
+                                                   Width="24"
+                                                   Height="24"
+                                                   Margin="0,0,0,0" />
                                         </Viewbox>
                                     </Canvas>
                                 </Border>

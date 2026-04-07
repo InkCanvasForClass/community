@@ -2,16 +2,17 @@ using System;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace Ink_Canvas.MainWindow_controls
 {
     public partial class PPTNavigationBottomRight : UserControl
     {
         public static readonly DependencyProperty CurrentPageProperty = DependencyProperty.Register(
-            nameof(CurrentPage), typeof(int), typeof(PPTNavigationBottomRight), new PropertyMetadata(1));
+            nameof(CurrentPage), typeof(string), typeof(PPTNavigationBottomRight), new PropertyMetadata("1"));
 
         public static readonly DependencyProperty TotalPagesProperty = DependencyProperty.Register(
-            nameof(TotalPages), typeof(int), typeof(PPTNavigationBottomRight), new PropertyMetadata(1));
+            nameof(TotalPages), typeof(string), typeof(PPTNavigationBottomRight), new PropertyMetadata("1"));
 
         public static readonly DependencyProperty IsVisibleProperty = DependencyProperty.Register(
             nameof(IsVisible), typeof(bool), typeof(PPTNavigationBottomRight), new PropertyMetadata(true));
@@ -25,15 +26,46 @@ namespace Ink_Canvas.MainWindow_controls
         public static readonly RoutedEvent PageClickedEvent = EventManager.RegisterRoutedEvent(
             nameof(PageClicked), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(PPTNavigationBottomRight));
 
-        public int CurrentPage
+        public Border BorderSelectionControl => PPTBtnRBBorderElement;
+
+        public Thickness ControlMargin
         {
-            get => (int)GetValue(CurrentPageProperty);
+            get => Margin;
+            set => Margin = value;
+        }
+
+        public UIElement ControlChild => ViewboxPPTNavigationBottomRight;
+
+        public void InvalidateVisualOnControl()
+        {
+            PPTBtnRBBorderElement.InvalidateVisual();
+        }
+
+        public new Visibility Visibility
+        {
+            get => base.Visibility;
+            set => base.Visibility = value;
+        }
+
+        public Border PPTBtnRBBorder => PPTBtnRBBorderElement;
+        public Border PPTRBPreviousButtonBorder => PPTRBPreviousButtonBorderElement;
+        public Border PPTRBPreviousButtonFeedbackBorder => PPTRBPreviousButtonFeedbackBorderElement;
+        public GeometryDrawing PPTRBPreviousButtonGeometry => PPTRBPreviousButtonGeometryElement;
+        public Border PPTRBPageButton => PPTRBPageButtonElement;
+        public Border PPTRBPageButtonFeedbackBorder => PPTRBPageButtonFeedbackBorderElement;
+        public Border PPTRBNextButtonBorder => PPTRBNextButtonBorderElement;
+        public Border PPTRBNextButtonFeedbackBorder => PPTRBNextButtonFeedbackBorderElement;
+        public GeometryDrawing PPTRBNextButtonGeometry => PPTRBNextButtonGeometryElement;
+
+        public string CurrentPage
+        {
+            get => (string)GetValue(CurrentPageProperty);
             set => SetValue(CurrentPageProperty, value);
         }
 
-        public int TotalPages
+        public string TotalPages
         {
-            get => (int)GetValue(TotalPagesProperty);
+            get => (string)GetValue(TotalPagesProperty);
             set => SetValue(TotalPagesProperty, value);
         }
 
@@ -68,49 +100,49 @@ namespace Ink_Canvas.MainWindow_controls
 
         private void GridPPTControlPrevious_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            PPTRBPreviousButtonFeedbackBorder.Opacity = 1;
+            PPTRBPreviousButtonFeedbackBorderElement.Opacity = 1;
         }
 
         private void GridPPTControlPrevious_MouseLeave(object sender, MouseEventArgs e)
         {
-            PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
+            PPTRBPreviousButtonFeedbackBorderElement.Opacity = 0;
         }
 
         private void GridPPTControlPrevious_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            PPTRBPreviousButtonFeedbackBorder.Opacity = 0;
+            PPTRBPreviousButtonFeedbackBorderElement.Opacity = 0;
             RaiseEvent(new RoutedEventArgs(PreviousClickedEvent, this));
         }
 
         private void PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            PPTRBPageButtonFeedbackBorder.Opacity = 1;
+            PPTRBPageButtonFeedbackBorderElement.Opacity = 1;
         }
 
         private void PPTNavigationBtn_MouseLeave(object sender, MouseEventArgs e)
         {
-            PPTRBPageButtonFeedbackBorder.Opacity = 0;
+            PPTRBPageButtonFeedbackBorderElement.Opacity = 0;
         }
 
         private void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            PPTRBPageButtonFeedbackBorder.Opacity = 0;
+            PPTRBPageButtonFeedbackBorderElement.Opacity = 0;
             RaiseEvent(new RoutedEventArgs(PageClickedEvent, this));
         }
 
         private void GridPPTControlNext_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            PPTRBNextButtonFeedbackBorder.Opacity = 1;
+            PPTRBNextButtonFeedbackBorderElement.Opacity = 1;
         }
 
         private void GridPPTControlNext_MouseLeave(object sender, MouseEventArgs e)
         {
-            PPTRBNextButtonFeedbackBorder.Opacity = 0;
+            PPTRBNextButtonFeedbackBorderElement.Opacity = 0;
         }
 
         private void GridPPTControlNext_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            PPTRBNextButtonFeedbackBorder.Opacity = 0;
+            PPTRBNextButtonFeedbackBorderElement.Opacity = 0;
             RaiseEvent(new RoutedEventArgs(NextClickedEvent, this));
         }
     }

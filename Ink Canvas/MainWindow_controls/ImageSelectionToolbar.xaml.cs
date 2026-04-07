@@ -10,8 +10,9 @@ namespace Ink_Canvas.MainWindow_controls
         public static readonly DependencyProperty SelectedImageProperty = DependencyProperty.Register(
             nameof(SelectedImage), typeof(object), typeof(ImageSelectionToolbar), new PropertyMetadata(null));
 
-        public static readonly DependencyProperty IsVisibleProperty = DependencyProperty.Register(
-            nameof(IsVisible), typeof(Visibility), typeof(ImageSelectionToolbar), new PropertyMetadata(Visibility.Collapsed));
+        public static new readonly DependencyProperty VisibilityProperty = DependencyProperty.Register(
+            nameof(Visibility), typeof(Visibility), typeof(ImageSelectionToolbar), 
+            new FrameworkPropertyMetadata(Visibility.Collapsed, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnVisibilityChanged));
 
         public static readonly RoutedEvent CloneRequestedEvent = EventManager.RegisterRoutedEvent(
             nameof(CloneRequested), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ImageSelectionToolbar));
@@ -28,16 +29,46 @@ namespace Ink_Canvas.MainWindow_controls
         public static readonly RoutedEvent ScaleChangedEvent = EventManager.RegisterRoutedEvent(
             nameof(ScaleChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ImageSelectionToolbar));
 
+        // 用于向后兼容 - 暴露内部 Border 以便 partial class 访问
+        public Border BorderSelectionControl => BorderImageSelectionControl;
+
+        // 暴露 Margin 属性以便 MW_ElementsControls.cs 设置位置
+        public Thickness ControlMargin
+        {
+            get => BorderImageSelectionControl.Margin;
+            set => BorderImageSelectionControl.Margin = value;
+        }
+
+        // 暴露 Child 属性以便 MW_AutoTheme.cs 访问
+        public UIElement ControlChild
+        {
+            get => BorderImageSelectionControl.Child;
+        }
+
+        // 暴露 InvalidateVisual 方法以便 MW_AutoTheme.cs 调用
+        public void InvalidateVisualOnControl()
+        {
+            BorderImageSelectionControl.InvalidateVisual();
+        }
+
         public object SelectedImage
         {
             get => GetValue(SelectedImageProperty);
             set => SetValue(SelectedImageProperty, value);
         }
 
-        public new Visibility IsVisible
+        public new Visibility Visibility
         {
-            get => (Visibility)GetValue(IsVisibleProperty);
-            set => SetValue(IsVisibleProperty, value);
+            get => (Visibility)GetValue(VisibilityProperty);
+            set => SetValue(VisibilityProperty, value);
+        }
+
+        private static void OnVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is ImageSelectionToolbar toolbar)
+            {
+                toolbar.BorderImageSelectionControl.Visibility = (Visibility)e.NewValue;
+            }
         }
 
         public event RoutedEventHandler CloneRequested

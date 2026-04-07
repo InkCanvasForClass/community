@@ -688,8 +688,8 @@ namespace Ink_Canvas
 
             if (currentMode == 0)
             {
-                LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                BorderPPTNavBottomLeft.Visibility = Visibility.Collapsed;
+                BorderPPTNavBottomRight.Visibility = Visibility.Collapsed;
                 LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 //進入黑板
@@ -820,16 +820,16 @@ namespace Ink_Canvas
                 {
                     var dops = Settings.PowerPointSettings.PPTButtonsDisplayOption.ToString();
                     var dopsc = dops.ToCharArray();
-                    if (dopsc[0] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftBottomPanelForPPTNavigation);
-                    if (dopsc[1] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightBottomPanelForPPTNavigation);
+                    if (dopsc[0] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(BorderPPTNavBottomLeft);
+                    if (dopsc[1] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(BorderPPTNavBottomRight);
                     if (dopsc[2] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(LeftSidePanelForPPTNavigation);
                     if (dopsc[3] == '2' && !isDisplayingOrHidingBlackboard) AnimationsHelper.ShowWithFadeIn(RightSidePanelForPPTNavigation);
                 }
                 else
                 {
                     // 如果不在放映模式或页数无效，隐藏所有翻页按钮
-                    LeftBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
-                    RightBottomPanelForPPTNavigation.Visibility = Visibility.Collapsed;
+                    BorderPPTNavBottomLeft.Visibility = Visibility.Collapsed;
+                    BorderPPTNavBottomRight.Visibility = Visibility.Collapsed;
                     LeftSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                     RightSidePanelForPPTNavigation.Visibility = Visibility.Collapsed;
                 }

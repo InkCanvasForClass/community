@@ -1,55 +1,39 @@
-using System;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
+using System.Windows.Shapes;
 
 namespace Ink_Canvas.MainWindow_controls
 {
     public partial class ImageResizeHandles : UserControl
     {
-        public static readonly DependencyProperty TargetBoundsProperty = DependencyProperty.Register(
-            nameof(TargetBounds), typeof(Rect), typeof(ImageResizeHandles), new PropertyMetadata(new Rect(0, 0, 0, 0)));
+        private const double HandleOffset = 4d;
 
-        public static readonly DependencyProperty IsVisibleProperty = DependencyProperty.Register(
-            nameof(IsVisible), typeof(Visibility), typeof(ImageResizeHandles), new PropertyMetadata(Visibility.Collapsed));
+        private FrameworkElement ResizeHandlesCanvasElement => (FrameworkElement)FindName("ImageResizeHandlesCanvas");
+        private Ellipse TopLeftHandle => (Ellipse)FindName("ImageTopLeftHandle");
+        private Ellipse TopRightHandle => (Ellipse)FindName("ImageTopRightHandle");
+        private Ellipse BottomLeftHandle => (Ellipse)FindName("ImageBottomLeftHandle");
+        private Ellipse BottomRightHandle => (Ellipse)FindName("ImageBottomRightHandle");
+        private Ellipse TopHandle => (Ellipse)FindName("ImageTopHandle");
+        private Ellipse BottomHandle => (Ellipse)FindName("ImageBottomHandle");
+        private Ellipse LeftHandle => (Ellipse)FindName("ImageLeftHandle");
+        private Ellipse RightHandle => (Ellipse)FindName("ImageRightHandle");
 
-        public static readonly RoutedEvent ResizeStartedEvent = EventManager.RegisterRoutedEvent(
-            nameof(ResizeStarted), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ImageResizeHandles));
+        public static new readonly DependencyProperty VisibilityProperty = DependencyProperty.Register(
+            nameof(Visibility),
+            typeof(Visibility),
+            typeof(ImageResizeHandles),
+            new FrameworkPropertyMetadata(Visibility.Collapsed, FrameworkPropertyMetadataOptions.BindsTwoWayByDefault, OnVisibilityChanged));
 
-        public static readonly RoutedEvent ResizeCompletedEvent = EventManager.RegisterRoutedEvent(
-            nameof(ResizeCompleted), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ImageResizeHandles));
-
-        public static readonly RoutedEvent BoundsChangedEvent = EventManager.RegisterRoutedEvent(
-            nameof(BoundsChanged), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(ImageResizeHandles));
-
-        public Rect TargetBounds
+        public new Visibility Visibility
         {
-            get => (Rect)GetValue(TargetBoundsProperty);
-            set => SetValue(TargetBoundsProperty, value);
+            get => (Visibility)GetValue(VisibilityProperty);
+            set => SetValue(VisibilityProperty, value);
         }
 
-        public new Visibility IsVisible
+        public Thickness ControlMargin
         {
-            get => (Visibility)GetValue(IsVisibleProperty);
-            set => SetValue(IsVisibleProperty, value);
-        }
-
-        public event RoutedEventHandler ResizeStarted
-        {
-            add => AddHandler(ResizeStartedEvent, value);
-            remove => RemoveHandler(ResizeStartedEvent, value);
-        }
-
-        public event RoutedEventHandler ResizeCompleted
-        {
-            add => AddHandler(ResizeCompletedEvent, value);
-            remove => RemoveHandler(ResizeCompletedEvent, value);
-        }
-
-        public event RoutedEventHandler BoundsChanged
-        {
-            add => AddHandler(BoundsChangedEvent, value);
-            remove => RemoveHandler(BoundsChangedEvent, value);
+            get => ResizeHandlesCanvasElement.Margin;
+            set => ResizeHandlesCanvasElement.Margin = value;
         }
 
         public ImageResizeHandles()
@@ -57,23 +41,50 @@ namespace Ink_Canvas.MainWindow_controls
             InitializeComponent();
         }
 
-        private void ImageResizeHandle_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        public void UpdateHandlePositions(Rect elementBounds)
         {
-            RaiseEvent(new RoutedEventArgs(ResizeStartedEvent, this));
-            e.Handled = true;
+            ControlMargin = new Thickness(elementBounds.Left, elementBounds.Top, 0, 0);
+
+            System.Windows.Controls.Canvas.SetLeft(TopLeftHandle, -HandleOffset);
+            System.Windows.Controls.Canvas.SetTop(TopLeftHandle, -HandleOffset);
+
+            System.Windows.Controls.Canvas.SetLeft(TopRightHandle, elementBounds.Width - HandleOffset);
+            System.Windows.Controls.Canvas.SetTop(TopRightHandle, -HandleOffset);
+
+            System.Windows.Controls.Canvas.SetLeft(BottomLeftHandle, -HandleOffset);
+            System.Windows.Controls.Canvas.SetTop(BottomLeftHandle, elementBounds.Height - HandleOffset);
+
+            System.Windows.Controls.Canvas.SetLeft(BottomRightHandle, elementBounds.Width - HandleOffset);
+            System.Windows.Controls.Canvas.SetTop(BottomRightHandle, elementBounds.Height - HandleOffset);
+
+            System.Windows.Controls.Canvas.SetLeft(TopHandle, elementBounds.Width / 2 - HandleOffset);
+            System.Windows.Controls.Canvas.SetTop(TopHandle, -HandleOffset);
+
+            System.Windows.Controls.Canvas.SetLeft(BottomHandle, elementBounds.Width / 2 - HandleOffset);
+            System.Windows.Controls.Canvas.SetTop(BottomHandle, elementBounds.Height - HandleOffset);
+
+            System.Windows.Controls.Canvas.SetLeft(LeftHandle, -HandleOffset);
+            System.Windows.Controls.Canvas.SetTop(LeftHandle, elementBounds.Height / 2 - HandleOffset);
+
+            System.Windows.Controls.Canvas.SetLeft(RightHandle, elementBounds.Width - HandleOffset);
+            System.Windows.Controls.Canvas.SetTop(RightHandle, elementBounds.Height / 2 - HandleOffset);
         }
 
-        private void ImageResizeHandle_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private static void OnVisibilityChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            RaiseEvent(new RoutedEventArgs(ResizeCompletedEvent, this));
-            e.Handled = true;
-        }
-
-        private void ImageResizeHandle_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
+            if (d is ImageResizeHandles handles)
             {
-                RaiseEvent(new RoutedEventArgs(BoundsChangedEvent, this));
+                var visibility = (Visibility)e.NewValue;
+                handles.SetCurrentValue(UIElement.VisibilityProperty, visibility);
+                ResizeHandlesVisibility(handles, visibility);
+            }
+        }
+
+        private static void ResizeHandlesVisibility(ImageResizeHandles handles, Visibility visibility)
+        {
+            if (handles.ResizeHandlesCanvasElement is UIElement resizeHandlesCanvas)
+            {
+                resizeHandlesCanvas.Visibility = visibility;
             }
         }
     }

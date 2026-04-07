@@ -252,14 +252,14 @@ namespace Ink_Canvas
 
                 if (Settings.Startup.IsEnableNibMode)
                 {
-                    ToggleSwitchEnableNibMode.IsOn = true;
-                    BoardToggleSwitchEnableNibMode.IsOn = true;
+                    if (BorderPenSettingsControl != null) BorderPenSettingsControl.IsNibModeEnabled = true;
+                    if (BoardPenSettingsControl != null) BoardPenSettingsControl.IsNibModeEnabled = true;
                     BoundsWidth = Settings.Advanced.NibModeBoundsWidth;
                 }
                 else
                 {
-                    ToggleSwitchEnableNibMode.IsOn = false;
-                    BoardToggleSwitchEnableNibMode.IsOn = false;
+                    if (BorderPenSettingsControl != null) BorderPenSettingsControl.IsNibModeEnabled = false;
+                    if (BoardPenSettingsControl != null) BoardPenSettingsControl.IsNibModeEnabled = false;
                     BoundsWidth = Settings.Advanced.FingerModeBoundsWidth;
                 }
 
@@ -339,8 +339,8 @@ namespace Ink_Canvas
             {
                 Settings.Startup = new Startup();
                 Settings.Startup.IsEnableNibMode = false; // 默认关闭笔尖模式
-                ToggleSwitchEnableNibMode.IsOn = false; // 默认关闭笔尖模式
-                BoardToggleSwitchEnableNibMode.IsOn = false; // 默认关闭笔尖模式
+                    if (BorderPenSettingsControl != null) BorderPenSettingsControl.IsNibModeEnabled = false; // 默认关闭笔尖模式
+                    if (BoardPenSettingsControl != null) BoardPenSettingsControl.IsNibModeEnabled = false; // 默认关闭笔尖模式
                 BoundsWidth = Settings.Advanced.FingerModeBoundsWidth; // 使用手指模式边界宽度
             }
 
@@ -365,13 +365,13 @@ namespace Ink_Canvas
             {
                 if (!Settings.Appearance.IsEnableDisPlayNibModeToggler)
                 {
-                    NibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
-                    BoardNibModeSimpleStackPanel.Visibility = Visibility.Collapsed;
+                    if (BorderPenSettingsControl != null) BorderPenSettingsControl.NibModePanelVisibility = Visibility.Collapsed;
+                    if (BoardPenSettingsControl != null) BoardPenSettingsControl.NibModePanelVisibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    NibModeSimpleStackPanel.Visibility = Visibility.Visible;
-                    BoardNibModeSimpleStackPanel.Visibility = Visibility.Visible;
+                    if (BorderPenSettingsControl != null) BorderPenSettingsControl.NibModePanelVisibility = Visibility.Visible;
+                    if (BoardPenSettingsControl != null) BoardPenSettingsControl.NibModePanelVisibility = Visibility.Visible;
                 }
 
                 //if (Settings.Appearance.IsColorfulViewboxFloatingBar) // 浮动工具栏背景色
@@ -803,16 +803,18 @@ namespace Ink_Canvas
                 drawingAttributes.Height = Settings.Canvas.InkWidth;
                 drawingAttributes.Width = Settings.Canvas.InkWidth;
 
-                InkWidthSlider.Value = Settings.Canvas.InkWidth * 2;
-                HighlighterWidthSlider.Value = Settings.Canvas.HighlighterWidth;
+                if (BorderPenSettingsControl != null) BorderPenSettingsControl.PenWidth = Settings.Canvas.InkWidth * 2;
+                if (BoardPenSettingsControl != null) BoardPenSettingsControl.PenWidth = Settings.Canvas.InkWidth * 2;
+                if (BorderPenSettingsControl != null) BorderPenSettingsControl.HighlighterWidth = Settings.Canvas.HighlighterWidth;
+                if (BoardPenSettingsControl != null) BoardPenSettingsControl.HighlighterWidth = Settings.Canvas.HighlighterWidth;
 
                 int alpha = (int)Settings.Canvas.InkAlpha;
                 if (alpha < 0) alpha = 0; if (alpha > 255) alpha = 255;
                 var inkColor = drawingAttributes.Color;
                 drawingAttributes.Color = Color.FromArgb((byte)alpha, inkColor.R, inkColor.G, inkColor.B);
                 inkCanvas.DefaultDrawingAttributes.Color = drawingAttributes.Color;
-                if (InkAlphaSlider != null) InkAlphaSlider.Value = alpha;
-                if (BoardInkAlphaSlider != null) BoardInkAlphaSlider.Value = alpha;
+                if (BorderPenSettingsControl != null) BorderPenSettingsControl.PenAlpha = alpha;
+                if (BoardPenSettingsControl != null) BoardPenSettingsControl.PenAlpha = alpha;
 
 
                 ComboBoxHyperbolaAsymptoteOption.SelectedIndex = (int)Settings.Canvas.HyperbolaAsymptoteOption;
@@ -865,8 +867,8 @@ namespace Ink_Canvas
                     Settings.Canvas.InkStyle = 0;
 
                 int penStyleUi = PenStyleUiIndexFromInkStyle(Settings.Canvas.InkStyle);
-                ComboBoxPenStyle.SelectedIndex = penStyleUi;
-                BoardComboBoxPenStyle.SelectedIndex = penStyleUi;
+                if (BorderPenSettingsControl != null) BorderPenSettingsControl.PenStyleSelectedIndex = penStyleUi;
+                if (BoardPenSettingsControl != null) BoardPenSettingsControl.PenStyleSelectedIndex = penStyleUi;
 
                 ComboBoxEraserSize.SelectedIndex = Settings.Canvas.EraserSize;
                 ComboBoxEraserSizeFloatingBar.SelectedIndex = Settings.Canvas.EraserSize;
@@ -1060,6 +1062,10 @@ namespace Ink_Canvas
             if (Settings.InkToShape != null)
             {
                 ToggleSwitchEnableInkToShape.IsOn = Settings.InkToShape.IsInkToShapeEnabled;
+                if (BorderPenSettingsControl != null)
+                    BorderPenSettingsControl.IsInkToShapeEnabled = Settings.InkToShape.IsInkToShapeEnabled;
+                if (BoardPenSettingsControl != null)
+                    BoardPenSettingsControl.IsInkToShapeEnabled = Settings.InkToShape.IsInkToShapeEnabled;
 
                 if (ComboBoxShapeRecognitionEngine != null)
                 {
@@ -1439,15 +1445,15 @@ namespace Ink_Canvas
                 }
 
                 // 同步批注子面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel != null)
+                if (BoardPenSettingsControl != null)
                 {
-                    ToggleSwitchInkFadeInPanel.IsOn = Settings.Canvas.EnableInkFade;
+                    BoardPenSettingsControl.IsInkFadeEnabled = Settings.Canvas.EnableInkFade;
                 }
 
                 // 同步普通画笔面板中的开关状态
-                if (ToggleSwitchInkFadeInPanel2 != null)
+                if (BorderPenSettingsControl != null)
                 {
-                    ToggleSwitchInkFadeInPanel2.IsOn = Settings.Canvas.EnableInkFade;
+                    BorderPenSettingsControl.IsInkFadeEnabled = Settings.Canvas.EnableInkFade;
                 }
 
                 // 同步滑块值
