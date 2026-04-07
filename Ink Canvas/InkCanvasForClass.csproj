@@ -142,6 +142,7 @@
     <PackageReference Include="AForge.Imaging" Version="2.2.5" />
     <PackageReference Include="AForge.Math" Version="2.2.5" />
     <PackageReference Include="WebDav.Client" Version="2.9.0" />
+    <PackageReference Include="Weikio.PluginFramework" Version="1.5.1" />
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
     <COMReference Include="IWshRuntimeLibrary">
