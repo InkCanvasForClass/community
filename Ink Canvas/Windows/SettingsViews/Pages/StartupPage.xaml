@@ -9,7 +9,7 @@
       xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
       xmlns:sys="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
-      d:DesignHeight="950" d:DesignWidth="800"
+      
       Title="启动">
 
     <ScrollViewer Padding="59,0,59,0" PanningMode="VerticalFirst">
@@ -40,7 +40,7 @@
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.View}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchNoFocusMode" Toggled="ToggleSwitchNoFocusMode_Toggled" />
+                    <ui:ToggleSwitch Name="ToggleSwitchNoFocusMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchNoFocusMode_Toggled" />
                 </ui:SettingsCard>
                 
                 <!-- 窗口无边框模式 -->
@@ -49,7 +49,7 @@
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchWindowMode" Toggled="ToggleSwitchWindowMode_Toggled" />
+                    <ui:ToggleSwitch Name="ToggleSwitchWindowMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchWindowMode_Toggled" />
                 </ui:SettingsCard>
                 
                 <!-- 窗口置顶 -->
@@ -58,7 +58,7 @@
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchAlwaysOnTop" Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
+                    <ui:ToggleSwitch Name="ToggleSwitchAlwaysOnTop" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
                 </ui:SettingsCard>
                 
                 <!-- UIA置顶 -->
@@ -67,7 +67,7 @@
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchUIAccessTopMost" Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
+                    <ui:ToggleSwitch Name="ToggleSwitchUIAccessTopMost" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
                 </ui:SettingsCard>
                 
                 <!-- 启动设置 -->
@@ -80,7 +80,7 @@
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchRunAtStartup" Toggled="ToggleSwitchRunAtStartup_Toggled" />
+                    <ui:ToggleSwitch Name="ToggleSwitchRunAtStartup" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchRunAtStartup_Toggled" />
                 </ui:SettingsCard>
                 
                 <!-- 开机运行后收纳到侧边栏 -->
@@ -89,7 +89,7 @@
                     <ui:SettingsCard.HeaderIcon>
                         <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" />
                     </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchFoldAtStartup" Toggled="ToggleSwitchFoldAtStartup_Toggled" />
+                    <ui:ToggleSwitch Name="ToggleSwitchFoldAtStartup" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchFoldAtStartup_Toggled" />
                 </ui:SettingsCard>
                 
                 <!-- 模式设置 -->
@@ -103,7 +103,7 @@
                     </ui:SettingsExpander.HeaderIcon>
                     <ui:SettingsExpander.Items>
                         <ui:SettingsCard Header="仅PPT模式">
-                            <ui:ToggleSwitch Name="ToggleSwitchPPTOnlyMode" Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
+                            <ui:ToggleSwitch Name="ToggleSwitchPPTOnlyMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
                         </ui:SettingsCard>
                     </ui:SettingsExpander.Items>
                 </ui:SettingsExpander>
