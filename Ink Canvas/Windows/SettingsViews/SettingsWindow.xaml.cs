@@ -2,11 +2,10 @@ using Ink_Canvas.Windows.SettingsViews.Pages;
 using iNKORE.UI.WPF.Modern.Controls;
 using System;
 using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Navigation;
-using System.Windows.Interop;
-using System.Windows.Input;
 using System.Linq;
+using System.Windows;
+using System.Windows.Interop;
+using System.Windows.Navigation;
 using MessageBox = System.Windows.MessageBox;
 using Screen = System.Windows.Forms.Screen;
 
@@ -16,13 +15,13 @@ namespace Ink_Canvas.Windows.SettingsViews
     {
         private readonly Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
-        
+
         // 保存窗口原始位置和大小
         private double _originalLeft;
         private double _originalTop;
         private double _originalWidth;
         private double _originalHeight;
-        
+
         // 标记窗口是否曾经最大化过
         private bool _wasMaximized = false;
 
@@ -89,10 +88,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                     _originalTop = this.Top;
                     _originalWidth = this.Width;
                     _originalHeight = this.Height;
-                    
+
                     // 标记窗口曾经最大化过
                     _wasMaximized = true;
-                    
+
                     // 最大化时清除最大尺寸限制
                     this.MaxWidth = double.PositiveInfinity;
                     this.MaxHeight = double.PositiveInfinity;
@@ -104,10 +103,10 @@ namespace Ink_Canvas.Windows.SettingsViews
                     this.Top = _originalTop;
                     this.Width = _originalWidth;
                     this.Height = _originalHeight;
-                    
+
                     // 重置标记
                     _wasMaximized = false;
-                    
+
                     // 只设置最大尺寸，不改变窗口位置
                     SetMaxSizeOnly();
                 }
@@ -116,11 +115,11 @@ namespace Ink_Canvas.Windows.SettingsViews
                     // 正常状态下只设置最大尺寸限制
                     SetMaxSizeOnly();
                 }
-                
+
                 // 窗口状态改变时更新标题栏显示
                 UpdateAppTitleBarMargin();
             };
-            
+
             // 窗口大小改变时更新标题栏显示
             this.SizeChanged += (sender, e) =>
             {
@@ -158,7 +157,7 @@ namespace Ink_Canvas.Windows.SettingsViews
         #endregion
 
         #region 高DPI/多屏自适应窗口控制
-        
+
         /// <summary>
         /// 获取当前窗口所在屏幕的工作区尺寸（DIP单位）
         /// </summary>
@@ -341,7 +340,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             if (sender.DisplayMode == NavigationViewDisplayMode.Minimal)
             {
                 AppTitleBar.Margin = new Thickness((sender.CompactPaneLength * 2), currMargin.Top, currMargin.Right, currMargin.Bottom);
-                
+
                 // 当窗口宽度非常小时，隐藏图标和应用设置文字
                 if (this.ActualWidth < 400)
                 {

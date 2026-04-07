@@ -2822,7 +2822,7 @@ namespace Ink_Canvas
                 settingsWindow.ShowDialog();
             }
         }
-        
+
         #endregion 新设置窗口
 
         // 在MainWindow类中添加：
