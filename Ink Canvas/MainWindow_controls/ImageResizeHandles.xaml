@@ -1,0 +1,44 @@
+<UserControl x:Class="Ink_Canvas.MainWindow_controls.ImageResizeHandles"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="Root">
+    <Canvas Name="ImageResizeHandlesCanvas" 
+            Visibility="{Binding IsVisible, ElementName=Root, Mode=TwoWay}" 
+            Panel.ZIndex="1000">
+        <!-- 四个角控制点 -->
+        <Ellipse Name="ImageTopLeftHandle" Style="{StaticResource ImageResizeHandleNWSE}"
+                 MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                 MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                 MouseMove="ImageResizeHandle_MouseMove" />
+        <Ellipse Name="ImageTopRightHandle" Style="{StaticResource ImageResizeHandleNESW}"
+                 MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                 MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                 MouseMove="ImageResizeHandle_MouseMove" />
+        <Ellipse Name="ImageBottomLeftHandle" Style="{StaticResource ImageResizeHandleNESW}"
+                 MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                 MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                 MouseMove="ImageResizeHandle_MouseMove" />
+        <Ellipse Name="ImageBottomRightHandle" Style="{StaticResource ImageResizeHandleNWSE}"
+                 MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                 MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                 MouseMove="ImageResizeHandle_MouseMove" />
+        
+        <!-- 四个边控制点 -->
+        <Ellipse Name="ImageTopHandle" Style="{StaticResource ImageResizeHandleNS}"
+                 MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                 MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                 MouseMove="ImageResizeHandle_MouseMove" />
+        <Ellipse Name="ImageBottomHandle" Style="{StaticResource ImageResizeHandleNS}"
+                 MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                 MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                 MouseMove="ImageResizeHandle_MouseMove" />
+        <Ellipse Name="ImageLeftHandle" Style="{StaticResource ImageResizeHandleWE}"
+                 MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                 MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                 MouseMove="ImageResizeHandle_MouseMove" />
+        <Ellipse Name="ImageRightHandle" Style="{StaticResource ImageResizeHandleWE}"
+                 MouseLeftButtonDown="ImageResizeHandle_MouseLeftButtonDown"
+                 MouseLeftButtonUp="ImageResizeHandle_MouseLeftButtonUp"
+                 MouseMove="ImageResizeHandle_MouseMove" />
+    </Canvas>
+</UserControl>

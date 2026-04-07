@@ -1,0 +1,117 @@
+using System;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+
+namespace Ink_Canvas.MainWindow_controls
+{
+    public partial class PPTNavigationSideRight : UserControl
+    {
+        public static readonly DependencyProperty CurrentPageProperty = DependencyProperty.Register(
+            nameof(CurrentPage), typeof(int), typeof(PPTNavigationSideRight), new PropertyMetadata(1));
+
+        public static readonly DependencyProperty TotalPagesProperty = DependencyProperty.Register(
+            nameof(TotalPages), typeof(int), typeof(PPTNavigationSideRight), new PropertyMetadata(1));
+
+        public static readonly DependencyProperty IsVisibleProperty = DependencyProperty.Register(
+            nameof(IsVisible), typeof(bool), typeof(PPTNavigationSideRight), new PropertyMetadata(true));
+
+        public static readonly RoutedEvent PreviousClickedEvent = EventManager.RegisterRoutedEvent(
+            nameof(PreviousClicked), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(PPTNavigationSideRight));
+
+        public static readonly RoutedEvent NextClickedEvent = EventManager.RegisterRoutedEvent(
+            nameof(NextClicked), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(PPTNavigationSideRight));
+
+        public static readonly RoutedEvent PageClickedEvent = EventManager.RegisterRoutedEvent(
+            nameof(PageClicked), RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(PPTNavigationSideRight));
+
+        public int CurrentPage
+        {
+            get => (int)GetValue(CurrentPageProperty);
+            set => SetValue(CurrentPageProperty, value);
+        }
+
+        public int TotalPages
+        {
+            get => (int)GetValue(TotalPagesProperty);
+            set => SetValue(TotalPagesProperty, value);
+        }
+
+        public bool IsVisible
+        {
+            get => (bool)GetValue(IsVisibleProperty);
+            set => SetValue(IsVisibleProperty, value);
+        }
+
+        public event RoutedEventHandler PreviousClicked
+        {
+            add => AddHandler(PreviousClickedEvent, value);
+            remove => RemoveHandler(PreviousClickedEvent, value);
+        }
+
+        public event RoutedEventHandler NextClicked
+        {
+            add => AddHandler(NextClickedEvent, value);
+            remove => RemoveHandler(NextClickedEvent, value);
+        }
+
+        public event RoutedEventHandler PageClicked
+        {
+            add => AddHandler(PageClickedEvent, value);
+            remove => RemoveHandler(PageClickedEvent, value);
+        }
+
+        public PPTNavigationSideRight()
+        {
+            InitializeComponent();
+        }
+
+        private void GridPPTControlPrevious_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            PPTRSPreviousButtonFeedbackBorder.Opacity = 1;
+        }
+
+        private void GridPPTControlPrevious_MouseLeave(object sender, MouseEventArgs e)
+        {
+            PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
+        }
+
+        private void GridPPTControlPrevious_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            PPTRSPreviousButtonFeedbackBorder.Opacity = 0;
+            RaiseEvent(new RoutedEventArgs(PreviousClickedEvent, this));
+        }
+
+        private void PPTNavigationBtn_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            PPTRSPageButtonFeedbackBorder.Opacity = 1;
+        }
+
+        private void PPTNavigationBtn_MouseLeave(object sender, MouseEventArgs e)
+        {
+            PPTRSPageButtonFeedbackBorder.Opacity = 0;
+        }
+
+        private void PPTNavigationBtn_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            PPTRSPageButtonFeedbackBorder.Opacity = 0;
+            RaiseEvent(new RoutedEventArgs(PageClickedEvent, this));
+        }
+
+        private void GridPPTControlNext_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            PPTRSNextButtonFeedbackBorder.Opacity = 1;
+        }
+
+        private void GridPPTControlNext_MouseLeave(object sender, MouseEventArgs e)
+        {
+            PPTRSNextButtonFeedbackBorder.Opacity = 0;
+        }
+
+        private void GridPPTControlNext_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            PPTRSNextButtonFeedbackBorder.Opacity = 0;
+            RaiseEvent(new RoutedEventArgs(NextClickedEvent, this));
+        }
+    }
+}

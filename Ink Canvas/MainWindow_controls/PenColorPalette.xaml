@@ -1,0 +1,405 @@
+<UserControl x:Class="Ink_Canvas.MainWindow_controls.PenColorPalette"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             xmlns:Controls="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
+             x:Name="Root">
+    <Grid>
+        <!-- Board Version -->
+        <Viewbox x:Name="BoardDefaultPenColorsPanel"
+                Visibility="{Binding IsBoardMode, ElementName=Root, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Collapsed}"
+                Margin="0,8,0,0" Stretch="Fill">
+            <ikw:SimpleStackPanel Width="300" Margin="0,0,0,0">
+                <Border Width="300" Height="100" BorderBrush="{DynamicResource IconForeground}"
+                        BorderThickness="0" CornerRadius="5">
+                    <Controls:UniformGrid Rows="2" Height="100">
+                        <ikw:SimpleStackPanel Height="45"
+                            Orientation="Horizontal" Width="270">
+                            <Controls:UniformGrid Columns="5"
+                                Width="270"
+                                Margin="0">
+                                <Border BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="100" Width="45"
+                                    MouseDown="Border_MouseDown"
+                                    MouseUp="ColorThemeSwitch_MouseUp">
+                                    <Grid Margin="3">
+                                        <Image
+                                            x:Name="BoardColorThemeSwitchIcon"
+                                            Source="{StaticResource BoardColorThemeSwitchIcon}"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="23"
+                                            Height="23"
+                                            Margin="0,0,0,0" />
+                                        <TextBlock Margin="0,0,0,2"
+                                            x:Name="BoardColorThemeSwitchTextBlock"
+                                            Text="亮系"
+                                            Foreground="{DynamicResource FloatBarForeground}"
+                                            VerticalAlignment="Bottom"
+                                            HorizontalAlignment="Center"
+                                            FontSize="11" />
+                                    </Grid>
+                                </Border>
+                                <Border x:Name="BoardBorderPenColorBlack" Style="{StaticResource BoardBorderPenColor}"
+                                    Background="Black"
+                                    BorderBrush="#D3D3D3"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorBlack_Click">
+                                    <Viewbox x:Name="BoardViewboxBtnColorBlackContent"
+                                        Visibility="Collapsed"
+                                        Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BoardBorderPenColorWhite" Style="{StaticResource BoardBorderPenColor}"
+                                    Background="White"
+                                    BorderBrush="#71717a"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorWhite_Click">
+                                    <Viewbox x:Name="BoardViewboxBtnColorWhiteContent"
+                                        Visibility="Collapsed"
+                                        Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-black.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BoardBorderPenColorRed" Style="{StaticResource BoardBorderPenColor}"
+                                    Background="#dc2626"
+                                    BorderBrush="#7f1d1d"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorRed_Click">
+                                    <Viewbox x:Name="BoardViewboxBtnColorRedContent"
+                                        Visibility="Collapsed"
+                                        Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BoardBorderPenColorYellow" Style="{StaticResource BoardBorderPenColor}"
+                                    Background="#eab308"
+                                    BorderBrush="#713f12"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorYellow_Click">
+                                    <Viewbox x:Name="BoardViewboxBtnColorYellowContent"
+                                        Visibility="Collapsed"
+                                        Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                            </Controls:UniformGrid>
+                        </ikw:SimpleStackPanel>
+                        <ikw:SimpleStackPanel Height="45"
+                            Orientation="Horizontal" Width="270">
+                            <Controls:UniformGrid Columns="5"
+                                Width="270"
+                                Margin="0">
+                                <Border x:Name="BoardBorderPenColorGreen" Style="{StaticResource BoardBorderPenColor}"
+                                    Background="#16a34a"
+                                    BorderBrush="#14532d"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorGreen_Click">
+                                    <Viewbox x:Name="BoardViewboxBtnColorGreenContent"
+                                        Visibility="Collapsed"
+                                        Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BoardBorderPenColorBlue" Style="{StaticResource BoardBorderPenColor}"
+                                    Background="#2563eb"
+                                    BorderBrush="#1e3a8a"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorBlue_Click">
+                                    <Viewbox x:Name="BoardViewboxBtnColorBlueContent"
+                                        Visibility="Collapsed"
+                                        Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BoardBorderPenColorPink" Style="{StaticResource BoardBorderPenColor}"
+                                    Background="#db2777"
+                                    BorderBrush="#831843"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorPink_Click">
+                                    <Viewbox x:Name="BoardViewboxBtnColorPinkContent"
+                                        Visibility="Collapsed"
+                                        Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BoardBorderPenColorTeal" Style="{StaticResource BoardBorderPenColor}"
+                                    Background="#0d9488"
+                                    BorderBrush="#134e4a"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorTeal_Click">
+                                    <Viewbox x:Name="BoardViewboxBtnColorTealContent"
+                                        Visibility="Collapsed"
+                                        Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BoardBorderPenColorOrange" Style="{StaticResource BoardBorderPenColor}"
+                                    Background="#ea580c"
+                                    BorderBrush="#7c2d12"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorOrange_Click">
+                                    <Viewbox x:Name="BoardViewboxBtnColorOrangeContent"
+                                        Visibility="Collapsed"
+                                        Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24"
+                                            Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                            </Controls:UniformGrid>
+                        </ikw:SimpleStackPanel>
+                    </Controls:UniformGrid>
+                </Border>
+            </ikw:SimpleStackPanel>
+        </Viewbox>
+
+        <!-- Non-Board Version -->
+        <Viewbox x:Name="DefaultPenColorsPanel" 
+                Visibility="{Binding IsBoardMode, ElementName=Root, Converter={StaticResource InverseBoolToVisibilityConverter}}"
+                Margin="0,8,0,0" Stretch="Fill">
+            <ikw:SimpleStackPanel Width="300" Margin="0,0,0,0">
+                <Border Width="300" Height="100" BorderBrush="Black"
+                        BorderThickness="0" CornerRadius="5">
+                    <Controls:UniformGrid Rows="2" Height="100">
+                        <ikw:SimpleStackPanel Height="45"
+                            Orientation="Horizontal" Width="270">
+                            <Controls:UniformGrid Columns="5" Width="270"
+                                Margin="0">
+                                <Border BorderBrush="{DynamicResource FloatBarBorderBrush}"
+                                    BorderThickness="1"
+                                    CornerRadius="100" Width="45"
+                                    MouseDown="Border_MouseDown"
+                                    MouseUp="ColorThemeSwitch_MouseUp">
+                                    <Grid Margin="3">
+                                        <Image x:Name="ColorThemeSwitchIcon"
+                                            Source="/Resources/Icons-Fluent/ic_fluent_weather_sunny_24_regular.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="23"
+                                            Height="23" Margin="0,0,0,0" />
+                                        <TextBlock Margin="0,0,0,2"
+                                            x:Name="ColorThemeSwitchTextBlock"
+                                            Text="亮系" Foreground="{DynamicResource FloatBarForeground}"
+                                            VerticalAlignment="Bottom"
+                                            HorizontalAlignment="Center"
+                                            FontSize="11" />
+                                    </Grid>
+                                </Border>
+                                <Border x:Name="BorderPenColorBlack"
+                                    Background="Black" BorderBrush="#D3D3D3"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorBlack_Click">
+                                    <Viewbox x:Name="ViewboxBtnColorBlackContent"
+                                        Visibility="Collapsed" Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24" Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BorderPenColorWhite"
+                                    Background="White"
+                                    BorderBrush="#71717a"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorWhite_Click">
+                                    <Viewbox x:Name="ViewboxBtnColorWhiteContent"
+                                        Visibility="Collapsed" Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-black.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24" Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BorderPenColorRed"
+                                    Background="#dc2626"
+                                    BorderBrush="#7f1d1d"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45" MouseUp="BtnColorRed_Click">
+                                    <Viewbox x:Name="ViewboxBtnColorRedContent"
+                                        Visibility="Collapsed" Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24" Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BorderPenColorYellow"
+                                    Background="#eab308"
+                                    BorderBrush="#713f12"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorYellow_Click">
+                                    <Viewbox x:Name="ViewboxBtnColorYellowContent"
+                                        Visibility="Collapsed" Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24" Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                            </Controls:UniformGrid>
+                        </ikw:SimpleStackPanel>
+                        <ikw:SimpleStackPanel Height="45"
+                            Orientation="Horizontal" Width="270">
+                            <Controls:UniformGrid Columns="5" Width="270"
+                                Margin="0">
+                                <Border x:Name="BorderPenColorGreen"
+                                    Background="#16a34a"
+                                    BorderBrush="#14532d"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorGreen_Click">
+                                    <Viewbox x:Name="ViewboxBtnColorGreenContent"
+                                        Visibility="Collapsed" Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24" Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BorderPenColorBlue"
+                                    Background="#2563eb"
+                                    BorderBrush="#1e3a8a"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45" MouseUp="BtnColorBlue_Click">
+                                    <Viewbox x:Name="ViewboxBtnColorBlueContent"
+                                        Visibility="Collapsed" Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24" Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BorderPenColorPink"
+                                    Background="#db2777"
+                                    BorderBrush="#831843"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45" MouseUp="BtnColorPink_Click">
+                                    <Viewbox x:Name="ViewboxBtnColorPinkContent"
+                                        Visibility="Collapsed" Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24" Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BorderPenColorTeal"
+                                    Background="#0d9488"
+                                    BorderBrush="#134e4a"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorTeal_Click">
+                                    <Viewbox x:Name="ViewboxBtnColorTealContent"
+                                        Visibility="Collapsed" Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24" Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                                <Border x:Name="BorderPenColorOrange"
+                                    Background="#ea580c"
+                                    BorderBrush="#7c2d12"
+                                    BorderThickness="1.5"
+                                    CornerRadius="100"
+                                    Width="45"
+                                    MouseUp="BtnColorOrange_Click">
+                                    <Viewbox x:Name="ViewboxBtnColorOrangeContent"
+                                        Visibility="Collapsed" Margin="8">
+                                        <Image Source="/Resources/new-icons/checked-white.png"
+                                            RenderOptions.BitmapScalingMode="HighQuality"
+                                            VerticalAlignment="Top"
+                                            Width="24"
+                                            Height="24" Margin="0,0,0,0" />
+                                    </Viewbox>
+                                </Border>
+                            </Controls:UniformGrid>
+                        </ikw:SimpleStackPanel>
+                    </Controls:UniformGrid>
+                </Border>
+            </ikw:SimpleStackPanel>
+        </Viewbox>
+    </Grid>
+</UserControl>

@@ -8,6 +8,7 @@
         xmlns:c="clr-namespace:Ink_Canvas.Converter"
         xmlns:Controls="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
         xmlns:controls="clr-namespace:Ink_Canvas.Controls"
+        xmlns:mwcontrols="clr-namespace:Ink_Canvas.MainWindow_controls"
         xmlns:Windows="clr-namespace:Ink_Canvas.Windows"
         xmlns:props="clr-namespace:Ink_Canvas.Properties"
         xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
