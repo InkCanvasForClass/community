@@ -1,6 +1,6 @@
 using System;
 using System.Windows;
-using System.Windows.Controls;
+using iNKORE.UI.WPF.Modern.Controls;
 
 namespace Ink_Canvas.Windows.SettingsViews.Pages
 {
