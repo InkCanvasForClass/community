@@ -51,6 +51,14 @@ namespace Ink_Canvas
         /// <param name="e">鼠标按钮事件的参数。</param>
         private void BtnToggleVideoPresenter_Click(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            if (Settings?.Canvas?.LaunchSeewoVideoShowcaseForWhiteboardBooth == true)
+            {
+                // 与主窗口「希沃视频展台」入口（BoardLaunchEasiCamera_MouseUp）一致：先走黑板/白板入口逻辑再启动
+                ImageBlackboard_MouseUp(null, null);
+                SoftwareLauncher.LaunchEasiCamera("希沃视频展台");
+                return;
+            }
+
             ToggleVideoPresenterSidebar();
         }
 

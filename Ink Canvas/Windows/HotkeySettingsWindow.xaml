@@ -6,211 +6,370 @@
         xmlns:local="clr-namespace:Ink_Canvas.Windows"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-        ui:ThemeManager.RequestedTheme="Light" 
-        Background="#F9F9F9"
-        AllowsTransparency="True"
-        mc:Ignorable="d" 
-        WindowStyle="None" 
+        mc:Ignorable="d"
+        Title="快捷键设置"
+        Height="600"
+        Width="800"
         WindowStartupLocation="CenterScreen"
         ResizeMode="CanResize"
-        Title="快捷键设置" 
-        Height="600" 
-        Width="800">
-    
+        FontFamily="Microsoft YaHei UI"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Height="48">
+
+    <Window.Resources>
+        <ResourceDictionary>
+            <SolidColorBrush x:Key="WindowBackground" Color="#1e1e1e" />
+            <SolidColorBrush x:Key="BorderBrush" Color="#3f3f46" />
+            <SolidColorBrush x:Key="TextForeground" Color="#fafafa" />
+            <SolidColorBrush x:Key="TextSecondary" Color="#a1a1aa" />
+            <SolidColorBrush x:Key="AccentColor" Color="#3b82f6" />
+            <SolidColorBrush x:Key="TitleForeground" Color="#fafafa" />
+
+            <Style x:Key="PrimaryButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="{StaticResource AccentColor}" />
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Padding" Value="16,8" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    CornerRadius="4"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#2563eb" />
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter Property="Background" Value="#1d4ed8" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <Style x:Key="SecondaryButtonStyle" TargetType="Button">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="Foreground" Value="{StaticResource TextForeground}" />
+                <Setter Property="BorderBrush" Value="{StaticResource BorderBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Padding" Value="16,8" />
+                <Setter Property="Cursor" Value="Hand" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="4"
+                                    Padding="{TemplateBinding Padding}">
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#27272a" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+        </ResourceDictionary>
+    </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
-        <!-- 标题栏 -->
-        <Border Grid.Row="0" Background="#3B82F6" Height="60" 
+
+        <!-- 标题栏（与云存储管理等新设置窗口一致） -->
+        <Border x:Name="Border_TitleBarRoot"
+                Grid.Row="0"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}"
                 MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
             <Grid>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="20,0,0,0">
-                    <TextBlock Text="快捷键设置" 
-                               Foreground="White" 
-                               FontSize="22" 
-                               FontWeight="SemiBold" 
-                               VerticalAlignment="Center"/>
-                </StackPanel>
-                <Button x:Name="BtnClose" 
-                        Content="&#xE8BB;" 
-                        FontFamily="Segoe MDL2 Assets"
-                        HorizontalAlignment="Right" 
-                        VerticalAlignment="Center" 
-                        Margin="0,0,20,0"
-                        Background="Transparent" 
-                        BorderThickness="0" 
-                        FontSize="16" 
-                        Foreground="White"
-                        Click="BtnClose_Click"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,0,0"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="{StaticResource TitleForeground}" />
+
+                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
+                                      Grid.Column="1"
+                                      Orientation="Horizontal"
+                                      Spacing="5"
+                                      VerticalAlignment="Center" />
+
+                <Rectangle Grid.Column="2"
+                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
             </Grid>
         </Border>
 
-        <!-- 主内容区 -->
-        <ScrollViewer Grid.Row="1" Margin="20" VerticalScrollBarVisibility="Auto">
-            <ikw:SimpleStackPanel Margin="20">
-                <!-- 说明文字 -->
-                <TextBlock Text="在这里可以自定义全局快捷键设置。全局快捷键在任何情况下都能生效，即使应用程序不在焦点状态。"
-                           TextWrapping="Wrap" 
-                           Margin="0,0,0,20" 
-                           Foreground="#666666"/>
+        <!-- 主内容 -->
+        <Border Grid.Row="1"
+                Background="{StaticResource WindowBackground}"
+                Padding="20,10,20,16">
+            <ui:ScrollViewerEx VerticalScrollBarVisibility="Auto"
+                               HorizontalScrollBarVisibility="Disabled"
+                               PanningMode="VerticalOnly"
+                               ui:ThemeManager.RequestedTheme="Dark">
+                <ikw:SimpleStackPanel Spacing="14">
+                    <TextBlock Text="在这里可以自定义全局快捷键设置。全局快捷键在任何情况下都能生效，即使应用程序不在焦点状态。"
+                               TextWrapping="Wrap"
+                               Foreground="{StaticResource TextSecondary}"
+                               FontSize="14"
+                               LineHeight="20" />
 
-                <!-- 鼠标模式快捷键设置 -->
-                <GroupBox Header="鼠标模式设置" Margin="0,0,0,20">
-                    <ikw:SimpleStackPanel>
-                        <ikw:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                            <ui:ToggleSwitch x:Name="ToggleSwitchEnableHotkeysInMouseMode" 
-                                            Header="在鼠标模式下启用快捷键" 
-                                            Margin="0,0,10,0"
-                                            Width="200"/>
+                    <Border BorderThickness="1"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            CornerRadius="8"
+                            Padding="18,16"
+                            Background="#27272a">
+                        <ikw:SimpleStackPanel Spacing="10">
+                            <TextBlock Text="鼠标模式"
+                                       FontSize="18"
+                                       FontWeight="SemiBold"
+                                       Foreground="{StaticResource TextForeground}" />
+                            <Border Height="1"
+                                    Background="{StaticResource BorderBrush}"
+                                    HorizontalAlignment="Stretch" />
+                            <ikw:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <ui:ToggleSwitch x:Name="ToggleSwitchEnableHotkeysInMouseMode"
+                                                 Header="在鼠标模式下启用快捷键"
+                                                 OnContent=""
+                                                 OffContent=""
+                                                 FontFamily="Microsoft YaHei UI"
+                                                 FontWeight="Bold"
+                                                 Margin="0,0,10,0"
+                                                 Width="220" />
+                            </ikw:SimpleStackPanel>
+                            <TextBlock Text="开启后，即使在鼠标模式下快捷键也会生效"
+                                       Foreground="{StaticResource TextSecondary}"
+                                       TextWrapping="Wrap"
+                                       FontSize="13" />
                         </ikw:SimpleStackPanel>
-                        <TextBlock Text="开启后，即使在鼠标模式下快捷键也会生效" 
-                                   Foreground="#666666" 
-                                   VerticalAlignment="Center"
-                                   TextWrapping="Wrap"/>
+                    </Border>
+
+                    <ikw:SimpleStackPanel x:Name="HotkeyList" Spacing="12">
+                        <!-- 基本操作 -->
+                        <Border BorderThickness="1"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                CornerRadius="8"
+                                Padding="18,16"
+                                Background="#27272a">
+                            <ikw:SimpleStackPanel Spacing="10">
+                                <TextBlock Text="基本操作"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextForeground}" />
+                                <Border Height="1"
+                                        Background="{StaticResource BorderBrush}"
+                                        HorizontalAlignment="Stretch" />
+                                <ikw:SimpleStackPanel Spacing="4">
+                                    <local:HotkeyItem x:Name="UndoHotkey"
+                                                      Title="撤销"
+                                                      Description="撤销上一步操作"
+                                                      DefaultKey="Z"
+                                                      DefaultModifiers="Control" />
+                                    <local:HotkeyItem x:Name="RedoHotkey"
+                                                      Title="重做"
+                                                      Description="重做上一步操作"
+                                                      DefaultKey="Y"
+                                                      DefaultModifiers="Control" />
+                                    <local:HotkeyItem x:Name="ClearHotkey"
+                                                      Title="清空"
+                                                      Description="清空当前画板内容"
+                                                      DefaultKey="E"
+                                                      DefaultModifiers="Control" />
+                                    <local:HotkeyItem x:Name="PasteHotkey"
+                                                      Title="粘贴"
+                                                      Description="粘贴剪贴板内容"
+                                                      DefaultKey="V"
+                                                      DefaultModifiers="Control" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </Border>
+
+                        <!-- 工具切换 -->
+                        <Border BorderThickness="1"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                CornerRadius="8"
+                                Padding="18,16"
+                                Background="#27272a">
+                            <ikw:SimpleStackPanel Spacing="10">
+                                <TextBlock Text="工具切换"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextForeground}" />
+                                <Border Height="1"
+                                        Background="{StaticResource BorderBrush}"
+                                        HorizontalAlignment="Stretch" />
+                                <ikw:SimpleStackPanel Spacing="4">
+                                    <local:HotkeyItem x:Name="SelectToolHotkey"
+                                                      Title="选择工具"
+                                                      Description="切换到选择工具"
+                                                      DefaultKey="S"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="DrawToolHotkey"
+                                                      Title="绘图工具"
+                                                      Description="切换到绘图工具"
+                                                      DefaultKey="D"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="EraserToolHotkey"
+                                                      Title="橡皮擦工具"
+                                                      Description="切换到橡皮擦工具"
+                                                      DefaultKey="E"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="BlackboardToolHotkey"
+                                                      Title="黑板工具"
+                                                      Description="切换到黑板工具"
+                                                      DefaultKey="B"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="QuitDrawToolHotkey"
+                                                      Title="退出绘图/白板"
+                                                      Description="退出绘图模式或白板模式"
+                                                      DefaultKey="Q"
+                                                      DefaultModifiers="Alt" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </Border>
+
+                        <!-- 画笔设置 -->
+                        <Border BorderThickness="1"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                CornerRadius="8"
+                                Padding="18,16"
+                                Background="#27272a">
+                            <ikw:SimpleStackPanel Spacing="10">
+                                <TextBlock Text="画笔设置"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextForeground}" />
+                                <Border Height="1"
+                                        Background="{StaticResource BorderBrush}"
+                                        HorizontalAlignment="Stretch" />
+                                <ikw:SimpleStackPanel Spacing="4">
+                                    <local:HotkeyItem x:Name="Pen1Hotkey"
+                                                      Title="画笔1"
+                                                      Description="选择画笔1"
+                                                      DefaultKey="D1"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="Pen2Hotkey"
+                                                      Title="画笔2"
+                                                      Description="选择画笔2"
+                                                      DefaultKey="D2"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="Pen3Hotkey"
+                                                      Title="画笔3"
+                                                      Description="选择画笔3"
+                                                      DefaultKey="D3"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="Pen4Hotkey"
+                                                      Title="画笔4"
+                                                      Description="选择画笔4"
+                                                      DefaultKey="D4"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="Pen5Hotkey"
+                                                      Title="画笔5"
+                                                      Description="选择画笔5"
+                                                      DefaultKey="D5"
+                                                      DefaultModifiers="Alt" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </Border>
+
+                        <!-- 功能快捷键 -->
+                        <Border BorderThickness="1"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                CornerRadius="8"
+                                Padding="18,16"
+                                Background="#27272a">
+                            <ikw:SimpleStackPanel Spacing="10">
+                                <TextBlock Text="功能快捷键"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextForeground}" />
+                                <Border Height="1"
+                                        Background="{StaticResource BorderBrush}"
+                                        HorizontalAlignment="Stretch" />
+                                <ikw:SimpleStackPanel Spacing="4">
+                                    <local:HotkeyItem x:Name="DrawLineHotkey"
+                                                      Title="绘制直线"
+                                                      Description="绘制直线工具"
+                                                      DefaultKey="L"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="ScreenshotHotkey"
+                                                      Title="截图"
+                                                      Description="保存屏幕截图到桌面"
+                                                      DefaultKey="C"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="QuickDrawHotkey"
+                                                      Title="快抽"
+                                                      Description="打开快抽窗口（与悬浮快抽按钮相同）"
+                                                      DefaultKey="K"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="HideHotkey"
+                                                      Title="隐藏"
+                                                      Description="隐藏应用程序"
+                                                      DefaultKey="V"
+                                                      DefaultModifiers="Alt" />
+                                    <local:HotkeyItem x:Name="ExitHotkey"
+                                                      Title="退出"
+                                                      Description="退出当前模式或应用程序"
+                                                      DefaultKey="Escape"
+                                                      DefaultModifiers="None" />
+                                </ikw:SimpleStackPanel>
+                            </ikw:SimpleStackPanel>
+                        </Border>
                     </ikw:SimpleStackPanel>
-                </GroupBox>
-
-                <!-- 快捷键列表 -->
-                <ikw:SimpleStackPanel x:Name="HotkeyList" Margin="0,0,0,20">
-                    <!-- 基本操作 -->
-                    <GroupBox Header="基本操作" Margin="0,0,0,15">
-                        <ikw:SimpleStackPanel>
-                            <local:HotkeyItem x:Name="UndoHotkey" 
-                                              Title="撤销" 
-                                              Description="撤销上一步操作"
-                                              DefaultKey="Z" 
-                                              DefaultModifiers="Control"/>
-                            <local:HotkeyItem x:Name="RedoHotkey" 
-                                              Title="重做" 
-                                              Description="重做上一步操作"
-                                              DefaultKey="Y" 
-                                              DefaultModifiers="Control"/>
-                            <local:HotkeyItem x:Name="ClearHotkey" 
-                                              Title="清空" 
-                                              Description="清空当前画板内容"
-                                              DefaultKey="E" 
-                                              DefaultModifiers="Control"/>
-                            <local:HotkeyItem x:Name="PasteHotkey" 
-                                              Title="粘贴" 
-                                              Description="粘贴剪贴板内容"
-                                              DefaultKey="V" 
-                                              DefaultModifiers="Control"/>
-                        </ikw:SimpleStackPanel>
-                    </GroupBox>
-
-                    <!-- 工具切换 -->
-                    <GroupBox Header="工具切换" Margin="0,0,0,15">
-                        <ikw:SimpleStackPanel>
-                            <local:HotkeyItem x:Name="SelectToolHotkey" 
-                                              Title="选择工具" 
-                                              Description="切换到选择工具"
-                                              DefaultKey="S" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="DrawToolHotkey" 
-                                              Title="绘图工具" 
-                                              Description="切换到绘图工具"
-                                              DefaultKey="D" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="EraserToolHotkey" 
-                                              Title="橡皮擦工具" 
-                                              Description="切换到橡皮擦工具"
-                                              DefaultKey="E" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="BlackboardToolHotkey" 
-                                              Title="黑板工具" 
-                                              Description="切换到黑板工具"
-                                              DefaultKey="B" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="QuitDrawToolHotkey" 
-                                              Title="退出绘图/白板" 
-                                              Description="退出绘图模式或白板模式"
-                                              DefaultKey="Q" 
-                                              DefaultModifiers="Alt"/>
-                        </ikw:SimpleStackPanel>
-                    </GroupBox>
-
-                    <!-- 画笔设置 -->
-                    <GroupBox Header="画笔设置" Margin="0,0,0,15">
-                        <ikw:SimpleStackPanel>
-                            <local:HotkeyItem x:Name="Pen1Hotkey" 
-                                              Title="画笔1" 
-                                              Description="选择画笔1"
-                                              DefaultKey="D1" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="Pen2Hotkey" 
-                                              Title="画笔2" 
-                                              Description="选择画笔2"
-                                              DefaultKey="D2" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="Pen3Hotkey" 
-                                              Title="画笔3" 
-                                              Description="选择画笔3"
-                                              DefaultKey="D3" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="Pen4Hotkey" 
-                                              Title="画笔4" 
-                                              Description="选择画笔4"
-                                              DefaultKey="D4" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="Pen5Hotkey" 
-                                              Title="画笔5" 
-                                              Description="选择画笔5"
-                                              DefaultKey="D5" 
-                                              DefaultModifiers="Alt"/>
-                        </ikw:SimpleStackPanel>
-                    </GroupBox>
-
-                    <!-- 功能快捷键 -->
-                    <GroupBox Header="功能快捷键" Margin="0,0,0,15">
-                        <ikw:SimpleStackPanel>
-                            <local:HotkeyItem x:Name="DrawLineHotkey" 
-                                              Title="绘制直线" 
-                                              Description="绘制直线工具"
-                                              DefaultKey="L" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="ScreenshotHotkey" 
-                                              Title="截图" 
-                                              Description="保存屏幕截图到桌面"
-                                              DefaultKey="C" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="HideHotkey" 
-                                              Title="隐藏" 
-                                              Description="隐藏应用程序"
-                                              DefaultKey="V" 
-                                              DefaultModifiers="Alt"/>
-                            <local:HotkeyItem x:Name="ExitHotkey" 
-                                              Title="退出" 
-                                              Description="退出当前模式或应用程序"
-                                              DefaultKey="Escape" 
-                                              DefaultModifiers="None"/>
-                        </ikw:SimpleStackPanel>
-                    </GroupBox>
-                </ikw:SimpleStackPanel></ikw:SimpleStackPanel>
-            </ScrollViewer>
+                </ikw:SimpleStackPanel>
+            </ui:ScrollViewerEx>
+        </Border>
 
         <!-- 底部操作栏 -->
-        <Border Grid.Row="2" Background="#F0F0F0" Height="60">
-            <Grid>
-                <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0">
-                    <Button x:Name="BtnResetToDefault" 
-                            Content="重置为默认" 
-                            Width="100" 
-                            Height="35" 
-                            Margin="0,0,10,0"
-                            Click="BtnResetToDefault_Click"/>
-                    <Button x:Name="BtnSave" 
-                            Content="保存设置" 
-                            Width="100" 
-                            Height="35" 
-                            Background="#3B82F6" 
-                            Foreground="White"
-                            Click="BtnSave_Click"/>
-                </ikw:SimpleStackPanel>
-            </Grid>
+        <Border Grid.Row="2"
+                Background="#18181b"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,1,0,0"
+                Padding="16,12">
+            <ikw:SimpleStackPanel Orientation="Horizontal"
+                                  HorizontalAlignment="Right"
+                                  VerticalAlignment="Center"
+                                  Spacing="10">
+                <Button x:Name="BtnResetToDefault"
+                        Content="重置为默认"
+                        MinWidth="100"
+                        Height="36"
+                        Style="{StaticResource SecondaryButtonStyle}"
+                        Click="BtnResetToDefault_Click" />
+                <Button x:Name="BtnSave"
+                        Content="保存设置"
+                        MinWidth="100"
+                        Height="36"
+                        Style="{StaticResource PrimaryButtonStyle}"
+                        Click="BtnSave_Click" />
+            </ikw:SimpleStackPanel>
         </Border>
     </Grid>
-</Window> 
+</Window>

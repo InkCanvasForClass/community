@@ -135,6 +135,9 @@ namespace Ink_Canvas.Windows
                 _hotkeyItems["Screenshot"] = ScreenshotHotkey;
                 ScreenshotHotkey.HotkeyName = "Screenshot";
 
+                _hotkeyItems["QuickDraw"] = QuickDrawHotkey;
+                QuickDrawHotkey.HotkeyName = "QuickDraw";
+
                 _hotkeyItems["Hide"] = HideHotkey;
                 HideHotkey.HotkeyName = "Hide";
 
@@ -242,6 +245,9 @@ namespace Ink_Canvas.Windows
                         break;
                     case "Screenshot":
                         hotkeyItem.SetCurrentHotkey(Key.C, ModifierKeys.Alt);
+                        break;
+                    case "QuickDraw":
+                        hotkeyItem.SetCurrentHotkey(Key.K, ModifierKeys.Alt);
                         break;
                     case "Hide":
                         hotkeyItem.SetCurrentHotkey(Key.V, ModifierKeys.Alt);
@@ -472,6 +478,8 @@ namespace Ink_Canvas.Windows
                     return () => _mainWindow.BtnDrawLine_Click(null, null);
                 case "Screenshot":
                     return () => _mainWindow.SaveScreenShotToDesktop();
+                case "QuickDraw":
+                    return () => _mainWindow.OpenQuickDrawFromHotkey();
                 case "Hide":
                     return () => _mainWindow.SymbolIconEmoji_MouseUp(null, null);
                 case "Exit":
@@ -533,11 +541,6 @@ namespace Ink_Canvas.Windows
         #endregion
 
         #region Event Handlers
-        private void BtnClose_Click(object sender, RoutedEventArgs e)
-        {
-            Close();
-        }
-
         /// <summary>
         /// 标题栏拖拽事件
         /// </summary>

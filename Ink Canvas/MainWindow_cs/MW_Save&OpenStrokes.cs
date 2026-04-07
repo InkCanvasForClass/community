@@ -1,3 +1,4 @@
+using Ink_Canvas.Controls;
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using System;
@@ -16,6 +17,7 @@ using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using System.Xml;
 using System.Xml.Linq;
 using Color = System.Drawing.Color;
@@ -28,16 +30,58 @@ namespace Ink_Canvas
     // 1. 定义元素信息结构
     public class CanvasElementInfo
     {
-        public string Type { get; set; } // "Image"
+        public string Type { get; set; } // "Image" | "Pdf"
         public string SourcePath { get; set; }
         public double Left { get; set; }
         public double Top { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
         public string Stretch { get; set; } = "Fill"; // 默认为Fill
+        /// <summary>PDF 当前页（从 0 开始），仅 Type == Pdf 时有效。</summary>
+        public int? PdfCurrentPage { get; set; }
+        /// <summary>保存时的 PDF 总页数，用于校验；仅 Type == Pdf 时有效。</summary>
+        public int? PdfPageCount { get; set; }
     }
     public partial class MainWindow : Window
     {
+        /// <summary>收集画布上图片与 PDF 的元数据，写入 .elements.json（与墨迹文件同路径）。</summary>
+        private void CollectCanvasElementsMetadata(List<CanvasElementInfo> elementInfos)
+        {
+            if (elementInfos == null || inkCanvas == null) return;
+
+            foreach (var child in inkCanvas.Children)
+            {
+                if (child is Image img && img.Source is BitmapImage bmp)
+                {
+                    elementInfos.Add(new CanvasElementInfo
+                    {
+                        Type = "Image",
+                        SourcePath = bmp.UriSource?.LocalPath ?? "",
+                        Left = InkCanvas.GetLeft(img),
+                        Top = InkCanvas.GetTop(img),
+                        Width = img.Width,
+                        Height = img.Height,
+                        Stretch = img.Stretch.ToString()
+                    });
+                }
+                else if (child is PdfEmbeddedView pdf && !string.IsNullOrEmpty(pdf.PdfPath))
+                {
+                    elementInfos.Add(new CanvasElementInfo
+                    {
+                        Type = "Pdf",
+                        SourcePath = pdf.PdfPath,
+                        Left = InkCanvas.GetLeft(pdf),
+                        Top = InkCanvas.GetTop(pdf),
+                        Width = pdf.Width,
+                        Height = pdf.Height,
+                        Stretch = "Uniform",
+                        PdfCurrentPage = (int)pdf.CurrentPageIndex,
+                        PdfPageCount = (int)pdf.PageCount
+                    });
+                }
+            }
+        }
+
         /// <summary>
         /// 保存墨迹的鼠标释放事件处理
         /// </summary>
@@ -419,22 +463,7 @@ namespace Ink_Canvas
 
                         // 保存元素信息
                         var elementInfos = new List<CanvasElementInfo>();
-                        foreach (var child in inkCanvas.Children)
-                        {
-                            if (child is Image img && img.Source is BitmapImage bmp)
-                            {
-                                elementInfos.Add(new CanvasElementInfo
-                                {
-                                    Type = "Image",
-                                    SourcePath = bmp.UriSource?.LocalPath ?? "",
-                                    Left = InkCanvas.GetLeft(img),
-                                    Top = InkCanvas.GetTop(img),
-                                    Width = img.Width,
-                                    Height = img.Height,
-                                    Stretch = img.Stretch.ToString()
-                                });
-                            }
-                        }
+                        CollectCanvasElementsMetadata(elementInfos);
                         string elementsPath = Settings.Automation.IsSaveStrokesAsXML ? Path.ChangeExtension(savePathWithName, ".elements.json") : Path.ChangeExtension(savePathWithName, ".elements.json");
                         File.WriteAllText(elementsPath, JsonConvert.SerializeObject(elementInfos, Newtonsoft.Json.Formatting.Indented));
                     }
@@ -485,22 +514,7 @@ namespace Ink_Canvas
 
                 // 同时保存元素信息
                 var elementInfos = new List<CanvasElementInfo>();
-                foreach (var child in inkCanvas.Children)
-                {
-                    if (child is Image img && img.Source is BitmapImage bmp)
-                    {
-                        elementInfos.Add(new CanvasElementInfo
-                        {
-                            Type = "Image",
-                            SourcePath = bmp.UriSource?.LocalPath ?? "",
-                            Left = InkCanvas.GetLeft(img),
-                            Top = InkCanvas.GetTop(img),
-                            Width = img.Width,
-                            Height = img.Height,
-                            Stretch = img.Stretch.ToString()
-                        });
-                    }
-                }
+                CollectCanvasElementsMetadata(elementInfos);
                 File.WriteAllText(Path.ChangeExtension(xmlPath, ".elements.json"), JsonConvert.SerializeObject(elementInfos, Newtonsoft.Json.Formatting.Indented));
 
                 // 异步上传到Dlass
@@ -1266,6 +1280,10 @@ namespace Ink_Canvas
                             InkCanvas.SetTop(img, info.Top);
                             inkCanvas.Children.Add(img);
                         }
+                        else if (string.Equals(info.Type, "Pdf", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
+                        {
+                            Dispatcher.BeginInvoke(new Action(() => { _ = RestorePdfFromElementInfoAsync(info); }), DispatcherPriority.Loaded);
+                        }
                     }
                 }
             }
@@ -1415,6 +1433,10 @@ namespace Ink_Canvas
                         InkCanvas.SetLeft(img, info.Left);
                         InkCanvas.SetTop(img, info.Top);
                         inkCanvas.Children.Add(img);
+                    }
+                    else if (string.Equals(info.Type, "Pdf", StringComparison.OrdinalIgnoreCase) && File.Exists(info.SourcePath))
+                    {
+                        Dispatcher.BeginInvoke(new Action(() => { _ = RestorePdfFromElementInfoAsync(info); }), DispatcherPriority.Loaded);
                     }
                 }
             }

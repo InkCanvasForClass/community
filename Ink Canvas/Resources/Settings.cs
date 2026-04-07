@@ -151,6 +151,10 @@ namespace Ink_Canvas
         [JsonProperty("enableVelocityBrushTip")]
         public bool EnableVelocityBrushTip { get; set; }
 
+        /// <summary>为 true 时，白板工具栏「展台」按钮启动希沃视频展台（sweclauncher），否则使用内置展台。</summary>
+        [JsonProperty("launchSeewoVideoShowcaseForWhiteboardBooth")]
+        public bool LaunchSeewoVideoShowcaseForWhiteboardBooth { get; set; } = false;
+
     }
 
     public enum OptionalOperation
@@ -294,8 +298,8 @@ namespace Ink_Canvas
         public bool IsShowQuickPanel { get; set; } = true;
         [JsonProperty("chickenSoupSource")]
         public int ChickenSoupSource { get; set; } = 1;
-        [JsonProperty("hitokotoCategories")]
-        public List<string> HitokotoCategories { get; set; } = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" }; // 默认全选所有分类
+        [JsonProperty("hitokotoCategories", NullValueHandling = NullValueHandling.Ignore)]
+        public List<string> HitokotoCategories { get; set; }
         [JsonProperty("isShowModeFingerToggleSwitch")]
         public bool IsShowModeFingerToggleSwitch { get; set; } = true;
         [JsonProperty("theme")]

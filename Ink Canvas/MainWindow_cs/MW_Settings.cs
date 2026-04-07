@@ -1,11 +1,9 @@
-using Hardcodet.Wpf.TaskbarNotification;
+using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using OSVersionExtension;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -1211,14 +1209,12 @@ namespace Ink_Canvas
                             return;
                         }
 
-                        // 构建 API URL：仅用于本次请求；null/空列表时本地采用默认全部分类，不写回 Settings，避免启动或拉取一言时触发无意义的配置持久化
-                        var stored = Settings.Appearance.HitokotoCategories;
-                        var categoriesForRequest = (stored == null || stored.Count == 0)
-                            ? new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" }
-                            : stored;
+                        var cats = Settings.Appearance.HitokotoCategories;
+                        if (cats == null || cats.Count == 0)
+                            cats = new List<string> { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" };
 
                         var urlBuilder = new StringBuilder("https://v1.hitokoto.cn/?encode=text");
-                        foreach (var category in categoriesForRequest)
+                        foreach (var category in cats)
                         {
                             urlBuilder.Append($"&c={category}");
                         }
@@ -1265,10 +1261,11 @@ namespace Ink_Canvas
         /// </remarks>
         private async void ComboBoxChickenSoupSource_SelectionChanged(object sender, RoutedEventArgs e)
         {
+            if (_suppressChickenSoupSourceSelectionChanged) return;
             if (!isLoaded) return;
             int idx = ComboBoxChickenSoupSource.SelectedIndex;
-            if (Settings.Appearance.ChickenSoupSource == idx)
-                return;
+            if (idx < 0) return;
+            if (Settings.Appearance.ChickenSoupSource == idx) return;
 
             Settings.Appearance.ChickenSoupSource = idx;
 
@@ -2708,6 +2705,15 @@ namespace Ink_Canvas
             SaveSettingsToFile();
         }
 
+        private void ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!isLoaded) return;
+
+            Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth =
+                ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn;
+            SaveSettingsToFile();
+        }
+
         private void ToggleSwitchAutoStraightenLine_Toggled(object sender, RoutedEventArgs e)
         {
             if (!isLoaded) return;
@@ -3591,6 +3597,11 @@ namespace Ink_Canvas
                     RestoreNonStrokeElements(preservedElements);
                     isInMultiTouchMode = true;
 
+                    palmEraserWasEnabledBeforeMultiTouch = Settings.Canvas.EnablePalmEraser;
+                    Settings.Canvas.EnablePalmEraser = false;
+                    if (ToggleSwitchEnablePalmEraser != null)
+                        ToggleSwitchEnablePalmEraser.IsOn = false;
+
                     // 恢复到之前的编辑状态
                     inkCanvas.EditingMode = currentEditingMode;
                     drawingShapeMode = currentDrawingShapeMode;
@@ -3620,6 +3631,13 @@ namespace Ink_Canvas
                     // 恢复非笔画元素
                     RestoreNonStrokeElements(preservedElements);
                     isInMultiTouchMode = false;
+
+                    if (palmEraserWasEnabledBeforeMultiTouch)
+                    {
+                        Settings.Canvas.EnablePalmEraser = true;
+                        if (ToggleSwitchEnablePalmEraser != null)
+                            ToggleSwitchEnablePalmEraser.IsOn = true;
+                    }
 
                     // 恢复到之前的编辑状态
                     inkCanvas.EditingMode = currentEditingMode;
@@ -5144,141 +5162,13 @@ namespace Ink_Canvas
         #endregion
 
         /// <summary>
-        /// 将 JSON 树归一化后再比较：统一数值为 double、对象属性按名称排序、纯字符串数组按字典序排序（如 hitokotoCategories 顺序与文件不一致时仍视为相同）。
-        /// </summary>
-        private static JToken NormalizeJsonForSettingsCompare(JToken token)
-        {
-            if (token == null || token.Type == JTokenType.Null)
-                return JValue.CreateNull();
-
-            switch (token.Type)
-            {
-                case JTokenType.Integer:
-                case JTokenType.Float:
-                    return new JValue(token.Value<double>());
-                case JTokenType.Date:
-                    return new JValue(token.Value<DateTime>().ToUniversalTime().ToString("o", CultureInfo.InvariantCulture));
-                case JTokenType.Object:
-                    var o = (JObject)token;
-                    var sorted = new JObject();
-                    foreach (var p in o.Properties().OrderBy(x => x.Name, StringComparer.Ordinal))
-                        sorted[p.Name] = NormalizeJsonForSettingsCompare(p.Value);
-                    return sorted;
-                case JTokenType.Array:
-                    var arr = (JArray)token;
-                    var items = arr.Select(NormalizeJsonForSettingsCompare).ToList();
-                    if (items.Count > 0)
-                    {
-                        if (items.TrueForAll(x => x.Type == JTokenType.String))
-                            return new JArray(items.Cast<JValue>().OrderBy(x => x.Value<string>(), StringComparer.Ordinal));
-                        if (items.TrueForAll(x => x.Type == JTokenType.Integer || x.Type == JTokenType.Float))
-                            return new JArray(items.OrderBy(x => x.Value<double>()));
-                    }
-                    return new JArray(items);
-                default:
-                    return token.DeepClone();
-            }
-        }
-
-        private static bool SettingsFileContentSemanticallyEquals(string newJson, string existingJson)
-        {
-            if (string.IsNullOrWhiteSpace(existingJson))
-                return false;
-            var a = NormalizeJsonForSettingsCompare(JToken.Parse(newJson));
-            var b = NormalizeJsonForSettingsCompare(JToken.Parse(existingJson));
-            return JToken.DeepEquals(a, b);
-        }
-
-        /// <summary>一言 API 官方分类字母，顺序固定，与自定义对话框一致。</summary>
-        private static readonly string[] HitokotoCategoryCanonicalOrder =
-            { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l" };
-
-        private static readonly HashSet<string> HitokotoCategoryKnownKeys =
-            new HashSet<string>(HitokotoCategoryCanonicalOrder, StringComparer.Ordinal);
-
-        /// <summary>
-        /// 将 <see cref="Appearance.HitokotoCategories"/> 规范为固定顺序并去重，避免 JSON 仅因数组顺序/重复项变化而反复重写。
-        /// null 或空列表表示「未持久化、运行时按全部分类」语义，不改为非空列表。
-        /// </summary>
-        private static void StabilizeAppearanceHitokotoCategories()
-        {
-            var appearance = Settings?.Appearance;
-            if (appearance == null)
-                return;
-
-            var list = appearance.HitokotoCategories;
-            if (list == null || list.Count == 0)
-                return;
-
-            var normalizedTokens = list
-                .Select(x => x?.Trim())
-                .Where(x => !string.IsNullOrEmpty(x))
-                .ToList();
-
-            var canonical = new List<string>();
-            foreach (var key in HitokotoCategoryCanonicalOrder)
-            {
-                if (normalizedTokens.Any(x => string.Equals(x, key, StringComparison.Ordinal)))
-                    canonical.Add(key);
-            }
-
-            foreach (var key in normalizedTokens
-                         .Where(x => !HitokotoCategoryKnownKeys.Contains(x))
-                         .Distinct(StringComparer.Ordinal)
-                         .OrderBy(x => x, StringComparer.Ordinal))
-            {
-                canonical.Add(key);
-            }
-
-            if (canonical.Count == 0)
-                return;
-
-            if (list.Count != canonical.Count || !list.SequenceEqual(canonical, StringComparer.Ordinal))
-                appearance.HitokotoCategories = canonical;
-        }
-
-        /// <summary>
         /// 将当前内存中的 Settings 序列化为格式化的 JSON 并写入应用程序配置文件（位于 App.RootPath 下的 Configs 目录或根设置文件）。
         /// </summary>
         /// <remarks>
-        /// 在写入前会确保目标目录/文件具有写入权限（使用 ProcessProtectionManager）。若与磁盘已有内容语义一致则跳过写入，避免启动或其它路径多次调用时重复刷盘。
-        /// 在 LoadSettings 执行期间会延迟到加载结束再统一写盘，避免启动流程中多次保存。
-        /// 任何写入失败或异常都会被吞掉，调用方不会收到异常抛出。
+        /// 在写入前会确保目标目录/文件具有写入权限（使用 ProcessProtectionManager）。任何写入失败或异常都会被吞掉，调用方不会收到异常抛出。
         /// </remarks>
-        private static int _settingsLoadReentrancyDepth;
-        private static bool _settingsSavePendingDuringLoad;
-
-        /// <summary>与 <see cref="EndDeferredSettingsSaveDuringLoad"/> 配对，在 LoadSettings 的 try/finally 中使用。</summary>
-        private static void BeginDeferredSettingsSaveDuringLoad()
-        {
-            _settingsLoadReentrancyDepth++;
-        }
-
-        private static void EndDeferredSettingsSaveDuringLoad()
-        {
-            if (_settingsLoadReentrancyDepth > 0)
-                _settingsLoadReentrancyDepth--;
-            if (_settingsLoadReentrancyDepth == 0 && _settingsSavePendingDuringLoad)
-            {
-                _settingsSavePendingDuringLoad = false;
-                SaveSettingsToFileCore();
-            }
-        }
-
         public static void SaveSettingsToFile()
         {
-            if (_settingsLoadReentrancyDepth > 0)
-            {
-                _settingsSavePendingDuringLoad = true;
-                return;
-            }
-
-            SaveSettingsToFileCore();
-        }
-
-        private static void SaveSettingsToFileCore()
-        {
-            StabilizeAppearanceHitokotoCategories();
             var text = JsonConvert.SerializeObject(Settings, Formatting.Indented);
             try
             {
@@ -5289,22 +5179,6 @@ namespace Ink_Canvas
                 }
 
                 var path = App.RootPath + settingsFileName;
-                if (File.Exists(path))
-                {
-                    try
-                    {
-                        string existing = File.ReadAllText(path);
-                        if (existing.Length > 0 && existing[0] == '\uFEFF')
-                            existing = existing.TrimStart('\uFEFF');
-                        if (!string.IsNullOrWhiteSpace(existing) && SettingsFileContentSemanticallyEquals(text, existing))
-                            return;
-                    }
-                    catch
-                    {
-                        // 无法比较或解析失败时仍写入，避免丢失修复机会
-                    }
-                }
-
                 ProcessProtectionManager.WithWriteAccess(path, () => File.WriteAllText(path, text));
             }
             catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }

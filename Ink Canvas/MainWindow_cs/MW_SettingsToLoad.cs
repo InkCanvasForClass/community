@@ -1,4 +1,4 @@
-using Hardcodet.Wpf.TaskbarNotification;
+using H.NotifyIcon;
 using Ink_Canvas.Helpers;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -37,9 +37,6 @@ namespace Ink_Canvas
         /// <param name="skipAutoUpdateCheck">指示是否跳过自动更新检查；为 true 时不会在加载设置后执行自动更新检测。</param>
         private void LoadSettings(bool isStartup = false, bool skipAutoUpdateCheck = false)
         {
-            BeginDeferredSettingsSaveDuringLoad();
-            try
-            {
             AppVersionTextBlock.Text = Assembly.GetExecutingAssembly().GetName().Version.ToString();
             try
             {
@@ -443,7 +440,17 @@ namespace Ink_Canvas
                 // 设置主题下拉框
                 ComboBoxTheme.SelectedIndex = Settings.Appearance.Theme;
 
-                ComboBoxChickenSoupSource.SelectedIndex = Settings.Appearance.ChickenSoupSource;
+                _suppressChickenSoupSourceSelectionChanged = true;
+                try
+                {
+                    ComboBoxChickenSoupSource.SelectedIndex = Settings.Appearance.ChickenSoupSource;
+                }
+                finally
+                {
+                    Dispatcher.BeginInvoke(
+                        (Action)(() => { _suppressChickenSoupSourceSelectionChanged = false; }),
+                        DispatcherPriority.ContextIdle);
+                }
 
                 // 初始化自定义按钮的可见性（仅在选择API时显示）
                 if (BtnHitokotoCustomize != null)
@@ -452,6 +459,7 @@ namespace Ink_Canvas
                         ? Visibility.Visible
                         : Visibility.Collapsed;
                 }
+
 
                 ToggleSwitchEnableQuickPanel.IsOn = Settings.Appearance.IsShowQuickPanel;
 
@@ -843,6 +851,9 @@ namespace Ink_Canvas
                 // 初始化屏蔽压感开关状态
                 ToggleSwitchDisablePressure.IsOn = Settings.Canvas.DisablePressure;
                 inkCanvas.DefaultDrawingAttributes.IgnorePressure = Settings.Canvas.DisablePressure;
+
+                ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth.IsOn =
+                    Settings.Canvas.LaunchSeewoVideoShowcaseForWhiteboardBooth;
 
                 if (Settings.Canvas.EnableVelocityBrushTip)
                 {
@@ -1319,11 +1330,6 @@ namespace Ink_Canvas
 
             // 刷新配置文件列表
             try { RefreshConfigProfileList(); } catch (Exception ex) { LogHelper.WriteLogToFile($"刷新配置文件列表失败: {ex.Message}", LogHelper.LogType.Warning); }
-            }
-            finally
-            {
-                EndDeferredSettingsSaveDuringLoad();
-            }
         }
 
         /// <summary>
@@ -1496,7 +1502,7 @@ namespace Ink_Canvas
                 Settings defaultSettings = new Settings();
 
                 // 将默认配置和用户配置都序列化为JObject
-                JObject defaultConfigObj = JObject.FromObject(defaultSettings);
+                JObject defaultConfigObj = JObject.FromObject(defaultSettings); EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(defaultConfigObj);
                 JObject userConfigObj = JObject.Parse(userConfigJson);
 
                 // 记录是否有清理操作
@@ -1537,6 +1543,13 @@ namespace Ink_Canvas
         /// 7. 删除标记的键
         /// 8. 设置变更标志
         /// </remarks>
+        private static void EnsureDefaultConfigSchemaIncludesIgnoredNullKeys(JObject defaultConfigObj)
+        {
+            if (defaultConfigObj == null) return;
+            if (defaultConfigObj["appearance"] is JObject appearance && !appearance.ContainsKey("hitokotoCategories"))
+                appearance["hitokotoCategories"] = JValue.CreateNull();
+        }
+
         private void RemoveObsoleteProperties(JObject userObj, JObject defaultObj, ref bool hasChanges)
         {
             if (userObj == null || defaultObj == null)

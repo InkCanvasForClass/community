@@ -1,4 +1,3 @@
-using Ink_Canvas;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -49,13 +48,17 @@ namespace Ink_Canvas.Helpers
                             break;
                     }
                     if (alternates.Count > 0)
-                        analysisAlternate = alternates[0];
+                    {
+                        var altFinal = alternates[0];
+                        if (altFinal?.AlternateNodes != null && altFinal.AlternateNodes.Count > 0)
+                            analysisAlternate = altFinal;
+                    }
                 }
             }
 
             analyzer.Dispose();
 
-            if (analysisAlternate != null && analysisAlternate.AlternateNodes.Count > 0)
+            if (analysisAlternate != null && analysisAlternate.AlternateNodes != null && analysisAlternate.AlternateNodes.Count > 0)
             {
                 var node = analysisAlternate.AlternateNodes[0] as InkDrawingNode;
                 if (node == null)

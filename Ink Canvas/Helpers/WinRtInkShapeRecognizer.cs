@@ -28,7 +28,8 @@ namespace Ink_Canvas.Helpers
                 {
                     try
                     {
-                        await RecognizeShapeAsync(new StrokeCollection());
+                        // 空 StrokeCollection 在 RecognizeShapeAsync 入口会直接返回，无法预热 WinRT InkAnalyzer。
+                        await RecognizeShapeAsync(CreateMinimalWarmupStrokeCollection()).ConfigureAwait(true);
                     }
                     catch
                     {
@@ -97,6 +98,23 @@ namespace Ink_Canvas.Helpers
             {
                 return InkShapeRecognitionResult.Empty;
             }
+        }
+
+        /// <summary>
+        /// 极短合成笔画，供 <see cref="Warmup"/> 等场景走完整 WinRT 转换与分析管线（空集合在入口处会被直接返回）。
+        /// </summary>
+        internal static StrokeCollection CreateMinimalWarmupStrokeCollection()
+        {
+            var da = new DrawingAttributes { Color = Colors.Black, Width = 2, Height = 2 };
+            var pts = new StylusPointCollection
+            {
+                new StylusPoint(8, 8),
+                new StylusPoint(14, 10),
+                new StylusPoint(20, 8),
+            };
+            var col = new StrokeCollection();
+            col.Add(new Stroke(pts, da));
+            return col;
         }
 
         /// <summary>供 WinRT 手写等模块复用：将 WPF <see cref="Stroke"/> 转为 WinRT <see cref="global::Windows.UI.Input.Inking.InkStroke"/>。</summary>

@@ -3,99 +3,216 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Ink_Canvas"
         xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
-        ui:ThemeManager.RequestedTheme="Light" Topmost="True" Background="Transparent"
-        mc:Ignorable="d" WindowStyle="None" AllowsTransparency="True"
-        WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d"
         Title="Ink Canvas Annotation 使用指南"
-        Height="600" Width="500">
-    <Border Background="{DynamicResource OperatingGuideWindowBackground}" CornerRadius="10" BorderThickness="1" BorderBrush="{DynamicResource OperatingGuideWindowBorderBrush}" Margin="10,10,10,50">
-        <Grid>
-            <Border MouseMove="WindowDragMove" Visibility="Visible" Width="64" Height="15" CornerRadius="8" Background="Gray" Margin="0,0,0,5" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
-            <ScrollViewer Margin="0,0,0,30" VerticalScrollBarVisibility="Auto"
-              PanningMode="VerticalOnly" ui:ThemeManager.RequestedTheme="Light"
-              ManipulationBoundaryFeedback="SCManipulationBoundaryFeedback">
-                <ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel Margin="20,20,20,0" Orientation="Horizontal" HorizontalAlignment="Left">
-                        <Image Margin="5, 0" Source="{DynamicResource OperatingGuideWindowKeyboardIcon}"
-                           RenderOptions.BitmapScalingMode="HighQuality" Height="40" Width="40"/>
-                        <TextBlock FontSize="22" Text="软件快捷键" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
+        Height="600"
+        Width="520"
+        MinHeight="400"
+        MinWidth="400"
+        WindowStartupLocation="CenterScreen"
+        Topmost="True"
+        ResizeMode="CanResize"
+        FontFamily="Microsoft YaHei UI"
+        ui:ThemeManager.IsThemeAware="True"
+        ui:TitleBar.ExtendViewIntoTitleBar="True"
+        ui:WindowHelper.SystemBackdropType="Mica"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        ui:TitleBar.Height="48">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- 自定义标题栏（与 OOBE / 隐私说明等 Fluent 窗口一致） -->
+        <Border x:Name="Border_TitleBarRoot"
+                Height="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.Height)}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=Title}"
+                           VerticalAlignment="Center"
+                           Margin="12,0,0,0"
+                           FontSize="12"
+                           FontWeight="SemiBold" />
+
+                <Rectangle Grid.Column="2"
+                           Width="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=Window}, Path=(ui:TitleBar.SystemOverlayRightInset)}" />
+
+                <ikw:SimpleStackPanel x:Name="StackPanel_RightButtons"
+                                      Grid.Column="1"
+                                      Orientation="Horizontal"
+                                      Spacing="5" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Background="{DynamicResource SettingsPageBackground}">
+            <ScrollViewer Padding="0"
+                          VerticalScrollBarVisibility="Auto"
+                          PanningMode="VerticalOnly"
+                          ManipulationBoundaryFeedback="SCManipulationBoundaryFeedback">
+                <ikw:SimpleStackPanel Margin="24,20,24,28" Spacing="4">
+                    <ikw:SimpleStackPanel Margin="0,0,0,12"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left"
+                                          Spacing="12">
+                        <Image Height="32"
+                               Width="32"
+                               Source="{DynamicResource OperatingGuideWindowKeyboardIcon}"
+                               RenderOptions.BitmapScalingMode="HighQuality" />
+                        <TextBlock FontSize="20"
+                                   FontWeight="SemiBold"
+                                   Text="软件快捷键"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
                     </ikw:SimpleStackPanel>
 
-                    <Viewbox Height="320" HorizontalAlignment="Left">
-                        <ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Image Source="{DynamicResource OperatingGuideWindowControlIcon1}"
-                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"/>
-                                <TextBlock FontSize="10" Text=" + Z  ——  撤销" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Image Source="{DynamicResource OperatingGuideWindowControlIcon2}"
-                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"/>
-                                <TextBlock FontSize="10" Text=" + Y  ——  重做" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <Image Source="{DynamicResource OperatingGuideWindowControlIcon3}"
-                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20"/>
-                                <TextBlock FontSize="10" Text=" + E  ——  清屏" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock FontSize="10" Text=" Alt  + V  ——  显示/隐藏笑脸右侧工具栏（Visibility）" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock FontSize="10" Text=" Alt  + C  ——  截屏（Capture）" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock FontSize="10" Text=" Alt  + S  ——  切换至选择模式（Select）" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock FontSize="10" Text=" Alt  + D  ——  切换至批注模式 / 墨迹颜色选择器（Draw）" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock FontSize="10" Text=" Alt  + Q  ——  退出批注模式（Quit）" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock FontSize="10" Text=" Alt  + B  ——  切换/退出画板模式（Board）" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock FontSize="10" Text=" Alt  + E  ——  切换至面积擦/墨迹擦功能（Eraser）" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock FontSize="10" Text=" Alt  + L  ——  切换至单次直线绘制功能（Line）" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                            <ikw:SimpleStackPanel Margin="20, 0" Height="20" Orientation="Horizontal" HorizontalAlignment="Left">
-                                <TextBlock FontSize="10" Text="Shift + Esc  ——  退出 PPT 放映" TextWrapping="Wrap" VerticalAlignment="Center" Foreground="{DynamicResource OperatingGuideWindowTextForeground}"/>
-                            </ikw:SimpleStackPanel>
-                        </ikw:SimpleStackPanel>
-                    </Viewbox>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left"
+                                          Spacing="8">
+                        <Image Source="{DynamicResource OperatingGuideWindowControlIcon1}"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Height="20"
+                               Width="20"
+                               VerticalAlignment="Center" />
+                        <TextBlock FontSize="14"
+                                   Text=" + Z  ——  撤销"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left"
+                                          Spacing="8">
+                        <Image Source="{DynamicResource OperatingGuideWindowControlIcon2}"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Height="20"
+                               Width="20"
+                               VerticalAlignment="Center" />
+                        <TextBlock FontSize="14"
+                                   Text=" + Y  ——  重做"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left"
+                                          Spacing="8">
+                        <Image Source="{DynamicResource OperatingGuideWindowControlIcon3}"
+                               RenderOptions.BitmapScalingMode="HighQuality"
+                               Height="20"
+                               Width="20"
+                               VerticalAlignment="Center" />
+                        <TextBlock FontSize="14"
+                                   Text=" + E  ——  清屏"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left">
+                        <TextBlock FontSize="14"
+                                   Text=" Alt  + V  ——  显示/隐藏笑脸右侧工具栏（Visibility）"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left">
+                        <TextBlock FontSize="14"
+                                   Text=" Alt  + C  ——  截屏（Capture）"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left">
+                        <TextBlock FontSize="14"
+                                   Text=" Alt  + S  ——  切换至选择模式（Select）"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left">
+                        <TextBlock FontSize="14"
+                                   Text=" Alt  + D  ——  切换至批注模式 / 墨迹颜色选择器（Draw）"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left">
+                        <TextBlock FontSize="14"
+                                   Text=" Alt  + Q  ——  退出批注模式（Quit）"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left">
+                        <TextBlock FontSize="14"
+                                   Text=" Alt  + B  ——  切换/退出画板模式（Board）"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left">
+                        <TextBlock FontSize="14"
+                                   Text=" Alt  + E  ——  切换至面积擦/墨迹擦功能（Eraser）"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel Margin="0,0,0,8"
+                                          MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left">
+                        <TextBlock FontSize="14"
+                                   Text=" Alt  + L  ——  切换至单次直线绘制功能（Line）"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
+                    <ikw:SimpleStackPanel MinHeight="28"
+                                          Orientation="Horizontal"
+                                          HorizontalAlignment="Left">
+                        <TextBlock FontSize="14"
+                                   Text="Shift + Esc  ——  退出 PPT 放映"
+                                   TextWrapping="Wrap"
+                                   VerticalAlignment="Center"
+                                   Foreground="{DynamicResource SettingsPageForeground}" />
+                    </ikw:SimpleStackPanel>
                 </ikw:SimpleStackPanel>
             </ScrollViewer>
-            <Viewbox Visibility="{Binding ElementName=BigViewController, Path=Visibility}" Margin="20,20,20,20" HorizontalAlignment="Right">
-                <ikw:SimpleStackPanel Height="180" Orientation="Horizontal">
-                    <Border x:Name="BtnFullscreen" MouseUp="BtnFullscreen_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                            Margin="5"
-                            Background="{DynamicResource OperatingGuideWindowFullscreenButtonBackground}" Height="20" Width="20" CornerRadius="100">
-                        <Border.Effect>
-                            <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
-                        </Border.Effect>
-                        <Viewbox Margin="5.5">
-                            <ui:FontIcon Name="FontIconFullscreen" Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" Foreground="{DynamicResource OperatingGuideWindowFullscreenButtonForeground}"/>
-                        </Viewbox>
-                    </Border>
-                    <Border x:Name="BtnClose" MouseUp="BtnClose_MouseUp" HorizontalAlignment="Right" VerticalAlignment="Bottom"
-                        Margin="5"
-                        Background="{DynamicResource OperatingGuideWindowCloseButtonBackground}" Height="20" Width="20" CornerRadius="100">
-                        <Border.Effect>
-                            <DropShadowEffect Direction="0" ShadowDepth="0" Opacity="0.1" BlurRadius="3"/>
-                        </Border.Effect>
-                        <Viewbox Margin="5.5">
-                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Clear}"  Foreground="{DynamicResource OperatingGuideWindowCloseButtonForeground}"/>
-                        </Viewbox>
-                    </Border>
-                </ikw:SimpleStackPanel>
-            </Viewbox>
         </Grid>
-    </Border>
+    </Grid>
 </Window>

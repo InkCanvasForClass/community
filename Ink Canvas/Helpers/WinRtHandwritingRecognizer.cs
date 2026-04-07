@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Ink;
@@ -19,6 +18,9 @@ namespace Ink_Canvas.Helpers
     /// </summary>
     internal static class WinRtHandwritingRecognizer
     {
+        private static WinRtInk.InkRecognizer _preferredHandwritingRecognizer;
+        private static bool _preferredHandwritingRecognizerResolved;
+
         private static void LogHandwriting(string message, LogHelper.LogType logType = LogHelper.LogType.Info)
         {
             LogHelper.WriteLogToFile("[手写体] " + message, logType);
@@ -38,7 +40,9 @@ namespace Ink_Canvas.Helpers
                 {
                     try
                     {
-                        await RecognizeHandwritingAsync(new StrokeCollection()).ConfigureAwait(true);
+                        await RecognizeHandwritingAsync(
+                            WinRtInkShapeRecognizer.CreateMinimalWarmupStrokeCollection(),
+                            verboseTrace: false).ConfigureAwait(true);
                     }
                     catch
                     {
@@ -57,15 +61,21 @@ namespace Ink_Canvas.Helpers
         /// 再对每一分词用 <see cref="WinRtInk.InkRecognizerContainer"/> 取 <c>GetTextCandidates</c>（与当前 SDK 中部分版本的
         /// <see cref="WinRtInk.InkRecognitionResult"/> 未暴露笔画映射的局限兼容）。
         /// </summary>
-        public static async Task<HandwritingRecognitionResult> RecognizeHandwritingAsync(StrokeCollection strokes)
+        /// <param name="verboseTrace">为 false 时跳过详细识别日志（用于 <see cref="Warmup"/> 等）。</param>
+        public static async Task<HandwritingRecognitionResult> RecognizeHandwritingAsync(
+            StrokeCollection strokes,
+            bool verboseTrace = true)
         {
             if (!IsApiAvailable || strokes == null || strokes.Count == 0)
                 return HandwritingRecognitionResult.Empty;
 
-            var traceRecognition = strokes.Count > 0;
+            var traceRecognition = verboseTrace;
 
             try
             {
+                var recognizer = new WinRtInk.InkRecognizerContainer();
+                TryApplyPreferredHandwritingRecognizer(recognizer, traceRecognition);
+
                 var analyzer = new WinAnalysis.InkAnalyzer();
                 var idToWpf = new Dictionary<uint, Stroke>();
 
@@ -92,19 +102,21 @@ namespace Ink_Canvas.Helpers
                         LogHandwriting(
                             "识别：AnalyzeAsync 未得到 Updated，Status=" +
                             (analysisResult == null ? "null" : analysisResult.Status.ToString()) +
-                            "，有效笔画数=" + idToWpf.Count);
-                    return HandwritingRecognitionResult.Empty;
+                            "，有效笔画数=" + idToWpf.Count +
+                            "，尝试整批 RecognizeAsync 回退。");
+                    return await RecognizeHandwritingWholeInkAsync(strokes, traceRecognition).ConfigureAwait(true);
                 }
 
                 var wordNodes = analyzer.AnalysisRoot?.FindNodes(WinAnalysis.InkAnalysisNodeKind.InkWord);
                 if (wordNodes == null || wordNodes.Count == 0)
                 {
                     if (traceRecognition)
-                        LogHandwriting("识别：未找到 InkWord 节点（可能被判为绘图或非书写），有效笔画数=" + idToWpf.Count);
-                    return HandwritingRecognitionResult.Empty;
+                        LogHandwriting(
+                            "识别：未找到 InkWord 节点（墨迹分析常将非横平笔划判为绘图），有效笔画数=" + idToWpf.Count +
+                            "，改用整批 RecognizeAsync 回退。");
+                    return await RecognizeHandwritingWholeInkAsync(strokes, traceRecognition).ConfigureAwait(true);
                 }
 
-                var recognizer = new WinRtInk.InkRecognizerContainer();
                 var segments = new List<HandwritingWordSegment>();
 
                 foreach (var node in wordNodes)
@@ -230,6 +242,243 @@ namespace Ink_Canvas.Helpers
                     LogHandwriting("识别异常：" + ex.Message, LogHelper.LogType.Warning);
                 return HandwritingRecognitionResult.Empty;
             }
+        }
+
+        private static void TryApplyPreferredHandwritingRecognizer(
+            WinRtInk.InkRecognizerContainer container,
+            bool logDetail)
+        {
+            if (container == null)
+                return;
+            try
+            {
+                if (!_preferredHandwritingRecognizerResolved)
+                {
+                    _preferredHandwritingRecognizerResolved = true;
+                    var all = container.GetRecognizers();
+                    _preferredHandwritingRecognizer = SelectBestInkRecognizer(all);
+                    if (logDetail)
+                    {
+                        if (_preferredHandwritingRecognizer != null)
+                            LogHandwriting("识别器：已选用 \"" + _preferredHandwritingRecognizer.Name + "\"。");
+                        else if (all != null && all.Count > 0)
+                            LogHandwriting("识别器：未匹配到与 UI/区域语言对应的引擎，使用系统默认（共 " + all.Count + " 个）。");
+                    }
+                }
+
+                if (_preferredHandwritingRecognizer != null)
+                    container.SetDefaultRecognizer(_preferredHandwritingRecognizer);
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile("[手写体] 设置默认手写识别器失败: " + ex.Message, LogHelper.LogType.Warning);
+            }
+        }
+
+        private static WinRtInk.InkRecognizer SelectBestInkRecognizer(
+            IReadOnlyList<WinRtInk.InkRecognizer> list)
+        {
+            if (list == null || list.Count == 0)
+                return null;
+
+            var culture = PrimaryHandwritingCulture();
+            var lang = (culture?.TwoLetterISOLanguageName ?? string.Empty).ToLowerInvariant();
+            var name = culture?.Name ?? string.Empty;
+
+            bool wantZhHans = lang == "zh" &&
+                              (name.IndexOf("hans", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                               name.Equals("zh-cn", StringComparison.OrdinalIgnoreCase) ||
+                               name.Equals("zh-sg", StringComparison.OrdinalIgnoreCase) ||
+                               (name.IndexOf("hant", StringComparison.OrdinalIgnoreCase) < 0 &&
+                                !name.Equals("zh-tw", StringComparison.OrdinalIgnoreCase) &&
+                                !name.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) &&
+                                !name.Equals("zh-mo", StringComparison.OrdinalIgnoreCase)));
+
+            bool wantZhHant = lang == "zh" &&
+                              (name.IndexOf("hant", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                               name.Equals("zh-tw", StringComparison.OrdinalIgnoreCase) ||
+                               name.Equals("zh-hk", StringComparison.OrdinalIgnoreCase) ||
+                               name.Equals("zh-mo", StringComparison.OrdinalIgnoreCase));
+
+            WinRtInk.InkRecognizer Pick(Func<string, bool> match)
+            {
+                foreach (var r in list)
+                {
+                    var n = r?.Name;
+                    if (string.IsNullOrEmpty(n))
+                        continue;
+                    if (match(n))
+                        return r;
+                }
+
+                return null;
+            }
+
+            if (wantZhHans)
+            {
+                var r = Pick(n =>
+                    n.IndexOf("简体", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    n.IndexOf("簡體", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    (n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                     (n.IndexOf("简体", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                      n.IndexOf("簡體", StringComparison.OrdinalIgnoreCase) >= 0)) ||
+                    (n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                     (n.IndexOf("Simplified", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                      n.IndexOf("Hans", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                      n.IndexOf("PRC", StringComparison.OrdinalIgnoreCase) >= 0)));
+                if (r != null)
+                    return r;
+                r = Pick(n =>
+                    n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0);
+                if (r != null)
+                    return r;
+            }
+            else if (wantZhHant)
+            {
+                var r = Pick(n =>
+                    n.IndexOf("繁体", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    n.IndexOf("繁體", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    (n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                     (n.IndexOf("繁体", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                      n.IndexOf("繁體", StringComparison.OrdinalIgnoreCase) >= 0)) ||
+                    (n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0 &&
+                     (n.IndexOf("Traditional", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                      n.IndexOf("Hant", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                      n.IndexOf("Taiwan", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                      n.IndexOf("Hong Kong", StringComparison.OrdinalIgnoreCase) >= 0)));
+                if (r != null)
+                    return r;
+                r = Pick(n =>
+                    n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0);
+                if (r != null)
+                    return r;
+            }
+            else if (lang == "ja")
+            {
+                var r = Pick(n =>
+                    n.IndexOf("Japanese", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    n.IndexOf("日本語", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    n.IndexOf("日语", StringComparison.OrdinalIgnoreCase) >= 0);
+                if (r != null)
+                    return r;
+            }
+            else if (lang == "en")
+            {
+                var r = Pick(n => n.IndexOf("English", StringComparison.OrdinalIgnoreCase) >= 0);
+                if (r != null)
+                    return r;
+            }
+
+            if (lang == "zh")
+            {
+                var r = Pick(n =>
+                    n.IndexOf("中文", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                    n.IndexOf("Chinese", StringComparison.OrdinalIgnoreCase) >= 0);
+                if (r != null)
+                    return r;
+            }
+
+            return null;
+        }
+
+        private static CultureInfo PrimaryHandwritingCulture()
+        {
+            var ui = CultureInfo.CurrentUICulture;
+            var ct = CultureInfo.CurrentCulture;
+            if (string.Equals(ui.TwoLetterISOLanguageName, "zh", StringComparison.OrdinalIgnoreCase))
+                return ui;
+            if (string.Equals(ct.TwoLetterISOLanguageName, "zh", StringComparison.OrdinalIgnoreCase))
+                return ct;
+            return ui;
+        }
+
+        private static async Task<HandwritingRecognitionResult> RecognizeHandwritingWholeInkAsync(
+            StrokeCollection strokes,
+            bool traceRecognition)
+        {
+            if (strokes == null || strokes.Count == 0)
+                return HandwritingRecognitionResult.Empty;
+
+            var container = new WinRtInk.InkStrokeContainer();
+            foreach (Stroke s in strokes)
+            {
+                var ink = WinRtInkShapeRecognizer.CreateInkStrokeFromWpf(s);
+                if (ink != null)
+                    container.AddStroke(ink);
+            }
+
+            var winStrokes = container.GetStrokes();
+            if (winStrokes == null || winStrokes.Count == 0)
+            {
+                if (traceRecognition)
+                    LogHandwriting("整批回退：无有效 WinRT 笔画。");
+                return HandwritingRecognitionResult.Empty;
+            }
+
+            var reco = new WinRtInk.InkRecognizerContainer();
+            TryApplyPreferredHandwritingRecognizer(reco, false);
+
+            IReadOnlyList<WinRtInk.InkRecognitionResult> rr;
+            try
+            {
+                rr = await reco
+                    .RecognizeAsync(container, WinRtInk.InkRecognitionTarget.All)
+                    .AsTask()
+                    .ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                if (traceRecognition)
+                    LogHandwriting("整批回退：RecognizeAsync 异常：" + ex.Message);
+                return HandwritingRecognitionResult.Empty;
+            }
+
+            if (rr == null || rr.Count == 0 || rr[0] == null)
+            {
+                if (traceRecognition)
+                    LogHandwriting("整批回退：RecognizeAsync 无结果。");
+                return HandwritingRecognitionResult.Empty;
+            }
+
+            var cands = rr[0].GetTextCandidates();
+            var primary = (cands != null && cands.Count > 0) ? cands[0] : string.Empty;
+            if (string.IsNullOrWhiteSpace(primary))
+            {
+                if (traceRecognition)
+                    LogHandwriting("整批回退：候选文本为空。");
+                return HandwritingRecognitionResult.Empty;
+            }
+
+            var merged = new List<string>();
+            if (cands != null)
+            {
+                foreach (var c in cands)
+                {
+                    if (!string.IsNullOrEmpty(c) && !merged.Contains(c))
+                        merged.Add(c);
+                }
+            }
+
+            var bounds = UnionStrokeBounds(strokes);
+            var group = new List<Stroke>();
+            foreach (Stroke s in strokes)
+                group.Add(s);
+
+            var seg = new HandwritingWordSegment(primary, merged, bounds, group);
+            return new HandwritingRecognitionResult(new List<HandwritingWordSegment> { seg });
+        }
+
+        private static Rect UnionStrokeBounds(StrokeCollection strokes)
+        {
+            if (strokes == null || strokes.Count == 0)
+                return Rect.Empty;
+
+            var r = strokes[0].GetBounds();
+            for (var i = 1; i < strokes.Count; i++)
+                r = Rect.Union(r, strokes[i].GetBounds());
+            return r;
         }
 
         private const string DefaultHandwritingFontFamilyList = "Ink Free,KaiTi,Segoe Script";
