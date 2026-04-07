@@ -12,8 +12,9 @@
       
       Title="启动">
 
-    <ScrollViewer Padding="59,0,59,0" PanningMode="VerticalFirst">
-        <FrameworkElement.Resources>
+    <ScrollViewer PanningMode="VerticalFirst">
+        <Grid Margin="59,0,59,0">
+            <FrameworkElement.Resources>
             <!--  Spacing between cards  -->
             <sys:Double x:Key="SettingsCardSpacing">4</sys:Double>
             <!--  Style (inc. the correct spacing) of a section header  -->
@@ -25,93 +26,94 @@
                 </Style.Setters>
             </Style>
         </FrameworkElement.Resources>
-        <Grid>
-            <ikw:SimpleStackPanel MaxWidth="1000"
-                HorizontalAlignment="Stretch"
-                Spacing="{StaticResource SettingsCardSpacing}">
+            <Grid>
+                <ikw:SimpleStackPanel MaxWidth="1000"
+                    HorizontalAlignment="Stretch"
+                    Spacing="{StaticResource SettingsCardSpacing}">
                 
-                <!-- 窗口设置 -->
-                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="窗口设置" />
+                    <!-- 窗口设置 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="窗口设置" />
                 
-                <!-- 窗口无焦点模式 -->
-                <ui:SettingsCard Description="{i18n:I18n Key=Startup_NoFocusModeHint}"
-                        Header="{i18n:I18n Key=Startup_NoFocusMode}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.View}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchNoFocusMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchNoFocusMode_Toggled" />
-                </ui:SettingsCard>
+                    <!-- 窗口无焦点模式 -->
+                    <ui:SettingsCard Description="{i18n:I18n Key=Startup_NoFocusModeHint}"
+                            Header="{i18n:I18n Key=Startup_NoFocusMode}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.View}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch Name="ToggleSwitchNoFocusMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchNoFocusMode_Toggled" />
+                    </ui:SettingsCard>
                 
-                <!-- 窗口无边框模式 -->
-                <ui:SettingsCard Description="{i18n:I18n Key=Startup_NoBorderModeHint}"
-                        Header="{i18n:I18n Key=Startup_NoBorderMode}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchWindowMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchWindowMode_Toggled" />
-                </ui:SettingsCard>
+                    <!-- 窗口无边框模式 -->
+                    <ui:SettingsCard Description="{i18n:I18n Key=Startup_NoBorderModeHint}"
+                            Header="{i18n:I18n Key=Startup_NoBorderMode}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.FullScreen}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch Name="ToggleSwitchWindowMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchWindowMode_Toggled" />
+                    </ui:SettingsCard>
                 
-                <!-- 窗口置顶 -->
-                <ui:SettingsCard Description="{i18n:I18n Key=Startup_TopMostHint}"
-                        Header="{i18n:I18n Key=Startup_TopMost}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchAlwaysOnTop" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
-                </ui:SettingsCard>
+                    <!-- 窗口置顶 -->
+                    <ui:SettingsCard Description="{i18n:I18n Key=Startup_TopMostHint}"
+                            Header="{i18n:I18n Key=Startup_TopMost}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Pinned}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch Name="ToggleSwitchAlwaysOnTop" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
+                    </ui:SettingsCard>
                 
-                <!-- UIA置顶 -->
-                <ui:SettingsCard Description="{i18n:I18n Key=Startup_UIAccessTopMostHint_1}"
-                        Header="{i18n:I18n Key=Startup_UIATopMost}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchUIAccessTopMost" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
-                </ui:SettingsCard>
+                    <!-- UIA置顶 -->
+                    <ui:SettingsCard Description="{i18n:I18n Key=Startup_UIAccessTopMostHint_1}"
+                            Header="{i18n:I18n Key=Startup_UIATopMost}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Shield}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch Name="ToggleSwitchUIAccessTopMost" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
+                    </ui:SettingsCard>
                 
-                <!-- 启动设置 -->
-                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="启动设置" />
+                    <!-- 启动设置 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="启动设置" />
                 
-                <!-- 开机时运行 -->
-                <ui:SettingsCard Description="{i18n:I18n Key=Startup_RunAtStartupHint}"
-                        Header="{i18n:I18n Key=Startup_RunAtStartup}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
-                    </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchRunAtStartup" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchRunAtStartup_Toggled" />
-                </ui:SettingsCard>
+                    <!-- 开机时运行 -->
+                    <ui:SettingsCard Description="{i18n:I18n Key=Startup_RunAtStartupHint}"
+                            Header="{i18n:I18n Key=Startup_RunAtStartup}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}"/>
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch Name="ToggleSwitchRunAtStartup" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchRunAtStartup_Toggled" />
+                    </ui:SettingsCard>
                 
-                <!-- 开机运行后收纳到侧边栏 -->
-                <ui:SettingsCard Description="{i18n:I18n Key=Startup_FoldAtStartupHint}"
-                        Header="{i18n:I18n Key=Startup_FoldAtStartup}">
-                    <ui:SettingsCard.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" />
-                    </ui:SettingsCard.HeaderIcon>
-                    <ui:ToggleSwitch Name="ToggleSwitchFoldAtStartup" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchFoldAtStartup_Toggled" />
-                </ui:SettingsCard>
+                    <!-- 开机运行后收纳到侧边栏 -->
+                    <ui:SettingsCard Description="{i18n:I18n Key=Startup_FoldAtStartupHint}"
+                            Header="{i18n:I18n Key=Startup_FoldAtStartup}">
+                        <ui:SettingsCard.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.ChevronLeft}" />
+                        </ui:SettingsCard.HeaderIcon>
+                        <ui:ToggleSwitch Name="ToggleSwitchFoldAtStartup" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchFoldAtStartup_Toggled" />
+                    </ui:SettingsCard>
                 
-                <!-- 模式设置 -->
-                <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
-                    Text="模式设置" />
+                    <!-- 模式设置 -->
+                    <TextBlock Style="{StaticResource SettingsSectionHeaderTextBlockStyle}"
+                        Text="模式设置" />
 
-                <ui:SettingsExpander Description="{i18n:I18n Key=Settings_ModeDesc}"
-                        Header="{i18n:I18n Key=Settings_ModeDesc_1}">
-                    <ui:SettingsExpander.HeaderIcon>
-                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
-                    </ui:SettingsExpander.HeaderIcon>
-                    <ui:SettingsExpander.Items>
-                        <ui:SettingsCard Header="仅PPT模式">
-                            <ui:ToggleSwitch Name="ToggleSwitchPPTOnlyMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
-                        </ui:SettingsCard>
-                    </ui:SettingsExpander.Items>
-                </ui:SettingsExpander>
+                    <ui:SettingsExpander Description="{i18n:I18n Key=Settings_ModeDesc}"
+                            Header="{i18n:I18n Key=Settings_ModeDesc_1}">
+                        <ui:SettingsExpander.HeaderIcon>
+                            <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Settings}" />
+                        </ui:SettingsExpander.HeaderIcon>
+                        <ui:SettingsExpander.Items>
+                            <ui:SettingsCard Header="仅PPT模式">
+                                <ui:ToggleSwitch Name="ToggleSwitchPPTOnlyMode" OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Toggled="ToggleSwitchPPTOnlyMode_Toggled" />
+                            </ui:SettingsCard>
+                        </ui:SettingsExpander.Items>
+                    </ui:SettingsExpander>
 
-                <!-- 底部空白 -->
-                <Rectangle Height="48" />
+                    <!-- 底部空白 -->
+                    <Rectangle Height="48" />
                 
-            </ikw:SimpleStackPanel>
+                </ikw:SimpleStackPanel>
+            </Grid>
         </Grid>
     </ScrollViewer>
 </ui:Page>
