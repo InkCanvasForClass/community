@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
+using Weikio.PluginFramework;
+using Weikio.PluginFramework.Abstractions;
+using Weikio.PluginFramework.Catalogs;
 
 namespace Ink_Canvas.Plugins
 {
@@ -15,7 +17,6 @@ namespace Ink_Canvas.Plugins
         public string FilePath { get; set; } = "";
         public bool IsLoaded { get; set; }
         public IPlugin? Instance { get; set; }
-        public Assembly? Assembly { get; set; }
         public Exception? LoadError { get; set; }
     }
 
@@ -27,6 +28,7 @@ namespace Ink_Canvas.Plugins
         private readonly List<PluginInfo> _plugins = new();
         private readonly Dictionary<Type, object> _services = new();
         private string _pluginsDirectory;
+        private FolderPluginCatalog? _catalog;
 
         public IReadOnlyList<PluginInfo> Plugins => _plugins.AsReadOnly();
         public event EventHandler<PluginInfo>? PluginLoaded;
@@ -49,11 +51,6 @@ namespace Ink_Canvas.Plugins
 
         public async Task LoadAllAsync()
         {
-            await Task.Run(() => LoadAll());
-        }
-
-        private void LoadAll()
-        {
             if (!Directory.Exists(_pluginsDirectory))
             {
                 Directory.CreateDirectory(_pluginsDirectory);
@@ -61,70 +58,58 @@ namespace Ink_Canvas.Plugins
                 return;
             }
 
-            var dllFiles = Directory.GetFiles(_pluginsDirectory, "*.dll")
-                .Where(f => !f.EndsWith("InkCanvasForClass.dll") &&
-                           !f.EndsWith("Weikio.PluginFramework.dll"));
-
-            foreach (var dll in dllFiles)
-            {
-                LoadPlugin(dll);
-            }
-
-            Log($"Plugin loading complete. Loaded {_plugins.Count} plugins.");
-        }
-
-        private void LoadPlugin(string dllPath)
-        {
-            if (!File.Exists(dllPath))
-            {
-                Log($"Plugin file not found: {dllPath}");
-                return;
-            }
-
             try
             {
-                var assembly = Assembly.LoadFrom(dllPath);
-                var pluginTypes = assembly.GetTypes()
-                    .Where(t => typeof(IPlugin).IsAssignableFrom(t) && !t.IsInterface && !t.IsAbstract);
+                var options = new FolderPluginCatalogOptions
+                {
+                    SearchPatterns = new[] { "*.dll" },
+                    IncludeSubfolders = false
+                };
 
-                foreach (var pluginType in pluginTypes)
+                _catalog = new FolderPluginCatalog(_pluginsDirectory, options);
+                await _catalog.Initialize();
+
+                var weikioPlugins = _catalog.GetPlugins();
+
+                foreach (var weikioPlugin in weikioPlugins)
                 {
                     try
                     {
-                        var plugin = (IPlugin)Activator.CreateInstance(pluginType)!;
+                        var pluginType = weikioPlugin.GetType();
+                        var instance = Activator.CreateInstance(pluginType) as IPlugin;
+
+                        if (instance == null)
+                        {
+                            Log($"Failed to create instance of plugin from {weikioPlugin.AssemblyPath}");
+                            continue;
+                        }
 
                         var info = new PluginInfo
                         {
-                            Id = plugin.Id,
-                            Name = plugin.Name,
-                            Version = plugin.Version,
-                            FilePath = dllPath,
+                            Id = instance.Id,
+                            Name = instance.Name,
+                            Version = instance.Version,
+                            FilePath = weikioPlugin.AssemblyPath ?? "",
                             IsLoaded = true,
-                            Instance = plugin,
-                            Assembly = assembly
+                            Instance = instance
                         };
 
-                        plugin.Initialize(this);
+                        instance.Initialize(this);
                         _plugins.Add(info);
                         PluginLoaded?.Invoke(this, info);
                         Log($"Plugin loaded: {info.Name} v{info.Version}");
                     }
                     catch (Exception ex)
                     {
-                        LogError($"Failed to create plugin instance from {dllPath}", ex);
+                        LogError($"Failed to load plugin from {weikioPlugin.AssemblyPath}", ex);
                     }
                 }
+
+                Log($"Plugin loading complete. Loaded {_plugins.Count} plugins.");
             }
             catch (Exception ex)
             {
-                LogError($"Failed to load plugin from {dllPath}", ex);
-
-                var info = new PluginInfo
-                {
-                    FilePath = dllPath,
-                    LoadError = ex
-                };
-                _plugins.Add(info);
+                LogError("Failed to initialize plugin catalog", ex);
             }
         }
 
