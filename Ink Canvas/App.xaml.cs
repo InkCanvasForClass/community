@@ -1,6 +1,5 @@
 using H.NotifyIcon;
 using Ink_Canvas.Helpers;
-using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;
@@ -1162,24 +1161,6 @@ namespace Ink_Canvas
                 LogHelper.WriteLogToFile($"初始化上传帮助类时出错: {ex.Message}", LogHelper.LogType.Error);
             }
 
-            // 加载插件
-            try
-            {
-                LogHelper.WriteLogToFile("开始加载插件");
-                var pluginsDir = Path.Combine(RootPath, "Plugins");
-                if (!Directory.Exists(pluginsDir))
-                {
-                    Directory.CreateDirectory(pluginsDir);
-                }
-                PluginManager.Instance.SetPluginsDirectory(pluginsDir);
-                await PluginManager.Instance.LoadAllAsync();
-                LogHelper.WriteLogToFile($"插件加载完成，已加载 {PluginManager.Instance.Plugins.Count} 个插件");
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"加载插件时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-
         }
 
         private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -1475,25 +1456,14 @@ namespace Ink_Canvas
                 }
 
                 if (IsAppExitByUser)
-            {
-                // 写入退出信号文件，通知看门狗正常退出
-                StartupCount.Reset();
-                File.WriteAllText(watchdogExitSignalFile, "exit");
-                if (watchdogProcess != null && !watchdogProcess.HasExited)
                 {
-                    watchdogProcess.Kill();
-                }
-            }
-
-                // 卸载所有插件
-                try
-                {
-                    PluginManager.Instance.UnloadAll();
-                    LogHelper.WriteLogToFile("插件已全部卸载");
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.WriteLogToFile($"卸载插件时出错: {ex.Message}", LogHelper.LogType.Error);
+                    // 写入退出信号文件，通知看门狗正常退出
+                    StartupCount.Reset();
+                    File.WriteAllText(watchdogExitSignalFile, "exit");
+                    if (watchdogProcess != null && !watchdogProcess.HasExited)
+                    {
+                        watchdogProcess.Kill();
+                    }
                 }
             }
             catch (Exception ex)
