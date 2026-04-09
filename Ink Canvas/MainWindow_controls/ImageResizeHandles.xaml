@@ -5,7 +5,7 @@
     <UserControl.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="MainWindow_cs/MW_ToolbarIcons.xaml"/>
+                <ResourceDictionary Source="/InkCanvasForClass;component/MainWindow_cs/MW_ToolbarIcons.xaml"/>
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </UserControl.Resources>
