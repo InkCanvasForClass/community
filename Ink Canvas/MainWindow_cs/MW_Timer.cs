@@ -323,7 +323,7 @@ namespace Ink_Canvas
             try
             {
                 // 只有在画布可见且有墨迹时才保存
-                if (inkCanvas.Visibility == Visibility.Visible && inkCanvas.Strokes.Count > 0)
+                if (BoardCanvasController.Visibility == Visibility.Visible && BoardCanvasController.Strokes.Count > 0)
                 {
                     // 静默保存
                     SaveInkCanvasStrokes(false, false);
@@ -1221,7 +1221,7 @@ namespace Ink_Canvas
                     {
                         // 判断是否处于批注模式（inkCanvas.EditingMode == InkCanvasEditingMode.Ink）
                         // 判断是否处于画板模式（!Topmost）
-                        if (inkCanvas.EditingMode != InkCanvasEditingMode.Ink && Topmost)
+                        if (BoardCanvasController.EditingMode != InkCanvasEditingMode.Ink && Topmost)
                         {
                             // 检查是否有未保存的内容或正在进行的操作
                             if (!isHidingSubPanelsWhenInking)
@@ -1455,8 +1455,8 @@ namespace Ink_Canvas
             try
             {
                 // 检查是否仍然在橡皮擦模式
-                if (inkCanvas.EditingMode != InkCanvasEditingMode.EraseByPoint &&
-                    inkCanvas.EditingMode != InkCanvasEditingMode.EraseByStroke)
+                if (BoardCanvasController.EditingMode != InkCanvasEditingMode.EraseByPoint &&
+                    BoardCanvasController.EditingMode != InkCanvasEditingMode.EraseByStroke)
                 {
                     StopEraserAutoSwitchBackTimer();
                     return;

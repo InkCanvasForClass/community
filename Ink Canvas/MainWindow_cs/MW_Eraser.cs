@@ -122,7 +122,7 @@ namespace Ink_Canvas
                 eraserShape = new RectangleStylusShape(eraserWidth, _h);
             }
 
-            hitTester = inkCanvas.Strokes.GetIncrementalStrokeHitTester(eraserShape);
+            hitTester = BoardCanvasController.Strokes.GetIncrementalStrokeHitTester(eraserShape);
             hitTester.StrokeHit += EraserGeometry_StrokeHit;
 
             // 计算缩放矩阵
@@ -189,10 +189,10 @@ namespace Ink_Canvas
             if (isUsingStrokesEraser)
             {
                 // 笔画橡皮擦模式
-                var _filtered = inkCanvas.Strokes.HitTest(pt).Where(stroke => !stroke.ContainsPropertyData(IsLockGuid));
+                var _filtered = BoardCanvasController.Strokes.HitTest(pt).Where(stroke => !stroke.ContainsPropertyData(IsLockGuid));
                 var filtered = _filtered as Stroke[] ?? _filtered.ToArray();
                 if (!filtered.Any()) return;
-                inkCanvas.Strokes.Remove(new StrokeCollection(filtered));
+                BoardCanvasController.Strokes.Remove(new StrokeCollection(filtered));
             }
             else
             {
@@ -237,11 +237,11 @@ namespace Ink_Canvas
             // 替换或删除笔画
             if (filteredResult.Any())
             {
-                inkCanvas.Strokes.Replace(new StrokeCollection(filtered2Replace), new StrokeCollection(filteredResult));
+                BoardCanvasController.Strokes.Replace(new StrokeCollection(filtered2Replace), new StrokeCollection(filteredResult));
             }
             else
             {
-                inkCanvas.Strokes.Remove(new StrokeCollection(filtered2Replace));
+                BoardCanvasController.Strokes.Remove(new StrokeCollection(filtered2Replace));
             }
         }
 
@@ -360,7 +360,7 @@ namespace Ink_Canvas
                 }
 
                 // 应用到InkCanvas
-                inkCanvas.EraserShape = eraserShape;
+                BoardCanvasController.EraserShape = eraserShape;
 
                 Trace.WriteLine($"Eraser: Applied shape - Size: {eraserWidth}, Circle: {isEraserCircleShape}");
             }

@@ -1559,7 +1559,7 @@ namespace Ink_Canvas
                     FloatingbarUIForInkReplay.IsHitTestVisible = true;
                     BlackboardUIGridForInkReplay.Visibility = Visibility.Visible;
                     BlackboardUIGridForInkReplay.IsHitTestVisible = true;
-                    inkCanvas.IsHitTestVisible = true;
+                    BoardCanvasController.IsHitTestVisible = true;
                     inkCanvas.IsManipulationEnabled = true;
 
                     if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
@@ -1607,7 +1607,7 @@ namespace Ink_Canvas
                 BlackboardUIGridForInkReplay.IsHitTestVisible = true;
                 AnimationsHelper.HideWithFadeOut(BorderInkReplayToolBox);
                 isStopInkReplay = true;
-                inkCanvas.IsHitTestVisible = true;
+                BoardCanvasController.IsHitTestVisible = true;
                 inkCanvas.IsManipulationEnabled = true;
 
                 if (inkCanvas.EditingMode == InkCanvasEditingMode.None)
@@ -2177,7 +2177,7 @@ namespace Ink_Canvas
                 }
                 else
                 {
-                    inkCanvas.IsHitTestVisible = false;
+                    BoardCanvasController.IsHitTestVisible = false;
                     inkCanvas.Visibility = Visibility.Visible;
                 }
             }
@@ -2186,7 +2186,7 @@ namespace Ink_Canvas
                 if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
                 {
                     inkCanvas.Visibility = Visibility.Visible;
-                    inkCanvas.IsHitTestVisible = true;
+                    BoardCanvasController.IsHitTestVisible = true;
                 }
                 else
                 {
@@ -2196,7 +2196,7 @@ namespace Ink_Canvas
                     }
                     else
                     {
-                        inkCanvas.IsHitTestVisible = false;
+                        BoardCanvasController.IsHitTestVisible = false;
                         inkCanvas.Visibility = Visibility.Visible;
                     }
                 }
@@ -2306,7 +2306,7 @@ namespace Ink_Canvas
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
 
-                inkCanvas.IsHitTestVisible = true;
+                BoardCanvasController.IsHitTestVisible = true;
                 inkCanvas.Visibility = Visibility.Visible;
 
                 GridBackgroundCoverHolder.Visibility = Visibility.Visible;
@@ -2757,7 +2757,7 @@ namespace Ink_Canvas
 
             // 设置画笔颜色
             drawingAttributes.Color = color;
-            inkCanvas.DefaultDrawingAttributes.Color = color;
+            BoardCanvasController.StrokeColor = color;
 
             // 如果当前是荧光笔模式，同时更新荧光笔颜色和属性
             if (penType == 1)
@@ -2814,7 +2814,7 @@ namespace Ink_Canvas
                 inkCanvas.DefaultDrawingAttributes.IsHighlighter = true;
 
                 // 确保荧光笔颜色索引正确更新
-                inkCanvas.DefaultDrawingAttributes.Color = drawingAttributes.Color;
+                BoardCanvasController.StrokeColor = drawingAttributes.Color;
             }
 
             // 更新颜色状态
@@ -3302,7 +3302,7 @@ namespace Ink_Canvas
                     isPalmEraserActive = false;
 
                 // 确保触摸事件能正常响应
-                inkCanvas.IsHitTestVisible = true;
+                BoardCanvasController.IsHitTestVisible = true;
                 inkCanvas.IsManipulationEnabled = true;
 
                 // 释放所有触摸捕获
@@ -3583,7 +3583,7 @@ namespace Ink_Canvas
                 // 进入批注模式
                 GridTransparencyFakeBackground.Opacity = 1;
                 GridTransparencyFakeBackground.Background = new SolidColorBrush(StringToColor("#01FFFFFF"));
-                inkCanvas.IsHitTestVisible = true;
+                BoardCanvasController.IsHitTestVisible = true;
                 inkCanvas.Visibility = Visibility.Visible;
 
                 GridBackgroundCoverHolder.Visibility = Visibility.Visible;
@@ -3636,7 +3636,7 @@ namespace Ink_Canvas
                             //BtnClear_Click(null, null);
                         }
 
-                    inkCanvas.IsHitTestVisible = true;
+                    BoardCanvasController.IsHitTestVisible = true;
                     inkCanvas.Visibility = Visibility.Visible;
                 }
                 else
@@ -3656,11 +3656,11 @@ namespace Ink_Canvas
                     if (Settings.PowerPointSettings.IsShowStrokeOnSelectInPowerPoint)
                     {
                         inkCanvas.Visibility = Visibility.Visible;
-                        inkCanvas.IsHitTestVisible = true;
+                        BoardCanvasController.IsHitTestVisible = true;
                     }
                     else
                     {
-                        inkCanvas.IsHitTestVisible = true;
+                        BoardCanvasController.IsHitTestVisible = true;
                         inkCanvas.Visibility = Visibility.Visible;
                     }
                 }

@@ -64,7 +64,7 @@ namespace Ink_Canvas
                 foreach (var stroke in strokes)
                     try
                     {
-                        stroke.DrawingAttributes.Color = inkCanvas.DefaultDrawingAttributes.Color;
+                        stroke.DrawingAttributes.Color = BoardCanvasController.StrokeColor;
                     }
                     catch
                     {
@@ -176,7 +176,7 @@ namespace Ink_Canvas
                 inkColor = lastBoardInkColor;
             }
 
-            double alpha = inkCanvas.DefaultDrawingAttributes.Color.A;
+            double alpha = BoardCanvasController.StrokeColor.A;
             if (penType == 0 && Settings?.Canvas != null)
             {
                 double settingAlpha = Settings.Canvas.InkAlpha;
@@ -189,94 +189,94 @@ namespace Ink_Canvas
                 if (inkColor == 0)
                 {
                     // Black
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 0, 0, 0);
+                    BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 0, 0, 0);
                 }
                 else if (inkColor == 5)
                 {
                     // White
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 255, 255, 255);
+                    BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 255, 255, 255);
                 }
                 else if (isUselightThemeColor)
                 {
                     if (inkColor == 1)
                         // Red
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 239, 68, 68);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 239, 68, 68);
                     else if (inkColor == 2)
                         // Green
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 34, 197, 94);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 34, 197, 94);
                     else if (inkColor == 3)
                         // Blue
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 59, 130, 246);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 59, 130, 246);
                     else if (inkColor == 4)
                         // Yellow
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 250, 204, 21);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 250, 204, 21);
                     else if (inkColor == 6)
                         // Pink
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 236, 72, 153);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 236, 72, 153);
                     else if (inkColor == 7)
                         // Teal (亮色)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 20, 184, 166);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 20, 184, 166);
                     else if (inkColor == 8)
                         // Orange (亮色)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 249, 115, 22);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 249, 115, 22);
                 }
                 else
                 {
                     if (inkColor == 1)
                         // Red
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 220, 38, 38);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 220, 38, 38);
                     else if (inkColor == 2)
                         // Green
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 22, 163, 74);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 22, 163, 74);
                     else if (inkColor == 3)
                         // Blue
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 37, 99, 235);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 37, 99, 235);
                     else if (inkColor == 4)
                         // Yellow
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 234, 179, 8);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 234, 179, 8);
                     else if (inkColor == 6)
                         // Pink ( Purple )
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 147, 51, 234);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 147, 51, 234);
                     else if (inkColor == 7)
                         // Teal (暗色)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 13, 148, 136);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 13, 148, 136);
                     else if (inkColor == 8)
                         // Orange (暗色)
-                        inkCanvas.DefaultDrawingAttributes.Color = Color.FromArgb((byte)alpha, 234, 88, 12);
+                        BoardCanvasController.StrokeColor = Color.FromArgb((byte)alpha, 234, 88, 12);
                 }
             }
             else if (penType == 1)
             {
                 if (highlighterColor == 100)
                     // Black
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(0, 0, 0);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(0, 0, 0);
                 else if (highlighterColor == 101)
                     // White
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(250, 250, 250);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(250, 250, 250);
                 else if (highlighterColor == 102)
                     // Red
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(239, 68, 68);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(239, 68, 68);
                 else if (highlighterColor == 103)
                     // Yellow
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(253, 224, 71);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(253, 224, 71);
                 else if (highlighterColor == 104)
                     // Green
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(74, 222, 128);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(74, 222, 128);
                 else if (highlighterColor == 105)
                     // Zinc
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(113, 113, 122);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(113, 113, 122);
                 else if (highlighterColor == 106)
                     // Blue
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(59, 130, 246);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(59, 130, 246);
                 else if (highlighterColor == 107)
                     // Purple
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(168, 85, 247);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(168, 85, 247);
                 else if (highlighterColor == 108)
                     // teal
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(45, 212, 191);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(45, 212, 191);
                 else if (highlighterColor == 109)
                     // Orange
-                    inkCanvas.DefaultDrawingAttributes.Color = Color.FromRgb(249, 115, 22);
+                    BoardCanvasController.StrokeColor = Color.FromRgb(249, 115, 22);
             }
 
             var penPalette = BorderPenColorPaletteControl as MainWindow_controls.PenColorPalette;
@@ -294,7 +294,7 @@ namespace Ink_Canvas
             // 更新快捷调色盘选择指示器
             if (penType == 0)
             {
-                UpdateQuickColorPaletteIndicator(inkCanvas.DefaultDrawingAttributes.Color);
+                UpdateQuickColorPaletteIndicator(BoardCanvasController.StrokeColor);
             }
         }
 
