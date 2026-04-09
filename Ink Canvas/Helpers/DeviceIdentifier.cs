@@ -129,10 +129,10 @@ namespace Ink_Canvas.Helpers
                     {
                         var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
                         var searcher = Activator.CreateInstance(searcherType, "SELECT ProcessorId FROM Win32_Processor");
-                        var getMethod = searcherType.GetMethod("Get");
+                        var getMethod = GetPublicInstanceMethod(searcherType, "Get");
                         var enumerator = getMethod.Invoke(searcher, null);
 
-                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
+                        var moveNextMethod = GetPublicInstanceMethod(enumerator.GetType(), "MoveNext");
                         var currentProperty = enumerator.GetType().GetProperty("Current");
 
                         if ((bool)moveNextMethod.Invoke(enumerator, null))
@@ -143,7 +143,7 @@ namespace Ink_Canvas.Helpers
                             hardwareInfo.Append(processorId?.ToString() ?? "");
                         }
 
-                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
+                        var disposeMethod = GetPublicInstanceMethod(searcher.GetType(), "Dispose");
                         disposeMethod?.Invoke(searcher, null);
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -153,10 +153,10 @@ namespace Ink_Canvas.Helpers
                     {
                         var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
                         var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BaseBoard");
-                        var getMethod = searcherType.GetMethod("Get");
+                        var getMethod = GetPublicInstanceMethod(searcherType, "Get");
                         var enumerator = getMethod.Invoke(searcher, null);
 
-                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
+                        var moveNextMethod = GetPublicInstanceMethod(enumerator.GetType(), "MoveNext");
                         var currentProperty = enumerator.GetType().GetProperty("Current");
 
                         if ((bool)moveNextMethod.Invoke(enumerator, null))
@@ -167,7 +167,7 @@ namespace Ink_Canvas.Helpers
                             hardwareInfo.Append(serialNumber?.ToString() ?? "");
                         }
 
-                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
+                        var disposeMethod = GetPublicInstanceMethod(searcher.GetType(), "Dispose");
                         disposeMethod?.Invoke(searcher, null);
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -177,10 +177,10 @@ namespace Ink_Canvas.Helpers
                     {
                         var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
                         var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_BIOS");
-                        var getMethod = searcherType.GetMethod("Get");
+                        var getMethod = GetPublicInstanceMethod(searcherType, "Get");
                         var enumerator = getMethod.Invoke(searcher, null);
 
-                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
+                        var moveNextMethod = GetPublicInstanceMethod(enumerator.GetType(), "MoveNext");
                         var currentProperty = enumerator.GetType().GetProperty("Current");
 
                         if ((bool)moveNextMethod.Invoke(enumerator, null))
@@ -191,7 +191,7 @@ namespace Ink_Canvas.Helpers
                             hardwareInfo.Append(serialNumber?.ToString() ?? "");
                         }
 
-                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
+                        var disposeMethod = GetPublicInstanceMethod(searcher.GetType(), "Dispose");
                         disposeMethod?.Invoke(searcher, null);
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -201,10 +201,10 @@ namespace Ink_Canvas.Helpers
                     {
                         var searcherType = assembly.GetType("System.Management.ManagementObjectSearcher");
                         var searcher = Activator.CreateInstance(searcherType, "SELECT SerialNumber FROM Win32_DiskDrive WHERE MediaType='Fixed hard disk media'");
-                        var getMethod = searcherType.GetMethod("Get");
+                        var getMethod = GetPublicInstanceMethod(searcherType, "Get");
                         var enumerator = getMethod.Invoke(searcher, null);
 
-                        var moveNextMethod = enumerator.GetType().GetMethod("MoveNext");
+                        var moveNextMethod = GetPublicInstanceMethod(enumerator.GetType(), "MoveNext");
                         var currentProperty = enumerator.GetType().GetProperty("Current");
 
                         if ((bool)moveNextMethod.Invoke(enumerator, null))
@@ -215,7 +215,7 @@ namespace Ink_Canvas.Helpers
                             hardwareInfo.Append(serialNumber?.ToString() ?? "");
                         }
 
-                        var disposeMethod = searcher.GetType().GetMethod("Dispose");
+                        var disposeMethod = GetPublicInstanceMethod(searcher.GetType(), "Dispose");
                         disposeMethod?.Invoke(searcher, null);
                     }
                     catch (Exception ex) { System.Diagnostics.Debug.WriteLine(ex); }
@@ -233,6 +233,12 @@ namespace Ink_Canvas.Helpers
             }
 
             return hardwareInfo.ToString();
+        }
+
+        private static MethodInfo GetPublicInstanceMethod(Type type, string methodName)
+        {
+            if (type == null || string.IsNullOrEmpty(methodName)) return null;
+            return type.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null);
         }
 
         /// <summary>
