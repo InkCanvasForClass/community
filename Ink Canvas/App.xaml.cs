@@ -1,5 +1,6 @@
 using H.NotifyIcon;
 using Ink_Canvas.Helpers;
+using Ink_Canvas.Plugins;
 using Ink_Canvas.Properties;
 using iNKORE.UI.WPF.Modern.Controls;
 using Microsoft.Win32;
@@ -1075,6 +1076,18 @@ namespace Ink_Canvas
             var mainWindow = new MainWindow();
             MainWindow = mainWindow;
 
+            // 注册 InkCanvas 服务供插件使用
+            try
+            {
+                var inkCanvasService = new Plugins.InkCanvasService(mainWindow);
+                Plugins.PluginManager.Instance.RegisterService<Plugins.IInkCanvasService>(inkCanvasService);
+                LogHelper.WriteLogToFile("InkCanvasService registered for plugins");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"Failed to register InkCanvasService: {ex.Message}", LogHelper.LogType.Error);
+            }
+
             // 主窗口加载完成后关闭启动画面
             mainWindow.Loaded += (s, args) =>
             {
@@ -1159,6 +1172,18 @@ namespace Ink_Canvas
             catch (Exception ex)
             {
                 LogHelper.WriteLogToFile($"初始化上传帮助类时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
+            // 加载插件
+            try
+            {
+                LogHelper.WriteLogToFile("开始加载插件");
+                await PluginManager.Instance.LoadAllAsync();
+                LogHelper.WriteLogToFile(string.Format("插件加载完成，共加载 {0} 个插件", PluginManager.Instance.Plugins.Count));
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile(string.Format("加载插件时出错: {0}", ex.Message), LogHelper.LogType.Error);
             }
 
         }
@@ -1437,6 +1462,18 @@ namespace Ink_Canvas
 
         private void App_Exit(object sender, ExitEventArgs e)
         {
+            // 卸载所有插件
+            try
+            {
+                LogHelper.WriteLogToFile("正在卸载插件...");
+                PluginManager.Instance.UnloadAll();
+                LogHelper.WriteLogToFile("插件卸载完成");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.WriteLogToFile($"卸载插件时出错: {ex.Message}", LogHelper.LogType.Error);
+            }
+
             // 仅在软件内主动退出时关闭看门狗，并写入退出信号
             try
             {

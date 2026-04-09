@@ -1,0 +1,24 @@
+<ui:Page
+    x:Class="Ink_Canvas.Windows.SettingsViews.Pages.PluginPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
+    xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+    Title="插件"
+    mc:Ignorable="d">
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24">
+                <TextBlock Text="🎨 插件管理" Style="{DynamicResource TitleTextBlockStyle}" Margin="0,0,0,16" />
+                
+                <Border x:Name="StatusBorder" Background="{DynamicResource InfoAcrylicFillColorDefaultBrush}" Padding="12" CornerRadius="8" Margin="0,0,0,20">
+                    <TextBlock x:Name="PluginCountText" Text="正在加载插件..." Foreground="{DynamicResource InfoTextFillColorPrimaryBrush}" />
+                </Border>
+                
+                <StackPanel x:Name="PluginContainer" />
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</ui:Page>

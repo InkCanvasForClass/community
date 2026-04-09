@@ -228,6 +228,15 @@
                     </ui:NavigationViewItem.MenuItems>
                 </ui:NavigationViewItem>
                 <ui:NavigationViewItemHeader Content="插件设置"/>
+                <ui:NavigationViewItem
+                    x:Name="PluginItem"
+                    Content="插件"
+                    Tag="PluginPage"
+                    ToolTipService.ToolTip="插件管理">
+                    <ui:NavigationViewItem.Icon>
+                        <ui:FontIcon Icon="{x:Static ui:SegoeFluentIcons.Puzzle}"/>
+                    </ui:NavigationViewItem.Icon>
+                </ui:NavigationViewItem>
             </ui:NavigationView.MenuItems>
 
             <ui:NavigationView.FooterMenuItems>

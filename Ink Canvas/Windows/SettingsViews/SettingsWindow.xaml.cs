@@ -6,6 +6,7 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Navigation;
+using System.Windows.Media;
 using MessageBox = System.Windows.MessageBox;
 using Screen = System.Windows.Forms.Screen;
 
@@ -15,6 +16,7 @@ namespace Ink_Canvas.Windows.SettingsViews
     {
         private readonly Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
+        private readonly Dictionary<string, Ink_Canvas.Plugins.PluginInfo> _pluginPages = new Dictionary<string, Ink_Canvas.Plugins.PluginInfo>();
 
         // 保存窗口原始位置和大小
         private double _originalLeft;
@@ -44,7 +46,9 @@ namespace Ink_Canvas.Windows.SettingsViews
                 { "FontsPage", typeof(FontsPage) },
                 { "StartupPage", typeof(StartupPage) },
                 { "AboutPage", typeof(AboutPage) },
-                { "Settings", typeof(SettingsPage) }
+                { "Settings", typeof(SettingsPage) },
+                { "PluginPage", typeof(PluginPage) },
+                { "PluginSettingsPage", typeof(PluginSettingsPage) }
             };
 
             // 默认选中首页
@@ -65,6 +69,7 @@ namespace Ink_Canvas.Windows.SettingsViews
             {
                 SetMaxSizeAndCenter();
                 RegisterDpiChangedListener();
+                LoadPluginSettingsPages();
             };
 
             // 窗口关闭时释放资源
@@ -258,6 +263,12 @@ namespace Ink_Canvas.Windows.SettingsViews
                 string tag = selectedItem.Tag as string;
                 if (!string.IsNullOrEmpty(tag) && _pageTypes.ContainsKey(tag))
                 {
+                    // 如果是插件设置页面，设置当前插件
+                    if (_pluginPages.TryGetValue(tag, out var plugin))
+                    {
+                        PluginSettingsPage.CurrentPlugin = plugin;
+                    }
+
                     // 避免重复导航到当前页面
                     if (rootFrame.SourcePageType != _pageTypes[tag])
                     {
@@ -457,6 +468,44 @@ namespace Ink_Canvas.Windows.SettingsViews
             }
 
             return items;
+        }
+
+        private void LoadPluginSettingsPages()
+        {
+            try
+            {
+                var pluginManager = Ink_Canvas.Plugins.PluginManager.Instance;
+                var plugins = pluginManager.Plugins;
+
+                foreach (var plugin in plugins)
+                {
+                    var settingsView = plugin.Instance.GetSettingsView();
+                    if (settingsView != null)
+                    {
+                        var pageTag = string.Format("PluginSettings_{0}", plugin.Id);
+                        
+                        _pageTypes[pageTag] = typeof(PluginSettingsPage);
+                        _pluginPages[pageTag] = plugin;
+
+                        var navItem = new NavigationViewItem
+                        {
+                            Content = string.Format("{0} 设置", plugin.Name),
+                            Tag = pageTag
+                        };
+
+                        navItem.Icon = new FontIcon
+                        {
+                            Glyph = "\uE713"
+                        };
+
+                        NavigationViewControl.MenuItems.Add(navItem);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(string.Format("加载插件设置页面时出错: {0}", ex.Message));
+            }
         }
         #endregion
     }
