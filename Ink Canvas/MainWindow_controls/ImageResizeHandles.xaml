@@ -3,11 +3,25 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Name="Root">
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="/InkCanvasForClass;component/MainWindow_cs/MW_ToolbarIcons.xaml"/>
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
+        <Style x:Key="ImageResizeHandleBase" TargetType="Ellipse">
+            <Setter Property="Width" Value="8"/>
+            <Setter Property="Height" Value="8"/>
+            <Setter Property="Fill" Value="White"/>
+            <Setter Property="Stroke" Value="#0078D4"/>
+            <Setter Property="StrokeThickness" Value="1"/>
+        </Style>
+        <Style x:Key="ImageResizeHandleNWSE" TargetType="Ellipse" BasedOn="{StaticResource ImageResizeHandleBase}">
+            <Setter Property="Cursor" Value="SizeNWSE"/>
+        </Style>
+        <Style x:Key="ImageResizeHandleNESW" TargetType="Ellipse" BasedOn="{StaticResource ImageResizeHandleBase}">
+            <Setter Property="Cursor" Value="SizeNESW"/>
+        </Style>
+        <Style x:Key="ImageResizeHandleNS" TargetType="Ellipse" BasedOn="{StaticResource ImageResizeHandleBase}">
+            <Setter Property="Cursor" Value="SizeNS"/>
+        </Style>
+        <Style x:Key="ImageResizeHandleWE" TargetType="Ellipse" BasedOn="{StaticResource ImageResizeHandleBase}">
+            <Setter Property="Cursor" Value="SizeWE"/>
+        </Style>
     </UserControl.Resources>
     <Canvas Name="ImageResizeHandlesCanvas"
             Visibility="Collapsed"
