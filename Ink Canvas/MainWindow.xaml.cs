@@ -119,6 +119,7 @@ namespace Ink_Canvas
             }
 
             InitializeComponent();
+            InitializeBoardCanvasController();
 
             BlackboardLeftSide.Visibility = Visibility.Collapsed;
             BlackboardCenterSide.Visibility = Visibility.Collapsed;

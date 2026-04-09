@@ -19,7 +19,7 @@ namespace Ink_Canvas
         double StrokeWidth { get; set; }
         double HighlighterWidth { get; set; }
         bool IsHighlighterMode { get; set; }
-        EllipseStylusShape EraserShape { get; set; }
+        StylusShape EraserShape { get; set; }
         StrokeCollection GetSelectedStrokes();
         void Select(StrokeCollection strokes);
         void ClearSelection();
