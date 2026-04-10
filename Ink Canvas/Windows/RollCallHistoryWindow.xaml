@@ -59,9 +59,9 @@
             <Label Content="点名历史记录" 
                    Margin="10" 
                    Foreground="{DynamicResource RollCallHistoryWindowForeground}"
-                   FontFamily="Microsoft YaHei UI"/>
+                  />
             <TextBox Name="TextBoxHistory" 
-                     FontFamily="Microsoft YaHei UI" 
+                     
                      VerticalScrollBarVisibility="Auto" 
                      AcceptsReturn="True" 
                      IsReadOnly="True"
@@ -73,7 +73,7 @@
                     VerticalAlignment="Bottom" 
                     HorizontalAlignment="Right"
                     Content="关闭" 
-                    FontFamily="Microsoft YaHei UI"
+                   
                     Width="100" 
                     Click="Button_Click"
                     Background="{DynamicResource RollCallHistoryWindowButtonBackground}"

@@ -55,14 +55,14 @@
             </Viewbox>
             <TextBlock TextWrapping="Wrap" Name="Label" Margin="60,0,10,0" VerticalAlignment="Center"/>
             <ikw:SimpleStackPanel Grid.Row="1" HorizontalAlignment="Right" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="10">
-                <Button Margin="0" Content="是" Width="100" FontFamily="Microsoft YaHei UI" Click="ButtonYes_Click" Foreground="White">
+                <Button Margin="0" Content="是" Width="100" Click="ButtonYes_Click" Foreground="White">
                     <Button.Resources>
                         <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundKey}" Color="#15803d"/>
                         <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPointerOverKey}" Color="#15803d"/>
                         <SolidColorBrush x:Key="{x:Static ui:ThemeKeys.ButtonBackgroundPressedKey}" Color="#166534"/>
                     </Button.Resources>
                 </Button>
-                <Button Margin="0" Content="否" Width="100" FontFamily="Microsoft YaHei UI" Click="ButtonNo_Click" Foreground="#555555"/>
+                <Button Margin="0" Content="否" Width="100" Click="ButtonNo_Click" Foreground="#555555"/>
             </ikw:SimpleStackPanel>
         </Grid>
     </Grid>

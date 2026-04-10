@@ -62,7 +62,7 @@
                           VerticalScrollBarVisibility="Auto"
                           HorizontalScrollBarVisibility="Disabled">
                 <TextBox Name="TextBoxPrivacyContent" 
-                         FontFamily="Microsoft YaHei UI" 
+                         
                          VerticalScrollBarVisibility="Auto" 
                          AcceptsReturn="True" 
                          IsReadOnly="True"
@@ -79,7 +79,7 @@
                 <Button Name="ButtonCancel"
                         Margin="0,0,10,0" 
                         Content="取消" 
-                        FontFamily="Microsoft YaHei UI"
+                       
                         Width="100" 
                         Height="35"
                         Click="ButtonCancel_Click"
@@ -103,7 +103,7 @@
                 </Button>
                 <Button Name="ButtonAccept"
                         Content="同意" 
-                        FontFamily="Microsoft YaHei UI"
+                       
                         Width="100" 
                         Height="35"
                         Click="ButtonAccept_Click"

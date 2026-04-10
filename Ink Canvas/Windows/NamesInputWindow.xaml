@@ -59,9 +59,9 @@
             <Label Content="请在下方输入名单，每行一人（建议直接粘贴表格姓名列）" 
                    Margin="10" 
                    Foreground="{DynamicResource NamesInputWindowForeground}"
-                   FontFamily="Microsoft YaHei UI"/>
+                  />
             <TextBox Name="TextBoxNames" 
-                     FontFamily="Microsoft YaHei UI" 
+                     
                      VerticalScrollBarVisibility="Auto" 
                      AcceptsReturn="True" 
                      Margin="10,40,10,50"
@@ -72,7 +72,7 @@
                     VerticalAlignment="Bottom" 
                     HorizontalAlignment="Right"
                     Content="关闭" 
-                    FontFamily="Microsoft YaHei UI"
+                   
                     Width="100" 
                     Click="Button_Click"
                     Background="{DynamicResource NamesInputWindowButtonBackground}"

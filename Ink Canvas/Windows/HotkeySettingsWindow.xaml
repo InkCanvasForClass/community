@@ -159,7 +159,7 @@
                                                  Header="在鼠标模式下启用快捷键"
                                                  OnContent=""
                                                  OffContent=""
-                                                 FontFamily="Microsoft YaHei UI"
+                                                
                                                  FontWeight="Bold"
                                                  Margin="0,0,10,0"
                                                  Width="220" />
