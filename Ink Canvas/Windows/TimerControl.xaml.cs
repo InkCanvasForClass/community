@@ -282,13 +282,8 @@ namespace Ink_Canvas.Windows
             return DateTime.Now - startTime;
         }
 
-        // 最近计时记录
-        private string recentTimer1 = "--:--";
-        private string recentTimer2 = "--:--";
-        private string recentTimer3 = "--:--";
-        private string recentTimer4 = "--:--";
-        private string recentTimer5 = "--:--";
-        private string recentTimer6 = "--:--";
+        // 最近计时记录（使用数组简化重复代码）
+        private readonly string[] _recentTimers = new string[] { "--:--", "--:--", "--:--", "--:--", "--:--", "--:--" };
 
         // JSON文件路径
         private static readonly string ConfigsFolder = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Configs");
@@ -1102,48 +1097,20 @@ namespace Ink_Canvas.Windows
             SetQuickTime(1, 0, 0);
         }
 
-        // 最近计时事件处理
-        private void RecentTimer1_Click(object sender, RoutedEventArgs e)
+        // 最近计时事件处理（统一处理方法）
+        private void HandleRecentTimerClick(int index)
         {
-            if ((isTimerRunning && !isPaused) || recentTimer1 == "--:--") return;
+            if ((isTimerRunning && !isPaused) || _recentTimers[index] == "--:--") return;
             UpdateActivityTime();
-            ApplyRecentTimer(recentTimer1);
+            ApplyRecentTimer(_recentTimers[index]);
         }
 
-        private void RecentTimer2_Click(object sender, RoutedEventArgs e)
-        {
-            if ((isTimerRunning && !isPaused) || recentTimer2 == "--:--") return;
-            UpdateActivityTime();
-            ApplyRecentTimer(recentTimer2);
-        }
-
-        private void RecentTimer3_Click(object sender, RoutedEventArgs e)
-        {
-            if ((isTimerRunning && !isPaused) || recentTimer3 == "--:--") return;
-            UpdateActivityTime();
-            ApplyRecentTimer(recentTimer3);
-        }
-
-        private void RecentTimer4_Click(object sender, RoutedEventArgs e)
-        {
-            if ((isTimerRunning && !isPaused) || recentTimer4 == "--:--") return;
-            UpdateActivityTime();
-            ApplyRecentTimer(recentTimer4);
-        }
-
-        private void RecentTimer5_Click(object sender, RoutedEventArgs e)
-        {
-            if ((isTimerRunning && !isPaused) || recentTimer5 == "--:--") return;
-            UpdateActivityTime();
-            ApplyRecentTimer(recentTimer5);
-        }
-
-        private void RecentTimer6_Click(object sender, RoutedEventArgs e)
-        {
-            if ((isTimerRunning && !isPaused) || recentTimer6 == "--:--") return;
-            UpdateActivityTime();
-            ApplyRecentTimer(recentTimer6);
-        }
+        private void RecentTimer1_Click(object sender, RoutedEventArgs e) => HandleRecentTimerClick(0);
+        private void RecentTimer2_Click(object sender, RoutedEventArgs e) => HandleRecentTimerClick(1);
+        private void RecentTimer3_Click(object sender, RoutedEventArgs e) => HandleRecentTimerClick(2);
+        private void RecentTimer4_Click(object sender, RoutedEventArgs e) => HandleRecentTimerClick(3);
+        private void RecentTimer5_Click(object sender, RoutedEventArgs e) => HandleRecentTimerClick(4);
+        private void RecentTimer6_Click(object sender, RoutedEventArgs e) => HandleRecentTimerClick(5);
 
         // 设置快捷时间
         private void SetQuickTime(int h, int m, int s)
@@ -1183,97 +1150,31 @@ namespace Ink_Canvas.Windows
             string currentTime = $"{minute:D2}:{second:D2}";
 
             // 检查是否已存在相同的时间
-            var existingIndex = -1;
-            if (recentTimer1 == currentTime) existingIndex = 0;
-            else if (recentTimer2 == currentTime) existingIndex = 1;
-            else if (recentTimer3 == currentTime) existingIndex = 2;
-            else if (recentTimer4 == currentTime) existingIndex = 3;
-            else if (recentTimer5 == currentTime) existingIndex = 4;
-            else if (recentTimer6 == currentTime) existingIndex = 5;
+            int existingIndex = Array.IndexOf(_recentTimers, currentTime);
 
             if (existingIndex >= 0)
             {
                 // 如果存在重复，将其移到最前面
-                string duplicateTimer = GetRecentTimerByIndex(existingIndex);
-
+                string duplicateTimer = _recentTimers[existingIndex];
                 // 移除重复项
-                RemoveRecentTimerByIndex(existingIndex);
-
-                // 将重复项添加到最前面
-                recentTimer6 = recentTimer5;
-                recentTimer5 = recentTimer4;
-                recentTimer4 = recentTimer3;
-                recentTimer3 = recentTimer2;
-                recentTimer2 = recentTimer1;
-                recentTimer1 = duplicateTimer;
+                for (int i = existingIndex; i < _recentTimers.Length - 1; i++)
+                {
+                    _recentTimers[i] = _recentTimers[i + 1];
+                }
+                _recentTimers[_recentTimers.Length - 1] = "--:--";
+                // 右移所有元素，将重复项添加到最前面
+                Array.Copy(_recentTimers, 0, _recentTimers, 1, _recentTimers.Length - 1);
+                _recentTimers[0] = duplicateTimer;
             }
             else
             {
-                // 如果不存在重复，正常添加新记录
-                recentTimer6 = recentTimer5;
-                recentTimer5 = recentTimer4;
-                recentTimer4 = recentTimer3;
-                recentTimer3 = recentTimer2;
-                recentTimer2 = recentTimer1;
-                recentTimer1 = currentTime;
+                // 右移所有元素，添加新记录到最前面
+                Array.Copy(_recentTimers, 0, _recentTimers, 1, _recentTimers.Length - 1);
+                _recentTimers[0] = currentTime;
             }
 
             UpdateRecentTimerDisplays();
             SaveRecentTimersToRegistry();
-        }
-
-        private string GetRecentTimerByIndex(int index)
-        {
-            switch (index)
-            {
-                case 0: return recentTimer1;
-                case 1: return recentTimer2;
-                case 2: return recentTimer3;
-                case 3: return recentTimer4;
-                case 4: return recentTimer5;
-                case 5: return recentTimer6;
-                default: return "";
-            }
-        }
-
-        private void RemoveRecentTimerByIndex(int index)
-        {
-            switch (index)
-            {
-                case 0:
-                    recentTimer1 = recentTimer2;
-                    recentTimer2 = recentTimer3;
-                    recentTimer3 = recentTimer4;
-                    recentTimer4 = recentTimer5;
-                    recentTimer5 = recentTimer6;
-                    recentTimer6 = "--:--";
-                    break;
-                case 1:
-                    recentTimer2 = recentTimer3;
-                    recentTimer3 = recentTimer4;
-                    recentTimer4 = recentTimer5;
-                    recentTimer5 = recentTimer6;
-                    recentTimer6 = "--:--";
-                    break;
-                case 2:
-                    recentTimer3 = recentTimer4;
-                    recentTimer4 = recentTimer5;
-                    recentTimer5 = recentTimer6;
-                    recentTimer6 = "--:--";
-                    break;
-                case 3:
-                    recentTimer4 = recentTimer5;
-                    recentTimer5 = recentTimer6;
-                    recentTimer6 = "--:--";
-                    break;
-                case 4:
-                    recentTimer5 = recentTimer6;
-                    recentTimer6 = "--:--";
-                    break;
-                case 5:
-                    recentTimer6 = "--:--";
-                    break;
-            }
         }
 
         // 更新最近计时显示
@@ -1281,19 +1182,14 @@ namespace Ink_Canvas.Windows
         {
             try
             {
-                var timer1Text = this.FindName("RecentTimer1Text") as TextBlock;
-                var timer2Text = this.FindName("RecentTimer2Text") as TextBlock;
-                var timer3Text = this.FindName("RecentTimer3Text") as TextBlock;
-                var timer4Text = this.FindName("RecentTimer4Text") as TextBlock;
-                var timer5Text = this.FindName("RecentTimer5Text") as TextBlock;
-                var timer6Text = this.FindName("RecentTimer6Text") as TextBlock;
-
-                if (timer1Text != null) timer1Text.Text = recentTimer1;
-                if (timer2Text != null) timer2Text.Text = recentTimer2;
-                if (timer3Text != null) timer3Text.Text = recentTimer3;
-                if (timer4Text != null) timer4Text.Text = recentTimer4;
-                if (timer5Text != null) timer5Text.Text = recentTimer5;
-                if (timer6Text != null) timer6Text.Text = recentTimer6;
+                for (int i = 0; i < _recentTimers.Length; i++)
+                {
+                    var timerText = this.FindName($"RecentTimer{i + 1}Text") as TextBlock;
+                    if (timerText != null)
+                    {
+                        timerText.Text = _recentTimers[i];
+                    }
+                }
             }
             catch
             {
@@ -1313,12 +1209,7 @@ namespace Ink_Canvas.Windows
 
                 if (!File.Exists(RecentTimersJsonPath))
                 {
-                    recentTimer1 = "--:--";
-                    recentTimer2 = "--:--";
-                    recentTimer3 = "--:--";
-                    recentTimer4 = "--:--";
-                    recentTimer5 = "--:--";
-                    recentTimer6 = "--:--";
+                    Array.Fill(_recentTimers, "--:--");
                     return;
                 }
 
@@ -1328,31 +1219,21 @@ namespace Ink_Canvas.Windows
 
                 if (data != null)
                 {
-                    recentTimer1 = data.RecentTimer1 ?? "--:--";
-                    recentTimer2 = data.RecentTimer2 ?? "--:--";
-                    recentTimer3 = data.RecentTimer3 ?? "--:--";
-                    recentTimer4 = data.RecentTimer4 ?? "--:--";
-                    recentTimer5 = data.RecentTimer5 ?? "--:--";
-                    recentTimer6 = data.RecentTimer6 ?? "--:--";
+                    _recentTimers[0] = data.RecentTimer1 ?? "--:--";
+                    _recentTimers[1] = data.RecentTimer2 ?? "--:--";
+                    _recentTimers[2] = data.RecentTimer3 ?? "--:--";
+                    _recentTimers[3] = data.RecentTimer4 ?? "--:--";
+                    _recentTimers[4] = data.RecentTimer5 ?? "--:--";
+                    _recentTimers[5] = data.RecentTimer6 ?? "--:--";
                 }
                 else
                 {
-                    recentTimer1 = "--:--";
-                    recentTimer2 = "--:--";
-                    recentTimer3 = "--:--";
-                    recentTimer4 = "--:--";
-                    recentTimer5 = "--:--";
-                    recentTimer6 = "--:--";
+                    Array.Fill(_recentTimers, "--:--");
                 }
             }
             catch (Exception)
             {
-                recentTimer1 = "--:--";
-                recentTimer2 = "--:--";
-                recentTimer3 = "--:--";
-                recentTimer4 = "--:--";
-                recentTimer5 = "--:--";
-                recentTimer6 = "--:--";
+                Array.Fill(_recentTimers, "--:--");
             }
         }
 
@@ -1370,12 +1251,12 @@ namespace Ink_Canvas.Windows
                 // 创建数据对象
                 var data = new RecentTimersData
                 {
-                    RecentTimer1 = recentTimer1,
-                    RecentTimer2 = recentTimer2,
-                    RecentTimer3 = recentTimer3,
-                    RecentTimer4 = recentTimer4,
-                    RecentTimer5 = recentTimer5,
-                    RecentTimer6 = recentTimer6
+                    RecentTimer1 = _recentTimers[0],
+                    RecentTimer2 = _recentTimers[1],
+                    RecentTimer3 = _recentTimers[2],
+                    RecentTimer4 = _recentTimers[3],
+                    RecentTimer5 = _recentTimers[4],
+                    RecentTimer6 = _recentTimers[5]
                 };
 
                 // 序列化为JSON并保存到文件

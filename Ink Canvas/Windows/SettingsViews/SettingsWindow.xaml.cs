@@ -14,7 +14,7 @@ namespace Ink_Canvas.Windows.SettingsViews
 {
     public partial class SettingsWindow : Window
     {
-        private readonly Dictionary<string, Type> _pageTypes;
+        private Dictionary<string, Type> _pageTypes;
         private readonly Dictionary<string, object> _pages = new Dictionary<string, object>();
         private readonly Dictionary<string, Ink_Canvas.Plugins.PluginInfo> _pluginPages = new Dictionary<string, Ink_Canvas.Plugins.PluginInfo>();
 
@@ -54,17 +54,14 @@ namespace Ink_Canvas.Windows.SettingsViews
             // 默认选中首页
             if (NavigationViewControl.MenuItems.Count > 0)
             {
-                // 首先导航到首页
                 NavigateToPage("HomePage");
-                // 然后选中首页菜单项
                 NavigationViewControl.SelectedItem = NavigationViewControl.MenuItems[0];
                 NavigationViewControl.Header = "首页";
             }
 
-            // 初始化标题栏边距
             UpdateAppTitleBarMargin();
 
-            // 窗口生命周期事件注册
+            // 窗口生命周期事件
             this.Loaded += (sender, e) =>
             {
                 SetMaxSizeAndCenter();
@@ -72,7 +69,6 @@ namespace Ink_Canvas.Windows.SettingsViews
                 LoadPluginSettingsPages();
             };
 
-            // 窗口关闭时释放资源
             this.Closed += (sender, e) =>
             {
                 UnregisterDpiChangedListener();
@@ -81,51 +77,39 @@ namespace Ink_Canvas.Windows.SettingsViews
             };
 
             // 修复触摸屏操作后鼠标指针消失的问题
-            FixTouchScreenCursorIssue();
+            this.TouchUp += (s, e) => ShowCursor(true);
+            this.MouseEnter += (s, e) => ShowCursor(true);
+            this.Activated += (s, e) => ShowCursor(true);
 
             // 窗口状态改变时调整大小限制
             this.StateChanged += (sender, e) =>
             {
                 if (this.WindowState == WindowState.Maximized)
                 {
-                    // 保存窗口原始位置和大小
                     _originalLeft = this.Left;
                     _originalTop = this.Top;
                     _originalWidth = this.Width;
                     _originalHeight = this.Height;
-
-                    // 标记窗口曾经最大化过
                     _wasMaximized = true;
-
-                    // 最大化时清除最大尺寸限制
                     this.MaxWidth = double.PositiveInfinity;
                     this.MaxHeight = double.PositiveInfinity;
                 }
                 else if (this.WindowState == WindowState.Normal && _wasMaximized)
                 {
-                    // 从最大化恢复到正常状态时，恢复窗口原始位置和大小
                     this.Left = _originalLeft;
                     this.Top = _originalTop;
                     this.Width = _originalWidth;
                     this.Height = _originalHeight;
-
-                    // 重置标记
                     _wasMaximized = false;
-
-                    // 只设置最大尺寸，不改变窗口位置
                     SetMaxSizeOnly();
                 }
                 else if (this.WindowState == WindowState.Normal)
                 {
-                    // 正常状态下只设置最大尺寸限制
                     SetMaxSizeOnly();
                 }
-
-                // 窗口状态改变时更新标题栏显示
                 UpdateAppTitleBarMargin();
             };
 
-            // 窗口大小改变时更新标题栏显示
             this.SizeChanged += (sender, e) =>
             {
                 if (NavigationViewControl.DisplayMode == NavigationViewDisplayMode.Minimal)
@@ -136,26 +120,6 @@ namespace Ink_Canvas.Windows.SettingsViews
         }
 
         #region 修复触摸屏鼠标指针消失问题
-        private void FixTouchScreenCursorIssue()
-        {
-            // 触摸结束时强制显示鼠标指针
-            this.TouchUp += (s, e) =>
-            {
-                ShowCursor(true);
-            };
-
-            // 鼠标进入窗口时确保指针可见
-            this.MouseEnter += (s, e) =>
-            {
-                ShowCursor(true);
-            };
-
-            // 窗口激活时确保指针可见
-            this.Activated += (s, e) =>
-            {
-                ShowCursor(true);
-            };
-        }
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern int ShowCursor(bool bShow);
