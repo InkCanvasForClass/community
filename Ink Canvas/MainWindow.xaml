@@ -631,15 +631,7 @@
                                     </GroupBox.Header>
                                     <ikw:SimpleStackPanel Spacing="6" Margin="0,10,0,0">
                                         <TextBlock TextWrapping="Wrap" Margin="0,0,0,10" Foreground="#fafafa" Text="{i18n:I18n Key=Settings_ModeDesc}"/>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
-                                            <TextBlock Text="{i18n:I18n Key=Mode_Normal}" VerticalAlignment="Center" Foreground="#fafafa" 
-                                                       FontSize="14" Margin="0,0,8,0"/>
-                                            <ui:ToggleSwitch x:Name="ToggleSwitchMode" 
-                                                             OnContent="{i18n:I18n Key=Mode_PPTOnly}" OffContent="{i18n:I18n Key=Mode_PPTOnly}"
-                                                             IsOn="False" 
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchMode_Toggled"/>
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchMode" Label="{i18n:I18n Key=Mode_Normal}" OnContent="{i18n:I18n Key=Mode_PPTOnly}" OffContent="{i18n:I18n Key=Mode_PPTOnly}" IsOn="False" Toggled="ToggleSwitchMode_Toggled"/>
                                     </ikw:SimpleStackPanel>
                                 </GroupBox>
                             
@@ -662,44 +654,14 @@
                                                    FontSize="26" />
                                     </GroupBox.Header>
                                     <ikw:SimpleStackPanel Spacing="6">
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Startup_NoFocusMode}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchNoFocusMode"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchNoFocusMode_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Startup_NoBorderMode}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchWindowMode"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchWindowMode_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Startup_TopMost}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAlwaysOnTop"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAlwaysOnTop_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Name="UIAccessTopMostPanel" Visibility="Collapsed">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Startup_UIATopMost}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchUIAccessTopMost"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchUIAccessTopMost_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Name="UIAccessTopMostDescription" Text="{i18n:I18n Key=Startup_UIAccessTopMostHint}" TextWrapping="Wrap" Foreground="#a1a1aa" Visibility="Collapsed" />
-                                        <ui:ToggleSwitch OnContent="" OffContent=""
-                                                         Name="ToggleSwitchIsAutoUpdate" Header="{i18n:I18n Key=Header_AutoUpdate}"
-                                                        
-                                                         Toggled="ToggleSwitchIsAutoUpdate_Toggled" />
-                                        <ui:ToggleSwitch OnContent="" OffContent=""
-                                                         Name="ToggleSwitchIsAutoUpdateWithSilence" Header="{i18n:I18n Key=Header_SilentUpdate}"
-                                                        
-                                                         Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled" />
-                                        <TextBlock Text="{i18n:I18n Key=Startup_SilentUpdateHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchNoFocusMode" Label="{i18n:I18n Key=Startup_NoFocusMode}" IsOn="True" Toggled="ToggleSwitchNoFocusMode_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchWindowMode" Label="{i18n:I18n Key=Startup_NoBorderMode}" IsOn="True" Toggled="ToggleSwitchWindowMode_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAlwaysOnTop" Label="{i18n:I18n Key=Startup_TopMost}" IsOn="True" Toggled="ToggleSwitchAlwaysOnTop_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchUIAccessTopMost" Label="{i18n:I18n Key=Startup_UIATopMost}" IsOn="False" Toggled="ToggleSwitchUIAccessTopMost_Toggled"
+                                                                      Hint="{i18n:I18n Key=Startup_UIAccessTopMostHint}" ShowWhen="{Binding IsOn, ElementName=ToggleSwitchAlwaysOnTop}" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsAutoUpdate" Label="{i18n:I18n Key=Header_AutoUpdate}" IsOn="True" Toggled="ToggleSwitchIsAutoUpdate_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsAutoUpdateWithSilence" Label="{i18n:I18n Key=Header_SilentUpdate}" IsOn="True" Toggled="ToggleSwitchIsAutoUpdateWithSilence_Toggled"
+                                                                      Hint="{i18n:I18n Key=Startup_SilentUpdateHint}" ShowWhen="{Binding IsOn, ElementName=ToggleSwitchIsAutoUpdate}"/>
                                     
                                         <!-- 更新包架构 -->
                                         <ikw:SimpleStackPanel Spacing="8" Margin="0,8,0,0">
@@ -777,20 +739,8 @@
                                                 </ikw:SimpleStackPanel>
                                             </ikw:SimpleStackPanel>
                                         </Border>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Startup_RunAtStartup}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchRunAtStartup"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchRunAtStartup_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Startup_FoldAtStartup}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchFoldAtStartup"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchFoldAtStartup_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchRunAtStartup" Label="{i18n:I18n Key=Startup_RunAtStartup}" IsOn="True" Toggled="ToggleSwitchRunAtStartup_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchFoldAtStartup" Label="{i18n:I18n Key=Startup_FoldAtStartup}" IsOn="True" Toggled="ToggleSwitchFoldAtStartup_Toggled"/>
                                         <!--
                     <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoHideCanvas" Header="自动隐藏画板" Toggled="ToggleSwitchAutoHideCanvas_Toggled"/>
                     <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoEnterModeFinger" Header="自动进入手指模式" Toggled="ToggleSwitchAutoEnterModeFinger_Toggled"/>
@@ -803,29 +753,9 @@
                                                    FontSize="26" />
                                     </GroupBox.Header>
                                     <ikw:SimpleStackPanel Spacing="6">
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_ShowCursor}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowCursor"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowCursor_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_EnablePressureTouch}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnablePressureTouchMode"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnablePressureTouchMode_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Canvas_EnablePressureTouchHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_DisablePressure}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchDisablePressure"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchDisablePressure_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Canvas_DisablePressureHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchShowCursor" Label="{i18n:I18n Key=Canvas_ShowCursor}" IsOn="True" Toggled="ToggleSwitchShowCursor_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnablePressureTouchMode" Label="{i18n:I18n Key=Canvas_EnablePressureTouch}" Hint="{i18n:I18n Key=Canvas_EnablePressureTouchHint}" IsOn="True" Toggled="ToggleSwitchEnablePressureTouchMode_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchDisablePressure" Label="{i18n:I18n Key=Canvas_DisablePressure}" Hint="{i18n:I18n Key=Canvas_DisablePressureHint}" IsOn="True" Toggled="ToggleSwitchDisablePressure_Toggled"/>
 
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_EraserSize}" VerticalAlignment="Center"
@@ -843,47 +773,11 @@
                                         <TextBlock Text="{i18n:I18n Key=Canvas_EraserSizeHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_HideStrokeWhenSelecting}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchHideStrokeWhenSelecting" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchHideStrokeWhenSelecting_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Canvas_HideStrokeWhenSelectingHint}"
-                                                   TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_ClearInkAlsoClearHistory}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchClearCanvasAndClearTimeMachine" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchClearCanvasAndClearTimeMachine_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_ClearCanvasAlsoClearImages}" VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchClearCanvasAlsoClearImages"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchClearCanvasAlsoClearImages_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_CompressPicturesUploaded}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,8,0" Width="320"
-                                                       Style="{StaticResource AutoFitSettingsOptionLabel14}" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchCompressPicturesUploaded"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchCompressPicturesUploaded_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,8,0" Width="320"
-                                                       Style="{StaticResource AutoFitSettingsOptionLabel14}" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchHideStrokeWhenSelecting" Label="{i18n:I18n Key=Canvas_HideStrokeWhenSelecting}" Hint="{i18n:I18n Key=Canvas_HideStrokeWhenSelectingHint}" IsOn="True" Toggled="ToggleSwitchHideStrokeWhenSelecting_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchClearCanvasAndClearTimeMachine" Label="{i18n:I18n Key=Canvas_ClearInkAlsoClearHistory}" IsOn="True" Toggled="ToggleSwitchClearCanvasAndClearTimeMachine_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchClearCanvasAlsoClearImages" Label="{i18n:I18n Key=Canvas_ClearCanvasAlsoClearImages}" IsOn="False" Toggled="ToggleSwitchClearCanvasAlsoClearImages_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchCompressPicturesUploaded" Label="{i18n:I18n Key=Canvas_CompressPicturesUploaded}" IsOn="True" Toggled="ToggleSwitchCompressPicturesUploaded_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth" Label="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBooth}" Hint="{i18n:I18n Key=Canvas_LaunchSeewoVideoShowcaseForWhiteboardBoothHint}" IsOn="False" Toggled="ToggleSwitchLaunchSeewoVideoShowcaseForWhiteboardBooth_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -899,36 +793,12 @@
                                         </ikw:SimpleStackPanel>
                                         <TextBlock Text="{i18n:I18n Key=Canvas_HyperbolaAsymptoteHint}" TextWrapping="Wrap"
                                                    Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_ShowCircleCenter}" VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchShowCircleCenter"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowCircleCenter_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                        <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_WPFBezierSmoothing}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchFitToCurve"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchFitToCurve_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAdvancedBezierSmoothing"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAdvancedBezierSmoothing_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchShowCircleCenter" Label="{i18n:I18n Key=Canvas_ShowCircleCenter}" IsOn="True" Toggled="ToggleSwitchShowCircleCenter_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchFitToCurve" Label="{i18n:I18n Key=Canvas_WPFBezierSmoothing}" IsOn="False" Toggled="ToggleSwitchFitToCurve_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAdvancedBezierSmoothing" Label="{i18n:I18n Key=Canvas_AdvancedBezierSmoothing}" IsOn="True" Toggled="ToggleSwitchAdvancedBezierSmoothing_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_EnableInkFade}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableInkFade"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableInkFade_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Canvas_EnableInkFadeHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableInkFade" Label="{i18n:I18n Key=Canvas_EnableInkFade}" Hint="{i18n:I18n Key=Canvas_EnableInkFadeHint}" IsOn="False" Toggled="ToggleSwitchEnableInkFade_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
                                                              Visibility="{Binding ElementName=ToggleSwitchEnableInkFade, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_InkFadeTime}" VerticalAlignment="Center"
@@ -941,24 +811,10 @@
                                         </ikw:SimpleStackPanel>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_HideInkFadeInPenMenu}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchHideInkFadeControlInPenMenu"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchHideInkFadeControlInPenMenu_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Canvas_HideInkFadeInPenMenuHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchHideInkFadeControlInPenMenu" Label="{i18n:I18n Key=Canvas_HideInkFadeInPenMenu}" Hint="{i18n:I18n Key=Canvas_HideInkFadeInPenMenuHint}" IsOn="False" Toggled="ToggleSwitchHideInkFadeControlInPenMenu_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_BrushAutoRestore}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchBrushAutoRestore"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchBrushAutoRestore_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Canvas_BrushAutoRestoreHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchBrushAutoRestore" Label="{i18n:I18n Key=Canvas_BrushAutoRestore}" Hint="{i18n:I18n Key=Canvas_BrushAutoRestoreHint}" IsOn="False" Toggled="ToggleSwitchBrushAutoRestore_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Left"
                                                              Spacing="4"
                                                              Visibility="{Binding ElementName=ToggleSwitchBrushAutoRestore, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -1001,14 +857,7 @@
                                         </ikw:SimpleStackPanel>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_SwitchBackAfterEraser}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableEraserAutoSwitchBack"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableEraserAutoSwitchBack_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Canvas_SwitchBackAfterEraserHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableEraserAutoSwitchBack" Label="{i18n:I18n Key=Canvas_SwitchBackAfterEraser}" Hint="{i18n:I18n Key=Canvas_SwitchBackAfterEraserHint}" IsOn="False" Toggled="ToggleSwitchEnableEraserAutoSwitchBack_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
                                                              Visibility="{Binding ElementName=ToggleSwitchEnableEraserAutoSwitchBack, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Canvas_SwitchBackDelay}" VerticalAlignment="Center"
@@ -1020,7 +869,7 @@
                                                        VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
                                         </ikw:SimpleStackPanel>
                                         <TextBlock Text="{i18n:I18n Key=Canvas_SwitchBackDelayHint}" TextWrapping="Wrap" Foreground="#a1a1aa"
-                                                   Visibility="{Binding ElementName=ToggleSwitchEnableEraserAutoSwitchBack, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                                   Visibility="{Binding ElementName=ToggleSwitchEnableEraserAutoSwitchBack, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                                     </ikw:SimpleStackPanel>
                                 </GroupBox>
                                 <!-- 崩溃后操作设置 -->
@@ -1048,41 +897,13 @@
                                                    FontSize="26" />
                                     </GroupBox.Header>
                                     <ikw:SimpleStackPanel Spacing="6">
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Gesture_AutoToggleTwoFinger}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,8,0"
-                                                       Width="320" Style="{StaticResource AutoFitSettingsOptionLabel14}" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoSwitchTwoFingerGesture" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoSwitchTwoFingerGesture_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Gesture_AutoToggleHint}" TextWrapping="Wrap"
-                                                   Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoSwitchTwoFingerGesture" Label="{i18n:I18n Key=Gesture_AutoToggleTwoFinger}" Hint="{i18n:I18n Key=Gesture_AutoToggleHint}" IsOn="True" Toggled="ToggleSwitchAutoSwitchTwoFingerGesture_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Gesture_AllowRotateScale}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,8,0"
-                                                       Width="320" Style="{StaticResource AutoFitSettingsOptionLabel14}" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableTwoFingerRotationOnSelection"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableTwoFingerRotation_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Gesture_AllowRotateScaleHint}" TextWrapping="Wrap"
-                                                   Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableTwoFingerRotationOnSelection" Label="{i18n:I18n Key=Gesture_AllowRotateScale}" Hint="{i18n:I18n Key=Gesture_AllowRotateScaleHint}" IsOn="True" Toggled="ToggleSwitchEnableTwoFingerRotation_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Gesture_EnablePalmEraser}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,8,0"
-                                                       Width="320" Style="{StaticResource AutoFitSettingsOptionLabel14}" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnablePalmEraser"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnablePalmEraser_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Gesture_PalmHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnablePalmEraser" Label="{i18n:I18n Key=Gesture_EnablePalmEraser}" Hint="{i18n:I18n Key=Gesture_PalmHint}" IsOn="False" Toggled="ToggleSwitchEnablePalmEraser_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
                                                              Visibility="{Binding ElementName=ToggleSwitchEnablePalmEraser, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Gesture_PalmSensitivity}" VerticalAlignment="Center"
@@ -1104,13 +925,7 @@
                                                    FontSize="26" />
                                     </GroupBox.Header>
                                     <ikw:SimpleStackPanel Spacing="6">
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_EnableInkRecognition}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableInkToShape"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableInkToShape_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableInkToShape" Label="{i18n:I18n Key=InkRecog_EnableInkRecognition}" IsOn="True" Toggled="ToggleSwitchEnableInkToShape_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_ShapeEngine}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,16,0" />
@@ -1124,36 +939,11 @@
                                         </ikw:SimpleStackPanel>
                                         <TextBlock Text="{i18n:I18n Key=InkRecog_ShapeEngineHint}" TextWrapping="Wrap"
                                                    Foreground="#a1a1aa" MaxWidth="520" HorizontalAlignment="Left" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_HandwritingBeautify}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableWinRtHandwritingStrokeBeautify"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableWinRtHandwritingStrokeBeautify_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=InkRecog_HandwritingBeautifyHint}" TextWrapping="Wrap"
-                                                   Foreground="#a1a1aa" MaxWidth="520" HorizontalAlignment="Left" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableWinRtHandwritingStrokeBeautify" Label="{i18n:I18n Key=InkRecog_HandwritingBeautify}" Hint="{i18n:I18n Key=InkRecog_HandwritingBeautifyHint}" IsOn="False" Toggled="ToggleSwitchEnableWinRtHandwritingStrokeBeautify_Toggled"/>
                                         <ikw:SimpleStackPanel Spacing="6"
                                                              Visibility="{Binding ElementName=ToggleSwitchEnableInkToShape, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                                <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_BlockRectFakePressure}"
-                                                           VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                                <ui:ToggleSwitch OnContent="" OffContent=""
-                                                                 Name="ToggleSwitchEnableInkToShapeNoFakePressureRectangle"
-                                                                 IsOn="True"
-                                                                 FontWeight="Bold"
-                                                                 Toggled="ToggleSwitchEnableInkToShapeNoFakePressureRectangle_Toggled" />
-                                            </ikw:SimpleStackPanel>
-                                            <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                                <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_BlockTriFakePressure}"
-                                                           VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                                <ui:ToggleSwitch OnContent="" OffContent=""
-                                                                 Name="ToggleSwitchEnableInkToShapeNoFakePressureTriangle"
-                                                                 IsOn="True"
-                                                                 FontWeight="Bold"
-                                                                 Toggled="ToggleSwitchEnableInkToShapeNoFakePressureTriangle_Toggled" />
-                                            </ikw:SimpleStackPanel>
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableInkToShapeNoFakePressureRectangle" Label="{i18n:I18n Key=InkRecog_BlockRectFakePressure}" IsOn="True" Toggled="ToggleSwitchEnableInkToShapeNoFakePressureRectangle_Toggled"/>
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableInkToShapeNoFakePressureTriangle" Label="{i18n:I18n Key=InkRecog_BlockTriFakePressure}" IsOn="True" Toggled="ToggleSwitchEnableInkToShapeNoFakePressureTriangle_Toggled"/>
                                             <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                                   Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                             <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -1192,13 +982,7 @@
                                         </ikw:SimpleStackPanel>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                               Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_AutoStraightLine}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoStraightenLine"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoStraightenLine_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoStraightenLine" Label="{i18n:I18n Key=InkRecog_AutoStraightLine}" IsOn="True" Toggled="ToggleSwitchAutoStraightenLine_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" 
                                                              Visibility="{Binding ElementName=ToggleSwitchAutoStraightenLine, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_LengthThreshold}" VerticalAlignment="Center"
@@ -1219,24 +1003,10 @@
                                             <TextBlock Foreground="#fafafa" Text="{Binding ElementName=LineStraightenSensitivitySlider, Path=Value, StringFormat={}{0:F2}}" 
                                                        VerticalAlignment="Center" FontSize="14" Margin="16,0,0,0" />
                                         </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left"
-                                                             Visibility="{Binding ElementName=ToggleSwitchAutoStraightenLine, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_HighPrecisionStraighten}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchHighPrecisionLineStraighten"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=InkRecog_HighPrecisionHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchHighPrecisionLineStraighten" Label="{i18n:I18n Key=InkRecog_HighPrecisionStraighten}" Hint="{i18n:I18n Key=InkRecog_HighPrecisionHint}" IsOn="True" ShowWhen="{Binding IsOn, ElementName=ToggleSwitchAutoStraightenLine}" Toggled="ToggleSwitchHighPrecisionLineStraighten_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                               Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_LineEndpointSnapping}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchLineEndpointSnapping"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchLineEndpointSnapping_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchLineEndpointSnapping" Label="{i18n:I18n Key=InkRecog_LineEndpointSnapping}" IsOn="True" Toggled="ToggleSwitchLineEndpointSnapping_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" 
                                                              Visibility="{Binding ElementName=ToggleSwitchLineEndpointSnapping, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=InkRecog_SnappingDistance}" VerticalAlignment="Center"
@@ -1281,13 +1051,7 @@
                                         </ikw:SimpleStackPanel>
                                         <TextBlock Text="{i18n:I18n Key=Theme_Language_RestartHint}"
                                                    TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Theme_EnableSplash}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableSplashScreen"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableSplashScreen_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableSplashScreen" Label="{i18n:I18n Key=Theme_EnableSplash}" IsOn="False" Toggled="ToggleSwitchEnableSplashScreen_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Theme_SplashStyle}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,16,0" />
@@ -1377,14 +1141,7 @@
                                                    TextWrapping="Wrap" Foreground="#a1a1aa" />
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                               Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Theme_ShowNibButton}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableDisPlayNibModeToggle" IsOn="False"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableDisPlayNibModeToggle_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableDisPlayNibModeToggle" Label="{i18n:I18n Key=Theme_ShowNibButton}" IsOn="False" Toggled="ToggleSwitchEnableDisPlayNibModeToggle_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                               Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                         <!--<ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -1392,31 +1149,9 @@
                         <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchColorfulViewboxFloatingBar" IsOn="True" FontWeight="Bold" Toggled="ToggleSwitchIsColorfulViewboxFloatingBar_Toggled" />
                     </ikw:SimpleStackPanel>-->
 
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Theme_BlackboardScale80}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableViewboxBlackBoardScaleTransform"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableViewboxBlackBoardScaleTransform_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Theme_ShowTimeInWhiteboard}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableTimeDisplayInWhiteboardMode"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Theme_ShowQuoteInWhiteboard}"
-                                                       VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableChickenSoupInWhiteboardMode"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableChickenSoupInWhiteboardMode_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableViewboxBlackBoardScaleTransform" Label="{i18n:I18n Key=Theme_BlackboardScale80}" IsOn="True" Toggled="ToggleSwitchEnableViewboxBlackBoardScaleTransform_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableTimeDisplayInWhiteboardMode" Label="{i18n:I18n Key=Theme_ShowTimeInWhiteboard}" IsOn="True" Toggled="ToggleSwitchEnableTimeDisplayInWhiteboardMode_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableChickenSoupInWhiteboardMode" Label="{i18n:I18n Key=Theme_ShowQuoteInWhiteboard}" IsOn="True" Toggled="ToggleSwitchEnableChickenSoupInWhiteboardMode_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Vertical" HorizontalAlignment="Left">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Theme_QuoteSource}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,0,6" />
@@ -1437,13 +1172,7 @@
                                         </ikw:SimpleStackPanel>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0"
                                               Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Theme_EnableQuickPanel}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableQuickPanel"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableQuickPanel_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableQuickPanel" Label="{i18n:I18n Key=Theme_EnableQuickPanel}" IsOn="True" Toggled="ToggleSwitchEnableQuickPanel_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Theme_UnfoldButtonIcon}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,16,0" />
@@ -1641,13 +1370,7 @@
                                                            FontSize="20" />
                                             </Grid>
                                         </Border>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Tray_EnableTrayIcon}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableTrayIcon"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableTrayIcon_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableTrayIcon" Label="{i18n:I18n Key=Tray_EnableTrayIcon}" IsOn="True" Toggled="ToggleSwitchEnableTrayIcon_Toggled"/>
                                     </ikw:SimpleStackPanel>
                                 </GroupBox>
                                 <GroupBox Name="GroupBoxPPT">
@@ -1660,59 +1383,33 @@
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Image Source="/Resources/Icons-png/Powerpoint.png" Margin="0,0,6,0" Width="28"
                                                    Height="28" VerticalAlignment="Center" />
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_SupportPowerPoint}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchSupportPowerPoint" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchSupportPowerPoint_Toggled" />
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchSupportPowerPoint" Label="{i18n:I18n Key=PPT_SupportPowerPoint}" IsOn="True" Toggled="ToggleSwitchSupportPowerPoint_Toggled"/>
                                         </ikw:SimpleStackPanel>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Image Source="/Resources/Icons-png/Powerpoint.png" Margin="0,0,6,0" Width="28"
                                                    Height="28" VerticalAlignment="Center" />
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_Enhancement}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchPowerPointEnhancement"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchPowerPointEnhancement_Toggled" />
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchPowerPointEnhancement" Label="{i18n:I18n Key=PPT_Enhancement}" IsOn="False" Toggled="ToggleSwitchPowerPointEnhancement_Toggled"/>
                                         </ikw:SimpleStackPanel>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Image Source="/Resources/Icons-png/Powerpoint.png" Margin="0,0,6,0" Width="28"
                                                    Height="28" VerticalAlignment="Center" />
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_SkipAnimations}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchSkipAnimationsWhenGoNext"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchSkipAnimationsWhenGoNext_Toggled" />
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchSkipAnimationsWhenGoNext" Label="{i18n:I18n Key=PPT_SkipAnimations}" IsOn="False" Toggled="ToggleSwitchSkipAnimationsWhenGoNext_Toggled"/>
                                         </ikw:SimpleStackPanel>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Image Source="/Resources/Icons-png/Powerpoint.png" Margin="0,0,6,0" Width="28"
                                                    Height="28" VerticalAlignment="Center" />
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_UseRot}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchUseRotPptLink"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchUseRotPptLink_Toggled" />
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchUseRotPptLink" Label="{i18n:I18n Key=PPT_UseRot}" IsOn="False" Toggled="ToggleSwitchUseRotPptLink_Toggled"/>
                                         </ikw:SimpleStackPanel>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Image Source="/Resources/Icons-png/WPS.png" Margin="0,0,6,0" Width="28"
                                                    Height="28" VerticalAlignment="Center" />
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_SupportWPS}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchSupportWPS"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchSupportWPS_Toggled" />
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchSupportWPS" Label="{i18n:I18n Key=PPT_SupportWPS}" IsOn="True" Toggled="ToggleSwitchSupportWPS_Toggled"/>
                                         </ikw:SimpleStackPanel>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Image Source="/Resources/Icons-png/WPS.png" Margin="0,0,6,0" Width="28"
                                                    Height="28" VerticalAlignment="Center" />
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_KillWppProcess}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchEnableWppProcessKill"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableWppProcessKill_Toggled" />
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableWppProcessKill" Label="{i18n:I18n Key=PPT_KillWppProcess}" Hint="{i18n:I18n Key=PPT_KillWppHint}" IsOn="True" Toggled="ToggleSwitchEnableWppProcessKill_Toggled"/>
                                         </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=PPT_KillWppHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                         <TextBlock Text="{i18n:I18n Key=PPT_WpsHint1}" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                         <Border BorderBrush="#ef4444"
                                                 BorderThickness="2" Padding="8" CornerRadius="6" Background="#991b1b">
@@ -1785,14 +1482,7 @@
                                                 </Image>
                                             </Grid>
                                         </Border>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_ShowFlipButtons}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchShowPPTButton" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowPPTButton_OnToggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchShowPPTButton" Label="{i18n:I18n Key=PPT_ShowFlipButtons}" IsOn="True" Toggled="ToggleSwitchShowPPTButton_OnToggled"/>
                                         <ikw:SimpleStackPanel Spacing="6" Name="PPTButtonSettingsPanel"
                                                              Visibility="{Binding ElementName=ToggleSwitchShowPPTButton, Path=IsOn, Converter={StaticResource BooleanToVisibilityConverter}}">
                                             <WrapPanel Margin="0,-4,0,4" Orientation="Horizontal"
@@ -2117,7 +1807,7 @@
                                             <TextBlock
                                                 Text="{i18n:I18n Key=PPT_OffsetHint}"
                                                 TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                                                                    <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                            <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                                 <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_LeftBottomOffset}" VerticalAlignment="Center"
                                                            FontSize="14" Margin="0,0,12,0" />
                                                 <Slider x:Name="PPTButtonLBPositionValueSlider" Minimum="-500"
@@ -2462,44 +2152,14 @@
                                                           Margin="16,0,0,0"
                                                           Content="{i18n:I18n Key=PPT_BlackBackground}" />
                                             </ikw:SimpleStackPanel>
-                                            <ikw:SimpleStackPanel Orientation="Horizontal"
-                                                                 HorizontalAlignment="Left">
-                                                <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_PageButtonClickable}"
-                                                           VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                                <ui:ToggleSwitch OnContent="" OffContent=""
-                                                                 Name="ToggleSwitchEnablePPTButtonPageClickable"
-                                                                 IsOn="True"
-                                                                 FontWeight="Bold"
-                                                                 Toggled="ToggleSwitchEnablePPTButtonPageClickable_OnToggled" />
-                                            </ikw:SimpleStackPanel>
-                                            <TextBlock
-                                                Text="{i18n:I18n Key=PPT_PageButtonClickableHint}"
-                                                TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                            <ikw:SimpleStackPanel Orientation="Horizontal"
-                                                                 HorizontalAlignment="Left">
-                                                <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_LongPressPageTurn}"
-                                                           VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                                <ui:ToggleSwitch OnContent="" OffContent=""
-                                                                 Name="ToggleSwitchEnablePPTButtonLongPressPageTurn"
-                                                                 IsOn="True"
-                                                                 FontWeight="Bold"
-                                                                 Toggled="ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled" />
-                                            </ikw:SimpleStackPanel>
-                                            <TextBlock
-                                                Text="{i18n:I18n Key=PPT_LongPressPageTurnHint}"
-                                                TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnablePPTButtonPageClickable" Label="{i18n:I18n Key=PPT_PageButtonClickable}" Hint="{i18n:I18n Key=PPT_PageButtonClickableHint}" IsOn="True" Toggled="ToggleSwitchEnablePPTButtonPageClickable_OnToggled"/>
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnablePPTButtonLongPressPageTurn" Label="{i18n:I18n Key=PPT_LongPressPageTurn}" Hint="{i18n:I18n Key=PPT_LongPressPageTurnHint}" IsOn="True" Toggled="ToggleSwitchEnablePPTButtonLongPressPageTurn_OnToggled"/>
                                         </ikw:SimpleStackPanel>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
                                         <ikw:SimpleStackPanel Name="SettingsShowCanvasAtNewSlideShowStackPanel"
                                                              Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_EnterAnnotationOnShow}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,8,0"
-                                                       Width="320" Style="{StaticResource AutoFitSettingsOptionLabel14}" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchShowCanvasAtNewSlideShow" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowCanvasAtNewSlideShow_Toggled" />
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchShowCanvasAtNewSlideShow" Label="{i18n:I18n Key=PPT_EnterAnnotationOnShow}" IsOn="True" Toggled="ToggleSwitchShowCanvasAtNewSlideShow_Toggled"/>
                                         </ikw:SimpleStackPanel>
                                         <Border Name="SettingsPPTInkingAndAutoFoldExplictBorder" BorderBrush="#ef4444"
                                                 BorderThickness="2" Padding="8" CornerRadius="6" Background="#991b1b">
@@ -2521,45 +2181,11 @@
                                                 </TextBlock>
                                             </ikw:SimpleStackPanel>
                                         </Border>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_TwoFingerGesture}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableTwoFingerGestureInPresentationMode"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableTwoFingerGestureInPresentationMode_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_FingerGestureSlide}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableFingerGestureSlideShowControl"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableFingerGestureSlideShowControl_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock
-                                            Text="{i18n:I18n Key=PPT_FingerGestureSlideHint}"
-                                            TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_ShowGestureButtonInShow}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchShowGestureButtonInSlideShow" IsOn="False"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowGestureButtonInSlideShow_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=PPT_ShowGestureButtonInShowHint}" TextWrapping="Wrap"
-                                                   Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_TimeCapsule}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnablePPTTimeCapsule" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnablePPTTimeCapsule_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=PPT_TimeCapsuleHint}" TextWrapping="Wrap"
-                                                   Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableTwoFingerGestureInPresentationMode" Label="{i18n:I18n Key=PPT_TwoFingerGesture}" IsOn="True" Toggled="ToggleSwitchEnableTwoFingerGestureInPresentationMode_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableFingerGestureSlideShowControl" Label="{i18n:I18n Key=PPT_FingerGestureSlide}" Hint="{i18n:I18n Key=PPT_FingerGestureSlideHint}" IsOn="True" Toggled="ToggleSwitchEnableFingerGestureSlideShowControl_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchShowGestureButtonInSlideShow" Label="{i18n:I18n Key=PPT_ShowGestureButtonInShow}" Hint="{i18n:I18n Key=PPT_ShowGestureButtonInShowHint}" IsOn="False" Toggled="ToggleSwitchShowGestureButtonInSlideShow_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnablePPTTimeCapsule" Label="{i18n:I18n Key=PPT_TimeCapsule}" Hint="{i18n:I18n Key=PPT_TimeCapsuleHint}" IsOn="True" Toggled="ToggleSwitchEnablePPTTimeCapsule_Toggled"/>
+                                        
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,0">
     <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_TimeCapsulePosition}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,16,0" />
@@ -2571,73 +2197,17 @@
                                                 <ComboBoxItem Content="{i18n:I18n Key=PPT_TimeCapsulePos_Center}" />
                                             </ComboBox>
                                         </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_ShowQuickPanelInShow}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchShowPPTSidebarByDefault" IsOn="False"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchShowPPTSidebarByDefault_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=PPT_ShowQuickPanelInShowHint}" TextWrapping="Wrap"
-                                                   Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchShowPPTSidebarByDefault" Label="{i18n:I18n Key=PPT_ShowQuickPanelInShow}" Hint="{i18n:I18n Key=PPT_ShowQuickPanelInShowHint}" IsOn="False" Toggled="ToggleSwitchShowPPTSidebarByDefault_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_AutoScreenshot}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoSaveScreenShotInPowerPoint" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoSaveScreenShotInPowerPoint_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=PPT_AutoScreenshotHint}" TextWrapping="Wrap"
-                                                   Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_AutoSaveStrokes}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoSaveStrokesInPowerPoint" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoSaveStrokesInPowerPoint_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=PPT_AutoSaveStrokesHint}"
-                                                   TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoSaveScreenShotInPowerPoint" Label="{i18n:I18n Key=PPT_AutoScreenshot}" Hint="{i18n:I18n Key=PPT_AutoScreenshotHint}" IsOn="True" Toggled="ToggleSwitchAutoSaveScreenShotInPowerPoint_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesInPowerPoint" Label="{i18n:I18n Key=PPT_AutoSaveStrokes}" Hint="{i18n:I18n Key=PPT_AutoSaveStrokesHint}" IsOn="True" Toggled="ToggleSwitchAutoSaveStrokesInPowerPoint_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_RememberLastPage}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchNotifyPreviousPage" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchNotifyPreviousPage_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=PPT_RememberLastPageHint}"
-                                                   TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_GoToFirstPageOnReenter}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAlwaysGoToFirstPageOnReenter" IsOn="False"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_NotifyHiddenPage}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchNotifyHiddenPage"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchNotifyHiddenPage_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=PPT_NotifyAutoPlay}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchNotifyAutoPlayPresentation" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchNotifyAutoPlayPresentation_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchNotifyPreviousPage" Label="{i18n:I18n Key=PPT_RememberLastPage}" Hint="{i18n:I18n Key=PPT_RememberLastPageHint}" IsOn="True" Toggled="ToggleSwitchNotifyPreviousPage_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAlwaysGoToFirstPageOnReenter" Label="{i18n:I18n Key=PPT_GoToFirstPageOnReenter}" IsOn="False" Toggled="ToggleSwitchAlwaysGoToFirstPageOnReenter_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchNotifyHiddenPage" Label="{i18n:I18n Key=PPT_NotifyHiddenPage}" IsOn="True" Toggled="ToggleSwitchNotifyHiddenPage_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchNotifyAutoPlayPresentation" Label="{i18n:I18n Key=PPT_NotifyAutoPlay}" IsOn="True" Toggled="ToggleSwitchNotifyAutoPlayPresentation_Toggled"/>
                                     </ikw:SimpleStackPanel>
 
                                 </GroupBox>
@@ -2650,11 +2220,7 @@
                                         <TextBlock Text="{i18n:I18n Key=Advanced_TouchMultiplierHint}"
                                                    Foreground="#a1a1aa" TextWrapping="Wrap" Width="460" />
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Advanced_SpecialScreenMode}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsSpecialScreen"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchIsSpecialScreen_OnToggled" />
+                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsSpecialScreen" Label="{i18n:I18n Key=Advanced_SpecialScreenMode}" IsOn="True" Toggled="ToggleSwitchIsSpecialScreen_OnToggled"/>
                                             <ui:ToggleSwitch OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Name="ToggleSwitchIsEnableUriScheme"
                                                              Visibility="Collapsed" IsOn="False"
                                                              AutomationProperties.Name="{i18n:I18n Key=Advanced_UriSchemeName}"
@@ -2693,18 +2259,9 @@
                                         </ikw:SimpleStackPanel>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Advanced_EraserBindTouchMultiplier}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEraserBindTouchMultiplier" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEraserBindTouchMultiplier_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEraserBindTouchMultiplier" Label="{i18n:I18n Key=Advanced_EraserBindTouchMultiplier}" Hint="{i18n:I18n Key=Advanced_EraserBindTouchHint}" IsOn="True" Toggled="ToggleSwitchEraserBindTouchMultiplier_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <TextBlock Text="{i18n:I18n Key=Advanced_EraserBindTouchHint}"
-                                                   TextWrapping="Wrap" Foreground="#a1a1aa" />
                                         <StackPanel Orientation="Horizontal"
                                                     Visibility="{Binding Visibility,ElementName=TouchMultiplierSlider}">
                                             <Slider x:Name="NibModeBoundsWidthSlider" Minimum="1" Maximum="50" Width="340"
@@ -2729,38 +2286,12 @@
                                                 Text="{Binding Value, ElementName=FingerModeBoundsWidthSlider, Mode=OneWay}"
                                                 VerticalAlignment="Bottom" Margin="10,0,0,8" FontSize="14" Width="30" />
                                         </StackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Advanced_QuadIRMode}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsQuadIR"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchIsQuadIR_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsQuadIR" Label="{i18n:I18n Key=Advanced_QuadIRMode}" IsOn="True" Toggled="ToggleSwitchIsQuadIR_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Advanced_Logging}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsLogEnabled"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchIsLogEnabled_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Advanced_LogByDate}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsSaveLogByDate"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchIsSaveLogByDate_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Advanced_LogRotateHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Advanced_ConfirmExit}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchIsSecondConfimeWhenShutdownApp" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsLogEnabled" Label="{i18n:I18n Key=Advanced_Logging}" IsOn="True" Toggled="ToggleSwitchIsLogEnabled_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsSaveLogByDate" Label="{i18n:I18n Key=Advanced_LogByDate}" Hint="{i18n:I18n Key=Advanced_LogRotateHint}" IsOn="True" Toggled="ToggleSwitchIsSaveLogByDate_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsSecondConfimeWhenShutdownApp" Label="{i18n:I18n Key=Advanced_ConfirmExit}" IsOn="True" Toggled="ToggleSwitchIsSecondConfimeWhenShutdownApp_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -2970,21 +2501,9 @@
                                         <TextBlock TextWrapping="Wrap" Foreground="#a1a1aa"
                                                    Text="{i18n:I18n Key=Backup_Desc}" />
                                     
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Backup_AutoBeforeUpdate}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsAutoBackupBeforeUpdate"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchIsAutoBackupBeforeUpdate_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsAutoBackupBeforeUpdate" Label="{i18n:I18n Key=Backup_AutoBeforeUpdate}" IsOn="True" Toggled="ToggleSwitchIsAutoBackupBeforeUpdate_Toggled"/>
                                     
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Backup_AutoPeriodic}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchIsAutoBackupEnabled"
-                                                             IsOn="True" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchIsAutoBackupEnabled_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsAutoBackupEnabled" Label="{i18n:I18n Key=Backup_AutoPeriodic}" IsOn="True" Toggled="ToggleSwitchIsAutoBackupEnabled_Toggled"/>
                                     
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Backup_Interval}" VerticalAlignment="Center"
@@ -3317,15 +2836,7 @@
                                                              FontWeight="Bold"
                                                              Toggled="ToggleSwitchAutoFoldInPPTSlideShow_Toggled" />
                                         </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Automation_KeepFoldAfterExit}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchKeepFoldAfterSoftwareExit"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchKeepFoldAfterSoftwareExit_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Automation_KeepFoldAfterExitHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchKeepFoldAfterSoftwareExit" Label="{i18n:I18n Key=Automation_KeepFoldAfterExit}" Hint="{i18n:I18n Key=Automation_KeepFoldAfterExitHint}" IsOn="False" Toggled="ToggleSwitchKeepFoldAfterSoftwareExit_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
                                         <TextBlock Margin="0,0,0,8" Text="{i18n:I18n Key=AutoKill_Title}" FontWeight="Bold" Foreground="#fafafa"
@@ -3364,14 +2875,7 @@
                                                              IsOn="True" FontWeight="Bold"
                                                              Toggled="ToggleSwitchAutoKillHiteAnnotation_Toggled" />
                                         </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=AutoKill_HiteAfterKillEnterAnnotation}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoEnterAnnotationAfterKillHite"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoEnterAnnotationAfterKillHite" Label="{i18n:I18n Key=AutoKill_HiteAfterKillEnterAnnotation}" IsOn="False" Toggled="ToggleSwitchAutoEnterAnnotationAfterKillHite_Toggled"/>
 
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <Image Source="/Resources/Icons-png/VComYouJiao.png" Margin="0,0,6,0"
@@ -3463,14 +2967,7 @@
                                                    TextWrapping="Wrap" Foreground="#a1a1aa" Margin="0,0,0,8" />
                                     
                                         <!-- 主控制开关 -->
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=FloatingInterceptor_Enable}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchFloatingWindowInterceptorEnabled" IsOn="False"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchFloatingWindowInterceptorEnabled_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchFloatingWindowInterceptorEnabled" Label="{i18n:I18n Key=FloatingInterceptor_Enable}" IsOn="False" Toggled="ToggleSwitchFloatingWindowInterceptorEnabled_Toggled"/>
                                     
                                         <!-- 拦截规则网格 -->
                                         <Grid Name="FloatingWindowInterceptorGrid" Margin="4,0" Visibility="Collapsed">
@@ -3680,39 +3177,11 @@
                                         <TextBlock Name="TextBlockFloatingWindowInterceptorStatus" Text="{i18n:I18n Key=FloatingInterceptor_StatusNotRunning}" 
                                                    Foreground="#a1a1aa" FontSize="12" Margin="0,4,0,0" />
                                     
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Storage_AutoScreenshotOnClear}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoSaveStrokesAtClear" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoSaveStrokesAtClear_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Storage_ScreenshotsByDateFolder}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchSaveScreenshotsInDateFolders" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchSaveScreenshotsInDateFolders_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Storage_AutoSaveInkOnScreenshot}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoSaveStrokesAtScreenshot" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtClear" Label="{i18n:I18n Key=Storage_AutoScreenshotOnClear}" IsOn="True" Toggled="ToggleSwitchAutoSaveStrokesAtClear_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchSaveScreenshotsInDateFolders" Label="{i18n:I18n Key=Storage_ScreenshotsByDateFolder}" IsOn="True" Toggled="ToggleSwitchSaveScreenshotsInDateFolders_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoSaveStrokesAtScreenshot" Label="{i18n:I18n Key=Storage_AutoSaveInkOnScreenshot}" IsOn="True" Toggled="ToggleSwitchAutoSaveStrokesAtScreenshot_Toggled"/>
                                     
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Storage_AutoSaveInk}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableAutoSaveStrokes" IsOn="False"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchEnableAutoSaveStrokes_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableAutoSaveStrokes" Label="{i18n:I18n Key=Storage_AutoSaveInk}" IsOn="False" Toggled="ToggleSwitchEnableAutoSaveStrokes_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <TextBlock Foreground="#a1a1aa" Text="{i18n:I18n Key=Storage_AutoSaveInterval}" VerticalAlignment="Center"
                                                        FontSize="12" Margin="0,0,16,0" />
@@ -3729,25 +3198,8 @@
                                         </ikw:SimpleStackPanel>
                                         <TextBlock Text="{i18n:I18n Key=Storage_AutoSaveHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
                                     
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Storage_SaveFullPageStrokes}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchSaveFullPageStrokes" IsOn="False"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchSaveFullPageStrokes_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Storage_SaveFullPageHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                    
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Storage_SaveAsXml}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchSaveStrokesAsXML" IsOn="False"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchSaveStrokesAsXML_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Storage_SaveAsXmlHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchSaveFullPageStrokes" Label="{i18n:I18n Key=Storage_SaveFullPageStrokes}" Hint="{i18n:I18n Key=Storage_SaveFullPageHint}" IsOn="False" Toggled="ToggleSwitchSaveFullPageStrokes_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchSaveStrokesAsXML" Label="{i18n:I18n Key=Storage_SaveAsXml}" Hint="{i18n:I18n Key=Storage_SaveAsXmlHint}" IsOn="False" Toggled="ToggleSwitchSaveStrokesAsXML_Toggled"/>
                                     
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
@@ -3790,16 +3242,7 @@
 
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Storage_AutoDeleteTitle}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoDelSavedFiles" IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoDelSavedFiles_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=Storage_AutoDeleteHint}"
-                                                   TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoDelSavedFiles" Label="{i18n:I18n Key=Storage_AutoDeleteTitle}" Hint="{i18n:I18n Key=Storage_AutoDeleteHint}" IsOn="True" Toggled="ToggleSwitchAutoDelSavedFiles_Toggled"/>
                                         <Line HorizontalAlignment="Center" X1="0" Y1="0" X2="400" Y2="0" Stroke="#3f3f46"
                                               StrokeThickness="1" Margin="0,4,0,4" />
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
@@ -3840,33 +3283,9 @@
                                         <TextBlock Margin="0,0,0,8" Text="{i18n:I18n Key=FoldMode_Title}" FontWeight="Bold" Foreground="#fafafa"
                                                    FontSize="20" />
                                     
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=FoldMode_ExitToAnnotation}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=FoldMode_ExitToAnnotationHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=FoldMode_AutoFoldAfterPPT}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoFoldAfterPPTSlideShow"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=FoldMode_AutoFoldAfterPPTHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
-                                                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboard}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchAutoFoldWhenExitWhiteboard"
-                                                             IsOn="False" FontWeight="Bold"
-                                                             Toggled="ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <TextBlock Text="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboardHint}" TextWrapping="Wrap" Foreground="#a1a1aa" />
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode" Label="{i18n:I18n Key=FoldMode_ExitToAnnotation}" Hint="{i18n:I18n Key=FoldMode_ExitToAnnotationHint}" IsOn="False" Toggled="ToggleSwitchAutoEnterAnnotationModeWhenExitFoldMode_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoFoldAfterPPTSlideShow" Label="{i18n:I18n Key=FoldMode_AutoFoldAfterPPT}" Hint="{i18n:I18n Key=FoldMode_AutoFoldAfterPPTHint}" IsOn="False" Toggled="ToggleSwitchAutoFoldAfterPPTSlideShow_Toggled"/>
+                                                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchAutoFoldWhenExitWhiteboard" Label="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboard}" Hint="{i18n:I18n Key=FoldMode_AutoFoldAfterWhiteboardHint}" IsOn="False" Toggled="ToggleSwitchAutoFoldWhenExitWhiteboard_Toggled"/>
                                     </ikw:SimpleStackPanel>
                                 </GroupBox>
                                 <GroupBox Name="GroupBoxRandWindow">
@@ -3875,15 +3294,7 @@
                                                    FontSize="26" />
                                     </GroupBox.Header>
                                     <ikw:SimpleStackPanel Spacing="12">
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_ShowEditNamesButton}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchDisplayRandWindowNamesInputBtn"
-                                                             IsOn="True"
-                                                             FontWeight="Bold"
-                                                             Toggled="ToggleSwitchDisplayRandWindowNamesInputBtn_OnToggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchDisplayRandWindowNamesInputBtn" Label="{i18n:I18n Key=Random_ShowEditNamesButton}" IsOn="True" Toggled="ToggleSwitchDisplayRandWindowNamesInputBtn_OnToggled"/>
                                     
                                         <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_BackgroundSettingsTitle}" 
                                                    FontSize="16" FontWeight="Bold" Margin="0,10,0,5" />
@@ -3907,33 +3318,9 @@
                                             <Button Name="ButtonManageBackgrounds" Content="{i18n:I18n Key=Random_CustomBackground_Manage}" 
                                                     Click="ButtonManageBackgrounds_Click" Padding="10,3" Margin="5,0,0,0"/>
                                         </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_EnableButtons}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchShowRandomAndSingleDraw"
-                                                             IsOn="True" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchShowRandomAndSingleDraw_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_EnableQuickButton}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableQuickDraw"
-                                                             IsOn="True" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchEnableQuickDraw_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_UseExternal}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchExternalCaller"
-                                                             IsOn="False" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchExternalCaller_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchShowRandomAndSingleDraw" Label="{i18n:I18n Key=Random_EnableButtons}" IsOn="True" Toggled="ToggleSwitchShowRandomAndSingleDraw_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableQuickDraw" Label="{i18n:I18n Key=Random_EnableQuickButton}" IsOn="True" Toggled="ToggleSwitchEnableQuickDraw_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchExternalCaller" Label="{i18n:I18n Key=Random_UseExternal}" IsOn="False" Toggled="ToggleSwitchExternalCaller_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,8,0,0">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_ExternalTypeLabel}"
                                                        VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
@@ -3982,25 +3369,9 @@
                                         <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_NewUI_Title}" 
                                                    FontSize="16" FontWeight="Bold" Margin="0,10,0,5" />
                                     
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_NewUI_Enable}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchUseNewRollCallUI"
-                                                             IsOn="True" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchUseNewRollCallUI_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchUseNewRollCallUI" Label="{i18n:I18n Key=Random_NewUI_Enable}" IsOn="True" Toggled="ToggleSwitchUseNewRollCallUI_Toggled"/>
                                     
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_ML_AvoidRepeat}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableMLAvoidance"
-                                                             IsOn="True" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchEnableMLAvoidance_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableMLAvoidance" Label="{i18n:I18n Key=Random_ML_AvoidRepeat}" IsOn="True" Toggled="ToggleSwitchEnableMLAvoidance_Toggled"/>
                                     
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Random_ML_HistoryCount}" VerticalAlignment="Center"
@@ -4037,42 +3408,10 @@
                                               Stroke="#3f3f46" StrokeThickness="1" Margin="0,4,0,4" />
                                         <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Timer_Title}" 
                                                    FontSize="16" FontWeight="Bold" Margin="0,10,0,5" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Timer_UseLegacyButtons}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchUseLegacyTimerUI"
-                                                             IsOn="False" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchUseLegacyTimerUI_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Timer_NewUI}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchUseNewStyleUI"
-                                                             IsOn="False" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchUseNewStyleUI_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Timer_EnableCountUp}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableOvertimeCountUp"
-                                                             IsOn="False" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchEnableOvertimeCountUp_Toggled" />
-                                        </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Timer_OvertimeHighlight}"
-                                                       VerticalAlignment="Center" FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableOvertimeRedText"
-                                                             IsOn="True" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchEnableOvertimeRedText_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchUseLegacyTimerUI" Label="{i18n:I18n Key=Timer_UseLegacyButtons}" IsOn="False" Toggled="ToggleSwitchUseLegacyTimerUI_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchUseNewStyleUI" Label="{i18n:I18n Key=Timer_NewUI}" IsOn="False" Toggled="ToggleSwitchUseNewStyleUI_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableOvertimeCountUp" Label="{i18n:I18n Key=Timer_EnableCountUp}" IsOn="False" Toggled="ToggleSwitchEnableOvertimeCountUp_Toggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableOvertimeRedText" Label="{i18n:I18n Key=Timer_OvertimeHighlight}" IsOn="True" Toggled="ToggleSwitchEnableOvertimeRedText_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Timer_Volume}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,16,0" />
@@ -4095,15 +3434,7 @@
                                                         Click="ButtonResetTimerSound_Click" Padding="10,3" Width="90"/>
                                             </WrapPanel>
                                         </ikw:SimpleStackPanel>
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
-                                            <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Timer_Progressive}" VerticalAlignment="Center"
-                                                       FontSize="14" Margin="0,0,16,0" />
-                                            <ui:ToggleSwitch OnContent="" OffContent=""
-                                                             Name="ToggleSwitchEnableProgressiveReminder"
-                                                             IsOn="False" 
-                                                             FontWeight="Bold" 
-                                                             Toggled="ToggleSwitchEnableProgressiveReminder_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchEnableProgressiveReminder" Label="{i18n:I18n Key=Timer_Progressive}" IsOn="False" Toggled="ToggleSwitchEnableProgressiveReminder_Toggled"/>
                                         <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,5,0,0">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Timer_ProgressiveVolume}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,16,0" />

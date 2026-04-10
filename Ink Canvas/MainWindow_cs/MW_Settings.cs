@@ -619,10 +619,6 @@ namespace Ink_Canvas
             if (!isLoaded) return;
             Settings.Startup.IsAutoUpdate = ToggleSwitchIsAutoUpdate.IsOn;
 
-            // 自动更新关闭时隐藏静默更新选项
-            ToggleSwitchIsAutoUpdateWithSilence.Visibility =
-                ToggleSwitchIsAutoUpdate.IsOn ? Visibility.Visible : Visibility.Collapsed;
-
             // 如果关闭了自动更新，同时也关闭静默更新
             if (!ToggleSwitchIsAutoUpdate.IsOn)
             {
@@ -3270,7 +3266,7 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
             Settings.Automation.IsAutoSaveStrokesAtScreenshot = ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn;
-            ToggleSwitchAutoSaveStrokesAtClear.Header =
+            ToggleSwitchAutoSaveStrokesAtClear.Label =
                 ToggleSwitchAutoSaveStrokesAtScreenshot.IsOn ? "清屏时自动截图并保存墨迹" : "清屏时自动截图";
             SaveSettingsToFile();
         }

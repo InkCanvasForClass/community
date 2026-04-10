@@ -1375,7 +1375,6 @@ namespace Ink_Canvas
 
             // 初始化UIA置顶开关
             ToggleSwitchUIAccessTopMost.IsOn = Settings.Advanced.EnableUIAccessTopMost;
-            UpdateUIAccessTopMostVisibility();
 
             App.IsUIAccessTopMostEnabled = Settings.Advanced.EnableUIAccessTopMost;
 
@@ -3238,7 +3237,6 @@ namespace Ink_Canvas
             Settings.Advanced.IsAlwaysOnTop = toggle != null && toggle.IsOn;
             SaveSettingsToFile();
             ApplyAlwaysOnTop();
-            UpdateUIAccessTopMostVisibility();
         }
 
         private void ToggleSwitchUIAccessTopMost_Toggled(object sender, RoutedEventArgs e)
@@ -4626,31 +4624,6 @@ namespace Ink_Canvas
         #endregion
 
         #region UIA置顶功能
-
-        /// <summary>
-        /// 更新UIA置顶开关的可见性
-        /// </summary>
-        private void UpdateUIAccessTopMostVisibility()
-        {
-            try
-            {
-                var visibility = Settings.Advanced.IsAlwaysOnTop ? Visibility.Visible : Visibility.Collapsed;
-
-                if (UIAccessTopMostPanel != null)
-                {
-                    UIAccessTopMostPanel.Visibility = visibility;
-                }
-
-                if (UIAccessTopMostDescription != null)
-                {
-                    UIAccessTopMostDescription.Visibility = visibility;
-                }
-            }
-            catch (Exception ex)
-            {
-                LogHelper.WriteLogToFile($"更新UIA置顶开关可见性时出错: {ex.Message}", LogHelper.LogType.Error);
-            }
-        }
 
         /// <summary>
         /// 应用UIA置顶功能
