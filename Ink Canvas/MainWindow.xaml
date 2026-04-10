@@ -542,7 +542,7 @@
                                                     </Button.Resources>
                                                     <ikw:SimpleStackPanel Orientation="Horizontal"
                                                                          VerticalAlignment="Center"
-                                                                         HorizontalAlignment="Center" Spacing="0">
+                                                                         HorizontalAlignment="Center">
                                                         <Image RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,0,6,0" Height="20" Width="20">
                                                             <Image.Source>
@@ -568,7 +568,7 @@
                                                         Margin="0,0,0,0">
                                                     <ikw:SimpleStackPanel Orientation="Horizontal"
                                                                          VerticalAlignment="Center"
-                                                                         HorizontalAlignment="Center" Spacing="0">
+                                                                         HorizontalAlignment="Center">
                                                         <Image
                                                             Margin="0,0,4,0" RenderOptions.BitmapScalingMode="HighQuality"
                                                             Height="20" Width="20">
@@ -599,7 +599,7 @@
                                                     </Button.Resources>
                                                     <ikw:SimpleStackPanel Orientation="Horizontal"
                                                                          VerticalAlignment="Center"
-                                                                         HorizontalAlignment="Center" Spacing="0">
+                                                                         HorizontalAlignment="Center">
                                                         <Image RenderOptions.BitmapScalingMode="HighQuality"
                                                                Margin="0,0,6,0" Height="20" Width="20">
                                                             <Image.Source>
@@ -4578,7 +4578,7 @@
                                 HorizontalAlignment="Right"
                                 Click="BtnCloseSettings_Click">
                                 <ikw:SimpleStackPanel Orientation="Horizontal" VerticalAlignment="Center"
-                                                     HorizontalAlignment="Center" Spacing="0">
+                                                     HorizontalAlignment="Center">
                                     <Image RenderOptions.BitmapScalingMode="HighQuality"
                                            Margin="0,0,6,0" Height="20" Width="20">
                                         <Image.Source>
@@ -7101,7 +7101,7 @@
                                                         <ikw:SimpleStackPanel.Resources>
                                                             <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
                                                         </ikw:SimpleStackPanel.Resources>
-                                                        <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
+                                                        <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
                                                             <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
                                                                 MouseUp="ImageCountdownTimer_MouseUp"
@@ -7164,7 +7164,7 @@
                                                                        HorizontalAlignment="Center" />
                                                             </ikw:SimpleStackPanel>
                                                         </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
+                                                        <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
                                                             <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
                                                                 MouseUp="SymbolIconSaveStrokes_MouseUp"
@@ -7227,7 +7227,7 @@
                                                                        HorizontalAlignment="Center" />
                                                             </ikw:SimpleStackPanel>
                                                         </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
+                                                        <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
                                                             <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
                                                                 MouseUp="SymbolIconScreenshot_MouseUp"
@@ -9576,7 +9576,7 @@
                                                 Visibility="Visible" BorderBrush="#2563eb"
                                                 BorderThickness="1"
                                                 CornerRadius="5" Margin="-170,-140,-147,37">
-                                            <ikw:SimpleStackPanel Spacing="0" Orientation="Vertical">
+                                            <ikw:SimpleStackPanel Orientation="Vertical">
                                                 <!--<TextBlock FontSize="16" Foreground="{DynamicResource FloatBarForeground}" HorizontalAlignment="Left" Margin="10,8">
                                                 <Run Text="图形"/>
                                                 <Run Text="(第一行支持长按保持选中)" FontSize="10"/>
@@ -10139,7 +10139,7 @@
                                                     <ikw:SimpleStackPanel.Resources>
                                                         <Style TargetType="Label" BasedOn="{StaticResource AutoFitToolPopupLabel8}" />
                                                     </ikw:SimpleStackPanel.Resources>
-                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
+                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
                                                         <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
                                                                              MouseUp="ImageCountdownTimer_MouseUp"
@@ -10202,7 +10202,7 @@
                                                                    HorizontalAlignment="Center" />
                                                         </ikw:SimpleStackPanel>
                                                     </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
+                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
                                                         <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
                                                                              MouseUp="SymbolIconSaveStrokes_MouseUp"
@@ -10265,7 +10265,7 @@
                                                                    HorizontalAlignment="Center" />
                                                         </ikw:SimpleStackPanel>
                                                     </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40" Spacing="0"
+                                                    <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
                                                         <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
                                                                              MouseUp="SymbolIconScreenshot_MouseUp"
@@ -10678,7 +10678,7 @@
                  HorizontalAlignment="Left" VerticalAlignment="Center">
             <Border ClipToBounds="True" Visibility="Visible" CornerRadius="0,6,6,0" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" Width="32">
-                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="0" Margin="0,5">
+                <ikw:SimpleStackPanel Orientation="Vertical" Margin="0,5">
                     <ikw:SimpleStackPanel
                         MouseUp="SymbolIconRandOne_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
@@ -10761,7 +10761,7 @@
                  HorizontalAlignment="Right" VerticalAlignment="Center">
             <Border ClipToBounds="True" Visibility="Visible" CornerRadius="6,0,0,6" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" Width="32">
-                <ikw:SimpleStackPanel Orientation="Vertical" Spacing="0" Margin="0,5">
+                <ikw:SimpleStackPanel Orientation="Vertical" Margin="0,5">
                     <ikw:SimpleStackPanel
                         MouseUp="SymbolIconRandOne_MouseUp"
                         Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"

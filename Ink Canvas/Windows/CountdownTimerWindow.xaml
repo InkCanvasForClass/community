@@ -172,7 +172,7 @@
                     <Border x:Name="BorderStopTime" Background="{DynamicResource TimerWindowStopTimeBackground}" Margin="0,23,0,0"
                             Height="18" CornerRadius="9"
                             VerticalAlignment="Center" HorizontalAlignment="Center">
-                        <ikw:SimpleStackPanel Margin="6,0" Spacing="0" Orientation="Horizontal" HorizontalAlignment="Center">
+                        <ikw:SimpleStackPanel Margin="6,0" Orientation="Horizontal" HorizontalAlignment="Center">
                             <Image Margin="0,0,2,0" Source="{DynamicResource TimerWindowClockIcon}" RenderOptions.BitmapScalingMode="HighQuality" Height="10" Width="10"/>
                             <TextBlock Name="TextBlockStopTime" Text="12:30 PM" FontSize="9" VerticalAlignment="Center" Foreground="{DynamicResource TimerWindowStopTimeForeground}"/>
                         </ikw:SimpleStackPanel>

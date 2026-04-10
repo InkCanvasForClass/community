@@ -164,12 +164,12 @@
     
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
         <Grid Margin="0,0,0,0" Background="Transparent">
-            <ikw:SimpleStackPanel VerticalAlignment="Stretch" Spacing="0">
+            <ikw:SimpleStackPanel VerticalAlignment="Stretch">
             <!-- 统一的主容器 -->
             <Border Background="{DynamicResource SettingsPageBackground}" CornerRadius="8" Margin="0,0,0,0" 
                     BorderThickness="1" BorderBrush="{DynamicResource SettingsPageBorderBrush}" Padding="0">
                 
-                <ikw:SimpleStackPanel Spacing="0">
+                <ikw:SimpleStackPanel>
                     <!-- 现代化标题栏 -->
                     <Border Background="{StaticResource HeaderGradient}" CornerRadius="8,8,0,0" Margin="0,0,0,0"
                             MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
