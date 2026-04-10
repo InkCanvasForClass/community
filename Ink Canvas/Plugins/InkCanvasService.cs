@@ -22,11 +22,11 @@ namespace Ink_Canvas.Plugins
                 {
                     try
                     {
-                        _mainWindow.UnFoldFloatingBar_MouseUp(null, null);
+                        _mainWindow.SwitchToBoardMode();
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error opening whiteboard: {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine(string.Format("Error opening whiteboard: {0}", ex.Message));
                     }
                 });
             }
@@ -44,7 +44,7 @@ namespace Ink_Canvas.Plugins
                     }
                     catch (Exception ex)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Error closing whiteboard: {ex.Message}");
+                        System.Diagnostics.Debug.WriteLine(string.Format("Error closing whiteboard: {0}", ex.Message));
                     }
                 });
             }
