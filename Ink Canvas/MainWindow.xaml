@@ -741,10 +741,8 @@
                                         </Border>
                                         <controls:LabeledToggleSwitch x:Name="ToggleSwitchRunAtStartup" Label="{i18n:I18n Key=Startup_RunAtStartup}" IsOn="True" Toggled="ToggleSwitchRunAtStartup_Toggled"/>
                                         <controls:LabeledToggleSwitch x:Name="ToggleSwitchFoldAtStartup" Label="{i18n:I18n Key=Startup_FoldAtStartup}" IsOn="True" Toggled="ToggleSwitchFoldAtStartup_Toggled"/>
-                                        <!--
-                    <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoHideCanvas" Header="自动隐藏画板" Toggled="ToggleSwitchAutoHideCanvas_Toggled"/>
-                    <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoEnterModeFinger" Header="自动进入手指模式" Toggled="ToggleSwitchAutoEnterModeFinger_Toggled"/>
-                    -->
+                                        <!--<ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoHideCanvas" Header="自动隐藏画板" Toggled="ToggleSwitchAutoHideCanvas_Toggled"/>
+                                        <ui:ToggleSwitch OnContent="" OffContent="" Name="ToggleSwitchAutoEnterModeFinger" Header="自动进入手指模式" Toggled="ToggleSwitchAutoEnterModeFinger_Toggled"/>-->
                                     </ikw:SimpleStackPanel>
                                 </GroupBox>
                                 <GroupBox Name="GroupBoxCanvas">
