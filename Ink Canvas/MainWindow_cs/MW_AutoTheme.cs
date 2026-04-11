@@ -286,48 +286,48 @@ namespace Ink_Canvas
                 switch (_currentToolMode)
                 {
                     case "cursor":
-                        CursorIconGeometry.Brush = new SolidColorBrush(selectedColor);
-                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Cursor_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
                         break;
                     case "pen":
                     case "color":
-                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        PenIconGeometry.Brush = new SolidColorBrush(selectedColor);
-                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Pen_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
                         break;
                     case "eraser":
-                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        CircleEraserIconGeometry.Brush = new SolidColorBrush(selectedColor);
-                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Eraser_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
                         break;
                     case "eraserByStrokes":
-                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(selectedColor);
-                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(selectedColor);
+                        Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
                         break;
                     case "select":
-                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        LassoSelectIconGeometry.Brush = new SolidColorBrush(selectedColor);
+                        Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        SymbolIconSelect.Icon.Brush = new SolidColorBrush(selectedColor);
                         break;
                     default:
                         // 默认情况，所有按钮都使用主题颜色
-                        CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                        LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                        SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
                         break;
                 }
             }

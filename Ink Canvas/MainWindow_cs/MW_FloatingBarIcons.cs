@@ -441,18 +441,18 @@ namespace Ink_Canvas
             {
                 if (mode != "clear")
                 {
-                    CursorIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    CursorIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false));
-                    PenIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    PenIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("pen", false));
-                    StrokeEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    StrokeEraserIconGeometry.Geometry =
+                    Cursor_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                    Cursor_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("cursor", false));
+                    Pen_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                    Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", false));
+                    EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                    EraserByStrokes_Icon.Icon.Geometry =
                         Geometry.Parse(GetCorrectIcon("eraserStroke", false));
-                    CircleEraserIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    CircleEraserIconGeometry.Geometry =
+                    Eraser_Icon.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                    Eraser_Icon.Icon.Geometry =
                         Geometry.Parse(GetCorrectIcon("eraserCircle", false));
-                    LassoSelectIconGeometry.Brush = new SolidColorBrush(FloatBarForegroundColor);
-                    LassoSelectIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false));
+                    SymbolIconSelect.Icon.Brush = new SolidColorBrush(FloatBarForegroundColor);
+                    SymbolIconSelect.Icon.Geometry = Geometry.Parse(GetCorrectIcon("lassoSelect", false));
 
                     bool isDarkThemeForButtons = Settings.Appearance.Theme == 1 ||
                                                  (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
@@ -509,8 +509,8 @@ namespace Ink_Canvas
                     case "pen":
                     case "color":
                         {
-                            PenIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            PenIconGeometry.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
+                            Pen_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                            Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
                             BoardPen.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardPenGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
@@ -521,8 +521,8 @@ namespace Ink_Canvas
                         }
                     case "eraser":
                         {
-                            CircleEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            CircleEraserIconGeometry.Geometry =
+                            Eraser_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                            Eraser_Icon.Icon.Geometry =
                                 Geometry.Parse(GetCorrectIcon("eraserCircle", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -534,8 +534,8 @@ namespace Ink_Canvas
                         }
                     case "eraserByStrokes":
                         {
-                            StrokeEraserIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            StrokeEraserIconGeometry.Geometry =
+                            EraserByStrokes_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                            EraserByStrokes_Icon.Icon.Geometry =
                                 Geometry.Parse(GetCorrectIcon("eraserStroke", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -547,8 +547,8 @@ namespace Ink_Canvas
                         }
                     case "select":
                         {
-                            LassoSelectIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            LassoSelectIconGeometry.Geometry =
+                            SymbolIconSelect.Icon.Brush = new SolidColorBrush(highlightColor);
+                            SymbolIconSelect.Icon.Geometry =
                                 Geometry.Parse(GetCorrectIcon("lassoSelect", true));
                             BoardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
@@ -560,8 +560,8 @@ namespace Ink_Canvas
                         }
                     case "cursor":
                         {
-                            CursorIconGeometry.Brush = new SolidColorBrush(highlightColor);
-                            CursorIconGeometry.Geometry =
+                            Cursor_Icon.Icon.Brush = new SolidColorBrush(highlightColor);
+                            Cursor_Icon.Icon.Geometry =
                                 Geometry.Parse(GetCorrectIcon("cursor", true));
                             bool isDarkThemeForCursor = Settings.Appearance.Theme == 1 ||
                                                         (Settings.Appearance.Theme == 2 && !IsSystemThemeLight());
@@ -999,12 +999,11 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        internal void SymbolIconSelect_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconSelect_MouseUp(object sender, RoutedEventArgs e)
         {
 
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == SymbolIconSelect && lastBorderMouseDownObject != SymbolIconSelect) return;
 
             BtnSelect_Click(null, null);
 
@@ -1033,10 +1032,8 @@ namespace Ink_Canvas
             else if (sender is Border border)
             {
                 lastBorderMouseDownObject = sender;
-                // 对于快捷调色板的颜色球，不改变背景颜色，只添加透明度效果
                 if (border.Name?.StartsWith("QuickColor") == true)
                 {
-                    // 保存原始颜色并添加透明度
                     if (border.Background is SolidColorBrush originalColor)
                     {
                         border.Background = new SolidColorBrush(Color.FromArgb(180, originalColor.Color.R, originalColor.Color.G, originalColor.Color.B));
@@ -2146,7 +2143,6 @@ namespace Ink_Canvas
         {
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == Cursor_Icon && lastBorderMouseDownObject != Cursor_Icon) return;
 
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
@@ -2260,10 +2256,8 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         internal void PenIcon_Click(object sender, RoutedEventArgs e)
         {
-
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == Pen_Icon && lastBorderMouseDownObject != Pen_Icon) return;
 
             // 如果当前有选中的图片元素，先取消选中
             if (currentSelectedElement != null)
@@ -2617,11 +2611,6 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void EraserIconByStrokes_Click(object sender, RoutedEventArgs e)
         {
-
-            if (lastBorderMouseDownObject is Panel panel)
-                panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == EraserByStrokes_Icon && lastBorderMouseDownObject != EraserByStrokes_Icon) return;
-
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
 

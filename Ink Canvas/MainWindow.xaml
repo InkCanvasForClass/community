@@ -7351,52 +7351,16 @@
                             </Canvas>
                             <ikw:SimpleStackPanel Margin="2,0" Name="StackPanelFloatingBar" Orientation="Horizontal" Cursor="Arrow" HorizontalAlignment="Left">
                                 <!--<ikw:SimpleStackPanel Name="Cursor_Icon" MouseDown="Border_MouseDown" MouseUp="CursorIcon_Click"-->
-                                <ikw:SimpleStackPanel Name="Cursor_Icon"
-                                                     MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                                     MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                                     MouseUp="CursorIcon_Click"
-                                                     Background="Transparent" Orientation="Vertical"
-                                                     HorizontalAlignment="Center" Width="28" Margin="0,-2">
-                                    <Image RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0"
-                                           x:Name="CursorToolbarIconImage">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                        <GeometryDrawing x:Name="CursorIconGeometry" />
-                                                    </DrawingGroup>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                    <TextBlock x:Name="SelectionToolBarTextBlock" Text="{i18n:I18n Key=FloatingBar_Mouse}" Foreground="{DynamicResource FloatBarForeground}"
-                                               FontSize="8"
-                                               Margin="0,1,0,0" TextAlignment="Center"
-                                               Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Name="Pen_Icon"
-                                                     MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                                     MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                                     MouseUp="PenIcon_Click"
-                                                     Background="Transparent" Orientation="Vertical"
-                                                     HorizontalAlignment="Center" Width="28" Margin="0,-2">
-                                    <Image x:Name="PenIcon"
-                                           RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                        <GeometryDrawing x:Name="PenIconGeometry" Brush="{DynamicResource IconForeground}"
-                                                                         Geometry="" />
-                                                    </DrawingGroup>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                    <TextBlock x:Name="PenToolbarTextBlock" Text="{i18n:I18n Key=FloatingBar_Annotate}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8"
-                                               Margin="0,1,0,0" TextAlignment="Center"
-                                               Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                </ikw:SimpleStackPanel>
+                                <controls:ToolbarImageButton x:Name="Cursor_Icon"
+                                                             ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                             ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                             ButtonMouseUp="CursorIcon_Click"
+                                                             Label="{i18n:I18n Key=FloatingBar_Mouse}" />
+                                <controls:ToolbarImageButton x:Name="Pen_Icon"
+                                                             ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                             ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                             ButtonMouseUp="PenIcon_Click"
+                                                             Label="{i18n:I18n Key=FloatingBar_Annotate}" />
                                 
                                 <!-- 快捷调色盘 - 双行显示模式 -->
                                 <ikw:SimpleStackPanel Name="QuickColorPalettePanel" 
@@ -8798,77 +8762,21 @@
                                         </Grid>
                                     </ikw:SimpleStackPanel>
 
-                                    <ikw:SimpleStackPanel Name="Eraser_Icon"
-                                                         MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                                         MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                                         MouseUp="EraserIcon_Click"
-                                                         Background="Transparent" Orientation="Vertical"
-                                                         HorizontalAlignment="Center" Margin="0,-2" Width="28">
-                                        <Image x:Name="CircleEraserToolbarIconImage"
-                                               RenderOptions.BitmapScalingMode="HighQuality" Height="17"
-                                               Margin="0,3,0,0">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                            <GeometryDrawing x:Name="CircleEraserIconGeometry"
-                                                                             Geometry="" />
-                                                        </DrawingGroup>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                        <TextBlock x:Name="CircleEraserToolbarTextBlock" Text="{i18n:I18n Key=FloatingBar_AreaEraser}" Foreground="{DynamicResource FloatBarForeground}"
-                                                   FontSize="8" Margin="0,1,0,0" TextAlignment="Center"
-                                                   Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                    </ikw:SimpleStackPanel>
-                                    <ikw:SimpleStackPanel Name="EraserByStrokes_Icon"
-                                                         MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                                         MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                                         MouseUp="EraserIconByStrokes_Click"
-                                                         Background="Transparent" Orientation="Vertical" Width="28"
-                                                         Margin="0,-2" HorizontalAlignment="Center">
-                                        <Image x:Name="StrokeEraserToolbarIconImage"
-                                               RenderOptions.BitmapScalingMode="HighQuality" Height="17"
-                                               Margin="0,3,0,0">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                            <GeometryDrawing x:Name="StrokeEraserIconGeometry"
-                                                                             Geometry="" />
-                                                        </DrawingGroup>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                        <TextBlock x:Name="InkEraserToolbarTextBlock" Text="{i18n:I18n Key=FloatingBar_StrokeEraser}" Foreground="{DynamicResource FloatBarForeground}"
-                                                   FontSize="8" Margin="0,1,0,0" TextAlignment="Center"
-                                                   Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                    </ikw:SimpleStackPanel>
-                                    <ikw:SimpleStackPanel Name="SymbolIconSelect"
-                                                         MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                                         MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                                         MouseUp="SymbolIconSelect_MouseUp" Background="Transparent"
-                                                         Orientation="Vertical" Margin="0,-2" Width="28"
-                                                         HorizontalAlignment="Center">
-                                        <Image x:Name="LassoSelect" RenderOptions.BitmapScalingMode="HighQuality"
-                                               Height="17" Margin="0,3,0,0">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                            <GeometryDrawing x:Name="LassoSelectIconGeometry"
-                                                                             Geometry="" />
-                                                        </DrawingGroup>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                        <TextBlock x:Name="LassoToolToolbarTextBlock" Text="{i18n:I18n Key=FloatingBar_LassoSelect}" Foreground="{DynamicResource FloatBarForeground}"
-                                                   FontSize="8" Margin="0,1,0,0" TextAlignment="Center"
-                                                   Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                    </ikw:SimpleStackPanel>
+                                    <controls:ToolbarImageButton x:Name="Eraser_Icon"
+                                                         ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                         ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                         ButtonMouseUp="EraserIcon_Click"
+                                                         Label="{i18n:I18n Key=FloatingBar_AreaEraser}" />
+                                    <controls:ToolbarImageButton x:Name="EraserByStrokes_Icon"
+                                                         ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                         ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                         ButtonMouseUp="EraserIconByStrokes_Click"
+                                                         Label="{i18n:I18n Key=FloatingBar_StrokeEraser}" />
+                                    <controls:ToolbarImageButton x:Name="SymbolIconSelect"
+                                                         ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                         ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                         ButtonMouseUp="SymbolIconSelect_MouseUp"
+                                                         Label="{i18n:I18n Key=FloatingBar_LassoSelect}" />
                                     <ikw:SimpleStackPanel
                                         Name="ShapeDrawFloatingBarBtn"
                                         MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"

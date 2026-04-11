@@ -4730,54 +4730,54 @@ namespace Ink_Canvas
 
             if (Settings.Appearance.UseLegacyFloatingBarUI)
             {
-                CursorIconGeometry.Geometry = Geometry.Parse(
+                Cursor_Icon.Icon.Geometry = Geometry.Parse(
                     isCursorSolid
                         ? XamlGraphicsIconGeometries.LegacySolidCursorIcon
                         : XamlGraphicsIconGeometries.LegacyLinedCursorIcon);
 
-                PenIconGeometry.Geometry = Geometry.Parse(
+                Pen_Icon.Icon.Geometry = Geometry.Parse(
                     isPenSolid
                         ? XamlGraphicsIconGeometries.LegacySolidPenIcon
                         : XamlGraphicsIconGeometries.LegacyLinedPenIcon);
 
-                StrokeEraserIconGeometry.Geometry = Geometry.Parse(
+                EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(
                     isStrokeEraserSolid
                         ? XamlGraphicsIconGeometries.LegacySolidEraserStrokeIcon
                         : XamlGraphicsIconGeometries.LegacyLinedEraserStrokeIcon);
 
-                CircleEraserIconGeometry.Geometry = Geometry.Parse(
+                Eraser_Icon.Icon.Geometry = Geometry.Parse(
                     isCircleEraserSolid
                         ? XamlGraphicsIconGeometries.LegacySolidEraserCircleIcon
                         : XamlGraphicsIconGeometries.LegacyLinedEraserCircleIcon);
 
-                LassoSelectIconGeometry.Geometry = Geometry.Parse(
+                SymbolIconSelect.Icon.Geometry = Geometry.Parse(
                     isLassoSolid
                         ? XamlGraphicsIconGeometries.LegacySolidLassoSelectIcon
                         : XamlGraphicsIconGeometries.LegacyLinedLassoSelectIcon);
             }
             else
             {
-                CursorIconGeometry.Geometry = Geometry.Parse(
+                Cursor_Icon.Icon.Geometry = Geometry.Parse(
                     isCursorSolid
                         ? XamlGraphicsIconGeometries.SolidCursorIcon
                         : XamlGraphicsIconGeometries.LinedCursorIcon);
 
-                PenIconGeometry.Geometry = Geometry.Parse(
+                Pen_Icon.Icon.Geometry = Geometry.Parse(
                     isPenSolid
                         ? XamlGraphicsIconGeometries.SolidPenIcon
                         : XamlGraphicsIconGeometries.LinedPenIcon);
 
-                StrokeEraserIconGeometry.Geometry = Geometry.Parse(
+                EraserByStrokes_Icon.Icon.Geometry = Geometry.Parse(
                     isStrokeEraserSolid
                         ? XamlGraphicsIconGeometries.SolidEraserStrokeIcon
                         : XamlGraphicsIconGeometries.LinedEraserStrokeIcon);
 
-                CircleEraserIconGeometry.Geometry = Geometry.Parse(
+                Eraser_Icon.Icon.Geometry = Geometry.Parse(
                     isCircleEraserSolid
                         ? XamlGraphicsIconGeometries.SolidEraserCircleIcon
                         : XamlGraphicsIconGeometries.LinedEraserCircleIcon);
 
-                LassoSelectIconGeometry.Geometry = Geometry.Parse(
+                SymbolIconSelect.Icon.Geometry = Geometry.Parse(
                     isLassoSolid
                         ? XamlGraphicsIconGeometries.SolidLassoSelectIcon
                         : XamlGraphicsIconGeometries.LinedLassoSelectIcon);
