@@ -2217,14 +2217,9 @@
                                     <ikw:SimpleStackPanel Spacing="6">
                                         <TextBlock Text="{i18n:I18n Key=Advanced_TouchMultiplierHint}"
                                                    Foreground="#a1a1aa" TextWrapping="Wrap" Width="460" />
-                                        <ikw:SimpleStackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                                            <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsSpecialScreen" Label="{i18n:I18n Key=Advanced_SpecialScreenMode}" IsOn="True" Toggled="ToggleSwitchIsSpecialScreen_OnToggled"/>
-                                            <ui:ToggleSwitch OnContent="{i18n:I18n Key=Common_On}" OffContent="{i18n:I18n Key=Common_Off}" Name="ToggleSwitchIsEnableUriScheme"
-                                                             Visibility="Collapsed" IsOn="False"
-                                                             AutomationProperties.Name="{i18n:I18n Key=Advanced_UriSchemeName}"
-                                                             ToolTip="{i18n:I18n Key=Tooltip_IccProtocol}"
-                                                             Toggled="ToggleSwitchIsEnableUriScheme_Toggled" />
-                                        </ikw:SimpleStackPanel>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsSpecialScreen" Label="{i18n:I18n Key=Advanced_SpecialScreenMode}" IsOn="True" Toggled="ToggleSwitchIsSpecialScreen_OnToggled"/>
+                                        <controls:LabeledToggleSwitch x:Name="ToggleSwitchIsEnableUriScheme" Label="{i18n:I18n Key=Advanced_UriSchemeName}" IsOn="False" Toggled="ToggleSwitchIsEnableUriScheme_Toggled"
+                                                                      Hint="{i18n:I18n Key=Tooltip_IccProtocol}"/>
                                         <StackPanel Orientation="Vertical">
                                             <TextBlock Foreground="#fafafa" Text="{i18n:I18n Key=Advanced_TouchMultiplier}" VerticalAlignment="Center"
                                                        FontSize="14" Margin="0,0,16,0" />
