@@ -625,14 +625,8 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconUndo_MouseUp(object sender, RoutedEventArgs e)
         {
-            //if (lastBorderMouseDownObject != sender) return;
-
-            if (lastBorderMouseDownObject is Panel panel)
-                panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == SymbolIconUndo && lastBorderMouseDownObject != SymbolIconUndo) return;
-
             if (!BtnUndo.IsEnabled) return;
             BtnUndo_Click(BtnUndo, null);
             HideSubPanels();
@@ -643,14 +637,8 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        internal void SymbolIconRedo_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconRedo_MouseUp(object sender, RoutedEventArgs e)
         {
-            //if (lastBorderMouseDownObject != sender) return;
-
-            if (lastBorderMouseDownObject is Panel panel)
-                panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == SymbolIconRedo && lastBorderMouseDownObject != SymbolIconRedo) return;
-
             if (!BtnRedo.IsEnabled) return;
             BtnRedo_Click(BtnRedo, null);
             HideSubPanels();
@@ -670,12 +658,8 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        internal void ImageBlackboard_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void ImageBlackboard_MouseUp(object sender, RoutedEventArgs e)
         {
-
-            if (lastBorderMouseDownObject is Panel panel)
-                panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == WhiteboardFloatingBarBtn && lastBorderMouseDownObject != WhiteboardFloatingBarBtn) return;
 
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -948,13 +932,8 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
+        internal void SymbolIconDelete_MouseUp(object sender, RoutedEventArgs e)
         {
-
-            if (lastBorderMouseDownObject is Panel panel)
-                panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == SymbolIconDelete && lastBorderMouseDownObject != SymbolIconDelete) return;
-
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
                 inkCanvas.Strokes.Remove(inkCanvas.GetSelectedStrokes());
@@ -1026,8 +1005,7 @@ namespace Ink_Canvas
             if (sender is Panel panel)
             {
                 lastBorderMouseDownObject = sender;
-                if (panel == SymbolIconDelete) panel.Background = new SolidColorBrush(Color.FromArgb(28, 127, 29, 29));
-                else panel.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
+                panel.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
             }
             else if (sender is Border border)
             {
@@ -1724,13 +1702,8 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        private void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
+        private void SymbolIconTools_MouseUp(object sender, RoutedEventArgs e)
         {
-
-            if (lastBorderMouseDownObject is Panel panel)
-                panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == ToolsFloatingBarBtn && lastBorderMouseDownObject != ToolsFloatingBarBtn) return;
-
             if (BorderTools.Visibility == Visibility.Visible)
             {
                 AnimationsHelper.HideWithSlideAndFade(BorderTools);
@@ -1741,11 +1714,6 @@ namespace Ink_Canvas
                 HideSubPanels();
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(BorderTools);
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderTools);
-            }
-
-            if (sender == ToolsFloatingBarBtn)
-            {
-                lastBorderMouseDownObject = null;
             }
         }
 
@@ -2643,11 +2611,6 @@ namespace Ink_Canvas
         /// <param name="e">路由事件参数</param>
         private void CursorWithDelIcon_Click(object sender, RoutedEventArgs e)
         {
-
-            if (lastBorderMouseDownObject is Panel panel)
-                panel.Background = new SolidColorBrush(Colors.Transparent);
-            if (sender == CursorWithDelFloatingBarBtn && lastBorderMouseDownObject != CursorWithDelFloatingBarBtn) return;
-
             SymbolIconDelete_MouseUp(sender, null);
             CursorIcon_Click(null, null);
         }

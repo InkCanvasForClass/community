@@ -57,10 +57,20 @@ namespace Ink_Canvas.Controls
         {
             InitializeComponent();
             ButtonPanel.Background = Brushes.Transparent;
+            IsEnabledChanged += ToolbarImageButton_IsEnabledChanged;
+        }
+
+        private void ToolbarImageButton_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            var isEnabled = (bool)e.NewValue;
+            ButtonImage.Opacity = isEnabled ? 1.0 : 0.5;
+            LabelTextBlock.Opacity = isEnabled ? 1.0 : 0.5;
+            ButtonPanel.IsEnabled = isEnabled;
         }
 
         private void ButtonPanel_MouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (!IsEnabled) return;
             if (_lastPressedButton != null && _lastPressedButton != this)
             {
                 _lastPressedButton.Background = Brushes.Transparent;
@@ -72,11 +82,13 @@ namespace Ink_Canvas.Controls
 
         private void ButtonPanel_MouseLeave(object sender, MouseEventArgs e)
         {
+            if (!IsEnabled) return;
             ButtonMouseLeave?.Invoke(this, e);
         }
 
         private void ButtonPanel_MouseUp(object sender, MouseButtonEventArgs e)
         {
+            if (!IsEnabled) return;
             if (_lastPressedButton == this)
             {
                 ButtonPanel.Background = Brushes.Transparent;

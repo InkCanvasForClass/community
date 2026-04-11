@@ -7935,28 +7935,11 @@
                                     </Border>
                                 </ikw:SimpleStackPanel>
                                 
-                                <ikw:SimpleStackPanel Name="SymbolIconDelete"
-                                                     MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                                     MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                                     MouseUp="SymbolIconDelete_MouseUp"
-                                                     Background="Transparent" Orientation="Vertical"
-                                                     HorizontalAlignment="Center" Width="28" Margin="0,-2">
-                                    <Image RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                        <GeometryDrawing x:Name="ClearIconGeometry" Brush="{DynamicResource RedBrush}"
-                                                                         Geometry="F1 M24,24z M0,0z M8.53333,2.37333L7.92,4.21333 2.56,4.21333C2.4,4.21333 2.26667,4.27556 2.16,4.4 2.05333,4.50667 2,4.63111 2,4.77333L2,5.89333C2,6.03556 2.05333,6.16889 2.16,6.29333 2.26667,6.4 2.4,6.45333 2.56,6.45333L21.44,6.45333C21.6,6.45333 21.7333,6.4 21.84,6.29333 21.9467,6.16889 22,6.03556 22,5.89333L22,4.77333C22,4.63111 21.9467,4.50667 21.84,4.4 21.7333,4.27556 21.6,4.21333 21.44,4.21333L16.08,4.21333 15.4667,2.37333C15.4311,2.26667 15.36,2.17778 15.2533,2.10667 15.1644,2.03556 15.0578,2 14.9333,2L9.06667,2C8.94222,2 8.82667,2.03556 8.72,2.10667 8.63111,2.17778 8.56889,2.26667 8.53333,2.37333z M19.7867,8.10667L18.7467,20.9867C18.7111,21.2711 18.5867,21.5111 18.3733,21.7067 18.1778,21.9022 17.9378,22 17.6533,22L6.37333,22C6.08889,22 5.84,21.9022 5.62667,21.7067 5.41333,21.5111 5.28889,21.2711 5.25333,20.9867L4.21333,8.10667 19.7867,8.10667z M8.66667,12.56L8.66667,16.9867C8.66667,17.1467 8.72,17.28 8.82667,17.3867 8.93333,17.4933 9.06667,17.5467 9.22667,17.5467L9.78667,17.5467C9.92889,17.5467 10.0533,17.4933 10.16,17.3867 10.2844,17.28 10.3467,17.1467 10.3467,16.9867L10.3467,12.56C10.3467,12.4 10.2844,12.2667 10.16,12.16 10.0533,12.0533 9.92889,12 9.78667,12L9.22667,12C9.06667,12 8.93333,12.0533 8.82667,12.16 8.72,12.2667 8.66667,12.4 8.66667,12.56z M14.2133,12C14.0711,12 13.9467,12.0533 13.84,12.16 13.7333,12.2667 13.68,12.4 13.68,12.56L13.68,16.9867C13.68,17.1467 13.7333,17.28 13.84,17.3867 13.9467,17.4933 14.0711,17.5467 14.2133,17.5467L14.7733,17.5467C14.9333,17.5467 15.0667,17.4933 15.1733,17.3867 15.28,17.28 15.3333,17.1467 15.3333,16.9867L15.3333,12.56C15.3333,12.4 15.28,12.2667 15.1733,12.16 15.0667,12.0533 14.9333,12 14.7733,12L14.2133,12z" />
-                                                    </DrawingGroup>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                    <TextBlock x:Name="TrashBinToolbarTextBlock" Text="{i18n:I18n Key=FloatingBar_Clear}" Foreground="{DynamicResource RedBrush}"
-                                               FontWeight="Bold" FontSize="8" Margin="0,1,0,0" TextAlignment="Center"
-                                               Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                </ikw:SimpleStackPanel>
+                                <controls:ToolbarImageButton x:Name="SymbolIconDelete"
+                                                             ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                             ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                             ButtonMouseUp="SymbolIconDelete_MouseUp"
+                                                             Label="{i18n:I18n Key=FloatingBar_Clear}" />
                                 <ikw:SimpleStackPanel Name="StackPanelCanvasControls" Visibility="Visible"
                                                      Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
                                     <ikw:SimpleStackPanel Width="0"
@@ -8777,31 +8760,11 @@
                                                          ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
                                                          ButtonMouseUp="SymbolIconSelect_MouseUp"
                                                          Label="{i18n:I18n Key=FloatingBar_LassoSelect}" />
-                                    <ikw:SimpleStackPanel
-                                        Name="ShapeDrawFloatingBarBtn"
-                                        MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                        MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                        MouseUp="ImageDrawShape_MouseUp" Background="Transparent"
-                                        Orientation="Vertical" HorizontalAlignment="Center" Margin="0,-2"
-                                        Width="28">
-                                        <Image RenderOptions.BitmapScalingMode="HighQuality" Height="17"
-                                               Margin="0,3,0,0">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                            <GeometryDrawing x:Name="ShapesIconGeometry"
-                                                                             Brush="{DynamicResource IconForeground}"
-                                                                             Geometry="F1 M24,24z M0,0z M8.7269,2.9067C8.84872,2.70875 9.00852,2.57931 9.20647,2.5184 9.41966,2.44227 9.62541,2.43465 9.82337,2.49556 10.0365,2.55647 10.2039,2.67829 10.3257,2.86102L13.9118,8.13731C12.9068,8.47231 12.0084,8.99766 11.2165,9.71334 10.4247,10.4138 9.8157,11.2513 9.38933,12.2259 8.93251,13.2156 8.70413,14.2587 8.70413,15.3551L8.7269,15.9946 2.46851,15.9946C2.22487,15.9946 2.01158,15.9185 1.82885,15.7662 1.66135,15.614 1.55481,15.4236 1.50913,15.1952 1.47868,14.9668 1.5244,14.746 1.64622,14.5328L8.7269,2.9067z M16.3329,21.545C15.2061,21.545 14.1632,21.2633 13.2038,20.6999 12.275,20.1517 11.5288,19.4056 10.9654,18.4615 10.4172,17.5022 10.1431,16.4667 10.1431,15.3551 10.1431,14.2283 10.4172,13.1928 10.9654,12.2487 11.5288,11.3046 12.2825,10.5585 13.2266,10.0103 14.1707,9.44687 15.1986,9.16516 16.3102,9.16516 17.437,9.16516 18.4724,9.44687 19.4165,10.0103 20.3606,10.5585 21.1068,11.3046 21.6549,12.2487 22.2184,13.1928 22.5,14.2283 22.5,15.3551 22.5,16.4667 22.2184,17.5022 21.6549,18.4615 21.1068,19.4056 20.3683,20.1517 19.4395,20.6999 18.4801,21.2633 17.4445,21.545 16.3329,21.545z" />
-                                                        </DrawingGroup>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                        <TextBlock x:Name="ShapesToolbarTextBlock" Text="{i18n:I18n Key=FloatingBar_Geometry}" Foreground="{DynamicResource FloatBarForeground}"
-                                                   FontSize="8" Margin="0,1,0,0" TextAlignment="Center"
-                                                   Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                    </ikw:SimpleStackPanel>
+                                    <controls:ToolbarImageButton x:Name="ShapeDrawFloatingBarBtn"
+                                                         ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                         ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                         ButtonMouseUp="ImageDrawShape_MouseUp"
+                                                         Label="{i18n:I18n Key=FloatingBar_Geometry}" />
 
                                     <Grid Width="0">
                                         <Border x:Name="BorderDrawShape" Background="{DynamicResource FloatBarBackground}" Opacity="1"
@@ -9049,88 +9012,23 @@
                                             </ikw:SimpleStackPanel>
                                         </Border>
                                     </Grid>
-                                    <ikw:SimpleStackPanel
-                                        Name="SymbolIconUndo"
-                                        MouseUp="SymbolIconUndo_MouseUp"
-                                        MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                        MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                        Background="Transparent" Orientation="Vertical"
-                                        HorizontalAlignment="Center" Margin="0,-2"
-                                        IsEnabled="{Binding ElementName=BtnUndo, Path=IsEnabled}"
-                                        Width="28">
-                                        <Image RenderOptions.BitmapScalingMode="HighQuality" Height="17"
-                                               Margin="0,3,0,0"
-                                               Opacity="{Binding ElementName=BtnUndo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                            <GeometryDrawing x:Name="UndoIconGeometry" Brush="{DynamicResource IconForeground}"
-                                                                             Geometry="F1 M24,24z M0,0z M10.3344,5.02734L10.3605,8.62849C12.2431,8.87029 14.0305,9.44026 15.7232,10.3384 17.4676,11.2538 18.9187,12.4196 20.0759,13.8359 21.3367,15.3731 22.1398,17.0657 22.4852,18.9138 22.5197,19.1211 22.4938,19.3197 22.4075,19.5097 22.3211,19.6997 22.2003,19.8292 22.0448,19.8983 21.8894,19.9501 21.7423,19.9069 21.6042,19.7687 20.7579,18.8361 19.6268,17.9984 18.2105,17.2557 16.9324,16.5821 15.5591,16.0553 14.091,15.6754 12.7093,15.3126 11.4659,15.1313 10.3605,15.1313L10.3344,18.862C10.3344,19.2938 10.2395,19.6047 10.0495,19.7947 9.8941,19.9501 9.69547,20.0106 9.45367,19.976 9.21187,19.9242 8.99586,19.8119 8.80587,19.6392 8.14955,18.9829 6.90606,17.7739 5.07526,16.0121 3.46899,14.475 2.41544,13.4559 1.91456,12.9551 1.63821,12.6787 1.5,12.3678 1.5,12.0224 1.51727,11.6769 1.67272,11.3574 1.96634,11.0638 4.02168,9.00847 6.3103,6.73724 8.83197,4.25011 9.00468,4.07739 9.20331,3.99967 9.42784,4.01694 9.66965,4.01694 9.87683,4.11194 10.0495,4.30193 10.2395,4.47464 10.3344,4.71645 10.3344,5.02734z" />
-                                                        </DrawingGroup>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                        <TextBlock x:Name="UndoToolbarTextBlock" Text="{i18n:I18n Key=Board_Undo}"
-                                                   Opacity="{Binding ElementName=BtnUndo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}"
-                                                   Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,1,0,0"
-                                                   TextAlignment="Center"
-                                                   Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                    </ikw:SimpleStackPanel>
-                                    <ikw:SimpleStackPanel
-                                        Name="SymbolIconRedo"
-                                        MouseUp="SymbolIconRedo_MouseUp"
-                                        MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                        MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                        Background="Transparent" Orientation="Vertical"
-                                        HorizontalAlignment="Center"
-                                        IsEnabled="{Binding ElementName=BtnRedo, Path=IsEnabled}"
-                                        Width="28" Margin="0,-2">
-                                        <Image RenderOptions.BitmapScalingMode="HighQuality" Height="17"
-                                               Margin="0,3,0,0"
-                                               Opacity="{Binding ElementName=BtnRedo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                            <GeometryDrawing x:Name="RedoIconGeometry" Brush="{DynamicResource IconForeground}"
-                                                                             Geometry="F1 M24,24z M0,0z M13.6656,5.02734L13.6395,8.62849C11.7569,8.87029 9.96948,9.44026 8.27685,10.3384 6.5324,11.2538 5.08134,12.4196 3.92413,13.8359 2.6633,15.3731 1.86023,17.0657 1.5148,18.9138 1.48026,19.1211 1.50619,19.3197 1.59255,19.5097 1.6789,19.6997 1.79974,19.8292 1.95518,19.8983 2.11063,19.9501 2.25766,19.9069 2.39583,19.7687 3.24215,18.8361 4.37323,17.9984 5.78951,17.2557 7.06761,16.5821 8.44089,16.0553 9.90899,15.6754 11.2907,15.3126 12.5341,15.1313 13.6395,15.1313L13.6656,18.862C13.6656,19.2938 13.7605,19.6047 13.9505,19.7947 14.1059,19.9501 14.3045,20.0106 14.5463,19.976 14.7881,19.9242 15.0041,19.8119 15.1941,19.6392 15.8505,18.9829 17.0939,17.7739 18.9247,16.0121 20.531,14.475 21.5846,13.4559 22.0854,12.9551 22.3618,12.6787 22.5,12.3678 22.5,12.0224 22.4827,11.6769 22.3273,11.3574 22.0337,11.0638 19.9783,9.00847 17.6897,6.73724 15.168,4.25011 14.9953,4.07739 14.7967,3.99967 14.5722,4.01694 14.3304,4.01694 14.1232,4.11194 13.9505,4.30193 13.7605,4.47464 13.6656,4.71645 13.6656,5.02734z" />
-                                                        </DrawingGroup>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                        <TextBlock x:Name="RedoToolbarTextBlock" Text="{i18n:I18n Key=Board_Redo}"
-                                                   Opacity="{Binding ElementName=BtnRedo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}"
-                                                   Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,1,0,0"
-                                                   TextAlignment="Center"
-                                                   Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                    </ikw:SimpleStackPanel>
-                                    <ikw:SimpleStackPanel
-                                        Name="CursorWithDelFloatingBarBtn"
-                                        MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                        MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                        MouseUp="CursorWithDelIcon_Click"
-                                        Background="Transparent" Orientation="Vertical"
-                                        HorizontalAlignment="Center" Width="28" Margin="0,-2">
-                                        <Image RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="17"
-                                               Margin="0,3,0,0">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                            <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                             Geometry="F0 M24,24z M0,0z M11.5007,11.0214C11.5007,10.674,11.7823,10.3923,12.1298,10.3923L14.2967,10.3923 14.2967,9.90299C14.2967,9.41878 14.5325,8.98723 14.8305,8.68924 15.1285,8.39124 15.56,8.15547 16.0442,8.15547L18.281,8.15547C18.7652,8.15547 19.1968,8.39124 19.4948,8.68924 19.7928,8.98723 20.0286,9.41878 20.0286,9.90299L20.0286,10.3923 22.1955,10.3923C22.5429,10.3923 22.8246,10.674 22.8246,11.0214 22.8246,11.3688 22.5429,11.6505 22.1955,11.6505L21.7062,11.6505 21.7062,18.8503C21.7062,19.3345 21.4704,19.766 21.1724,20.064 20.8744,20.362 20.4429,20.5978 19.9587,20.5978L14.3666,20.5978C13.8824,20.5978 13.4508,20.362 13.1528,20.064 12.8549,19.766 12.6191,19.3345 12.6191,18.8503L12.6191,11.6505 12.1298,11.6505C11.7823,11.6505,11.5007,11.3688,11.5007,11.0214z M14.0425,19.1743C13.9211,19.0529,13.8773,18.9253,13.8773,18.8503L13.8773,11.6505 20.448,11.6505 20.448,18.8503C20.448,18.9253 20.4041,19.0529 20.2827,19.1743 20.1613,19.2958 20.0337,19.3396 19.9587,19.3396L14.3666,19.3396C14.2916,19.3396,14.1639,19.2958,14.0425,19.1743z M15.5549,9.90299C15.5549,9.82799 15.5987,9.70034 15.7202,9.57893 15.8416,9.45752 15.9692,9.41368 16.0442,9.41368L18.281,9.41368C18.356,9.41368 18.4837,9.45752 18.6051,9.57893 18.7265,9.70034 18.7703,9.82799 18.7703,9.90299L18.7703,10.3923 15.5549,10.3923 15.5549,9.90299z M18.9101,13.8174C18.9101,13.47 18.6285,13.1883 18.281,13.1883 17.9336,13.1883 17.6519,13.47 17.6519,13.8174L17.6519,17.1727C17.6519,17.5201 17.9336,17.8018 18.281,17.8018 18.6285,17.8018 18.9101,17.5201 18.9101,17.1727L18.9101,13.8174z M16.6733,13.8174C16.6733,13.47 16.3917,13.1883 16.0442,13.1883 15.6968,13.1883 15.4151,13.47 15.4151,13.8174L15.4151,17.1727C15.4151,17.5201 15.6968,17.8018 16.0442,17.8018 16.3917,17.8018 16.6733,17.5201 16.6733,17.1727L16.6733,13.8174z M1.32567,3.55246C1.47265,3.40549,1.69379,3.36174,1.88566,3.44167L11.8342,7.58639C12.0311,7.66845 12.1567,7.86389 12.1495,8.07716 12.1424,8.29043 12.0039,8.47698 11.8018,8.54561L8.25047,9.75183 11.4309,12.9323C11.6313,13.1326 11.6313,13.4574 11.4309,13.6577 11.2306,13.8581 10.9058,13.8581 10.7055,13.6577L7.52503,10.4773 6.31881,14.0286C6.25019,14.2307 6.06364,14.3692 5.85037,14.3763 5.6371,14.3835 5.44166,14.2579 5.3596,14.0609L1.21488,4.11245C1.13494,3.92058,1.1787,3.69944,1.32567,3.55246z" />
-                                                        </DrawingGroup>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                        <TextBlock x:Name="ClearAndMouseToolbarTextBlock" Text="{i18n:I18n Key=FloatingBar_ClearAndMouse}" Foreground="{DynamicResource FloatBarForeground}"
-                                                   FontSize="8" Margin="0,1,0,0" TextAlignment="Center"
-                                                   Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                    </ikw:SimpleStackPanel>
+                                    <controls:ToolbarImageButton x:Name="SymbolIconUndo"
+                                                         ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                         ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                         ButtonMouseUp="SymbolIconUndo_MouseUp"
+                                                         Label="{i18n:I18n Key=Board_Undo}"
+                                                         IsEnabled="{Binding ElementName=BtnUndo, Path=IsEnabled}" />
+                                    <controls:ToolbarImageButton x:Name="SymbolIconRedo"
+                                                         ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                         ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                         ButtonMouseUp="SymbolIconRedo_MouseUp"
+                                                         Label="{i18n:I18n Key=Board_Redo}"
+                                                         IsEnabled="{Binding ElementName=BtnRedo, Path=IsEnabled}" />
+                                    <controls:ToolbarImageButton x:Name="CursorWithDelFloatingBarBtn"
+                                                         ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                         ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                         ButtonMouseUp="CursorWithDelIcon_Click"
+                                                         Label="{i18n:I18n Key=FloatingBar_ClearAndMouse}" />
                                 </ikw:SimpleStackPanel>
                                 <Grid Width="0">
                                     <Grid x:Name="BackgroundPaletteGrid" Margin="-203,-128,83,37">
@@ -9271,55 +9169,16 @@
                                 <ikw:SimpleStackPanel
                                     Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
                                     <Border Margin="2,0,2,0" BorderBrush="#71717a" BorderThickness="1,0,0,0" />
-                                    <ikw:SimpleStackPanel
-                                        Name="WhiteboardFloatingBarBtn"
-                                        MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                        MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                        MouseUp="ImageBlackboard_MouseUp" Background="Transparent"
-                                        Orientation="Vertical" HorizontalAlignment="Center" Width="28"
-                                        Margin="0,-2">
-                                        <Image RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="17"
-                                               Margin="0,3,0,0">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                            <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                             Geometry="F0 M24,24z M0,0z M5,5.875C4.70163,5.875 4.41548,5.99353 4.2045,6.2045 3.99353,6.41548 3.875,6.70163 3.875,7L3.875,17C3.875,17.2984 3.99353,17.5845 4.2045,17.7955 4.41548,18.0065 4.70163,18.125 5,18.125L8,18.125C8.48325,18.125 8.875,18.5168 8.875,19 8.875,19.4832 8.48325,19.875 8,19.875L5,19.875C4.2375,19.875 3.50623,19.5721 2.96707,19.0329 2.4279,18.4938 2.125,17.7625 2.125,17L2.125,7C2.125,6.2375 2.4279,5.50624 2.96707,4.96707 3.50624,4.4279 4.2375,4.125 5,4.125L19,4.125C19.7625,4.125 20.4938,4.4279 21.0329,4.96707 21.5721,5.50623 21.875,6.2375 21.875,7L21.875,18C21.875,18.4973 21.6775,18.9742 21.3258,19.3258 20.9742,19.6775 20.4973,19.875 20,19.875 19.5168,19.875 19.125,19.4832 19.125,19 19.125,18.5168 19.5168,18.125 20,18.125 20.0332,18.125 20.0649,18.1118 20.0884,18.0884 20.1118,18.0649 20.125,18.0332 20.125,18L20.125,7C20.125,6.70163 20.0065,6.41548 19.7955,6.2045 19.5845,5.99353 19.2984,5.875 19,5.875L5,5.875z M10.6742,15.6742C11.0258,15.3225,11.5027,15.125,12,15.125L16,15.125C16.4973,15.125 16.9742,15.3225 17.3258,15.6742 17.6775,16.0258 17.875,16.5027 17.875,17L17.875,18C17.875,18.4973 17.6775,18.9742 17.3258,19.3258 16.9742,19.6775 16.4973,19.875 16,19.875L12,19.875C11.5027,19.875 11.0258,19.6775 10.6742,19.3258 10.3225,18.9742 10.125,18.4973 10.125,18L10.125,17C10.125,16.5027,10.3225,16.0258,10.6742,15.6742z" />
-                                                        </DrawingGroup>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                        <TextBlock x:Name="WhiteboardToolbarTextBlock" Text="{i18n:I18n Key=FloatingBar_Whiteboard}" Foreground="{DynamicResource FloatBarForeground}"
-                                                   FontSize="8" Margin="0,1,0,0" TextAlignment="Center"
-                                                   Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                    </ikw:SimpleStackPanel>
-                                    <ikw:SimpleStackPanel
-                                        Name="ToolsFloatingBarBtn"
-                                        MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
-                                        MouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
-                                        MouseUp="SymbolIconTools_MouseUp" Background="Transparent"
-                                        Orientation="Vertical" HorizontalAlignment="Center" Width="28"
-                                        Margin="0,-2">
-                                        <Image RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="17"
-                                               Margin="0,3,0,0">
-                                            <Image.Source>
-                                                <DrawingImage>
-                                                    <DrawingImage.Drawing>
-                                                        <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                            <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                             Geometry="F0 M24,24z M0,0z M4.41721,4.29873C4.35178,4.29873,4.29873,4.35178,4.29873,4.41721L4.29873,9.15646C4.29873,9.22189,4.35178,9.27494,4.41721,9.27494L9.15646,9.27494C9.22189,9.27494,9.27494,9.22189,9.27494,9.15646L9.27494,4.41721C9.27494,4.35178,9.22189,4.29873,9.15646,4.29873L4.41721,4.29873z M2.64,4.41721C2.64,3.43569,3.43569,2.64,4.41721,2.64L9.15646,2.64C10.138,2.64,10.9337,3.43569,10.9337,4.41721L10.9337,9.15646C10.9337,10.138,10.138,10.9337,9.15646,10.9337L4.41721,10.9337C3.43569,10.9337,2.64,10.138,2.64,9.15646L2.64,4.41721z M14.8435,4.29873C14.7781,4.29873,14.7251,4.35178,14.7251,4.41721L14.7251,9.15646C14.7251,9.22189,14.7781,9.27494,14.8435,9.27494L19.5828,9.27494C19.6482,9.27494,19.7013,9.22189,19.7013,9.15646L19.7013,4.41721C19.7013,4.35178,19.6482,4.29873,19.5828,4.29873L14.8435,4.29873z M13.0663,4.41721C13.0663,3.43569,13.862,2.64,14.8435,2.64L19.5828,2.64C20.5643,2.64,21.36,3.43569,21.36,4.41721L21.36,9.15646C21.36,10.138,20.5643,10.9337,19.5828,10.9337L14.8435,10.9337C13.862,10.9337,13.0663,10.138,13.0663,9.15646L13.0663,4.41721z M14.8435,14.7251C14.7781,14.7251,14.7251,14.7781,14.7251,14.8435L14.7251,19.5828C14.7251,19.6482,14.7781,19.7013,14.8435,19.7013L19.5828,19.7013C19.6482,19.7013,19.7013,19.6482,19.7013,19.5828L19.7013,14.8435C19.7013,14.7781,19.6482,14.7251,19.5828,14.7251L14.8435,14.7251z M13.0663,14.8435C13.0663,13.862,13.862,13.0663,14.8435,13.0663L19.5828,13.0663C20.5643,13.0663,21.36,13.862,21.36,14.8435L21.36,19.5828C21.36,20.5643,20.5643,21.36,19.5828,21.36L14.8435,21.36C13.862,21.36,13.0663,20.5643,13.0663,19.5828L13.0663,14.8435z M4.41721,14.7251C4.35178,14.7251,4.29873,14.7781,4.29873,14.8435L4.29873,19.5828C4.29873,19.6482,4.35178,19.7013,4.41721,19.7013L9.15646,19.7013C9.22189,19.7013,9.27494,19.6482,9.27494,19.5828L9.27494,14.8435C9.27494,14.7781,9.22189,14.7251,9.15646,14.7251L4.41721,14.7251z M2.64,14.8435C2.64,13.862,3.43569,13.0663,4.41721,13.0663L9.15646,13.0663C10.138,13.0663,10.9337,13.862,10.9337,14.8435L10.9337,19.5828C10.9337,20.5643,10.138,21.36,9.15646,21.36L4.41721,21.36C3.43569,21.36,2.64,20.5643,2.64,19.5828L2.64,14.8435z" />
-                                                        </DrawingGroup>
-                                                    </DrawingImage.Drawing>
-                                                </DrawingImage>
-                                            </Image.Source>
-                                        </Image>
-                                        <TextBlock x:Name="ToolsToolbarTextBlock" Text="{i18n:I18n Key=Board_Tools}" Foreground="{DynamicResource FloatBarForeground}"
-                                                   FontSize="8"
-                                                   Margin="0,1,0,0" TextAlignment="Center"
-                                                   Style="{StaticResource AutoFitMainToolbarLabel8}" />
-                                    </ikw:SimpleStackPanel>
+                                    <controls:ToolbarImageButton x:Name="WhiteboardFloatingBarBtn"
+                                                         ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                         ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                         ButtonMouseUp="ImageBlackboard_MouseUp"
+                                                         Label="{i18n:I18n Key=FloatingBar_Whiteboard}" />
+                                    <controls:ToolbarImageButton x:Name="ToolsFloatingBarBtn"
+                                                         ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
+                                                         ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
+                                                         ButtonMouseUp="SymbolIconTools_MouseUp"
+                                                         Label="{i18n:I18n Key=Board_Tools}" />
                                     <ikw:SimpleStackPanel
                                         x:Name="Fold_Icon"
                                         MouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
