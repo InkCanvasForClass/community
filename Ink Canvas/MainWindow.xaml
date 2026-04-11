@@ -7939,6 +7939,7 @@
                                                              ButtonMouseDown="FloatingBarToolBtnMouseDownFeedback_Panel"
                                                              ButtonMouseLeave="FloatingBarToolBtnMouseLeaveFeedback_Panel"
                                                              ButtonMouseUp="SymbolIconDelete_MouseUp"
+                                                             IconBrush="{DynamicResource RedBrush}"
                                                              Label="{i18n:I18n Key=FloatingBar_Clear}" />
                                 <ikw:SimpleStackPanel Name="StackPanelCanvasControls" Visibility="Visible"
                                                      Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">

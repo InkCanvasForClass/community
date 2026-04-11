@@ -43,6 +43,16 @@ namespace Ink_Canvas.Controls
 
         public GeometryDrawing GeometryDrawing => IconGeometryInternal;
 
+        public static readonly DependencyProperty IconBrushProperty = DependencyProperty.Register(
+            nameof(IconBrush), typeof(Brush), typeof(ToolbarImageButton),
+            new PropertyMetadata(null, (d, e) => ((ToolbarImageButton)d).IconGeometryInternal.Brush = (Brush)e.NewValue));
+
+        public Brush IconBrush
+        {
+            get => (Brush)GetValue(IconBrushProperty);
+            set => SetValue(IconBrushProperty, value);
+        }
+
         public new Brush Background
         {
             get => ButtonPanel.Background;

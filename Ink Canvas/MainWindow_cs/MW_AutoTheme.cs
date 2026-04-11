@@ -173,8 +173,6 @@ namespace Ink_Canvas
 
                 SetAllFloatingBarButtonsToColor(FloatBarForegroundColor);
 
-                SymbolIconDelete.Icon.Brush = new SolidColorBrush(Color.FromRgb(239, 68, 68));
-
                 switch (_currentToolMode)
                 {
                     case "cursor":
