@@ -64,8 +64,8 @@ namespace Ink_Canvas
         /// 处理折叠浮动栏的鼠标点击事件。
         /// </summary>
         /// <param name="sender">事件发送者。</param>
-        /// <param name="e">鼠标按钮事件参数。</param>
-        public async void FoldFloatingBar_MouseUp(object sender, MouseButtonEventArgs e)
+        /// <param name="e">路由事件参数。</param>
+        public async void FoldFloatingBar_MouseUp(object sender, RoutedEventArgs e)
         {
             await FoldFloatingBar(sender);
         }
@@ -91,19 +91,6 @@ namespace Ink_Canvas
         /// </remarks>
         public async Task FoldFloatingBar(object sender, bool isAutoFoldCommand = false)
         {
-            var isShouldRejectAction = false;
-
-            await Dispatcher.InvokeAsync(() =>
-            {
-                if (lastBorderMouseDownObject != null && lastBorderMouseDownObject is Panel)
-                    ((Panel)lastBorderMouseDownObject).Background = new SolidColorBrush(Colors.Transparent);
-                if (sender == Fold_Icon && lastBorderMouseDownObject != Fold_Icon) isShouldRejectAction = true;
-            });
-
-            if (isShouldRejectAction)
-            {
-                return;
-            }
 
             // FloatingBarIcons_MouseUp_New(sender);
             if (sender == null)
@@ -338,8 +325,8 @@ namespace Ink_Canvas
         /// 处理展开浮动栏的鼠标点击事件。
         /// </summary>
         /// <param name="sender">事件发送者。</param>
-        /// <param name="e">鼠标按钮事件参数。</param>
-        public async void UnFoldFloatingBar_MouseUp(object sender, MouseButtonEventArgs e)
+        /// <param name="e">路由事件参数。</param>
+        public async void UnFoldFloatingBar_MouseUp(object sender, RoutedEventArgs e)
         {
             await UnFoldFloatingBar(sender);
         }
