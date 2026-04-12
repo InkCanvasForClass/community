@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Brushes = System.Windows.Media.Brushes;
@@ -37,6 +38,7 @@ namespace Ink_Canvas
         private Bitmap _capturedCameraImage = null;
         private DateTime _lastBlankClickTime = DateTime.MinValue;
         private WpfPoint _lastBlankClickPosition;
+        private readonly BitmapSource _inkOverlayPreview;
 
         private const int DoubleClickTimeThresholdMs = 300; // 双击判定时间阈值（常见范围 200~500ms）
         private const double DoubleClickDistanceThresholdPx = 12; // 双击判定位置阈值（像素）
@@ -55,9 +57,11 @@ namespace Ink_Canvas
         public Bitmap CameraImage { get; private set; }
         public System.Windows.Media.Imaging.BitmapSource CameraBitmapSource { get; private set; }
         public bool ShouldAddToWhiteboard { get; private set; }
+        public bool IncludeInkInScreenshot { get; private set; }
 
-        public ScreenshotSelectorWindow()
+        public ScreenshotSelectorWindow(BitmapSource inkOverlayPreview = null)
         {
+            _inkOverlayPreview = inkOverlayPreview;
             InitializeComponent();
 
             // 设置窗口覆盖所有屏幕
@@ -71,6 +75,7 @@ namespace Ink_Canvas
 
             // 初始化按钮状态 
             InitializeButtonStates();
+            InitializeInkPreview();
 
             // 初始化摄像头服务
             InitializeCameraService();
@@ -104,6 +109,44 @@ namespace Ink_Canvas
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             CameraModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+        }
+
+        private void InitializeInkPreview()
+        {
+            IncludeInkInScreenshot = false;
+            IncludeInkCheckBox.IsChecked = false;
+
+            if (_inkOverlayPreview != null)
+            {
+                InkPreviewImage.Source = _inkOverlayPreview;
+            }
+            else
+            {
+                IncludeInkCheckBox.IsEnabled = false;
+                IncludeInkCheckBox.Opacity = 0.6;
+                IncludeInkCheckBox.ToolTip = "当前无可预览墨迹";
+            }
+
+            UpdateInkPreviewVisibility();
+        }
+
+        private void IncludeInkCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            IncludeInkInScreenshot = true;
+            UpdateInkPreviewVisibility();
+        }
+
+        private void IncludeInkCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            IncludeInkInScreenshot = false;
+            UpdateInkPreviewVisibility();
+        }
+
+        private void UpdateInkPreviewVisibility()
+        {
+            InkPreviewImage.Visibility = IncludeInkInScreenshot && _inkOverlayPreview != null
+                ? Visibility.Visible
+                : Visibility.Collapsed;
         }
 
         private void InitializeCameraService()
@@ -370,6 +413,7 @@ namespace Ink_Canvas
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            IncludeInkCheckBox.IsEnabled = _inkOverlayPreview != null;
             HintText.Text = "拖拽鼠标选择矩形区域";
             HintTextBorder.Visibility = Visibility.Visible;
         }
@@ -383,6 +427,7 @@ namespace Ink_Canvas
             FreehandModeButton.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235)); // 蓝色
             RectangleModeButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
             FullScreenButton.Background = new SolidColorBrush(Color.FromRgb(107, 114, 128)); // 灰色
+            IncludeInkCheckBox.IsEnabled = _inkOverlayPreview != null;
             HintText.Text = "按住鼠标左键自由绘制，松开后可继续调整或重新绘制，确认后再截图";
             HintTextBorder.Visibility = Visibility.Visible;
         }
@@ -402,6 +447,7 @@ namespace Ink_Canvas
 
             // 隐藏摄像头预览
             CameraPreviewBorder.Visibility = Visibility.Collapsed;
+            IncludeInkCheckBox.IsEnabled = _inkOverlayPreview != null;
 
             // 直接执行全屏截图
             PerformFullScreenCapture();
@@ -426,6 +472,8 @@ namespace Ink_Canvas
                 CameraPreviewBorder.Visibility = Visibility.Visible;
                 HintText.Text = "摄像头预览模式，点击确认截图按钮进行截图";
                 HintTextBorder.Visibility = Visibility.Visible;
+                IncludeInkCheckBox.IsEnabled = false;
+                IncludeInkCheckBox.IsChecked = false;
 
                 // 启动摄像头预览
                 if (_cameraService != null && _cameraService.HasAvailableCameras())
@@ -491,6 +539,7 @@ namespace Ink_Canvas
         private void ConfirmButton_Click(object sender, RoutedEventArgs e)
         {
             ShouldAddToWhiteboard = false;
+            IncludeInkInScreenshot = IncludeInkCheckBox.IsChecked == true;
 
             // 在自由绘制模式下，按当前自由选区执行确认
             if (_isFreehandMode)
@@ -512,6 +561,7 @@ namespace Ink_Canvas
         private void AddToWhiteboardButton_Click(object sender, RoutedEventArgs e)
         {
             ShouldAddToWhiteboard = true;
+            IncludeInkInScreenshot = IncludeInkCheckBox.IsChecked == true;
 
             // 在自由绘制模式下，按当前自由选区执行确认
             if (_isFreehandMode)
@@ -578,10 +628,12 @@ namespace Ink_Canvas
             if (hitElement != null && (
                 hitElement is Ellipse ||
                 hitElement is System.Windows.Controls.Button ||
+                hitElement is System.Windows.Controls.CheckBox ||
                 hitElement is Border ||
                 hitElement is TextBlock ||
                 hitElement is StackPanel ||
                 hitElement is Separator ||
+                hitElement.Name == "ToolbarDividerRectangle" ||
                 hitElement.Name == "SizeInfoBorder" ||
                 hitElement.Name == "HintText" ||
                 hitElement.Name == "AdjustModeHint" ||
@@ -669,10 +721,12 @@ namespace Ink_Canvas
             if (hitElement != null && (
                 hitElement is Ellipse ||
                 hitElement is System.Windows.Controls.Button ||
+                hitElement is System.Windows.Controls.CheckBox ||
                 hitElement is Border ||
                 hitElement is TextBlock ||
                 hitElement is StackPanel ||
                 hitElement is Separator ||
+                hitElement.Name == "ToolbarDividerRectangle" ||
                 hitElement.Name == "SizeInfoBorder" ||
                 hitElement.Name == "HintText" ||
                 hitElement.Name == "AdjustModeHint"))
@@ -1178,6 +1232,7 @@ namespace Ink_Canvas
             SelectedPath = null;
             CameraImage = null;
             ShouldAddToWhiteboard = false;
+            IncludeInkInScreenshot = false;
             DialogResult = false;
             Close();
         }

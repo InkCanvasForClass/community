@@ -554,37 +554,22 @@ namespace Ink_Canvas
                 BoardHighlightPenTabButton.Background = new SolidColorBrush(Colors.Transparent);
                 BoardHighlightPenTabButtonIndicator.Visibility = Visibility.Collapsed;
 
-                // PenPalette.Margin = new Thickness(-160, -200, -33, 32);
+                // 动态计算面板位置，使其对齐笔按钮（考虑快捷调色盘等动态宽度）
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    var marginAnimation = new ThicknessAnimation
-                    {
-                        Duration = TimeSpan.FromSeconds(0.1),
-                        From = PenPalette.Margin,
-                        To = new Thickness(-160, -200, -33, 32),
-                        EasingFunction = new CubicEase()
-                    };
-                    PenPalette.BeginAnimation(MarginProperty, marginAnimation);
+                    PenPalette.BeginAnimation(MarginProperty, null);
+                    var currentMargin = PenPalette.Margin;
+                    // 先设置正确的Top/Bottom，保持当前Left/Right
+                    PenPalette.Margin = new Thickness(currentMargin.Left, -200, currentMargin.Right, 32);
+                    UpdatePenPalettePosition();
                 });
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    var marginAnimation = new ThicknessAnimation
-                    {
-                        Duration = TimeSpan.FromSeconds(0.1),
-                        From = PenPalette.Margin,
-                        To = new Thickness(-160, -200, -33, 50),
-                        EasingFunction = new CubicEase()
-                    };
-                    BoardPenPaletteGrid.BeginAnimation(MarginProperty, marginAnimation);
+                    BoardPenPaletteGrid.BeginAnimation(MarginProperty, null);
+                    var currentMargin = BoardPenPaletteGrid.Margin;
+                    BoardPenPaletteGrid.Margin = new Thickness(currentMargin.Left, -200, currentMargin.Right, 50);
                 });
-
-
-                await Task.Delay(100);
-
-                await Dispatcher.InvokeAsync(() => { PenPalette.Margin = new Thickness(-160, -200, -33, 32); });
-
-                await Dispatcher.InvokeAsync(() => { BoardPenPaletteGrid.Margin = new Thickness(-160, -200, -33, 50); });
             }
             else if (penType == 1)
             {
@@ -622,36 +607,22 @@ namespace Ink_Canvas
                 BoardHighlightPenTabButton.Background = new SolidColorBrush(Color.FromArgb(72, 219, 234, 254));
                 BoardHighlightPenTabButtonIndicator.Visibility = Visibility.Visible;
 
-                // PenPalette.Margin = new Thickness(-160, -157, -33, 32);
+                // 动态计算面板位置，使其对齐笔按钮（考虑快捷调色盘等动态宽度）
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    var marginAnimation = new ThicknessAnimation
-                    {
-                        Duration = TimeSpan.FromSeconds(0.1),
-                        From = PenPalette.Margin,
-                        To = new Thickness(-160, -157, -33, 32),
-                        EasingFunction = new CubicEase()
-                    };
-                    PenPalette.BeginAnimation(MarginProperty, marginAnimation);
+                    PenPalette.BeginAnimation(MarginProperty, null);
+                    var currentMargin = PenPalette.Margin;
+                    // 荧光笔模式面板稍小，使用不同的Top/Bottom
+                    PenPalette.Margin = new Thickness(currentMargin.Left, -157, currentMargin.Right, 32);
+                    UpdatePenPalettePosition();
                 });
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    var marginAnimation = new ThicknessAnimation
-                    {
-                        Duration = TimeSpan.FromSeconds(0.1),
-                        From = PenPalette.Margin,
-                        To = new Thickness(-160, -154, -33, 50),
-                        EasingFunction = new CubicEase()
-                    };
-                    BoardPenPaletteGrid.BeginAnimation(MarginProperty, marginAnimation);
+                    BoardPenPaletteGrid.BeginAnimation(MarginProperty, null);
+                    var currentMargin = BoardPenPaletteGrid.Margin;
+                    BoardPenPaletteGrid.Margin = new Thickness(currentMargin.Left, -154, currentMargin.Right, 50);
                 });
-
-                await Task.Delay(100);
-
-                await Dispatcher.InvokeAsync(() => { PenPalette.Margin = new Thickness(-160, -157, -33, 32); });
-
-                await Dispatcher.InvokeAsync(() => { BoardPenPaletteGrid.Margin = new Thickness(-160, -154, -33, 50); });
             }
         }
 

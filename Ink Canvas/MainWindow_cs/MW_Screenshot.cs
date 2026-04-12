@@ -162,10 +162,11 @@ namespace Ink_Canvas
             var originalVisibility = Visibility;
             try
             {
+                var inkOverlayPreview = CreateInkOverlayPreviewBitmapSource();
                 Visibility = Visibility.Hidden;
                 await Task.Delay(200);
 
-                var screenshotResult = await ShowScreenshotSelector();
+                var screenshotResult = await ShowScreenshotSelector(inkOverlayPreview);
 
                 if (!screenshotResult.HasValue)
                 {
@@ -202,10 +203,32 @@ namespace Ink_Canvas
 
                     try
                     {
+                        if (screenshotResult.Value.IncludeInk && screenshotResult.Value.InkOverlayBitmapSource != null)
+                        {
+                            var withInkBitmap = OverlayInkOnCapturedBitmap(finalBitmap, screenshotResult.Value.Area, screenshotResult.Value.InkOverlayBitmapSource);
+                            if (withInkBitmap != null && withInkBitmap != finalBitmap)
+                            {
+                                if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
+                                {
+                                    finalBitmap.Dispose();
+                                }
+                                finalBitmap = withInkBitmap;
+                                needDisposeFinalBitmap = true;
+                            }
+                        }
+
                         if (screenshotResult.Value.Path != null && screenshotResult.Value.Path.Count > 0)
                         {
-                            finalBitmap = ApplyShapeMask(originalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
-                            needDisposeFinalBitmap = true;
+                            var maskedBitmap = ApplyShapeMask(finalBitmap, screenshotResult.Value.Path, screenshotResult.Value.Area);
+                            if (maskedBitmap != null && maskedBitmap != finalBitmap)
+                            {
+                                if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
+                                {
+                                    finalBitmap.Dispose();
+                                }
+                                finalBitmap = maskedBitmap;
+                                needDisposeFinalBitmap = true;
+                            }
                         }
 
                         var directory = Path.GetDirectoryName(desktopPath);
@@ -275,10 +298,32 @@ namespace Ink_Canvas
 
                     try
                     {
+                        if (screenshotResult.IncludeInk && screenshotResult.InkOverlayBitmapSource != null)
+                        {
+                            var withInkBitmap = OverlayInkOnCapturedBitmap(finalBitmap, screenshotResult.Area, screenshotResult.InkOverlayBitmapSource);
+                            if (withInkBitmap != null && withInkBitmap != finalBitmap)
+                            {
+                                if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
+                                {
+                                    finalBitmap.Dispose();
+                                }
+                                finalBitmap = withInkBitmap;
+                                needDisposeFinalBitmap = true;
+                            }
+                        }
+
                         if (screenshotResult.Path != null && screenshotResult.Path.Count > 0)
                         {
-                            finalBitmap = ApplyShapeMask(originalBitmap, screenshotResult.Path, screenshotResult.Area);
-                            needDisposeFinalBitmap = true;
+                            var maskedBitmap = ApplyShapeMask(finalBitmap, screenshotResult.Path, screenshotResult.Area);
+                            if (maskedBitmap != null && maskedBitmap != finalBitmap)
+                            {
+                                if (needDisposeFinalBitmap && finalBitmap != originalBitmap)
+                                {
+                                    finalBitmap.Dispose();
+                                }
+                                finalBitmap = maskedBitmap;
+                                needDisposeFinalBitmap = true;
+                            }
                         }
 
                         bitmapSourceForClipboard = ConvertBitmapToBitmapSource(finalBitmap);

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.schemastore.org/all-contributors.json",
   "projectName": "community",
   "projectOwner": "InkCanvasForClass",
   "files": [
@@ -6,7 +7,7 @@
   ],
   "commitType": "docs",
   "commitConvention": "angular",
-  "contributorsPerLine": 7,
+  "contributorsPerLine": 5,
   "contributors": [
     {
       "login": "CJKmkp",
@@ -100,7 +101,8 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/156585442?v=4",
       "profile": "https://github.com/Tayasui-rainnya",
       "contributions": [
-        "design"
+        "design",
+        "code"
       ]
     },
     {
@@ -110,7 +112,8 @@
       "profile": "https://github.com/doudou0720",
       "contributions": [
         "code",
-        "blog"
+        "blog",
+        "infra"
       ]
     },
     {
@@ -141,5 +144,6 @@
         "blog"
       ]
     }
-  ]
+  ],
+  "repoType": "github"
 }

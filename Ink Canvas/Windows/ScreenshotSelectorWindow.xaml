@@ -36,6 +36,13 @@
             </Rectangle.Clip>
         </Rectangle>
 
+        <!-- 墨迹预览层（用于“包含墨迹”预览） -->
+        <Image Name="InkPreviewImage"
+               Stretch="Fill"
+               IsHitTestVisible="False"
+               Visibility="Collapsed"
+               Panel.ZIndex="950" />
+
         <!-- 选择区域容器 -->
         <Canvas Name="SelectionCanvas" Panel.ZIndex="1000">
             <!-- 矩形选择模式 -->
@@ -141,6 +148,18 @@
                           Background="#404040" />
                 
                 <!-- 操作按钮 -->
+                <CheckBox Name="IncludeInkCheckBox"
+                          Content="包含墨迹"
+                          Margin="4,0"
+                          VerticalAlignment="Center"
+                          Foreground="White"
+                          Checked="IncludeInkCheckBox_Checked"
+                          Unchecked="IncludeInkCheckBox_Unchecked" />
+                <Rectangle Name="ToolbarDividerRectangle"
+                           Width="1"
+                           Height="20"
+                           Fill="#404040"
+                           Margin="8,0" />
                 <Button Name="ConfirmButton"
                         Content="确认截图"
                         Margin="4,0"

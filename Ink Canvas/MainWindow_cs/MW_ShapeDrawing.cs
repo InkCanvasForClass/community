@@ -43,6 +43,7 @@ namespace Ink_Canvas
             else
             {
                 HideSubPanels();
+                UpdateBorderDrawShapePosition();
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(BorderDrawShape);
                 AnimationsHelper.ShowWithSlideFromBottomAndFade(BoardBorderDrawShape);
             }
