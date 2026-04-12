@@ -12,6 +12,7 @@
         xmlns:props="clr-namespace:Ink_Canvas.Properties"
         xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
         xmlns:helpers="clr-namespace:Ink_Canvas.Helpers"
+        xmlns:icons="clr-namespace:Ink_Canvas"
         mc:Ignorable="d"
         AllowsTransparency="True"
         WindowStyle="None"
@@ -48,6 +49,7 @@
             <c:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
             <c:IntNumberToString x:Key="IntNumberToString" />
             <c:IntNumberToString2 x:Key="IntNumberToString2" />
+            <c:StringToGeometryConverter x:Key="StringToGeometryConverter" />
 
             <!-- 浮动栏/白板栏：英文等长文本自动缩小避免截断 -->
             <Style x:Key="AutoFitFloatBarLabel12" TargetType="TextBlock">

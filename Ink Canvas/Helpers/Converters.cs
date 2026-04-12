@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace Ink_Canvas.Converter
 {
@@ -150,6 +151,29 @@ namespace Ink_Canvas.Converter
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             return null;
+        }
+    }
+
+    public class StringToGeometryConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            try
+            {
+                if (value is string geometryString && !string.IsNullOrEmpty(geometryString))
+                {
+                    return Geometry.Parse(geometryString);
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return null;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }
