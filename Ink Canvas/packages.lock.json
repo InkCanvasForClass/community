@@ -48,6 +48,12 @@
           "Fody": "6.8.2"
         }
       },
+      "gong-wpf-dragdrop": {
+        "type": "Direct",
+        "requested": "[4.0.0, )",
+        "resolved": "4.0.0",
+        "contentHash": "nDj86v1XHhgmQR8PPo/uDDp/xdLDxcqZdvIwSxWAHQPiRX/GBXK13FYY0C2xQow9RSl6j5FKLk8xoYrdb52vqg=="
+      },
       "H.NotifyIcon.Wpf": {
         "type": "Direct",
         "requested": "[2.0.131, )",
