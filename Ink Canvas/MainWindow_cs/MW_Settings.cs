@@ -4675,8 +4675,8 @@ namespace Ink_Canvas
             Settings.RandSettings.ShowRandomAndSingleDraw = isToggled;
 
             // 更新UI显示
-            RandomDrawPanel.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
-            SingleDrawPanel.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
+            BoardRandomDrawToolBtn.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
+            BoardSingleDrawToolBtn.Visibility = isToggled ? Visibility.Visible : Visibility.Collapsed;
 
             // 保存设置到文件
             SaveSettingsToFile();

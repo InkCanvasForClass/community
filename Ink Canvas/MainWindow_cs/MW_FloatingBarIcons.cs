@@ -1101,8 +1101,8 @@ namespace Ink_Canvas
         /// 截图图标点击事件处理
         /// </summary>
         /// <param name="sender">发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        private async void SymbolIconScreenshot_MouseUp(object sender, MouseButtonEventArgs e)
+        /// <param name="e">路由事件参数</param>
+        private async void SymbolIconScreenshot_MouseUp(object sender, RoutedEventArgs e)
         {
             HideSubPanelsImmediately();
             await Task.Delay(50);
@@ -1122,8 +1122,8 @@ namespace Ink_Canvas
         /// 倒计时计时器图标点击事件处理
         /// </summary>
         /// <param name="sender">发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        private void ImageCountdownTimer_MouseUp(object sender, MouseButtonEventArgs e)
+        /// <param name="e">路由事件参数</param>
+        private void ImageCountdownTimer_MouseUp(object sender, RoutedEventArgs e)
         {
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -1176,8 +1176,8 @@ namespace Ink_Canvas
         /// 操作指南窗口图标点击事件处理
         /// </summary>
         /// <param name="sender">发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        private void OperatingGuideWindowIcon_MouseUp(object sender, MouseButtonEventArgs e)
+        /// <param name="e">路由事件参数</param>
+        private void OperatingGuideWindowIcon_MouseUp(object sender, RoutedEventArgs e)
         {
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
@@ -1190,11 +1190,11 @@ namespace Ink_Canvas
         /// 随机点名图标点击事件处理
         /// </summary>
         /// <param name="sender">发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        private void SymbolIconRand_MouseUp(object sender, MouseButtonEventArgs e)
+        /// <param name="e">路由事件参数</param>
+        private void SymbolIconRand_MouseUp(object sender, RoutedEventArgs e)
         {
             // 如果控件被隐藏，不处理事件
-            if (RandomDrawPanel.Visibility != Visibility.Visible) return;
+            if (BoardRandomDrawToolBtn.Visibility != Visibility.Visible) return;
 
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -1323,11 +1323,11 @@ namespace Ink_Canvas
         /// 单次点名图标点击事件处理
         /// </summary>
         /// <param name="sender">发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        private void SymbolIconRandOne_MouseUp(object sender, MouseButtonEventArgs e)
+        /// <param name="e">路由事件参数</param>
+        private void SymbolIconRandOne_MouseUp(object sender, RoutedEventArgs e)
         {
             // 如果控件被隐藏，不处理事件
-            if (SingleDrawPanel.Visibility != Visibility.Visible) return;
+            if (BoardSingleDrawToolBtn.Visibility != Visibility.Visible) return;
 
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -1398,8 +1398,8 @@ namespace Ink_Canvas
         /// 墨迹重播按钮点击事件处理
         /// </summary>
         /// <param name="sender">发送者</param>
-        /// <param name="e">鼠标按钮事件参数</param>
-        private void GridInkReplayButton_MouseUp(object sender, MouseButtonEventArgs e)
+        /// <param name="e">路由事件参数</param>
+        private void GridInkReplayButton_MouseUp(object sender, RoutedEventArgs e)
         {
             //if (lastBorderMouseDownObject != sender) return;
 

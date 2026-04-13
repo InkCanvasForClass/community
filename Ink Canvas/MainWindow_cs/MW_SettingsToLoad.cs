@@ -1100,8 +1100,8 @@ namespace Ink_Canvas
                 ToggleSwitchEnableQuickDraw.IsOn = Settings.RandSettings.EnableQuickDraw;
                 ToggleSwitchExternalCaller.IsOn = Settings.RandSettings.DirectCallCiRand;
                 ComboBoxExternalCallerType.SelectedIndex = Settings.RandSettings.ExternalCallerType;
-                RandomDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
-                SingleDrawPanel.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
+                BoardRandomDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
+                BoardSingleDrawToolBtn.Visibility = Settings.RandSettings.ShowRandomAndSingleDraw ? Visibility.Visible : Visibility.Collapsed;
 
                 // 计时器设置
                 ToggleSwitchUseLegacyTimerUI.IsOn = Settings.RandSettings.UseLegacyTimerUI;

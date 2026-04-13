@@ -6430,192 +6430,21 @@
                                                         </ikw:SimpleStackPanel.Resources>
                                                         <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
-                                                            <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                MouseUp="ImageCountdownTimer_MouseUp"
-                                                                Margin="0,0,0,0" Height="38" Width="32"
-                                                                Orientation="Vertical">
-                                                                <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                    <Image.Source>
-                                                                        <DrawingImage>
-                                                                            <DrawingImage.Drawing>
-                                                                                <DrawingGroup
-                                                                                    ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                    <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                        Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.TimerIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                                </DrawingGroup>
-                                                                            </DrawingImage.Drawing>
-                                                                        </DrawingImage>
-                                                                    </Image.Source>
-                                                                </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Timer}" FontSize="8"
-                                                                       HorizontalAlignment="Center" />
-                                                            </ikw:SimpleStackPanel>
-                                                            <ikw:SimpleStackPanel x:Name="RandomDrawPanel" Visibility="Collapsed" MouseDown="Border_MouseDown"
-                                                                MouseUp="SymbolIconRand_MouseUp"
-                                                                Margin="0,0,0,0" Height="38" Width="32"
-                                                                Orientation="Vertical">
-                                                                <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                    <Image.Source>
-                                                                        <DrawingImage>
-                                                                            <DrawingImage.Drawing>
-                                                                                <DrawingGroup
-                                                                                    ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                    <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                        Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.RandomDrawIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                                </DrawingGroup>
-                                                                            </DrawingImage.Drawing>
-                                                                        </DrawingImage>
-                                                                    </Image.Source>
-                                                                </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_RandomDraw}" FontSize="8"
-                                                                       HorizontalAlignment="Center" />
-                                                            </ikw:SimpleStackPanel>
-                                                            <ikw:SimpleStackPanel x:Name="SingleDrawPanel" Visibility="Collapsed" MouseDown="Border_MouseDown"
-                                                                MouseUp="SymbolIconRandOne_MouseUp"
-                                                                Margin="0,0,0,0" Height="38" Width="32"
-                                                                Orientation="Vertical">
-                                                                <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                    <Image.Source>
-                                                                        <DrawingImage>
-                                                                            <DrawingImage.Drawing>
-                                                                                <DrawingGroup
-                                                                                    ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                    <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                        Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.SingleDrawIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                                </DrawingGroup>
-                                                                            </DrawingImage.Drawing>
-                                                                        </DrawingImage>
-                                                                    </Image.Source>
-                                                                </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_SingleDraw}" FontSize="8"
-                                                                       HorizontalAlignment="Center" />
-                                                            </ikw:SimpleStackPanel>
+                                                            <controls:ToolbarImageButton x:Name="BoardTimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
+                                                            <controls:ToolbarImageButton x:Name="BoardRandomDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
+                                                            <controls:ToolbarImageButton x:Name="BoardSingleDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
                                                         </ikw:SimpleStackPanel>
                                                         <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
-                                                            <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                MouseUp="SymbolIconSaveStrokes_MouseUp"
-                                                                Margin="0,0,0,0" Height="38" Width="32"
-                                                                Orientation="Vertical">
-                                                                <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                    <Image.Source>
-                                                                        <DrawingImage>
-                                                                            <DrawingImage.Drawing>
-                                                                                <DrawingGroup
-                                                                                    ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                    <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                        Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.SaveIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                                </DrawingGroup>
-                                                                            </DrawingImage.Drawing>
-                                                                        </DrawingImage>
-                                                                    </Image.Source>
-                                                                </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Save}" FontSize="8"
-                                                                       HorizontalAlignment="Center" />
-                                                            </ikw:SimpleStackPanel>
-                                                            <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                MouseUp="SymbolIconOpenStrokes_MouseUp"
-                                                                Margin="0,0,0,0" Height="38" Width="32"
-                                                                Orientation="Vertical">
-                                                                <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                    <Image.Source>
-                                                                        <DrawingImage>
-                                                                            <DrawingImage.Drawing>
-                                                                                <DrawingGroup
-                                                                                    ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                    <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                        Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.OpenIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                                </DrawingGroup>
-                                                                            </DrawingImage.Drawing>
-                                                                        </DrawingImage>
-                                                                    </Image.Source>
-                                                                </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Open}" FontSize="8"
-                                                                       HorizontalAlignment="Center" />
-                                                            </ikw:SimpleStackPanel>
-                                                            <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                MouseUp="GridInkReplayButton_MouseUp"
-                                                                Margin="0,0,0,0" Height="38" Width="32"
-                                                                Orientation="Vertical">
-                                                                <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                    <Image.Source>
-                                                                        <DrawingImage>
-                                                                            <DrawingImage.Drawing>
-                                                                                <DrawingGroup
-                                                                                    ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                    <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                        Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ReplayIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                                </DrawingGroup>
-                                                                            </DrawingImage.Drawing>
-                                                                        </DrawingImage>
-                                                                    </Image.Source>
-                                                                </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Replay}" FontSize="8"
-                                                                       HorizontalAlignment="Center" />
-                                                            </ikw:SimpleStackPanel>
+                                                            <controls:ToolbarImageButton x:Name="BoardSaveToolBtn" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
+                                                            <controls:ToolbarImageButton x:Name="BoardOpenToolBtn" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
+                                                            <controls:ToolbarImageButton x:Name="BoardReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
                                                         </ikw:SimpleStackPanel>
                                                         <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
-                                                            <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                MouseUp="SymbolIconScreenshot_MouseUp"
-                                                                Margin="0,0,0,0" Height="38" Width="32"
-                                                                Orientation="Vertical">
-                                                                <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                    <Image.Source>
-                                                                        <DrawingImage>
-                                                                            <DrawingImage.Drawing>
-                                                                                <DrawingGroup
-                                                                                    ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                    <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                        Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ScreenshotIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                                </DrawingGroup>
-                                                                            </DrawingImage.Drawing>
-                                                                        </DrawingImage>
-                                                                    </Image.Source>
-                                                                </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Screenshot}" FontSize="8"
-                                                                       HorizontalAlignment="Center" />
-                                                            </ikw:SimpleStackPanel>
-                                                            <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                MouseUp="OperatingGuideWindowIcon_MouseUp"
-                                                                Margin="0,0,0,0" Height="38" Width="32"
-                                                                Orientation="Vertical">
-                                                                <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                    <Image.Source>
-                                                                        <DrawingImage>
-                                                                            <DrawingImage.Drawing>
-                                                                                <DrawingGroup
-                                                                                    ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                    <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                        Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ManualIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                                </DrawingGroup>
-                                                                            </DrawingImage.Drawing>
-                                                                        </DrawingImage>
-                                                                    </Image.Source>
-                                                                </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Manual}" FontSize="8"
-                                                                       HorizontalAlignment="Center" />
-                                                            </ikw:SimpleStackPanel>
-                                                            <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                MouseUp="SymbolIconSettings_Click"
-                                                                Margin="0,0,0,0" Height="38" Width="32"
-                                                                Orientation="Vertical">
-                                                                <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                    <Image.Source>
-                                                                        <DrawingImage>
-                                                                            <DrawingImage.Drawing>
-                                                                                <DrawingGroup
-                                                                                    ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                    <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                        Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.SettingsIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                                </DrawingGroup>
-                                                                            </DrawingImage.Drawing>
-                                                                        </DrawingImage>
-                                                                    </Image.Source>
-                                                                </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Settings}" FontSize="8"
-                                                                       HorizontalAlignment="Center" />
-                                                            </ikw:SimpleStackPanel>
+                                                            <controls:ToolbarImageButton x:Name="BoardScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
+                                                            <controls:ToolbarImageButton x:Name="BoardManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
+                                                            <controls:ToolbarImageButton x:Name="BoardSettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
                                                         </ikw:SimpleStackPanel>
                                                     </ikw:SimpleStackPanel>
                                                 </ikw:SimpleStackPanel>
@@ -9161,192 +8990,21 @@
                                                     </ikw:SimpleStackPanel.Resources>
                                                     <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
-                                                        <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="ImageCountdownTimer_MouseUp"
-                                                                             Margin="0,0,0,0" Height="38" Width="32"
-                                                                             Orientation="Vertical">
-                                                            <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                <Image.Source>
-                                                                    <DrawingImage>
-                                                                        <DrawingImage.Drawing>
-                                                                            <DrawingGroup
-                                                                                ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.TimerIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                            </DrawingGroup>
-                                                                        </DrawingImage.Drawing>
-                                                                    </DrawingImage>
-                                                                </Image.Source>
-                                                            </Image>
-                                                            <Label Content="{i18n:I18n Key=Tools_Timer}" FontSize="8"
-                                                                   HorizontalAlignment="Center" />
-                                                        </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="SymbolIconRand_MouseUp"
-                                                                             Margin="0,0,0,0" Height="38" Width="32"
-                                                                             Orientation="Vertical">
-                                                            <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                <Image.Source>
-                                                                    <DrawingImage>
-                                                                        <DrawingImage.Drawing>
-                                                                            <DrawingGroup
-                                                                                ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.RandomDrawIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                            </DrawingGroup>
-                                                                        </DrawingImage.Drawing>
-                                                                    </DrawingImage>
-                                                                </Image.Source>
-                                                            </Image>
-                                                            <Label Content="{i18n:I18n Key=Tools_RandomDraw}" FontSize="8"
-                                                                   HorizontalAlignment="Center" />
-                                                        </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="SymbolIconRandOne_MouseUp"
-                                                                             Margin="0,0,0,0" Height="38" Width="32"
-                                                                             Orientation="Vertical">
-                                                            <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                <Image.Source>
-                                                                    <DrawingImage>
-                                                                        <DrawingImage.Drawing>
-                                                                            <DrawingGroup
-                                                                                ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.SingleDrawIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                            </DrawingGroup>
-                                                                        </DrawingImage.Drawing>
-                                                                    </DrawingImage>
-                                                                </Image.Source>
-                                                            </Image>
-                                                            <Label Content="{i18n:I18n Key=Tools_SingleDraw}" FontSize="8"
-                                                                   HorizontalAlignment="Center" />
-                                                        </ikw:SimpleStackPanel>
+                                                        <controls:ToolbarImageButton x:Name="TimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
+                                                        <controls:ToolbarImageButton x:Name="RandomDrawToolBtn" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
+                                                        <controls:ToolbarImageButton x:Name="SingleDrawToolBtn" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
                                                     </ikw:SimpleStackPanel>
                                                     <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
-                                                        <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="SymbolIconSaveStrokes_MouseUp"
-                                                                             Margin="0,0,0,0" Height="38" Width="32"
-                                                                             Orientation="Vertical">
-                                                            <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                <Image.Source>
-                                                                    <DrawingImage>
-                                                                        <DrawingImage.Drawing>
-                                                                            <DrawingGroup
-                                                                                ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.SaveIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                            </DrawingGroup>
-                                                                        </DrawingImage.Drawing>
-                                                                    </DrawingImage>
-                                                                </Image.Source>
-                                                            </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Save}" FontSize="8"
-                                                                   HorizontalAlignment="Center" />
-                                                        </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="SymbolIconOpenStrokes_MouseUp"
-                                                                             Margin="0,0,0,0" Height="38" Width="32"
-                                                                             Orientation="Vertical">
-                                                            <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                <Image.Source>
-                                                                    <DrawingImage>
-                                                                        <DrawingImage.Drawing>
-                                                                            <DrawingGroup
-                                                                                ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.OpenIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                            </DrawingGroup>
-                                                                        </DrawingImage.Drawing>
-                                                                    </DrawingImage>
-                                                                </Image.Source>
-                                                            </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Open}" FontSize="8"
-                                                                   HorizontalAlignment="Center" />
-                                                        </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="GridInkReplayButton_MouseUp"
-                                                                             Margin="0,0,0,0" Height="38" Width="32"
-                                                                             Orientation="Vertical">
-                                                            <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                <Image.Source>
-                                                                    <DrawingImage>
-                                                                        <DrawingImage.Drawing>
-                                                                            <DrawingGroup
-                                                                                ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ReplayIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                            </DrawingGroup>
-                                                                        </DrawingImage.Drawing>
-                                                                    </DrawingImage>
-                                                                </Image.Source>
-                                                            </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Replay}" FontSize="8"
-                                                                   HorizontalAlignment="Center" />
-                                                        </ikw:SimpleStackPanel>
+                                                        <controls:ToolbarImageButton x:Name="SaveToolBtn" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
+                                                        <controls:ToolbarImageButton x:Name="OpenToolBtn" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
+                                                        <controls:ToolbarImageButton x:Name="ReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
                                                     </ikw:SimpleStackPanel>
                                                     <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
-                                                        <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="SymbolIconScreenshot_MouseUp"
-                                                                             Margin="0,0,0,0" Height="38" Width="32"
-                                                                             Orientation="Vertical">
-                                                            <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                <Image.Source>
-                                                                    <DrawingImage>
-                                                                        <DrawingImage.Drawing>
-                                                                            <DrawingGroup
-                                                                                ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ScreenshotIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                            </DrawingGroup>
-                                                                        </DrawingImage.Drawing>
-                                                                    </DrawingImage>
-                                                                </Image.Source>
-                                                            </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Screenshot}" FontSize="8"
-                                                                   HorizontalAlignment="Center" />
-                                                        </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="OperatingGuideWindowIcon_MouseUp"
-                                                                             Margin="0,0,0,0" Height="38" Width="32"
-                                                                             Orientation="Vertical">
-                                                            <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                <Image.Source>
-                                                                    <DrawingImage>
-                                                                        <DrawingImage.Drawing>
-                                                                            <DrawingGroup
-                                                                                ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.ManualIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                            </DrawingGroup>
-                                                                        </DrawingImage.Drawing>
-                                                                    </DrawingImage>
-                                                                </Image.Source>
-                                                            </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Manual}" FontSize="8"
-                                                                   HorizontalAlignment="Center" />
-                                                        </ikw:SimpleStackPanel>
-                                                        <ikw:SimpleStackPanel MouseDown="Border_MouseDown"
-                                                                             MouseUp="SymbolIconSettings_Click"
-                                                                             Margin="0,0,0,0" Height="38" Width="32"
-                                                                             Orientation="Vertical">
-                                                            <Image Margin="0,4,0,2" Height="19" Width="19">
-                                                                <Image.Source>
-                                                                    <DrawingImage>
-                                                                        <DrawingImage.Drawing>
-                                                                            <DrawingGroup
-                                                                                ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                                    Geometry="{Binding Source={x:Static icons:XamlGraphicsIconGeometries.SettingsIconGeometry}, Converter={StaticResource StringToGeometryConverter}}"/>
-                                                                            </DrawingGroup>
-                                                                        </DrawingImage.Drawing>
-                                                                    </DrawingImage>
-                                                                </Image.Source>
-                                                            </Image>
-                                                                <Label Content="{i18n:I18n Key=Tools_Settings}" FontSize="8"
-                                                                   HorizontalAlignment="Center" />
-                                                        </ikw:SimpleStackPanel>
+                                                        <controls:ToolbarImageButton x:Name="ScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
+                                                        <controls:ToolbarImageButton x:Name="ManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
+                                                        <controls:ToolbarImageButton x:Name="SettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
                                                     </ikw:SimpleStackPanel>
                                                 </ikw:SimpleStackPanel>
                                             </ikw:SimpleStackPanel>

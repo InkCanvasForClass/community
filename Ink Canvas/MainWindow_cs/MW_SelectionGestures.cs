@@ -29,16 +29,16 @@ namespace Ink_Canvas
         /// <param name="sender">事件发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
         /// <remarks>
-        /// 如果发送者是 RandomDrawPanel 或 SingleDrawPanel，且它们被隐藏，则不处理事件
+        /// 如果发送者是 BoardRandomDrawToolBtn 或 BoardSingleDrawToolBtn，且它们被隐藏，则不处理事件
         /// 否则存储当前鼠标按下的对象
         /// </remarks>
         private void Border_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            // 如果发送者是 RandomDrawPanel 或 SingleDrawPanel，且它们被隐藏，则不处理事件
-            if (sender is SimpleStackPanel panel)
+            // 如果发送者是 BoardRandomDrawToolBtn 或 BoardSingleDrawToolBtn，且它们被隐藏，则不处理事件
+            if (sender is FrameworkElement element)
             {
-                if ((panel == RandomDrawPanel || panel == SingleDrawPanel) &&
-                    panel.Visibility != Visibility.Visible)
+                if ((element == BoardRandomDrawToolBtn || element == BoardSingleDrawToolBtn) &&
+                    element.Visibility != Visibility.Visible)
                 {
                     return;
                 }

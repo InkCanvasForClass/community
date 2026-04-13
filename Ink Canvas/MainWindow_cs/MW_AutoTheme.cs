@@ -168,6 +168,26 @@ namespace Ink_Canvas
                 ToolsFloatingBarBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ToolsFloatingBarBtnIcon);
                 Fold_Icon.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.FoldIcon);
 
+                TimerToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.TimerIconGeometry);
+                RandomDrawToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.RandomDrawIconGeometry);
+                SingleDrawToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SingleDrawIconGeometry);
+                SaveToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SaveIconGeometry);
+                OpenToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.OpenIconGeometry);
+                ReplayToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ReplayIconGeometry);
+                ScreenshotToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ScreenshotIconGeometry);
+                ManualToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ManualIconGeometry);
+                SettingsToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SettingsIconGeometry);
+
+                BoardTimerToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.TimerIconGeometry);
+                BoardRandomDrawToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.RandomDrawIconGeometry);
+                BoardSingleDrawToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SingleDrawIconGeometry);
+                BoardSaveToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SaveIconGeometry);
+                BoardOpenToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.OpenIconGeometry);
+                BoardReplayToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ReplayIconGeometry);
+                BoardScreenshotToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ScreenshotIconGeometry);
+                BoardManualToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.ManualIconGeometry);
+                BoardSettingsToolBtn.Icon.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.SettingsIconGeometry);
+
                 bool isDarkTheme = IsCurrentThemeDark();
                 Color selectedColor = isDarkTheme ? Color.FromRgb(102, 204, 255) : Color.FromRgb(30, 58, 138);
 
