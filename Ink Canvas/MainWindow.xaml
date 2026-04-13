@@ -6430,21 +6430,21 @@
                                                         </ikw:SimpleStackPanel.Resources>
                                                         <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
-                                                            <controls:ToolbarImageButton x:Name="BoardTimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
-                                                            <controls:ToolbarImageButton x:Name="BoardRandomDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
-                                                            <controls:ToolbarImageButton x:Name="BoardSingleDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
+                                                            <controls:ToolMenuButton x:Name="BoardTimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
+                                                            <controls:ToolMenuButton x:Name="BoardRandomDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
+                                                            <controls:ToolMenuButton x:Name="BoardSingleDrawToolBtn" Visibility="Collapsed" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
                                                         </ikw:SimpleStackPanel>
                                                         <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
-                                                            <controls:ToolbarImageButton x:Name="BoardSaveToolBtn" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
-                                                            <controls:ToolbarImageButton x:Name="BoardOpenToolBtn" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
-                                                            <controls:ToolbarImageButton x:Name="BoardReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
+                                                            <controls:ToolMenuButton x:Name="BoardSaveToolBtn" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
+                                                            <controls:ToolMenuButton x:Name="BoardOpenToolBtn" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
+                                                            <controls:ToolMenuButton x:Name="BoardReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
                                                         </ikw:SimpleStackPanel>
                                                         <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                              Orientation="Horizontal">
-                                                            <controls:ToolbarImageButton x:Name="BoardScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
-                                                            <controls:ToolbarImageButton x:Name="BoardManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
-                                                            <controls:ToolbarImageButton x:Name="BoardSettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
+                                                            <controls:ToolMenuButton x:Name="BoardScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
+                                                            <controls:ToolMenuButton x:Name="BoardManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
+                                                            <controls:ToolMenuButton x:Name="BoardSettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
                                                         </ikw:SimpleStackPanel>
                                                     </ikw:SimpleStackPanel>
                                                 </ikw:SimpleStackPanel>
@@ -8477,21 +8477,21 @@
                                                     </ikw:SimpleStackPanel.Resources>
                                                     <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
-                                                        <controls:ToolbarImageButton x:Name="TimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
-                                                        <controls:ToolbarImageButton x:Name="RandomDrawToolBtn" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
-                                                        <controls:ToolbarImageButton x:Name="SingleDrawToolBtn" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
+                                                        <controls:ToolMenuButton x:Name="TimerToolBtn" ButtonMouseUp="ImageCountdownTimer_MouseUp" Label="{i18n:I18n Key=Tools_Timer}" />
+                                                        <controls:ToolMenuButton x:Name="RandomDrawToolBtn" ButtonMouseUp="SymbolIconRand_MouseUp" Label="{i18n:I18n Key=Tools_RandomDraw}" />
+                                                        <controls:ToolMenuButton x:Name="SingleDrawToolBtn" ButtonMouseUp="SymbolIconRandOne_MouseUp" Label="{i18n:I18n Key=Tools_SingleDraw}" />
                                                     </ikw:SimpleStackPanel>
                                                     <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
-                                                        <controls:ToolbarImageButton x:Name="SaveToolBtn" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
-                                                        <controls:ToolbarImageButton x:Name="OpenToolBtn" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
-                                                        <controls:ToolbarImageButton x:Name="ReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
+                                                        <controls:ToolMenuButton x:Name="SaveToolBtn" ButtonMouseUp="SymbolIconSaveStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Save}" />
+                                                        <controls:ToolMenuButton x:Name="OpenToolBtn" ButtonMouseUp="SymbolIconOpenStrokes_MouseUp" Label="{i18n:I18n Key=Tools_Open}" />
+                                                        <controls:ToolMenuButton x:Name="ReplayToolBtn" ButtonMouseUp="GridInkReplayButton_MouseUp" Label="{i18n:I18n Key=Tools_Replay}" />
                                                     </ikw:SimpleStackPanel>
                                                     <ikw:SimpleStackPanel Margin="0,0,0,0" Height="40"
                                                                          Orientation="Horizontal">
-                                                        <controls:ToolbarImageButton x:Name="ScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
-                                                        <controls:ToolbarImageButton x:Name="ManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
-                                                        <controls:ToolbarImageButton x:Name="SettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
+                                                        <controls:ToolMenuButton x:Name="ScreenshotToolBtn" ButtonMouseUp="SymbolIconScreenshot_MouseUp" Label="{i18n:I18n Key=Tools_Screenshot}" />
+                                                        <controls:ToolMenuButton x:Name="ManualToolBtn" ButtonMouseUp="OperatingGuideWindowIcon_MouseUp" Label="{i18n:I18n Key=Tools_Manual}" />
+                                                        <controls:ToolMenuButton x:Name="SettingsToolBtn" ButtonMouseUp="SymbolIconSettings_Click" Label="{i18n:I18n Key=Tools_Settings}" />
                                                     </ikw:SimpleStackPanel>
                                                 </ikw:SimpleStackPanel>
                                             </ikw:SimpleStackPanel>

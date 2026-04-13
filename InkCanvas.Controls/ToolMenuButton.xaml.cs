@@ -1,0 +1,95 @@
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+
+namespace Ink_Canvas.Controls
+{
+    public partial class ToolMenuButton : UserControl
+    {
+        public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
+            nameof(Label), typeof(string), typeof(ToolMenuButton),
+            new PropertyMetadata(string.Empty, OnLabelChanged));
+
+        private static void OnLabelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var button = (ToolMenuButton)d;
+            if (button.LabelControl != null)
+                button.LabelControl.Content = (string)e.NewValue;
+        }
+
+        public string Label
+        {
+            get => (string)GetValue(LabelProperty);
+            set => SetValue(LabelProperty, value);
+        }
+
+        public static readonly DependencyProperty IconGeometryProperty = DependencyProperty.Register(
+            nameof(IconGeometry), typeof(string), typeof(ToolMenuButton),
+            new PropertyMetadata(string.Empty, OnIconGeometryChanged));
+
+        private static void OnIconGeometryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var button = (ToolMenuButton)d;
+            if (e.NewValue is string geometry && !string.IsNullOrEmpty(geometry) && button.IconGeometryInternal != null)
+            {
+                button.IconGeometryInternal.Geometry = Geometry.Parse(geometry);
+            }
+        }
+
+        public string IconGeometry
+        {
+            get => (string)GetValue(IconGeometryProperty);
+            set => SetValue(IconGeometryProperty, value);
+        }
+
+        public static readonly DependencyProperty IconBrushProperty = DependencyProperty.Register(
+            nameof(IconBrush), typeof(Brush), typeof(ToolMenuButton),
+            new PropertyMetadata(null, OnIconBrushChanged));
+
+        private static void OnIconBrushChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var button = (ToolMenuButton)d;
+            if (button.IconGeometryInternal != null)
+                button.IconGeometryInternal.Brush = (Brush)e.NewValue;
+        }
+
+        public Brush IconBrush
+        {
+            get => (Brush)GetValue(IconBrushProperty);
+            set => SetValue(IconBrushProperty, value);
+        }
+
+        public new Brush Background
+        {
+            get => ButtonPanel.Background;
+            set => ButtonPanel.Background = value;
+        }
+
+        public GeometryDrawing Icon => IconGeometryInternal;
+
+        public event MouseButtonEventHandler ButtonMouseDown;
+        public event MouseEventHandler ButtonMouseLeave;
+        public event RoutedEventHandler ButtonMouseUp;
+
+        public ToolMenuButton()
+        {
+            InitializeComponent();
+        }
+
+        private void ButtonPanel_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            ButtonMouseDown?.Invoke(this, e);
+        }
+
+        private void ButtonPanel_MouseLeave(object sender, MouseEventArgs e)
+        {
+            ButtonMouseLeave?.Invoke(this, e);
+        }
+
+        private void ButtonPanel_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            ButtonMouseUp?.Invoke(this, new RoutedEventArgs(e.RoutedEvent, this));
+        }
+    }
+}
