@@ -1023,6 +1023,10 @@ namespace Ink_Canvas
                     border.Background = new SolidColorBrush(Color.FromArgb(28, 24, 24, 27));
                 }
             }
+            else if (sender is Ink_Canvas.Controls.ColorPickerButton colorPicker)
+            {
+                lastBorderMouseDownObject = sender;
+            }
         }
 
         /// <summary>
@@ -1082,6 +1086,10 @@ namespace Ink_Canvas
                 {
                     border.Background = new SolidColorBrush(Colors.Transparent);
                 }
+            }
+            else if (sender is Ink_Canvas.Controls.ColorPickerButton colorPicker)
+            {
+                lastBorderMouseDownObject = null;
             }
         }
 
@@ -2820,22 +2828,22 @@ namespace Ink_Canvas
         private void UpdateQuickColorPaletteIndicator(Color selectedColor)
         {
             // 隐藏所有check图标（双行显示）
-            QuickColorWhiteCheck.Visibility = Visibility.Collapsed;
-            QuickColorOrangeCheck.Visibility = Visibility.Collapsed;
-            QuickColorYellowCheck.Visibility = Visibility.Collapsed;
-            QuickColorBlackCheck.Visibility = Visibility.Collapsed;
-            QuickColorBlueCheck.Visibility = Visibility.Collapsed;
-            QuickColorRedCheck.Visibility = Visibility.Collapsed;
-            QuickColorGreenCheck.Visibility = Visibility.Collapsed;
-            QuickColorPurpleCheck.Visibility = Visibility.Collapsed;
+            QuickColorWhite.IsChecked = false;
+            QuickColorOrange.IsChecked = false;
+            QuickColorYellow.IsChecked = false;
+            QuickColorBlack.IsChecked = false;
+            QuickColorBlue.IsChecked = false;
+            QuickColorRed.IsChecked = false;
+            QuickColorGreen.IsChecked = false;
+            QuickColorPurple.IsChecked = false;
 
             // 隐藏所有check图标（单行显示）
-            QuickColorWhiteCheckSingle.Visibility = Visibility.Collapsed;
-            QuickColorOrangeCheckSingle.Visibility = Visibility.Collapsed;
-            QuickColorYellowCheckSingle.Visibility = Visibility.Collapsed;
-            QuickColorBlackCheckSingle.Visibility = Visibility.Collapsed;
-            QuickColorRedCheckSingle.Visibility = Visibility.Collapsed;
-            QuickColorGreenCheckSingle.Visibility = Visibility.Collapsed;
+            QuickColorWhiteSingle.IsChecked = false;
+            QuickColorOrangeSingle.IsChecked = false;
+            QuickColorYellowSingle.IsChecked = false;
+            QuickColorBlackSingle.IsChecked = false;
+            QuickColorRedSingle.IsChecked = false;
+            QuickColorGreenSingle.IsChecked = false;
 
             // 显示当前选中颜色的check图标
             // 在荧光笔模式下，使用更宽松的颜色匹配
@@ -2843,21 +2851,21 @@ namespace Ink_Canvas
 
             if (IsColorSimilar(selectedColor, Colors.White, tolerance) || IsColorSimilar(selectedColor, Color.FromRgb(250, 250, 250), tolerance))
             {
-                QuickColorWhiteCheck.Visibility = Visibility.Visible;
-                QuickColorWhiteCheckSingle.Visibility = Visibility.Visible;
+                QuickColorWhite.IsChecked = true;
+                QuickColorWhiteSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Colors.Black, tolerance))
             {
-                QuickColorBlackCheck.Visibility = Visibility.Visible;
-                QuickColorBlackCheckSingle.Visibility = Visibility.Visible;
+                QuickColorBlack.IsChecked = true;
+                QuickColorBlackSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Colors.Yellow, tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(234, 179, 8), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(250, 204, 21), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(253, 224, 71), tolerance))
             {
-                QuickColorYellowCheck.Visibility = Visibility.Visible;
-                QuickColorYellowCheckSingle.Visibility = Visibility.Visible;
+                QuickColorYellow.IsChecked = true;
+                QuickColorYellowSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(255, 165, 0), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(251, 150, 80), tolerance) ||
@@ -2866,29 +2874,29 @@ namespace Ink_Canvas
                      IsColorSimilar(selectedColor, Color.FromRgb(251, 146, 60), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(253, 126, 20), tolerance))
             {
-                QuickColorOrangeCheck.Visibility = Visibility.Visible;
-                QuickColorOrangeCheckSingle.Visibility = Visibility.Visible;
+                QuickColorOrange.IsChecked = true;
+                QuickColorOrangeSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(37, 99, 235), tolerance))
             {
-                QuickColorBlueCheck.Visibility = Visibility.Visible;
+                QuickColorBlue.IsChecked = true;
                 // 单行显示模式没有蓝色，所以不设置单行的check
             }
             else if (IsColorSimilar(selectedColor, Colors.Red, tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(220, 38, 38), tolerance) ||
                      IsColorSimilar(selectedColor, Color.FromRgb(239, 68, 68), tolerance))
             {
-                QuickColorRedCheck.Visibility = Visibility.Visible;
-                QuickColorRedCheckSingle.Visibility = Visibility.Visible;
+                QuickColorRed.IsChecked = true;
+                QuickColorRedSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(22, 163, 74), tolerance))
             {
-                QuickColorGreenCheck.Visibility = Visibility.Visible;
-                QuickColorGreenCheckSingle.Visibility = Visibility.Visible;
+                QuickColorGreen.IsChecked = true;
+                QuickColorGreenSingle.IsChecked = true;
             }
             else if (IsColorSimilar(selectedColor, Color.FromRgb(147, 51, 234), tolerance))
             {
-                QuickColorPurpleCheck.Visibility = Visibility.Visible;
+                QuickColorPurple.IsChecked = true;
                 // 单行显示模式没有紫色，所以不设置单行的check
             }
         }

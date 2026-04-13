@@ -1,0 +1,39 @@
+<UserControl x:Class="Ink_Canvas.Controls.CircularColorButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="45" d:DesignWidth="45">
+    <Border x:Name="ButtonBorder"
+            BorderBrush="#fed7aa"
+            BorderThickness="1.5"
+            CornerRadius="100"
+            MouseDown="ButtonBorder_MouseDown"
+            MouseLeave="ButtonBorder_MouseLeave"
+            MouseUp="ButtonBorder_MouseUp">
+        <Canvas x:Name="ButtonCanvas">
+            <Image x:Name="TransparentGridImage"
+                   Source="/Resources/Icons-png/transparent-grid.png"
+                   RenderOptions.BitmapScalingMode="HighQuality">
+                <Image.Clip>
+                    <EllipseGeometry x:Name="ImageClipGeometry" Center="21,21" RadiusX="21" RadiusY="21"/>
+                </Image.Clip>
+            </Image>
+            <Border x:Name="ColorOverlay"
+                    CornerRadius="21"
+                    Opacity="0.75"/>
+            <Viewbox x:Name="CheckViewbox"
+                     Visibility="Visible"
+                     Canvas.Top="9"
+                     Canvas.Left="9"
+                     Width="24"
+                     Height="24">
+                <Image x:Name="CheckImage"
+                       Source="/Resources/new-icons/checked-white.png"
+                       RenderOptions.BitmapScalingMode="HighQuality"
+                       VerticalAlignment="Top"/>
+            </Viewbox>
+        </Canvas>
+    </Border>
+</UserControl>

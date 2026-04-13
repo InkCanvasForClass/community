@@ -1,0 +1,36 @@
+<UserControl x:Class="Ink_Canvas.Controls.ColorPickerButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             mc:Ignorable="d"
+             d:DesignHeight="13" d:DesignWidth="13">
+    <Border x:Name="ButtonBorder"
+            BorderBrush="#CCCCCC"
+            BorderThickness="1"
+            CornerRadius="3"
+            Margin="1,0,1,0"
+            MouseDown="ButtonBorder_MouseDown"
+            MouseLeave="ButtonBorder_MouseLeave"
+            MouseUp="ButtonBorder_MouseUp">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="BorderThickness" Value="2"/>
+                        <Setter Property="BorderBrush" Value="#666666"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <Grid>
+            <Path x:Name="CheckPath"
+                  Data="M9,20.42L2.79,14.21L5.62,11.38L9,14.77L18.88,4.88L21.71,7.71L9,20.42Z"
+                  Stretch="Uniform"
+                  Opacity="1.0"
+                  Visibility="Collapsed"
+                  HorizontalAlignment="Center"
+                  VerticalAlignment="Center"/>
+        </Grid>
+    </Border>
+</UserControl>
