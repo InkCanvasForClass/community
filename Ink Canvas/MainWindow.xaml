@@ -7,7 +7,8 @@
         xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
         xmlns:c="clr-namespace:Ink_Canvas.Converter"
         xmlns:Controls="http://schemas.microsoft.com/netfx/2009/xaml/presentation"
-        xmlns:controls="clr-namespace:Ink_Canvas.Controls"
+        xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
+        xmlns:localControls="clr-namespace:Ink_Canvas.Controls"
         xmlns:Windows="clr-namespace:Ink_Canvas.Windows"
         xmlns:props="clr-namespace:Ink_Canvas.Properties"
         xmlns:i18n="clr-namespace:Ink_Canvas.MarkupExtensions"
@@ -3982,7 +3983,7 @@
             </Canvas>
             
             <!-- 快抽悬浮按钮 -->
-            <controls:QuickDrawFloatingButtonControl x:Name="QuickDrawFloatingButton"
+            <localControls:QuickDrawFloatingButtonControl x:Name="QuickDrawFloatingButton"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
                     Margin="0,0,0,200"

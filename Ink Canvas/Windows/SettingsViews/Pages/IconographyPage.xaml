@@ -7,7 +7,7 @@
     xmlns:ui="http://schemas.inkore.net/lib/ui/wpf/modern"
     xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
     xmlns:sys="clr-namespace:System;assembly=mscorlib"
-    xmlns:controls="clr-namespace:Ink_Canvas.Controls"
+    xmlns:controls="clr-namespace:Ink_Canvas.Controls;assembly=InkCanvas.Controls"
     Title="图标设置"
     mc:Ignorable="d">
     <Grid x:Name="RootGrid">

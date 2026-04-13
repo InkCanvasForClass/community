@@ -148,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\InkCanvas.PluginSdk\InkCanvas.PluginSdk.csproj" />
+    <ProjectReference Include="..\InkCanvas.Controls\InkCanvas.Controls.csproj" />
   </ItemGroup>
   <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Full'">
     <COMReference Include="IWshRuntimeLibrary">
