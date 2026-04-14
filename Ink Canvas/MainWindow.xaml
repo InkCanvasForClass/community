@@ -8846,63 +8846,13 @@
             <Border ClipToBounds="True" Visibility="Visible" CornerRadius="0,6,6,0" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" Width="32">
                 <ikw:SimpleStackPanel Orientation="Vertical" Margin="0,5">
-                    <ikw:SimpleStackPanel
-                        MouseUp="SymbolIconRandOne_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelPersonMoneyIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_SingleDraw}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-                        MouseUp="SymbolIconRand_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelPeopleMoneyIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_RandomDraw}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-
-                        MouseUp="ImageCountdownTimer_MouseUp" Background="Transparent"
-                        Orientation="Vertical" HorizontalAlignment="Center" Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelTimerIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_Timer}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-                        MouseUp="ImageBlackboard_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_Whiteboard}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-                        x:Name="BtnExitPptFromSidebarLeft"
-                        MouseUp="ExitPPTSlideShow_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0" Visibility="Collapsed">
-                        <Image Source="{DynamicResource QuickPanelEndSlideshowIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_ExitShow}" Foreground="{DynamicResource FloatBarForeground}" FontSize="7" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-
-                    <ikw:SimpleStackPanel
-                        MouseUp="UnFoldFloatingBar_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelEyeIcon}" RenderOptions.BitmapScalingMode="HighQuality"
-                               Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_Show}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-                        MouseUp="HideQuickPanel_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelChevronLeftIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,3" />
-                    </ikw:SimpleStackPanel>
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPersonMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_SingleDraw}" ButtonMouseUp="SymbolIconRandOne_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelTimerIcon}" Label="{i18n:I18n Key=QuickPanel_Timer}" ButtonMouseUp="ImageCountdownTimer_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelBlackboardIcon}" Label="{i18n:I18n Key=QuickPanel_Whiteboard}" ButtonMouseUp="ImageBlackboard_MouseUp" />
+                    <controls:QuickPanelButton x:Name="BtnExitPptFromSidebarLeft" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{i18n:I18n Key=QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelEyeIcon}" Label="{i18n:I18n Key=QuickPanel_Show}" ButtonMouseUp="UnFoldFloatingBar_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelChevronLeftIcon}" ButtonMouseUp="HideQuickPanel_MouseUp" />
                 </ikw:SimpleStackPanel>
             </Border>
         </Viewbox>
@@ -8929,73 +8879,13 @@
             <Border ClipToBounds="True" Visibility="Visible" CornerRadius="6,0,0,6" Background="{DynamicResource FloatBarBackground}" Opacity="1"
                     BorderThickness="1" BorderBrush="{DynamicResource FloatBarBorderBrush}" Width="32">
                 <ikw:SimpleStackPanel Orientation="Vertical" Margin="0,5">
-                    <ikw:SimpleStackPanel
-                        MouseUp="SymbolIconRandOne_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelPersonMoneyIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_SingleDraw}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-                        MouseUp="SymbolIconRand_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelPeopleMoneyIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_RandomDraw}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-
-                        MouseUp="ImageCountdownTimer_MouseUp" Background="Transparent"
-                        Orientation="Vertical" HorizontalAlignment="Center" Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelTimerIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_Timer}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-                        MouseUp="ImageBlackboard_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelBlackboardIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_Whiteboard}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-                        x:Name="BtnExitPptFromSidebarRight"
-                        MouseUp="ExitPPTSlideShow_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0" Visibility="Collapsed">
-                        <Image Source="{DynamicResource QuickPanelEndSlideshowIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_ExitShow}" Foreground="{DynamicResource FloatBarForeground}" FontSize="7" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-
-                    <ikw:SimpleStackPanel
-                        MouseUp="UnFoldFloatingBar_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelEyeIcon}" RenderOptions.BitmapScalingMode="HighQuality"
-                               Height="17" Margin="0,3,0,0" />
-                        <TextBlock Text="{i18n:I18n Key=QuickPanel_Show}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8" Margin="0,2,0,3" TextAlignment="Center" />
-                    </ikw:SimpleStackPanel>
-                    <ikw:SimpleStackPanel
-                        MouseUp="HideQuickPanel_MouseUp"
-                        Background="Transparent" Orientation="Vertical" HorizontalAlignment="Center"
-                        Width="32" Margin="0">
-                        <Image Source="{DynamicResource QuickPanelChevronLeftIcon}"
-                               RenderOptions.BitmapScalingMode="HighQuality" Height="17" Margin="0,3,0,3"
-                               RenderTransformOrigin="0.5,0.5">
-                            <Image.RenderTransform>
-                                <TransformGroup>
-                                    <ScaleTransform />
-                                    <SkewTransform />
-                                    <RotateTransform Angle="180" />
-                                    <TranslateTransform />
-                                </TransformGroup>
-                            </Image.RenderTransform>
-                        </Image>
-                    </ikw:SimpleStackPanel>
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPersonMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_SingleDraw}" ButtonMouseUp="SymbolIconRandOne_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelPeopleMoneyIcon}" Label="{i18n:I18n Key=QuickPanel_RandomDraw}" ButtonMouseUp="SymbolIconRand_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelTimerIcon}" Label="{i18n:I18n Key=QuickPanel_Timer}" ButtonMouseUp="ImageCountdownTimer_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelBlackboardIcon}" Label="{i18n:I18n Key=QuickPanel_Whiteboard}" ButtonMouseUp="ImageBlackboard_MouseUp" />
+                    <controls:QuickPanelButton x:Name="BtnExitPptFromSidebarRight" IconSource="{DynamicResource QuickPanelEndSlideshowIcon}" Label="{i18n:I18n Key=QuickPanel_ExitShow}" LabelFontSize="7" Visibility="Collapsed" ButtonMouseUp="ExitPPTSlideShow_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelEyeIcon}" Label="{i18n:I18n Key=QuickPanel_Show}" ButtonMouseUp="UnFoldFloatingBar_MouseUp" />
+                    <controls:QuickPanelButton IconSource="{DynamicResource QuickPanelChevronLeftIcon}" ButtonMouseUp="HideQuickPanel_MouseUp" />
                 </ikw:SimpleStackPanel>
             </Border>
         </Viewbox>

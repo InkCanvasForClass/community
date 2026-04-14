@@ -315,7 +315,7 @@ namespace Ink_Canvas
         /// 1. 隐藏左侧快捷面板
         /// 2. 隐藏右侧快捷面板
         /// </remarks>
-        private void HideQuickPanel_MouseUp(object sender, MouseButtonEventArgs e)
+        private void HideQuickPanel_MouseUp(object sender, RoutedEventArgs e)
         {
             HideLeftQuickPanel();
             HideRightQuickPanel();

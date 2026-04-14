@@ -7,6 +7,9 @@ namespace Ink_Canvas.Controls
 {
     public partial class ToolMenuButton : UserControl
     {
+        private Geometry _pendingGeometry;
+        private Brush _pendingBrush;
+
         public static readonly DependencyProperty LabelProperty = DependencyProperty.Register(
             nameof(Label), typeof(string), typeof(ToolMenuButton),
             new PropertyMetadata(string.Empty, OnLabelChanged));
@@ -31,9 +34,11 @@ namespace Ink_Canvas.Controls
         private static void OnIconGeometryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var button = (ToolMenuButton)d;
-            if (e.NewValue is string geometry && !string.IsNullOrEmpty(geometry) && button.IconGeometryInternal != null)
+            if (e.NewValue is string geometry && !string.IsNullOrEmpty(geometry))
             {
-                button.IconGeometryInternal.Geometry = Geometry.Parse(geometry);
+                button._pendingGeometry = Geometry.Parse(geometry);
+                if (button.IconGeometryInternal != null)
+                    button.IconGeometryInternal.Geometry = button._pendingGeometry;
             }
         }
 
@@ -50,8 +55,9 @@ namespace Ink_Canvas.Controls
         private static void OnIconBrushChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var button = (ToolMenuButton)d;
+            button._pendingBrush = (Brush)e.NewValue;
             if (button.IconGeometryInternal != null)
-                button.IconGeometryInternal.Brush = (Brush)e.NewValue;
+                button.IconGeometryInternal.Brush = button._pendingBrush;
         }
 
         public Brush IconBrush
@@ -66,7 +72,15 @@ namespace Ink_Canvas.Controls
             set => ButtonPanel.Background = value;
         }
 
-        public GeometryDrawing Icon => IconGeometryInternal;
+        public GeometryDrawing Icon
+        {
+            get
+            {
+                if (IconGeometryInternal != null)
+                    return IconGeometryInternal;
+                return new GeometryDrawing(_pendingBrush, null, _pendingGeometry);
+            }
+        }
 
         public event MouseButtonEventHandler ButtonMouseDown;
         public event MouseEventHandler ButtonMouseLeave;
@@ -75,6 +89,18 @@ namespace Ink_Canvas.Controls
         public ToolMenuButton()
         {
             InitializeComponent();
+            Loaded += ToolMenuButton_Loaded;
+        }
+
+        private void ToolMenuButton_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (IconGeometryInternal != null)
+            {
+                if (_pendingGeometry != null)
+                    IconGeometryInternal.Geometry = _pendingGeometry;
+                if (_pendingBrush != null)
+                    IconGeometryInternal.Brush = _pendingBrush;
+            }
         }
 
         private void ButtonPanel_MouseDown(object sender, MouseButtonEventArgs e)

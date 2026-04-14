@@ -1,0 +1,25 @@
+<UserControl x:Class="Ink_Canvas.Controls.QuickPanelButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             mc:Ignorable="d"
+             d:DesignHeight="30" d:DesignWidth="32">
+    <ikw:SimpleStackPanel x:Name="ButtonPanel"
+                          MouseUp="ButtonPanel_MouseUp"
+                          Background="Transparent"
+                          Orientation="Vertical"
+                          HorizontalAlignment="Center"
+                          Width="32" Margin="0">
+        <Image x:Name="ButtonImage"
+               RenderOptions.BitmapScalingMode="HighQuality"
+               Height="17" Margin="0,3,0,0" />
+        <TextBlock x:Name="LabelTextBlock"
+                   Foreground="{DynamicResource FloatBarForeground}"
+                   FontSize="8"
+                   Margin="0,2,0,3"
+                   TextAlignment="Center"
+                   Visibility="Collapsed" />
+    </ikw:SimpleStackPanel>
+</UserControl>

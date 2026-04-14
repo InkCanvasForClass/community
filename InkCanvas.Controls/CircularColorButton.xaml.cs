@@ -66,7 +66,7 @@ namespace Ink_Canvas.Controls
         private static void OnButtonSizeChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var button = (CircularColorButton)d;
-            if (button.ButtonBorder == null) return;
+            if (button.ButtonBorder == null || button.ColorOverlay == null) return;
             
             var size = (double)e.NewValue;
             button.ButtonBorder.Width = size;
@@ -74,11 +74,17 @@ namespace Ink_Canvas.Controls
             var radius = (size - 3) / 2;
             button.ColorOverlay.Width = radius * 2;
             button.ColorOverlay.Height = radius * 2;
-            button.ImageClipGeometry.RadiusX = radius;
-            button.ImageClipGeometry.RadiusY = radius;
-            button.ImageClipGeometry.Center = new Point(radius, radius);
-            button.TransparentGridImage.Width = radius * 2;
-            button.TransparentGridImage.Height = radius * 2;
+            if (button.ImageClipGeometry != null)
+            {
+                button.ImageClipGeometry.RadiusX = radius;
+                button.ImageClipGeometry.RadiusY = radius;
+                button.ImageClipGeometry.Center = new Point(radius, radius);
+            }
+            if (button.TransparentGridImage != null)
+            {
+                button.TransparentGridImage.Width = radius * 2;
+                button.TransparentGridImage.Height = radius * 2;
+            }
         }
 
         public double ButtonSize

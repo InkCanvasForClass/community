@@ -2884,7 +2884,7 @@ namespace Ink_Canvas
             ShowPage(currentPageIndex);
         }
         // 快速面板退出PPT放映按钮事件
-        private void ExitPPTSlideShow_MouseUp(object sender, MouseButtonEventArgs e)
+        private void ExitPPTSlideShow_MouseUp(object sender, RoutedEventArgs e)
         {
             // 直接调用PPT放映结束按钮的逻辑
             BtnPPTSlideShowEnd_Click(BtnPPTSlideShowEnd, null);
