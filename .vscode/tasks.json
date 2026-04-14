@@ -1,0 +1,18 @@
+﻿{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build (InkCanvasForClass)",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "build",
+        "Ink Canvas/InkCanvasForClass.csproj",
+        "-c",
+        "Debug"
+      ],
+      "problemMatcher": "$msCompile",
+      "group": "build"
+    }
+  ]
+}

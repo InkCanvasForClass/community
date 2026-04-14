@@ -1,0 +1,15 @@
+﻿{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch InkCanvasForClass",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build (InkCanvasForClass)",
+      "program": "${workspaceFolder}/Ink Canvas/bin/Debug/AnyCPU/net6.0-windows10.0.19041.0/InkCanvasForClass.exe",
+      "cwd": "${workspaceFolder}/Ink Canvas",
+      "stopAtEntry": false,
+      "console": "internalConsole"
+    }
+  ]
+}
