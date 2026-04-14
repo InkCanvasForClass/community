@@ -8089,96 +8089,15 @@
 
                                                 <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
                                                                      Margin="4,6,4,0">
-                                                    <ikw:SimpleStackPanel Name="BoardImageDrawLine"
-                                                                         MouseDown="Image_MouseDown"
-                                                                         MouseUp="BtnDrawLine_Click" Margin="0,0,0,0"
-                                                                         Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="{DynamicResource GeoIconLine}"
-                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                               Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawLine}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Name="BoardImageDrawDashedLine"
-                                                                         MouseDown="Image_MouseDown"
-                                                                         MouseUp="BtnDrawDashedLine_Click"
-                                                                         Margin="0,0,0,0"
-                                                                         Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="{DynamicResource GeoIconDashedLine}"
-                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                               Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawDashedLine}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Name="BoardImageDrawDotLine"
-                                                                         MouseDown="Image_MouseDown"
-                                                                         MouseUp="BtnDrawDotLine_Click"
-                                                                         Margin="0,0,0,0"
-                                                                         Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="{DynamicResource GeoIconDotLine}"
-                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                               Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawDottedLine}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Name="BoardImageDrawArrow"
-                                                                         MouseDown="Image_MouseDown"
-                                                                         MouseUp="BtnDrawArrow_Click" Margin="0,0,0,0"
-                                                                         Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="{DynamicResource GeoIconArrow}"
-                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                               Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawArrow}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel Name="BoardImageDrawParallelLine"
-                                                                         MouseDown="Image_MouseDown"
-                                                                         MouseUp="BtnDrawParallelLine_Click"
-                                                                         Margin="0,0,0,0" Height="38" Width="32"
-                                                                         Orientation="Vertical">
-                                                        <Image
-                                                            Source="{DynamicResource GeoIconParallelLine}"
-                                                            RenderOptions.BitmapScalingMode="HighQuality"
-                                                            Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawParallelLines}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel MouseUp="BtnDrawRectangleCenter_Click"
-                                                                         Margin="0,0,0,0" Height="38" Width="32"
-                                                                         Orientation="Vertical">
-                                                        <Image
-                                                            Source="{DynamicResource GeoIconRectangleCenter}"
-                                                            RenderOptions.BitmapScalingMode="HighQuality"
-                                                            Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawCenteredSquare}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel MouseUp="BtnDrawCircle_Click" Margin="0,0,0,0"
-                                                                         Height="38" Width="32" Orientation="Vertical">
-                                                        <Image
-                                                            Source="{DynamicResource GeoIconCircle}"
-                                                            RenderOptions.BitmapScalingMode="HighQuality"
-                                                            Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawCenteredCircle}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel MouseUp="BtnDrawDashedCircle_Click"
-                                                                         Margin="0,0,0,0" Height="38" Width="32"
-                                                                         Orientation="Vertical">
-                                                        <Image
-                                                            Source="{DynamicResource GeoIconDashedCircle}"
-                                                            RenderOptions.BitmapScalingMode="HighQuality"
-                                                            Margin="0,4,0,2"
-                                                            Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawCenteredDashedCircle}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel MouseUp="BtnDrawCenterEllipse_Click"
-                                                                         Margin="0,0,0,0" Height="38" Width="32"
-                                                                         Orientation="Vertical">
-                                                        <Image
-                                                            Source="{DynamicResource GeoIconEllipseCenter}"
-                                                            RenderOptions.BitmapScalingMode="HighQuality"
-                                                            Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawCenteredEllipse}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <!--<Image Name="BoardImageDrawLine" Margin="16,12,0,12" MouseDown="Image_MouseDown" MouseUp="BtnDrawLine_Click" Source="{DynamicResource DrawShapeImageSource.Line}"/>-->
-                                                    <!--<Image Name="BoardImageDrawDashedLine" Margin="0,12,0,12" MouseDown="Image_MouseDown" MouseUp="BtnDrawDashedLine_Click" Source="{DynamicResource DrawShapeImageSource.DashedLine}"/>-->
-                                                    <!--<Image Name="BoardImageDrawDotLine" Margin="0,12,0,12" MouseDown="Image_MouseDown" MouseUp="BtnDrawDotLine_Click" Source="{DynamicResource DrawShapeImageSource.DotLine}"/>-->
-                                                    <!--<Image Name="BoardImageDrawArrow" Margin="0,12,0,12" MouseDown="Image_MouseDown" MouseUp="BtnDrawArrow_Click" Source="{DynamicResource DrawShapeImageSource.ArrowLine}"/>-->
-                                                    <!--<Image Name="BoardImageDrawParallelLine" Margin="0,11.5,16,11.5" MouseDown="Image_MouseDown" MouseUp="BtnDrawParallelLine_Click" Source="{DynamicResource DrawShapeImageSource.ParallelLine}"/>-->
+                                                    <controls:GeometryButton x:Name="BoardImageDrawLine" IconSource="{DynamicResource GeoIconLine}" Label="{i18n:I18n Key=Geometry_DrawLine}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawLine_Click" />
+                                                    <controls:GeometryButton x:Name="BoardImageDrawDashedLine" IconSource="{DynamicResource GeoIconDashedLine}" Label="{i18n:I18n Key=Geometry_DrawDashedLine}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawDashedLine_Click" />
+                                                    <controls:GeometryButton x:Name="BoardImageDrawDotLine" IconSource="{DynamicResource GeoIconDotLine}" Label="{i18n:I18n Key=Geometry_DrawDottedLine}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawDotLine_Click" />
+                                                    <controls:GeometryButton x:Name="BoardImageDrawArrow" IconSource="{DynamicResource GeoIconArrow}" Label="{i18n:I18n Key=Geometry_DrawArrow}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawArrow_Click" />
+                                                    <controls:GeometryButton x:Name="BoardImageDrawParallelLine" IconSource="{DynamicResource GeoIconParallelLine}" Label="{i18n:I18n Key=Geometry_DrawParallelLines}" ButtonMouseDown="Image_MouseDown" ButtonMouseUp="BtnDrawParallelLine_Click" />
+                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconRectangleCenter}" Label="{i18n:I18n Key=Geometry_DrawCenteredSquare}" ButtonMouseUp="BtnDrawRectangleCenter_Click" />
+                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconCircle}" Label="{i18n:I18n Key=Geometry_DrawCenteredCircle}" ButtonMouseUp="BtnDrawCircle_Click" />
+                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconDashedCircle}" Label="{i18n:I18n Key=Geometry_DrawCenteredDashedCircle}" ButtonMouseUp="BtnDrawDashedCircle_Click" />
+                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconEllipseCenter}" Label="{i18n:I18n Key=Geometry_DrawCenteredEllipse}" ButtonMouseUp="BtnDrawCenterEllipse_Click" />
                                                     <Image Visibility="Collapsed" Margin="14,9,0,9"
                                                            MouseUp="BtnDrawCoordinate1_Click"
                                                            Source="{DynamicResource DrawShapeImageSource.Coordinate1}" />
@@ -8197,36 +8116,10 @@
                                                 </ikw:SimpleStackPanel>
                                                 <ikw:SimpleStackPanel Orientation="Horizontal" Height="38" Spacing="2"
                                                                      Margin="4,0,4,6">
-                                                    <ikw:SimpleStackPanel MouseUp="BtnDrawCuboid_Click" Margin="0,0,0,0"
-                                                                         Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="{DynamicResource GeoIconCuboid}"
-                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                               Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawCuboid}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel MouseUp="BtnDrawRectangle_Click"
-                                                                         Margin="0,0,0,0"
-                                                                         Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="{DynamicResource GeoIconRectangle}"
-                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                               Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawSquare}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel MouseUp="BtnDrawCylinder_Click"
-                                                                         Margin="0,0,0,0"
-                                                                         Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="{DynamicResource GeoIconCylinder}"
-                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                               Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawCylinder}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
-                                                    <ikw:SimpleStackPanel MouseUp="BtnDrawCone_Click" Margin="0,0,0,0"
-                                                                         Height="38" Width="32" Orientation="Vertical">
-                                                        <Image Source="{DynamicResource GeoIconCone}"
-                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                               Margin="0,4,0,2" Height="19" Width="19" />
-                                                        <Label Content="{i18n:I18n Key=Geometry_DrawCone}" FontSize="8" HorizontalAlignment="Center" />
-                                                    </ikw:SimpleStackPanel>
+                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconCuboid}" Label="{i18n:I18n Key=Geometry_DrawCuboid}" ButtonMouseUp="BtnDrawCuboid_Click" />
+                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconRectangle}" Label="{i18n:I18n Key=Geometry_DrawSquare}" ButtonMouseUp="BtnDrawRectangle_Click" />
+                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconCylinder}" Label="{i18n:I18n Key=Geometry_DrawCylinder}" ButtonMouseUp="BtnDrawCylinder_Click" />
+                                                    <controls:GeometryButton IconSource="{DynamicResource GeoIconCone}" Label="{i18n:I18n Key=Geometry_DrawCone}" ButtonMouseUp="BtnDrawCone_Click" />
                                                 </ikw:SimpleStackPanel>
                                                 <ikw:SimpleStackPanel Visibility="Collapsed" Height="50" Spacing="10"
                                                                      Orientation="Horizontal">
