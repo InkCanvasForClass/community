@@ -283,26 +283,26 @@ namespace Ink_Canvas
             {
                 // 亮系
                 // 亮色的红色
-                BorderPenColorRed.Background = new SolidColorBrush(Color.FromRgb(239, 68, 68));
-                BoardBorderPenColorRed.Background = new SolidColorBrush(Color.FromRgb(239, 68, 68));
+                BorderPenColorRed.Color = Color.FromRgb(239, 68, 68);
+                BoardBorderPenColorRed.Color = Color.FromRgb(239, 68, 68);
                 // 亮色的绿色
-                BorderPenColorGreen.Background = new SolidColorBrush(Color.FromRgb(34, 197, 94));
-                BoardBorderPenColorGreen.Background = new SolidColorBrush(Color.FromRgb(34, 197, 94));
+                BorderPenColorGreen.Color = Color.FromRgb(34, 197, 94);
+                BoardBorderPenColorGreen.Color = Color.FromRgb(34, 197, 94);
                 // 亮色的蓝色
-                BorderPenColorBlue.Background = new SolidColorBrush(Color.FromRgb(59, 130, 246));
-                BoardBorderPenColorBlue.Background = new SolidColorBrush(Color.FromRgb(59, 130, 246));
+                BorderPenColorBlue.Color = Color.FromRgb(59, 130, 246);
+                BoardBorderPenColorBlue.Color = Color.FromRgb(59, 130, 246);
                 // 亮色的黄色
-                BorderPenColorYellow.Background = new SolidColorBrush(Color.FromRgb(250, 204, 21));
-                BoardBorderPenColorYellow.Background = new SolidColorBrush(Color.FromRgb(250, 204, 21));
+                BorderPenColorYellow.Color = Color.FromRgb(250, 204, 21);
+                BoardBorderPenColorYellow.Color = Color.FromRgb(250, 204, 21);
                 // 亮色的粉色
-                BorderPenColorPink.Background = new SolidColorBrush(Color.FromRgb(236, 72, 153));
-                BoardBorderPenColorPink.Background = new SolidColorBrush(Color.FromRgb(236, 72, 153));
+                BorderPenColorPink.Color = Color.FromRgb(236, 72, 153);
+                BoardBorderPenColorPink.Color = Color.FromRgb(236, 72, 153);
                 // 亮色的Teal
-                BorderPenColorTeal.Background = new SolidColorBrush(Color.FromRgb(20, 184, 166));
-                BoardBorderPenColorTeal.Background = new SolidColorBrush(Color.FromRgb(20, 184, 166));
+                BorderPenColorTeal.Color = Color.FromRgb(20, 184, 166);
+                BoardBorderPenColorTeal.Color = Color.FromRgb(20, 184, 166);
                 // 亮色的Orange
-                BorderPenColorOrange.Background = new SolidColorBrush(Color.FromRgb(249, 115, 22));
-                BoardBorderPenColorOrange.Background = new SolidColorBrush(Color.FromRgb(249, 115, 22));
+                BorderPenColorOrange.Color = Color.FromRgb(249, 115, 22);
+                BoardBorderPenColorOrange.Color = Color.FromRgb(249, 115, 22);
 
                 var newImageSource = new BitmapImage();
                 newImageSource.BeginInit();
@@ -319,26 +319,26 @@ namespace Ink_Canvas
             {
                 // 暗系
                 // 暗色的红色
-                BorderPenColorRed.Background = new SolidColorBrush(Color.FromRgb(220, 38, 38));
-                BoardBorderPenColorRed.Background = new SolidColorBrush(Color.FromRgb(220, 38, 38));
+                BorderPenColorRed.Color = Color.FromRgb(220, 38, 38);
+                BoardBorderPenColorRed.Color = Color.FromRgb(220, 38, 38);
                 // 暗色的绿色
-                BorderPenColorGreen.Background = new SolidColorBrush(Color.FromRgb(22, 163, 74));
-                BoardBorderPenColorGreen.Background = new SolidColorBrush(Color.FromRgb(22, 163, 74));
+                BorderPenColorGreen.Color = Color.FromRgb(22, 163, 74);
+                BoardBorderPenColorGreen.Color = Color.FromRgb(22, 163, 74);
                 // 暗色的蓝色
-                BorderPenColorBlue.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                BoardBorderPenColorBlue.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
+                BorderPenColorBlue.Color = Color.FromRgb(37, 99, 235);
+                BoardBorderPenColorBlue.Color = Color.FromRgb(37, 99, 235);
                 // 暗色的黄色
-                BorderPenColorYellow.Background = new SolidColorBrush(Color.FromRgb(234, 179, 8));
-                BoardBorderPenColorYellow.Background = new SolidColorBrush(Color.FromRgb(234, 179, 8));
+                BorderPenColorYellow.Color = Color.FromRgb(234, 179, 8);
+                BoardBorderPenColorYellow.Color = Color.FromRgb(234, 179, 8);
                 // 暗色的紫色对应亮色的粉色
-                BorderPenColorPink.Background = new SolidColorBrush(Color.FromRgb(147, 51, 234));
-                BoardBorderPenColorPink.Background = new SolidColorBrush(Color.FromRgb(147, 51, 234));
+                BorderPenColorPink.Color = Color.FromRgb(147, 51, 234);
+                BoardBorderPenColorPink.Color = Color.FromRgb(147, 51, 234);
                 // 暗色的Teal
-                BorderPenColorTeal.Background = new SolidColorBrush(Color.FromRgb(13, 148, 136));
-                BoardBorderPenColorTeal.Background = new SolidColorBrush(Color.FromRgb(13, 148, 136));
+                BorderPenColorTeal.Color = Color.FromRgb(13, 148, 136);
+                BoardBorderPenColorTeal.Color = Color.FromRgb(13, 148, 136);
                 // 暗色的Orange
-                BorderPenColorOrange.Background = new SolidColorBrush(Color.FromRgb(234, 88, 12));
-                BoardBorderPenColorOrange.Background = new SolidColorBrush(Color.FromRgb(234, 88, 12));
+                BorderPenColorOrange.Color = Color.FromRgb(234, 88, 12);
+                BoardBorderPenColorOrange.Color = Color.FromRgb(234, 88, 12);
 
                 var newImageSource = new BitmapImage();
                 newImageSource.BeginInit();
@@ -353,127 +353,129 @@ namespace Ink_Canvas
             }
 
             // 改变选中提示
-            ViewboxBtnColorBlackContent.Visibility = Visibility.Collapsed;
-            ViewboxBtnColorBlueContent.Visibility = Visibility.Collapsed;
-            ViewboxBtnColorGreenContent.Visibility = Visibility.Collapsed;
-            ViewboxBtnColorRedContent.Visibility = Visibility.Collapsed;
-            ViewboxBtnColorYellowContent.Visibility = Visibility.Collapsed;
-            ViewboxBtnColorWhiteContent.Visibility = Visibility.Collapsed;
-            ViewboxBtnColorPinkContent.Visibility = Visibility.Collapsed;
-            ViewboxBtnColorTealContent.Visibility = Visibility.Collapsed;
-            ViewboxBtnColorOrangeContent.Visibility = Visibility.Collapsed;
+            BorderPenColorBlack.IsChecked = false;
+            BorderPenColorBlue.IsChecked = false;
+            BorderPenColorGreen.IsChecked = false;
+            BorderPenColorRed.IsChecked = false;
+            BorderPenColorYellow.IsChecked = false;
+            BorderPenColorWhite.IsChecked = false;
+            BorderPenColorPink.IsChecked = false;
+            BorderPenColorTeal.IsChecked = false;
+            BorderPenColorOrange.IsChecked = false;
 
-            BoardViewboxBtnColorBlackContent.Visibility = Visibility.Collapsed;
-            BoardViewboxBtnColorBlueContent.Visibility = Visibility.Collapsed;
-            BoardViewboxBtnColorGreenContent.Visibility = Visibility.Collapsed;
-            BoardViewboxBtnColorRedContent.Visibility = Visibility.Collapsed;
-            BoardViewboxBtnColorYellowContent.Visibility = Visibility.Collapsed;
-            BoardViewboxBtnColorWhiteContent.Visibility = Visibility.Collapsed;
-            BoardViewboxBtnColorPinkContent.Visibility = Visibility.Collapsed;
-            BoardViewboxBtnColorTealContent.Visibility = Visibility.Collapsed;
-            BoardViewboxBtnColorOrangeContent.Visibility = Visibility.Collapsed;
+            BoardBorderPenColorBlack.IsChecked = false;
+            BoardBorderPenColorBlue.IsChecked = false;
+            BoardBorderPenColorGreen.IsChecked = false;
+            BoardBorderPenColorRed.IsChecked = false;
+            BoardBorderPenColorYellow.IsChecked = false;
+            BoardBorderPenColorWhite.IsChecked = false;
+            BoardBorderPenColorPink.IsChecked = false;
+            BoardBorderPenColorTeal.IsChecked = false;
+            BoardBorderPenColorOrange.IsChecked = false;
 
-            HighlighterPenViewboxBtnColorBlackContent.Visibility = Visibility.Collapsed;
-            HighlighterPenViewboxBtnColorBlueContent.Visibility = Visibility.Collapsed;
-            HighlighterPenViewboxBtnColorGreenContent.Visibility = Visibility.Collapsed;
-            HighlighterPenViewboxBtnColorOrangeContent.Visibility = Visibility.Collapsed;
-            HighlighterPenViewboxBtnColorPurpleContent.Visibility = Visibility.Collapsed;
-            HighlighterPenViewboxBtnColorRedContent.Visibility = Visibility.Collapsed;
-            HighlighterPenViewboxBtnColorTealContent.Visibility = Visibility.Collapsed;
-            HighlighterPenViewboxBtnColorWhiteContent.Visibility = Visibility.Collapsed;
-            HighlighterPenViewboxBtnColorYellowContent.Visibility = Visibility.Collapsed;
-            HighlighterPenViewboxBtnColorZincContent.Visibility = Visibility.Collapsed;
+            HighlighterPenColorBlack.IsChecked = false;
+            HighlighterPenColorBlue.IsChecked = false;
+            HighlighterPenColorGreen.IsChecked = false;
+            HighlighterPenColorOrange.IsChecked = false;
+            HighlighterPenPenColorPurple.IsChecked = false;
+            HighlighterPenColorRed.IsChecked = false;
+            HighlighterPenColorTeal.IsChecked = false;
+            HighlighterPenColorWhite.IsChecked = false;
+            HighlighterPenColorYellow.IsChecked = false;
+            HighlighterPenColorZinc.IsChecked = false;
 
-            BoardHighlighterPenViewboxBtnColorBlackContent.Visibility = Visibility.Collapsed;
-            BoardHighlighterPenViewboxBtnColorBlueContent.Visibility = Visibility.Collapsed;
-            BoardHighlighterPenViewboxBtnColorGreenContent.Visibility = Visibility.Collapsed;
-            BoardHighlighterPenViewboxBtnColorOrangeContent.Visibility = Visibility.Collapsed;
-            BoardHighlighterPenViewboxBtnColorPurpleContent.Visibility = Visibility.Collapsed;
-            BoardHighlighterPenViewboxBtnColorRedContent.Visibility = Visibility.Collapsed;
-            BoardHighlighterPenViewboxBtnColorTealContent.Visibility = Visibility.Collapsed;
-            BoardHighlighterPenViewboxBtnColorWhiteContent.Visibility = Visibility.Collapsed;
-            BoardHighlighterPenViewboxBtnColorYellowContent.Visibility = Visibility.Collapsed;
-            BoardHighlighterPenViewboxBtnColorZincContent.Visibility = Visibility.Collapsed;
+            BoardHighlighterPenColorBlack.IsChecked = false;
+            BoardHighlighterPenColorBlue.IsChecked = false;
+            BoardHighlighterPenColorGreen.IsChecked = false;
+            BoardHighlighterPenColorOrange.IsChecked = false;
+            BoardHighlighterPenPenColorPurple.IsChecked = false;
+            BoardHighlighterPenColorRed.IsChecked = false;
+            BoardHighlighterPenColorTeal.IsChecked = false;
+            BoardHighlighterPenColorWhite.IsChecked = false;
+            BoardHighlighterPenColorYellow.IsChecked = false;
+            BoardHighlighterPenColorZinc.IsChecked = false;
 
             switch (inkColor)
             {
                 case 0:
-                    ViewboxBtnColorBlackContent.Visibility = Visibility.Visible;
-                    BoardViewboxBtnColorBlackContent.Visibility = Visibility.Visible;
+                    BorderPenColorBlack.IsChecked = true;
+                    BoardBorderPenColorBlack.IsChecked = true;
                     break;
                 case 1:
-                    ViewboxBtnColorRedContent.Visibility = Visibility.Visible;
-                    BoardViewboxBtnColorRedContent.Visibility = Visibility.Visible;
+                    BorderPenColorRed.IsChecked = true;
+                    BoardBorderPenColorRed.IsChecked = true;
                     break;
                 case 2:
-                    ViewboxBtnColorGreenContent.Visibility = Visibility.Visible;
-                    BoardViewboxBtnColorGreenContent.Visibility = Visibility.Visible;
+                    BorderPenColorGreen.IsChecked = true;
+                    BoardBorderPenColorGreen.IsChecked = true;
                     break;
                 case 3:
-                    ViewboxBtnColorBlueContent.Visibility = Visibility.Visible;
-                    BoardViewboxBtnColorBlueContent.Visibility = Visibility.Visible;
+                    BorderPenColorBlue.IsChecked = true;
+                    BoardBorderPenColorBlue.IsChecked = true;
                     break;
                 case 4:
-                    ViewboxBtnColorYellowContent.Visibility = Visibility.Visible;
-                    BoardViewboxBtnColorYellowContent.Visibility = Visibility.Visible;
+                    BorderPenColorYellow.IsChecked = true;
+                    BoardBorderPenColorYellow.IsChecked = true;
                     break;
                 case 5:
-                    ViewboxBtnColorWhiteContent.Visibility = Visibility.Visible;
-                    BoardViewboxBtnColorWhiteContent.Visibility = Visibility.Visible;
+                    BorderPenColorWhite.IsChecked = true;
+                    BoardBorderPenColorWhite.IsChecked = true;
                     break;
                 case 6:
-                    ViewboxBtnColorPinkContent.Visibility = Visibility.Visible;
-                    BoardViewboxBtnColorPinkContent.Visibility = Visibility.Visible;
+                    BorderPenColorPink.IsChecked = true;
+                    BoardBorderPenColorPink.IsChecked = true;
                     break;
                 case 7:
-                    ViewboxBtnColorTealContent.Visibility = Visibility.Visible;
+                    BorderPenColorTeal.IsChecked = true;
+                    BoardBorderPenColorTeal.IsChecked = true;
                     break;
                 case 8:
-                    ViewboxBtnColorOrangeContent.Visibility = Visibility.Visible;
+                    BorderPenColorOrange.IsChecked = true;
+                    BoardBorderPenColorOrange.IsChecked = true;
                     break;
             }
 
             switch (highlighterColor)
             {
                 case 100:
-                    HighlighterPenViewboxBtnColorBlackContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorBlackContent.Visibility = Visibility.Visible;
+                    HighlighterPenColorBlack.IsChecked = true;
+                    BoardHighlighterPenColorBlack.IsChecked = true;
                     break;
                 case 101:
-                    HighlighterPenViewboxBtnColorWhiteContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorWhiteContent.Visibility = Visibility.Visible;
+                    HighlighterPenColorWhite.IsChecked = true;
+                    BoardHighlighterPenColorWhite.IsChecked = true;
                     break;
                 case 102:
-                    HighlighterPenViewboxBtnColorRedContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorRedContent.Visibility = Visibility.Visible;
+                    HighlighterPenColorRed.IsChecked = true;
+                    BoardHighlighterPenColorRed.IsChecked = true;
                     break;
                 case 103:
-                    HighlighterPenViewboxBtnColorYellowContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorYellowContent.Visibility = Visibility.Visible;
+                    HighlighterPenColorYellow.IsChecked = true;
+                    BoardHighlighterPenColorYellow.IsChecked = true;
                     break;
                 case 104:
-                    HighlighterPenViewboxBtnColorGreenContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorGreenContent.Visibility = Visibility.Visible;
+                    HighlighterPenColorGreen.IsChecked = true;
+                    BoardHighlighterPenColorGreen.IsChecked = true;
                     break;
                 case 105:
-                    HighlighterPenViewboxBtnColorZincContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorZincContent.Visibility = Visibility.Visible;
+                    HighlighterPenColorZinc.IsChecked = true;
+                    BoardHighlighterPenColorZinc.IsChecked = true;
                     break;
                 case 106:
-                    HighlighterPenViewboxBtnColorBlueContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorBlueContent.Visibility = Visibility.Visible;
+                    HighlighterPenColorBlue.IsChecked = true;
+                    BoardHighlighterPenColorBlue.IsChecked = true;
                     break;
                 case 107:
-                    HighlighterPenViewboxBtnColorPurpleContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorPurpleContent.Visibility = Visibility.Visible;
+                    HighlighterPenPenColorPurple.IsChecked = true;
+                    BoardHighlighterPenPenColorPurple.IsChecked = true;
                     break;
                 case 108:
-                    HighlighterPenViewboxBtnColorTealContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorTealContent.Visibility = Visibility.Visible;
+                    HighlighterPenColorTeal.IsChecked = true;
+                    BoardHighlighterPenColorTeal.IsChecked = true;
                     break;
                 case 109:
-                    HighlighterPenViewboxBtnColorOrangeContent.Visibility = Visibility.Visible;
-                    BoardHighlighterPenViewboxBtnColorOrangeContent.Visibility = Visibility.Visible;
+                    HighlighterPenColorOrange.IsChecked = true;
+                    BoardHighlighterPenColorOrange.IsChecked = true;
                     break;
             }
 
