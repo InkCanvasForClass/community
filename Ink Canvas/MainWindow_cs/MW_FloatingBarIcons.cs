@@ -462,12 +462,12 @@ namespace Ink_Canvas
                         BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
                         BoardSelect.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
                         BoardEraser.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
-                        BoardSelectGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardEraserGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardSelectLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                        BoardEraserLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                        BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                         BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                         BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
                         BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
@@ -477,12 +477,12 @@ namespace Ink_Canvas
                         BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
                         BoardSelect.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
                         BoardEraser.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
-                        BoardSelectGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardEraserGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardSelectLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                        BoardEraserLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardSelect.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                        BoardEraser.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                         BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                         BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
                         BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
@@ -514,8 +514,8 @@ namespace Ink_Canvas
                             Pen_Icon.Icon.Geometry = Geometry.Parse(GetCorrectIcon("pen", true));
                             BoardPen.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardPenGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
-                            BoardPenLabel.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                            BoardPen.Foreground = new SolidColorBrush(Colors.GhostWhite);
 
                             SetFloatingBarHighlightPosition("pen");
                             break;
@@ -527,8 +527,8 @@ namespace Ink_Canvas
                                 Geometry.Parse(GetCorrectIcon("eraserCircle", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardEraserGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
-                            BoardEraserLabel.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                            BoardEraser.Foreground = new SolidColorBrush(Colors.GhostWhite);
 
                             SetFloatingBarHighlightPosition("eraser");
                             break;
@@ -540,8 +540,8 @@ namespace Ink_Canvas
                                 Geometry.Parse(GetCorrectIcon("eraserStroke", true));
                             BoardEraser.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardEraser.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardEraserGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
-                            BoardEraserLabel.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            BoardEraser.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                            BoardEraser.Foreground = new SolidColorBrush(Colors.GhostWhite);
 
                             SetFloatingBarHighlightPosition("eraserByStrokes");
                             break;
@@ -553,8 +553,8 @@ namespace Ink_Canvas
                                 Geometry.Parse(GetCorrectIcon("lassoSelect", true));
                             BoardSelect.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
                             BoardSelect.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                            BoardSelectGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
-                            BoardSelectLabel.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                            BoardSelect.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                            BoardSelect.Foreground = new SolidColorBrush(Colors.GhostWhite);
 
                             SetFloatingBarHighlightPosition("select");
                             break;
@@ -570,15 +570,15 @@ namespace Ink_Canvas
                             {
                                 BoardPen.Background = new SolidColorBrush(Color.FromRgb(42, 42, 42));
                                 BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(85, 85, 85));
-                                BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
-                                BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                                BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(255, 255, 255));
+                                BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(255, 255, 255));
                             }
                             else
                             {
                                 BoardPen.Background = new SolidColorBrush(Color.FromRgb(244, 244, 245));
                                 BoardPen.BorderBrush = new SolidColorBrush(Color.FromRgb(161, 161, 170));
-                                BoardPenGeometry.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
-                                BoardPenLabel.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                                BoardPen.IconGeometryDrawing.Brush = new SolidColorBrush(Color.FromRgb(24, 24, 27));
+                                BoardPen.Foreground = new SolidColorBrush(Color.FromRgb(24, 24, 27));
                             }
 
                             SetFloatingBarHighlightPosition("cursor");

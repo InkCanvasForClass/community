@@ -1,0 +1,40 @@
+<UserControl x:Class="Ink_Canvas.Controls.BoardToolbarButton"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:ikw="http://schemas.inkore.net/lib/ui/wpf"
+             mc:Ignorable="d"
+             d:DesignHeight="50" d:DesignWidth="60">
+    <Border x:Name="ButtonBorder"
+            Width="60" Height="50"
+            MouseDown="ButtonBorder_MouseDown"
+            MouseUp="ButtonBorder_MouseUp"
+            Background="{DynamicResource BoardFloatBarBackground}"
+            Opacity="1"
+            BorderThickness="1"
+            BorderBrush="{DynamicResource BoardFloatBarBorderBrush}">
+        <Grid Margin="6,6,6,4">
+            <Image x:Name="ButtonImage"
+                   VerticalAlignment="Top"
+                   RenderOptions.BitmapScalingMode="HighQuality"
+                   Height="20" Width="20">
+                <Image.Source>
+                    <DrawingImage>
+                        <DrawingImage.Drawing>
+                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
+                                <GeometryDrawing x:Name="IconGeometryInternal"
+                                                 Brush="{DynamicResource IconForeground}" />
+                            </DrawingGroup>
+                        </DrawingImage.Drawing>
+                    </DrawingImage>
+                </Image.Source>
+            </Image>
+            <TextBlock x:Name="LabelTextBlock"
+                       Foreground="{DynamicResource FloatBarForeground}"
+                       VerticalAlignment="Bottom"
+                       HorizontalAlignment="Center"
+                       FontSize="12" />
+        </Grid>
+    </Border>
+</UserControl>

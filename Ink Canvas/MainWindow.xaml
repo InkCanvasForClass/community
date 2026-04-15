@@ -4854,81 +4854,29 @@
                                             </Border>
                                         </Grid>
                                     </Border>
-                                    <Border Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            MouseUp="BoardChangeBackgroundColorBtn_MouseUp" CornerRadius="0,5,5,0"
-                                            Background="{DynamicResource BoardFloatBarBackground}" Opacity="1" BorderThickness="0,1,1,1"
-                                            BorderBrush="{DynamicResource BoardFloatBarBorderBrush}">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F0 M24,24z M0,0z M4.71815,3.98345C6.64142,2.23541 9.19629,1.17001 12,1.17001 17.9812,1.17001 22.83,6.01877 22.83,12 22.83,17.9813 17.9812,22.83 12,22.83 11.6262,22.83 11.2568,22.8111 10.8927,22.7741 5.8167,22.2586 1.77699,18.2377 1.2325,13.1703 1.22536,13.1039 1.21882,13.0373 1.21289,12.9705 1.20871,12.9234 1.20483,12.8762 1.20125,12.8289 1.18054,12.5553 1.17,12.2789 1.17,12 1.17,9.41057 2.07878,7.03339 3.59479,5.17001 3.9391,4.74681 4.31473,4.35011 4.71815,3.98345z M12,20.83C16.8767,20.83 20.83,16.8767 20.83,12 20.83,7.12334 16.8767,3.17001 12,3.17001L12,20.83z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_Background}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BoardChangeBackgroundColorBtn"
+                                                                 Position="Last"
+                                                                 Label="{i18n:I18n Key=Board_Background}"
+                                                                 IconGeometry="F0 M24,24z M0,0z M4.71815,3.98345C6.64142,2.23541 9.19629,1.17001 12,1.17001 17.9812,1.17001 22.83,6.01877 22.83,12 22.83,17.9813 17.9812,22.83 12,22.83 11.6262,22.83 11.2568,22.8111 10.8927,22.7741 5.8167,22.2586 1.77699,18.2377 1.2325,13.1703 1.22536,13.1039 1.21882,13.0373 1.21289,12.9705 1.20871,12.9234 1.20483,12.8762 1.20125,12.8289 1.18054,12.5553 1.17,12.2789 1.17,12 1.17,9.41057 2.07878,7.03339 3.59479,5.17001 3.9391,4.74681 4.31473,4.35011 4.71815,3.98345z M12,20.83C16.8767,20.83 20.83,16.8767 20.83,12 20.83,7.12334 16.8767,3.17001 12,3.17001L12,20.83z"
+                                                                 ButtonMouseDown="Border_MouseDown"
+                                                                 ButtonMouseUp="BoardChangeBackgroundColorBtn_MouseUp" />
                                 </ikw:SimpleStackPanel>
                             </Border>
 
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,5,0">
                                 <ikw:SimpleStackPanel Orientation="Horizontal">
-                                    <Border x:Name="BoardSelect" Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            BorderThickness="1,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            MouseUp="SymbolIconSelect_MouseUp" CornerRadius="5,0,0,5"
-                                            Background="{DynamicResource BoardFloatBarBackground}"
-                                            Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing x:Name="BoardSelectGeometry"
-                                                                    Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M22.7989,10.1653L1.14304,1.14304 10.1653,22.7989 12.8305,14.9518 19.6892,21.8105 21.8105,19.6892 14.9518,12.8305 22.7989,10.1653z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_Select}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       Name="BoardSelectLabel"
-                                                       HorizontalAlignment="Center" FontSize="12" />
-                                        </Grid>
-                                    </Border>
-                                    <Border x:Name="BoardPen" Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            BorderThickness="0,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            MouseUp="PenIcon_Click" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image x:Name="BoardPenIcon" VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing x:Name="BoardPenGeometry"
-                                                                    Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M20.4786,1.42438C19.9985,1.23743 19.4847,1.15194 18.9698,1.17319 18.4549,1.19444 17.9499,1.32197 17.4869,1.54789 17.0368,1.76752 16.6358,2.07554 16.3083,2.45361L3.85516,14.9067 9.08243,20.134 21.5311,7.68529C21.9113,7.36382 22.223,6.96912 22.447,6.52438 22.6786,6.06462 22.8113,5.56167 22.8365,5.04763 22.8616,4.5336 22.7787,4.02012 22.593,3.54002 22.4073,3.05994 22.1232,2.62403 21.759,2.25988 21.3949,1.89574 20.9587,1.61132 20.4786,1.42438z M7.28056,21.1605L2.8286,16.7086 1.15912,22.83 7.28056,21.1605z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_Pen}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       Name="BoardPenLabel"
-                                                       HorizontalAlignment="Center" FontSize="12" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BoardSelect"
+                                                                 Position="First"
+                                                                 Label="{i18n:I18n Key=Board_Select}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M22.7989,10.1653L1.14304,1.14304 10.1653,22.7989 12.8305,14.9518 19.6892,21.8105 21.8105,19.6892 14.9518,12.8305 22.7989,10.1653z"
+                                                                 ButtonMouseDown="Border_MouseDown"
+                                                                 ButtonMouseUp="SymbolIconSelect_MouseUp" />
+                                    <controls:BoardToolbarButton x:Name="BoardPen"
+                                                                 Position="Middle"
+                                                                 Label="{i18n:I18n Key=Board_Pen}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M20.4786,1.42438C19.9985,1.23743 19.4847,1.15194 18.9698,1.17319 18.4549,1.19444 17.9499,1.32197 17.4869,1.54789 17.0368,1.76752 16.6358,2.07554 16.3083,2.45361L3.85516,14.9067 9.08243,20.134 21.5311,7.68529C21.9113,7.36382 22.223,6.96912 22.447,6.52438 22.6786,6.06462 22.8113,5.56167 22.8365,5.04763 22.8616,4.5336 22.7787,4.02012 22.593,3.54002 22.4073,3.05994 22.1232,2.62403 21.759,2.25988 21.3949,1.89574 20.9587,1.61132 20.4786,1.42438z M7.28056,21.1605L2.8286,16.7086 1.15912,22.83 7.28056,21.1605z"
+                                                                 ButtonMouseDown="Border_MouseDown"
+                                                                 ButtonMouseUp="PenIcon_Click" />
                                     <Border>
                                         <Grid Margin="0,5,0,5" Width="0">
                                             <Grid Name="BoardPenPaletteGrid" Margin="-160,-200,-53,50"
@@ -5283,29 +5231,12 @@
 
                                         </Grid>
                                     </Border>
-                                    <Border x:Name="BoardEraser" Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            BorderThickness="0,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            MouseUp="BoardEraserIcon_Click" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing x:Name="BoardEraserGeometry"
-                                                                    Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M15.6314,20.7262L22.7921,13.5655C24.3494,12.141,24.2819,9.81776,22.8105,8.34633L16.7793,2.31508C15.3547,0.757753,13.0315,0.825236,11.5601,2.29666L4.38099,9.47574 15.6314,20.7262z M14.2172,22.1404L2.96677,10.89 1.20761,12.6491C-0.34971,14.0737,-0.281711,16.3974,1.18971,17.8688L6.15089,22.83 13.5276,22.83 14.2172,22.1404z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_Eraser}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       Name="BoardEraserLabel"
-                                                       HorizontalAlignment="Center" FontSize="12" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BoardEraser"
+                                                                 Position="Middle"
+                                                                 Label="{i18n:I18n Key=Board_Eraser}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M15.6314,20.7262L22.7921,13.5655C24.3494,12.141,24.2819,9.81776,22.8105,8.34633L16.7793,2.31508C15.3547,0.757753,13.0315,0.825236,11.5601,2.29666L4.38099,9.47574 15.6314,20.7262z M14.2172,22.1404L2.96677,10.89 1.20761,12.6491C-0.34971,14.0737,-0.281711,16.3974,1.18971,17.8688L6.15089,22.83 13.5276,22.83 14.2172,22.1404z"
+                                                                 ButtonMouseDown="Border_MouseDown"
+                                                                 ButtonMouseUp="BoardEraserIcon_Click" />
                                     <Border>
                                         <Grid RenderTransformOrigin="0,1" Margin="-133,-172,13,55">
                                             <Grid.RenderTransform>
@@ -5514,31 +5445,12 @@
                                                        HorizontalAlignment="Center" FontSize="12" />
                                         </Grid>
                                     </Border>
-                                    <Border x:Name="BoardGeometry" Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            BorderThickness="0,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            MouseUp="ImageDrawShape_MouseUp" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M17.8604,10.7597L12.0068,1.17001 6.13961,10.7597 17.8604,10.7597z" />
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M10.9345,13.2403L1.34476,13.2403 1.34476,22.83 10.9345,22.83 10.9345,13.2403z" />
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M17.8604,13.2403C15.2122,13.2403 13.0655,15.387 13.0655,18.0352 13.0655,20.6833 15.2122,22.83 17.8604,22.83 20.5085,22.83 22.6552,20.6833 22.6552,18.0352 22.6552,15.387 20.5085,13.2403 17.8604,13.2403z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_Shape}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BoardGeometry"
+                                                                 Position="Middle"
+                                                                 Label="{i18n:I18n Key=Board_Shape}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M17.8604,10.7597L12.0068,1.17001 6.13961,10.7597 17.8604,10.7597z M10.9345,13.2403L1.34476,13.2403 1.34476,22.83 10.9345,22.83 10.9345,13.2403z M17.8604,13.2403C15.2122,13.2403 13.0655,15.387 13.0655,18.0352 13.0655,20.6833 15.2122,22.83 17.8604,22.83 20.5085,22.83 22.6552,20.6833 22.6552,18.0352 22.6552,15.387 20.5085,13.2403 17.8604,13.2403z"
+                                                                 ButtonMouseDown="Border_MouseDown"
+                                                                 ButtonMouseUp="ImageDrawShape_MouseUp" />
                                     <Border Width="0">
                                         <Border x:Name="BoardBorderDrawShape" Visibility="Visible"
                                                 Background="{DynamicResource FloatBarBackground}"
@@ -5687,27 +5599,12 @@
                                             </Viewbox>
                                         </Border>
                                     </Border>
-                                    <Border x:Name="BoardInsertImage" Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            BorderThickness="0,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            MouseUp="InsertImageOptions_MouseUp" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"/>
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_InsertImage}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BoardInsertImage"
+                                                                 Position="Last"
+                                                                 Label="{i18n:I18n Key=Board_InsertImage}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"
+                                                                 ButtonMouseDown="Border_MouseDown"
+                                                                 ButtonMouseUp="InsertImageOptions_MouseUp" />
                                     <Border>
                                         <!-- Image Insertion Options Panel -->
                                         <Grid RenderTransformOrigin="0,1" Margin="-110,-92,13,55">
