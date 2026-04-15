@@ -22,7 +22,8 @@ namespace Ink_Canvas.Controls
         private static void OnLabelChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var button = (BoardToolbarButton)d;
-            button.LabelTextBlock.Text = (string)e.NewValue;
+            if (button.LabelTextBlock != null)
+                button.LabelTextBlock.Text = (string)e.NewValue;
         }
 
         public string Label
@@ -38,7 +39,7 @@ namespace Ink_Canvas.Controls
         private static void OnIconGeometryChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var button = (BoardToolbarButton)d;
-            if (e.NewValue is string geometry && !string.IsNullOrEmpty(geometry))
+            if (button.IconGeometryInternal != null && e.NewValue is string geometry && !string.IsNullOrEmpty(geometry))
             {
                 button.IconGeometryInternal.Geometry = Geometry.Parse(geometry);
             }
@@ -73,7 +74,7 @@ namespace Ink_Canvas.Controls
         private static void OnIconBrushChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             var button = (BoardToolbarButton)d;
-            if (e.NewValue is Brush brush)
+            if (button.IconGeometryInternal != null && e.NewValue is Brush brush)
             {
                 button.IconGeometryInternal.Brush = brush;
             }
@@ -115,7 +116,16 @@ namespace Ink_Canvas.Controls
         public BoardToolbarButton()
         {
             InitializeComponent();
+            Loaded += BoardToolbarButton_Loaded;
+        }
+
+        private void BoardToolbarButton_Loaded(object sender, RoutedEventArgs e)
+        {
             UpdateCornerRadius(Position);
+            if (!string.IsNullOrEmpty(IconGeometry))
+            {
+                IconGeometryInternal.Geometry = Geometry.Parse(IconGeometry);
+            }
         }
 
         private void UpdateCornerRadius(ButtonPosition position)
