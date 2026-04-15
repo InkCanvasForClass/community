@@ -4877,10 +4877,9 @@
                                                                  IconGeometry="F1 M24,24z M0,0z M20.4786,1.42438C19.9985,1.23743 19.4847,1.15194 18.9698,1.17319 18.4549,1.19444 17.9499,1.32197 17.4869,1.54789 17.0368,1.76752 16.6358,2.07554 16.3083,2.45361L3.85516,14.9067 9.08243,20.134 21.5311,7.68529C21.9113,7.36382 22.223,6.96912 22.447,6.52438 22.6786,6.06462 22.8113,5.56167 22.8365,5.04763 22.8616,4.5336 22.7787,4.02012 22.593,3.54002 22.4073,3.05994 22.1232,2.62403 21.759,2.25988 21.3949,1.89574 20.9587,1.61132 20.4786,1.42438z M7.28056,21.1605L2.8286,16.7086 1.15912,22.83 7.28056,21.1605z"
                                                                  ButtonMouseDown="Border_MouseDown"
                                                                  ButtonMouseUp="PenIcon_Click" />
-                                    <Border>
-                                        <Grid Margin="0,5,0,5" Width="0">
-                                            <Grid Name="BoardPenPaletteGrid" Margin="-160,-200,-53,50"
-                                                  RenderTransformOrigin="0,1">
+                                    <Border Height="50">
+                                        <Grid Margin="-30,5,30,5" Width="0">
+                                            <Grid Name="BoardPenPaletteGrid" Margin="-96.5,-84" RenderTransformOrigin="0.5,1">
                                                 <Grid.RenderTransform>
                                                     <TransformGroup>
                                                         <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
@@ -5005,7 +5004,6 @@
                                                                     <ComboBox Height="30"
                                                                         VerticalAlignment="Center"
                                                                         Name="BoardComboBoxPenStyle"
-                                                                       
                                                                         SelectedIndex="1"
                                                                         SelectionChanged="ComboBoxPenStyle_SelectionChanged">
                                                                         <ComboBoxItem Content="实时笔锋"
@@ -5028,7 +5026,6 @@
                                                                         <ui:ToggleSwitch
                                                                             x:Name="BoardToggleSwitchEnableNibMode"
                                                                             MinWidth="0"
-                                                                           
                                                                             Width="80" Margin="10,0,0,0"
                                                                             Toggled="ToggleSwitchEnableNibMode_Toggled"
                                                                             IsOn="True" />
@@ -5041,7 +5038,6 @@
                                                                             VerticalAlignment="Center" />
                                                                         <ui:ToggleSwitch
                                                                             Foreground="{DynamicResource FloatBarForeground}"
-                                                                           
                                                                             Width="80"
                                                                             Toggled="ToggleSwitchEnableInkToShape_Toggled"
                                                                             MinWidth="0"
@@ -5056,7 +5052,6 @@
                                                                         <ui:ToggleSwitch
                                                                             x:Name="ToggleSwitchInkFadeInPanel"
                                                                             Foreground="{DynamicResource FloatBarForeground}"
-                                                                           
                                                                             Width="90"
                                                                             Toggled="ToggleSwitchInkFadeInPanel_Toggled"
                                                                             MinWidth="0"
@@ -5071,16 +5066,15 @@
                                                                            FontSize="17" VerticalAlignment="Center" />
                                                                     <Slider x:Name="BoardInkWidthSlider" Minimum="1"
                                                                             Maximum="20"
-                                                                            Width="208"
+                                                                            Width="200"
                                                                             FontSize="20" IsSnapToTickEnabled="True"
                                                                             Value="5"
                                                                             TickFrequency="0.1" TickPlacement="None"
                                                                             ValueChanged="InkWidthSlider_ValueChanged" />
-                                                                    <TextBlock
+                                                                    <TextBlock Width="36" TextAlignment="Right"
                                                                         Text="{Binding Value, ElementName=InkWidthSlider, Mode=OneWay}"
-                                                                        FontFamily="Consolas"
-                                                                        VerticalAlignment="Bottom"
-                                                                        Margin="10,0,0,4.5" FontSize="15" />
+                                                                        FontFamily="Consolas" VerticalAlignment="Center"
+                                                                        Margin="10,0,0,0" FontSize="15" />
                                                                 </StackPanel>
                                                                 <StackPanel Orientation="Horizontal" Height="30">
                                                                     <Label Margin="0,0,10,0" Content="透明"
@@ -5089,18 +5083,16 @@
                                                                            FontSize="17" VerticalAlignment="Center" />
                                                                     <Slider x:Name="BoardInkAlphaSlider"
                                                                             Margin="0,0,0,0"
-                                                                            Minimum="1" Maximum="255" Width="208"
-                                                                           
+                                                                            Minimum="1" Maximum="255" Width="200"
                                                                             FontSize="20"
                                                                             IsSnapToTickEnabled="True" Value="255"
                                                                             TickFrequency="1"
                                                                             TickPlacement="None"
                                                                             ValueChanged="InkAlphaSlider_ValueChanged" />
-                                                                    <TextBlock
+                                                                    <TextBlock Width="36" TextAlignment="Right"
                                                                         Text="{Binding Value, ElementName=InkAlphaSlider, Mode=OneWay}"
-                                                                        FontFamily="Consolas"
-                                                                        VerticalAlignment="Bottom"
-                                                                        Margin="10,0,0,4.5" FontSize="15" />
+                                                                        FontFamily="Consolas" VerticalAlignment="Center"
+                                                                        Margin="10,0,0,0" FontSize="15" />
                                                                 </StackPanel>
                                                             </ikw:SimpleStackPanel>
                                                         </Viewbox>
