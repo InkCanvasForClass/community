@@ -426,7 +426,7 @@ namespace Ink_Canvas
         /// <remarks>
         /// 该方法在切换前会取消当前选中元素（同时保留并恢复编辑模式）、调用视频呈现器的离开页前钩子、保存当前页的笔迹与元素、清空画布；切换到前一页后恢复该页内容、调用视频呈现器的页已更改钩子并刷新页面索引显示。
         /// </remarks>
-        private void BtnWhiteBoardSwitchPrevious_Click(object sender, EventArgs e)
+        private void BtnWhiteBoardSwitchPrevious_Click(object sender, MouseButtonEventArgs e)
         {
             if (CurrentWhiteboardIndex <= 1) return;
 
@@ -458,7 +458,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">触发事件的源对象（通常为按钮）。</param>
         /// <param name="e">事件参数。</param>
-        private void BtnWhiteBoardSwitchNext_Click(object sender, EventArgs e)
+        private void BtnWhiteBoardSwitchNext_Click(object sender, MouseButtonEventArgs e)
         {
             if (CurrentWhiteboardIndex < WhiteboardTotalCount &&
                 Settings.Automation.IsAutoSaveStrokesAtClear &&
@@ -505,7 +505,7 @@ namespace Ink_Canvas
         /// - 将当前页面的历史保存到时间轴并清空画布，然后在白板集合中插入一个空白页面（其历史为 null），随后恢复该页面并触发页面变更回调。  
         /// - 更新页码显示并在达到上限时禁用添加按钮；若侧边页列表可见，则刷新该列表。  
         /// </remarks>
-        private void BtnWhiteBoardAdd_Click(object sender, EventArgs e)
+        private void BtnWhiteBoardAdd_Click(object sender, MouseButtonEventArgs e)
         {
             if (WhiteboardTotalCount >= 99) return;
             if (Settings.Automation.IsAutoSaveStrokesAtClear &&
@@ -652,8 +652,8 @@ namespace Ink_Canvas
             bool isMaxPage = WhiteboardTotalCount >= 99;
 
             // 设置按钮文本
-            BtnLeftWhiteBoardSwitchNextLabel.Text = isLastPage ? "新页面" : "下一页";
-            BtnRightWhiteBoardSwitchNextLabel.Text = isLastPage ? "新页面" : "下一页";
+            BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? "新页面" : "下一页";
+            BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Text = isLastPage ? "新页面" : "下一页";
 
             if (isLastPage)
             {
@@ -670,11 +670,11 @@ namespace Ink_Canvas
             // 设置下一页按钮颜色
             if (iconForegroundBrush != null)
             {
-                BtnLeftWhiteBoardSwitchNextGeometry.Brush = iconForegroundBrush;
-                BtnRightWhiteBoardSwitchNextGeometry.Brush = iconForegroundBrush;
+                BtnLeftWhiteBoardSwitchNext.IconGeometryDrawing.Brush = iconForegroundBrush;
+                BtnRightWhiteBoardSwitchNext.IconGeometryDrawing.Brush = iconForegroundBrush;
             }
-            BtnLeftWhiteBoardSwitchNextLabel.Opacity = 1;
-            BtnRightWhiteBoardSwitchNextLabel.Opacity = 1;
+            BtnLeftWhiteBoardSwitchNext.LabelTextBlockControl.Opacity = 1;
+            BtnRightWhiteBoardSwitchNext.LabelTextBlockControl.Opacity = 1;
 
             BtnWhiteBoardSwitchPrevious.IsEnabled = true;
 
@@ -684,21 +684,21 @@ namespace Ink_Canvas
                 if (iconForegroundBrush != null)
                 {
                     var disabledBrush = new SolidColorBrush(Color.FromArgb(127, iconForegroundBrush.Color.R, iconForegroundBrush.Color.G, iconForegroundBrush.Color.B));
-                    BtnLeftWhiteBoardSwitchPreviousGeometry.Brush = disabledBrush;
-                    BtnRightWhiteBoardSwitchPreviousGeometry.Brush = disabledBrush;
+                    BtnLeftWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = disabledBrush;
+                    BtnRightWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = disabledBrush;
                 }
-                BtnLeftWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
-                BtnRightWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
+                BtnLeftWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
+                BtnRightWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
             }
             else
             {
                 if (iconForegroundBrush != null)
                 {
-                    BtnLeftWhiteBoardSwitchPreviousGeometry.Brush = iconForegroundBrush;
-                    BtnRightWhiteBoardSwitchPreviousGeometry.Brush = iconForegroundBrush;
+                    BtnLeftWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = iconForegroundBrush;
+                    BtnRightWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush = iconForegroundBrush;
                 }
-                BtnLeftWhiteBoardSwitchPreviousLabel.Opacity = 1;
-                BtnRightWhiteBoardSwitchPreviousLabel.Opacity = 1;
+                BtnLeftWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 1;
+                BtnRightWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 1;
             }
 
             BtnWhiteBoardDelete.IsEnabled = WhiteboardTotalCount != 1;

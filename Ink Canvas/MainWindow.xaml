@@ -4504,32 +4504,12 @@
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,0,0">
                                 <ikw:SimpleStackPanel Orientation="Horizontal">
-                                    <Border Width="60" Height="50"
-                                            IsEnabled="{Binding ElementName=BtnWhiteBoardSwitchPrevious, Path=IsEnabled}"
-                                            BorderThickness="1,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            MouseUp="BtnWhiteBoardSwitchPrevious_Click" CornerRadius="5,0,0,5"
-                                            Background="{DynamicResource BoardFloatBarBackground}"
-                                            Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    x:Name="BtnLeftWhiteBoardSwitchPreviousGeometry"
-                                                                    Geometry="F1 M24,24z M0,0z M7.40091,10.456L14.5033,3.35357 12.3198,1.17001 1.48978,12 12.3198,22.83 14.5033,20.6465 7.40089,13.544 22.5102,13.544 22.5102,10.456 7.40091,10.456z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="上一页" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12"
-                                                       x:Name="BtnLeftWhiteBoardSwitchPreviousLabel" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BtnLeftWhiteBoardSwitchPrevious"
+                                                                 Position="First"
+                                                                 Label="上一页"
+                                                                 IconGeometry="F1 M24,24z M0,0z M7.40091,10.456L14.5033,3.35357 12.3198,1.17001 1.48978,12 12.3198,22.83 14.5033,20.6465 7.40089,13.544 22.5102,13.544 22.5102,10.456 7.40091,10.456z"
+                                                                 IsEnabledBinding="{Binding ElementName=BtnWhiteBoardSwitchPrevious, Path=IsEnabled}"
+                                                                 ButtonMouseUp="BtnWhiteBoardSwitchPrevious_Click" />
                                     <Border Width="75" Height="50" MouseUp="BtnWhiteBoardPageIndex_Click"
                                             Name="BtnLeftPageListWB"
                                             BorderThickness="1,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" Background="{DynamicResource BoardFloatBarBackground}"
@@ -4602,31 +4582,12 @@
                                             </ui:ScrollViewerEx>
                                         </Border>
                                     </Grid>
-                                    <Border Width="60" Height="50" MouseUp="BtnWhiteBoardSwitchNext_Click"
-                                            CornerRadius="0,5,5,0"
-                                            IsEnabled="{Binding ElementName=BtnWhiteBoardSwitchNext, Path=IsEnabled}"
-                                            BorderThickness="0,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    x:Name="BtnLeftWhiteBoardSwitchNextGeometry"
-                                                                    Geometry="F1 M24,24z M0,0z M16.5991,10.456L9.49667,3.35357 11.6802,1.17001 22.5102,12 11.6802,22.83 9.49667,20.6465 16.5991,13.544 1.48978,13.544 1.48978,10.456 16.5991,10.456z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="下一页" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12"
-                                                       x:Name="BtnLeftWhiteBoardSwitchNextLabel" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BtnLeftWhiteBoardSwitchNext"
+                                                                 Position="Last"
+                                                                 Label="下一页"
+                                                                 IconGeometry="F1 M24,24z M0,0z M16.5991,10.456L9.49667,3.35357 11.6802,1.17001 22.5102,12 11.6802,22.83 9.49667,20.6465 16.5991,13.544 1.48978,13.544 1.48978,10.456 16.5991,10.456z"
+                                                                 IsEnabledBinding="{Binding ElementName=BtnWhiteBoardSwitchNext, Path=IsEnabled}"
+                                                                 ButtonMouseUp="BtnWhiteBoardSwitchNext_Click" />
                                 </ikw:SimpleStackPanel>
                             </Border>
                             <Border Width="60" Height="50"
@@ -5750,57 +5711,19 @@
                     <Grid Name="BlackboardRightSide" Visibility="Visible" Margin="0,0,0,3" Height="50"
                           HorizontalAlignment="Center" VerticalAlignment="Bottom">
                         <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="5">
-                            <Border Width="60" Height="50"
-                                    BorderThickness="1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                    MouseUp="BtnWhiteBoardAdd_Click" CornerRadius="5" Background="{DynamicResource BoardFloatBarBackground}"
-                                    Opacity="1">
-                                <Grid Margin="6,6,6,4">
-                                    <Image VerticalAlignment="Top"
-                                           RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                        <Image.Source>
-                                            <DrawingImage>
-                                                <DrawingImage.Drawing>
-                                                    <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                        <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                         Geometry="F0 M24,24z M0,0z M7.39778,13.723L10.7693,13.723 10.7693,10.3514 13.2307,10.3514 13.2307,13.723 16.6022,13.723 16.6022,16.1843 13.2307,16.1843 13.2307,19.5559 10.7693,19.5559 10.7693,16.1843 7.39778,16.1843 7.39778,13.723z M3.1391,1.17001L3.1391,22.83 20.8609,22.83 20.8609,6.66948 15.3614,1.17002 3.1391,1.17001z M12.9846,3.13911L5.10819,3.1391 5.10819,20.8609 18.8918,20.8609 18.8918,9.04638 12.9846,9.04638 12.9846,3.13911z M18.484,7.07729L14.9536,3.54692 14.9536,7.07729 18.484,7.07729z" />
-                                                    </DrawingGroup>
-                                                </DrawingImage.Drawing>
-                                            </DrawingImage>
-                                        </Image.Source>
-                                    </Image>
-                                    <TextBlock Text="{i18n:I18n Key=Board_NewPage}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                               HorizontalAlignment="Center" FontSize="12" Style="{StaticResource AutoFitFloatBarLabel12}" />
-                                </Grid>
-                            </Border>
+                            <controls:BoardToolbarButton x:Name="BtnWhiteBoardAddBoard"
+                                                                 Position="Single"
+                                                                 Label="{i18n:I18n Key=Board_NewPage}"
+                                                                 IconGeometry="F0 M24,24z M0,0z M7.39778,13.723L10.7693,13.723 10.7693,10.3514 13.2307,10.3514 13.2307,13.723 16.6022,13.723 16.6022,16.1843 13.2307,16.1843 13.2307,19.5559 10.7693,19.5559 10.7693,16.1843 7.39778,16.1843 7.39778,13.723z M3.1391,1.17001L3.1391,22.83 20.8609,22.83 20.8609,6.66948 15.3614,1.17002 3.1391,1.17001z M12.9846,3.13911L5.10819,3.1391 5.10819,20.8609 18.8918,20.8609 18.8918,9.04638 12.9846,9.04638 12.9846,3.13911z M18.484,7.07729L14.9536,3.54692 14.9536,7.07729 18.484,7.07729z"
+                                                                 ButtonMouseUp="BtnWhiteBoardAdd_Click" />
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}" Margin="0,0,0,0">
                                 <ikw:SimpleStackPanel Orientation="Horizontal">
-                                    <Border Width="60" Height="50"
-                                            IsEnabled="{Binding ElementName=BtnWhiteBoardSwitchPrevious, Path=IsEnabled}"
-                                            BorderThickness="1,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            MouseUp="BtnWhiteBoardSwitchPrevious_Click" CornerRadius="5,0,0,5"
-                                            Background="{DynamicResource BoardFloatBarBackground}"
-                                            Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    x:Name="BtnRightWhiteBoardSwitchPreviousGeometry"
-                                                                    Geometry="F1 M24,24z M0,0z M7.40091,10.456L14.5033,3.35357 12.3198,1.17001 1.48978,12 12.3198,22.83 14.5033,20.6465 7.40089,13.544 22.5102,13.544 22.5102,10.456 7.40091,10.456z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_PreviousPage}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12"
-                                                       Name="BtnRightWhiteBoardSwitchPreviousLabel"
-                                                       Style="{StaticResource AutoFitFloatBarLabel12}" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BtnRightWhiteBoardSwitchPrevious"
+                                                                 Position="First"
+                                                                 Label="{i18n:I18n Key=Board_PreviousPage}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M7.40091,10.456L14.5033,3.35357 12.3198,1.17001 1.48978,12 12.3198,22.83 14.5033,20.6465 7.40089,13.544 22.5102,13.544 22.5102,10.456 7.40091,10.456z"
+                                                                 IsEnabledBinding="{Binding ElementName=BtnWhiteBoardSwitchPrevious, Path=IsEnabled}"
+                                                                 ButtonMouseUp="BtnWhiteBoardSwitchPrevious_Click" />
                                     <Border Width="75" Height="50" MouseUp="BtnWhiteBoardPageIndex_Click"
                                             Name="BtnRightPageListWB"
                                             BorderThickness="1,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" Background="{DynamicResource BoardFloatBarBackground}"
@@ -5873,32 +5796,12 @@
                                             </ui:ScrollViewerEx>
                                         </Border>
                                     </Grid>
-                                    <Border Width="60" Height="50" MouseUp="BtnWhiteBoardSwitchNext_Click"
-                                            IsEnabled="{Binding ElementName=BtnWhiteBoardSwitchNext, Path=IsEnabled}"
-                                            CornerRadius="0,5,5,0"
-                                            BorderThickness="0,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    x:Name="BtnRightWhiteBoardSwitchNextGeometry"
-                                                                    Geometry="F1 M24,24z M0,0z M16.5991,10.456L9.49667,3.35357 11.6802,1.17001 22.5102,12 11.6802,22.83 9.49667,20.6465 16.5991,13.544 1.48978,13.544 1.48978,10.456 16.5991,10.456z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_NextPage}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12"
-                                                       Name="BtnRightWhiteBoardSwitchNextLabel"
-                                                       Style="{StaticResource AutoFitFloatBarLabel12}" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BtnRightWhiteBoardSwitchNext"
+                                                                 Position="Last"
+                                                                 Label="{i18n:I18n Key=Board_NextPage}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M16.5991,10.456L9.49667,3.35357 11.6802,1.17001 22.5102,12 11.6802,22.83 9.49667,20.6465 16.5991,13.544 1.48978,13.544 1.48978,10.456 16.5991,10.456z"
+                                                                 IsEnabledBinding="{Binding ElementName=BtnWhiteBoardSwitchNext, Path=IsEnabled}"
+                                                                 ButtonMouseUp="BtnWhiteBoardSwitchNext_Click" />
                                 </ikw:SimpleStackPanel>
                             </Border>
                         </ikw:SimpleStackPanel>

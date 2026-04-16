@@ -1308,12 +1308,12 @@ namespace Ink_Canvas
             BlackBoardLeftSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
             BlackBoardRightSidePageListView.ItemsSource = blackBoardSidePageListViewObservableCollection;
 
-            BtnLeftWhiteBoardSwitchPreviousGeometry.Brush =
+            BtnLeftWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush =
                 new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
-            BtnLeftWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
-            BtnRightWhiteBoardSwitchPreviousGeometry.Brush =
+            BtnLeftWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
+            BtnRightWhiteBoardSwitchPrevious.IconGeometryDrawing.Brush =
                 new SolidColorBrush(Color.FromArgb(127, 24, 24, 27));
-            BtnRightWhiteBoardSwitchPreviousLabel.Opacity = 0.5;
+            BtnRightWhiteBoardSwitchPrevious.LabelTextBlockControl.Opacity = 0.5;
 
             // 应用颜色主题，这将考虑自定义背景色
             CheckColorTheme(true);
