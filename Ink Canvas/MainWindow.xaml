@@ -5592,7 +5592,7 @@
                                         </Border>
                                     </Border>
                                     <controls:BoardToolbarButton x:Name="BoardInsertImage"
-                                                                 Position="Last"
+                                                                 Position="Middle"
                                                                  Label="{i18n:I18n Key=Board_InsertImage}"
                                                                  IconGeometry="F1 M24,24z M0,0z M19,3H5C3.9,3 3,3.9 3,5v14c0,1.1 0.9,2 2,2h14c1.1,0 2-0.9 2-2V5C21,3.9 20.1,3 19,3zM19,19H5V5h14V19z M17,7c-1.1,0-2,0.9-2,2s0.9,2 2,2 2-0.9 2-2S18.1,7 17,7zM7,17l2.5-3.01 1.96,2.36 2.54-3.21L17,17H7z"
                                                                  ButtonMouseDown="Border_MouseDown"
@@ -5682,43 +5682,20 @@
                                             </Border>
                                         </Grid>
                                     </Border>
-                                    <Border x:Name="BoardUndo" Width="60" Height="50" MouseDown="Border_MouseDown" MouseUp="SymbolIconUndo_MouseUp" BorderThickness="0,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" IsEnabled="{Binding ElementName=BtnUndo, Path=IsEnabled}" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20" Opacity="{Binding ElementName=BtnUndo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M8.71408,16.8493L0.874451,9.00964 8.71408,1.17001 8.71408,7.42358 15.7239,7.42358C16.7074,7.42358 17.6791,7.62744 18.583,8.02124 19.4866,8.41493 20.3023,8.98966 20.9857,9.70849 21.6689,10.4271 22.2069,11.276 22.5726,12.2047 22.9383,13.1333 23.1256,14.126 23.1256,15.1268 23.1256,16.1276 22.9383,17.1203 22.5726,18.0489 22.2069,18.9776 21.6689,19.8264 20.9857,20.5451 20.3023,21.2639 19.4866,21.8387 18.583,22.2324 17.6791,22.6262 16.7074,22.83 15.7239,22.83L10.437,22.83 10.437,19.6579 15.7239,19.6579C16.2679,19.6579 16.8086,19.5453 17.3159,19.3243 17.8235,19.1031 18.29,18.7767 18.6867,18.3594 19.0835,17.942 19.4023,17.4422 19.6211,16.8866 19.8399,16.3308 19.9534,15.7326 19.9534,15.1268 19.9534,14.5209 19.8399,13.9227 19.6211,13.367 19.4023,12.8114 19.0835,12.3115 18.6867,11.8941 18.29,11.4769 17.8235,11.1505 17.3159,10.9293 16.8086,10.7083 16.2679,10.5957 15.7239,10.5957L8.71408,10.5957 8.71408,16.8493z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_Undo}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom" HorizontalAlignment="Center" FontSize="12"
-                                                       Style="{StaticResource AutoFitFloatBarLabel12}" />
-                                        </Grid>
-                                    </Border>
-                                    <Border x:Name="BoardRedo" Width="60" Height="50" CornerRadius="0,5,5,0" MouseDown="Border_MouseDown" MouseUp="SymbolIconRedo_MouseUp" BorderThickness="0,1,1,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}" IsEnabled="{Binding ElementName=BtnRedo, Path=IsEnabled}" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top" RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20" Opacity="{Binding ElementName=BtnRedo, Path=IsEnabled, Converter={StaticResource IsEnabledToOpacityConverter}}">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M15.2859,16.8493L23.1255,9.00964 15.2859,1.17001 15.2859,7.42358 8.27607,7.42358C7.29262,7.42358 6.32086,7.62744 5.41703,8.02124 4.51341,8.41493 3.69773,8.98966 3.01434,9.70849 2.33111,10.4271 1.79312,11.276 1.42741,12.2047 1.06174,13.1333 0.874422,14.126 0.874422,15.1268 0.874422,16.1276 1.06174,17.1203 1.42741,18.0489 1.79312,18.9776 2.33111,19.8264 3.01434,20.5451 3.69773,21.2639 4.51341,21.8387 5.41703,22.2324 6.32086,22.6262 7.29262,22.83 8.27607,22.83L13.563,22.83 13.563,19.6579 8.27607,19.6579C7.7321,19.6579 7.19139,19.5453 6.68406,19.3243 6.17652,19.1031 5.70999,18.7767 5.31333,18.3594 4.91651,17.942 4.59775,17.4422 4.37894,16.8866 4.1601,16.3308 4.04656,15.7326 4.04656,15.1268 4.04656,14.5209 4.1601,13.9227 4.37894,13.367 4.59775,12.8114 4.91651,12.3115 5.31333,11.8941 5.70999,11.4769 6.17652,11.1505 6.68406,10.9293 7.19139,10.7083 7.7321,10.5957 8.27607,10.5957L15.2859,10.5957 15.2859,16.8493z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_Redo}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12" Style="{StaticResource AutoFitFloatBarLabel12}" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BoardUndo"
+                                                                 Position="Middle"
+                                                                 Label="{i18n:I18n Key=Board_Undo}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M8.71408,16.8493L0.874451,9.00964 8.71408,1.17001 8.71408,7.42358 15.7239,7.42358C16.7074,7.42358 17.6791,7.62744 18.583,8.02124 19.4866,8.41493 20.3023,8.98966 20.9857,9.70849 21.6689,10.4271 22.2069,11.276 22.5726,12.2047 22.9383,13.1333 23.1256,14.126 23.1256,15.1268 23.1256,16.1276 22.9383,17.1203 22.5726,18.0489 22.2069,18.9776 21.6689,19.8264 20.9857,20.5451 20.3023,21.2639 19.4866,21.8387 18.583,22.2324 17.6791,22.6262 16.7074,22.83 15.7239,22.83L10.437,22.83 10.437,19.6579 15.7239,19.6579C16.2679,19.6579 16.8086,19.5453 17.3159,19.3243 17.8235,19.1031 18.29,18.7767 18.6867,18.3594 19.0835,17.942 19.4023,17.4422 19.6211,16.8866 19.8399,16.3308 19.9534,15.7326 19.9534,15.1268 19.9534,14.5209 19.8399,13.9227 19.6211,13.367 19.4023,12.8114 19.0835,12.3115 18.6867,11.8941 18.29,11.4769 17.8235,11.1505 17.3159,10.9293 16.8086,10.7083 16.2679,10.5957 15.7239,10.5957L8.71408,10.5957 8.71408,16.8493z"
+                                                                 IsEnabledBinding="{Binding ElementName=BtnUndo, Path=IsEnabled}"
+                                                                 ButtonMouseDown="Border_MouseDown"
+                                                                 ButtonMouseUp="SymbolIconUndo_MouseUp" />
+                                    <controls:BoardToolbarButton x:Name="BoardRedo"
+                                                                 Position="Last"
+                                                                 Label="{i18n:I18n Key=Board_Redo}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M15.2859,16.8493L23.1255,9.00964 15.2859,1.17001 15.2859,7.42358 8.27607,7.42358C7.29262,7.42358 6.32086,7.62744 5.41703,8.02124 4.51341,8.41493 3.69773,8.98966 3.01434,9.70849 2.33111,10.4271 1.79312,11.276 1.42741,12.2047 1.06174,13.1333 0.874422,14.126 0.874422,15.1268 0.874422,16.1276 1.06174,17.1203 1.42741,18.0489 1.79312,18.9776 2.33111,19.8264 3.01434,20.5451 3.69773,21.2639 4.51341,21.8387 5.41703,22.2324 6.32086,22.6262 7.29262,22.83 8.27607,22.83L13.563,22.83 13.563,19.6579 8.27607,19.6579C7.7321,19.6579 7.19139,19.5453 6.68406,19.3243 6.17652,19.1031 5.70999,18.7767 5.31333,18.3594 4.91651,17.942 4.59775,17.4422 4.37894,16.8866 4.1601,16.3308 4.04656,15.7326 4.04656,15.1268 4.04656,14.5209 4.1601,13.9227 4.37894,13.367 4.59775,12.8114 4.91651,12.3115 5.31333,11.8941 5.70999,11.4769 6.17652,11.1505 6.68406,10.9293 7.19139,10.7083 7.7321,10.5957 8.27607,10.5957L15.2859,10.5957 15.2859,16.8493z"
+                                                                 IsEnabledBinding="{Binding ElementName=BtnRedo, Path=IsEnabled}"
+                                                                 ButtonMouseDown="Border_MouseDown"
+                                                                 ButtonMouseUp="SymbolIconRedo_MouseUp" />
                                 </ikw:SimpleStackPanel>
                             </Border>
 

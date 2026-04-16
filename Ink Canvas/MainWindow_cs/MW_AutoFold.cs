@@ -65,7 +65,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">事件发送者。</param>
         /// <param name="e">路由事件参数。</param>
-        public async void FoldFloatingBar_MouseUp(object sender, RoutedEventArgs e)
+        public async void FoldFloatingBar_MouseUp(object sender, MouseButtonEventArgs e)
         {
             await FoldFloatingBar(sender);
         }
@@ -315,7 +315,7 @@ namespace Ink_Canvas
         /// 1. 隐藏左侧快捷面板
         /// 2. 隐藏右侧快捷面板
         /// </remarks>
-        private void HideQuickPanel_MouseUp(object sender, RoutedEventArgs e)
+        private void HideQuickPanel_MouseUp(object sender, MouseButtonEventArgs e)
         {
             HideLeftQuickPanel();
             HideRightQuickPanel();
@@ -326,7 +326,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">事件发送者。</param>
         /// <param name="e">路由事件参数。</param>
-        public async void UnFoldFloatingBar_MouseUp(object sender, RoutedEventArgs e)
+        public async void UnFoldFloatingBar_MouseUp(object sender, MouseButtonEventArgs e)
         {
             await UnFoldFloatingBar(sender);
         }

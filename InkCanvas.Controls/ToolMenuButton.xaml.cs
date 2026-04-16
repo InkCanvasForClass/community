@@ -84,7 +84,7 @@ namespace Ink_Canvas.Controls
 
         public event MouseButtonEventHandler ButtonMouseDown;
         public event MouseEventHandler ButtonMouseLeave;
-        public event RoutedEventHandler ButtonMouseUp;
+        public event MouseButtonEventHandler ButtonMouseUp;
 
         public ToolMenuButton()
         {
@@ -115,7 +115,7 @@ namespace Ink_Canvas.Controls
 
         private void ButtonPanel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            ButtonMouseUp?.Invoke(this, new RoutedEventArgs(e.RoutedEvent, this));
+            ButtonMouseUp?.Invoke(this, e);
         }
     }
 }

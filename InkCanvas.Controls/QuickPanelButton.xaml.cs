@@ -65,7 +65,7 @@ namespace Ink_Canvas.Controls
             set => SetValue(LabelFontSizeProperty, value);
         }
 
-        public event RoutedEventHandler ButtonMouseUp;
+        public event MouseButtonEventHandler ButtonMouseUp;
 
         public QuickPanelButton()
         {
@@ -74,7 +74,7 @@ namespace Ink_Canvas.Controls
 
         private void ButtonPanel_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            ButtonMouseUp?.Invoke(this, new RoutedEventArgs(e.RoutedEvent, this));
+            ButtonMouseUp?.Invoke(this, e);
         }
     }
 }

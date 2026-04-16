@@ -626,7 +626,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        internal void SymbolIconUndo_MouseUp(object sender, RoutedEventArgs e)
+        internal void SymbolIconUndo_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (!BtnUndo.IsEnabled) return;
             BtnUndo_Click(BtnUndo, null);
@@ -659,7 +659,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        internal void ImageBlackboard_MouseUp(object sender, RoutedEventArgs e)
+        internal void ImageBlackboard_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -933,7 +933,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        internal void SymbolIconDelete_MouseUp(object sender, RoutedEventArgs e)
+        internal void SymbolIconDelete_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (inkCanvas.GetSelectedStrokes().Count > 0)
             {
@@ -979,7 +979,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        internal void SymbolIconSelect_MouseUp(object sender, RoutedEventArgs e)
+        internal void SymbolIconSelect_MouseUp(object sender, MouseButtonEventArgs e)
         {
 
             if (lastBorderMouseDownObject is Panel panel)
@@ -1098,7 +1098,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void SymbolIconSettings_Click(object sender, RoutedEventArgs e)
+        private void SymbolIconSettings_Click(object sender, MouseButtonEventArgs e)
         {
             if (isOpeningOrHidingSettingsPane) return;
             HideSubPanels();
@@ -1110,7 +1110,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private async void SymbolIconScreenshot_MouseUp(object sender, RoutedEventArgs e)
+        private async void SymbolIconScreenshot_MouseUp(object sender, MouseButtonEventArgs e)
         {
             HideSubPanelsImmediately();
             await Task.Delay(50);
@@ -1131,7 +1131,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void ImageCountdownTimer_MouseUp(object sender, RoutedEventArgs e)
+        private void ImageCountdownTimer_MouseUp(object sender, MouseButtonEventArgs e)
         {
             LeftUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
             RightUnFoldButtonQuickPanel.Visibility = Visibility.Collapsed;
@@ -1185,7 +1185,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void OperatingGuideWindowIcon_MouseUp(object sender, RoutedEventArgs e)
+        private void OperatingGuideWindowIcon_MouseUp(object sender, MouseButtonEventArgs e)
         {
             AnimationsHelper.HideWithSlideAndFade(BorderTools);
             AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
@@ -1199,7 +1199,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void SymbolIconRand_MouseUp(object sender, RoutedEventArgs e)
+        private void SymbolIconRand_MouseUp(object sender, MouseButtonEventArgs e)
         {
             // 如果控件被隐藏，不处理事件
             if (BoardRandomDrawToolBtn.Visibility != Visibility.Visible) return;
@@ -1332,7 +1332,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void SymbolIconRandOne_MouseUp(object sender, RoutedEventArgs e)
+        private void SymbolIconRandOne_MouseUp(object sender, MouseButtonEventArgs e)
         {
             // 如果控件被隐藏，不处理事件
             if (BoardSingleDrawToolBtn.Visibility != Visibility.Visible) return;
@@ -1407,7 +1407,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void GridInkReplayButton_MouseUp(object sender, RoutedEventArgs e)
+        private void GridInkReplayButton_MouseUp(object sender, MouseButtonEventArgs e)
         {
             //if (lastBorderMouseDownObject != sender) return;
 
@@ -1711,7 +1711,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">鼠标按钮事件参数</param>
-        private void SymbolIconTools_MouseUp(object sender, RoutedEventArgs e)
+        private void SymbolIconTools_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (BorderTools.Visibility == Visibility.Visible)
             {
@@ -2117,7 +2117,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        internal async void CursorIcon_Click(object sender, RoutedEventArgs e)
+        internal async void CursorIcon_Click(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
@@ -2232,7 +2232,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        internal void PenIcon_Click(object sender, RoutedEventArgs e)
+        internal void PenIcon_Click(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject is Panel panel)
                 panel.Background = new SolidColorBrush(Colors.Transparent);
@@ -2477,7 +2477,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        internal void EraserIcon_Click(object sender, RoutedEventArgs e)
+        internal void EraserIcon_Click(object sender, MouseButtonEventArgs e)
         {
             bool isAlreadyEraser = inkCanvas.EditingMode == InkCanvasEditingMode.EraseByPoint;
             forceEraser = false;
@@ -2590,7 +2590,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void EraserIconByStrokes_Click(object sender, RoutedEventArgs e)
+        private void EraserIconByStrokes_Click(object sender, MouseButtonEventArgs e)
         {
             // 禁用高级橡皮擦系统
             DisableEraserOverlay();
@@ -2622,7 +2622,7 @@ namespace Ink_Canvas
         /// </summary>
         /// <param name="sender">发送者</param>
         /// <param name="e">路由事件参数</param>
-        private void CursorWithDelIcon_Click(object sender, RoutedEventArgs e)
+        private void CursorWithDelIcon_Click(object sender, MouseButtonEventArgs e)
         {
             SymbolIconDelete_MouseUp(sender, null);
             CursorIcon_Click(null, null);

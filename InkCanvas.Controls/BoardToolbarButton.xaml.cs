@@ -113,6 +113,34 @@ namespace Ink_Canvas.Controls
             set => LabelTextBlock.Foreground = value;
         }
 
+        public static readonly DependencyProperty IsEnabledBindingProperty = DependencyProperty.Register(
+            nameof(IsEnabledBinding), typeof(bool?), typeof(BoardToolbarButton),
+            new PropertyMetadata(null, OnIsEnabledBindingChanged));
+
+        private static void OnIsEnabledBindingChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            var button = (BoardToolbarButton)d;
+            if (e.NewValue is bool isEnabled)
+            {
+                button.IsEnabled = isEnabled;
+                button.UpdateIconOpacity(isEnabled);
+            }
+        }
+
+        public bool? IsEnabledBinding
+        {
+            get => (bool?)GetValue(IsEnabledBindingProperty);
+            set => SetValue(IsEnabledBindingProperty, value);
+        }
+
+        private void UpdateIconOpacity(bool isEnabled)
+        {
+            if (ButtonImage != null)
+            {
+                ButtonImage.Opacity = isEnabled ? 1.0 : 0.4;
+            }
+        }
+
         public BoardToolbarButton()
         {
             InitializeComponent();

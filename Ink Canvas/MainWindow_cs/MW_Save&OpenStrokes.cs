@@ -94,7 +94,7 @@ namespace Ink_Canvas
         /// 3. 隐藏通知面板
         /// 4. 调用SaveInkCanvasStrokes方法保存墨迹
         /// </remarks>
-        private void SymbolIconSaveStrokes_MouseUp(object sender, RoutedEventArgs e)
+        private void SymbolIconSaveStrokes_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender || inkCanvas.Visibility != Visibility.Visible) return;
 
@@ -901,7 +901,7 @@ namespace Ink_Canvas
         ///    - 其他：处理单个墨迹文件（二进制格式）
         /// 5. 如果墨迹画布不可见，切换到鼠标模式
         /// </remarks>
-        private void SymbolIconOpenStrokes_MouseUp(object sender, RoutedEventArgs e)
+        private void SymbolIconOpenStrokes_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (lastBorderMouseDownObject != sender) return;
             AnimationsHelper.HideWithSlideAndFade(BorderTools);

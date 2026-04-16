@@ -61,7 +61,7 @@ namespace Ink_Canvas.Controls
 
         public event MouseButtonEventHandler ButtonMouseDown;
         public event MouseEventHandler ButtonMouseLeave;
-        public event RoutedEventHandler ButtonMouseUp;
+        public event MouseButtonEventHandler ButtonMouseUp;
 
         public ToolbarImageButton()
         {
@@ -104,7 +104,7 @@ namespace Ink_Canvas.Controls
                 ButtonPanel.Background = Brushes.Transparent;
                 _lastPressedButton = null;
             }
-            ButtonMouseUp?.Invoke(this, new RoutedEventArgs(e.RoutedEvent, this));
+            ButtonMouseUp?.Invoke(this, e);
         }
     }
 }
