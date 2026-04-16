@@ -25,6 +25,8 @@
                             <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
                                 <GeometryDrawing x:Name="IconGeometryInternal"
                                                  Brush="{DynamicResource IconForeground}" />
+                                <GeometryDrawing x:Name="IconGeometryInternal2"
+                                                 Brush="{DynamicResource IconForeground}" />
                             </DrawingGroup>
                         </DrawingImage.Drawing>
                     </DrawingImage>

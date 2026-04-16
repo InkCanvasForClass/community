@@ -39,7 +39,7 @@ namespace Ink_Canvas
         /// <summary>
         /// 用於浮動工具欄的"手勢"按鈕和白板工具欄的"手勢"按鈕的點擊事件
         /// </summary>
-        private void TwoFingerGestureBorder_MouseUp(object sender, RoutedEventArgs e)
+        private void TwoFingerGestureBorder_MouseUp(object sender, MouseButtonEventArgs e)
         {
             if (TwoFingerGestureBorder.Visibility == Visibility.Visible)
             {
@@ -93,12 +93,12 @@ namespace Ink_Canvas
                     new BitmapImage(new Uri(gestureIconPath, UriKind.Relative));
 
                 BoardGesture.Background = new SolidColorBrush(boardBgColor);
-                BoardGestureGeometry.Brush = new SolidColorBrush(boardIconColor);
-                BoardGestureGeometry2.Brush = new SolidColorBrush(boardIconColor);
-                BoardGestureLabel.Foreground = new SolidColorBrush(boardTextColor);
+                BoardGesture.IconGeometryDrawing.Brush = new SolidColorBrush(boardIconColor);
+                BoardGesture.IconGeometryDrawing2.Brush = new SolidColorBrush(boardIconColor);
+                BoardGesture.Foreground = new SolidColorBrush(boardTextColor);
                 BoardGesture.BorderBrush = new SolidColorBrush(boardBorderColor);
-                BoardGestureGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
-                BoardGestureGeometry2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
+                BoardGesture.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
+                BoardGesture.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
             }
             else
             {
@@ -110,12 +110,12 @@ namespace Ink_Canvas
                         new BitmapImage(new Uri("/Resources/new-icons/gesture-enabled.png", UriKind.Relative));
 
                     BoardGesture.Background = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                    BoardGestureGeometry.Brush = new SolidColorBrush(Colors.GhostWhite);
-                    BoardGestureGeometry2.Brush = new SolidColorBrush(Colors.GhostWhite);
-                    BoardGestureLabel.Foreground = new SolidColorBrush(Colors.GhostWhite);
+                    BoardGesture.IconGeometryDrawing.Brush = new SolidColorBrush(Colors.GhostWhite);
+                    BoardGesture.IconGeometryDrawing2.Brush = new SolidColorBrush(Colors.GhostWhite);
+                    BoardGesture.Foreground = new SolidColorBrush(Colors.GhostWhite);
                     BoardGesture.BorderBrush = new SolidColorBrush(Color.FromRgb(37, 99, 235));
-                    BoardGestureGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.EnabledGestureIcon);
-                    BoardGestureGeometry2.Geometry = Geometry.Parse("F0 M24,24z M0,0z " + XamlGraphicsIconGeometries.EnabledGestureIconBadgeCheck);
+                    BoardGesture.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.EnabledGestureIcon);
+                    BoardGesture.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z " + XamlGraphicsIconGeometries.EnabledGestureIconBadgeCheck);
                 }
                 else
                 {
@@ -123,12 +123,12 @@ namespace Ink_Canvas
                         new BitmapImage(new Uri(gestureIconPath, UriKind.Relative));
 
                     BoardGesture.Background = new SolidColorBrush(boardBgColor);
-                    BoardGestureGeometry.Brush = new SolidColorBrush(boardIconColor);
-                    BoardGestureGeometry2.Brush = new SolidColorBrush(boardIconColor);
-                    BoardGestureLabel.Foreground = new SolidColorBrush(boardTextColor);
+                    BoardGesture.IconGeometryDrawing.Brush = new SolidColorBrush(boardIconColor);
+                    BoardGesture.IconGeometryDrawing2.Brush = new SolidColorBrush(boardIconColor);
+                    BoardGesture.Foreground = new SolidColorBrush(boardTextColor);
                     BoardGesture.BorderBrush = new SolidColorBrush(boardBorderColor);
-                    BoardGestureGeometry.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
-                    BoardGestureGeometry2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
+                    BoardGesture.IconGeometryDrawing.Geometry = Geometry.Parse(XamlGraphicsIconGeometries.DisabledGestureIcon);
+                    BoardGesture.IconGeometryDrawing2.Geometry = Geometry.Parse("F0 M24,24z M0,0z");
                 }
             }
         }

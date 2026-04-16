@@ -90,6 +90,7 @@ namespace Ink_Canvas.Controls
         public event MouseButtonEventHandler ButtonMouseUp;
 
         public GeometryDrawing IconGeometryDrawing => IconGeometryInternal;
+        public GeometryDrawing IconGeometryDrawing2 => IconGeometryInternal2;
 
         public Border ButtonBorderControl => ButtonBorder;
 
