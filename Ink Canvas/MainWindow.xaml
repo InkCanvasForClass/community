@@ -5666,28 +5666,11 @@
 
                             <Border CornerRadius="5,5,5,5" Background="{DynamicResource BoardFloatBarBackground}">
                                 <ikw:SimpleStackPanel Orientation="Horizontal">
-                                    <Border Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            MouseUp="SymbolIconTools_MouseUp" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1"
-                                            BorderThickness="1,1,0,1" BorderBrush="{DynamicResource BoardFloatBarBorderBrush}"
-                                            CornerRadius="5,0,0,5">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F1 M24,24z M0,0z M3.336,1.17001C2.13975,1.17001,1.17,2.13976,1.17,3.33601L1.17,8.75101C1.17,9.94726,2.13975,10.917,3.336,10.917L8.751,10.917C9.94725,10.917,10.917,9.94726,10.917,8.75101L10.917,3.33601C10.917,2.13976,9.94725,1.17001,8.751,1.17001L3.336,1.17001z M15.249,1.17001C14.0527,1.17001,13.083,2.13976,13.083,3.33601L13.083,8.75101C13.083,9.94726,14.0527,10.917,15.249,10.917L20.664,10.917C21.8602,10.917,22.83,9.94726,22.83,8.75101L22.83,3.33601C22.83,2.13976,21.8602,1.17001,20.664,1.17001L15.249,1.17001z M3.336,13.083C2.13975,13.083,1.17,14.0528,1.17,15.249L1.17,20.664C1.17,21.8603,2.13975,22.83,3.336,22.83L8.751,22.83C9.94725,22.83,10.917,21.8603,10.917,20.664L10.917,15.249C10.917,14.0528,9.94725,13.083,8.751,13.083L3.336,13.083z M15.249,13.083C14.0527,13.083,13.083,14.0528,13.083,15.249L13.083,20.664C13.083,21.8603,14.0527,22.83,15.249,22.83L20.664,22.83C21.8602,22.83,22.83,21.8603,22.83,20.664L22.83,15.249C22.83,14.0528,21.8602,13.083,20.664,13.083L15.249,13.083z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_Tools}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12" Style="{StaticResource AutoFitFloatBarLabel12}" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BoardTools"
+                                                                 Position="First"
+                                                                 Label="{i18n:I18n Key=Board_Tools}"
+                                                                 IconGeometry="F1 M24,24z M0,0z M3.336,1.17001C2.13975,1.17001,1.17,2.13976,1.17,3.33601L1.17,8.75101C1.17,9.94726,2.13975,10.917,3.336,10.917L8.751,10.917C9.94725,10.917,10.917,9.94726,10.917,8.75101L10.917,3.33601C10.917,2.13976,9.94725,1.17001,8.751,1.17001L3.336,1.17001z M15.249,1.17001C14.0527,1.17001,13.083,2.13976,13.083,3.33601L13.083,8.75101C13.083,9.94726,14.0527,10.917,15.249,10.917L20.664,10.917C21.8602,10.917,22.83,9.94726,22.83,8.75101L22.83,3.33601C22.83,2.13976,21.8602,1.17001,20.664,1.17001L15.249,1.17001z M3.336,13.083C2.13975,13.083,1.17,14.0528,1.17,15.249L1.17,20.664C1.17,21.8603,2.13975,22.83,3.336,22.83L8.751,22.83C9.94725,22.83,10.917,21.8603,10.917,20.664L10.917,15.249C10.917,14.0528,9.94725,13.083,8.751,13.083L3.336,13.083z M15.249,13.083C14.0527,13.083,13.083,14.0528,13.083,15.249L13.083,20.664C13.083,21.8603,14.0527,22.83,15.249,22.83L20.664,22.83C21.8602,22.83,22.83,21.8603,22.83,20.664L22.83,15.249C22.83,14.0528,21.8602,13.083,20.664,13.083L15.249,13.083z"
+                                                                 ButtonMouseUp="SymbolIconTools_MouseUp" />
                                     <Border>
                                         <Grid Width="0" Margin="0,0,0,5" RenderTransformOrigin="0,1">
                                             <Grid.RenderTransform>
@@ -5750,29 +5733,11 @@
                                             </Border>
                                         </Grid>
                                     </Border>
-                                    <Border Width="60" Height="50" MouseDown="Border_MouseDown"
-                                            MouseUp="ImageBlackboard_MouseUp"
-                                            CornerRadius="0,5,5,0" Background="{DynamicResource BoardFloatBarBackground}" Opacity="1"
-                                            BorderThickness="0,1,1,1"
-                                            BorderBrush="{DynamicResource BoardFloatBarBorderBrush}">
-                                        <Grid Margin="6,6,6,4">
-                                            <Image VerticalAlignment="Top"
-                                                   RenderOptions.BitmapScalingMode="HighQuality" Height="20" Width="20">
-                                                <Image.Source>
-                                                    <DrawingImage>
-                                                        <DrawingImage.Drawing>
-                                                            <DrawingGroup ClipGeometry="M0,0 V24 H24 V0 H0 Z">
-                                                                <GeometryDrawing Brush="{DynamicResource IconForeground}"
-                                                                    Geometry="F0 M24,24z M0,0z M12,23.4102C18.3017,23.4102 23.4102,18.3017 23.4102,12 23.4102,5.69834 18.3017,0.589813 12,0.589813 5.69834,0.589813 0.589813,5.69834 0.589813,12 0.589813,18.3017 5.69834,23.4102 12,23.4102z M8.25212,6.38964C7.73781,5.87533 6.90395,5.87533 6.38964,6.38964 5.87533,6.90395 5.87533,7.73781 6.38964,8.25212L10.1375,12 6.38964,15.7479C5.87533,16.2622 5.87533,17.0961 6.38964,17.6104 6.90395,18.1247 7.73781,18.1247 8.25212,17.6104L12,13.8625 15.7479,17.6104C16.2622,18.1247 17.0961,18.1247 17.6104,17.6104 18.1247,17.0961 18.1247,16.2622 17.6104,15.7479L13.8625,12 17.6104,8.25212C18.1247,7.73781 18.1247,6.90395 17.6104,6.38964 17.0961,5.87533 16.2622,5.87533 15.7479,6.38964L12,10.1375 8.25212,6.38964z" />
-                                                            </DrawingGroup>
-                                                        </DrawingImage.Drawing>
-                                                    </DrawingImage>
-                                                </Image.Source>
-                                            </Image>
-                                            <TextBlock Text="{i18n:I18n Key=Board_Exit}" Foreground="{DynamicResource FloatBarForeground}" VerticalAlignment="Bottom"
-                                                       HorizontalAlignment="Center" FontSize="12" Style="{StaticResource AutoFitFloatBarLabel12}" />
-                                        </Grid>
-                                    </Border>
+                                    <controls:BoardToolbarButton x:Name="BoardExit"
+                                                                 Position="Last"
+                                                                 Label="{i18n:I18n Key=Board_Exit}"
+                                                                 IconGeometry="F0 M24,24z M0,0z M12,23.4102C18.3017,23.4102 23.4102,18.3017 23.4102,12 23.4102,5.69834 18.3017,0.589813 12,0.589813 5.69834,0.589813 0.589813,5.69834 0.589813,12 0.589813,18.3017 5.69834,23.4102 12,23.4102z M8.25212,6.38964C7.73781,5.87533 6.90395,5.87533 6.38964,6.38964 5.87533,6.90395 5.87533,7.73781 6.38964,8.25212L10.1375,12 6.38964,15.7479C5.87533,16.2622 5.87533,17.0961 6.38964,17.6104 6.90395,18.1247 7.73781,18.1247 8.25212,17.6104L12,13.8625 15.7479,17.6104C16.2622,18.1247 17.0961,18.1247 17.6104,17.6104 18.1247,17.0961 18.1247,16.2622 17.6104,15.7479L13.8625,12 17.6104,8.25212C18.1247,7.73781 18.1247,6.90395 17.6104,6.38964 17.0961,5.87533 16.2622,5.87533 15.7479,6.38964L12,10.1375 8.25212,6.38964z"
+                                                                 ButtonMouseUp="ImageBlackboard_MouseUp" />
                                 </ikw:SimpleStackPanel>
                             </Border>
 
