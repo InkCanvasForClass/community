@@ -7184,150 +7184,149 @@
                     </Border>
 
                     <ikw:SimpleStackPanel Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
-                        <Border Margin="2,0,0,0" x:Name="EnableTwoFingerGestureBorder" Visibility="Visible" Width="36"
+                        <Border Margin=" 4,0,0,0" x:Name="EnableTwoFingerGestureBorder" Visibility="Visible" Width="36"
                             Height="36" CornerRadius="5" Background="{DynamicResource FloatBarBackground}" BorderBrush="{DynamicResource FloatBarBorderBrush}"
                             BorderThickness="1">
-                        <ikw:SimpleStackPanel
-
-                            MouseUp="TwoFingerGestureBorder_MouseUp" Background="Transparent"
-                            Orientation="Vertical" HorizontalAlignment="Center" Width="36" Margin="0">
-                            <Image x:Name="EnableTwoFingerGestureBtn" Source="{DynamicResource GestureIcon}"
-                                   RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="18"
-                                   Margin="0,3,0,0" />
-                            <TextBlock x:Name="gestureiconText" Text="{i18n:I18n Key=FloatingBar_GestureButton}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8"
-                                       Margin="0,0,0,0"
-                                       TextAlignment="Center" />
-                        </ikw:SimpleStackPanel>
-                    </Border>
-                    <Canvas Width="0">
-                        <Border ClipToBounds="True" Name="TwoFingerGestureBorder" Visibility="Collapsed"
-                                Canvas.Left="-86" Canvas.Top="-111"
-                                CornerRadius="5"
-                                Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="#2563eb"
-                                BorderThickness="1">
-                            <ikw:SimpleStackPanel Margin="0">
-                                <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1" CornerRadius="6,6,0,0"
-                                        Background="#2563eb" Margin="-1,-1,-1,1">
-                                    <Canvas Height="24" ClipToBounds="True">
-                                        <TextBlock Text="{i18n:I18n Key=FloatingBar_GesturePanelTitle}" Canvas.Left="8" Foreground="White" Padding="0,5"
-                                                   FontSize="11" FontWeight="Bold" TextAlignment="Center" />
-                                        <Image Margin="98,5,0,0"
-                                                               Source="/Resources/new-icons/close-white.png"
-                                                               RenderOptions.BitmapScalingMode="HighQuality"
-                                                               Height="16"
-                                                               Width="16" MouseDown="Border_MouseDown"
-                                                               MouseUp="CloseBordertools_MouseUp" />
-                                    </Canvas>
-                                </Border>
-                                <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center"
-                                                     HorizontalAlignment="Center" Margin="0,3,0,0">
-                                    <Image Source="{DynamicResource MultiTouchIcon}"
-                                           RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
-                                    <Label Content="{i18n:I18n Key=FloatingBar_Gesture_MultiTouchWriting}" FontSize="8"
-                                           VerticalAlignment="Center" Width="56"
-                                           Style="{StaticResource AutoFitGestureOptionLabel10}" />
-                                    <Viewbox Width="36" Height="20" Margin="2,0,0,0">
-                                        <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
-                                                         Name="ToggleSwitchEnableMultiTouchMode"
-                                                         IsOn="False" OnContent=""
-                                                         OffContent=""
-                                                         Toggled="ToggleSwitchEnableMultiTouchMode_Toggled"
-                                                         RenderTransformOrigin="0.5,0.5">
-                                            <ui:ToggleSwitch.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform />
-                                                    <SkewTransform />
-                                                    <RotateTransform />
-                                                    <TranslateTransform X="8" />
-                                                </TransformGroup>
-                                            </ui:ToggleSwitch.RenderTransform>
-                                        </ui:ToggleSwitch>
-                                    </Viewbox>
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel Opacity="1" x:Name="TwoFingerGestureSimpleStackPanel"
-                                                     Orientation="Horizontal" Spacing="2" VerticalAlignment="Center"
-                                                     HorizontalAlignment="Center">
-                                    <Image Source="{DynamicResource HandMoveIcon}"
-                                           RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
-                                    <Label Content="{i18n:I18n Key=FloatingBar_Gesture_TwoFingerMove}" FontSize="8"
-                                           VerticalAlignment="Center" Width="56"
-                                           Style="{StaticResource AutoFitGestureOptionLabel10}" />
-                                    <Viewbox Width="36" Height="20" Margin="2,0,0,0">
-                                        <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
-                                                         Name="ToggleSwitchEnableTwoFingerTranslate"
-                                                         IsOn="False" OnContent=""
-                                                         OffContent=""
-                                                         Toggled="ToggleSwitchEnableTwoFingerTranslate_Toggled"
-                                                         RenderTransformOrigin="0.5,0.5">
-                                            <ui:ToggleSwitch.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform />
-                                                    <SkewTransform />
-                                                    <RotateTransform />
-                                                    <TranslateTransform X="8" />
-                                                </TransformGroup>
-                                            </ui:ToggleSwitch.RenderTransform>
-                                        </ui:ToggleSwitch>
-                                    </Viewbox>
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel
-                                    Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
-                                    Orientation="Horizontal" Spacing="2" VerticalAlignment="Center"
-                                    HorizontalAlignment="Center">
-                                    <Image Source="{DynamicResource ZoomIcon}"
-                                           RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
-                                    <Label Content="{i18n:I18n Key=FloatingBar_Gesture_TwoFingerZoom}" FontSize="8"
-                                           VerticalAlignment="Center" Width="56"
-                                           Style="{StaticResource AutoFitGestureOptionLabel10}" />
-                                    <Viewbox Width="36" Height="20" Margin="2,0,0,0">
-                                        <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
-                                                        
-                                                         IsOn="False" OnContent="" OffContent=""
-                                                         Name="ToggleSwitchEnableTwoFingerZoom"
-                                                         Toggled="ToggleSwitchEnableTwoFingerZoom_Toggled"
-                                                         RenderTransformOrigin="0.5,0.5">
-                                            <ui:ToggleSwitch.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform />
-                                                    <SkewTransform />
-                                                    <RotateTransform />
-                                                    <TranslateTransform X="8" />
-                                                </TransformGroup>
-                                            </ui:ToggleSwitch.RenderTransform>
-                                        </ui:ToggleSwitch>
-                                    </Viewbox>
-                                </ikw:SimpleStackPanel>
-                                <ikw:SimpleStackPanel
-                                    Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
-                                    Orientation="Horizontal" Spacing="2" VerticalAlignment="Center"
-                                    HorizontalAlignment="Center">
-                                    <Image Source="{DynamicResource RotateIcon}"
-                                           RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
-                                    <Label Content="{i18n:I18n Key=FloatingBar_Gesture_TwoFingerRotate}" FontSize="8"
-                                           VerticalAlignment="Center" Width="56"
-                                           Style="{StaticResource AutoFitGestureOptionLabel10}" />
-                                    <Viewbox Width="36" Height="20" Margin="2,0,0,0">
-                                        <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
-                                                        
-                                                         IsOn="False" OnContent="" OffContent=""
-                                                         Name="ToggleSwitchEnableTwoFingerRotation"
-                                                         Toggled="ToggleSwitchEnableTwoFingerRotation_Toggled"
-                                                         RenderTransformOrigin="0.5,0.5">
-                                            <ui:ToggleSwitch.RenderTransform>
-                                                <TransformGroup>
-                                                    <ScaleTransform />
-                                                    <SkewTransform />
-                                                    <RotateTransform />
-                                                    <TranslateTransform X="8" />
-                                                </TransformGroup>
-                                            </ui:ToggleSwitch.RenderTransform>
-                                        </ui:ToggleSwitch>
-                                    </Viewbox>
-
-                                </ikw:SimpleStackPanel>
+                            <ikw:SimpleStackPanel
+                                MouseUp="TwoFingerGestureBorder_MouseUp" Background="Transparent"
+                                Orientation="Vertical" HorizontalAlignment="Center" Width="36" Margin="0">
+                                <Image x:Name="EnableTwoFingerGestureBtn" Source="{DynamicResource GestureIcon}"
+                                       RenderOptions.BitmapScalingMode="HighQuality" Width="28" Height="18"
+                                       Margin="0,3,0,0" />
+                                <TextBlock x:Name="gestureiconText" Text="{i18n:I18n Key=FloatingBar_GestureButton}" Foreground="{DynamicResource FloatBarForeground}" FontSize="8"
+                                           Margin="0,0,0,0"
+                                           TextAlignment="Center" />
                             </ikw:SimpleStackPanel>
                         </Border>
-                    </Canvas>
+                        <Canvas Width="0">
+                            <Border ClipToBounds="True" Name="TwoFingerGestureBorder" Visibility="Collapsed"
+                                    Canvas.Left="-86" Canvas.Top="-111"
+                                    CornerRadius="5"
+                                    Background="{DynamicResource FloatBarBackground}" Opacity="1" BorderBrush="#2563eb"
+                                    BorderThickness="1">
+                                <ikw:SimpleStackPanel Margin="0">
+                                    <Border BorderBrush="#1e3a8a" BorderThickness="0,0,0,1" CornerRadius="6,6,0,0"
+                                            Background="#2563eb" Margin="-1,-1,-1,1">
+                                        <Canvas Height="24" ClipToBounds="True">
+                                            <TextBlock Text="{i18n:I18n Key=FloatingBar_GesturePanelTitle}" Canvas.Left="8" Foreground="White" Padding="0,5"
+                                                       FontSize="11" FontWeight="Bold" TextAlignment="Center" />
+                                            <Image Margin="98,5,0,0"
+                                                                   Source="/Resources/new-icons/close-white.png"
+                                                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                                                   Height="16"
+                                                                   Width="16" MouseDown="Border_MouseDown"
+                                                                   MouseUp="CloseBordertools_MouseUp" />
+                                        </Canvas>
+                                    </Border>
+                                    <ikw:SimpleStackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center"
+                                                         HorizontalAlignment="Center" Margin="0,3,0,0">
+                                        <Image Source="{DynamicResource MultiTouchIcon}"
+                                               RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
+                                        <Label Content="{i18n:I18n Key=FloatingBar_Gesture_MultiTouchWriting}" FontSize="8"
+                                               VerticalAlignment="Center" Width="56"
+                                               Style="{StaticResource AutoFitGestureOptionLabel10}" />
+                                        <Viewbox Width="36" Height="20" Margin="2,0,0,0">
+                                            <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
+                                                             Name="ToggleSwitchEnableMultiTouchMode"
+                                                             IsOn="False" OnContent=""
+                                                             OffContent=""
+                                                             Toggled="ToggleSwitchEnableMultiTouchMode_Toggled"
+                                                             RenderTransformOrigin="0.5,0.5">
+                                                <ui:ToggleSwitch.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform />
+                                                        <SkewTransform />
+                                                        <RotateTransform />
+                                                        <TranslateTransform X="8" />
+                                                    </TransformGroup>
+                                                </ui:ToggleSwitch.RenderTransform>
+                                            </ui:ToggleSwitch>
+                                        </Viewbox>
+                                    </ikw:SimpleStackPanel>
+                                    <ikw:SimpleStackPanel Opacity="1" x:Name="TwoFingerGestureSimpleStackPanel"
+                                                         Orientation="Horizontal" Spacing="2" VerticalAlignment="Center"
+                                                         HorizontalAlignment="Center">
+                                        <Image Source="{DynamicResource HandMoveIcon}"
+                                               RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
+                                        <Label Content="{i18n:I18n Key=FloatingBar_Gesture_TwoFingerMove}" FontSize="8"
+                                               VerticalAlignment="Center" Width="56"
+                                               Style="{StaticResource AutoFitGestureOptionLabel10}" />
+                                        <Viewbox Width="36" Height="20" Margin="2,0,0,0">
+                                            <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
+                                                             Name="ToggleSwitchEnableTwoFingerTranslate"
+                                                             IsOn="False" OnContent=""
+                                                             OffContent=""
+                                                             Toggled="ToggleSwitchEnableTwoFingerTranslate_Toggled"
+                                                             RenderTransformOrigin="0.5,0.5">
+                                                <ui:ToggleSwitch.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform />
+                                                        <SkewTransform />
+                                                        <RotateTransform />
+                                                        <TranslateTransform X="8" />
+                                                    </TransformGroup>
+                                                </ui:ToggleSwitch.RenderTransform>
+                                            </ui:ToggleSwitch>
+                                        </Viewbox>
+                                    </ikw:SimpleStackPanel>
+                                    <ikw:SimpleStackPanel
+                                        Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
+                                        Orientation="Horizontal" Spacing="2" VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                        <Image Source="{DynamicResource ZoomIcon}"
+                                               RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
+                                        <Label Content="{i18n:I18n Key=FloatingBar_Gesture_TwoFingerZoom}" FontSize="8"
+                                               VerticalAlignment="Center" Width="56"
+                                               Style="{StaticResource AutoFitGestureOptionLabel10}" />
+                                        <Viewbox Width="36" Height="20" Margin="2,0,0,0">
+                                            <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
+                                                        
+                                                             IsOn="False" OnContent="" OffContent=""
+                                                             Name="ToggleSwitchEnableTwoFingerZoom"
+                                                             Toggled="ToggleSwitchEnableTwoFingerZoom_Toggled"
+                                                             RenderTransformOrigin="0.5,0.5">
+                                                <ui:ToggleSwitch.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform />
+                                                        <SkewTransform />
+                                                        <RotateTransform />
+                                                        <TranslateTransform X="8" />
+                                                    </TransformGroup>
+                                                </ui:ToggleSwitch.RenderTransform>
+                                            </ui:ToggleSwitch>
+                                        </Viewbox>
+                                    </ikw:SimpleStackPanel>
+                                    <ikw:SimpleStackPanel
+                                        Opacity="{Binding ElementName=TwoFingerGestureSimpleStackPanel, Path=Opacity}"
+                                        Orientation="Horizontal" Spacing="2" VerticalAlignment="Center"
+                                        HorizontalAlignment="Center">
+                                        <Image Source="{DynamicResource RotateIcon}"
+                                               RenderOptions.BitmapScalingMode="HighQuality" Height="16" Width="16" />
+                                        <Label Content="{i18n:I18n Key=FloatingBar_Gesture_TwoFingerRotate}" FontSize="8"
+                                               VerticalAlignment="Center" Width="56"
+                                               Style="{StaticResource AutoFitGestureOptionLabel10}" />
+                                        <Viewbox Width="36" Height="20" Margin="2,0,0,0">
+                                            <ui:ToggleSwitch MinWidth="0" Margin="0,-6,0,-6"
+                                                        
+                                                             IsOn="False" OnContent="" OffContent=""
+                                                             Name="ToggleSwitchEnableTwoFingerRotation"
+                                                             Toggled="ToggleSwitchEnableTwoFingerRotation_Toggled"
+                                                             RenderTransformOrigin="0.5,0.5">
+                                                <ui:ToggleSwitch.RenderTransform>
+                                                    <TransformGroup>
+                                                        <ScaleTransform />
+                                                        <SkewTransform />
+                                                        <RotateTransform />
+                                                        <TranslateTransform X="8" />
+                                                    </TransformGroup>
+                                                </ui:ToggleSwitch.RenderTransform>
+                                            </ui:ToggleSwitch>
+                                        </Viewbox>
+
+                                    </ikw:SimpleStackPanel>
+                                </ikw:SimpleStackPanel>
+                            </Border>
+                        </Canvas>
                     </ikw:SimpleStackPanel>
                     <!--Visibility="{Binding ElementName=BtnPPTSlideShowEnd, Path=Visibility}">-->
                     <Border x:Name="BorderFloatingBarExitPPTBtn" Margin="2,0,0,0" Width="34" Height="36"
