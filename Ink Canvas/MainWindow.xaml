@@ -6544,10 +6544,10 @@
                                 <controls:ToolbarImageButton x:Name="Pen_Icon" ButtonMouseUp="PenIcon_Click" Label="{i18n:I18n Key=FloatingBar_Annotate}" />
                                 <ikw:SimpleStackPanel Width="0"
                                                          Orientation="{Binding ElementName=StackPanelFloatingBar, Path=Orientation}">
-                                    <Grid Margin="0,5,0,5" Width="0" RenderTransformOrigin="0.5,0.5">
+                                    <Grid Margin="-14,5,14,5" Width="0" RenderTransformOrigin=" 1,0">
                                         <Border x:Name="PenPalette" Visibility="Visible" Background="{DynamicResource FloatBarBackground}"
                                                     Opacity="1" BorderBrush="#2563eb"
-                                                    BorderThickness="1" CornerRadius="8" Margin="-160,-200,-33,32">
+                                                    BorderThickness="1" CornerRadius="8" Margin="-96.5,-84">
                                             <ikw:SimpleStackPanel Margin="0,-20,0,0">
                                                 <Border BorderBrush="#1e3a8a" Height="32" BorderThickness="0,0,0,1"
                                                             CornerRadius="8,8,0,0" Background="#2563eb"
