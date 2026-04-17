@@ -1652,7 +1652,7 @@ namespace Ink_Canvas
                 if (int.TryParse(File.ReadAllText(positionFile), out var page) && page > 0)
                 {
                     _lastPlaybackPage = page;
-                    new YesOrNoNotificationWindow($"上次播放到了第 {page} 页, 是否立即跳转", () =>
+                    var yesNoWindow = new YesOrNoNotificationWindow($"上次播放到了第 {page} 页, 是否立即跳转", () =>
                     {
                         try
                         {
@@ -1674,7 +1674,17 @@ namespace Ink_Canvas
                         {
                             LogHelper.WriteLogToFile($"跳转到第{page}页失败: {ex}", LogHelper.LogType.Error);
                         }
-                    }).ShowDialog();
+                    });
+                    yesNoWindow.Owner = this;
+                    PauseTopmostMaintenance();
+                    try
+                    {
+                        yesNoWindow.ShowDialog();
+                    }
+                    finally
+                    {
+                        ResumeTopmostMaintenance();
+                    }
                 }
             }
             catch (Exception ex)
@@ -1716,7 +1726,7 @@ namespace Ink_Canvas
                 if (hasHiddenSlides && !IsShowingRestoreHiddenSlidesWindow)
                 {
                     IsShowingRestoreHiddenSlidesWindow = true;
-                    new YesOrNoNotificationWindow("检测到此演示文档中包含隐藏的幻灯片，是否取消隐藏？",
+                    var yesNoWindow = new YesOrNoNotificationWindow("检测到此演示文档中包含隐藏的幻灯片，是否取消隐藏？",
                         () =>
                         {
                             try
@@ -1740,7 +1750,17 @@ namespace Ink_Canvas
                             }
                         },
                         () => { IsShowingRestoreHiddenSlidesWindow = false; },
-                        () => { IsShowingRestoreHiddenSlidesWindow = false; }).ShowDialog();
+                        () => { IsShowingRestoreHiddenSlidesWindow = false; });
+                    yesNoWindow.Owner = this;
+                    PauseTopmostMaintenance();
+                    try
+                    {
+                        yesNoWindow.ShowDialog();
+                    }
+                    finally
+                    {
+                        ResumeTopmostMaintenance();
+                    }
                 }
             }
             catch (Exception ex)
@@ -1786,7 +1806,7 @@ namespace Ink_Canvas
                 if (hasSlideTimings && !IsShowingAutoplaySlidesWindow)
                 {
                     IsShowingAutoplaySlidesWindow = true;
-                    new YesOrNoNotificationWindow("检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？",
+                    var yesNoWindow = new YesOrNoNotificationWindow("检测到此演示文档中自动播放或排练计时已经启用，可能导致幻灯片自动翻页，是否取消？",
                         () =>
                         {
                             try
@@ -1806,7 +1826,17 @@ namespace Ink_Canvas
                             }
                         },
                         () => { IsShowingAutoplaySlidesWindow = false; },
-                        () => { IsShowingAutoplaySlidesWindow = false; }).ShowDialog();
+                        () => { IsShowingAutoplaySlidesWindow = false; });
+                    yesNoWindow.Owner = this;
+                    PauseTopmostMaintenance();
+                    try
+                    {
+                        yesNoWindow.ShowDialog();
+                    }
+                    finally
+                    {
+                        ResumeTopmostMaintenance();
+                    }
                 }
             }
             catch (Exception ex)

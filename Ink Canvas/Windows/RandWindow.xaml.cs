@@ -401,7 +401,9 @@ namespace Ink_Canvas
                 if (!ok) return;
             }
 
-            new NamesInputWindow().ShowDialog();
+            var namesInputWindow = new NamesInputWindow();
+            namesInputWindow.Owner = this;
+            namesInputWindow.ShowDialog();
             Window_Loaded(this, null);
         }
 

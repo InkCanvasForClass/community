@@ -2896,6 +2896,7 @@ namespace Ink_Canvas
             BorderSettings.Visibility = Visibility.Hidden;
             BorderSettingsMask.Visibility = Visibility.Hidden;
             var win = new HistoryRollbackWindow(Settings.Startup.UpdateChannel);
+            win.Owner = this;
             win.ShowDialog();
             // 可选：回滚窗口关闭后恢复设置面板显示
             BorderSettings.Visibility = Visibility.Visible;
@@ -3349,6 +3350,7 @@ namespace Ink_Canvas
 
                 // 创建快捷键设置窗口
                 var hotkeySettingsWindow = new HotkeySettingsWindow(this, _globalHotkeyManager);
+                hotkeySettingsWindow.Owner = this;
 
                 // 设置窗口关闭事件，用于在快捷键设置窗口关闭后恢复设置面板
                 hotkeySettingsWindow.Closed += (s, e) =>
@@ -4692,6 +4694,7 @@ namespace Ink_Canvas
                     return;
 
                 var quickDrawWindow = new QuickDrawWindow();
+                quickDrawWindow.Owner = this;
                 quickDrawWindow.ShowDialog();
             }
             catch (Exception ex)

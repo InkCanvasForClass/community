@@ -1215,7 +1215,9 @@ namespace Ink_Canvas
             if (Settings.RandSettings.UseNewRollCallUI)
             {
                 // 使用新点名UI - 随机抽模式
-                new NewStyleRollCallWindow(Settings, false).ShowDialog();
+                var rollCallWindow = new NewStyleRollCallWindow(Settings, false);
+                rollCallWindow.Owner = this;
+                rollCallWindow.ShowDialog();
             }
             else
             {
@@ -1378,11 +1380,15 @@ namespace Ink_Canvas
                     // 调用失败时回退到相应的点名窗口
                     if (Settings.RandSettings.UseNewRollCallUI)
                     {
-                        new NewStyleRollCallWindow(Settings, true).ShowDialog(); // 单次抽模式
+                        var rollCallWindow = new NewStyleRollCallWindow(Settings, true); // 单次抽模式
+                        rollCallWindow.Owner = this;
+                        rollCallWindow.ShowDialog();
                     }
                     else
                     {
-                        new RandWindow(Settings, true).ShowDialog();
+                        var randWindow = new RandWindow(Settings, true);
+                        randWindow.Owner = this;
+                        randWindow.ShowDialog();
                     }
                 }
             }
@@ -1392,12 +1398,16 @@ namespace Ink_Canvas
                 if (Settings.RandSettings.UseNewRollCallUI)
                 {
                     // 使用新点名UI - 单次抽模式
-                    new NewStyleRollCallWindow(Settings, true).ShowDialog();
+                    var rollCallWindow = new NewStyleRollCallWindow(Settings, true);
+                    rollCallWindow.Owner = this;
+                    rollCallWindow.ShowDialog();
                 }
                 else
                 {
                     // 使用默认的随机点名窗口
-                    new RandWindow(Settings, true).ShowDialog();
+                    var randWindow = new RandWindow(Settings, true);
+                    randWindow.Owner = this;
+                    randWindow.ShowDialog();
                 }
             }
         }
