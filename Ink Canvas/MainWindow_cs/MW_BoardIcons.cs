@@ -29,593 +29,158 @@ namespace Ink_Canvas
         {
             if (!isLoaded) return;
 
-            // 创建背景选项面板（如果不存在）
-            if (BackgroundPalette == null)
+            if (BackgroundPalette.Visibility == Visibility.Visible)
             {
-                CreateBackgroundPalette();
-            }
-
-            // 显示或隐藏背景选项面板
-            if (BackgroundPalette != null)
-            {
-                if (BackgroundPalette.Visibility == Visibility.Visible)
-                {
-                    // 如果面板已经显示，则隐藏它
-                    AnimationsHelper.HideWithSlideAndFade(BackgroundPalette);
-                }
-                else
-                {
-                    // 隐藏其他可能显示的面板
-                    AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
-                    AnimationsHelper.HideWithSlideAndFade(BorderTools);
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
-                    AnimationsHelper.HideWithSlideAndFade(PenPalette);
-                    AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
-                    AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
-                    AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
-                    AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
-                    AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
-                    AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
-                    AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
-
-                    // 显示背景选项面板
-                    AnimationsHelper.ShowWithSlideFromBottomAndFade(BackgroundPalette);
-                }
-                return;
-            }
-
-            // 原有的背景切换代码
-            Settings.Canvas.UsingWhiteboard = !Settings.Canvas.UsingWhiteboard;
-            SaveSettingsToFile();
-            if (Settings.Canvas.UsingWhiteboard)
-            {
-                if (inkColor == 5) lastBoardInkColor = 0;
-                ICCWaterMarkDark.Visibility = Visibility.Visible;
-                ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
-
-                // 设置为白板默认背景色
-                Color defaultWhiteboardColor = Color.FromRgb(255, 255, 255);
-
-                if (currentMode == 1) // 白板模式
-                {
-                    // 设置背景为默认白板背景色
-                    GridBackgroundCover.Background = new SolidColorBrush(defaultWhiteboardColor);
-
-                    // 更新RGB滑块的值为默认白板背景色
-                    if (BackgroundPalette != null && BackgroundPalette.Visibility == Visibility.Visible)
-                    {
-                        UpdateRGBSliders(defaultWhiteboardColor);
-                    }
-
-                    // 更新自定义背景色为默认白板背景色
-                    CustomBackgroundColor = defaultWhiteboardColor;
-
-                    // 保存到设置
-                    string colorHex = $"#{defaultWhiteboardColor.R:X2}{defaultWhiteboardColor.G:X2}{defaultWhiteboardColor.B:X2}";
-                    Settings.Canvas.CustomBackgroundColor = colorHex;
-                    SaveSettingsToFile();
-                }
-
-                // 设置墨迹颜色为黑色
-                CheckLastColor(0);
-                forceEraser = false;
+                AnimationsHelper.HideWithSlideAndFade(BackgroundPalette);
             }
             else
             {
-                if (inkColor == 0) lastBoardInkColor = 5;
-                ICCWaterMarkWhite.Visibility = Visibility.Visible;
-                ICCWaterMarkDark.Visibility = Visibility.Collapsed;
+                AnimationsHelper.HideWithSlideAndFade(EraserSizePanel);
+                AnimationsHelper.HideWithSlideAndFade(BorderTools);
+                AnimationsHelper.HideWithSlideAndFade(BoardBorderTools);
+                AnimationsHelper.HideWithSlideAndFade(PenPalette);
+                AnimationsHelper.HideWithSlideAndFade(BoardPenPalette);
+                AnimationsHelper.HideWithSlideAndFade(BorderDrawShape);
+                AnimationsHelper.HideWithSlideAndFade(BoardBorderDrawShape);
+                AnimationsHelper.HideWithSlideAndFade(BoardEraserSizePanel);
+                AnimationsHelper.HideWithSlideAndFade(TwoFingerGestureBorder);
+                AnimationsHelper.HideWithSlideAndFade(BoardTwoFingerGestureBorder);
+                AnimationsHelper.HideWithSlideAndFade(BoardImageOptionsPanel);
 
-                // 设置为黑板默认背景色
-                Color defaultBlackboardColor = Color.FromRgb(22, 41, 36);
-
-                if (currentMode == 1) // 黑板模式
-                {
-                    // 设置背景为默认黑板背景色
-                    GridBackgroundCover.Background = new SolidColorBrush(defaultBlackboardColor);
-
-                    // 更新RGB滑块的值为默认黑板背景色
-                    if (BackgroundPalette != null && BackgroundPalette.Visibility == Visibility.Visible)
-                    {
-                        UpdateRGBSliders(defaultBlackboardColor);
-                    }
-
-                    // 更新自定义背景色为默认黑板背景色
-                    CustomBackgroundColor = defaultBlackboardColor;
-
-                    // 保存到设置
-                    string colorHex = $"#{defaultBlackboardColor.R:X2}{defaultBlackboardColor.G:X2}{defaultBlackboardColor.B:X2}";
-                    Settings.Canvas.CustomBackgroundColor = colorHex;
-                    SaveSettingsToFile();
-                }
-
-                // 设置墨迹颜色为白色
-                CheckLastColor(5);
-                forceEraser = false;
+                LoadCustomBackgroundColor();
+                UpdateBackgroundButtonsState();
+                AnimationsHelper.ShowWithSlideFromBottomAndFade(BackgroundPalette);
             }
-
-            CheckColorTheme(true);
         }
 
-        /// <summary>
-        /// 创建背景颜色选项面板
-        /// </summary>
-        /// <remarks>
-        /// - 加载自定义背景色
-        /// - 创建背景选项面板UI
-        /// - 添加标题栏和关闭按钮
-        /// - 添加白板/黑板模式选择按钮
-        /// - 添加RGB颜色选择器
-        /// - 添加颜色预览和应用按钮
-        /// - 将面板添加到主网格
-        /// </remarks>
-        private void CreateBackgroundPalette()
+        private void WhiteboardModeBtn_MouseUp(object sender, MouseButtonEventArgs e)
         {
-            // 确保加载自定义背景色
-            LoadCustomBackgroundColor();
+            Settings.Canvas.UsingWhiteboard = true;
+            SaveSettingsToFile();
+            ICCWaterMarkDark.Visibility = Visibility.Visible;
+            ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
 
-            // 创建一个类似于PenPalette的面板
-            BackgroundPalette = new Border
+            Color defaultWhiteboardColor = Color.FromRgb(255, 255, 255);
+
+            if (currentMode == 1)
             {
-                Name = "BackgroundPalette",
-                Visibility = Visibility.Collapsed,
-                Background = (SolidColorBrush)Application.Current.FindResource("SettingsPageBackground"),
-                Opacity = 1,
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)),
-                BorderThickness = new Thickness(1),
-                CornerRadius = new CornerRadius(8),
-                Width = 300,
-                MaxHeight = 400
-            };
-
-            // 确保面板显示在顶层
-            Panel.SetZIndex(BackgroundPalette, 1000);
-
-            // 创建面板内容
-            var stackPanel = new StackPanel();
-
-            // 创建标题栏
-            var titleBorder = new Border
-            {
-                BorderBrush = new SolidColorBrush(Color.FromRgb(0x1e, 0x3a, 0x8a)),
-                Height = 32,
-                BorderThickness = new Thickness(0, 0, 0, 1),
-                CornerRadius = new CornerRadius(8, 8, 0, 0),
-                Background = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)),
-                Margin = new Thickness(-1, -1, -1, 0),
-                Padding = new Thickness(1, 1, 1, 0)
-            };
-
-            var titleCanvas = new System.Windows.Controls.Canvas { Height = 24, ClipToBounds = true };
-            var titleText = new TextBlock
-            {
-                Text = "背景设置",
-                Foreground = (SolidColorBrush)Application.Current.FindResource("FloatBarForeground"),
-                Padding = new Thickness(0, 5, 0, 0),
-                FontSize = 11,
-                FontWeight = FontWeights.Bold,
-                TextAlignment = TextAlignment.Center
-            };
-            System.Windows.Controls.Canvas.SetLeft(titleText, 8);
-            titleCanvas.Children.Add(titleText);
-
-            // 关闭按钮
-            var closeImage = new Image
-            {
-                Source = new BitmapImage(new Uri("/Resources/new-icons/close-white.png", UriKind.Relative)),
-                Height = 16,
-                Width = 16
-            };
-            RenderOptions.SetBitmapScalingMode(closeImage, BitmapScalingMode.HighQuality);
-            closeImage.MouseUp += CloseBordertools_MouseUp;
-            System.Windows.Controls.Canvas.SetRight(closeImage, 8);
-            System.Windows.Controls.Canvas.SetTop(closeImage, 4);
-            titleCanvas.Children.Add(closeImage);
-
-            titleBorder.Child = titleCanvas;
-            stackPanel.Children.Add(titleBorder);
-
-            // 创建背景选项内容区域
-            var contentPanel = new StackPanel { Margin = new Thickness(8) };
-
-            // 黑板/白板选择
-            var modeTitle = new TextBlock
-            {
-                Text = "白板模式",
-                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground"),
-                FontSize = 10,
-                FontWeight = FontWeights.Bold,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 4, 0, 8)
-            };
-            contentPanel.Children.Add(modeTitle);
-
-            var modePanel = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Center };
-
-            // 白板按钮
-            var whiteboardButton = new Border
-            {
-                Width = 60,
-                Height = 30,
-                Background = Settings.Canvas.UsingWhiteboard ? new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) : new SolidColorBrush(Colors.LightGray),
-                CornerRadius = new CornerRadius(4),
-                Margin = new Thickness(0, 0, 8, 0)
-            };
-            var whiteboardText = new TextBlock
-            {
-                Text = "白板",
-                Foreground = Settings.Canvas.UsingWhiteboard ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            whiteboardButton.Child = whiteboardText;
-            whiteboardButton.MouseUp += (s, args) =>
-            {
-                Settings.Canvas.UsingWhiteboard = true;
+                GridBackgroundCover.Background = new SolidColorBrush(defaultWhiteboardColor);
+                UpdateRGBSliders(defaultWhiteboardColor);
+                CustomBackgroundColor = defaultWhiteboardColor;
+                string colorHex = $"#{defaultWhiteboardColor.R:X2}{defaultWhiteboardColor.G:X2}{defaultWhiteboardColor.B:X2}";
+                Settings.Canvas.CustomBackgroundColor = colorHex;
                 SaveSettingsToFile();
-                ICCWaterMarkDark.Visibility = Visibility.Visible;
-                ICCWaterMarkWhite.Visibility = Visibility.Collapsed;
-
-                // 设置为白板默认背景色
-                Color defaultWhiteboardColor = Color.FromRgb(255, 255, 255);
-
-                if (currentMode == 1) // 白板模式
-                {
-                    // 设置背景为默认白板背景色
-                    GridBackgroundCover.Background = new SolidColorBrush(defaultWhiteboardColor);
-
-                    // 更新RGB滑块的值为默认白板背景色
-                    UpdateRGBSliders(defaultWhiteboardColor);
-
-                    // 更新自定义背景色为默认白板背景色
-                    CustomBackgroundColor = defaultWhiteboardColor;
-
-                    // 保存到设置
-                    string colorHex = $"#{defaultWhiteboardColor.R:X2}{defaultWhiteboardColor.G:X2}{defaultWhiteboardColor.B:X2}";
-                    Settings.Canvas.CustomBackgroundColor = colorHex;
-                    SaveSettingsToFile();
-                }
-
-                // 设置墨迹颜色为黑色
-                CheckLastColor(0);
-                forceEraser = false;
-
-                CheckColorTheme(true);
-                UpdateBackgroundButtonsState();
-            };
-            modePanel.Children.Add(whiteboardButton);
-
-            // 黑板按钮
-            var blackboardButton = new Border
-            {
-                Width = 60,
-                Height = 30,
-                Background = !Settings.Canvas.UsingWhiteboard ? new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) : new SolidColorBrush(Colors.LightGray),
-                CornerRadius = new CornerRadius(4)
-            };
-            var blackboardText = new TextBlock
-            {
-                Text = "黑板",
-                Foreground = !Settings.Canvas.UsingWhiteboard ? new SolidColorBrush(Colors.White) : new SolidColorBrush(Colors.Black),
-                HorizontalAlignment = HorizontalAlignment.Center,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            blackboardButton.Child = blackboardText;
-            blackboardButton.MouseUp += (s, args) =>
-            {
-                Settings.Canvas.UsingWhiteboard = false;
-                SaveSettingsToFile();
-                ICCWaterMarkWhite.Visibility = Visibility.Visible;
-                ICCWaterMarkDark.Visibility = Visibility.Collapsed;
-
-                // 设置为黑板默认背景色
-                Color defaultBlackboardColor = Color.FromRgb(22, 41, 36);
-
-                if (currentMode == 1) // 黑板模式
-                {
-                    // 设置背景为默认黑板背景色
-                    GridBackgroundCover.Background = new SolidColorBrush(defaultBlackboardColor);
-
-                    // 更新RGB滑块的值为默认黑板背景色
-                    UpdateRGBSliders(defaultBlackboardColor);
-
-                    // 更新自定义背景色为默认黑板背景色
-                    CustomBackgroundColor = defaultBlackboardColor;
-
-                    // 保存到设置
-                    string colorHex = $"#{defaultBlackboardColor.R:X2}{defaultBlackboardColor.G:X2}{defaultBlackboardColor.B:X2}";
-                    Settings.Canvas.CustomBackgroundColor = colorHex;
-                    SaveSettingsToFile();
-                }
-
-                // 设置墨迹颜色为白色
-                CheckLastColor(5);
-                forceEraser = false;
-
-                CheckColorTheme(true);
-                UpdateBackgroundButtonsState();
-            };
-            modePanel.Children.Add(blackboardButton);
-
-            contentPanel.Children.Add(modePanel);
-
-            // 添加一条分隔线
-            var separator = new Border
-            {
-                Height = 1,
-                Background = (SolidColorBrush)Application.Current.FindResource("SettingsPageBorderBrush"),
-                Margin = new Thickness(0, 12, 0, 12)
-            };
-            contentPanel.Children.Add(separator);
-
-            // 添加RGB颜色选择器部分
-            var colorTitle = new TextBlock
-            {
-                Text = "背景颜色",
-                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground"),
-                FontSize = 10,
-                FontWeight = FontWeights.Bold,
-                HorizontalAlignment = HorizontalAlignment.Center,
-                Margin = new Thickness(0, 4, 0, 8)
-            };
-            contentPanel.Children.Add(colorTitle);
-
-            // 创建颜色预览
-            Border colorPreview = new Border
-            {
-                Width = 100,
-                Height = 40,
-                BorderThickness = new Thickness(1),
-                BorderBrush = (SolidColorBrush)Application.Current.FindResource("SettingsPageBorderBrush"),
-                Background = new SolidColorBrush(Colors.White),
-                CornerRadius = new CornerRadius(4),
-                Margin = new Thickness(0, 0, 0, 10),
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
-            contentPanel.Children.Add(colorPreview);
-
-            // 获取当前背景颜色
-            Color currentBackgroundColor;
-            if (currentMode == 1) // 白板或黑板模式
-            {
-                if (GridBackgroundCover.Background is SolidColorBrush brush)
-                {
-                    currentBackgroundColor = brush.Color;
-                }
-                else
-                {
-                    // 默认颜色
-                    currentBackgroundColor = Settings.Canvas.UsingWhiteboard ?
-                        Color.FromRgb(234, 235, 237) : // 白板默认颜色
-                        Color.FromRgb(22, 41, 36);    // 黑板默认颜色
-                }
-            }
-            else
-            {
-                // 默认白色
-                currentBackgroundColor = Colors.White;
             }
 
-            // 更新颜色预览
-            colorPreview.Background = new SolidColorBrush(currentBackgroundColor);
+            CheckLastColor(0);
+            forceEraser = false;
+            CheckColorTheme(true);
+            UpdateBackgroundButtonsState();
+        }
 
-            // 先创建所有滑块控件
-            // R滑块和文本框
-            var rPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 0, 10, 5) };
-            var rLabel = new TextBlock { Text = "R:", Width = 20, VerticalAlignment = VerticalAlignment.Center, Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground") };
-            var rSlider = new Slider
+        private void BlackboardModeBtn_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Settings.Canvas.UsingWhiteboard = false;
+            SaveSettingsToFile();
+            ICCWaterMarkWhite.Visibility = Visibility.Visible;
+            ICCWaterMarkDark.Visibility = Visibility.Collapsed;
+
+            Color defaultBlackboardColor = Color.FromRgb(22, 41, 36);
+
+            if (currentMode == 1)
             {
-                Minimum = 0,
-                Maximum = 255,
-                Value = currentBackgroundColor.R,
-                Width = 150,
-                Margin = new Thickness(5, 0, 5, 0),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            var rValueText = new TextBlock
+                GridBackgroundCover.Background = new SolidColorBrush(defaultBlackboardColor);
+                UpdateRGBSliders(defaultBlackboardColor);
+                CustomBackgroundColor = defaultBlackboardColor;
+                string colorHex = $"#{defaultBlackboardColor.R:X2}{defaultBlackboardColor.G:X2}{defaultBlackboardColor.B:X2}";
+                Settings.Canvas.CustomBackgroundColor = colorHex;
+                SaveSettingsToFile();
+            }
+
+            CheckLastColor(5);
+            forceEraser = false;
+            CheckColorTheme(true);
+            UpdateBackgroundButtonsState();
+        }
+
+        private void BackgroundRSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (BackgroundRValue != null)
             {
-                Text = currentBackgroundColor.R.ToString(),
-                Width = 30,
-                VerticalAlignment = VerticalAlignment.Center,
-                TextAlignment = TextAlignment.Right,
-                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground")
-            };
-
-            // G滑块和文本框
-            var gPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 0, 10, 5) };
-            var gLabel = new TextBlock { Text = "G:", Width = 20, VerticalAlignment = VerticalAlignment.Center, Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground") };
-            var gSlider = new Slider
-            {
-                Minimum = 0,
-                Maximum = 255,
-                Value = currentBackgroundColor.G,
-                Width = 150,
-                Margin = new Thickness(5, 0, 5, 0),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            var gValueText = new TextBlock
-            {
-                Text = currentBackgroundColor.G.ToString(),
-                Width = 30,
-                VerticalAlignment = VerticalAlignment.Center,
-                TextAlignment = TextAlignment.Right,
-                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground")
-            };
-
-            // B滑块和文本框
-            var bPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10, 0, 10, 5) };
-            var bLabel = new TextBlock { Text = "B:", Width = 20, VerticalAlignment = VerticalAlignment.Center, Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground") };
-            var bSlider = new Slider
-            {
-                Minimum = 0,
-                Maximum = 255,
-                Value = currentBackgroundColor.B,
-                Width = 150,
-                Margin = new Thickness(5, 0, 5, 0),
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            var bValueText = new TextBlock
-            {
-                Text = currentBackgroundColor.B.ToString(),
-                Width = 30,
-                VerticalAlignment = VerticalAlignment.Center,
-                TextAlignment = TextAlignment.Right,
-                Foreground = (SolidColorBrush)Application.Current.FindResource("TextForeground")
-            };
-
-            // 现在添加事件处理程序
-            rSlider.ValueChanged += (s, e) =>
-            {
-                int value = (int)e.NewValue;
-                rValueText.Text = value.ToString();
-                UpdateColorPreview(colorPreview, rSlider, gSlider, bSlider);
-            };
-
-            gSlider.ValueChanged += (s, e) =>
-            {
-                int value = (int)e.NewValue;
-                gValueText.Text = value.ToString();
-                UpdateColorPreview(colorPreview, rSlider, gSlider, bSlider);
-            };
-
-            bSlider.ValueChanged += (s, e) =>
-            {
-                int value = (int)e.NewValue;
-                bValueText.Text = value.ToString();
-                UpdateColorPreview(colorPreview, rSlider, gSlider, bSlider);
-            };
-
-            // 添加控件到面板
-            rPanel.Children.Add(rLabel);
-            rPanel.Children.Add(rSlider);
-            rPanel.Children.Add(rValueText);
-            contentPanel.Children.Add(rPanel);
-
-            gPanel.Children.Add(gLabel);
-            gPanel.Children.Add(gSlider);
-            gPanel.Children.Add(gValueText);
-            contentPanel.Children.Add(gPanel);
-
-            bPanel.Children.Add(bLabel);
-            bPanel.Children.Add(bSlider);
-            bPanel.Children.Add(bValueText);
-            contentPanel.Children.Add(bPanel);
-
-            // 应用按钮
-            var applyButton = new Button
-            {
-                Content = "应用颜色",
-                Margin = new Thickness(0, 10, 0, 0),
-                Padding = new Thickness(10, 5, 10, 5),
-                Background = new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)),
-                Foreground = new SolidColorBrush(Colors.White),
-                BorderThickness = new Thickness(0),
-                HorizontalAlignment = HorizontalAlignment.Center
-            };
-
-            applyButton.Click += (s, e) =>
-            {
-                Color selectedColor = Color.FromRgb(
-                    (byte)rSlider.Value,
-                    (byte)gSlider.Value,
-                    (byte)bSlider.Value
-                );
-                ApplyCustomBackgroundColor(selectedColor);
-            };
-
-            contentPanel.Children.Add(applyButton);
-
-            stackPanel.Children.Add(contentPanel);
-
-            // 将面板添加到父容器
-            BackgroundPalette.Child = stackPanel;
-
-            // 获取主窗口中的根网格，确保面板添加到顶层
-            Grid mainGrid = FindName("Main_Grid") as Grid;
-            if (mainGrid != null)
-            {
-                // 删除可能已存在的BackgroundPalette
-                foreach (UIElement element in mainGrid.Children)
-                {
-                    if (element is Border border && border.Name == "BackgroundPalette")
-                    {
-                        mainGrid.Children.Remove(border);
-                        break;
-                    }
-                }
-
-                // 重新定位面板
-                BackgroundPalette.HorizontalAlignment = HorizontalAlignment.Center;
-                BackgroundPalette.VerticalAlignment = VerticalAlignment.Center;
-                BackgroundPalette.Margin = new Thickness(0, 0, 0, 0);
-
-                // 添加到主网格
-                mainGrid.Children.Add(BackgroundPalette);
-
-                // 设置面板位置
-                var clickElement = FindName("BoardChangeBackgroundColorBtn") as FrameworkElement;
-                if (clickElement != null)
-                {
-                    Point position = clickElement.TranslatePoint(new Point(0, 0), mainGrid);
-                    BackgroundPalette.Margin = new Thickness(
-                        position.X - 150,
-                        position.Y + clickElement.ActualHeight + 5,
-                        0, 0);
-                    BackgroundPalette.HorizontalAlignment = HorizontalAlignment.Left;
-                    BackgroundPalette.VerticalAlignment = VerticalAlignment.Top;
-                }
+                BackgroundRValue.Text = ((int)e.NewValue).ToString();
+                UpdateColorPreviewFromSliders();
             }
         }
 
-        /// <summary>
-        /// 更新背景颜色选项面板中的按钮状态
-        /// </summary>
-        /// <remarks>
-        /// - 更新白板和黑板按钮的背景和前景色
-        /// - 根据当前使用的模式设置按钮状态
-        /// </remarks>
+        private void BackgroundGSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (BackgroundGValue != null)
+            {
+                BackgroundGValue.Text = ((int)e.NewValue).ToString();
+                UpdateColorPreviewFromSliders();
+            }
+        }
+
+        private void BackgroundBSlider_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (BackgroundBValue != null)
+            {
+                BackgroundBValue.Text = ((int)e.NewValue).ToString();
+                UpdateColorPreviewFromSliders();
+            }
+        }
+
+        private void ApplyBackgroundColorBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Color selectedColor = Color.FromRgb(
+                (byte)BackgroundRSlider.Value,
+                (byte)BackgroundGSlider.Value,
+                (byte)BackgroundBSlider.Value
+            );
+            ApplyCustomBackgroundColor(selectedColor);
+        }
+
+        private void UpdateColorPreviewFromSliders()
+        {
+            if (BackgroundColorPreview != null)
+            {
+                Color previewColor = Color.FromRgb(
+                    (byte)BackgroundRSlider.Value,
+                    (byte)BackgroundGSlider.Value,
+                    (byte)BackgroundBSlider.Value
+                );
+                BackgroundColorPreview.Background = new SolidColorBrush(previewColor);
+            }
+        }
+
         private void UpdateBackgroundButtonsState()
         {
-            if (BackgroundPalette != null && BackgroundPalette.Child is StackPanel stackPanel)
+            if (WhiteboardModeBtn != null)
             {
-                if (stackPanel.Children.Count > 1 && stackPanel.Children[1] is StackPanel contentPanel)
+                WhiteboardModeBtn.Background = Settings.Canvas.UsingWhiteboard ?
+                    new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :
+                    new SolidColorBrush(Colors.LightGray);
+                if (WhiteboardModeBtn.Child is TextBlock whiteboardText)
                 {
-                    if (contentPanel.Children.Count > 1 && contentPanel.Children[1] is StackPanel modePanel)
-                    {
-                        if (modePanel.Children.Count > 1)
-                        {
-                            var whiteboardButton = modePanel.Children[0] as Border;
-                            var blackboardButton = modePanel.Children[1] as Border;
+                    whiteboardText.Foreground = Settings.Canvas.UsingWhiteboard ?
+                        new SolidColorBrush(Colors.White) :
+                        new SolidColorBrush(Colors.Black);
+                }
+            }
 
-                            if (whiteboardButton != null && whiteboardButton.Child is TextBlock whiteboardText)
-                            {
-                                whiteboardButton.Background = Settings.Canvas.UsingWhiteboard ?
-                                    new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :
-                                    new SolidColorBrush(Colors.LightGray);
-                                whiteboardText.Foreground = Settings.Canvas.UsingWhiteboard ?
-                                    new SolidColorBrush(Colors.White) :
-                                    new SolidColorBrush(Colors.Black);
-                            }
-
-                            if (blackboardButton != null && blackboardButton.Child is TextBlock blackboardText)
-                            {
-                                blackboardButton.Background = !Settings.Canvas.UsingWhiteboard ?
-                                    new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :
-                                    new SolidColorBrush(Colors.LightGray);
-                                blackboardText.Foreground = !Settings.Canvas.UsingWhiteboard ?
-                                    new SolidColorBrush(Colors.White) :
-                                    new SolidColorBrush(Colors.Black);
-                            }
-                        }
-                    }
+            if (BlackboardModeBtn != null)
+            {
+                BlackboardModeBtn.Background = !Settings.Canvas.UsingWhiteboard ?
+                    new SolidColorBrush(Color.FromRgb(0x25, 0x63, 0xeb)) :
+                    new SolidColorBrush(Colors.LightGray);
+                if (BlackboardModeBtn.Child is TextBlock blackboardText)
+                {
+                    blackboardText.Foreground = !Settings.Canvas.UsingWhiteboard ?
+                        new SolidColorBrush(Colors.White) :
+                        new SolidColorBrush(Colors.Black);
                 }
             }
         }
-
-        /// <summary>
-        /// 背景颜色选项面板
-        /// </summary>
-        private Border BackgroundPalette { get; set; }
 
         /// <summary>
         /// 当前自定义背景色
